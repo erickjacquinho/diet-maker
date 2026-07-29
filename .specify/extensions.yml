@@ -1,0 +1,10 @@
+version: "1.0"
+extensions:
+  enforce-speckit-implement:
+    name: "Enforce Speckit Implement"
+    description: "Hook configuration to ensure implementation tasks are routed through /speckit-implement"
+    hooks:
+      before_implement:
+        - name: "enforce-speckit-implement"
+          command: "speckit-implement"
+          optional: false

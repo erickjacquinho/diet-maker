@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriDiet Local Pro - Warm Minimalist Dashboard (Refs Imagens 1 & 2)</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            warm: {
+              bg: '#f5f2eb',         /* Creme / Areia Suave de Fundo (Imagem 1) */
+              card: '#ffffff',       /* Branco Puro Nítido */
+              inner: '#faf8f5',     /* Off-White Sutil para Itens */
+              border: '#e8e4dc',     /* Linha Bege Sólida 1px */
+              borderDark: '#d6cfc4', /* Contorno de Foco */
+              charcoal: '#111827',   /* Carvão Escuro para Títulos/Números */
+              secondary: '#4b5563',  /* Cinza Médio para Textos do Corpo */
+              muted: '#8c8275',      /* Bege/Cinza Neutro para Rótulos Secundários */
+              emerald: '#059669',    /* Esmeralda Sólido */
+              emeraldBg: '#e6f4ea',
+              rose: '#e11d48',       /* Carmim / Proteína */
+              roseBg: '#fce8e6',
+              amber: '#d97706',      /* Âmbar / Carboidrato */
+              amberBg: '#fef3c7',
+              teal: '#0d9488',       /* Teal / Gordura */
+              tealBg: '#e6f2f2',
+              terracotta: '#d97760'  /* Coral Terracota (Imagem 2) */
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Regra estrita Swiss Flat: ZERO box-shadow, ZERO gradient */
+    * {
+      box-shadow: none !important;
+      background-image: none !important;
+    }
+  </style>
+</head>
+<body class="bg-warm-bg text-warm-charcoal font-sans antialiased min-h-screen flex">
+
+  <!-- 1. Sidebar Lateral Esquerda Fixa (Inspirada nas Imagens 1 & 2) -->
+  <aside class="w-60 bg-warm-card border-r border-warm-border h-screen sticky top-0 flex flex-col justify-between p-5 shrink-0 hidden md:flex">
+    <div>
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3 mb-8">
+        <div class="w-9 h-9 bg-warm-charcoal text-white font-black text-lg flex items-center justify-center rounded-xl">
+          N
+        </div>
+        <div>
+          <h1 class="font-black text-base text-warm-charcoal tracking-tight">NutriDiet</h1>
+          <span class="text-[10px] font-bold text-warm-emerald uppercase tracking-wider">Pro Local</span>
+        </div>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <nav class="space-y-1.5">
+        <a href="#" class="flex items-center space-x-3 px-3.5 py-2.5 bg-warm-charcoal text-white rounded-xl text-xs font-bold transition-all">
+          <span class="text-base">🥗</span>
+          <span>Montar Dieta</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-3.5 py-2.5 text-warm-muted hover:text-warm-charcoal hover:bg-warm-inner rounded-xl text-xs font-semibold transition-all">
+          <span class="text-base">👥</span>
+          <span>Pacientes</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-3.5 py-2.5 text-warm-muted hover:text-warm-charcoal hover:bg-warm-inner rounded-xl text-xs font-semibold transition-all">
+          <span class="text-base">📚</span>
+          <span>Tabela TACO</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-3.5 py-2.5 text-warm-muted hover:text-warm-charcoal hover:bg-warm-inner rounded-xl text-xs font-semibold transition-all">
+          <span class="text-base">📋</span>
+          <span>Templates</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Actions / Profile Card -->
+    <div class="pt-4 border-t border-warm-border space-y-3">
+      <div class="flex items-center space-x-2.5 p-2 bg-warm-inner border border-warm-border rounded-xl">
+        <div class="w-8 h-8 rounded-full bg-warm-emerald text-white flex items-center justify-center font-bold text-xs">
+          DR
+        </div>
+        <div class="text-xs">
+          <div class="font-bold text-warm-charcoal">Dr. Lucas</div>
+          <div class="text-[10px] text-warm-muted">Nutricionista</div>
+        </div>
+      </div>
+
+      <div class="flex space-x-1.5">
+        <button class="flex-1 py-1.5 bg-warm-card border border-warm-border hover:bg-warm-inner text-[11px] font-bold text-warm-charcoal rounded-xl transition-all">
+          💾 Salvar
+        </button>
+        <button class="flex-1 py-1.5 bg-warm-card border border-warm-border hover:bg-warm-inner text-[11px] font-bold text-warm-charcoal rounded-xl transition-all">
+          📂 Abrir
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. Main Content Area -->
+  <div class="flex-1 min-w-0 flex flex-col min-h-screen">
+
+    <!-- Mobile Header -->
+    <header class="bg-warm-card border-b border-warm-border p-4 flex md:hidden items-center justify-between">
+      <div class="font-black text-base text-warm-charcoal">NutriDiet Pro</div>
+      <button class="p-2 bg-warm-inner border border-warm-border rounded-xl text-xs font-bold">Menu</button>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto w-full">
+
+      <!-- Top Title & Quick Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-warm-charcoal tracking-tight">Plano Alimentar Ativo</h2>
+          <p class="text-xs text-warm-secondary">Elaboração visual com acompanhamento de metas manuais</p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button class="px-4 py-2 bg-warm-emerald hover:opacity-90 text-white font-bold text-xs rounded-xl transition-all">
+            + Nova Refeição
+          </button>
+          <button class="px-3.5 py-2 bg-warm-card border border-warm-border hover:bg-warm-inner text-warm-charcoal font-bold text-xs rounded-xl transition-all">
+            % Escalar Dieta
+          </button>
+          <button class="px-3.5 py-2 bg-warm-card border border-warm-border hover:bg-warm-inner text-warm-charcoal font-bold text-xs rounded-xl transition-all">
+            💬 WhatsApp
+          </button>
+          <button class="px-3.5 py-2 bg-warm-card border border-warm-border hover:bg-warm-inner text-warm-charcoal font-bold text-xs rounded-xl transition-all">
+            📄 PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Macro Tracker Header Card (Warm Off-White) -->
+      <section class="bg-warm-card border border-warm-border rounded-2xl p-6">
+        <!-- Patient Info Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-warm-border gap-3">
+          <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-full bg-warm-inner border border-warm-borderDark flex items-center justify-center text-warm-charcoal font-black text-sm">
+              CE
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-lg font-black text-warm-charcoal">Carlos Eduardo Silva</h3>
+                <span class="text-xs font-bold px-2.5 py-0.5 bg-warm-inner border border-warm-border text-warm-charcoal rounded-full">
+                  82.5 kg
+                </span>
+              </div>
+              <p class="text-xs text-warm-secondary">Hipertrofia Muscular e Definição • Metas Manuais</p>
+            </div>
+          </div>
+
+          <button class="px-3.5 py-2 bg-warm-inner border border-warm-border hover:border-warm-borderDark text-warm-charcoal text-xs font-bold rounded-xl transition-all">
+            ✏️ Ajustar Metas
+          </button>
+        </div>
+
+        <!-- Macros Metric Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Kcal -->
+          <div class="bg-warm-inner border border-warm-border rounded-2xl p-4">
+            <div class="flex justify-between text-xs font-semibold text-warm-muted mb-1">
+              <span>Kcal Total</span>
+              <span class="font-bold text-warm-charcoal">102%</span>
+            </div>
+            <div class="text-3xl font-black text-warm-charcoal my-1">
+              2.450 <span class="text-xs font-normal text-warm-muted">/ 2.400 kcal</span>
+            </div>
+            <div class="w-full bg-warm-border h-2 rounded-full overflow-hidden mt-3">
+              <div class="bg-warm-emerald h-full w-[100%]"></div>
+            </div>
+          </div>
+
+          <!-- Proteínas -->
+          <div class="bg-warm-inner border border-warm-border rounded-2xl p-4">
+            <div class="flex justify-between text-xs font-semibold text-warm-muted mb-1">
+              <span class="text-warm-rose font-bold">Proteínas</span>
+              <span class="text-[10px] font-bold text-warm-emerald bg-warm-emeraldBg border border-warm-emerald/30 px-2 py-0.5 rounded-full">Na meta ✓</span>
+            </div>
+            <div class="text-3xl font-black text-warm-charcoal my-1">
+              168g <span class="text-xs font-normal text-warm-muted">/ 165g</span>
+            </div>
+            <div class="text-xs font-bold text-warm-emerald mb-2">
+              2.03 g/kg <span class="text-[10px] text-warm-muted font-normal">(meta: 2.0)</span>
+            </div>
+            <div class="w-full bg-warm-border h-2 rounded-full overflow-hidden">
+              <div class="bg-warm-rose h-full w-[100%]"></div>
+            </div>
+          </div>
+
+          <!-- Carboidratos -->
+          <div class="bg-warm-inner border border-warm-border rounded-2xl p-4">
+            <div class="flex justify-between text-xs font-semibold text-warm-muted mb-1">
+              <span class="text-warm-amber font-bold">Carboidratos</span>
+              <span class="text-[10px] font-bold text-warm-amber bg-warm-amberBg border border-warm-amber/30 px-2 py-0.5 rounded-full">-12g restante</span>
+            </div>
+            <div class="text-3xl font-black text-warm-charcoal my-1">
+              268g <span class="text-xs font-normal text-warm-muted">/ 280g</span>
+            </div>
+            <div class="text-xs font-bold text-warm-amber mb-2">
+              3.24 g/kg <span class="text-[10px] text-warm-muted font-normal">(meta: 3.4)</span>
+            </div>
+            <div class="w-full bg-warm-border h-2 rounded-full overflow-hidden">
+              <div class="bg-warm-amber h-full w-[95%]"></div>
+            </div>
+          </div>
+
+          <!-- Gorduras -->
+          <div class="bg-warm-inner border border-warm-border rounded-2xl p-4">
+            <div class="flex justify-between text-xs font-semibold text-warm-muted mb-1">
+              <span class="text-warm-teal font-bold">Gorduras</span>
+              <span class="text-[10px] font-bold text-warm-emerald bg-warm-emeraldBg border border-warm-emerald/30 px-2 py-0.5 rounded-full">Na meta ✓</span>
+            </div>
+            <div class="text-3xl font-black text-warm-charcoal my-1">
+              64g <span class="text-xs font-normal text-warm-muted">/ 65g</span>
+            </div>
+            <div class="text-xs font-bold text-warm-teal mb-2">
+              0.77 g/kg <span class="text-[10px] text-warm-muted font-normal">(meta: 0.8)</span>
+            </div>
+            <div class="w-full bg-warm-border h-2 rounded-full overflow-hidden">
+              <div class="bg-warm-teal h-full w-[98%]"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Meal Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Refeição 1: Café da Manhã -->
+        <div class="bg-warm-card border border-warm-border rounded-2xl p-6 space-y-4">
+          <!-- Meal Header -->
+          <div class="flex items-center justify-between pb-3 border-b border-warm-border">
+            <div class="flex items-center space-x-2.5">
+              <h4 class="text-base font-black text-warm-charcoal">Café da Manhã</h4>
+              <span class="text-xs text-warm-muted bg-warm-inner border border-warm-border px-2.5 py-0.5 rounded-full font-mono">07:30</span>
+            </div>
+            <div class="flex items-center space-x-1.5 text-xs font-bold">
+              <span class="px-2.5 py-0.5 bg-warm-amberBg text-warm-amber border border-warm-amber/30 rounded-full">520 kcal</span>
+              <span class="px-2.5 py-0.5 bg-warm-roseBg text-warm-rose border border-warm-rose/30 rounded-full">P: 34g</span>
+              <span class="px-2.5 py-0.5 bg-warm-amberBg text-warm-amber border border-warm-amber/30 rounded-full">C: 58g</span>
+              <span class="px-2.5 py-0.5 bg-warm-tealBg text-warm-teal border border-warm-teal/30 rounded-full">G: 14g</span>
+            </div>
+          </div>
+
+          <!-- Items List -->
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Ovo de galinha inteiro cozido</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">219 kcal • <span class="text-warm-rose font-bold">P: 20g</span> • C: 0.9g • <span class="text-warm-teal font-bold">G: 14g</span></div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  150 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Aveia em flocos</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">197 kcal • P: 7g • <span class="text-warm-amber font-bold">C: 33g</span> • G: 4g</div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  50 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Banana prata</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">98 kcal • P: 1.3g • <span class="text-warm-amber font-bold">C: 26g</span> • G: 0.1g</div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  100 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative">
+            <input type="text" placeholder="+ Buscar alimento na base TACO (ex: Frango, Arroz)..." class="w-full bg-warm-inner border border-warm-border rounded-xl px-3.5 py-2 text-xs text-warm-charcoal placeholder-warm-muted focus:outline-none focus:border-warm-emerald transition-all">
+          </div>
+
+          <!-- Meal Footer Actions -->
+          <div class="flex items-center justify-between pt-2 border-t border-warm-border text-xs">
+            <div class="flex space-x-2">
+              <button class="text-warm-secondary hover:text-warm-charcoal px-2.5 py-1 bg-warm-card border border-warm-border hover:bg-warm-inner rounded-xl font-semibold transition-all">📋 Duplicar</button>
+              <button class="text-warm-secondary hover:text-warm-charcoal px-2.5 py-1 bg-warm-card border border-warm-border hover:bg-warm-inner rounded-xl font-semibold transition-all">% Escalar</button>
+            </div>
+            <button class="text-warm-muted hover:text-warm-rose p-1 font-semibold transition-colors">Excluir</button>
+          </div>
+        </div>
+
+        <!-- Refeição 2: Almoço -->
+        <div class="bg-warm-card border border-warm-border rounded-2xl p-6 space-y-4">
+          <!-- Meal Header -->
+          <div class="flex items-center justify-between pb-3 border-b border-warm-border">
+            <div class="flex items-center space-x-2.5">
+              <h4 class="text-base font-black text-warm-charcoal">Almoço</h4>
+              <span class="text-xs text-warm-muted bg-warm-inner border border-warm-border px-2.5 py-0.5 rounded-full font-mono">12:30</span>
+            </div>
+            <div class="flex items-center space-x-1.5 text-xs font-bold">
+              <span class="px-2.5 py-0.5 bg-warm-amberBg text-warm-amber border border-warm-amber/30 rounded-full">780 kcal</span>
+              <span class="px-2.5 py-0.5 bg-warm-roseBg text-warm-rose border border-warm-rose/30 rounded-full">P: 62g</span>
+              <span class="px-2.5 py-0.5 bg-warm-amberBg text-warm-amber border border-warm-amber/30 rounded-full">C: 75g</span>
+              <span class="px-2.5 py-0.5 bg-warm-tealBg text-warm-teal border border-warm-teal/30 rounded-full">G: 18g</span>
+            </div>
+          </div>
+
+          <!-- Items List -->
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Peito de frango grelhado</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">297 kcal • <span class="text-warm-rose font-bold">P: 55.8g</span> • C: 0g • G: 6.4g</div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  180 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Arroz branco cozido</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">256 kcal • P: 5g • <span class="text-warm-amber font-bold">C: 56.2g</span> • G: 0.4g</div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  200 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+              <div>
+                <div class="text-xs font-bold text-warm-charcoal">Azeite de oliva extra virgem</div>
+                <div class="text-[11px] text-warm-secondary mt-0.5">88 kcal • P: 0g • C: 0g • <span class="text-warm-teal font-bold">G: 10g</span></div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
+                  10 <span class="text-warm-muted font-normal">g</span>
+                </div>
+                <button class="text-warm-muted hover:text-warm-rose p-1 transition-colors">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative">
+            <input type="text" placeholder="+ Buscar alimento na base TACO (ex: Frango, Arroz)..." class="w-full bg-warm-inner border border-warm-border rounded-xl px-3.5 py-2 text-xs text-warm-charcoal placeholder-warm-muted focus:outline-none focus:border-warm-emerald transition-all">
+          </div>
+
+          <!-- Meal Footer Actions -->
+          <div class="flex items-center justify-between pt-2 border-t border-warm-border text-xs">
+            <div class="flex space-x-2">
+              <button class="text-warm-secondary hover:text-warm-charcoal px-2.5 py-1 bg-warm-card border border-warm-border hover:bg-warm-inner rounded-xl font-semibold transition-all">📋 Duplicar</button>
+              <button class="text-warm-secondary hover:text-warm-charcoal px-2.5 py-1 bg-warm-card border border-warm-border hover:bg-warm-inner rounded-xl font-semibold transition-all">% Escalar</button>
+            </div>
+            <button class="text-warm-muted hover:text-warm-rose p-1 font-semibold transition-colors">Excluir</button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

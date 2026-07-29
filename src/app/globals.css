@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ==========================================================================
+       1. PRIMITIVE TOKENS (CSS Variables)
+       ========================================================================== */
+    --stone-50: #faf8f5;
+    --stone-100: #f5f2eb;
+    --stone-200: #e8e4dc;
+    --stone-300: #d6cfc4;
+    --stone-500: #8c8275;
+    --stone-700: #4b5563;
+    --stone-900: #111827;
+
+    --emerald-600: #059669;
+    --emerald-50: #e6f4ea;
+
+    --rose-600: #e11d48;
+    --rose-50: #fce8e6;
+
+    --amber-600: #d97706;
+    --amber-50: #fef3c7;
+
+    --teal-600: #0d9488;
+    --teal-50: #e6f2f2;
+
+    --terracotta-500: #d97760;
+    --terracotta-50: #fdf2f0;
+
+    /* ==========================================================================
+       2. SEMANTIC TOKENS (Surfaces, Text, Borders, Macros)
+       ========================================================================== */
+    --color-bg-app: var(--stone-100);          /* Fundo geral da aplicação */
+    --color-surface-card: #ffffff;            /* Painéis e Cards */
+    --color-surface-subtle: var(--stone-50);   /* Containers internos */
+    --color-border-clean: var(--stone-200);    /* Linhas de contorno 1px */
+    --color-border-focus: var(--stone-300);    /* Borda em estado foco/hover */
+
+    --color-text-primary: var(--stone-900);    /* Títulos e números grandes */
+    --color-text-secondary: var(--stone-700);  /* Descrições e corpo de texto */
+    --color-text-muted: var(--stone-500);      /* Rótulos e placeholders */
+
+    --color-macro-kcal: var(--emerald-600);
+    --color-macro-kcal-bg: var(--emerald-50);
+    --color-macro-protein: var(--rose-600);
+    --color-macro-protein-bg: var(--rose-50);
+    --color-macro-carbs: var(--amber-600);
+    --color-macro-carbs-bg: var(--amber-50);
+    --color-macro-fats: var(--teal-600);
+    --color-macro-fats-bg: var(--teal-50);
+
+    /* ==========================================================================
+       3. GEOMETRY, Z-INDEX & MOTION
+       ========================================================================== */
+    --radius-2xl: 16px;
+    --radius-xl: 12px;
+    --radius-lg: 8px;
+    --radius-full: 9999px;
+
+    --z-base: 0;
+    --z-card: 1;
+    --z-sticky-sidebar: 10;
+    --z-dropdown: 20;
+    --z-modal-backdrop: 40;
+    --z-modal-content: 50;
+    --z-toast: 60;
+
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 200ms ease-in-out;
+
+    /* Shadcn Fallbacks HSL */
+    --background: 42 27% 94%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 20% 97%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 38 20% 88%;
+    --muted-foreground: 28 6% 45%;
+    --accent: 40 20% 97%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 343 78% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 38 20% 88%;
+    --input: 38 20% 88%;
+    --ring: 160 84% 39%;
+    --radius: 0.75rem;
+  }
+}
+
+/* ==========================================================================
+   4. SWISS FLAT RULES (Zero Box-Shadow & Zero Gradient)
+   ========================================================================== */
+* {
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+body {
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
