@@ -5,18 +5,18 @@
       "hooks": [
         {
           "type": "prompt",
-          "prompt": "Evaluate if the user prompt involves component creation, refactoring, or reorganization under src/components/. Remind that all component decisions MUST strictly comply with the 5-level Atomic Design hierarchy defined in c:\\Programmer\\diet-maker\\.agents\\rules\\atomic-design.md."
+          "prompt": "Before taking any action on the user prompt ($USER_PROMPT), read and strictly follow all rules and guidelines in c:\\Programmer\\diet-maker\\AGENTS.md, including Atomic Design hierarchy, Shadcn UI preservation, and file organization rules (/tests and /refs)."
         }
       ]
     }
   ],
   "PreToolUse": [
     {
-      "matcher": "Write|Edit",
+      "matcher": "*",
       "hooks": [
         {
           "type": "prompt",
-          "prompt": "Validate if the current file creation, edit, or relocation targets any file under src/components/. If targeting src/components/, review c:\\Programmer\\diet-maker\\.agents\\rules\\atomic-design.md to verify that: 1. Atoms (atoms/) are indivisible primitive elements with zero imports of molecules/organisms. 2. Molécules (molecules/) are simple combinations of 2+ atoms with a single functional purpose. 3. Organisms (organisms/) are complex layout/section components. 4. Templates (templates/) are page layout skeletons. If the component placement or structure violates atomic-design.md rules, return permissionDecision 'deny' or systemMessage with instructions to correct the location."
+          "prompt": "Before executing ANY action or tool ($TOOL_NAME with input $TOOL_INPUT), read and verify full compliance with c:\\Programmer\\diet-maker\\AGENTS.md: 1. Atomic Design 5-level hierarchy (atoms, molecules, organisms, templates, pages). 2. Shadcn UI base component preservation & child component creation. 3. File placement rules (/tests for tests, /refs for references). If the planned tool use violates any AGENTS.md directive, return systemMessage with mandatory corrections or block non-compliant operations."
         }
       ]
     }
