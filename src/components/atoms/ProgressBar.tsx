@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface ProgressBarProps {
   value: number; // 0 a 100
-  colorVariant?: 'emerald' | 'rose' | 'amber' | 'teal';
+  colorVariant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue';
   className?: string;
 }
 
@@ -16,6 +16,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     rose: 'bg-warm-rose',
     amber: 'bg-warm-amber',
     teal: 'bg-warm-teal',
+    blue: 'bg-blue-600',
   };
 
   const clampedValue = Math.min(100, Math.max(0, value));

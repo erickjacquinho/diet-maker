@@ -24,6 +24,11 @@ export const primitiveTokens = {
       500: '#f43f5e',
       600: '#e11d48',
     },
+    blue: {
+      50: '#eff6ff',
+      500: '#3b82f6',
+      600: '#2563eb',
+    },
     amber: {
       50: '#fef3c7',
       500: '#f59e0b',
@@ -86,8 +91,8 @@ export const primitiveTokens = {
   radii: {
     none: '0px',
     sm: '4px',
-    md: '8px',
-    lg: '12px',
+    md: '6px',
+    lg: '8px',
     xl: '12px',
     '2xl': '16px',
     full: '9999px',
@@ -131,8 +136,8 @@ export const semanticTokens = {
       bg: primitiveTokens.colors.emerald[50],
     },
     protein: {
-      main: primitiveTokens.colors.rose[600],
-      bg: primitiveTokens.colors.rose[50],
+      main: primitiveTokens.colors.blue[600],
+      bg: primitiveTokens.colors.blue[50],
     },
     carbs: {
       main: primitiveTokens.colors.amber[600],
@@ -172,6 +177,18 @@ export const componentTokens = {
     borderFocus: semanticTokens.borders.emerald,
     placeholder: semanticTokens.text.muted,
     radii: primitiveTokens.radii.xl,
+  },
+  card: {
+    radii: primitiveTokens.radii['2xl'],
+    bg: semanticTokens.surfaces.card,
+    border: semanticTokens.borders.clean,
+    padding: primitiveTokens.spacing[6],
+  },
+  modal: {
+    radii: primitiveTokens.radii['2xl'],
+    bg: semanticTokens.surfaces.card,
+    border: semanticTokens.borders.clean,
+    zIndex: primitiveTokens.zIndices.modalContent,
   },
   sidebar: {
     width: primitiveTokens.spacing.sidebarWidth,

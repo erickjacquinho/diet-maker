@@ -26,7 +26,7 @@
 | **Card Header** | `text-base` | 16px / 24px | `font-black` (900) | `text-warm-charcoal` | Título da Refeição ("Café da Manhã") |
 | **Body Bold** | `text-xs` | 12px / 16px | `font-bold` (700) | `text-warm-charcoal` | Nome do Alimento ("Ovo de galinha cozido") |
 | **Body Regular** | `text-xs` | 12px / 16px | `font-normal` (400) | `text-warm-secondary` | Subtítulo "Elaboração visual com metas manuais" |
-| **Caption / Muted**| `text-[11px]`| 11px / 14px | `font-medium` (500) | `text-warm-muted` | Detalhes de alimento ("219 kcal • P: 20g • C: 0.9g") |
+| **Caption / Muted**| `text-[11px]`| 11px / 14px | `font-medium` (500) | `text-warm-muted` | Detalhes de alimento ("P: 20g • C: 0.9g • G: 14g • 219 kcal") |
 | **Micro Badge** | `text-[10px]`| 10px / 12px | `font-bold` (700) | `text-warm-emerald` | Tag superior ("PRO LOCAL", "Na meta ✓") |
 
 ---
@@ -44,6 +44,6 @@
   Ovo de galinha inteiro cozido
 </div>
 <div className="text-[11px] text-warm-secondary mt-0.5">
-  219 kcal • <span className="text-warm-rose font-bold">P: 20g</span> • C: 0.9g
+  <span className="text-warm-rose font-bold">P: 20g</span> • C: 0.9g • G: 14g • 219 kcal
 </div>
 ```

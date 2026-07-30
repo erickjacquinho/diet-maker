@@ -23,6 +23,16 @@ module.exports = {
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
+        macro: {
+          protein: 'var(--color-macro-protein)',
+          proteinBg: 'var(--color-macro-protein-bg)',
+          carbs: 'var(--color-macro-carbs)',
+          carbsBg: 'var(--color-macro-carbs-bg)',
+          fats: 'var(--color-macro-fats)',
+          fatsBg: 'var(--color-macro-fats-bg)',
+          kcal: 'var(--color-macro-kcal)',
+          kcalBg: 'var(--color-macro-kcal-bg)',
+        },
         warm: {
           bg: '#f5f2eb',         /* Creme / Areia Suave de Fundo */
           card: '#ffffff',       /* Branco Puro Nítido */
@@ -34,9 +44,13 @@ module.exports = {
           muted: '#8c8275',      /* Bege/Cinza Neutro */
           emerald: '#059669',    /* Esmeralda Sólido */
           emeraldBg: '#e6f4ea',  /* Esmeralda Pastel */
-          rose: '#e11d48',       /* Carmim / Proteína */
+          protein: '#2563eb',    /* Azul Cobalto / Proteína */
+          proteinBg: '#eff6ff',  /* Azul Pastel */
+          carbs: '#f97316',      /* Laranja Solar / Carboidrato */
+          carbsBg: '#fff7ed',    /* Laranja Pastel */
+          rose: '#e11d48',       /* Carmim / Alerta */
           roseBg: '#fce8e6',     /* Carmim Pastel */
-          amber: '#d97706',      /* Âmbar / Carboidrato */
+          amber: '#d97706',      /* Âmbar / Aviso */
           amberBg: '#fef3c7',    /* Âmbar Pastel */
           teal: '#0d9488',       /* Teal / Gordura */
           tealBg: '#e6f2f2',     /* Teal Pastel */

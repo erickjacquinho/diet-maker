@@ -13,7 +13,7 @@
   {
     "id": "taco-2",
     "name": "Arroz, integral, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 360,
     "proteinG": 7.3,
@@ -35,7 +35,7 @@
   {
     "id": "taco-4",
     "name": "Arroz, tipo 1, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 358,
     "proteinG": 7.2,
@@ -57,7 +57,7 @@
   {
     "id": "taco-6",
     "name": "Arroz, tipo 2, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 358,
     "proteinG": 7.2,
@@ -68,7 +68,7 @@
   {
     "id": "taco-7",
     "name": "Aveia, flocos, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 394,
     "proteinG": 13.9,
@@ -79,7 +79,7 @@
   {
     "id": "taco-8",
     "name": "Biscoito, doce, maisena",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 443,
     "proteinG": 8.1,
@@ -90,7 +90,7 @@
   {
     "id": "taco-9",
     "name": "Biscoito, doce, recheado com chocolate",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 472,
     "proteinG": 6.4,
@@ -101,7 +101,7 @@
   {
     "id": "taco-10",
     "name": "Biscoito, doce, recheado com morango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 471,
     "proteinG": 5.7,
@@ -112,7 +112,7 @@
   {
     "id": "taco-11",
     "name": "Biscoito, doce, wafer, recheado de chocolate",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 502,
     "proteinG": 5.6,
@@ -123,7 +123,7 @@
   {
     "id": "taco-12",
     "name": "Biscoito, doce, wafer, recheado de morango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 513,
     "proteinG": 4.5,
@@ -145,7 +145,7 @@
   {
     "id": "taco-14",
     "name": "Bolo, mistura para",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 419,
     "proteinG": 6.2,
@@ -156,7 +156,7 @@
   {
     "id": "taco-15",
     "name": "Bolo, pronto, aipim",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 324,
     "proteinG": 4.4,
@@ -167,7 +167,7 @@
   {
     "id": "taco-16",
     "name": "Bolo, pronto, chocolate",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 410,
     "proteinG": 6.2,
@@ -178,7 +178,7 @@
   {
     "id": "taco-17",
     "name": "Bolo, pronto, coco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 333,
     "proteinG": 5.7,
@@ -189,7 +189,7 @@
   {
     "id": "taco-18",
     "name": "Bolo, pronto, milho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 311,
     "proteinG": 4.8,
@@ -200,7 +200,7 @@
   {
     "id": "taco-19",
     "name": "Canjica, branca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 358,
     "proteinG": 7.2,
@@ -211,7 +211,7 @@
   {
     "id": "taco-20",
     "name": "Canjica, com leite integral",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 112,
     "proteinG": 2.4,
@@ -222,7 +222,7 @@
   {
     "id": "taco-21",
     "name": "Cereais, milho, flocos, com sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 370,
     "proteinG": 7.3,
@@ -233,7 +233,7 @@
   {
     "id": "taco-22",
     "name": "Cereais, milho, flocos, sem sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 363,
     "proteinG": 6.9,
@@ -244,7 +244,7 @@
   {
     "id": "taco-23",
     "name": "Cereais, mingau, milho, infantil",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 394,
     "proteinG": 6.4,
@@ -255,7 +255,7 @@
   {
     "id": "taco-24",
     "name": "Cereais, mistura para vitamina, trigo, cevada e aveia",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 381,
     "proteinG": 8.9,
@@ -266,7 +266,7 @@
   {
     "id": "taco-25",
     "name": "Cereal matinal, milho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 365,
     "proteinG": 7.2,
@@ -277,7 +277,7 @@
   {
     "id": "taco-26",
     "name": "Cereal matinal, milho, açúcar",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 377,
     "proteinG": 4.7,
@@ -288,7 +288,7 @@
   {
     "id": "taco-27",
     "name": "Creme de arroz, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 386,
     "proteinG": 7.0,
@@ -299,7 +299,7 @@
   {
     "id": "taco-28",
     "name": "Creme de milho, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 333,
     "proteinG": 4.8,
@@ -310,7 +310,7 @@
   {
     "id": "taco-29",
     "name": "Curau, milho verde",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 78,
     "proteinG": 2.4,
@@ -321,7 +321,7 @@
   {
     "id": "taco-30",
     "name": "Curau, milho verde, mistura para",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 402,
     "proteinG": 2.2,
@@ -332,7 +332,7 @@
   {
     "id": "taco-31",
     "name": "Farinha, de arroz, enriquecida",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 363,
     "proteinG": 1.3,
@@ -343,7 +343,7 @@
   {
     "id": "taco-32",
     "name": "Farinha, de centeio, integral",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 336,
     "proteinG": 12.5,
@@ -354,7 +354,7 @@
   {
     "id": "taco-33",
     "name": "Farinha, de milho, amarela",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 351,
     "proteinG": 7.2,
@@ -365,7 +365,7 @@
   {
     "id": "taco-34",
     "name": "Farinha, de rosca",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 371,
     "proteinG": 11.4,
@@ -376,7 +376,7 @@
   {
     "id": "taco-35",
     "name": "Farinha, de trigo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 360,
     "proteinG": 9.8,
@@ -387,7 +387,7 @@
   {
     "id": "taco-36",
     "name": "Farinha, láctea, de cereais",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 415,
     "proteinG": 11.9,
@@ -409,7 +409,7 @@
   {
     "id": "taco-38",
     "name": "Lasanha, massa fresca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 220,
     "proteinG": 7.0,
@@ -420,7 +420,7 @@
   {
     "id": "taco-39",
     "name": "Macarrão, instantâneo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 436,
     "proteinG": 8.8,
@@ -431,7 +431,7 @@
   {
     "id": "taco-40",
     "name": "Macarrão, trigo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 371,
     "proteinG": 10.0,
@@ -442,7 +442,7 @@
   {
     "id": "taco-41",
     "name": "Macarrão, trigo, cru, com ovos",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 371,
     "proteinG": 10.3,
@@ -453,7 +453,7 @@
   {
     "id": "taco-42",
     "name": "Milho, amido, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 361,
     "proteinG": 0.6,
@@ -464,7 +464,7 @@
   {
     "id": "taco-43",
     "name": "Milho, fubá, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 353,
     "proteinG": 7.2,
@@ -475,7 +475,7 @@
   {
     "id": "taco-44",
     "name": "Milho, verde, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 138,
     "proteinG": 6.6,
@@ -497,7 +497,7 @@
   {
     "id": "taco-46",
     "name": "Mingau tradicional, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 373,
     "proteinG": 0.6,
@@ -519,7 +519,7 @@
   {
     "id": "taco-48",
     "name": "Pão, aveia, forma",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 343,
     "proteinG": 12.3,
@@ -530,7 +530,7 @@
   {
     "id": "taco-49",
     "name": "Pão, de soja",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 309,
     "proteinG": 11.3,
@@ -541,7 +541,7 @@
   {
     "id": "taco-50",
     "name": "Pão, glúten, forma",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 253,
     "proteinG": 12.0,
@@ -552,7 +552,7 @@
   {
     "id": "taco-51",
     "name": "Pão, milho, forma",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 292,
     "proteinG": 8.3,
@@ -563,7 +563,7 @@
   {
     "id": "taco-52",
     "name": "Pão, trigo, forma, integral",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 253,
     "proteinG": 9.4,
@@ -574,7 +574,7 @@
   {
     "id": "taco-53",
     "name": "Pão, trigo, francês",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 300,
     "proteinG": 8.0,
@@ -585,7 +585,7 @@
   {
     "id": "taco-54",
     "name": "Pão, trigo, sovado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 311,
     "proteinG": 8.4,
@@ -596,7 +596,7 @@
   {
     "id": "taco-55",
     "name": "Pastel, de carne, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 289,
     "proteinG": 10.7,
@@ -618,7 +618,7 @@
   {
     "id": "taco-57",
     "name": "Pastel, de queijo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 308,
     "proteinG": 9.9,
@@ -640,7 +640,7 @@
   {
     "id": "taco-59",
     "name": "Pastel, massa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 310,
     "proteinG": 6.9,
@@ -662,7 +662,7 @@
   {
     "id": "taco-61",
     "name": "Pipoca, com óleo de soja, sem sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Cereais & Tubérculos",
     "kcal": 448,
     "proteinG": 9.9,
@@ -706,7 +706,7 @@
   {
     "id": "taco-65",
     "name": "Abóbora, cabotian, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 39,
     "proteinG": 1.7,
@@ -717,7 +717,7 @@
   {
     "id": "taco-66",
     "name": "Abóbora, menina brasileira, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 14,
     "proteinG": 0.6,
@@ -728,7 +728,7 @@
   {
     "id": "taco-67",
     "name": "Abóbora, moranga, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 12,
     "proteinG": 1.0,
@@ -750,7 +750,7 @@
   {
     "id": "taco-69",
     "name": "Abóbora, pescoço, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 24,
     "proteinG": 0.7,
@@ -772,7 +772,7 @@
   {
     "id": "taco-71",
     "name": "Abobrinha, italiana, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 19,
     "proteinG": 1.1,
@@ -794,7 +794,7 @@
   {
     "id": "taco-73",
     "name": "Abobrinha, paulista, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 31,
     "proteinG": 0.6,
@@ -805,7 +805,7 @@
   {
     "id": "taco-74",
     "name": "Acelga, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 21,
     "proteinG": 1.4,
@@ -816,7 +816,7 @@
   {
     "id": "taco-75",
     "name": "Agrião, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 17,
     "proteinG": 2.7,
@@ -827,7 +827,7 @@
   {
     "id": "taco-76",
     "name": "Aipo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 19,
     "proteinG": 0.8,
@@ -838,7 +838,7 @@
   {
     "id": "taco-77",
     "name": "Alface, americana, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 9,
     "proteinG": 0.6,
@@ -849,7 +849,7 @@
   {
     "id": "taco-78",
     "name": "Alface, crespa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 11,
     "proteinG": 1.3,
@@ -860,7 +860,7 @@
   {
     "id": "taco-79",
     "name": "Alface, lisa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 14,
     "proteinG": 1.7,
@@ -871,7 +871,7 @@
   {
     "id": "taco-80",
     "name": "Alface, roxa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 13,
     "proteinG": 0.9,
@@ -882,7 +882,7 @@
   {
     "id": "taco-81",
     "name": "Alfavaca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 29,
     "proteinG": 2.7,
@@ -893,7 +893,7 @@
   {
     "id": "taco-82",
     "name": "Alho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 113,
     "proteinG": 7.0,
@@ -904,7 +904,7 @@
   {
     "id": "taco-83",
     "name": "Alho-poró, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 32,
     "proteinG": 1.4,
@@ -915,7 +915,7 @@
   {
     "id": "taco-84",
     "name": "Almeirão, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 18,
     "proteinG": 1.8,
@@ -948,7 +948,7 @@
   {
     "id": "taco-87",
     "name": "Batata, baroa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 101,
     "proteinG": 1.0,
@@ -970,7 +970,7 @@
   {
     "id": "taco-89",
     "name": "Batata, doce, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 118,
     "proteinG": 1.3,
@@ -1003,7 +1003,7 @@
   {
     "id": "taco-92",
     "name": "Batata, inglesa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 64,
     "proteinG": 1.8,
@@ -1025,7 +1025,7 @@
   {
     "id": "taco-94",
     "name": "Batata, inglesa, sauté",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 68,
     "proteinG": 1.3,
@@ -1047,7 +1047,7 @@
   {
     "id": "taco-96",
     "name": "Berinjela, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 20,
     "proteinG": 1.2,
@@ -1069,7 +1069,7 @@
   {
     "id": "taco-98",
     "name": "Beterraba, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 49,
     "proteinG": 1.9,
@@ -1080,7 +1080,7 @@
   {
     "id": "taco-99",
     "name": "Biscoito, polvilho doce",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 438,
     "proteinG": 1.3,
@@ -1102,7 +1102,7 @@
   {
     "id": "taco-101",
     "name": "Brócolis, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 25,
     "proteinG": 3.6,
@@ -1124,7 +1124,7 @@
   {
     "id": "taco-103",
     "name": "Cará, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 96,
     "proteinG": 2.3,
@@ -1135,7 +1135,7 @@
   {
     "id": "taco-104",
     "name": "Caruru, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 34,
     "proteinG": 3.2,
@@ -1146,7 +1146,7 @@
   {
     "id": "taco-105",
     "name": "Catalonha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 24,
     "proteinG": 1.9,
@@ -1168,7 +1168,7 @@
   {
     "id": "taco-107",
     "name": "Cebola, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 39,
     "proteinG": 1.7,
@@ -1179,7 +1179,7 @@
   {
     "id": "taco-108",
     "name": "Cebolinha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 20,
     "proteinG": 1.9,
@@ -1201,7 +1201,7 @@
   {
     "id": "taco-110",
     "name": "Cenoura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 34,
     "proteinG": 1.3,
@@ -1212,7 +1212,7 @@
   {
     "id": "taco-111",
     "name": "Chicória, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 14,
     "proteinG": 1.1,
@@ -1234,7 +1234,7 @@
   {
     "id": "taco-113",
     "name": "Chuchu, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 17,
     "proteinG": 0.7,
@@ -1256,7 +1256,7 @@
   {
     "id": "taco-115",
     "name": "Couve, manteiga, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 27,
     "proteinG": 2.9,
@@ -1278,7 +1278,7 @@
   {
     "id": "taco-117",
     "name": "Couve-flor, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 23,
     "proteinG": 1.9,
@@ -1300,7 +1300,7 @@
   {
     "id": "taco-119",
     "name": "Espinafre, Nova Zelândia, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 16,
     "proteinG": 2.0,
@@ -1322,7 +1322,7 @@
   {
     "id": "taco-121",
     "name": "Farinha, de mandioca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 361,
     "proteinG": 1.6,
@@ -1344,7 +1344,7 @@
   {
     "id": "taco-123",
     "name": "Farinha, de puba",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 360,
     "proteinG": 1.6,
@@ -1355,7 +1355,7 @@
   {
     "id": "taco-124",
     "name": "Fécula, de mandioca",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 331,
     "proteinG": 0.5,
@@ -1366,7 +1366,7 @@
   {
     "id": "taco-125",
     "name": "Feijão, broto, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 39,
     "proteinG": 4.2,
@@ -1377,7 +1377,7 @@
   {
     "id": "taco-126",
     "name": "Inhame, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 97,
     "proteinG": 2.1,
@@ -1388,7 +1388,7 @@
   {
     "id": "taco-127",
     "name": "Jiló, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 27,
     "proteinG": 1.4,
@@ -1399,7 +1399,7 @@
   {
     "id": "taco-128",
     "name": "Jurubeba, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 126,
     "proteinG": 4.4,
@@ -1421,7 +1421,7 @@
   {
     "id": "taco-130",
     "name": "Mandioca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 151,
     "proteinG": 1.1,
@@ -1432,7 +1432,7 @@
   {
     "id": "taco-131",
     "name": "Mandioca, farofa, temperada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 406,
     "proteinG": 2.1,
@@ -1454,7 +1454,7 @@
   {
     "id": "taco-133",
     "name": "Manjericão, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 21,
     "proteinG": 2.0,
@@ -1465,7 +1465,7 @@
   {
     "id": "taco-134",
     "name": "Maxixe, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 14,
     "proteinG": 1.4,
@@ -1476,7 +1476,7 @@
   {
     "id": "taco-135",
     "name": "Mostarda, folha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 18,
     "proteinG": 2.1,
@@ -1498,7 +1498,7 @@
   {
     "id": "taco-137",
     "name": "Nabo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 18,
     "proteinG": 1.2,
@@ -1542,7 +1542,7 @@
   {
     "id": "taco-141",
     "name": "Pão, de queijo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 295,
     "proteinG": 3.6,
@@ -1553,7 +1553,7 @@
   {
     "id": "taco-142",
     "name": "Pepino, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 10,
     "proteinG": 0.9,
@@ -1564,7 +1564,7 @@
   {
     "id": "taco-143",
     "name": "Pimentão, amarelo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 28,
     "proteinG": 1.2,
@@ -1575,7 +1575,7 @@
   {
     "id": "taco-144",
     "name": "Pimentão, verde, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 21,
     "proteinG": 1.1,
@@ -1586,7 +1586,7 @@
   {
     "id": "taco-145",
     "name": "Pimentão, vermelho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 23,
     "proteinG": 1.0,
@@ -1597,7 +1597,7 @@
   {
     "id": "taco-146",
     "name": "Polvilho, doce",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 351,
     "proteinG": 0.4,
@@ -1608,7 +1608,7 @@
   {
     "id": "taco-147",
     "name": "Quiabo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 30,
     "proteinG": 1.9,
@@ -1619,7 +1619,7 @@
   {
     "id": "taco-148",
     "name": "Rabanete, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 14,
     "proteinG": 1.4,
@@ -1630,7 +1630,7 @@
   {
     "id": "taco-149",
     "name": "Repolho, branco, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 17,
     "proteinG": 0.9,
@@ -1641,7 +1641,7 @@
   {
     "id": "taco-150",
     "name": "Repolho, roxo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 31,
     "proteinG": 1.9,
@@ -1663,7 +1663,7 @@
   {
     "id": "taco-152",
     "name": "Rúcula, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 13,
     "proteinG": 1.8,
@@ -1674,7 +1674,7 @@
   {
     "id": "taco-153",
     "name": "Salsa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 33,
     "proteinG": 3.3,
@@ -1696,7 +1696,7 @@
   {
     "id": "taco-155",
     "name": "Serralha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 30,
     "proteinG": 2.7,
@@ -1707,7 +1707,7 @@
   {
     "id": "taco-156",
     "name": "Taioba, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 34,
     "proteinG": 2.9,
@@ -1718,7 +1718,7 @@
   {
     "id": "taco-157",
     "name": "Tomate, com semente, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 15,
     "proteinG": 1.1,
@@ -1729,7 +1729,7 @@
   {
     "id": "taco-158",
     "name": "Tomate, extrato",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 61,
     "proteinG": 2.4,
@@ -1751,7 +1751,7 @@
   {
     "id": "taco-160",
     "name": "Tomate, purê",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 28,
     "proteinG": 1.4,
@@ -1762,7 +1762,7 @@
   {
     "id": "taco-161",
     "name": "Tomate, salada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 21,
     "proteinG": 0.8,
@@ -1773,7 +1773,7 @@
   {
     "id": "taco-162",
     "name": "Vagem, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Verduras & Legumes",
     "kcal": 25,
     "proteinG": 1.8,
@@ -1784,7 +1784,7 @@
   {
     "id": "taco-163",
     "name": "Abacate, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 96,
     "proteinG": 1.2,
@@ -1795,7 +1795,7 @@
   {
     "id": "taco-164",
     "name": "Abacaxi, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 48,
     "proteinG": 0.9,
@@ -1806,7 +1806,7 @@
   {
     "id": "taco-165",
     "name": "Abacaxi, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 31,
     "proteinG": 0.5,
@@ -1817,7 +1817,7 @@
   {
     "id": "taco-166",
     "name": "Abiu, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 62,
     "proteinG": 0.8,
@@ -1828,7 +1828,7 @@
   {
     "id": "taco-167",
     "name": "Açaí, polpa, com xarope de guaraná e glucose",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 110,
     "proteinG": 0.7,
@@ -1839,7 +1839,7 @@
   {
     "id": "taco-168",
     "name": "Açaí, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 58,
     "proteinG": 0.8,
@@ -1850,7 +1850,7 @@
   {
     "id": "taco-169",
     "name": "Acerola, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 33,
     "proteinG": 0.9,
@@ -1861,7 +1861,7 @@
   {
     "id": "taco-170",
     "name": "Acerola, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 22,
     "proteinG": 0.6,
@@ -1883,7 +1883,7 @@
   {
     "id": "taco-172",
     "name": "Ameixa, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 53,
     "proteinG": 0.8,
@@ -1905,7 +1905,7 @@
   {
     "id": "taco-174",
     "name": "Atemóia, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 97,
     "proteinG": 1.0,
@@ -1916,7 +1916,7 @@
   {
     "id": "taco-175",
     "name": "Banana, da terra, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 128,
     "proteinG": 1.4,
@@ -1927,7 +1927,7 @@
   {
     "id": "taco-176",
     "name": "Banana, doce em barra",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 280,
     "proteinG": 2.2,
@@ -1938,7 +1938,7 @@
   {
     "id": "taco-177",
     "name": "Banana, figo, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 105,
     "proteinG": 1.1,
@@ -1949,7 +1949,7 @@
   {
     "id": "taco-178",
     "name": "Banana, maçã, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 87,
     "proteinG": 1.8,
@@ -1960,7 +1960,7 @@
   {
     "id": "taco-179",
     "name": "Banana, nanica, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 92,
     "proteinG": 1.4,
@@ -1971,7 +1971,7 @@
   {
     "id": "taco-180",
     "name": "Banana, ouro, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 112,
     "proteinG": 1.5,
@@ -1982,7 +1982,7 @@
   {
     "id": "taco-181",
     "name": "Banana, pacova, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 78,
     "proteinG": 1.2,
@@ -1993,7 +1993,7 @@
   {
     "id": "taco-182",
     "name": "Banana, prata, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 98,
     "proteinG": 1.3,
@@ -2004,7 +2004,7 @@
   {
     "id": "taco-183",
     "name": "Cacau, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 74,
     "proteinG": 1.0,
@@ -2015,7 +2015,7 @@
   {
     "id": "taco-184",
     "name": "Cajá-Manga, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 46,
     "proteinG": 1.3,
@@ -2026,7 +2026,7 @@
   {
     "id": "taco-185",
     "name": "Cajá, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 26,
     "proteinG": 0.6,
@@ -2037,7 +2037,7 @@
   {
     "id": "taco-186",
     "name": "Caju, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 43,
     "proteinG": 1.0,
@@ -2048,7 +2048,7 @@
   {
     "id": "taco-187",
     "name": "Caju, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 37,
     "proteinG": 0.5,
@@ -2059,7 +2059,7 @@
   {
     "id": "taco-188",
     "name": "Caju, suco concentrado, envasado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 45,
     "proteinG": 0.4,
@@ -2070,7 +2070,7 @@
   {
     "id": "taco-189",
     "name": "Caqui, chocolate, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 71,
     "proteinG": 0.4,
@@ -2081,7 +2081,7 @@
   {
     "id": "taco-190",
     "name": "Carambola, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 46,
     "proteinG": 0.9,
@@ -2092,7 +2092,7 @@
   {
     "id": "taco-191",
     "name": "Ciriguela, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 76,
     "proteinG": 1.4,
@@ -2103,7 +2103,7 @@
   {
     "id": "taco-192",
     "name": "Cupuaçu, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 49,
     "proteinG": 1.2,
@@ -2114,7 +2114,7 @@
   {
     "id": "taco-193",
     "name": "Cupuaçu, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 49,
     "proteinG": 0.8,
@@ -2125,7 +2125,7 @@
   {
     "id": "taco-194",
     "name": "Figo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 41,
     "proteinG": 1.0,
@@ -2147,7 +2147,7 @@
   {
     "id": "taco-196",
     "name": "Fruta-pão, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 67,
     "proteinG": 1.1,
@@ -2158,7 +2158,7 @@
   {
     "id": "taco-197",
     "name": "Goiaba, branca, com casca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 52,
     "proteinG": 0.9,
@@ -2169,7 +2169,7 @@
   {
     "id": "taco-198",
     "name": "Goiaba, doce em pasta",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 269,
     "proteinG": 0.6,
@@ -2180,7 +2180,7 @@
   {
     "id": "taco-199",
     "name": "Goiaba, doce, cascão",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 286,
     "proteinG": 0.4,
@@ -2191,7 +2191,7 @@
   {
     "id": "taco-200",
     "name": "Goiaba, vermelha, com casca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 54,
     "proteinG": 1.1,
@@ -2202,7 +2202,7 @@
   {
     "id": "taco-201",
     "name": "Graviola, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 62,
     "proteinG": 0.8,
@@ -2213,7 +2213,7 @@
   {
     "id": "taco-202",
     "name": "Graviola, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 38,
     "proteinG": 0.6,
@@ -2224,7 +2224,7 @@
   {
     "id": "taco-203",
     "name": "Jabuticaba, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 58,
     "proteinG": 0.6,
@@ -2235,7 +2235,7 @@
   {
     "id": "taco-204",
     "name": "Jaca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 88,
     "proteinG": 1.4,
@@ -2246,7 +2246,7 @@
   {
     "id": "taco-205",
     "name": "Jambo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 27,
     "proteinG": 0.9,
@@ -2257,7 +2257,7 @@
   {
     "id": "taco-206",
     "name": "Jamelão, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 41,
     "proteinG": 0.5,
@@ -2268,7 +2268,7 @@
   {
     "id": "taco-207",
     "name": "Kiwi, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 51,
     "proteinG": 1.3,
@@ -2279,7 +2279,7 @@
   {
     "id": "taco-208",
     "name": "Laranja, baía, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 45,
     "proteinG": 1.0,
@@ -2290,7 +2290,7 @@
   {
     "id": "taco-209",
     "name": "Laranja, baía, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 37,
     "proteinG": 0.7,
@@ -2301,7 +2301,7 @@
   {
     "id": "taco-210",
     "name": "Laranja, da terra, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 51,
     "proteinG": 1.1,
@@ -2312,7 +2312,7 @@
   {
     "id": "taco-211",
     "name": "Laranja, da terra, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 41,
     "proteinG": 0.7,
@@ -2323,7 +2323,7 @@
   {
     "id": "taco-212",
     "name": "Laranja, lima, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 46,
     "proteinG": 1.1,
@@ -2334,7 +2334,7 @@
   {
     "id": "taco-213",
     "name": "Laranja, lima, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 39,
     "proteinG": 0.7,
@@ -2345,7 +2345,7 @@
   {
     "id": "taco-214",
     "name": "Laranja, pêra, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 37,
     "proteinG": 1.0,
@@ -2356,7 +2356,7 @@
   {
     "id": "taco-215",
     "name": "Laranja, pêra, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 33,
     "proteinG": 0.7,
@@ -2367,7 +2367,7 @@
   {
     "id": "taco-216",
     "name": "Laranja, valência, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 46,
     "proteinG": 0.8,
@@ -2378,7 +2378,7 @@
   {
     "id": "taco-217",
     "name": "Laranja, valência, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 36,
     "proteinG": 0.5,
@@ -2389,7 +2389,7 @@
   {
     "id": "taco-218",
     "name": "Limão, cravo, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 14,
     "proteinG": 0.3,
@@ -2400,7 +2400,7 @@
   {
     "id": "taco-219",
     "name": "Limão, galego, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 22,
     "proteinG": 0.6,
@@ -2411,7 +2411,7 @@
   {
     "id": "taco-220",
     "name": "Limão, tahiti, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 32,
     "proteinG": 0.9,
@@ -2422,7 +2422,7 @@
   {
     "id": "taco-221",
     "name": "Maçã, Argentina, com casca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 63,
     "proteinG": 0.2,
@@ -2433,7 +2433,7 @@
   {
     "id": "taco-222",
     "name": "Maçã, Fuji, com casca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 56,
     "proteinG": 0.3,
@@ -2444,7 +2444,7 @@
   {
     "id": "taco-223",
     "name": "Macaúba, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 404,
     "proteinG": 2.1,
@@ -2455,7 +2455,7 @@
   {
     "id": "taco-224",
     "name": "Mamão, doce em calda, drenado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 196,
     "proteinG": 0.2,
@@ -2466,7 +2466,7 @@
   {
     "id": "taco-225",
     "name": "Mamão, Formosa, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 45,
     "proteinG": 0.8,
@@ -2477,7 +2477,7 @@
   {
     "id": "taco-226",
     "name": "Mamão, Papaia, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 40,
     "proteinG": 0.5,
@@ -2488,7 +2488,7 @@
   {
     "id": "taco-227",
     "name": "Mamão verde, doce em calda, drenado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 209,
     "proteinG": 0.3,
@@ -2499,7 +2499,7 @@
   {
     "id": "taco-228",
     "name": "Manga, Haden, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 64,
     "proteinG": 0.4,
@@ -2510,7 +2510,7 @@
   {
     "id": "taco-229",
     "name": "Manga, Palmer, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 72,
     "proteinG": 0.4,
@@ -2521,7 +2521,7 @@
   {
     "id": "taco-230",
     "name": "Manga, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 48,
     "proteinG": 0.4,
@@ -2532,7 +2532,7 @@
   {
     "id": "taco-231",
     "name": "Manga, Tommy Atkins, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 51,
     "proteinG": 0.9,
@@ -2543,7 +2543,7 @@
   {
     "id": "taco-232",
     "name": "Maracujá, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 68,
     "proteinG": 2.0,
@@ -2554,7 +2554,7 @@
   {
     "id": "taco-233",
     "name": "Maracujá, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 39,
     "proteinG": 0.8,
@@ -2565,7 +2565,7 @@
   {
     "id": "taco-234",
     "name": "Maracujá, suco concentrado, envasado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 42,
     "proteinG": 0.8,
@@ -2576,7 +2576,7 @@
   {
     "id": "taco-235",
     "name": "Melancia, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 33,
     "proteinG": 0.9,
@@ -2587,7 +2587,7 @@
   {
     "id": "taco-236",
     "name": "Melão, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 29,
     "proteinG": 0.7,
@@ -2598,7 +2598,7 @@
   {
     "id": "taco-237",
     "name": "Mexerica, Murcote, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 58,
     "proteinG": 0.9,
@@ -2609,7 +2609,7 @@
   {
     "id": "taco-238",
     "name": "Mexerica, Rio, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 37,
     "proteinG": 0.7,
@@ -2620,7 +2620,7 @@
   {
     "id": "taco-239",
     "name": "Morango, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 30,
     "proteinG": 0.9,
@@ -2631,7 +2631,7 @@
   {
     "id": "taco-240",
     "name": "Nêspera, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 43,
     "proteinG": 0.3,
@@ -2642,7 +2642,7 @@
   {
     "id": "taco-241",
     "name": "Pequi, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 205,
     "proteinG": 2.3,
@@ -2653,7 +2653,7 @@
   {
     "id": "taco-242",
     "name": "Pêra, Park, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 61,
     "proteinG": 0.2,
@@ -2664,7 +2664,7 @@
   {
     "id": "taco-243",
     "name": "Pêra, Williams, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 53,
     "proteinG": 0.6,
@@ -2675,7 +2675,7 @@
   {
     "id": "taco-244",
     "name": "Pêssego, Aurora, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 36,
     "proteinG": 0.8,
@@ -2697,7 +2697,7 @@
   {
     "id": "taco-246",
     "name": "Pinha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 88,
     "proteinG": 1.5,
@@ -2708,7 +2708,7 @@
   {
     "id": "taco-247",
     "name": "Pitanga, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 41,
     "proteinG": 0.9,
@@ -2719,7 +2719,7 @@
   {
     "id": "taco-248",
     "name": "Pitanga, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 19,
     "proteinG": 0.3,
@@ -2730,7 +2730,7 @@
   {
     "id": "taco-249",
     "name": "Romã, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 56,
     "proteinG": 0.4,
@@ -2741,7 +2741,7 @@
   {
     "id": "taco-250",
     "name": "Tamarindo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 276,
     "proteinG": 3.2,
@@ -2752,7 +2752,7 @@
   {
     "id": "taco-251",
     "name": "Tangerina, Poncã, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 38,
     "proteinG": 0.8,
@@ -2763,7 +2763,7 @@
   {
     "id": "taco-252",
     "name": "Tangerina, Poncã, suco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 36,
     "proteinG": 0.5,
@@ -2774,7 +2774,7 @@
   {
     "id": "taco-253",
     "name": "Tucumã, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 262,
     "proteinG": 2.1,
@@ -2785,7 +2785,7 @@
   {
     "id": "taco-254",
     "name": "Umbu, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 37,
     "proteinG": 0.8,
@@ -2796,7 +2796,7 @@
   {
     "id": "taco-255",
     "name": "Umbu, polpa, congelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 34,
     "proteinG": 0.5,
@@ -2807,7 +2807,7 @@
   {
     "id": "taco-256",
     "name": "Uva, Itália, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 53,
     "proteinG": 0.7,
@@ -2818,7 +2818,7 @@
   {
     "id": "taco-257",
     "name": "Uva, Rubi, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 49,
     "proteinG": 0.6,
@@ -2829,7 +2829,7 @@
   {
     "id": "taco-258",
     "name": "Uva, suco concentrado, envasado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Frutas",
     "kcal": 58,
     "proteinG": 0.0,
@@ -2840,7 +2840,7 @@
   {
     "id": "taco-259",
     "name": "Azeite, de dendê",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2851,7 +2851,7 @@
   {
     "id": "taco-260",
     "name": "Azeite, de oliva, extra virgem",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2862,7 +2862,7 @@
   {
     "id": "taco-261",
     "name": "Manteiga, com sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 726,
     "proteinG": 0.4,
@@ -2873,7 +2873,7 @@
   {
     "id": "taco-262",
     "name": "Manteiga, sem sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 758,
     "proteinG": 0.4,
@@ -2884,7 +2884,7 @@
   {
     "id": "taco-263",
     "name": "Margarina, com óleo hidrogenado, com sal (65% de lipídeos)",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 596,
     "proteinG": 0.0,
@@ -2895,7 +2895,7 @@
   {
     "id": "taco-264",
     "name": "Margarina, com óleo hidrogenado, sem sal (80% de lipídeos)",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 723,
     "proteinG": 0.0,
@@ -2906,7 +2906,7 @@
   {
     "id": "taco-265",
     "name": "Margarina, com óleo interesterificado, com sal (65%de lipídeos)",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 594,
     "proteinG": 0.0,
@@ -2917,7 +2917,7 @@
   {
     "id": "taco-266",
     "name": "Margarina, com óleo interesterificado, sem sal (65% de lipídeos)",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 593,
     "proteinG": 0.0,
@@ -2928,7 +2928,7 @@
   {
     "id": "taco-267",
     "name": "Óleo, de babaçu",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2939,7 +2939,7 @@
   {
     "id": "taco-268",
     "name": "Óleo, de canola",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2950,7 +2950,7 @@
   {
     "id": "taco-269",
     "name": "Óleo, de girassol",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2961,7 +2961,7 @@
   {
     "id": "taco-270",
     "name": "Óleo, de milho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2972,7 +2972,7 @@
   {
     "id": "taco-271",
     "name": "Óleo, de pequi",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -2983,7 +2983,7 @@
   {
     "id": "taco-272",
     "name": "Óleo, de soja",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 884,
     "proteinG": 0.0,
@@ -3016,7 +3016,7 @@
   {
     "id": "taco-275",
     "name": "Abadejo, filé, congelado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 59,
     "proteinG": 13.1,
@@ -3038,7 +3038,7 @@
   {
     "id": "taco-277",
     "name": "Atum, conserva em óleo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 166,
     "proteinG": 26.2,
@@ -3049,7 +3049,7 @@
   {
     "id": "taco-278",
     "name": "Atum, fresco, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 118,
     "proteinG": 25.7,
@@ -3060,7 +3060,7 @@
   {
     "id": "taco-279",
     "name": "Bacalhau, salgado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 136,
     "proteinG": 29.0,
@@ -3104,7 +3104,7 @@
   {
     "id": "taco-283",
     "name": "Cação, posta, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 83,
     "proteinG": 17.9,
@@ -3126,7 +3126,7 @@
   {
     "id": "taco-285",
     "name": "Camarão, Rio Grande, grande, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 47,
     "proteinG": 10.0,
@@ -3159,7 +3159,7 @@
   {
     "id": "taco-288",
     "name": "Corimba, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 128,
     "proteinG": 17.4,
@@ -3192,7 +3192,7 @@
   {
     "id": "taco-291",
     "name": "Corvina de água doce, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 101,
     "proteinG": 18.9,
@@ -3203,7 +3203,7 @@
   {
     "id": "taco-292",
     "name": "Corvina do mar, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 94,
     "proteinG": 18.6,
@@ -3236,7 +3236,7 @@
   {
     "id": "taco-295",
     "name": "Dourada de água doce, fresca",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 131,
     "proteinG": 18.8,
@@ -3247,7 +3247,7 @@
   {
     "id": "taco-296",
     "name": "Lambari, congelado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 131,
     "proteinG": 16.8,
@@ -3269,7 +3269,7 @@
   {
     "id": "taco-298",
     "name": "Lambari, fresco,cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 152,
     "proteinG": 15.7,
@@ -3313,7 +3313,7 @@
   {
     "id": "taco-302",
     "name": "Merluza, filé, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 89,
     "proteinG": 16.6,
@@ -3335,7 +3335,7 @@
   {
     "id": "taco-304",
     "name": "Pescada, branca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 111,
     "proteinG": 16.3,
@@ -3368,7 +3368,7 @@
   {
     "id": "taco-307",
     "name": "Pescada, filé, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 107,
     "proteinG": 16.6,
@@ -3390,7 +3390,7 @@
   {
     "id": "taco-309",
     "name": "Pescada, filé, molho escabeche",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 142,
     "proteinG": 11.8,
@@ -3401,7 +3401,7 @@
   {
     "id": "taco-310",
     "name": "Pescadinha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 76,
     "proteinG": 15.5,
@@ -3423,7 +3423,7 @@
   {
     "id": "taco-312",
     "name": "Pintado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 91,
     "proteinG": 18.6,
@@ -3445,7 +3445,7 @@
   {
     "id": "taco-314",
     "name": "Porquinho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 93,
     "proteinG": 20.5,
@@ -3467,7 +3467,7 @@
   {
     "id": "taco-316",
     "name": "Salmão, sem pele, fresco, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 170,
     "proteinG": 19.3,
@@ -3500,7 +3500,7 @@
   {
     "id": "taco-319",
     "name": "Sardinha, conserva em óleo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 285,
     "proteinG": 15.9,
@@ -3522,7 +3522,7 @@
   {
     "id": "taco-321",
     "name": "Sardinha, inteira, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 114,
     "proteinG": 21.1,
@@ -3533,7 +3533,7 @@
   {
     "id": "taco-322",
     "name": "Tucunaré, filé, congelado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 88,
     "proteinG": 18.0,
@@ -3544,7 +3544,7 @@
   {
     "id": "taco-323",
     "name": "Apresuntado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 129,
     "proteinG": 13.4,
@@ -3555,7 +3555,7 @@
   {
     "id": "taco-324",
     "name": "Caldo de carne, tablete",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 241,
     "proteinG": 7.8,
@@ -3566,7 +3566,7 @@
   {
     "id": "taco-325",
     "name": "Caldo de galinha, tablete",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 251,
     "proteinG": 6.3,
@@ -3588,7 +3588,7 @@
   {
     "id": "taco-327",
     "name": "Carne, bovina, acém, moído, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 137,
     "proteinG": 19.4,
@@ -3610,7 +3610,7 @@
   {
     "id": "taco-329",
     "name": "Carne, bovina, acém, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 144,
     "proteinG": 20.8,
@@ -3621,7 +3621,7 @@
   {
     "id": "taco-330",
     "name": "Carne, bovina, almôndegas, cruas",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 189,
     "proteinG": 12.3,
@@ -3654,7 +3654,7 @@
   {
     "id": "taco-333",
     "name": "Carne, bovina, bucho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 137,
     "proteinG": 20.5,
@@ -3665,7 +3665,7 @@
   {
     "id": "taco-334",
     "name": "Carne, bovina, capa de contra-filé, com gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 217,
     "proteinG": 19.2,
@@ -3687,7 +3687,7 @@
   {
     "id": "taco-336",
     "name": "Carne, bovina, capa de contra-filé, sem gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 131,
     "proteinG": 21.5,
@@ -3720,7 +3720,7 @@
   {
     "id": "taco-339",
     "name": "Carne, bovina, charque, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 249,
     "proteinG": 22.7,
@@ -3731,7 +3731,7 @@
   {
     "id": "taco-340",
     "name": "Carne, bovina, contra-filé, à milanesa",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 352,
     "proteinG": 20.6,
@@ -3742,7 +3742,7 @@
   {
     "id": "taco-341",
     "name": "Carne, bovina, contra-filé de costela, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 202,
     "proteinG": 19.8,
@@ -3764,7 +3764,7 @@
   {
     "id": "taco-343",
     "name": "Carne, bovina, contra-filé, com gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 206,
     "proteinG": 21.1,
@@ -3786,7 +3786,7 @@
   {
     "id": "taco-345",
     "name": "Carne, bovina, contra-filé, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 157,
     "proteinG": 24.0,
@@ -3819,7 +3819,7 @@
   {
     "id": "taco-348",
     "name": "Carne, bovina, costela, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 358,
     "proteinG": 16.7,
@@ -3841,7 +3841,7 @@
   {
     "id": "taco-350",
     "name": "Carne, bovina, coxão duro, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 148,
     "proteinG": 21.5,
@@ -3863,7 +3863,7 @@
   {
     "id": "taco-352",
     "name": "Carne, bovina, coxão mole, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 169,
     "proteinG": 21.2,
@@ -3885,7 +3885,7 @@
   {
     "id": "taco-354",
     "name": "Carne, bovina, cupim, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 221,
     "proteinG": 19.5,
@@ -3896,7 +3896,7 @@
   {
     "id": "taco-355",
     "name": "Carne, bovina, fígado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 141,
     "proteinG": 20.7,
@@ -3918,7 +3918,7 @@
   {
     "id": "taco-357",
     "name": "Carne, bovina, filé mingnon, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 143,
     "proteinG": 21.6,
@@ -3951,7 +3951,7 @@
   {
     "id": "taco-360",
     "name": "Carne, bovina, flanco, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 141,
     "proteinG": 20.0,
@@ -3973,7 +3973,7 @@
   {
     "id": "taco-362",
     "name": "Carne, bovina, fraldinha, com gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 221,
     "proteinG": 17.6,
@@ -3995,7 +3995,7 @@
   {
     "id": "taco-364",
     "name": "Carne, bovina, lagarto, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 135,
     "proteinG": 20.5,
@@ -4017,7 +4017,7 @@
   {
     "id": "taco-366",
     "name": "Carne, bovina, língua, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 215,
     "proteinG": 17.1,
@@ -4028,7 +4028,7 @@
   {
     "id": "taco-367",
     "name": "Carne, bovina, maminha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 153,
     "proteinG": 20.9,
@@ -4050,7 +4050,7 @@
   {
     "id": "taco-369",
     "name": "Carne, bovina, miolo de alcatra, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 163,
     "proteinG": 21.6,
@@ -4083,7 +4083,7 @@
   {
     "id": "taco-372",
     "name": "Carne, bovina, músculo, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 142,
     "proteinG": 21.6,
@@ -4094,7 +4094,7 @@
   {
     "id": "taco-373",
     "name": "Carne, bovina, paleta, com gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 159,
     "proteinG": 21.4,
@@ -4116,7 +4116,7 @@
   {
     "id": "taco-375",
     "name": "Carne, bovina, paleta, sem gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 141,
     "proteinG": 21.0,
@@ -4127,7 +4127,7 @@
   {
     "id": "taco-376",
     "name": "Carne, bovina, patinho, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 133,
     "proteinG": 21.7,
@@ -4160,7 +4160,7 @@
   {
     "id": "taco-379",
     "name": "Carne, bovina, peito, sem gordura, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 259,
     "proteinG": 17.6,
@@ -4171,7 +4171,7 @@
   {
     "id": "taco-380",
     "name": "Carne, bovina, picanha, com gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 213,
     "proteinG": 18.8,
@@ -4193,7 +4193,7 @@
   {
     "id": "taco-382",
     "name": "Carne, bovina, picanha, sem gordura, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 134,
     "proteinG": 21.2,
@@ -4226,7 +4226,7 @@
   {
     "id": "taco-385",
     "name": "Carne, bovina, seca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 313,
     "proteinG": 19.7,
@@ -4248,7 +4248,7 @@
   {
     "id": "taco-387",
     "name": "Croquete, de carne, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 246,
     "proteinG": 12.0,
@@ -4292,7 +4292,7 @@
   {
     "id": "taco-391",
     "name": "Frango, asa, com pele, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 213,
     "proteinG": 18.1,
@@ -4325,7 +4325,7 @@
   {
     "id": "taco-394",
     "name": "Frango, coração, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 222,
     "proteinG": 12.6,
@@ -4358,7 +4358,7 @@
   {
     "id": "taco-397",
     "name": "Frango, coxa, com pele, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 161,
     "proteinG": 17.1,
@@ -4380,7 +4380,7 @@
   {
     "id": "taco-399",
     "name": "Frango, coxa, sem pele, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 120,
     "proteinG": 17.8,
@@ -4391,7 +4391,7 @@
   {
     "id": "taco-400",
     "name": "Frango, fígado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 106,
     "proteinG": 17.6,
@@ -4402,7 +4402,7 @@
   {
     "id": "taco-401",
     "name": "Frango, filé, à milanesa",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 221,
     "proteinG": 28.5,
@@ -4413,7 +4413,7 @@
   {
     "id": "taco-402",
     "name": "Frango, inteiro, com pele, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 226,
     "proteinG": 16.4,
@@ -4446,7 +4446,7 @@
   {
     "id": "taco-405",
     "name": "Frango, inteiro, sem pele, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 129,
     "proteinG": 20.6,
@@ -4468,7 +4468,7 @@
   {
     "id": "taco-407",
     "name": "Frango, peito, com pele, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 149,
     "proteinG": 20.8,
@@ -4490,7 +4490,7 @@
   {
     "id": "taco-409",
     "name": "Frango, peito, sem pele, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 119,
     "proteinG": 21.5,
@@ -4523,7 +4523,7 @@
   {
     "id": "taco-412",
     "name": "Frango, sobrecoxa, com pele, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 255,
     "proteinG": 15.5,
@@ -4545,7 +4545,7 @@
   {
     "id": "taco-414",
     "name": "Frango, sobrecoxa, sem pele, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 162,
     "proteinG": 17.6,
@@ -4556,7 +4556,7 @@
   {
     "id": "taco-415",
     "name": "Hambúrguer, bovino, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 215,
     "proteinG": 13.2,
@@ -4589,7 +4589,7 @@
   {
     "id": "taco-418",
     "name": "Lingüiça, frango, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 218,
     "proteinG": 14.2,
@@ -4622,7 +4622,7 @@
   {
     "id": "taco-421",
     "name": "Lingüiça, porco, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 227,
     "proteinG": 16.1,
@@ -4655,7 +4655,7 @@
   {
     "id": "taco-424",
     "name": "Mortadela",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 269,
     "proteinG": 12.0,
@@ -4677,7 +4677,7 @@
   {
     "id": "taco-426",
     "name": "Peru, congelado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 94,
     "proteinG": 18.1,
@@ -4688,7 +4688,7 @@
   {
     "id": "taco-427",
     "name": "Porco, bisteca, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 164,
     "proteinG": 21.5,
@@ -4732,7 +4732,7 @@
   {
     "id": "taco-431",
     "name": "Porco, costela, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 256,
     "proteinG": 18.0,
@@ -4754,7 +4754,7 @@
   {
     "id": "taco-433",
     "name": "Porco, lombo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 176,
     "proteinG": 22.6,
@@ -4765,7 +4765,7 @@
   {
     "id": "taco-434",
     "name": "Porco, orelha, salgada, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 258,
     "proteinG": 18.5,
@@ -4787,7 +4787,7 @@
   {
     "id": "taco-436",
     "name": "Porco, pernil, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 186,
     "proteinG": 20.1,
@@ -4798,7 +4798,7 @@
   {
     "id": "taco-437",
     "name": "Porco, rabo, salgado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 377,
     "proteinG": 15.6,
@@ -4809,7 +4809,7 @@
   {
     "id": "taco-438",
     "name": "Presunto, com capa de gordura",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 128,
     "proteinG": 14.4,
@@ -4820,7 +4820,7 @@
   {
     "id": "taco-439",
     "name": "Presunto, sem capa de gordura",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 94,
     "proteinG": 14.3,
@@ -4842,7 +4842,7 @@
   {
     "id": "taco-441",
     "name": "Quibe, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 109,
     "proteinG": 12.4,
@@ -4864,7 +4864,7 @@
   {
     "id": "taco-443",
     "name": "Salame",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 398,
     "proteinG": 25.8,
@@ -4875,7 +4875,7 @@
   {
     "id": "taco-444",
     "name": "Toucinho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 593,
     "proteinG": 11.5,
@@ -4897,7 +4897,7 @@
   {
     "id": "taco-446",
     "name": "Bebida láctea, pêssego",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 55,
     "proteinG": 2.1,
@@ -4908,7 +4908,7 @@
   {
     "id": "taco-447",
     "name": "Creme de Leite",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 221,
     "proteinG": 1.5,
@@ -4919,7 +4919,7 @@
   {
     "id": "taco-448",
     "name": "Iogurte, natural",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 51,
     "proteinG": 4.1,
@@ -4930,7 +4930,7 @@
   {
     "id": "taco-449",
     "name": "Iogurte, natural, desnatado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 41,
     "proteinG": 3.8,
@@ -4941,7 +4941,7 @@
   {
     "id": "taco-450",
     "name": "Iogurte, sabor abacaxi",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 0,
     "proteinG": 0.0,
@@ -4952,7 +4952,7 @@
   {
     "id": "taco-451",
     "name": "Iogurte, sabor morango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 70,
     "proteinG": 2.7,
@@ -4963,7 +4963,7 @@
   {
     "id": "taco-452",
     "name": "Iogurte, sabor pêssego",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 68,
     "proteinG": 2.5,
@@ -4974,7 +4974,7 @@
   {
     "id": "taco-453",
     "name": "Leite, condensado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 313,
     "proteinG": 7.7,
@@ -4985,7 +4985,7 @@
   {
     "id": "taco-454",
     "name": "Leite, de cabra",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 66,
     "proteinG": 3.1,
@@ -4996,7 +4996,7 @@
   {
     "id": "taco-455",
     "name": "Leite, de vaca, achocolatado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 83,
     "proteinG": 2.1,
@@ -5007,7 +5007,7 @@
   {
     "id": "taco-456",
     "name": "Leite, de vaca, desnatado, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 362,
     "proteinG": 34.7,
@@ -5018,7 +5018,7 @@
   {
     "id": "taco-457",
     "name": "Leite, de vaca, desnatado, UHT",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 0,
     "proteinG": 0.0,
@@ -5029,7 +5029,7 @@
   {
     "id": "taco-458",
     "name": "Leite, de vaca, integral",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 0,
     "proteinG": 0.0,
@@ -5040,7 +5040,7 @@
   {
     "id": "taco-459",
     "name": "Leite, de vaca, integral, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 497,
     "proteinG": 25.4,
@@ -5051,7 +5051,7 @@
   {
     "id": "taco-460",
     "name": "Leite, fermentado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 70,
     "proteinG": 1.9,
@@ -5062,7 +5062,7 @@
   {
     "id": "taco-461",
     "name": "Queijo, minas, frescal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 264,
     "proteinG": 17.4,
@@ -5073,7 +5073,7 @@
   {
     "id": "taco-462",
     "name": "Queijo, minas, meia cura",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 321,
     "proteinG": 21.2,
@@ -5084,7 +5084,7 @@
   {
     "id": "taco-463",
     "name": "Queijo, mozarela",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 330,
     "proteinG": 22.6,
@@ -5095,7 +5095,7 @@
   {
     "id": "taco-464",
     "name": "Queijo, parmesão",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 453,
     "proteinG": 35.6,
@@ -5106,7 +5106,7 @@
   {
     "id": "taco-465",
     "name": "Queijo, pasteurizado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 303,
     "proteinG": 9.4,
@@ -5117,7 +5117,7 @@
   {
     "id": "taco-466",
     "name": "Queijo, petit suisse, morango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 121,
     "proteinG": 5.8,
@@ -5128,7 +5128,7 @@
   {
     "id": "taco-467",
     "name": "Queijo, prato",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 360,
     "proteinG": 22.7,
@@ -5139,7 +5139,7 @@
   {
     "id": "taco-468",
     "name": "Maria mole",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 257,
     "proteinG": 9.6,
@@ -5150,7 +5150,7 @@
   {
     "id": "taco-469",
     "name": "Queijo, ricota",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leite & Derivados",
     "kcal": 140,
     "proteinG": 12.6,
@@ -5161,7 +5161,7 @@
   {
     "id": "taco-470",
     "name": "Bebida isotônica, sabores variados",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 26,
     "proteinG": 0.0,
@@ -5172,7 +5172,7 @@
   {
     "id": "taco-471",
     "name": "Café, infusão 10%",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 9,
     "proteinG": 0.7,
@@ -5183,7 +5183,7 @@
   {
     "id": "taco-472",
     "name": "Cana, aguardente 1",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 216,
     "proteinG": 0.0,
@@ -5194,7 +5194,7 @@
   {
     "id": "taco-473",
     "name": "Cana, caldo de",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 65,
     "proteinG": 0.0,
@@ -5205,7 +5205,7 @@
   {
     "id": "taco-474",
     "name": "Cerveja, pilsen 2",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 41,
     "proteinG": 0.6,
@@ -5216,7 +5216,7 @@
   {
     "id": "taco-475",
     "name": "Chá, erva-doce, infusão 5%",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 1,
     "proteinG": 0.0,
@@ -5227,7 +5227,7 @@
   {
     "id": "taco-476",
     "name": "Chá, mate, infusão 5%",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 3,
     "proteinG": 0.0,
@@ -5238,7 +5238,7 @@
   {
     "id": "taco-477",
     "name": "Chá, preto, infusão 5%",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 2,
     "proteinG": 0.0,
@@ -5249,7 +5249,7 @@
   {
     "id": "taco-478",
     "name": "Coco, água de",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 22,
     "proteinG": 0.0,
@@ -5260,7 +5260,7 @@
   {
     "id": "taco-479",
     "name": "Refrigerante, tipo água tônica",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 31,
     "proteinG": 0.0,
@@ -5271,7 +5271,7 @@
   {
     "id": "taco-480",
     "name": "Refrigerante, tipo cola",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 34,
     "proteinG": 0.0,
@@ -5282,7 +5282,7 @@
   {
     "id": "taco-481",
     "name": "Refrigerante, tipo guaraná",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 39,
     "proteinG": 0.0,
@@ -5293,7 +5293,7 @@
   {
     "id": "taco-482",
     "name": "Refrigerante, tipo laranja",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 46,
     "proteinG": 0.0,
@@ -5304,7 +5304,7 @@
   {
     "id": "taco-483",
     "name": "Refrigerante, tipo limão",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 40,
     "proteinG": 0.0,
@@ -5315,7 +5315,7 @@
   {
     "id": "taco-484",
     "name": "Omelete, de queijo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 268,
     "proteinG": 15.6,
@@ -5326,7 +5326,7 @@
   {
     "id": "taco-485",
     "name": "Ovo, de codorna, inteiro, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 177,
     "proteinG": 13.7,
@@ -5370,7 +5370,7 @@
   {
     "id": "taco-489",
     "name": "Ovo, de galinha, inteiro, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Carnes, Pescados & Ovos",
     "kcal": 143,
     "proteinG": 13.0,
@@ -5392,7 +5392,7 @@
   {
     "id": "taco-491",
     "name": "Achocolatado, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 401,
     "proteinG": 4.2,
@@ -5403,7 +5403,7 @@
   {
     "id": "taco-492",
     "name": "Açúcar, cristal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 387,
     "proteinG": 0.3,
@@ -5414,7 +5414,7 @@
   {
     "id": "taco-493",
     "name": "Açúcar, mascavo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 369,
     "proteinG": 0.8,
@@ -5425,7 +5425,7 @@
   {
     "id": "taco-494",
     "name": "Açúcar, refinado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 387,
     "proteinG": 0.3,
@@ -5436,7 +5436,7 @@
   {
     "id": "taco-495",
     "name": "Chocolate, ao leite",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 540,
     "proteinG": 7.2,
@@ -5447,7 +5447,7 @@
   {
     "id": "taco-496",
     "name": "Chocolate, ao leite, com castanha do Pará",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 559,
     "proteinG": 7.4,
@@ -5458,7 +5458,7 @@
   {
     "id": "taco-497",
     "name": "Chocolate, ao leite, dietético",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 557,
     "proteinG": 6.9,
@@ -5469,7 +5469,7 @@
   {
     "id": "taco-498",
     "name": "Chocolate, meio amargo",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 475,
     "proteinG": 4.9,
@@ -5480,7 +5480,7 @@
   {
     "id": "taco-499",
     "name": "Cocada branca",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 449,
     "proteinG": 1.1,
@@ -5491,7 +5491,7 @@
   {
     "id": "taco-500",
     "name": "Doce, de abóbora, cremoso",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 199,
     "proteinG": 0.9,
@@ -5502,7 +5502,7 @@
   {
     "id": "taco-501",
     "name": "Doce, de leite, cremoso",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 306,
     "proteinG": 5.5,
@@ -5513,7 +5513,7 @@
   {
     "id": "taco-502",
     "name": "Geléia, mocotó, natural",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 106,
     "proteinG": 2.1,
@@ -5524,7 +5524,7 @@
   {
     "id": "taco-503",
     "name": "Glicose de milho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 292,
     "proteinG": 0.0,
@@ -5535,7 +5535,7 @@
   {
     "id": "taco-504",
     "name": "Maria mole",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 301,
     "proteinG": 3.8,
@@ -5546,7 +5546,7 @@
   {
     "id": "taco-505",
     "name": "Maria mole, coco queimado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 307,
     "proteinG": 3.9,
@@ -5557,7 +5557,7 @@
   {
     "id": "taco-506",
     "name": "Marmelada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 257,
     "proteinG": 0.4,
@@ -5568,7 +5568,7 @@
   {
     "id": "taco-507",
     "name": "Mel, de abelha",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 309,
     "proteinG": 0.0,
@@ -5579,7 +5579,7 @@
   {
     "id": "taco-508",
     "name": "Melado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 297,
     "proteinG": 0.0,
@@ -5590,7 +5590,7 @@
   {
     "id": "taco-509",
     "name": "Quindim",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 411,
     "proteinG": 4.7,
@@ -5601,7 +5601,7 @@
   {
     "id": "taco-510",
     "name": "Rapadura",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 352,
     "proteinG": 1.0,
@@ -5623,7 +5623,7 @@
   {
     "id": "taco-512",
     "name": "Capuccino, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 417,
     "proteinG": 11.3,
@@ -5645,7 +5645,7 @@
   {
     "id": "taco-514",
     "name": "Fermento, biológico, levedura, tablete",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 90,
     "proteinG": 17.0,
@@ -5656,7 +5656,7 @@
   {
     "id": "taco-515",
     "name": "Gelatina, sabores variados, pó",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 380,
     "proteinG": 8.9,
@@ -5667,7 +5667,7 @@
   {
     "id": "taco-516",
     "name": "Sal, dietético",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 0,
     "proteinG": 0.0,
@@ -5678,7 +5678,7 @@
   {
     "id": "taco-517",
     "name": "Sal, grosso",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 0,
     "proteinG": 0.0,
@@ -5689,7 +5689,7 @@
   {
     "id": "taco-518",
     "name": "Shoyu",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 61,
     "proteinG": 3.3,
@@ -5700,7 +5700,7 @@
   {
     "id": "taco-519",
     "name": "Tempero a base de sal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 21,
     "proteinG": 2.7,
@@ -5711,7 +5711,7 @@
   {
     "id": "taco-520",
     "name": "Azeitona, preta, conserva",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 194,
     "proteinG": 1.2,
@@ -5722,7 +5722,7 @@
   {
     "id": "taco-521",
     "name": "Azeitona, verde, conserva",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 137,
     "proteinG": 0.9,
@@ -5733,7 +5733,7 @@
   {
     "id": "taco-522",
     "name": "Chantilly, spray, com gordura vegetal",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 315,
     "proteinG": 0.5,
@@ -5744,7 +5744,7 @@
   {
     "id": "taco-523",
     "name": "Leite, de coco",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 166,
     "proteinG": 1.0,
@@ -5755,7 +5755,7 @@
   {
     "id": "taco-524",
     "name": "Maionese, tradicional com ovos",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 302,
     "proteinG": 0.6,
@@ -5766,7 +5766,7 @@
   {
     "id": "taco-525",
     "name": "Acarajé",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 289,
     "proteinG": 8.3,
@@ -5777,7 +5777,7 @@
   {
     "id": "taco-526",
     "name": "Arroz carreteiro",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 154,
     "proteinG": 10.8,
@@ -5788,7 +5788,7 @@
   {
     "id": "taco-527",
     "name": "Baião de dois, arroz e feijão-de-corda",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 136,
     "proteinG": 6.2,
@@ -5799,7 +5799,7 @@
   {
     "id": "taco-528",
     "name": "Barreado",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 165,
     "proteinG": 18.3,
@@ -5810,7 +5810,7 @@
   {
     "id": "taco-529",
     "name": "Bife à cavalo, com contra filé",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 291,
     "proteinG": 23.7,
@@ -5821,7 +5821,7 @@
   {
     "id": "taco-530",
     "name": "Bolinho de arroz",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 274,
     "proteinG": 8.0,
@@ -5832,7 +5832,7 @@
   {
     "id": "taco-531",
     "name": "Camarão à baiana",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 101,
     "proteinG": 7.9,
@@ -5843,7 +5843,7 @@
   {
     "id": "taco-532",
     "name": "Charuto, de repolho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 78,
     "proteinG": 6.8,
@@ -5865,7 +5865,7 @@
   {
     "id": "taco-534",
     "name": "Cuscuz, paulista",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 142,
     "proteinG": 2.6,
@@ -5876,7 +5876,7 @@
   {
     "id": "taco-535",
     "name": "Cuxá, molho",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 80,
     "proteinG": 5.6,
@@ -5887,7 +5887,7 @@
   {
     "id": "taco-536",
     "name": "Dobradinha",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 125,
     "proteinG": 19.8,
@@ -5898,7 +5898,7 @@
   {
     "id": "taco-537",
     "name": "Estrogonofe de carne",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 173,
     "proteinG": 15.0,
@@ -5909,7 +5909,7 @@
   {
     "id": "taco-538",
     "name": "Estrogonofe de frango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 157,
     "proteinG": 17.6,
@@ -5920,7 +5920,7 @@
   {
     "id": "taco-539",
     "name": "Feijão tropeiro mineiro",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 152,
     "proteinG": 10.2,
@@ -5931,7 +5931,7 @@
   {
     "id": "taco-540",
     "name": "Feijoada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 117,
     "proteinG": 8.7,
@@ -5942,7 +5942,7 @@
   {
     "id": "taco-541",
     "name": "Frango, com açafrão",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 113,
     "proteinG": 9.7,
@@ -5953,7 +5953,7 @@
   {
     "id": "taco-542",
     "name": "Macarrão, molho bolognesa",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 120,
     "proteinG": 4.9,
@@ -5964,7 +5964,7 @@
   {
     "id": "taco-543",
     "name": "Maniçoba",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 134,
     "proteinG": 10.0,
@@ -5975,7 +5975,7 @@
   {
     "id": "taco-544",
     "name": "Quibebe",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 86,
     "proteinG": 8.6,
@@ -5986,7 +5986,7 @@
   {
     "id": "taco-545",
     "name": "Salada, de legumes, com maionese",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 96,
     "proteinG": 1.1,
@@ -6008,7 +6008,7 @@
   {
     "id": "taco-547",
     "name": "Salpicão, de frango",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 148,
     "proteinG": 13.9,
@@ -6019,7 +6019,7 @@
   {
     "id": "taco-548",
     "name": "Sarapatel",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 123,
     "proteinG": 18.5,
@@ -6030,7 +6030,7 @@
   {
     "id": "taco-549",
     "name": "Tabule",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 57,
     "proteinG": 2.0,
@@ -6041,7 +6041,7 @@
   {
     "id": "taco-550",
     "name": "Tacacá",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 47,
     "proteinG": 7.0,
@@ -6052,7 +6052,7 @@
   {
     "id": "taco-551",
     "name": "Tapioca, com manteiga",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 348,
     "proteinG": 0.1,
@@ -6063,7 +6063,7 @@
   {
     "id": "taco-552",
     "name": "Tucupi, com pimenta-de-cheiro",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 27,
     "proteinG": 2.1,
@@ -6074,7 +6074,7 @@
   {
     "id": "taco-553",
     "name": "Vaca atolada",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 145,
     "proteinG": 5.1,
@@ -6085,7 +6085,7 @@
   {
     "id": "taco-554",
     "name": "Vatapá",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 255,
     "proteinG": 6.0,
@@ -6096,7 +6096,7 @@
   {
     "id": "taco-555",
     "name": "Virado à paulista",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 307,
     "proteinG": 10.2,
@@ -6107,7 +6107,7 @@
   {
     "id": "taco-556",
     "name": "Yakisoba",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Doces, Bebidas & Processados",
     "kcal": 113,
     "proteinG": 7.5,
@@ -6118,7 +6118,7 @@
   {
     "id": "taco-557",
     "name": "Amendoim, grão, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 544,
     "proteinG": 27.2,
@@ -6140,7 +6140,7 @@
   {
     "id": "taco-559",
     "name": "Ervilha, em vagem",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 88,
     "proteinG": 7.5,
@@ -6173,7 +6173,7 @@
   {
     "id": "taco-562",
     "name": "Feijão, carioca, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 329,
     "proteinG": 20.0,
@@ -6195,7 +6195,7 @@
   {
     "id": "taco-564",
     "name": "Feijão, fradinho, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 339,
     "proteinG": 20.2,
@@ -6217,7 +6217,7 @@
   {
     "id": "taco-566",
     "name": "Feijão, jalo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 328,
     "proteinG": 20.1,
@@ -6239,7 +6239,7 @@
   {
     "id": "taco-568",
     "name": "Feijão, preto, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 324,
     "proteinG": 21.3,
@@ -6261,7 +6261,7 @@
   {
     "id": "taco-570",
     "name": "Feijão, rajado, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 326,
     "proteinG": 17.3,
@@ -6283,7 +6283,7 @@
   {
     "id": "taco-572",
     "name": "Feijão, rosinha, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 337,
     "proteinG": 20.9,
@@ -6305,7 +6305,7 @@
   {
     "id": "taco-574",
     "name": "Feijão, roxo, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 331,
     "proteinG": 22.2,
@@ -6316,7 +6316,7 @@
   {
     "id": "taco-575",
     "name": "Grão-de-bico, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 355,
     "proteinG": 21.2,
@@ -6327,7 +6327,7 @@
   {
     "id": "taco-576",
     "name": "Guandu, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 344,
     "proteinG": 19.0,
@@ -6349,7 +6349,7 @@
   {
     "id": "taco-578",
     "name": "Lentilha, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 339,
     "proteinG": 23.2,
@@ -6360,7 +6360,7 @@
   {
     "id": "taco-579",
     "name": "Paçoca, amendoim",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 487,
     "proteinG": 16.0,
@@ -6371,7 +6371,7 @@
   {
     "id": "taco-580",
     "name": "Pé-de-moleque, amendoim",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 503,
     "proteinG": 13.2,
@@ -6382,7 +6382,7 @@
   {
     "id": "taco-581",
     "name": "Soja, farinha",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 404,
     "proteinG": 36.0,
@@ -6415,7 +6415,7 @@
   {
     "id": "taco-584",
     "name": "Soja, queijo (tofu)",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 64,
     "proteinG": 6.6,
@@ -6426,7 +6426,7 @@
   {
     "id": "taco-585",
     "name": "Tremoço, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Leguminosas",
     "kcal": 381,
     "proteinG": 33.6,
@@ -6470,7 +6470,7 @@
   {
     "id": "taco-589",
     "name": "Castanha-do-Brasil, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 643,
     "proteinG": 14.5,
@@ -6481,7 +6481,7 @@
   {
     "id": "taco-590",
     "name": "Coco, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 406,
     "proteinG": 3.7,
@@ -6492,7 +6492,7 @@
   {
     "id": "taco-591",
     "name": "Coco, verde, cru",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 0,
     "proteinG": 0.0,
@@ -6503,7 +6503,7 @@
   {
     "id": "taco-592",
     "name": "Farinha, de mesocarpo de babaçu, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 329,
     "proteinG": 1.4,
@@ -6514,7 +6514,7 @@
   {
     "id": "taco-593",
     "name": "Gergelim, semente",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 584,
     "proteinG": 21.2,
@@ -6525,7 +6525,7 @@
   {
     "id": "taco-594",
     "name": "Linhaça, semente",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 495,
     "proteinG": 14.1,
@@ -6558,7 +6558,7 @@
   {
     "id": "taco-597",
     "name": "Noz, crua",
-    "preparo": "Cru / In Natura",
+    "preparo": "inNatura",
     "category": "Gorduras, Nozes & Sementes",
     "kcal": 620,
     "proteinG": 14.0,

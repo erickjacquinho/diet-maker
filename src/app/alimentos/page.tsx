@@ -25,11 +25,16 @@ import {
   ChevronsRight,
   Filter,
   RotateCcw,
+  GripVertical,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { CreateButton, EditIconButton, DeleteIconButton } from '@/components/atoms';
+
 import {
   Table,
   TableHeader,
@@ -44,6 +49,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
+
 import {
   Select,
   SelectContent,
@@ -51,7 +58,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getAllFoods, toggleFavoriteFood, addCustomFood, FoodItem } from '@/lib/tacoStore';
+import {
+  getAllFoods,
+  toggleFavoriteFood,
+  addCustomFood,
+  updateCustomFood,
+  deleteCustomFood,
+  FoodItem,
+} from '@/lib/tacoStore';
 
 function normalizeText(text: string): string {
   return text
@@ -72,13 +86,15 @@ export default function FoodsPage() {
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
+  const [activeReorderId, setActiveReorderId] = useState<string | null>(null);
 
-  // New Custom Food Form State
+  // Custom Food Form State
   const [formData, setFormData] = useState({
     name: '',
     portion: '',
     unit: 'g',
-    preparo: 'In Natura',
+    preparo: 'inNatura',
     category: 'Suplementos',
     proteinG: '',
     carbsG: '',
@@ -96,40 +112,13 @@ export default function FoodsPage() {
     setFoods(getAllFoods());
   };
 
-  // Automatic Calorie Calculation via Atwater Factors: (4 * P) + (4 * C) + (9 * G)
-  const calculatedKcal = Math.round(
-    (Number(formData.proteinG) || 0) * 4 +
-      (Number(formData.carbsG) || 0) * 4 +
-      (Number(formData.fatsG) || 0) * 9
-  );
-
-  const handleCreateCustomFood = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    const portionVal = formData.portion.trim();
-    const portionStr = portionVal ? `${portionVal}${formData.unit}` : formData.unit;
-    const fullName = `${formData.name.trim()} (${portionStr})`;
-
-    addCustomFood({
-      name: fullName,
-      preparo: formData.preparo.trim() || 'In Natura',
-      category: formData.category,
-      kcal: calculatedKcal,
-      proteinG: Number(formData.proteinG) || 0,
-      carbsG: Number(formData.carbsG) || 0,
-      fatsG: Number(formData.fatsG) || 0,
-      fiberG: Number(formData.fiberG) || 0,
-      isFavorite: formData.isFavorite,
-    });
-
-    setFoods(getAllFoods());
-    setIsModalOpen(false);
+  const handleOpenCreateModal = () => {
+    setEditingFoodId(null);
     setFormData({
       name: '',
       portion: '',
       unit: 'g',
-      preparo: 'In Natura',
+      preparo: 'inNatura',
       category: 'Suplementos',
       proteinG: '',
       carbsG: '',
@@ -137,6 +126,119 @@ export default function FoodsPage() {
       fiberG: '',
       isFavorite: false,
     });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (food: FoodItem) => {
+    setEditingFoodId(food.id);
+
+    let cleanName = food.name;
+    let portionVal = '';
+    let unitVal = 'g';
+    const match = food.name.match(/^(.*?)(?:\s*\((.*?)\))?$/);
+    if (match) {
+      if (match[1]) cleanName = match[1].trim();
+      if (match[2]) {
+        const portionMatch = match[2].match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+        if (portionMatch) {
+          portionVal = portionMatch[1];
+          unitVal = portionMatch[2] || 'g';
+        } else {
+          unitVal = match[2];
+        }
+      }
+    }
+
+    const validUnits = ['g', 'ml', 'un', 'scoop', 'fatia', 'colher (sopa)', 'colher (chá)', 'xícara', 'porção'];
+    const safeUnit = validUnits.includes(unitVal) ? unitVal : 'g';
+
+    const validCategories = [
+      'Carnes, Pescados & Ovos',
+      'Verduras & Legumes',
+      'Frutas',
+      'Cereais & Tubérculos',
+      'Leguminosas',
+      'Leite & Derivados',
+      'Gorduras, Nozes & Sementes',
+      'Doces, Bebidas & Processados',
+      'Suplementos',
+      'Manipulados & Produtos',
+    ];
+    const safeCategory = validCategories.includes(food.category) ? food.category : 'Suplementos';
+
+    setFormData({
+      name: cleanName,
+      portion: portionVal,
+      unit: safeUnit,
+      preparo: food.preparo || 'Personalizado',
+      category: safeCategory,
+      proteinG: String(food.proteinG ?? ''),
+      carbsG: String(food.carbsG ?? ''),
+      fatsG: String(food.fatsG ?? ''),
+      fiberG: String(food.fiberG ?? ''),
+      isFavorite: food.isFavorite || false,
+    });
+    setIsModalOpen(true);
+  };
+
+
+  // Automatic Calorie Calculation via Atwater Factors: (4 * P) + (4 * C) + (9 * G)
+  const calculatedKcal = Math.round(
+    (Number(formData.proteinG) || 0) * 4 +
+      (Number(formData.carbsG) || 0) * 4 +
+      (Number(formData.fatsG) || 0) * 9
+  );
+
+  const handleSaveCustomFood = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim()) return;
+
+    const portionVal = formData.portion.trim();
+    const portionStr = portionVal ? `${portionVal}${formData.unit}` : formData.unit;
+    const fullName = `${formData.name.trim()} (${portionStr})`;
+
+    const foodPayload = {
+      name: fullName,
+      preparo: formData.preparo.trim() || 'Personalizado',
+      category: formData.category,
+      kcal: calculatedKcal,
+      proteinG: Number(formData.proteinG) || 0,
+      carbsG: Number(formData.carbsG) || 0,
+      fatsG: Number(formData.fatsG) || 0,
+      fiberG: Number(formData.fiberG) || 0,
+      isFavorite: formData.isFavorite,
+    };
+
+    if (editingFoodId) {
+      updateCustomFood(editingFoodId, foodPayload);
+    } else {
+      addCustomFood(foodPayload);
+    }
+
+    setFoods(getAllFoods());
+    setIsModalOpen(false);
+    setEditingFoodId(null);
+    setFormData({
+      name: '',
+      portion: '',
+      unit: 'g',
+      preparo: 'inNatura',
+      category: 'Suplementos',
+      proteinG: '',
+      carbsG: '',
+      fatsG: '',
+      fiberG: '',
+      isFavorite: false,
+    });
+  };
+
+  const handleDeleteCustomFood = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este alimento customizado?')) {
+      deleteCustomFood(id);
+      setFoods(getAllFoods());
+      setIsModalOpen(false);
+      setEditingFoodId(null);
+    }
   };
 
   // Extract unique categories and preparo values for dropdowns
@@ -203,6 +305,34 @@ export default function FoodsPage() {
   const columns = useMemo<ColumnDef<FoodItem>[]>(
     () => [
       {
+        id: 'reorder',
+        header: () => <span className="sr-only">Reordenar</span>,
+        cell: ({ row }) => {
+          const food = row.original;
+          const isActivated = activeReorderId === food.id;
+          return (
+            <button
+              type="button"
+              onMouseDown={() => setActiveReorderId(food.id)}
+              onMouseUp={() => setActiveReorderId(null)}
+              onTouchStart={() => setActiveReorderId(food.id)}
+              onTouchEnd={() => setActiveReorderId(null)}
+              onClick={() => setActiveReorderId((prev) => (prev === food.id ? null : food.id))}
+              aria-label={`Reordenar ${food.name}`}
+              className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-warm-muted hover:text-warm-charcoal ${
+                isActivated
+                  ? 'opacity-100 text-warm-emerald bg-warm-emerald/10 ring-1 ring-warm-emerald/30'
+                  : 'opacity-0 group-hover/row:opacity-100'
+              }`}
+              title="Reordenar alimento"
+            >
+              <GripVertical size={14} />
+            </button>
+          );
+        },
+        enableSorting: false,
+      },
+      {
         id: 'favorite',
         header: () => <span title="Favoritos">⭐</span>,
         cell: ({ row }) => {
@@ -212,12 +342,12 @@ export default function FoodsPage() {
               variant="ghost"
               size="icon"
               onClick={() => handleToggleFavorite(food.id)}
-              className="h-6 w-6 p-0 hover:bg-warm-inner"
+              className="h-6 w-6 p-0 hover:bg-warm-inner/80 rounded-lg transition-colors"
               title={food.isFavorite ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
             >
               <Star
                 size={14}
-                className={food.isFavorite ? 'fill-amber-400 text-amber-400' : 'text-warm-muted'}
+                className={food.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-warm-muted/50 hover:text-warm-muted'}
               />
             </Button>
           );
@@ -231,7 +361,7 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
           >
             <span>Alimento</span>
             {column.getIsSorted() === 'asc' ? (
@@ -239,7 +369,7 @@ export default function FoodsPage() {
             ) : column.getIsSorted() === 'desc' ? (
               <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 opacity-40" />
+              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
             )}
           </Button>
         ),
@@ -252,7 +382,7 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
           >
             <span>Preparo</span>
             {column.getIsSorted() === 'asc' ? (
@@ -260,12 +390,12 @@ export default function FoodsPage() {
             ) : column.getIsSorted() === 'desc' ? (
               <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 opacity-40" />
+              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
             )}
           </Button>
         ),
         cell: ({ row }) => (
-          <Badge variant="outline" className="text-[10px] font-semibold border-warm-border/80 px-1.5 py-0">
+          <Badge variant="outline" className="text-[10px] font-bold border-warm-border bg-warm-inner text-warm-charcoal px-2 py-0.5 rounded-md">
             {row.original.preparo}
           </Badge>
         ),
@@ -277,7 +407,7 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
           >
             <span>Categoria</span>
             {column.getIsSorted() === 'asc' ? (
@@ -285,22 +415,22 @@ export default function FoodsPage() {
             ) : column.getIsSorted() === 'desc' ? (
               <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 opacity-40" />
+              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <span className="text-warm-muted font-medium text-xs">{row.original.category}</span>,
+        cell: ({ row }) => <span className="text-warm-muted font-semibold text-xs">{row.original.category}</span>,
       },
       {
         accessorKey: 'source',
-        header: () => <span className="text-center block text-xs">Origem</span>,
+        header: () => <span className="text-center block text-xs font-bold text-warm-charcoal">Origem</span>,
         cell: ({ row }) => (
           <Badge
             variant={row.original.source === 'TACO' ? 'secondary' : 'default'}
-            className={`text-[9px] font-extrabold px-1.5 py-0 ${
+            className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
               row.original.source === 'TACO'
-                ? 'bg-warm-border/50 text-warm-muted'
-                : 'bg-warm-emerald/10 text-warm-emerald'
+                ? 'bg-warm-inner text-warm-muted border border-warm-border'
+                : 'bg-warm-emerald/10 text-warm-emerald border border-warm-emerald/20'
             }`}
           >
             {row.original.source}
@@ -315,7 +445,7 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-warm-charcoal"
           >
             <span>Kcal</span>
             {column.getIsSorted() === 'asc' ? (
@@ -323,11 +453,11 @@ export default function FoodsPage() {
             ) : column.getIsSorted() === 'desc' ? (
               <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 opacity-40" />
+              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-black text-warm-charcoal text-xs">{row.original.kcal} kcal</div>,
+        cell: ({ row }) => <div className="text-right font-black text-warm-charcoal text-xs">{row.original.kcal} <span className="text-[10px] text-warm-muted font-bold">kcal</span></div>,
       },
       {
         accessorKey: 'proteinG',
@@ -336,19 +466,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-rose-700 text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-blue-600 text-xs"
           >
             <span>Proteína</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-rose-700 font-black" />
+              <ArrowUp size={12} className="ml-1 text-blue-600 font-black" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-rose-700 font-black" />
+              <ArrowDown size={12} className="ml-1 text-blue-600 font-black" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-bold text-rose-700 text-xs">{row.original.proteinG}g</div>,
+        cell: ({ row }) => <div className="text-right font-bold text-blue-600 text-xs">{row.original.proteinG}g</div>,
       },
       {
         accessorKey: 'carbsG',
@@ -357,19 +487,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-amber-700 text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-orange-500 text-xs"
           >
             <span>Carbo</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-amber-700 font-black" />
+              <ArrowUp size={12} className="ml-1 text-orange-500 font-black" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-amber-700 font-black" />
+              <ArrowDown size={12} className="ml-1 text-orange-500 font-black" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-bold text-amber-700 text-xs">{row.original.carbsG}g</div>,
+        cell: ({ row }) => <div className="text-right font-bold text-orange-500 text-xs">{row.original.carbsG}g</div>,
       },
       {
         accessorKey: 'fatsG',
@@ -399,7 +529,7 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-warm-charcoal"
           >
             <span>Fibra</span>
             {column.getIsSorted() === 'asc' ? (
@@ -411,10 +541,26 @@ export default function FoodsPage() {
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right text-warm-muted text-xs">{row.original.fiberG}g</div>,
+        cell: ({ row }) => <div className="text-right text-warm-muted font-medium text-xs">{row.original.fiberG}g</div>,
+      },
+      {
+        id: 'actions',
+        header: () => <span className="sr-only">Ações</span>,
+        cell: ({ row }) => {
+          const food = row.original;
+          if (food.source !== 'CUSTOM') return null;
+          return (
+            <EditIconButton
+              onClick={() => handleOpenEditModal(food)}
+              title="Editar Alimento Customizado"
+            />
+          );
+
+        },
+        enableSorting: false,
       },
     ],
-    []
+    [activeReorderId]
   );
 
   const table = useReactTable({
@@ -444,71 +590,84 @@ export default function FoodsPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
-      {/* Compact Header Bar */}
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-2">
-          <BookOpen size={20} className="text-warm-emerald" />
-          <h1 className="font-black text-xl text-warm-charcoal tracking-tight">Tabela de Alimentos (TACO)</h1>
+        <div>
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-warm-emerald/10 text-warm-emerald">
+              <BookOpen size={20} />
+            </div>
+            <h1 className="font-black text-xl text-warm-charcoal tracking-tight">Tabela de Alimentos (TACO)</h1>
+          </div>
+          <p className="text-xs text-warm-muted font-medium mt-1">
+            Biblioteca oficial TACO e alimentos customizados para prescrição de dietas.
+          </p>
         </div>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          size="sm"
-          className="flex items-center space-x-1.5 shrink-0 bg-warm-emerald text-white hover:bg-warm-emerald/90 font-bold h-8 text-xs"
+        <CreateButton
+          onClick={handleOpenCreateModal}
+          icon={<Plus size={14} />}
         >
-          <Plus size={14} />
-          <span>Cadastrar Alimento</span>
-        </Button>
+          Cadastrar Alimento
+        </CreateButton>
       </div>
 
-      {/* Ultra Compact Filter Controls Card */}
-      <Card className="bg-warm-card border-warm-border p-3 rounded-xl shadow-xs">
+      {/* Filter Controls Card */}
+      <Card className="bg-warm-card border-warm-border p-4 rounded-2xl shadow-xs">
         <CardContent className="p-0 space-y-3">
           {/* Row 1: Primary Tabs & Clear Button */}
-          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-warm-border pb-2">
-            <div className="flex items-center space-x-1 overflow-x-auto">
-              <Button
-                size="sm"
-                variant={activeTab === 'all' ? 'default' : 'ghost'}
+          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-warm-border pb-3">
+            <div className="flex items-center space-x-1.5 overflow-x-auto">
+              <button
+                type="button"
                 onClick={() => setActiveTab('all')}
-                className="text-xs h-7 px-2.5 font-bold shrink-0"
+                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all ${
+                  activeTab === 'all'
+                    ? 'bg-warm-charcoal text-white shadow-xs'
+                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
+                }`}
               >
                 Todos ({foods.length})
-              </Button>
-              <Button
-                size="sm"
-                variant={activeTab === 'favorites' ? 'default' : 'ghost'}
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveTab('favorites')}
-                className="text-xs h-7 px-2.5 font-bold flex items-center space-x-1 shrink-0"
+                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'favorites'
+                    ? 'bg-warm-charcoal text-white shadow-xs'
+                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
+                }`}
               >
                 <Star size={12} className="fill-amber-400 text-amber-400" />
                 <span>Favoritos ⭐ ({foods.filter((f) => f.isFavorite).length})</span>
-              </Button>
-              <Button
-                size="sm"
-                variant={activeTab === 'custom' ? 'default' : 'ghost'}
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveTab('custom')}
-                className="text-xs h-7 px-2.5 font-bold shrink-0"
+                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all ${
+                  activeTab === 'custom'
+                    ? 'bg-warm-charcoal text-white shadow-xs'
+                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
+                }`}
               >
                 Customizados ({foods.filter((f) => f.source === 'CUSTOM').length})
-              </Button>
+              </button>
             </div>
 
             {isFiltered && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                type="button"
                 onClick={resetFilters}
-                className="text-xs text-rose-700 hover:text-rose-900 font-bold flex items-center space-x-1 h-7 px-2"
+                className="text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1 transition-colors"
               >
                 <RotateCcw size={12} />
                 <span>Limpar Filtros</span>
-              </Button>
+              </button>
             )}
           </div>
 
           {/* Row 2: Search Input & Select Dropdowns */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-            {/* Diacritic Insensitive Search */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
+            {/* Search */}
             <div className="md:col-span-6 relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
               <Input
@@ -516,17 +675,17 @@ export default function FoodsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Pesquisa rápida (ex: pao, feijao, frango, grelhado)..."
-                className="pl-8 pr-3 bg-warm-inner border-warm-border text-xs h-8"
+                className="pl-8 pr-3 bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal placeholder:text-warm-muted focus-visible:ring-warm-emerald"
               />
             </div>
 
             {/* Category Dropdown Filter */}
             <div className="md:col-span-3">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-8">
+                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-semibold">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs shadow-md">
                   <SelectItem value="all">Todas as Categorias ({categoriesList.length})</SelectItem>
                   {categoriesList.map((cat) => (
                     <SelectItem key={cat} value={cat}>
@@ -540,10 +699,10 @@ export default function FoodsPage() {
             {/* Preparo Dropdown Filter */}
             <div className="md:col-span-3">
               <Select value={preparoFilter} onValueChange={setPreparoFilter}>
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-8">
+                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-semibold">
                   <SelectValue placeholder="Preparo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs shadow-md">
                   <SelectItem value="all">Todos os Preparos ({preparosList.length})</SelectItem>
                   {preparosList.map((prep) => (
                     <SelectItem key={prep} value={prep}>
@@ -556,60 +715,72 @@ export default function FoodsPage() {
           </div>
 
           {/* Row 3: Essential Macro Preset Shortcuts */}
-          <div className="flex items-center space-x-1.5 pt-0.5 overflow-x-auto">
-            <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider shrink-0 flex items-center space-x-1">
-              <Filter size={11} />
-              <span>Filtros:</span>
+          <div className="flex items-center space-x-2 pt-1 overflow-x-auto">
+            <span className="text-[10px] font-black text-warm-muted uppercase tracking-wider shrink-0 flex items-center space-x-1">
+              <Filter size={11} className="text-warm-emerald" />
+              <span>Macros:</span>
             </span>
 
-            <Button
-              size="sm"
-              variant={macroPreset === 'high-protein' ? 'default' : 'outline'}
+            <button
+              type="button"
               onClick={() => setMacroPreset(macroPreset === 'high-protein' ? 'all' : 'high-protein')}
-              className="text-xs h-7 px-2 font-bold text-rose-700 shrink-0"
+              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+                macroPreset === 'high-protein'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-warm-inner text-blue-600 border border-blue-200 hover:bg-blue-50'
+              }`}
             >
               🥩 Proteína Alta
-            </Button>
+            </button>
 
-            <Button
-              size="sm"
-              variant={macroPreset === 'high-carb' ? 'default' : 'outline'}
+            <button
+              type="button"
               onClick={() => setMacroPreset(macroPreset === 'high-carb' ? 'all' : 'high-carb')}
-              className="text-xs h-7 px-2 font-bold text-amber-700 shrink-0"
+              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+                macroPreset === 'high-carb'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-warm-inner text-amber-600 border border-amber-200 hover:bg-amber-50'
+              }`}
             >
               🍞 Carboidrato Alto
-            </Button>
+            </button>
 
-            <Button
-              size="sm"
-              variant={macroPreset === 'high-fat' ? 'default' : 'outline'}
+            <button
+              type="button"
               onClick={() => setMacroPreset(macroPreset === 'high-fat' ? 'all' : 'high-fat')}
-              className="text-xs h-7 px-2 font-bold text-emerald-700 shrink-0"
+              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+                macroPreset === 'high-fat'
+                  ? 'bg-emerald-700 text-white shadow-xs'
+                  : 'bg-warm-inner text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+              }`}
             >
               🧀 Gordura Alta
-            </Button>
+            </button>
 
-            <Button
-              size="sm"
-              variant={macroPreset === 'high-fiber' ? 'default' : 'outline'}
+            <button
+              type="button"
               onClick={() => setMacroPreset(macroPreset === 'high-fiber' ? 'all' : 'high-fiber')}
-              className="text-xs h-7 px-2 font-bold text-teal-700 shrink-0"
+              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+                macroPreset === 'high-fiber'
+                  ? 'bg-teal-700 text-white shadow-xs'
+                  : 'bg-warm-inner text-teal-700 border border-teal-200 hover:bg-teal-50'
+              }`}
             >
               🌾 Fibra Alta
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Spreadsheet Table (Clean & Compact) */}
-      <Card className="bg-warm-card border-warm-border rounded-xl overflow-hidden shadow-xs p-0">
+      {/* Spreadsheet Table */}
+      <Card className="bg-warm-card border-warm-border rounded-2xl overflow-hidden shadow-xs p-0">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-warm-inner border-b border-warm-border">
+            <TableHeader className="bg-warm-inner/80 border-b border-warm-border">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="border-b border-warm-border hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="py-2 px-3 select-none text-[10px] uppercase font-bold text-warm-muted">
+                    <TableHead key={header.id} className="py-2.5 px-3 select-none text-[10px] uppercase font-black text-warm-muted tracking-wider">
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -621,15 +792,15 @@ export default function FoodsPage() {
             <TableBody className="divide-y divide-warm-border text-warm-charcoal font-medium">
               {table.getRowModel().rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="py-6 text-center text-warm-muted font-semibold text-xs">
+                  <TableCell colSpan={columns.length} className="py-8 text-center text-warm-muted font-semibold text-xs italic">
                     Nenhum alimento encontrado para os filtros selecionados.
                   </TableCell>
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-warm-inner/60 transition-colors">
+                  <TableRow key={row.id} className="group/row hover:bg-warm-inner/50 transition-colors border-b border-warm-border/60">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2 px-3 text-xs">
+                      <TableCell key={cell.id} className="py-2.5 px-3 text-xs">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -641,37 +812,44 @@ export default function FoodsPage() {
         </div>
 
         {/* Compact Pagination Bar */}
-        <div className="py-2 px-3 border-t border-warm-border bg-warm-inner/40 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+        <div className="py-3 px-4 border-t border-warm-border bg-warm-inner/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center space-x-2 text-warm-muted font-medium text-[11px]">
             <span>
-              <strong className="text-warm-charcoal">{filteredFoods.length}</strong> alimentos
+              <strong className="text-warm-charcoal font-bold">{filteredFoods.length}</strong> alimentos
             </span>
             <span>•</span>
             <span>
-              Página <strong className="text-warm-charcoal">{table.getState().pagination.pageIndex + 1}</strong> de{' '}
-              <strong className="text-warm-charcoal">{table.getPageCount() || 1}</strong>
+              Página <strong className="text-warm-charcoal font-bold">{table.getState().pagination.pageIndex + 1}</strong> de{' '}
+              <strong className="text-warm-charcoal font-bold">{table.getPageCount() || 1}</strong>
             </span>
           </div>
 
           <div className="flex items-center space-x-3">
             {/* Page Size Selector */}
             <div className="flex items-center space-x-1.5">
-              <span className="text-warm-muted font-medium text-[10px]">Por página:</span>
+              <span className="text-warm-muted font-bold text-[10px]">Por página:</span>
               <Select
-                value={String(table.getState().pagination.pageSize)}
-                onValueChange={(val) => table.setPageSize(Number(val))}
+                value={table.getState().pagination.pageSize > 100 ? 'all' : String(table.getState().pagination.pageSize)}
+                onValueChange={(val) => {
+                  if (val === 'all') {
+                    table.setPageSize(filteredFoods.length || 999999);
+                  } else {
+                    table.setPageSize(Number(val));
+                  }
+                }}
               >
-                <SelectTrigger className="h-7 w-20 bg-warm-card border-warm-border text-xs font-bold">
+                <SelectTrigger className="h-7 w-20 bg-warm-card border-warm-border text-xs font-bold text-warm-charcoal rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
                   <SelectItem value="15">15</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
                   <SelectItem value="100">100</SelectItem>
-                  <SelectItem value={String(filteredFoods.length || 597)}>Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                 </SelectContent>
               </Select>
+
             </div>
 
             {/* Pagination Controls */}
@@ -681,7 +859,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7"
+                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
                 title="Primeira Página"
               >
                 <ChevronsLeft size={14} />
@@ -691,7 +869,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7"
+                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
                 title="Página Anterior"
               >
                 <ChevronLeft size={14} />
@@ -701,7 +879,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7"
+                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
                 title="Próxima Página"
               >
                 <ChevronRight size={14} />
@@ -711,7 +889,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7"
+                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
                 title="Última Página"
               >
                 <ChevronsRight size={14} />
@@ -721,17 +899,23 @@ export default function FoodsPage() {
         </div>
       </Card>
 
-      {/* Modal Cadastro de Alimento Customizado Shadcn Dialog */}
+      {/* Modal Cadastro/Edição de Alimento Customizado Shadcn Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-lg bg-warm-card border-warm-border p-5 rounded-xl">
-          <DialogHeader className="border-b border-warm-border pb-2.5 flex flex-row items-center justify-between">
+        <DialogContent className="sm:max-w-lg bg-warm-card border-warm-border p-6 rounded-2xl shadow-xl">
+          <DialogHeader className="border-b border-warm-border pb-3 flex flex-row items-center justify-between">
             <div>
-              <DialogTitle className="font-black text-base text-warm-charcoal">Novo Alimento Customizado</DialogTitle>
-              <p className="text-[11px] text-warm-muted">Cadastre um produto comercial ou suplemento manipulado.</p>
+              <DialogTitle className="font-black text-base text-warm-charcoal">
+                {editingFoodId ? 'Editar Alimento Customizado' : 'Novo Alimento Customizado'}
+              </DialogTitle>
+              <p className="text-[11px] text-warm-muted font-medium mt-0.5">
+                {editingFoodId
+                  ? 'Atualize os dados e composição nutricional do alimento.'
+                  : 'Cadastre um produto comercial ou suplemento manipulado na biblioteca.'}
+              </p>
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleCreateCustomFood} className="space-y-3 pt-1">
+          <form onSubmit={handleSaveCustomFood} className="space-y-3.5 pt-2">
             {/* Row 1: Name, Portion & Unit */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
               <div className="md:col-span-6">
@@ -744,7 +928,7 @@ export default function FoodsPage() {
                   placeholder="Ex: Whey Protein 80% Max"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs h-8"
+                  className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-medium placeholder:text-warm-muted focus:border-warm-emerald"
                 />
               </div>
               <div className="md:col-span-3">
@@ -756,7 +940,7 @@ export default function FoodsPage() {
                   placeholder="Ex: 100 ou 1"
                   value={formData.portion}
                   onChange={(e) => setFormData({ ...formData, portion: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold h-8"
+                  className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal"
                 />
               </div>
               <div className="md:col-span-3">
@@ -764,10 +948,10 @@ export default function FoodsPage() {
                   Unidade
                 </label>
                 <Select value={formData.unit} onValueChange={(val) => setFormData({ ...formData, unit: val })}>
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs font-bold h-8">
+                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
                     <SelectItem value="g">g (Grama)</SelectItem>
                     <SelectItem value="ml">ml (Mililitro)</SelectItem>
                     <SelectItem value="un">un (Unidade)</SelectItem>
@@ -787,10 +971,10 @@ export default function FoodsPage() {
               <div className="md:col-span-6">
                 <label className="text-xs font-bold text-warm-charcoal block mb-1">Categoria</label>
                 <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-8">
+                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
                     <SelectItem value="Carnes, Pescados & Ovos">Carnes, Pescados & Ovos</SelectItem>
                     <SelectItem value="Verduras & Legumes">Verduras & Legumes</SelectItem>
                     <SelectItem value="Frutas">Frutas</SelectItem>
@@ -811,75 +995,22 @@ export default function FoodsPage() {
                   placeholder="Ex: Grelhado, Cozido, Cru, Air Fryer"
                   value={formData.preparo}
                   onChange={(e) => setFormData({ ...formData, preparo: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs h-8"
+                  className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal"
                 />
               </div>
             </div>
 
-            {/* Row 3: MACRONUTRIENTS SIDE BY SIDE (3 COLUMNS) */}
-            <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">
-                Macronutrientes da Porção (g)
-              </label>
-              <div className="grid grid-cols-3 gap-2.5 p-2.5 bg-warm-inner border border-warm-border rounded-lg">
-                <div>
-                  <label className="text-[10px] font-bold text-rose-700 block mb-1">Proteínas (g)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    min="0"
-                    placeholder="Ex: 24"
-                    value={formData.proteinG}
-                    onChange={(e) => setFormData({ ...formData, proteinG: e.target.value })}
-                    className="bg-warm-card border-warm-border text-xs font-black text-center h-8"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-amber-700 block mb-1">Carboidratos (g)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    min="0"
-                    placeholder="Ex: 3"
-                    value={formData.carbsG}
-                    onChange={(e) => setFormData({ ...formData, carbsG: e.target.value })}
-                    className="bg-warm-card border-warm-border text-xs font-black text-center h-8"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-emerald-700 block mb-1">Gorduras (g)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    min="0"
-                    placeholder="Ex: 1.5"
-                    value={formData.fatsG}
-                    onChange={(e) => setFormData({ ...formData, fatsG: e.target.value })}
-                    className="bg-warm-card border-warm-border text-xs font-black text-center h-8"
-                  />
-                </div>
-              </div>
-            </div>
+            <AutoKcalSection
+              title="Macronutrientes da Porção & Calorias Calculadas"
+              proteinG={Number(formData.proteinG) || 0}
+              carbsG={Number(formData.carbsG) || 0}
+              fatsG={Number(formData.fatsG) || 0}
+              onProteinChange={(val) => setFormData({ ...formData, proteinG: String(val) })}
+              onCarbsChange={(val) => setFormData({ ...formData, carbsG: String(val) })}
+              onFatsChange={(val) => setFormData({ ...formData, fatsG: String(val) })}
+            />
 
-            {/* AUTOMATIC CALORIE CALCULATION CARD (NO INPUT) */}
-            <div className="p-2.5 bg-warm-emerald/10 border border-warm-emerald/20 rounded-lg flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Flame size={16} className="text-warm-emerald" />
-                <div>
-                  <span className="text-[10px] font-extrabold text-warm-charcoal block leading-none">
-                    Calorias Calculadas Automaticamente
-                  </span>
-                  <span className="text-[9px] text-warm-muted font-medium">
-                    Fatores de Atwater: (4 kcal/P) + (4 kcal/C) + (9 kcal/G)
-                  </span>
-                </div>
-              </div>
-              <div className="font-black text-sm text-warm-emerald">
-                {calculatedKcal} <span className="text-xs">kcal</span>
-              </div>
-            </div>
-
-            {/* Row 4: SEPARATE FIBER INPUT */}
+            {/* FIBER */}
             <div>
               <label className="text-xs font-semibold text-warm-muted block mb-1">Fibra Alimentar (opcional)</label>
               <Input
@@ -889,23 +1020,35 @@ export default function FoodsPage() {
                 placeholder="Ex: 2"
                 value={formData.fiberG}
                 onChange={(e) => setFormData({ ...formData, fiberG: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs font-bold h-8"
+                className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal"
               />
             </div>
 
-            <div className="pt-2 flex space-x-2">
-              <Button
+            <div className="pt-2 flex items-center space-x-2">
+              {editingFoodId && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCustomFood(editingFoodId)}
+                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1"
+                  title="Excluir Alimento"
+                >
+                  <Trash2 size={13} />
+                  <span>Excluir</span>
+                </button>
+              )}
+              <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                variant="secondary"
-                size="sm"
-                className="flex-1 text-xs h-8"
+                className="flex-1 px-4 py-2 bg-warm-inner hover:bg-warm-border text-warm-charcoal rounded-xl text-xs font-bold transition-colors"
               >
                 Cancelar
-              </Button>
-              <Button type="submit" size="sm" className="flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90 h-8">
-                Salvar Alimento
-              </Button>
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-warm-emerald hover:bg-warm-emerald/90 text-white rounded-xl text-xs font-bold transition-colors shadow-xs border-none"
+              >
+                {editingFoodId ? 'Salvar Alterações' : 'Salvar Alimento'}
+              </button>
             </div>
           </form>
         </DialogContent>
@@ -913,3 +1056,4 @@ export default function FoodsPage() {
     </div>
   );
 }
+

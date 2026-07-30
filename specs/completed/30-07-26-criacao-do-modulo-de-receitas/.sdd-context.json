@@ -1,0 +1,6 @@
+{
+  "task": "Criacao do modulo de Receitas Culinarias com busca de ingredientes da TACO, rendimento por porcao, integracao com AutoKcalSection e insercao em dietas",
+  "slug": "criacao-do-modulo-de-receitas",
+  "feature_dir": "specs/30-07-26-criacao-do-modulo-de-receitas",
+  "date": "2026-07-30"
+}

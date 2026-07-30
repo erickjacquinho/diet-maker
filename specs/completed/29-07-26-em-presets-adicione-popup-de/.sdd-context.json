@@ -1,0 +1,6 @@
+{
+  "task": "em /presets adicione popup de confirmacao ao clicar fora do popup. tambem é necesasrio que quando selecionado a opcao multiplicativa, esta deve responder aos dados do paciente em que o preset é carregado.",
+  "slug": "em-presets-adicione-popup-de",
+  "feature_dir": "specs/29-07-26-em-presets-adicione-popup-de",
+  "date": "2026-07-29"
+}

@@ -15,7 +15,22 @@ npm run dev
 
 # Gerar build de produção para Vercel
 npm run build
+
+# Executar linter com verificação de regras de Atomic Design
+npm run lint
+
+# Executar scanner AST e gerar relatório completo de conformidade
+npm run audit:atomic-design
 ```
+
+---
+
+## 🎨 Auditoria de Conformidade ao Atomic Design
+
+O projeto conta com ferramentas automatizadas para garantir que telas, organismos e páginas utilizem os componentes reutilizáveis de Design System (localizados em `src/components/ui` e `src/components/atoms`) em vez de tags HTML nativas brutas ou estilos inline:
+
+1. **ESLint (`npm run lint`)**: Alerta e sinaliza no editor o uso de `<button>`, `<input>`, `<select>`, `<textarea>` nativos ou `style={{ ... }}` fora dos átomos de UI.
+2. **Scanner AST (`npm run audit:atomic-design`)**: Varre todos os arquivos `.tsx`/`.jsx`, calcula a porcentagem de conformidade e gera relatórios detalhados em `.audit-report.json` e `.audit-report.md`.
 
 ---
 

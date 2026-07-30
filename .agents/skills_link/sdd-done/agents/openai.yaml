@@ -1,0 +1,4 @@
+interface:
+  display_name: "SDD Done"
+  short_description: "Audite e arquive SDDs concluidos"
+  default_prompt: "Use $sdd-done para auditar e arquivar os SDDs concluídos deste repositório."

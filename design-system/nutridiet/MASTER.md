@@ -23,6 +23,7 @@ A especificação completa do Design System NutriDiet encontra-se dividida nos s
 ### 📄 1.3 Guias por Página (`pages/`)
 - 🥗 [diet-builder.md](file:///c:/Programmer/diet-maker/design-system/nutridiet/pages/diet-builder.md) — Especificação da tela de Montar Dieta / Dashboard Ativo.
 
+
 ---
 
 ## 🎨 2. Síntese dos Tokens Principais

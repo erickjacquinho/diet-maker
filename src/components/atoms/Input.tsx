@@ -3,11 +3,8 @@ import { Input as ShadcnInput } from '@/components/ui/input';
 
 export type InputProps = React.ComponentProps<typeof ShadcnInput>;
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className = '', ...props }, ref) => (
-    <ShadcnInput ref={ref} className={className} {...props} />
-  )
-);
+export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => (
+  <ShadcnInput ref={ref} {...props} />
+));
 
 Input.displayName = 'Input';
-

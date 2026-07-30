@@ -1,5 +1,7 @@
-import React from 'react';
-import { Trash2 } from 'lucide-react';
+'use client';
+
+import React, { useState } from 'react';
+import { Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export interface MealItemRowProps {
@@ -12,6 +14,7 @@ export interface MealItemRowProps {
   quantityGrams: number;
   onQuantityChange?: (newGrams: number) => void;
   onRemove?: () => void;
+  isReorderingActive?: boolean;
 }
 
 export const MealItemRow: React.FC<MealItemRowProps> = ({
@@ -21,22 +24,91 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   carbs,
   fats,
   quantityGrams,
+  onQuantityChange,
   onRemove,
+  isReorderingActive: propIsActive = false,
 }) => {
+  const [isActivated, setIsActivated] = useState(false);
+  const [isEditingGrams, setIsEditingGrams] = useState(false);
+  const [tempGrams, setTempGrams] = useState<number>(quantityGrams);
+
+  const isActive = isActivated || propIsActive;
+
+  const handleSaveGrams = () => {
+    const val = Math.max(1, Number(tempGrams) || 100);
+    if (onQuantityChange) {
+      onQuantityChange(val);
+    }
+    setIsEditingGrams(false);
+  };
+
   return (
-    <div className="flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
-      <div>
-        <div className="text-xs font-bold text-warm-charcoal">{name}</div>
-        <div className="text-[11px] text-warm-secondary mt-0.5">
-          {kcal} kcal • <span className="text-warm-rose font-bold">P: {protein}g</span> •{' '}
-          <span className="text-warm-amber font-bold">C: {carbs}g</span> •{' '}
-          <span className="text-warm-teal font-bold">G: {fats}g</span>
+    <div className="group/row flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+      <div className="flex items-center space-x-2">
+        <button
+          type="button"
+          onMouseDown={() => setIsActivated(true)}
+          onMouseUp={() => setIsActivated(false)}
+          onTouchStart={() => setIsActivated(true)}
+          onTouchEnd={() => setIsActivated(false)}
+          onClick={() => setIsActivated((prev) => !prev)}
+          aria-label={`Reordenar ${name}`}
+          className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-warm-muted hover:text-warm-charcoal ${
+            isActive
+              ? 'opacity-100 text-warm-emerald bg-warm-emerald/10 ring-1 ring-warm-emerald/30'
+              : 'opacity-0 group-hover/row:opacity-100'
+          }`}
+          title="Reordenar alimento"
+        >
+          <GripVertical size={14} />
+        </button>
+
+        <div>
+          <div className="text-xs font-bold text-warm-charcoal">{name}</div>
+          <div className="text-[11px] text-warm-secondary mt-0.5 flex items-center space-x-1.5">
+            <span className="text-blue-600 font-bold">P: {protein}g</span>
+            <span className="text-warm-muted font-normal">•</span>
+            <span className="text-amber-600 font-bold">C: {carbs}g</span>
+            <span className="text-warm-muted font-normal">•</span>
+            <span className="text-teal-600 font-bold">G: {fats}g</span>
+            <span className="text-warm-muted font-normal">•</span>
+            <span>{kcal} kcal</span>
+          </div>
         </div>
       </div>
+
       <div className="flex items-center space-x-2">
-        <div className="bg-warm-card border border-warm-borderDark rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal">
-          {quantityGrams} <span className="text-warm-muted font-normal">g</span>
-        </div>
+        {isEditingGrams ? (
+          <div className="flex items-center space-x-1">
+            <input
+              type="number"
+              min={1}
+              max={5000}
+              value={tempGrams}
+              onChange={(e) => setTempGrams(Number(e.target.value))}
+              onBlur={handleSaveGrams}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSaveGrams();
+              }}
+              className="w-16 h-7 px-1 text-center bg-warm-card border border-warm-emerald rounded-lg text-xs font-black text-warm-charcoal focus:outline-none"
+              autoFocus
+            />
+            <span className="text-xs font-bold text-warm-muted">g</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setTempGrams(quantityGrams);
+              setIsEditingGrams(true);
+            }}
+            className="bg-warm-card border border-warm-borderDark hover:border-warm-emerald rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal transition-all hover:scale-105"
+            title="Clique para editar gramatura"
+          >
+            {quantityGrams} <span className="text-warm-muted font-normal">g</span>
+          </button>
+        )}
+
         <Button
           variant="ghost"
           size="icon"
@@ -50,4 +122,3 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
     </div>
   );
 };
-

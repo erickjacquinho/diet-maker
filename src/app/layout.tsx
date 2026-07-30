@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { AppLayoutShell } from "@/components/templates";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={plusJakartaSans.variable} suppressHydrationWarning>
       <body className="bg-warm-bg text-warm-charcoal font-sans antialiased min-h-screen">
         <AppLayoutShell>{children}</AppLayoutShell>
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

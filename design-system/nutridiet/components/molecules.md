@@ -98,7 +98,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
       <div>
         <div className="text-xs font-bold text-warm-charcoal">{name}</div>
         <div className="text-[11px] text-warm-secondary mt-0.5">
-          {kcal} kcal • <span className="text-warm-rose font-bold">P: {protein}g</span> • C: {carbs}g • <span class="text-warm-teal font-bold">G: {fats}g</span>
+          <span className="text-warm-rose font-bold">P: {protein}g</span> • C: {carbs}g • <span className="text-warm-teal font-bold">G: {fats}g</span> • {kcal} kcal
         </div>
       </div>
       <div className="flex items-center space-x-2">

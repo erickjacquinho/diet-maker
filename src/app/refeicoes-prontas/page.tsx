@@ -12,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
+import { calculatePresetCalories } from '@/lib/presetUtils';
 
 interface ReadyMeal {
   id: string;
@@ -36,7 +38,6 @@ export default function ReadyMealsPage() {
   const [formData, setFormData] = useState({
     name: '',
     suggestedTime: '08:00',
-    kcal: 400,
     proteinG: 30,
     carbsG: 40,
     fatsG: 12,
@@ -57,8 +58,15 @@ export default function ReadyMealsPage() {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    const calculatedKcal = calculatePresetCalories(
+      Number(formData.proteinG),
+      Number(formData.carbsG),
+      Number(formData.fatsG)
+    );
+
     const newMeal: ReadyMeal = {
       ...formData,
+      kcal: calculatedKcal,
       id: `meal-block-${Date.now()}`,
       name: formData.name.trim(),
       itemsPreview: formData.itemsPreview.trim() || 'Itens cadastrados no bloco',
@@ -71,7 +79,6 @@ export default function ReadyMealsPage() {
     setFormData({
       name: '',
       suggestedTime: '08:00',
-      kcal: 400,
       proteinG: 30,
       carbsG: 40,
       fatsG: 12,
@@ -79,6 +86,7 @@ export default function ReadyMealsPage() {
       itemsPreview: '',
     });
   };
+
 
   const filteredMeals = meals.filter((m) =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,8 +113,9 @@ export default function ReadyMealsPage() {
         </div>
         <Button
           onClick={() => setIsModalOpen(true)}
+          variant="emerald"
           size="sm"
-          className="flex items-center space-x-2 shrink-0 bg-warm-emerald text-white hover:bg-warm-emerald/90 font-bold"
+          className="flex items-center space-x-2 shrink-0 font-bold"
         >
           <Plus size={16} />
           <span>Criar Bloco de Refeição</span>
@@ -142,8 +151,9 @@ export default function ReadyMealsPage() {
             </div>
             <Button
               onClick={() => setIsModalOpen(true)}
+              variant="emerald"
               size="sm"
-              className="inline-flex items-center space-x-2 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90"
+              className="inline-flex items-center space-x-2 text-xs font-bold"
             >
               <Plus size={16} />
               <span>Criar Primeiro Bloco</span>
@@ -180,7 +190,7 @@ export default function ReadyMealsPage() {
                   </div>
                   <div>
                     <span className="text-[9px] font-bold text-warm-muted block uppercase">Prot</span>
-                    <span className="font-black text-xs text-rose-700">{meal.proteinG}g</span>
+                    <span className="font-black text-xs text-blue-600">{meal.proteinG}g</span>
                   </div>
                   <div>
                     <span className="text-[9px] font-bold text-warm-muted block uppercase">Carb</span>
@@ -240,44 +250,16 @@ export default function ReadyMealsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-1.5">
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Kcal</label>
-                <Input
-                  type="number"
-                  value={formData.kcal}
-                  onChange={(e) => setFormData({ ...formData, kcal: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Prot (g)</label>
-                <Input
-                  type="number"
-                  value={formData.proteinG}
-                  onChange={(e) => setFormData({ ...formData, proteinG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Carb (g)</label>
-                <Input
-                  type="number"
-                  value={formData.carbsG}
-                  onChange={(e) => setFormData({ ...formData, carbsG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Gord (g)</label>
-                <Input
-                  type="number"
-                  value={formData.fatsG}
-                  onChange={(e) => setFormData({ ...formData, fatsG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
-            </div>
+            <AutoKcalSection
+              title="Macronutrientes & Calorias Calculadas"
+              proteinG={formData.proteinG}
+              carbsG={formData.carbsG}
+              fatsG={formData.fatsG}
+              onProteinChange={(val) => setFormData({ ...formData, proteinG: val })}
+              onCarbsChange={(val) => setFormData({ ...formData, carbsG: val })}
+              onFatsChange={(val) => setFormData({ ...formData, fatsG: val })}
+            />
+
 
             <div>
               <label className="text-xs font-bold text-warm-charcoal block mb-1">Alimentos Incluídos (Resumo)</label>
@@ -300,7 +282,7 @@ export default function ReadyMealsPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" size="sm" className="flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90">
+              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
                 Salvar Refeição
               </Button>
             </div>
