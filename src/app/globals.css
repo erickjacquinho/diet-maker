@@ -20,11 +20,11 @@
     --emerald-600: #059669;
     --emerald-50: #e6f4ea;
 
-    --rose-600: #e11d48;
-    --rose-50: #fce8e6;
+    --blue-600: #2563eb;
+    --blue-50: #eff6ff;
 
-    --amber-600: #d97706;
-    --amber-50: #fef3c7;
+    --orange-500: #f97316;
+    --orange-50: #fff7ed;
 
     --teal-600: #0d9488;
     --teal-50: #e6f2f2;
@@ -45,22 +45,32 @@
     --color-text-secondary: var(--stone-700);  /* Descrições e corpo de texto */
     --color-text-muted: var(--stone-500);      /* Rótulos e placeholders */
 
-    --color-macro-kcal: var(--emerald-600);
-    --color-macro-kcal-bg: var(--emerald-50);
-    --color-macro-protein: var(--rose-600);
-    --color-macro-protein-bg: var(--rose-50);
-    --color-macro-carbs: var(--amber-600);
-    --color-macro-carbs-bg: var(--amber-50);
-    --color-macro-fats: var(--teal-600);
-    --color-macro-fats-bg: var(--teal-50);
+    --color-macro-kcal: var(--stone-500);
+    --color-macro-kcal-bg: var(--stone-100);
+    --color-macro-protein: var(--blue-600);
+    --color-macro-protein-bg: var(--blue-50);
+    --color-macro-carbs: var(--orange-500);
+    --color-macro-carbs-bg: var(--orange-50);
+    --color-macro-fats: var(--emerald-600);
+    --color-macro-fats-bg: var(--emerald-50);
 
     /* ==========================================================================
-       3. GEOMETRY, Z-INDEX & MOTION
+       3. GEOMETRY, RADIUS, SPACING, Z-INDEX & MOTION
        ========================================================================== */
     --radius-2xl: 16px;
     --radius-xl: 12px;
     --radius-lg: 8px;
+    --radius-md: 6px;
+    --radius-sm: 4px;
     --radius-full: 9999px;
+
+    --space-sidebar: 240px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
 
     --z-base: 0;
     --z-card: 1;
@@ -121,3 +131,16 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Remove spin buttons / chevrons from number inputs (typing-only) */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+

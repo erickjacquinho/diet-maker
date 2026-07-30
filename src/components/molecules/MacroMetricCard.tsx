@@ -7,11 +7,11 @@ export interface MacroMetricCardProps {
   currentValue: string; // Ex: "168g" ou "2.450"
   targetValue: string;  // Ex: "165g" ou "2.400 kcal"
   statusBadgeText?: string;
-  statusBadgeVariant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'neutral';
+  statusBadgeVariant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue' | 'neutral';
   percentage: number;   // 0 a 100+
   gPerKgRatio?: string; // Ex: "2.03 g/kg"
   gPerKgMeta?: string;  // Ex: "2.0"
-  macroColor: 'emerald' | 'rose' | 'amber' | 'teal';
+  macroColor: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue';
 }
 
 export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
@@ -30,6 +30,7 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
     rose: 'text-warm-rose',
     amber: 'text-warm-amber',
     teal: 'text-warm-teal',
+    blue: 'text-blue-600',
   };
 
   return (
@@ -59,4 +60,3 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
     </Card>
   );
 };
-

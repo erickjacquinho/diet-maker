@@ -1,0 +1,6 @@
+{
+  "task": "Utilizar ESLint e AST da forma mais robusta possivel para auditar e forcar a conformidade dos componentes ao Atomic Design",
+  "slug": "utilizar-eslint-e-ast-da",
+  "feature_dir": "specs/30-07-26-utilizar-eslint-e-ast-da",
+  "date": "2026-07-30"
+}

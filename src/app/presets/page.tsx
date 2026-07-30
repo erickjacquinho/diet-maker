@@ -20,6 +20,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import {
+  calculatePresetCalories,
+  calculateMacroGrams,
+  MacroMode,
+} from '@/lib/presetUtils';
+
 interface DietPreset {
   id: string;
   title: string;
@@ -28,6 +34,13 @@ interface DietPreset {
   proteinG: number;
   carbsG: number;
   fatsG: number;
+  proteinMode?: MacroMode;
+  proteinValue?: number;
+  carbsMode?: MacroMode;
+  carbsValue?: number;
+  fatsMode?: MacroMode;
+  fatsValue?: number;
+  referenceWeight?: number;
   mealsCount: number;
   description: string;
 }
@@ -39,17 +52,42 @@ export default function PresetsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmDiscardOpen, setIsConfirmDiscardOpen] = useState(false);
+
 
   const [formData, setFormData] = useState({
     title: '',
     category: 'Emagrecimento',
-    targetKcal: 2000,
-    proteinG: 160,
-    carbsG: 200,
-    fatsG: 60,
+    proteinMode: 'absoluto' as MacroMode,
+    proteinValue: 160,
+    carbsMode: 'absoluto' as MacroMode,
+    carbsValue: 200,
+    fatsMode: 'absoluto' as MacroMode,
+    fatsValue: 60,
+    referenceWeight: 70,
     mealsCount: 5,
     description: '',
   });
+
+  const proteinG = calculateMacroGrams(
+    { mode: formData.proteinMode, value: formData.proteinValue },
+    formData.referenceWeight
+  );
+  const carbsG = calculateMacroGrams(
+    { mode: formData.carbsMode, value: formData.carbsValue },
+    formData.referenceWeight
+  );
+  const fatsG = calculateMacroGrams(
+    { mode: formData.fatsMode, value: formData.fatsValue },
+    formData.referenceWeight
+  );
+
+  const calculatedKcal = calculatePresetCalories(proteinG, carbsG, fatsG);
+
+  const hasMultiplicative =
+    formData.proteinMode === 'multiplicativo' ||
+    formData.carbsMode === 'multiplicativo' ||
+    formData.fatsMode === 'multiplicativo';
 
   useEffect(() => {
     try {
@@ -66,6 +104,10 @@ export default function PresetsPage() {
 
     const newPreset: DietPreset = {
       ...formData,
+      proteinG,
+      carbsG,
+      fatsG,
+      targetKcal: calculatedKcal,
       id: `preset-${Date.now()}`,
       title: formData.title.trim(),
       description: formData.description.trim(),
@@ -78,10 +120,13 @@ export default function PresetsPage() {
     setFormData({
       title: '',
       category: 'Emagrecimento',
-      targetKcal: 2000,
-      proteinG: 160,
-      carbsG: 200,
-      fatsG: 60,
+      proteinMode: 'absoluto',
+      proteinValue: 160,
+      carbsMode: 'absoluto',
+      carbsValue: 200,
+      fatsMode: 'absoluto',
+      fatsValue: 60,
+      referenceWeight: 70,
       mealsCount: 5,
       description: '',
     });
@@ -113,8 +158,9 @@ export default function PresetsPage() {
         </div>
         <Button
           onClick={() => setIsModalOpen(true)}
+          variant="emerald"
           size="sm"
-          className="flex items-center space-x-2 shrink-0 bg-warm-emerald text-white hover:bg-warm-emerald/90 font-bold"
+          className="flex items-center space-x-2 shrink-0 font-bold"
         >
           <Plus size={16} />
           <span>Criar Novo Preset</span>
@@ -150,8 +196,9 @@ export default function PresetsPage() {
             </div>
             <Button
               onClick={() => setIsModalOpen(true)}
+              variant="emerald"
               size="sm"
-              className="inline-flex items-center space-x-2 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90"
+              className="inline-flex items-center space-x-2 text-xs font-bold"
             >
               <Plus size={16} />
               <span>Criar Primeiro Preset</span>
@@ -188,15 +235,21 @@ export default function PresetsPage() {
                   </div>
                   <div>
                     <span className="text-[9px] font-bold text-warm-muted block uppercase">Prot</span>
-                    <span className="font-black text-xs text-rose-700">{preset.proteinG}g</span>
+                    <span className="font-black text-xs text-blue-600">
+                      {preset.proteinMode === 'multiplicativo' ? `${preset.proteinValue ?? preset.proteinG}g/kg` : `${preset.proteinG}g`}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[9px] font-bold text-warm-muted block uppercase">Carb</span>
-                    <span className="font-black text-xs text-amber-700">{preset.carbsG}g</span>
+                    <span className="font-black text-xs text-amber-700">
+                      {preset.carbsMode === 'multiplicativo' ? `${preset.carbsValue ?? preset.carbsG}g/kg` : `${preset.carbsG}g`}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[9px] font-bold text-warm-muted block uppercase">Gord</span>
-                    <span className="font-black text-xs text-emerald-700">{preset.fatsG}g</span>
+                    <span className="font-black text-xs text-emerald-700">
+                      {preset.fatsMode === 'multiplicativo' ? `${preset.fatsValue ?? preset.fatsG}g/kg` : `${preset.fatsG}g`}
+                    </span>
                   </div>
                 </div>
 
@@ -218,13 +271,30 @@ export default function PresetsPage() {
       )}
 
       {/* Modal Criar Preset Shadcn Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
+      <Dialog
+        open={isModalOpen}
+        onOpenChange={(open) => {
+          if (!open && (formData.title.trim() || formData.description.trim())) {
+            setIsConfirmDiscardOpen(true);
+          } else {
+            setIsModalOpen(open);
+          }
+        }}
+      >
+        <DialogContent
+          onInteractOutside={(e) => {
+            if (formData.title.trim() || formData.description.trim()) {
+              e.preventDefault();
+              setIsConfirmDiscardOpen(true);
+            }
+          }}
+          className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl max-h-[90vh] overflow-y-auto"
+        >
           <DialogHeader className="border-b border-warm-border pb-3">
             <DialogTitle className="font-black text-base text-warm-charcoal">Novo Preset de Dieta</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreatePreset} className="space-y-3 pt-2">
+          <form onSubmit={handleCreatePreset} className="space-y-3.5 pt-2">
             <div>
               <label className="text-xs font-bold text-warm-charcoal block mb-1">Título do Protocolo</label>
               <Input
@@ -252,43 +322,145 @@ export default function PresetsPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-4 gap-1.5">
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Kcal</label>
+            {/* Macronutrientes Section Header */}
+            <div className="space-y-2.5">
+              <label className="text-xs font-bold text-warm-charcoal block">Macronutrientes</label>
+
+              {/* Proteína */}
+              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-600 flex items-center space-x-1">
+                    <span>Proteínas</span>
+                    {formData.proteinMode === 'multiplicativo' && (
+                      <span className="text-[10px] text-warm-muted font-normal">({proteinG}g est.)</span>
+                    )}
+                  </span>
+                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.proteinMode}
+                    onValueChange={(val: MacroMode) => setFormData({ ...formData, proteinMode: val })}
+                  >
+                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="absoluto">Absoluto (g)</SelectItem>
+                      <SelectItem value="multiplicativo">Multiplicativo (g/kg)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={formData.proteinMode === 'multiplicativo' ? 0.1 : 1}
+                    value={formData.proteinValue}
+                    onChange={(e) => setFormData({ ...formData, proteinValue: Number(e.target.value) })}
+                    placeholder={formData.proteinMode === 'multiplicativo' ? 'ex: 2.0' : 'ex: 160'}
+                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                  />
+                </div>
+              </div>
+
+              {/* Carboidratos */}
+              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-700 flex items-center space-x-1">
+                    <span>Carboidratos</span>
+                    {formData.carbsMode === 'multiplicativo' && (
+                      <span className="text-[10px] text-warm-muted font-normal">({carbsG}g est.)</span>
+                    )}
+                  </span>
+                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.carbsMode}
+                    onValueChange={(val: MacroMode) => setFormData({ ...formData, carbsMode: val })}
+                  >
+                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="absoluto">Absoluto (g)</SelectItem>
+                      <SelectItem value="multiplicativo">Multiplicativo (g/kg)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={formData.carbsMode === 'multiplicativo' ? 0.1 : 1}
+                    value={formData.carbsValue}
+                    onChange={(e) => setFormData({ ...formData, carbsValue: Number(e.target.value) })}
+                    placeholder={formData.carbsMode === 'multiplicativo' ? 'ex: 3.0' : 'ex: 200'}
+                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                  />
+                </div>
+              </div>
+
+              {/* Gorduras */}
+              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-700 flex items-center space-x-1">
+                    <span>Gorduras</span>
+                    {formData.fatsMode === 'multiplicativo' && (
+                      <span className="text-[10px] text-warm-muted font-normal">({fatsG}g est.)</span>
+                    )}
+                  </span>
+                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.fatsMode}
+                    onValueChange={(val: MacroMode) => setFormData({ ...formData, fatsMode: val })}
+                  >
+                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="absoluto">Absoluto (g)</SelectItem>
+                      <SelectItem value="multiplicativo">Multiplicativo (g/kg)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={formData.fatsMode === 'multiplicativo' ? 0.1 : 1}
+                    value={formData.fatsValue}
+                    onChange={(e) => setFormData({ ...formData, fatsValue: Number(e.target.value) })}
+                    placeholder={formData.fatsMode === 'multiplicativo' ? 'ex: 0.8' : 'ex: 60'}
+                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Peso de Referência (visível se algum macro for multiplicativo) */}
+            {hasMultiplicative && (
+              <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between space-x-2">
+                <div>
+                  <label className="text-xs font-bold text-warm-charcoal block">Peso de Referência (kg)</label>
+                  <span className="text-[10px] text-warm-muted font-medium block">Estimativa para cálculo total (g/kg × kg)</span>
+                </div>
                 <Input
                   type="number"
-                  value={formData.targetKcal}
-                  onChange={(e) => setFormData({ ...formData, targetKcal: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
+                  min={1}
+                  value={formData.referenceWeight}
+                  onChange={(e) => setFormData({ ...formData, referenceWeight: Number(e.target.value) })}
+                  className="bg-warm-card border-warm-border text-xs font-bold text-center w-20 h-8 shrink-0"
                 />
               </div>
+            )}
+
+            {/* Auto-calculated Kcal Display */}
+            <div className="p-3 bg-warm-inner border border-warm-border rounded-xl flex items-center justify-between">
               <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Prot (g)</label>
-                <Input
-                  type="number"
-                  value={formData.proteinG}
-                  onChange={(e) => setFormData({ ...formData, proteinG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
+                <span className="text-xs font-bold text-warm-charcoal block">Calorias Totais (Calculadas)</span>
+                <span className="text-[10px] text-warm-muted font-medium block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
               </div>
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Carb (g)</label>
-                <Input
-                  type="number"
-                  value={formData.carbsG}
-                  onChange={(e) => setFormData({ ...formData, carbsG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-warm-muted block mb-1">Gord (g)</label>
-                <Input
-                  type="number"
-                  value={formData.fatsG}
-                  onChange={(e) => setFormData({ ...formData, fatsG: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold text-center p-1"
-                />
-              </div>
+              <Badge variant="secondary" className="font-black text-sm text-warm-emerald bg-warm-emerald/10 border-none px-3 py-1 shrink-0">
+                {calculatedKcal} kcal
+              </Badge>
             </div>
 
             <div>
@@ -312,14 +484,61 @@ export default function PresetsPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" size="sm" className="flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90">
+              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
                 Salvar Preset
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Confirmação de Descarte ao Clicar Fora */}
+      <Dialog open={isConfirmDiscardOpen} onOpenChange={setIsConfirmDiscardOpen}>
+        <DialogContent className="sm:max-w-sm bg-warm-card border-warm-border p-6 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-black text-base text-warm-charcoal">Descartar alterações?</DialogTitle>
+            <div className="text-xs text-warm-secondary pt-1">
+              Você possui dados preenchidos no formulário de preset. Se fechar agora, todas as informações não salvas serão perdidas.
+            </div>
+          </DialogHeader>
+          <div className="pt-4 flex space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsConfirmDiscardOpen(false)}
+              className="flex-1 text-xs font-bold"
+            >
+              Continuar Editando
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                setIsConfirmDiscardOpen(false);
+                setIsModalOpen(false);
+                setFormData({
+                  title: '',
+                  category: 'Emagrecimento',
+                  proteinMode: 'absoluto',
+                  proteinValue: 160,
+                  carbsMode: 'absoluto',
+                  carbsValue: 200,
+                  fatsMode: 'absoluto',
+                  fatsValue: 60,
+                  referenceWeight: 70,
+                  mealsCount: 5,
+                  description: '',
+                });
+              }}
+              className="flex-1 text-xs font-bold"
+            >
+              Descartar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-

@@ -1,0 +1,6 @@
+interface:
+  display_name: "SDD"
+  short_description: "Orquestre especificações com Spec Kit"
+  default_prompt: "Use $sdd para transformar esta tarefa em especificação, plano e tasks validadas."
+policy:
+  allow_implicit_invocation: false

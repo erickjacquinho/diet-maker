@@ -45,7 +45,7 @@ export function getAllFoods(): FoodItem[] {
 
   const tacoFoods: FoodItem[] = tacoData.map((item) => ({
     ...item,
-    preparo: item.preparo || 'In Natura',
+    preparo: item.preparo || 'inNatura',
     source: 'TACO' as const,
     isFavorite: favorites.has(item.id),
   }));
@@ -75,7 +75,8 @@ export function toggleFavoriteFood(foodId: string): string[] {
 
 export function addCustomFood(newFood: Omit<FoodItem, 'id' | 'source'> & { isFavorite?: boolean }): FoodItem {
   const customFoods = getCustomFoodsFromStorage();
-  const createdId = `custom-${Date.now()}`;
+  const uniqueSuffix = Math.random().toString(36).substring(2, 7);
+  const createdId = `custom-${Date.now()}-${uniqueSuffix}`;
   const isFav = newFood.isFavorite ?? false;
   const created: FoodItem = {
     ...newFood,
@@ -95,3 +96,66 @@ export function addCustomFood(newFood: Omit<FoodItem, 'id' | 'source'> & { isFav
   }
   return created;
 }
+
+export function updateCustomFood(
+  foodId: string,
+  updatedData: Partial<Omit<FoodItem, 'id' | 'source'>>
+): FoodItem | null {
+  const customFoods = getCustomFoodsFromStorage();
+  const index = customFoods.findIndex((f) => f.id === foodId);
+  if (index === -1) return null;
+
+  const existing = customFoods[index];
+  const updated: FoodItem = {
+    ...existing,
+    ...updatedData,
+    source: 'CUSTOM',
+    preparo: updatedData.preparo || existing.preparo || 'Personalizado',
+  };
+
+  customFoods[index] = updated;
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(customFoods));
+    if (updatedData.isFavorite !== undefined) {
+      const favorites = new Set(getFavoritesFromStorage());
+      if (updatedData.isFavorite) {
+        favorites.add(foodId);
+      } else {
+        favorites.delete(foodId);
+      }
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
+    }
+  }
+
+  return updated;
+}
+
+export function deleteCustomFood(foodId: string): boolean {
+  const customFoods = getCustomFoodsFromStorage();
+  const index = customFoods.findIndex((f) => f.id === foodId);
+  if (index === -1) return false;
+
+  const updated = customFoods.filter((f) => f.id !== foodId);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(updated));
+    const favorites = new Set(getFavoritesFromStorage());
+    favorites.delete(foodId);
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
+  }
+
+  return true;
+}
+
+export function searchTacoFoods(query: string): FoodItem[] {
+  if (!query || !query.trim()) return [];
+  const normalized = query.toLowerCase().trim();
+  const all = getAllFoods();
+  return all.filter(
+    (f) =>
+      f.name.toLowerCase().includes(normalized) ||
+      f.category.toLowerCase().includes(normalized)
+  );
+}
+
+

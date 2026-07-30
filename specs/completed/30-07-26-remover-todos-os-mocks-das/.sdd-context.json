@@ -1,0 +1,6 @@
+{
+  "task": "remover todos os mocks das paginas. o aplicativo deve ficar limpo para uso e testes.",
+  "slug": "remover-todos-os-mocks-das",
+  "feature_dir": "specs/30-07-26-remover-todos-os-mocks-das",
+  "date": "2026-07-30"
+}

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, UserPlus, Calendar, Weight, Target, ArrowRight, Users } from 'lucide-react';
 import { Avatar } from '@/components/atoms';
+import { CreateButton } from '@/components/atoms/Button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { getPatientsFromStorage, savePatientToStorage, Patient } from '@/lib/patientsStore';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { getPatientsFromStorage, savePatientToStorage, Patient, DEFAULT_OBJECTIVES } from '@/lib/patientsStore';
+import { calculatePresetCalories } from '@/lib/presetUtils';
 
 export default function PatientsListPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -27,7 +36,6 @@ export default function PatientsListPage() {
     gender: 'Masculino',
     heightCm: 175,
     weightKg: 75,
-    targetKcal: 2000,
     targetProtein: 150,
     targetCarbs: 220,
     targetFats: 60,
@@ -42,13 +50,19 @@ export default function PatientsListPage() {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    const calculatedKcal = calculatePresetCalories(
+      Number(formData.targetProtein),
+      Number(formData.targetCarbs),
+      Number(formData.targetFats)
+    );
+
     savePatientToStorage({
       name: formData.name.trim(),
       age: Number(formData.age),
       gender: formData.gender,
       heightCm: Number(formData.heightCm),
       weightKg: Number(formData.weightKg),
-      targetKcal: Number(formData.targetKcal),
+      targetKcal: calculatedKcal,
       targetProtein: Number(formData.targetProtein),
       targetCarbs: Number(formData.targetCarbs),
       targetFats: Number(formData.targetFats),
@@ -63,13 +77,13 @@ export default function PatientsListPage() {
       gender: 'Masculino',
       heightCm: 175,
       weightKg: 75,
-      targetKcal: 2000,
       targetProtein: 150,
       targetCarbs: 220,
       targetFats: 60,
       objective: 'Recomposição Corporal',
     });
   };
+
 
   const filteredPatients = patients.filter(
     (p) =>
@@ -87,14 +101,12 @@ export default function PatientsListPage() {
             Gerencie o histórico, medições e prescrições alimentares de cada paciente.
           </p>
         </div>
-        <Button
+        <CreateButton
           onClick={() => setIsModalOpen(true)}
-          size="sm"
-          className="flex items-center space-x-2 shrink-0 bg-warm-emerald hover:bg-warm-emerald/90 text-white font-bold"
+          icon={<UserPlus size={15} className="shrink-0" />}
         >
-          <UserPlus size={16} />
-          <span>Cadastrar Paciente</span>
-        </Button>
+          Cadastrar Paciente
+        </CreateButton>
       </div>
 
       {/* Search Input */}
@@ -124,13 +136,12 @@ export default function PatientsListPage() {
                 Sua lista de pacientes está em branco. Cadastre seu primeiro paciente para iniciar o acompanhamento nutricional.
               </p>
             </div>
-            <Button
+            <CreateButton
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center space-x-2 text-xs font-bold bg-warm-emerald text-white"
+              icon={<UserPlus size={15} className="shrink-0" />}
             >
-              <UserPlus size={16} />
-              <span>Cadastrar Primeiro Paciente</span>
-            </Button>
+              Cadastrar Primeiro Paciente
+            </CreateButton>
           </CardContent>
         </Card>
       ) : (
@@ -166,7 +177,7 @@ export default function PatientsListPage() {
                       <Target size={10} />
                       <span>Meta Kcal</span>
                     </div>
-                    <div className="font-black text-xs text-warm-emerald mt-0.5">{patient.targetKcal} kcal</div>
+                    <div className="font-bold text-xs text-warm-muted mt-0.5">{patient.targetKcal} kcal</div>
                   </div>
                   <div>
                     <div className="text-[10px] font-semibold text-warm-muted flex items-center justify-center space-x-1">
@@ -204,7 +215,7 @@ export default function PatientsListPage() {
 
           <form onSubmit={handleCreatePatient} className="space-y-3 pt-2">
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome Completo do Paciente</label>
+              <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome Completo</label>
               <Input
                 type="text"
                 required
@@ -248,56 +259,23 @@ export default function PatientsListPage() {
 
             <div>
               <label className="text-xs font-bold text-warm-charcoal block mb-1">Objetivo Clínico / Esportivo</label>
-              <Input
-                type="text"
-                placeholder="Ex: Hipertrofia Muscular, Emagrecimento"
+              <Select
                 value={formData.objective}
-                onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs"
-              />
+                onValueChange={(val) => setFormData({ ...formData, objective: val })}
+              >
+                <SelectTrigger className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold h-9 w-full">
+                  <SelectValue placeholder="Selecione o objetivo" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {DEFAULT_OBJECTIVES.map((obj) => (
+                    <SelectItem key={obj} value={obj}>
+                      {obj}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="p-3 bg-warm-inner border border-warm-border rounded-xl space-y-2">
-              <span className="text-[11px] font-bold text-warm-charcoal uppercase tracking-wider block">Metas Manuais Iniciais</span>
-              <div className="grid grid-cols-4 gap-1.5 text-center">
-                <div>
-                  <span className="text-[9px] font-semibold text-warm-muted block uppercase">Kcal</span>
-                  <Input
-                    type="number"
-                    value={formData.targetKcal}
-                    onChange={(e) => setFormData({ ...formData, targetKcal: Number(e.target.value) })}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center px-1"
-                  />
-                </div>
-                <div>
-                  <span className="text-[9px] font-semibold text-warm-muted block uppercase">Prot (g)</span>
-                  <Input
-                    type="number"
-                    value={formData.targetProtein}
-                    onChange={(e) => setFormData({ ...formData, targetProtein: Number(e.target.value) })}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center px-1"
-                  />
-                </div>
-                <div>
-                  <span className="text-[9px] font-semibold text-warm-muted block uppercase">Carb (g)</span>
-                  <Input
-                    type="number"
-                    value={formData.targetCarbs}
-                    onChange={(e) => setFormData({ ...formData, targetCarbs: Number(e.target.value) })}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center px-1"
-                  />
-                </div>
-                <div>
-                  <span className="text-[9px] font-semibold text-warm-muted block uppercase">Gord (g)</span>
-                  <Input
-                    type="number"
-                    value={formData.targetFats}
-                    onChange={(e) => setFormData({ ...formData, targetFats: Number(e.target.value) })}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center px-1"
-                  />
-                </div>
-              </div>
-            </div>
 
             <div className="pt-2 flex space-x-2">
               <Button
@@ -310,7 +288,7 @@ export default function PatientsListPage() {
                 Cancelar
               </Button>
 
-              <Button type="submit" size="sm" className="flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90">
+              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
                 Salvar Paciente
               </Button>
             </div>
