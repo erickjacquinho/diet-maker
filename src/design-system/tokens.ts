@@ -1,207 +1,47 @@
 /**
- * NutriDiet Design System - Single Source of Truth Tokens (TypeScript)
- * Swiss Warm Minimalist Flat Architecture
+ * @deprecated Compatibility facade for the historical catalogue page.
+ * New consumers must import tokenNames, textStyle and recipes from "@/design-system".
+ * Values remain owned by tokens.css; this module contains aliases only.
  */
+const css = (name: string) => `var(--${name})`;
 
 export const primitiveTokens = {
   colors: {
-    stone: {
-      50: '#faf8f5',
-      100: '#f5f2eb',
-      200: '#e8e4dc',
-      300: '#d6cfc4',
-      500: '#8c8275',
-      700: '#4b5563',
-      900: '#111827',
-    },
-    emerald: {
-      50: '#e6f4ea',
-      500: '#10b981',
-      600: '#059669',
-    },
-    rose: {
-      50: '#fce8e6',
-      500: '#f43f5e',
-      600: '#e11d48',
-    },
-    blue: {
-      50: '#eff6ff',
-      500: '#3b82f6',
-      600: '#2563eb',
-    },
-    amber: {
-      50: '#fef3c7',
-      500: '#f59e0b',
-      600: '#d97706',
-    },
-    teal: {
-      50: '#e6f2f2',
-      500: '#14b8a6',
-      600: '#0d9488',
-    },
-    terracotta: {
-      500: '#d97760',
-      600: '#c86650',
-    },
-    white: '#ffffff',
-    transparent: 'transparent',
+    stone: { 50: css("ref-color-warm-25"), 100: css("ref-color-warm-50"), 200: css("ref-color-warm-200"), 300: css("ref-color-warm-300"), 500: css("ref-color-warm-500"), 700: css("ref-color-warm-800"), 900: css("ref-color-warm-950") },
+    warm: { 0: css("ref-color-warm-0"), 25: css("ref-color-warm-25"), 50: css("ref-color-warm-50"), 100: css("ref-color-warm-100"), 150: css("ref-color-warm-150"), 200: css("ref-color-warm-200"), 300: css("ref-color-warm-300"), 500: css("ref-color-warm-500"), 600: css("ref-color-warm-600"), 700: css("ref-color-warm-700"), 800: css("ref-color-warm-800"), 950: css("ref-color-warm-950") },
+    blue: { 50: css("ref-color-blue-50"), 100: css("ref-color-blue-100"), 500: css("ref-color-blue-500"), 600: css("ref-color-blue-700"), 700: css("ref-color-blue-700"), 800: css("ref-color-blue-800"), 900: css("ref-color-blue-900") },
+    emerald: { 50: css("ref-color-fat-50"), 600: css("ref-color-fat-500") },
+    amber: { 50: css("ref-color-carbohydrate-50"), 600: css("ref-color-carbohydrate-500") },
+    teal: { 50: css("ref-color-fat-50"), 600: css("ref-color-fat-500") },
+    protein: { 50: css("ref-color-protein-50"), 200: css("ref-color-protein-200"), 500: css("ref-color-protein-500") },
+    carbohydrate: { 50: css("ref-color-carbohydrate-50"), 200: css("ref-color-carbohydrate-200"), 500: css("ref-color-carbohydrate-500") },
+    fat: { 50: css("ref-color-fat-50"), 200: css("ref-color-fat-200"), 500: css("ref-color-fat-500") },
   },
   typography: {
-    fonts: {
-      display: "'Plus Jakarta Sans', sans-serif",
-      body: "'Inter', sans-serif",
-      mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-    },
-    sizes: {
-      micro: '10px',
-      caption: '11px',
-      body: '12px',
-      titleSm: '14px',
-      titleMd: '16px',
-      titleLg: '18px',
-      pageTitle: '24px',
-      hero: '30px',
-    },
-    weights: {
-      normal: 400,
-      medium: 500,
-      semibold: 600,
-      bold: 700,
-      extrabold: 800,
-      black: 900,
-    },
+    fonts: { display: "Plus Jakarta Sans", body: "Plus Jakarta Sans", mono: "Plus Jakarta Sans" },
+    sizes: { caption: "type-12", body: "type-14", title: "type-20", pageTitle: "type-28" },
+    weights: { regular: "font-regular", medium: "font-medium", semibold: "font-semibold", bold: "font-bold" },
   },
-  spacing: {
-    0: '0px',
-    1: '4px',
-    1.5: '6px',
-    2: '8px',
-    2.5: '10px',
-    3: '12px',
-    3.5: '14px',
-    4: '16px',
-    5: '20px',
-    6: '24px',
-    8: '32px',
-    10: '40px',
-    12: '48px',
-    16: '64px',
-    sidebarWidth: '240px',
-  },
-  radii: {
-    none: '0px',
-    sm: '4px',
-    md: '6px',
-    lg: '8px',
-    xl: '12px',
-    '2xl': '16px',
-    full: '9999px',
-  },
-  zIndices: {
-    base: 0,
-    card: 1,
-    stickySidebar: 10,
-    dropdown: 20,
-    modalBackdrop: 40,
-    modalContent: 50,
-    toast: 60,
-  },
-  transitions: {
-    fast: '150ms ease-in-out',
-    normal: '200ms ease-in-out',
-    slow: '300ms ease-in-out',
-  },
+  spacing: { 0: css("ref-space-0"), 1: css("ref-space-1"), 2: css("ref-space-2"), 3: css("ref-space-3"), 4: css("ref-space-4"), 5: css("ref-space-5"), 6: css("ref-space-6"), 8: css("ref-space-8"), 10: css("ref-space-10"), 12: css("ref-space-12"), 16: css("ref-space-16") },
+  radii: { none: css("ref-radius-0"), compact: css("ref-radius-4"), control: css("ref-radius-6"), surface: css("ref-radius-8"), round: css("ref-radius-round") },
+  transitions: { fast: css("sys-motion-fast"), normal: css("sys-motion-standard"), standard: css("sys-motion-standard"), slow: css("sys-motion-slow") },
 } as const;
 
 export const semanticTokens = {
-  surfaces: {
-    app: primitiveTokens.colors.stone[100],        // #f5f2eb
-    card: primitiveTokens.colors.white,             // #ffffff
-    inner: primitiveTokens.colors.stone[50],        // #faf8f5
-  },
-  text: {
-    primary: primitiveTokens.colors.stone[900],     // #111827
-    secondary: primitiveTokens.colors.stone[700],   // #4b5563
-    muted: primitiveTokens.colors.stone[500],       // #8c8275
-    onPrimary: primitiveTokens.colors.white,
-  },
-  borders: {
-    clean: primitiveTokens.colors.stone[200],      // #e8e4dc
-    focus: primitiveTokens.colors.stone[300],      // #d6cfc4
-    emerald: primitiveTokens.colors.emerald[600],  // #059669
-  },
+  surfaces: { app: css("sys-color-canvas"), card: css("sys-color-surface"), inner: css("sys-color-surface-subtle") },
+  text: { primary: css("sys-color-text-primary"), secondary: css("sys-color-text-secondary"), muted: css("sys-color-text-muted") },
+  borders: { clean: css("sys-color-border-subtle"), focus: css("sys-color-action-primary-focus"), control: css("sys-color-border-control-essential"), emerald: css("sys-color-action-primary-focus") },
   macros: {
-    calories: {
-      main: primitiveTokens.colors.emerald[600],
-      bg: primitiveTokens.colors.emerald[50],
-    },
-    protein: {
-      main: primitiveTokens.colors.blue[600],
-      bg: primitiveTokens.colors.blue[50],
-    },
-    carbs: {
-      main: primitiveTokens.colors.amber[600],
-      bg: primitiveTokens.colors.amber[50],
-    },
-    fats: {
-      main: primitiveTokens.colors.teal[600],
-      bg: primitiveTokens.colors.teal[50],
-    },
-    terracotta: {
-      main: primitiveTokens.colors.terracotta[500],
-      bg: '#fdf2f0',
-    },
+    protein: { main: css("sys-color-macro-protein"), bg: css("sys-color-macro-protein-soft") },
+    carbohydrate: { main: css("sys-color-macro-carbohydrate"), bg: css("sys-color-macro-carbohydrate-soft") },
+    fat: { main: css("sys-color-macro-fat"), bg: css("sys-color-macro-fat-soft") },
   },
 } as const;
 
 export const componentTokens = {
-  button: {
-    radii: primitiveTokens.radii.xl,
-    font: primitiveTokens.typography.fonts.body,
-    fontWeight: primitiveTokens.typography.weights.bold,
-    transition: primitiveTokens.transitions.fast,
-    sizes: {
-      sm: { px: '10px', py: '4px', font: '11px' },
-      md: { px: '14px', py: '8px', font: '12px' },
-      lg: { px: '16px', py: '10px', font: '14px' },
-    },
-  },
-  badge: {
-    radii: primitiveTokens.radii.full,
-    font: primitiveTokens.typography.fonts.body,
-    fontWeight: primitiveTokens.typography.weights.bold,
-  },
-  input: {
-    bg: semanticTokens.surfaces.inner,
-    border: semanticTokens.borders.clean,
-    borderFocus: semanticTokens.borders.emerald,
-    placeholder: semanticTokens.text.muted,
-    radii: primitiveTokens.radii.xl,
-  },
-  card: {
-    radii: primitiveTokens.radii['2xl'],
-    bg: semanticTokens.surfaces.card,
-    border: semanticTokens.borders.clean,
-    padding: primitiveTokens.spacing[6],
-  },
-  modal: {
-    radii: primitiveTokens.radii['2xl'],
-    bg: semanticTokens.surfaces.card,
-    border: semanticTokens.borders.clean,
-    zIndex: primitiveTokens.zIndices.modalContent,
-  },
-  sidebar: {
-    width: primitiveTokens.spacing.sidebarWidth,
-    bg: semanticTokens.surfaces.card,
-    borderRight: semanticTokens.borders.clean,
-    zIndex: primitiveTokens.zIndices.stickySidebar,
-  },
+  button: { background: css("cmp-button-primary-background"), radius: css("sys-radius-control") },
+  input: { border: css("cmp-input-border-default"), radius: css("sys-radius-control") },
+  card: { padding: css("cmp-card-padding-default"), radius: css("sys-radius-surface") },
 } as const;
 
-export const designTokens = {
-  primitive: primitiveTokens,
-  semantic: semanticTokens,
-  component: componentTokens,
-} as const;
-
-export type DesignTokens = typeof designTokens;
+export const designTokens = { primitive: primitiveTokens, semantic: semanticTokens, component: componentTokens } as const;

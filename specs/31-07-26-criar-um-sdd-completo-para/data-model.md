@@ -114,3 +114,27 @@ Estado inicial: `legacy-inventoried`. Nenhum componente ou rota é declarado con
 | `evidence` | `.artifacts/design-system/stage-0-gate.json` |
 
 Os 42 warnings de lint e 228 achados do auditor Atomic são dívida inventariada do runtime legado; os comandos retornaram sucesso no Stage 0 e esses achados permanecem bloqueantes para homologação das fases de componentes/rotas.
+
+### TokenContract e TextStyleContract — MIG-002
+
+- Runtime público único: `src/design-system/index.ts`.
+- Valores reference, semantic/system e component: `src/design-system/tokens.css`.
+- Catálogo fechado: 45 text styles nomeados, com tipografia, peso, line-height e tone definidos centralmente.
+- Recipes iniciais: Button/IconButton, Input/Textarea, Badge, Card e TableRow, todas com variantes fechadas.
+- Fachada `src/design-system/tokens.ts`: temporariamente `deprecated`, sem valores visuais próprios, mantida apenas para a rota histórica até o Stage 7.
+- Aliases globais/Tailwind/Shadcn: derivados das CSS variables canônicas, sem dark mode, Inter, palette `warm` ativa ou reset global de sombra.
+
+Estado após MIG-002: `foundation-migrated`.
+
+### MigrationCheckpoint — MIG-002
+
+| Campo | Valor |
+| --- | --- |
+| `stage` | `foundation` |
+| `commands` | auditor LEG restrito, `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links`, `npm run verify:design-system` |
+| `result` | `passed` |
+| `tests` | 92 passed; 21 contratos novos de foundation/auditor |
+| `legacyScope` | 3 arquivos, zero findings |
+| `evidence` | `.artifacts/design-system/stage-1-foundation.json` |
+
+Os warnings de camadas superiores permanecem fora do escopo de MIG-002 e não autorizam avançar seus próprios checkpoints sem migração e evidência.

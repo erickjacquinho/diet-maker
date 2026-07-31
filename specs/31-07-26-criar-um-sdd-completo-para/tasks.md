@@ -34,21 +34,21 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **CRITICAL**: nenhuma migração de componente ou rota pode começar antes desta fase estar verde.
 
-- [ ] T009 [P] Escrever testes que falhem inicialmente para tokens, text styles e recipes em `tests/design-system/tokens.test.ts`, `tests/design-system/text-styles.test.ts` e `tests/design-system/recipes.test.ts` [FR-002] [FR-003] [skill: $tdd]
-- [ ] T010 [P] Escrever testes de rejeição dos códigos LEG001–LEG010 para o auditor em `tests/design-system/legacy-audit.contract.test.ts` usando as fixtures de `tests/fixtures/design-system-legacy/` [FR-021] [skill: $tdd]
-- [ ] T011 [P] Criar os tipos fechados de tokens, text styles, recipes, findings e checkpoints em `src/design-system/types.ts` [FR-002] [FR-022] [skill: $design-system]
-- [ ] T012 Criar as variáveis primitive, semantic e component em `src/design-system/tokens.css`, alinhadas exclusivamente a `design-system/03-token-architecture.md`, `design-system/04-color-system.md`, `design-system/05-typography-system.md`, `design-system/06-geometry-and-desktop-layout.md`, `design-system/07-icons-motion-and-layers.md` e `design-system/08-states-and-accessibility.md` [FR-002] [SC-003] [skill: $design-system]
-- [ ] T013 Definir `TokenId`, nomes por camada e o mapa público `tokenNames` em `src/design-system/types.ts`/`src/design-system/index.ts`, apontando para as variáveis CSS sem duplicar valores [FR-002] [skill: $design-system]
-- [ ] T014 Criar a escala fechada de tipografia em `src/design-system/text-styles.ts`, incluindo uso permitido, cor, peso, tamanho e line-height de cada estilo [FR-003] [SC-004] [skill: $design-system]
-- [ ] T015 Criar recipes CVA de componentes em `src/design-system/recipes.ts`, com variantes, estados, densidades e perfis permitidos [FR-004] [skill: $design-system]
-- [ ] T016 Criar a API única de runtime em `src/design-system/index.ts` e remover qualquer export visual duplicado dentro de `src/design-system/` [FR-002] [FR-004] [skill: $frontend-architecture-mindset]
-- [ ] T017 Fazer os testes T009 passarem em `tests/design-system/` e executar o gate de Stage 1, validando que valores arbitrários, IDs inexistentes e variantes não cadastradas são rejeitados sem escape local e que type-check/lint/testes estão verdes [FR-002] [FR-003] [FR-004] [FR-018] [skill: $tdd]
-- [ ] T018 [P] Atualizar `src/app/globals.css` para importar somente `src/design-system/tokens.css` e regras globais canônicas, removendo fonte antiga, reset visual proibido, sombra global e dark mode ativo [FR-005] [FR-006] [skill: $ui-styling]
-- [ ] T019 [P] Atualizar `tailwind.config.js` com aliases de tokens semânticos, spacing, radius e text styles canônicos, removendo palette/radius/font aliases legados [FR-006] [skill: $ui-styling]
-- [ ] T020 [P] Atualizar `components.json` e utilitários de composição sem inserir domínio em `src/components/ui/` [FR-006] [FR-010] [skill: $shadcn]
-- [ ] T021 [P] Adicionar teste de configuração em `tests/design-system/configuration.test.ts` para globals, Tailwind, Shadcn e ausência de aliases legados [FR-005] [FR-006] [skill: $tdd]
-- [ ] T022 Executar o gate de Stage 2 com `tests/design-system/configuration.test.ts`, `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links` e auditoria LEG001–LEG010 limitada a `src/app/globals.css`, `tailwind.config.js` e `components.json` [FR-006] [FR-018] [FR-020] [SC-001] [skill: $speckit-implement]
-- [ ] T023 Registrar `TokenContract` e `TextStyleContract` conformes e avançar o checkpoint para `foundation-migrated` somente após T022 verde em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-022] [FR-023] [skill: $design-system]
+- [X] T009 [P] Escrever testes que falhem inicialmente para tokens, text styles e recipes em `tests/design-system/tokens.test.ts`, `tests/design-system/text-styles.test.ts` e `tests/design-system/recipes.test.ts` [FR-002] [FR-003] [skill: $tdd]
+- [X] T010 [P] Escrever testes de rejeição dos códigos LEG001–LEG010 para o auditor em `tests/design-system/legacy-audit.contract.test.ts` usando as fixtures de `tests/fixtures/design-system-legacy/` [FR-021] [skill: $tdd]
+- [X] T011 [P] Criar os tipos fechados de tokens, text styles, recipes, findings e checkpoints em `src/design-system/types.ts` [FR-002] [FR-022] [skill: $design-system]
+- [X] T012 Criar as variáveis primitive, semantic e component em `src/design-system/tokens.css`, alinhadas exclusivamente a `design-system/03-token-architecture.md`, `design-system/04-color-system.md`, `design-system/05-typography-system.md`, `design-system/06-geometry-and-desktop-layout.md`, `design-system/07-icons-motion-and-layers.md` e `design-system/08-states-and-accessibility.md` [FR-002] [SC-003] [skill: $design-system]
+- [X] T013 Definir `TokenId`, nomes por camada e o mapa público `tokenNames` em `src/design-system/types.ts`/`src/design-system/index.ts`, apontando para as variáveis CSS sem duplicar valores [FR-002] [skill: $design-system]
+- [X] T014 Criar a escala fechada de tipografia em `src/design-system/text-styles.ts`, incluindo uso permitido, cor, peso, tamanho e line-height de cada estilo [FR-003] [SC-004] [skill: $design-system]
+- [X] T015 Criar recipes CVA de componentes em `src/design-system/recipes.ts`, com variantes, estados, densidades e perfis permitidos [FR-004] [skill: $design-system]
+- [X] T016 Criar a API única de runtime em `src/design-system/index.ts` e remover qualquer export visual duplicado dentro de `src/design-system/` [FR-002] [FR-004] [skill: $frontend-architecture-mindset]
+- [X] T017 Fazer os testes T009 passarem em `tests/design-system/` e executar o gate de Stage 1, validando que valores arbitrários, IDs inexistentes e variantes não cadastradas são rejeitados sem escape local e que type-check/lint/testes estão verdes [FR-002] [FR-003] [FR-004] [FR-018] [skill: $tdd]
+- [X] T018 [P] Atualizar `src/app/globals.css` para importar somente `src/design-system/tokens.css` e regras globais canônicas, removendo fonte antiga, reset visual proibido, sombra global e dark mode ativo [FR-005] [FR-006] [skill: $ui-styling]
+- [X] T019 [P] Atualizar `tailwind.config.js` com aliases de tokens semânticos, spacing, radius e text styles canônicos, removendo palette/radius/font aliases legados [FR-006] [skill: $ui-styling]
+- [X] T020 [P] Atualizar `components.json` e utilitários de composição sem inserir domínio em `src/components/ui/` [FR-006] [FR-010] [skill: $shadcn]
+- [X] T021 [P] Adicionar teste de configuração em `tests/design-system/configuration.test.ts` para globals, Tailwind, Shadcn e ausência de aliases legados [FR-005] [FR-006] [skill: $tdd]
+- [X] T022 Executar o gate de Stage 2 com `tests/design-system/configuration.test.ts`, `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links` e auditoria LEG001–LEG010 limitada a `src/app/globals.css`, `tailwind.config.js` e `components.json` [FR-006] [FR-018] [FR-020] [SC-001] [skill: $speckit-implement]
+- [X] T023 Registrar `TokenContract` e `TextStyleContract` conformes e avançar o checkpoint para `foundation-migrated` somente após T022 verde em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-022] [FR-023] [skill: $design-system]
 
 ---
 
