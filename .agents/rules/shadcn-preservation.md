@@ -20,11 +20,11 @@ Esta regra estabelece o padrão arquitetural para o uso do **Shadcn UI** no proj
   - **Reuso**: Permite variações de uso no sistema sem duplicar código primitivo.
 
 ### 3. Fidelidade Total à Identidade do Projeto
-- Todos os componentes filhos, variações e composições de UI **MUST** utilizar rigorosamente os tokens e padrões do [Design System NutriDiet](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md).
+- Todos os componentes filhos, variações e composições de UI **MUST** utilizar rigorosamente os tokens e padrões do [Design System NutriDiet](file:///c:/Programmer/diet-maker/design-system/README.md).
 - Evite criar estilos isolados fora da escala de tokens (cores, espaçamentos, tipografia, bordas e sombras da aplicação).
 
 ---
 
 ## 🔗 Referências
-- Documentação do Design System: `c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md`
+- Documentação do Design System: `c:/Programmer/diet-maker/design-system/README.md`
 - Diretrizes Globais de Agentes: `c:/Programmer/diet-maker/agents.md`

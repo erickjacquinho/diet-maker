@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "audit:atomic-design": "node scripts/audit-atomic-design.mjs",
+    "verify:links": "node scripts/verify-links.js",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

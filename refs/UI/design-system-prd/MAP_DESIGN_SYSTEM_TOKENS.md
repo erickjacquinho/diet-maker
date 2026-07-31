@@ -2,7 +2,7 @@
 
 > **Documento de Especificação de Tokens Visuais Mestre**  
 > **Diretriz Absoluta**: **ZERO VALORES HARDCODED OU VALORES ABSOLUTOS (HEX / PIXELS AD-HOC) EM COMPONENTES**. 100% das cores, tipografias, arredondamentos, bordas, espaçamentos, z-index e sombras do **NutriDiet Local Pro** DEVEM ser consumidos via tokens semânticos e utilitários declarados no Design System.  
-> **Base de Especificação**: [PRD_DESIGN_SYSTEM.md](file:///c:/Programmer/diet-maker/refs/UI/design-system-prd/PRD_DESIGN_SYSTEM.md) + [MASTER.md](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md)
+> **Base de Especificação**: [PRD_DESIGN_SYSTEM.md](file:///c:/Programmer/diet-maker/refs/UI/design-system-prd/PRD_DESIGN_SYSTEM.md) + [README.md](file:///c:/Programmer/diet-maker/design-system/README.md)
 
 ---
 

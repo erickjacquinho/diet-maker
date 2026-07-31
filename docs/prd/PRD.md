@@ -4,7 +4,7 @@
 > - 📄 **PRD**: [PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md)
 > - 📖 **Glossário de Domínio**: [CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md)
 > - 🏛️ **Decisões de Arquitetura**: [ADRs](file:///c:/Programmer/diet-maker/docs/adr/)
-> - 🤖 **Instruções para Agentes**: [AGENTS_PATHS.md](file:///c:/Programmer/diet-maker/AGENTS_PATHS.md)
+> - 🤖 **Instruções para Agentes**: [AGENTS.md](file:///c:/Programmer/diet-maker/AGENTS.md)
 > - 🏠 **Índice Geral**: [README.md](file:///c:/Programmer/diet-maker/README.md)
 
 ---
