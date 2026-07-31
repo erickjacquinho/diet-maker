@@ -174,3 +174,9 @@ Depois de decidir reutilizar, configurar, variar, compor ou criar, aplique esta 
 | `structure` | organizar shell, container, grid ou região de página |
 
 O documento da categoria, o registro e o perfil resolvem a decisão final; esta tabela é apenas roteamento.
+
+## 11. Evolução sem proliferação
+
+Antes de propor nova categoria, tente nesta ordem: componente existente, variante fechada, composição, trait compatível e exceção temporária. Uma nova categoria só é elegível quando a diferença compartilhada inclui anatomia, estados e tokens, aparece em pelo menos três famílias independentes e não pode ser resolvida pelas onze categorias estáveis.
+
+Toda proposta recebe lifecycle `proposed`, decisão em `category-decisions.md`, contrato completo antes de `experimental` e consumidor real antes de `stable`. Categoria deprecated bloqueia novos consumers; categoria removed bloqueia toda referência.

@@ -18,6 +18,8 @@ Perfis individuais (components/profiles)
 
 Nenhum nível inferior pode redefinir o superior. Exceções precisam seguir [category-decisions.md](./category-decisions.md).
 
+O vocabulário fechado de tokens consumíveis está em [token-index.md](./token-index.md). Categorias e perfis não podem inventar um identificador fora desse índice.
+
 ## Dois eixos independentes
 
 | Eixo | Responde | Fonte |
@@ -37,6 +39,7 @@ components/
 ├── audit-contract.md
 ├── registry.schema.json
 ├── registry.json
+├── token-index.md
 ├── category-decisions.md
 ├── categories/
 │   ├── actions.md
@@ -86,4 +89,3 @@ npm run verify:design-system
 ```
 
 O gate cobre fontes, exports, categorias, traits, perfis, estados, tokens, links, exceções e sincronização normativa. O processo completo está em [audit-contract.md](./audit-contract.md).
-

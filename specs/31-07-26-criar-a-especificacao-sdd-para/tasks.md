@@ -114,20 +114,20 @@
 
 ### Tests
 
-- [ ] T046 [skill: $tdd] [US4] Adicionar testes para `SRC001`–`EXP002` em `tests/design-system/component-catalog.test.mjs`
-- [ ] T047 [skill: $tdd] [US4] Adicionar testes para `REG001`–`TRT002` em `tests/design-system/component-catalog.test.mjs`
-- [ ] T048 [skill: $tdd] [US4] Adicionar testes para `PRF001`–`TOK002` em `tests/design-system/component-catalog.test.mjs`
-- [ ] T049 [skill: $tdd] [US4] Adicionar testes para `GOV001`–`PROP001` em `tests/design-system/component-catalog.test.mjs`
+- [X] T046 [skill: $tdd] [US4] Adicionar testes para `SRC001`–`EXP002` em `tests/design-system/component-catalog.test.mjs`
+- [X] T047 [skill: $tdd] [US4] Adicionar testes para `REG001`–`TRT002` em `tests/design-system/component-catalog.test.mjs`
+- [X] T048 [skill: $tdd] [US4] Adicionar testes para `PRF001`–`TOK002` em `tests/design-system/component-catalog.test.mjs`
+- [X] T049 [skill: $tdd] [US4] Adicionar testes para `GOV001`–`PROP001` em `tests/design-system/component-catalog.test.mjs`
 
 ### Audit implementation
 
-- [ ] T050 [skill: $tdd] [US4] Implementar cobertura de fontes e exports `SRC001`–`EXP002` em `scripts/verify-design-system-components.mjs`
-- [ ] T051 [skill: $tdd] [US4] Implementar schema, categorias e traits `REG001`–`TRT002` em `scripts/verify-design-system-components.mjs`
-- [ ] T052 [skill: $tdd] [US4] Implementar perfis, estados, tokens e duplicação `PRF001`–`TOK002` em `scripts/verify-design-system-components.mjs`
-- [ ] T053 [skill: $tdd] [US4] Implementar governança, placeholders, links, sync e propostas `GOV001`–`PROP001` em `scripts/verify-design-system-components.mjs`
-- [ ] T054 [skill: $tdd] [US4] Implementar saída ordenada humana/estruturada e exit codes 0/1/2 em `scripts/verify-design-system-components.mjs`
-- [ ] T055 [skill: $tdd] [US4] Ativar modo estrito no script `verify:design-system` em `package.json`
-- [ ] T056 [skill: $tdd] [US4] Executar a matriz de fixtures e registrar o resultado em `specs/31-07-26-criar-a-especificacao-sdd-para/checklists/audit-results.md`
+- [X] T050 [skill: $tdd] [US4] Implementar cobertura de fontes e exports `SRC001`–`EXP002` em `scripts/verify-design-system-components.mjs`
+- [X] T051 [skill: $tdd] [US4] Implementar schema, categorias e traits `REG001`–`TRT002` em `scripts/verify-design-system-components.mjs`
+- [X] T052 [skill: $tdd] [US4] Implementar perfis, estados, tokens e duplicação `PRF001`–`TOK002` em `scripts/verify-design-system-components.mjs`
+- [X] T053 [skill: $tdd] [US4] Implementar governança, placeholders, links, sync e propostas `GOV001`–`PROP001` em `scripts/verify-design-system-components.mjs`
+- [X] T054 [skill: $tdd] [US4] Implementar saída ordenada humana/estruturada e exit codes 0/1/2 em `scripts/verify-design-system-components.mjs`
+- [X] T055 [skill: $tdd] [US4] Ativar modo estrito no script `verify:design-system` em `package.json`
+- [X] T056 [skill: $tdd] [US4] Executar a matriz de fixtures e registrar o resultado em `specs/31-07-26-criar-a-especificacao-sdd-para/checklists/audit-results.md`
 
 **Checkpoint**: Todos os códigos obrigatórios têm teste de falha e restauração; auditoria canônica passa em modo estrito.
 
@@ -139,11 +139,11 @@
 
 **Independent Test**: Uma proposta futura é resolvida por categoria existente ou bloqueada até decisão formal; depreciação impede novos consumidores.
 
-- [ ] T057 [skill: $design-system] [P] [US5] Acrescentar template e regras para decisões futuras ao registro existente em `design-system/components/category-decisions.md`
-- [ ] T058 [skill: $design-system] [P] [US5] Atualizar lifecycle de categorias, traits e exceções em `design-system/14-lifecycle-and-governance.md`
-- [ ] T059 [skill: $design-system] [P] [US5] Atualizar critérios de criação e evolução de componente/categoria em `design-system/09-component-decision-model.md`
-- [ ] T060 [skill: $tdd] [US5] Adicionar fixtures de componente futuro herdável, categoria ausente, categoria depreciada e exceção expirada em `tests/fixtures/design-system-catalog/governance/`
-- [ ] T061 [skill: $tdd] [US5] Adicionar testes dos fluxos de proposta, depreciação e revisão em `tests/design-system/component-catalog.test.mjs`
+- [X] T057 [skill: $design-system] [P] [US5] Acrescentar template e regras para decisões futuras ao registro existente em `design-system/components/category-decisions.md`
+- [X] T058 [skill: $design-system] [P] [US5] Atualizar lifecycle de categorias, traits e exceções em `design-system/14-lifecycle-and-governance.md`
+- [X] T059 [skill: $design-system] [P] [US5] Atualizar critérios de criação e evolução de componente/categoria em `design-system/09-component-decision-model.md`
+- [X] T060 [skill: $tdd] [US5] Adicionar fixtures de componente futuro herdável, categoria ausente, categoria depreciada e exceção expirada em `tests/fixtures/design-system-catalog/governance/`
+- [X] T061 [skill: $tdd] [US5] Adicionar testes dos fluxos de proposta, depreciação e revisão em `tests/design-system/component-catalog.test.mjs`
 
 **Checkpoint**: Toda entrada futura possui caminho de decisão verificável e categorias depreciadas rejeitam novos consumidores.
 
@@ -153,18 +153,18 @@
 
 **Purpose**: Remover duplicação, sincronizar fontes de verdade e homologar o escopo documental.
 
-- [ ] T062 [skill: $design-system] Converter `design-system/12-component-specifications.md` em índice das categorias e perfis sem contratos duplicados
-- [ ] T063 [skill: $design-system] Sincronizar a visão humana do inventário em `design-system/15-component-registry.md`
-- [ ] T064 [skill: $design-system] Atualizar conformidade e comandos de gate em `design-system/13-implementation-and-compliance.md`
-- [ ] T065 [skill: $design-system] Atualizar ordem de leitura e fonte canônica em `design-system/README.md`
-- [ ] T066 [skill: $design-system] Atualizar roteamento de categorias e perfis em `agents.md`
-- [ ] T067 [skill: $design-system] Verificar versão, links e ausência de regras históricas concorrentes em `.specify/memory/constitution.md`
-- [ ] T068 [skill: $tdd] Executar `npm run verify:design-system` em até 5 segundos e exigir 39 fontes, 11 categorias, 4 propostas e zero finding bloqueante
-- [ ] T069 [skill: $tdd] Executar `npm test -- tests/design-system/component-catalog.test.mjs` e exigir todas as fixtures verdes
-- [ ] T070 [skill: $tdd] Executar `npm run verify:links` e exigir zero links locais quebrados
-- [ ] T071 [skill: general] Executar `git diff --check` e exigir zero erro de whitespace
-- [ ] T072 [skill: general] Executar `git diff --name-only -- src` e exigir nenhuma alteração em `src/`
-- [ ] T073 [skill: $design-system] Realizar revisão independente de um componente por categoria e registrar concordância em `specs/31-07-26-criar-a-especificacao-sdd-para/checklists/reproducibility.md`
+- [X] T062 [skill: $design-system] Converter `design-system/12-component-specifications.md` em índice das categorias e perfis sem contratos duplicados
+- [X] T063 [skill: $design-system] Sincronizar a visão humana do inventário em `design-system/15-component-registry.md`
+- [X] T064 [skill: $design-system] Atualizar conformidade e comandos de gate em `design-system/13-implementation-and-compliance.md`
+- [X] T065 [skill: $design-system] Atualizar ordem de leitura e fonte canônica em `design-system/README.md`
+- [X] T066 [skill: $design-system] Atualizar roteamento de categorias e perfis em `agents.md`
+- [X] T067 [skill: $design-system] Verificar versão, links e ausência de regras históricas concorrentes em `.specify/memory/constitution.md`
+- [X] T068 [skill: $tdd] Executar `npm run verify:design-system` em até 5 segundos e exigir 39 fontes, 11 categorias, 4 propostas e zero finding bloqueante
+- [X] T069 [skill: $tdd] Executar `npm test -- tests/design-system/component-catalog.test.mjs` e exigir todas as fixtures verdes
+- [X] T070 [skill: $tdd] Executar `npm run verify:links` e exigir zero links locais quebrados
+- [X] T071 [skill: general] Executar `git diff --check` e exigir zero erro de whitespace
+- [X] T072 [skill: general] Executar `git diff --name-only -- src` e exigir nenhuma alteração em `src/`
+- [X] T073 [skill: $design-system] Realizar revisão independente de um componente por categoria e registrar concordância em `specs/31-07-26-criar-a-especificacao-sdd-para/checklists/reproducibility.md`
 
 ---
 
@@ -243,3 +243,13 @@ Integration: registry links + duplication tests
 ### Completion rule
 
 O SDD somente pode ser marcado implementado quando T068–T073 passarem. Isso não declara o código visual conforme; declara apenas o catálogo normativo homologado e pronto para SDDs posteriores de telas e migração.
+
+## Phase 8: Convergence
+
+**Purpose**: Fechar gaps encontrados ao comparar a implementação atual com todos os requisitos, decisões do plano e critérios de aceite, preservando o contrato append-only do converge.
+
+- [X] T074 [skill: $tdd] Completar a validação estrutural do registry para lifecycle, campos obrigatórios, enums, paths, exports, relações e duplicidades conforme FR-032 e SC-006 (partial)
+- [X] T075 [skill: $tdd] Criar índice canônico de tokens e validar referências de categorias/perfis, links aos fundamentos e redefinições locais conforme FR-002, FR-033 e FR-034 (partial)
+- [X] T076 [skill: $design-system] Completar cada decisão inicial em `design-system/components/category-decisions.md` com problema recorrente, consumidores, alternativas, impacto, compatibilidade e decisão conforme FR-028 (partial)
+- [X] T077 [skill: $tdd] Bloquear propostas e novos consumidores que referenciem categorias deprecated e exigir substituto estruturado conforme FR-030 e US5/AC3 (partial)
+- [X] T078 [skill: $tdd] Adicionar fixtures e testes de regressão para schema incompleto, token arbitrário, fundamento ausente, decisão incompleta e proposta em categoria deprecated conforme SC-006 e SC-010 (missing)

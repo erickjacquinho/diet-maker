@@ -10,7 +10,7 @@ Execute a command.
 
 ## Category inheritance
 
-Inherits [actions](../../categories/actions.md).
+Herda `actions`.
 
 ## Specific anatomy
 

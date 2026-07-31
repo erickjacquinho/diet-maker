@@ -1,0 +1,7 @@
+{
+  "id": "ui-categoryless",
+  "lifecycle": "proposed",
+  "currentLayer": null,
+  "targetLayer": "ui",
+  "primaryCategory": "category-that-does-not-exist"
+}

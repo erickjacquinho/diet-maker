@@ -323,3 +323,16 @@ Uma migração de tela está concluída quando:
 - componentes estão na camada correta;
 - testes relevantes passam;
 - registro e documentação refletem o código.
+
+## 17. Gate documental atual
+
+O catálogo de componentes possui uma interface pública e determinística:
+
+```text
+npm run verify:design-system
+npm test -- tests/design-system/component-catalog.test.mjs
+```
+
+O primeiro comando executa o modo estrito e exige 39 fontes atuais cobertas, zero export visual descoberto, 11 categorias homologadas, quatro propostas `specified` e zero finding bloqueante. O segundo executa as fixtures válidas e inválidas, incluindo exit codes 0/1/2, lifecycle e exceções expiradas.
+
+O gate valida documentação e rastreabilidade. Ele não declara que `src` já recebeu a migração visual; essa distinção permanece explícita no registry e na Definition of Done de cada tela.

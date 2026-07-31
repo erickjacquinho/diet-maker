@@ -10,7 +10,7 @@ Execute a command.
 
 ## Category inheritance
 
-Inherits [fields](../../categories/fields.md).
+Herda `fields`.
 
 ## Specific anatomy
 

@@ -42,6 +42,16 @@ async function appendTo(root, projectPath, content) {
   await writeFile(filePath, `${current}\n${content}\n`);
 }
 
+async function readFixture(name) {
+  return readFile(path.join(fixtureRoot, 'governance', name), 'utf8');
+}
+
+async function replaceIn(root, projectPath, search, replacement) {
+  const filePath = path.join(root, ...projectPath.split('/'));
+  const current = await readFile(filePath, 'utf8');
+  await writeFile(filePath, current.replace(search, replacement));
+}
+
 async function expectFinding(root, code, mode = 'strict') {
   const findings = await verifyComponentCatalog(root, { mode });
   expect(findings.map((item) => item.code), JSON.stringify(findings, null, 2)).toContain(code);
@@ -120,6 +130,33 @@ describe('verifyComponentCatalog public seam', () => {
     );
 
     expect(keys).toEqual([...keys].sort());
+  });
+
+  it('validates required registry fields, enums and paths through REG001', async () => {
+    let root = await createWorkspace();
+    const schemaFixture = JSON.parse(await readFixture('invalid-schema-missing-lifecycle.json'));
+    await mutateRegistry(root, (registry) => { delete registry.components[0][schemaFixture.field]; });
+    await expectFinding(root, 'REG001', 'inventory');
+
+    root = await createWorkspace();
+    await mutateRegistry(root, (registry) => { registry.components[0].profile = 'profiles/button.md'; });
+    await expectFinding(root, 'REG001', 'inventory');
+
+    root = await createWorkspace();
+    await mutateRegistry(root, (registry) => { registry.categories[0].lifecycle = 'unknown'; });
+    await expectFinding(root, 'REG001', 'inventory');
+  });
+
+  it('reports duplicate exports and duplicate relation values through REG002', async () => {
+    let root = await createWorkspace();
+    await mutateRegistry(root, (registry) => {
+      registry.components[0].publicExports.push({ ...registry.components[0].publicExports[0] });
+    });
+    await expectFinding(root, 'REG002', 'inventory');
+
+    root = await createWorkspace();
+    await mutateRegistry(root, (registry) => { registry.categories[0].relatedCategories = ['actions', 'actions']; });
+    await expectFinding(root, 'REG002', 'inventory');
   });
 });
 
@@ -467,5 +504,85 @@ describe('complete audit finding matrix', () => {
     });
     expect(result.status).toBe(2);
     expect(JSON.parse(result.stdout).findings.map(({ code }) => code)).toEqual(['REG001']);
+  });
+
+  it('accepts a future component inheriting a stable category without adding it to the baseline', async () => {
+    const registry = JSON.parse(
+      await readFile(path.resolve('design-system/components/registry.json'), 'utf8'),
+    );
+    expect(registry.components.filter(({ lifecycle }) => lifecycle === 'proposed')).toHaveLength(4);
+    await expect(verifyComponentCatalog(process.cwd(), { mode: 'strict' })).resolves.toEqual([]);
+  });
+
+  it('blocks a new consumer when its category is deprecated', async () => {
+    const root = await createWorkspace();
+    await mutateRegistry(root, (registry) => {
+      registry.categories[0].lifecycle = 'deprecated';
+      registry.categories[0].consumers = ['ui-button'];
+    });
+
+    await expectFinding(root, 'GOV002');
+  });
+
+  it('blocks an expired exception record', async () => {
+    const root = await createWorkspace();
+    await mutateRegistry(root, (registry) => {
+      registry.components[0].exceptions = ['EXC-ui-button-temporary'];
+    });
+    await appendTo(
+      root,
+      'design-system/components/profiles/ui/button.md',
+      'ExceptionRecord: EXC-ui-button-temporary; owner: maintainer; reviewAt: 2020-01-01; scope: button icon',
+    );
+
+    await expectFinding(root, 'GOV001');
+  });
+
+  it('rejects arbitrary tokens and missing foundation links', async () => {
+    let root = await createWorkspace();
+    await appendTo(root, 'design-system/components/categories/actions.md', await readFixture('invalid-token-arbitrary.md'));
+    await expectFinding(root, 'TOK001');
+
+    root = await createWorkspace();
+    await appendTo(root, 'design-system/components/profiles/ui/button.md', 'Token: `token-arbitrary-not-in-foundations`');
+    await expectFinding(root, 'TOK001');
+
+    root = await createWorkspace();
+    await appendTo(root, 'design-system/components/categories/actions.md', await readFixture('invalid-missing-foundation.md'));
+    await replaceIn(root, 'design-system/components/categories/actions.md', '[04 — Cores](../../04-color-system.md)', '[04 — Cores](../../missing-foundation.md)');
+    await expectFinding(root, 'SYNC001');
+  });
+
+  it('rejects local foundation redefinitions', async () => {
+    const root = await createWorkspace();
+    await appendTo(root, 'design-system/components/categories/actions.md', 'GLOBAL-FOUNDATION-REDEFINITION: --color-local-primary');
+    await expectFinding(root, 'CAT003');
+  });
+
+  it('requires a complete structured decision record for each category', async () => {
+    const root = await createWorkspace();
+    const incompleteDecision = await readFixture('invalid-incomplete-decision.md');
+    await replaceIn(root, 'design-system/components/category-decisions.md', /^- Alternatives:.*$/m, incompleteDecision.trim());
+    await expectFinding(root, 'GOV002');
+  });
+
+  it('blocks proposals that introduce a new consumer of a deprecated category', async () => {
+    const root = await createWorkspace();
+    const proposalFixture = JSON.parse(await readFixture('invalid-deprecated-proposal.json'));
+    await mutateRegistry(root, (registry) => {
+      registry.categories[0].lifecycle = 'deprecated';
+      registry.categories[0].consumers = [];
+      registry.components.push({
+        ...structuredClone(registry.components[0]),
+        id: 'ui-future-deprecated',
+        name: 'FutureDeprecated',
+        lifecycle: proposalFixture.componentLifecycle,
+        currentLayer: null,
+        sourceFiles: [],
+        primaryCategory: proposalFixture.category,
+        specStatus: 'specified',
+      });
+    });
+    await expectFinding(root, 'GOV002');
   });
 });

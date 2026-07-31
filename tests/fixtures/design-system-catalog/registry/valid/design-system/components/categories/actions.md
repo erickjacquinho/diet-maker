@@ -70,3 +70,11 @@ Nenhuma decisão compartilhada permanece aberta.
 
 ## Change history
 `CAT-TEST-ACTIONS` criou a categoria.
+
+## Foundations
+
+- [04 — Cores](../../04-color-system.md)
+- [05 — Tipografia](../../05-typography-system.md)
+- [06 — Geometria](../../06-geometry-and-desktop-layout.md)
+- [07 — Ícones](../../07-icons-motion-and-layers.md)
+- [08 — Estados](../../08-states-and-accessibility.md)

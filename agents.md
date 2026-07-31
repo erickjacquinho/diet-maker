@@ -20,6 +20,18 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **Historical Visual Prototype** | [demo_dashboard.html](file:///c:/Programmer/diet-maker/demo_dashboard.html) | Artefato histórico e não normativo; não usar como fonte de tokens ou estilos |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
+### Design System component catalog
+
+| Scope | Direct target |
+| :--- | :--- |
+| Visual category contract | `design-system/components/categories/<category>.md` |
+| Individual component profile | `design-system/components/profiles/<layer>/<component>.md` |
+| Component IDs, layers, traits, sources and exports | `design-system/components/registry.json` |
+| Category lifecycle and creation decisions | `design-system/components/category-decisions.md` |
+| Catalog audit contract | `design-system/components/audit-contract.md` |
+
+When a component is new or changed, consult the category before the profile. The Atomic layer and visual category are independent axes; do not create a visual rule in a layer document or a duplicate state/token table in a profile.
+
 ## Repository Layout
 
 ```

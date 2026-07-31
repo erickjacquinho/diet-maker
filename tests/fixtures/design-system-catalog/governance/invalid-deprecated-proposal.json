@@ -1,0 +1,6 @@
+{
+  "category": "actions",
+  "categoryLifecycle": "deprecated",
+  "componentLifecycle": "proposed",
+  "expectedFinding": "GOV002"
+}

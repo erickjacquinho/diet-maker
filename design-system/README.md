@@ -45,6 +45,8 @@ O produto-alvo é exclusivamente web para desktop a partir de `1024px`. Mobile e
 
 Leitura mínima para implementação: 02 a 08, 10 a 13. Para criar ou alterar API pública, incluir 09, 11, 14 e 15.
 
+Para componentes, a leitura normativa continua em [09-component-decision-model](./09-component-decision-model.md) → [11-component-contract](./11-component-contract.md) → [12-component-specifications](./12-component-specifications.md) → [components/README](./components/README.md). O registry JSON, os onze documentos de categoria e os 43 perfis são as fontes executáveis; documentos históricos removidos não são fontes concorrentes.
+
 ## 3. Decisões fixadas
 
 ```text
