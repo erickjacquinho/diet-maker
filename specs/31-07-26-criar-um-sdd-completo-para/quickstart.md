@@ -7,6 +7,12 @@
 - servidor local disponível para validação visual;
 - nenhuma alteração não relacionada misturada ao checkpoint.
 
+## Política de rastreabilidade
+
+Os relatórios em `.artifacts/design-system/` são evidências versionadas desta migração. Cada arquivo deve ser JSON/Markdown determinístico, identificar comandos, escopo, resultado e revisão do Git usada no checkpoint. Artefatos temporários de navegador, caches e capturas sem vínculo com um gate não pertencem ao diretório.
+
+Uma fase só pode atualizar seu estado após todos os comandos aplicáveis passarem. Em caso de falha, preservar o relatório com estado `blocked`, corrigir apenas o escopo da fase e repetir o gate; não reescrever nem apagar evidências de etapas já aprovadas.
+
 ## Baseline
 
 ```powershell

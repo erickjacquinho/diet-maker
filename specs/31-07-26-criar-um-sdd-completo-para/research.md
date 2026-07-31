@@ -66,3 +66,13 @@
 **Decision**: Cada etapa termina em commit isolado e só atualiza registry/status após passar seus gates. Falha exige reverter o último checkpoint da etapa, não apagar dados ou resetar o repositório inteiro.
 
 **Rationale**: A migração afeta muitas superfícies; checkpoints pequenos reduzem custo de recuperação.
+
+## Regras operacionais aplicáveis à execução
+
+- `design-system/` é a única fonte visual normativa; `refs/` e `demo_dashboard.html` permanecem históricos e somente leitura.
+- O alvo é web desktop a partir de 1024px, sem mobile, tablet ou dark mode.
+- A dependência de UI é estritamente descendente: `ui → atoms → molecules → organisms → templates → app`; nenhuma camada importa uma camada superior.
+- Primitives em `src/components/ui/` permanecem genéricos, sem regras de domínio, dados nutricionais ou estilização ad hoc; especializações vivem em wrappers catalogados.
+- Categorias visuais definem regras compartilhadas e perfis individuais registram apenas particularidades, sem duplicar tokens, geometria ou matriz de estados.
+- Mudanças de runtime devem consumir tokens e recipes canônicos, preservar contratos públicos e só avançar após os gates de legado, catálogo, tipos, lint, testes, links, Atomic/Shadcn e revisão visual/acessível.
+- Nenhum componente, rota ou proposta recebe estado de conformidade sem evidência reproduzível e registry sincronizado.

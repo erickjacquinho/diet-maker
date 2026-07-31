@@ -84,3 +84,33 @@ legacy-inventoried → foundation-migrated → layer-migrated → route-migrated
 ```
 
 Uma etapa só pode avançar com zero findings `error`, testes aplicáveis verdes, revisão visual/acessível aprovada e registro atualizado. `homologated` não pode ser atribuído a componente ou rota sem evidência.
+
+## Execution records
+
+### MigrationBaseline — MIG-001
+
+| Campo | Valor |
+| --- | --- |
+| `capturedAt` | `2026-07-31T16:56:21-03:00` |
+| `sourceFiles` | 82 |
+| `routes` | 10 |
+| `componentSources` | 39 |
+| `imports` | 293 |
+| `legacyFindings` | 4389 |
+| `registryRevision` | `b5b9cde5f56df28022a16688965340da4ad1e768` |
+| `evidence` | `.artifacts/design-system/design-system-baseline.json` (SHA-256 `c9385f920510f9f934048232a0e573b1cbd14a3788a52b14ae0933b25d7eb281`) |
+
+Estado inicial: `legacy-inventoried`. Nenhum componente ou rota é declarado conforme neste checkpoint. O rollback de MIG-001 retorna à revisão `b5b9cde5f56df28022a16688965340da4ad1e768`; alterações preexistentes fora do escopo não fazem parte do checkpoint.
+
+### MigrationCheckpoint — MIG-001
+
+| Campo | Valor |
+| --- | --- |
+| `stage` | `setup` |
+| `inputs` | baseline executável, registry, 39 fontes de componentes e 10 rotas |
+| `commands` | baseline ×2, `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links`, `npm run audit:atomic-design` |
+| `result` | `passed` |
+| `rollbackRevision` | `b5b9cde5f56df28022a16688965340da4ad1e768` |
+| `evidence` | `.artifacts/design-system/stage-0-gate.json` |
+
+Os 42 warnings de lint e 228 achados do auditor Atomic são dívida inventariada do runtime legado; os comandos retornaram sucesso no Stage 0 e esses achados permanecem bloqueantes para homologação das fases de componentes/rotas.

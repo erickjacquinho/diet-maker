@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-07-30T06:16:41.420Z",
+  "timestamp": "2026-07-31T20:10:09.150Z",
   "summary": {
-    "totalFilesScanned": 52,
+    "totalFilesScanned": 54,
     "compliantFiles": 32,
-    "nonCompliantFiles": 20,
-    "totalViolations": 193,
-    "complianceScorePercentage": 61.54
+    "nonCompliantFiles": 22,
+    "totalViolations": 228,
+    "complianceScorePercentage": 59.26
   },
   "violations": [
     {
@@ -856,7 +856,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 117,
+      "line": 116,
       "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -865,7 +865,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 220,
+      "line": 219,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -874,7 +874,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 233,
+      "line": 232,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -883,7 +883,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 242,
+      "line": 241,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -892,7 +892,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 251,
+      "line": 250,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -901,7 +901,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 263,
+      "line": 262,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -910,7 +910,7 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 292,
+      "line": 281,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -919,16 +919,16 @@
     },
     {
       "file": "src/app/pacientes/page.tsx",
-      "line": 302,
+      "line": 291,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button type=\"submit\" size=\"sm\" className=\"flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90\">"
+      "snippet": "<Button type=\"submit\" variant=\"emerald\" size=\"sm\" className=\"flex-1 text-xs font-bold\">"
     },
     {
       "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
-      "line": 425,
+      "line": 416,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -937,7 +937,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
-      "line": 437,
+      "line": 428,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -946,7 +946,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
-      "line": 449,
+      "line": 440,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -955,12 +955,21 @@
     },
     {
       "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
-      "line": 461,
+      "line": 452,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
       "suggestedReplacement": "<Input> (from Design System @/components/ui)",
       "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+      "line": 464,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
     },
     {
       "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
@@ -972,17 +981,152 @@
       "snippet": "<Button"
     },
     {
-      "file": "src/app/pacientes/[id]/consulta/[date]/page.tsx",
-      "line": 482,
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 624,
       "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 637,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 654,
+      "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
+      "snippet": "<Button variant=\"outline\" size=\"sm\" onClick={() => setIsScaleModalOpen(false)}>"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 658,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"emerald\" onClick={handleExecuteScale} size=\"sm\" className=\"font-bold\">"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 681,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "select",
+      "suggestedReplacement": "<Select> (from Design System @/components/ui)",
+      "snippet": "<select"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 696,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "select",
+      "suggestedReplacement": "<Select> (from Design System @/components/ui)",
+      "snippet": "<select"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 711,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"outline\" size=\"sm\" onClick={() => setIsCopyModalOpen(false)}>"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 714,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"emerald\" onClick={handleExecuteCopyMeals} size=\"sm\" className=\"font-bold\">"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 738,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 748,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 758,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 776,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"outline\" size=\"sm\" onClick={() => setIsAdjustGoalsModalOpen(false)}>"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 779,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"emerald\" onClick={handleSaveAdjustedGoals} size=\"sm\" className=\"font-bold\">"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 800,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "textarea",
+      "suggestedReplacement": "<Textarea> (from Design System @/components/ui)",
+      "snippet": "<textarea"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 809,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"outline\" size=\"sm\" onClick={() => setIsWhatsAppModalOpen(false)}>"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+      "line": 812,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button variant=\"emerald\" onClick={handleCopyWhatsAppText} size=\"sm\" className=\"font-bold flex items-center space-x-1.5\">"
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 594,
+      "line": 616,
       "column": 31,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -991,7 +1135,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 647,
+      "line": 669,
       "column": 39,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -1000,7 +1144,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 767,
+      "line": 789,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1009,7 +1153,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 779,
+      "line": 801,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1018,7 +1162,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 788,
+      "line": 810,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1027,7 +1171,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 797,
+      "line": 819,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1036,7 +1180,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 809,
+      "line": 831,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1045,7 +1189,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 830,
+      "line": 852,
       "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1054,25 +1198,25 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 870,
+      "line": 892,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
       "snippet": "<Button"
-    },
-    {
-      "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 880,
-      "column": 17,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button type=\"submit\" size=\"sm\" className=\"flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90\">"
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
       "line": 902,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button type=\"submit\" variant=\"emerald\" size=\"sm\" className=\"flex-1 text-xs font-bold\">"
+    },
+    {
+      "file": "src/app/pacientes/[id]/page.tsx",
+      "line": 924,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1081,7 +1225,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 911,
+      "line": 933,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1090,7 +1234,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 939,
+      "line": 962,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1099,7 +1243,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 951,
+      "line": 974,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1108,7 +1252,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 963,
+      "line": 986,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1117,7 +1261,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 998,
+      "line": 1022,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1126,30 +1270,12 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 1007,
+      "line": 1031,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
       "snippet": "<Button"
-    },
-    {
-      "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 1037,
-      "column": 19,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Input",
-      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
-      "snippet": "<Input"
-    },
-    {
-      "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 1049,
-      "column": 19,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Input",
-      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
-      "snippet": "<Input"
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
@@ -1172,6 +1298,24 @@
     {
       "file": "src/app/pacientes/[id]/page.tsx",
       "line": 1085,
+      "column": 19,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/page.tsx",
+      "line": 1097,
+      "column": 19,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/app/pacientes/[id]/page.tsx",
+      "line": 1109,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1180,7 +1324,7 @@
     },
     {
       "file": "src/app/pacientes/[id]/page.tsx",
-      "line": 1094,
+      "line": 1118,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1198,7 +1342,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 173,
+      "line": 174,
       "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1207,7 +1351,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 196,
+      "line": 197,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1216,7 +1360,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 256,
+      "line": 258,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1225,7 +1369,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 298,
+      "line": 300,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1234,7 +1378,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 310,
+      "line": 312,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1243,7 +1387,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 339,
+      "line": 341,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1252,7 +1396,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 351,
+      "line": 353,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1261,7 +1405,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 375,
+      "line": 377,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1270,7 +1414,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 387,
+      "line": 389,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1279,7 +1423,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 411,
+      "line": 413,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Select",
@@ -1288,7 +1432,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 423,
+      "line": 425,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1297,7 +1441,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 443,
+      "line": 445,
       "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1306,7 +1450,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 466,
+      "line": 468,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "textarea",
@@ -1315,7 +1459,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 476,
+      "line": 478,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1324,16 +1468,16 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 485,
+      "line": 487,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button type=\"submit\" size=\"sm\" className=\"flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90\">"
+      "snippet": "<Button type=\"submit\" variant=\"emerald\" size=\"sm\" className=\"flex-1 text-xs font-bold\">"
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 503,
+      "line": 505,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1342,7 +1486,7 @@
     },
     {
       "file": "src/app/presets/page.tsx",
-      "line": 512,
+      "line": 514,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1441,7 +1585,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 128,
+      "line": 129,
       "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1450,7 +1594,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 151,
+      "line": 152,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1459,7 +1603,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 205,
+      "line": 207,
       "column": 19,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1468,7 +1612,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 230,
+      "line": 232,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1477,7 +1621,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 242,
+      "line": 244,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Input",
@@ -1486,7 +1630,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 264,
+      "line": 266,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "textarea",
@@ -1495,7 +1639,7 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 274,
+      "line": 276,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1504,12 +1648,12 @@
     },
     {
       "file": "src/app/refeicoes-prontas/page.tsx",
-      "line": 283,
+      "line": 285,
       "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button type=\"submit\" size=\"sm\" className=\"flex-1 text-xs font-bold bg-warm-emerald text-white hover:bg-warm-emerald/90\">"
+      "snippet": "<Button type=\"submit\" variant=\"emerald\" size=\"sm\" className=\"flex-1 text-xs font-bold\">"
     },
     {
       "file": "src/components/atoms/ProgressBar.tsx",
@@ -1548,8 +1692,98 @@
       "snippet": "<Input"
     },
     {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 45,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 58,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 80,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 91,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 106,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 129,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/FoodSearchModal.tsx",
+      "line": 92,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/components/molecules/FoodSearchModal.tsx",
+      "line": 113,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/FoodSearchModal.tsx",
+      "line": 164,
+      "column": 19,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
+    },
+    {
+      "file": "src/components/molecules/FoodSearchModal.tsx",
+      "line": 197,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
       "file": "src/components/molecules/MealItemRow.tsx",
-      "line": 36,
+      "line": 48,
       "column": 9,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -1558,7 +1792,25 @@
     },
     {
       "file": "src/components/molecules/MealItemRow.tsx",
-      "line": 72,
+      "line": 83,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<input"
+    },
+    {
+      "file": "src/components/molecules/MealItemRow.tsx",
+      "line": 99,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/MealItemRow.tsx",
+      "line": 112,
       "column": 9,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1576,7 +1828,7 @@
     },
     {
       "file": "src/components/molecules/ReadOnlyDietModal.tsx",
-      "line": 187,
+      "line": 150,
       "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -1611,60 +1863,6 @@
       "snippet": "<Button"
     },
     {
-      "file": "src/components/molecules/SidebarBrand.tsx",
-      "line": 34,
-      "column": 13,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
-      "file": "src/components/molecules/SidebarBrand.tsx",
-      "line": 63,
-      "column": 11,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
-      "file": "src/components/molecules/SidebarQuickActions.tsx",
-      "line": 24,
-      "column": 13,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
-      "file": "src/components/molecules/SidebarQuickActions.tsx",
-      "line": 41,
-      "column": 13,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
-      "file": "src/components/molecules/SidebarQuickActions.tsx",
-      "line": 61,
-      "column": 7,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
-      "file": "src/components/molecules/SidebarQuickActions.tsx",
-      "line": 70,
-      "column": 7,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button"
-    },
-    {
       "file": "src/components/molecules/TacoSearchInput.tsx",
       "line": 16,
       "column": 7,
@@ -1675,34 +1873,133 @@
     },
     {
       "file": "src/components/organisms/MealCardContainer.tsx",
-      "line": 77,
-      "column": 13,
+      "line": 69,
+      "column": 17,
       "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button onClick={onDuplicate} variant=\"secondary\" size=\"sm\" className=\"flex items-center space-x-1\">"
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
     },
     {
       "file": "src/components/organisms/MealCardContainer.tsx",
-      "line": 81,
-      "column": 13,
+      "line": 76,
+      "column": 17,
       "type": "RESTRICTED_HTML_TAG",
-      "element": "Button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button onClick={onScale} variant=\"secondary\" size=\"sm\" className=\"flex items-center space-x-1\">"
+      "element": "Input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<Input"
     },
     {
       "file": "src/components/organisms/MealCardContainer.tsx",
-      "line": 86,
+      "line": 83,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/MealCardContainer.tsx",
+      "line": 99,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/organisms/MealCardContainer.tsx",
+      "line": 141,
       "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button onClick={onDeleteMeal} variant=\"destructive\" size=\"sm\" className=\"flex items-center space-x-1\">"
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/MealCardContainer.tsx",
+      "line": 155,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button onClick={onDuplicate} variant=\"secondary\" size=\"sm\" className=\"flex items-center space-x-1 text-xs\">"
+    },
+    {
+      "file": "src/components/organisms/MealCardContainer.tsx",
+      "line": 159,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button onClick={onScale} variant=\"secondary\" size=\"sm\" className=\"flex items-center space-x-1 text-xs\">"
+    },
+    {
+      "file": "src/components/organisms/MealCardContainer.tsx",
+      "line": 164,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button onClick={onDeleteMeal} variant=\"destructive\" size=\"sm\" className=\"flex items-center space-x-1 text-xs\">"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 63,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 92,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 229,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 246,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 266,
+      "column": 7,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/organisms/SidebarNav.tsx",
+      "line": 275,
+      "column": 7,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
     },
     {
       "file": "src/components/templates/DietBuilderTemplate.tsx",
-      "line": 28,
+      "line": 63,
       "column": 9,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1711,16 +2008,25 @@
     },
     {
       "file": "src/components/templates/DietBuilderTemplate.tsx",
-      "line": 43,
+      "line": 92,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
+    },
+    {
+      "file": "src/components/templates/DietBuilderTemplate.tsx",
+      "line": 103,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<Button onClick={onAddMeal} variant=\"default\" size=\"sm\" className=\"flex items-center space-x-1.5 bg-warm-emerald text-white\">"
+      "snippet": "<Button"
     },
     {
       "file": "src/components/templates/DietBuilderTemplate.tsx",
-      "line": 47,
+      "line": 113,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1729,7 +2035,7 @@
     },
     {
       "file": "src/components/templates/DietBuilderTemplate.tsx",
-      "line": 51,
+      "line": 118,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
@@ -1738,12 +2044,21 @@
     },
     {
       "file": "src/components/templates/DietBuilderTemplate.tsx",
-      "line": 55,
+      "line": 123,
       "column": 13,
       "type": "RESTRICTED_HTML_TAG",
       "element": "Button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
       "snippet": "<Button onClick={onExportPDF} variant=\"secondary\" size=\"sm\" className=\"flex items-center space-x-1.5\">"
+    },
+    {
+      "file": "src/components/templates/DietBuilderTemplate.tsx",
+      "line": 148,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "Button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<Button"
     }
   ]
 }

@@ -17,14 +17,14 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **Purpose**: congelar o estado inicial e preparar evidências reprodutíveis sem alterar o runtime.
 
-- [ ] T001 Ler `AGENTS.md`, `design-system/README.md`, `.agents/rules/atomic-design.md` e `.agents/rules/shadcn-preservation.md`, registrar as regras aplicáveis em `specs/31-07-26-criar-um-sdd-completo-para/research.md` [FR-021] [FR-026] [skill: $speckit-implement]
-- [ ] T002 [P] Criar o diretório de artefatos de execução `.artifacts/design-system/` e sua política de rastreabilidade em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` [FR-002] [FR-023] [skill: $speckit-implement]
-- [ ] T003 [P] Criar `scripts/capture-design-system-baseline.mjs` para enumerar componentes, rotas, imports, aliases, classes e contagens do baseline [FR-001] [skill: $code-reviewer-expert]
-- [ ] T004 [P] Criar `tests/fixtures/design-system-legacy/` com um arquivo mínimo por código LEG001–LEG010, sem conectá-los ao runtime [FR-021] [skill: $tdd]
-- [ ] T005 Executar o baseline duas vezes e salvar a evidência em `.artifacts/design-system/design-system-baseline.json`; confirmar que `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links` e `npm run audit:atomic-design` permanecem verdes [SC-006] [skill: $speckit-implement]
-- [ ] T006 Registrar `MigrationBaseline` inicial e estado `legacy-inventoried` em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md`, sem declarar nenhum componente ou rota conforme [FR-001] [skill: $design-system]
-- [ ] T007 Criar o primeiro checkpoint local com mensagem rastreável e registrar o identificador no `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-023] [skill: $git-commit]
-- [ ] T008 Executar o gate de Stage 0 conforme `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md`; bloquear a fase se o baseline não for determinístico ou qualquer comando falhar [SC-011] [skill: $speckit-implement]
+- [X] T001 Ler `AGENTS.md`, `design-system/README.md`, `.agents/rules/atomic-design.md` e `.agents/rules/shadcn-preservation.md`, registrar as regras aplicáveis em `specs/31-07-26-criar-um-sdd-completo-para/research.md` [FR-021] [FR-026] [skill: $speckit-implement]
+- [X] T002 [P] Criar o diretório de artefatos de execução `.artifacts/design-system/` e sua política de rastreabilidade em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` [FR-002] [FR-023] [skill: $speckit-implement]
+- [X] T003 [P] Criar `scripts/capture-design-system-baseline.mjs` para enumerar componentes, rotas, imports, aliases, classes e contagens do baseline [FR-001] [skill: $code-reviewer-expert]
+- [X] T004 [P] Criar `tests/fixtures/design-system-legacy/` com um arquivo mínimo por código LEG001–LEG010, sem conectá-los ao runtime [FR-021] [skill: $tdd]
+- [X] T005 Executar o baseline duas vezes e salvar a evidência em `.artifacts/design-system/design-system-baseline.json`; confirmar que `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links` e `npm run audit:atomic-design` permanecem verdes [SC-006] [skill: $speckit-implement]
+- [X] T006 Registrar `MigrationBaseline` inicial e estado `legacy-inventoried` em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md`, sem declarar nenhum componente ou rota conforme [FR-001] [skill: $design-system]
+- [X] T007 Criar o primeiro checkpoint local com mensagem rastreável e registrar o identificador no `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-023] [skill: $git-commit]
+- [X] T008 Executar o gate de Stage 0 conforme `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md`; bloquear a fase se o baseline não for determinístico ou qualquer comando falhar [SC-011] [skill: $speckit-implement]
 
 ---
 

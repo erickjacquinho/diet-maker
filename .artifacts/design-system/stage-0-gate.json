@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "checkpointId": "MIG-001",
+  "stage": "setup",
+  "baselineRevision": "b5b9cde5f56df28022a16688965340da4ad1e768",
+  "baselineSha256": "c9385f920510f9f934048232a0e573b1cbd14a3788a52b14ae0933b25d7eb281",
+  "deterministicBaseline": true,
+  "inventory": {
+    "sourceFiles": 82,
+    "componentSources": 39,
+    "routes": 10,
+    "imports": 293,
+    "legacyFindings": 4389
+  },
+  "commands": [
+    { "command": "npm run type-check", "exitCode": 0 },
+    { "command": "npm run lint", "exitCode": 0, "warnings": 42 },
+    { "command": "npm test", "exitCode": 0, "testsPassed": 71 },
+    { "command": "npm run verify:links", "exitCode": 0, "brokenLinks": 0 },
+    { "command": "npm run audit:atomic-design", "exitCode": 0, "legacyViolations": 228 }
+  ],
+  "result": "passed",
+  "notes": "Legacy warnings remain inventoried and must reach zero before homologation."
+}
