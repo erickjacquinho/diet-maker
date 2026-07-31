@@ -1,7 +1,10 @@
 # ADR-005: Design System Warm Minimalist Off-White (Swiss Flat 2.0)
 
-- **Status**: Aceito
+- **Status**: Substituído
 - **Data**: 2026-07-29
+- **Substituído por**: [NutriDiet Design System — Guia canônico](file:///c:/Programmer/diet-maker/design-system/README.md)
+
+> Este ADR registra uma decisão histórica e não deve orientar novas implementações. Paleta, tipografia, geometria, movimento e acessibilidade vigentes estão exclusivamente no guia canônico. Em caso de divergência, `design-system/` prevalece.
 
 ## Contexto
 O NutriDiet Pro necessita de uma identidade visual marcante, limpa, clara e de alta legibilidade para atendimento em consultório. O usuário especificou que a interface não deve conter sombras 3D (`box-shadow`), gradientes (`linear-gradient`) ou filtros de profundidade, baseando-se nas referências visuais de dashboards minimalistas quentes (Swiss Warm Minimalist).

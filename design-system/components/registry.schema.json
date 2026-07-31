@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nutridiet.local/schemas/component-registry.schema.json",
+  "title": "NutriDiet Component Category Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "baseline", "categories", "traits", "components"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currentSourceCount", "capturedAt"],
+      "properties": {
+        "currentSourceCount": { "type": "integer", "minimum": 0 },
+        "capturedAt": { "type": "string", "format": "date" }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/categoryEntry" }
+    },
+    "traits": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/trait" }
+    },
+    "components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/component" }
+    }
+  },
+  "$defs": {
+    "layer": {
+      "enum": ["ui", "atom", "molecule", "organism", "template"]
+    },
+    "categoryId": {
+      "enum": [
+        "actions",
+        "fields",
+        "selection",
+        "navigation",
+        "surfaces",
+        "data-display",
+        "feedback",
+        "overlays",
+        "loading",
+        "nutrition-domain",
+        "structure"
+      ]
+    },
+    "categoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "lifecycle", "document", "allowedTraits", "relatedCategories", "consumers", "decisionRef"],
+      "properties": {
+        "id": { "$ref": "#/$defs/categoryId" },
+        "name": { "type": "string", "minLength": 1 },
+        "lifecycle": { "enum": ["proposed", "experimental", "stable", "deprecated", "removed"] },
+        "document": { "type": "string", "pattern": "^design-system/components/categories/.+\\.md$" },
+        "allowedTraits": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "relatedCategories": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/categoryId" } },
+        "consumers": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "decisionRef": { "type": "string", "minLength": 1 }
+      }
+    },
+    "trait": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "purpose", "adds", "forbiddenOverrides", "compatibleCategories"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "purpose": { "type": "string", "minLength": 1 },
+        "adds": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "forbiddenOverrides": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "compatibleCategories": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/categoryId" } }
+      }
+    },
+    "sourceFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "discoveredLayer"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^src/components/.+\\.tsx$" },
+        "role": { "enum": ["implementation", "reexport", "compound-family"] },
+        "discoveredLayer": { "$ref": "#/$defs/layer" }
+      }
+    },
+    "publicExport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "documentedBy"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["component", "compound-part", "recipe", "hook", "type"] },
+        "documentedBy": { "enum": ["category", "profile", "non-visual"] }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "nature", "lifecycle", "currentLayer", "targetLayer", "primaryCategory", "traits", "sourceFiles", "publicExports", "profile", "consumers", "primitiveBase", "specStatus", "exceptions"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "nature": { "enum": ["ui-generic", "product-generic", "domain"] },
+        "lifecycle": { "enum": ["proposed", "experimental", "implemented", "migration-required", "stable", "deprecated", "removed"] },
+        "currentLayer": { "anyOf": [{ "$ref": "#/$defs/layer" }, { "type": "null" }] },
+        "targetLayer": { "$ref": "#/$defs/layer" },
+        "primaryCategory": { "$ref": "#/$defs/categoryId" },
+        "traits": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "sourceFiles": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/sourceFile" } },
+        "publicExports": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/publicExport" } },
+        "profile": { "type": "string", "pattern": "^design-system/components/profiles/.+\\.md$" },
+        "consumers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "primitiveBase": { "type": ["string", "null"] },
+        "specStatus": { "enum": ["inventoried", "specified", "homologated"] },
+        "exceptions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "lifecycle": { "const": "proposed" } }, "required": ["lifecycle"] },
+          "then": { "properties": { "currentLayer": { "type": "null" }, "sourceFiles": { "maxItems": 0 } } },
+          "else": { "properties": { "currentLayer": { "$ref": "#/$defs/layer" }, "sourceFiles": { "minItems": 1 } } }
+        }
+      ]
+    }
+  }
+}

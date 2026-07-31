@@ -42,9 +42,10 @@ Toda a especificação, arquitetura, design system e decisões de design estão 
 c:/Programmer/diet-maker/
 ├── README.md                          # Visão geral do projeto e índice de documentação
 ├── AGENTS.md                          # Guia de rotas e instrução para agentes de IA
-├── demo_dashboard.html                # Protótipo visual HTML do Design System (Swiss Warm Minimalist)
+├── demo_dashboard.html                # Protótipo histórico; não normativo
 ├── design-system/
-│   └── README.md                      # Fonte Única da Verdade do Design System (Tokens de Cores, Fontes, Componentes)
+│   ├── README.md                      # Índice e fonte canônica do Design System
+│   └── 01-*.md … 15-*.md             # Regras normativas completas
 ├── src/
 │   └── app/                           # Arquitetura Next.js App Router
 │       ├── globals.css                # Estilos globais e variáveis Tailwind
@@ -70,7 +71,7 @@ c:/Programmer/diet-maker/
 ## 🔗 Links Rápidos
 
 - 🎨 **[README.md Design System](file:///c:/Programmer/diet-maker/design-system/README.md)**: Especificação completa de tokens de cores, tipografia, geometria de cards e componentes.
-- 🖥️ **[Protótipo Visual (demo_dashboard.html)](file:///c:/Programmer/diet-maker/demo_dashboard.html)**: Demonstração navegável do visual Swiss Warm Minimalist.
+- 🖥️ **[Protótipo histórico (demo_dashboard.html)](file:///c:/Programmer/diet-maker/demo_dashboard.html)**: Registro não normativo; não deve orientar tokens ou estilos atuais.
 - 📋 **[Product Requirements Document (PRD.md)](file:///c:/Programmer/diet-maker/docs/prd/PRD.md)**: Requisitos funcionais, user stories e critérios de aceitação.
 - 📖 **[Glossário de Domínio (CONTEXT.md)](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md)**: Termos técnicos de nutrição (VET, g/kg, macros, deltas e escala).
 - 🏛️ **[Decisões de Arquitetura (ADRs)](file:///c:/Programmer/diet-maker/docs/adr/)**: Registros formais de decisões do sistema (incluindo migração Next.js no ADR-006).

@@ -1,0 +1,2356 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "currentSourceCount": 39,
+    "capturedAt": "2026-07-31"
+  },
+  "categories": [
+    {
+      "id": "actions",
+      "name": "Ações",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/actions.md",
+      "allowedTraits": [
+        "icon-only",
+        "destructive",
+        "async",
+        "collapsible"
+      ],
+      "relatedCategories": [
+        "feedback",
+        "loading"
+      ],
+      "consumers": [
+        "ui-button",
+        "atom-button",
+        "atom-icon-button",
+        "molecule-sidebar-quick-actions"
+      ],
+      "decisionRef": "CAT-2026-07-31-actions"
+    },
+    {
+      "id": "fields",
+      "name": "Campos",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/fields.md",
+      "allowedTraits": [
+        "async",
+        "nutrition-context",
+        "read-only"
+      ],
+      "relatedCategories": [
+        "selection",
+        "feedback"
+      ],
+      "consumers": [
+        "ui-input",
+        "atom-input",
+        "molecule-taco-search-input",
+        "ui-textarea",
+        "molecule-form-field"
+      ],
+      "decisionRef": "CAT-2026-07-31-fields"
+    },
+    {
+      "id": "selection",
+      "name": "Seleção",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/selection.md",
+      "allowedTraits": [
+        "async",
+        "nutrition-context"
+      ],
+      "relatedCategories": [
+        "fields",
+        "navigation"
+      ],
+      "consumers": [
+        "ui-select",
+        "ui-tabs",
+        "organism-diet-mode-switcher"
+      ],
+      "decisionRef": "CAT-2026-07-31-selection"
+    },
+    {
+      "id": "navigation",
+      "name": "Navegação",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/navigation.md",
+      "allowedTraits": [
+        "collapsible",
+        "identity",
+        "icon-only"
+      ],
+      "relatedCategories": [
+        "actions",
+        "structure"
+      ],
+      "consumers": [
+        "molecule-sidebar-brand",
+        "molecule-sidebar-nav-item",
+        "molecule-sidebar-user-profile",
+        "organism-sidebar-nav"
+      ],
+      "decisionRef": "CAT-2026-07-31-navigation"
+    },
+    {
+      "id": "surfaces",
+      "name": "Superfícies",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/surfaces.md",
+      "allowedTraits": [
+        "interactive-surface"
+      ],
+      "relatedCategories": [
+        "data-display",
+        "structure"
+      ],
+      "consumers": [
+        "ui-card",
+        "ui-scroll-area",
+        "ui-separator"
+      ],
+      "decisionRef": "CAT-2026-07-31-surfaces"
+    },
+    {
+      "id": "data-display",
+      "name": "Apresentação de dados",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/data-display.md",
+      "allowedTraits": [
+        "identity",
+        "nutrition-context"
+      ],
+      "relatedCategories": [
+        "surfaces",
+        "feedback"
+      ],
+      "consumers": [
+        "ui-table",
+        "atom-avatar",
+        "molecule-patient-badge-header"
+      ],
+      "decisionRef": "CAT-2026-07-31-data-display"
+    },
+    {
+      "id": "feedback",
+      "name": "Feedback",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/feedback.md",
+      "allowedTraits": [
+        "nutrition-macro"
+      ],
+      "relatedCategories": [
+        "actions",
+        "loading"
+      ],
+      "consumers": [
+        "ui-badge",
+        "atom-badge"
+      ],
+      "decisionRef": "CAT-2026-07-31-feedback"
+    },
+    {
+      "id": "overlays",
+      "name": "Overlays",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/overlays.md",
+      "allowedTraits": [
+        "async",
+        "read-only",
+        "nutrition-context",
+        "destructive"
+      ],
+      "relatedCategories": [
+        "actions",
+        "fields",
+        "feedback"
+      ],
+      "consumers": [
+        "ui-dialog",
+        "ui-dropdown-menu",
+        "ui-popover",
+        "ui-sheet",
+        "ui-tooltip",
+        "organism-food-search-modal",
+        "organism-read-only-diet-modal"
+      ],
+      "decisionRef": "CAT-2026-07-31-overlays"
+    },
+    {
+      "id": "loading",
+      "name": "Carregamento e progresso",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/loading.md",
+      "allowedTraits": [
+        "async",
+        "nutrition-macro"
+      ],
+      "relatedCategories": [
+        "feedback",
+        "data-display"
+      ],
+      "consumers": [
+        "atom-progress-bar",
+        "atom-spinner",
+        "atom-skeleton"
+      ],
+      "decisionRef": "CAT-2026-07-31-loading"
+    },
+    {
+      "id": "nutrition-domain",
+      "name": "Domínio nutricional",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/nutrition-domain.md",
+      "allowedTraits": [
+        "nutrition-macro",
+        "nutrition-context",
+        "async",
+        "read-only",
+        "interactive-surface"
+      ],
+      "relatedCategories": [
+        "data-display",
+        "fields",
+        "surfaces"
+      ],
+      "consumers": [
+        "molecule-auto-kcal-section",
+        "molecule-macro-metric-card",
+        "molecule-meal-item-row",
+        "molecule-recipe-card",
+        "molecule-recipe-ingredient-row",
+        "organism-macro-tracker-header",
+        "organism-meal-card-container"
+      ],
+      "decisionRef": "CAT-2026-07-31-nutrition-domain"
+    },
+    {
+      "id": "structure",
+      "name": "Estrutura",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/structure.md",
+      "allowedTraits": [
+        "collapsible",
+        "nutrition-context"
+      ],
+      "relatedCategories": [
+        "navigation",
+        "surfaces"
+      ],
+      "consumers": [
+        "template-app-layout-shell",
+        "template-diet-builder-template"
+      ],
+      "decisionRef": "CAT-2026-07-31-structure"
+    }
+  ],
+  "traits": [
+    {
+      "id": "icon-only",
+      "purpose": "Representa ação ou navegação sem label visível.",
+      "adds": [
+        "accessible-name",
+        "tooltip-when-needed"
+      ],
+      "forbiddenOverrides": [
+        "geometry",
+        "focus",
+        "semantic-role"
+      ],
+      "compatibleCategories": [
+        "actions",
+        "navigation"
+      ]
+    },
+    {
+      "id": "destructive",
+      "purpose": "Comunica consequência destrutiva confirmável.",
+      "adds": [
+        "error-semantic",
+        "confirmation-rule"
+      ],
+      "forbiddenOverrides": [
+        "accessibility",
+        "focus",
+        "disabled"
+      ],
+      "compatibleCategories": [
+        "actions",
+        "overlays"
+      ]
+    },
+    {
+      "id": "async",
+      "purpose": "Acrescenta loading e anúncio de operação assíncrona.",
+      "adds": [
+        "loading-state",
+        "aria-busy"
+      ],
+      "forbiddenOverrides": [
+        "base-geometry",
+        "focus",
+        "error-semantics"
+      ],
+      "compatibleCategories": [
+        "actions",
+        "fields",
+        "selection",
+        "overlays",
+        "loading",
+        "nutrition-domain"
+      ]
+    },
+    {
+      "id": "nutrition-context",
+      "purpose": "Associa conteúdo e unidades do domínio nutricional.",
+      "adds": [
+        "domain-copy",
+        "nutrition-units"
+      ],
+      "forbiddenOverrides": [
+        "base-geometry",
+        "typography-scale",
+        "focus"
+      ],
+      "compatibleCategories": [
+        "fields",
+        "selection",
+        "data-display",
+        "overlays",
+        "nutrition-domain",
+        "structure"
+      ]
+    },
+    {
+      "id": "read-only",
+      "purpose": "Distingue consulta legível de estado disabled.",
+      "adds": [
+        "read-only-semantics"
+      ],
+      "forbiddenOverrides": [
+        "contrast",
+        "focus-when-interactive",
+        "content-hierarchy"
+      ],
+      "compatibleCategories": [
+        "fields",
+        "overlays",
+        "nutrition-domain"
+      ]
+    },
+    {
+      "id": "collapsible",
+      "purpose": "Define representação expandida e recolhida em desktop.",
+      "adds": [
+        "collapsed-anatomy",
+        "expanded-anatomy"
+      ],
+      "forbiddenOverrides": [
+        "platform-scope",
+        "focus",
+        "navigation-semantics"
+      ],
+      "compatibleCategories": [
+        "navigation",
+        "structure",
+        "actions"
+      ]
+    },
+    {
+      "id": "identity",
+      "purpose": "Apresenta pessoa, marca ou entidade identificável.",
+      "adds": [
+        "identity-content",
+        "fallback"
+      ],
+      "forbiddenOverrides": [
+        "typography-scale",
+        "contrast",
+        "geometry"
+      ],
+      "compatibleCategories": [
+        "navigation",
+        "data-display"
+      ]
+    },
+    {
+      "id": "nutrition-macro",
+      "purpose": "Aplica semântica oficial de proteína, carboidrato e gordura.",
+      "adds": [
+        "macro-semantic-color",
+        "tabular-values"
+      ],
+      "forbiddenOverrides": [
+        "base-anatomy",
+        "focus",
+        "non-macro-colors"
+      ],
+      "compatibleCategories": [
+        "feedback",
+        "loading",
+        "nutrition-domain"
+      ]
+    },
+    {
+      "id": "interactive-surface",
+      "purpose": "Permite interação na superfície sem competir com ações internas.",
+      "adds": [
+        "surface-interaction"
+      ],
+      "forbiddenOverrides": [
+        "nested-action-rule",
+        "focus",
+        "border-width"
+      ],
+      "compatibleCategories": [
+        "surfaces",
+        "nutrition-domain"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "ui-badge",
+      "name": "Badge",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "feedback",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/badge.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "BadgeProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Badge",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "badgeVariants",
+          "kind": "recipe",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/badge.md",
+      "consumers": [
+        "atom-badge",
+        "molecule-patient-badge-header",
+        "organism-diet-mode-switcher",
+        "organism-food-search-modal",
+        "organism-read-only-diet-modal",
+        "src/app/alimentos/page.tsx",
+        "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-button",
+      "name": "Button",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "actions",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/button.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Button",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "buttonVariants",
+          "kind": "recipe",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/button.md",
+      "consumers": [
+        "atom-button",
+        "molecule-meal-item-row",
+        "molecule-patient-badge-header",
+        "organism-diet-mode-switcher",
+        "organism-food-search-modal",
+        "organism-meal-card-container",
+        "src/app/alimentos/page.tsx",
+        "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx",
+        "template-diet-builder-template"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-card",
+      "name": "Card",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "surfaces",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/card.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Card",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CardHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CardFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CardTitle",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CardDescription",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CardContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/card.md",
+      "consumers": [
+        "molecule-macro-metric-card",
+        "molecule-recipe-card",
+        "organism-macro-tracker-header",
+        "organism-meal-card-container",
+        "src/app/alimentos/page.tsx",
+        "src/app/design-system/page.tsx",
+        "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/receitas/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-dialog",
+      "name": "Dialog",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/dialog.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Dialog",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogPortal",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogOverlay",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogClose",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogTitle",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DialogDescription",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/dialog.md",
+      "consumers": [
+        "organism-food-search-modal",
+        "organism-read-only-diet-modal",
+        "src/app/alimentos/page.tsx",
+        "src/app/design-system/page.tsx",
+        "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/receitas/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-dropdown-menu",
+      "name": "DropdownMenu",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/dropdown-menu.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "DropdownMenu",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuCheckboxItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuRadioItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuLabel",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuSeparator",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuShortcut",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuGroup",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuPortal",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuSub",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuSubContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuSubTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DropdownMenuRadioGroup",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/dropdown-menu.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-input",
+      "name": "Input",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "fields",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/input.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "InputProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Input",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/input.md",
+      "consumers": [
+        "atom-input",
+        "molecule-auto-kcal-section",
+        "molecule-taco-search-input",
+        "organism-food-search-modal",
+        "organism-meal-card-container",
+        "src/app/alimentos/page.tsx",
+        "src/app/pacientes/[id]/consulta/[date]/page.tsx",
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx",
+        "ui-textarea"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-popover",
+      "name": "Popover",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/popover.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Popover",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "PopoverTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "PopoverContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/popover.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-scroll-area",
+      "name": "ScrollArea",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "surfaces",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/scroll-area.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ScrollArea",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "ScrollBar",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/scroll-area.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-select",
+      "name": "Select",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "selection",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/select.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Select",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectGroup",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectValue",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectLabel",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectSeparator",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectScrollUpButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SelectScrollDownButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/select.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx",
+        "src/app/design-system/page.tsx",
+        "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/page.tsx",
+        "src/app/presets/page.tsx",
+        "src/app/receitas/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-separator",
+      "name": "Separator",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "surfaces",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/separator.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Separator",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/separator.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-sheet",
+      "name": "Sheet",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/sheet.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Sheet",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetPortal",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetOverlay",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetClose",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetTitle",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SheetDescription",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/sheet.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-table",
+      "name": "Table",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/table.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Table",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableBody",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableHead",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableRow",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableCell",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TableCaption",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/table.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx",
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-tabs",
+      "name": "Tabs",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "selection",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/tabs.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Tabs",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TabsList",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TabsTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TabsContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/tabs.md",
+      "consumers": [
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-tooltip",
+      "name": "Tooltip",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/tooltip.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Tooltip",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TooltipTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TooltipContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "TooltipProvider",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/tooltip.md",
+      "consumers": [
+        "organism-sidebar-nav",
+        "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-avatar",
+      "name": "Avatar",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "data-display",
+      "traits": [
+        "identity"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/Avatar.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AvatarProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Avatar",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/avatar.md",
+      "consumers": [
+        "molecule-patient-badge-header"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-badge",
+      "name": "Badge",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "feedback",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/Badge.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "BadgeProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Badge",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/badge.md",
+      "consumers": [],
+      "primitiveBase": "ui-badge",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-button",
+      "name": "Button",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "actions",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/Button.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Button",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CreateButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreateButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SecondaryActionButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SecondaryActionButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "IconButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "IconButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "ExplicitIconButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "EditIconButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DeleteIconButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/button.md",
+      "consumers": [
+        "atom-icon-button",
+        "src/app/pacientes/page.tsx"
+      ],
+      "primitiveBase": "ui-button",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-icon-button",
+      "name": "IconButton",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "actions",
+      "traits": [
+        "icon-only"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/IconButton.tsx",
+          "role": "reexport",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "IconButton",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "EditIconButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "DeleteIconButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "IconButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "ExplicitIconButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/icon-button.md",
+      "consumers": [],
+      "primitiveBase": "atom-button",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-input",
+      "name": "Input",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "fields",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/Input.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "InputProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Input",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/input.md",
+      "consumers": [
+        "molecule-taco-search-input"
+      ],
+      "primitiveBase": "ui-input",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-progress-bar",
+      "name": "ProgressBar",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "loading",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/ProgressBar.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ProgressBarProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "ProgressBar",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/progress-bar.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-auto-kcal-section",
+      "name": "AutoKcalSection",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/AutoKcalSection.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AutoKcalSectionProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "AutoKcalSection",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/auto-kcal-section.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx",
+        "src/app/refeicoes-prontas/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-diet-mode-switcher",
+      "name": "DietModeSwitcher",
+      "nature": "domain",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "organism",
+      "primaryCategory": "selection",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/DietModeSwitcher.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "DietModeSwitcherProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "DietModeSwitcher",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/diet-mode-switcher.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-food-search-modal",
+      "name": "FoodSearchModal",
+      "nature": "domain",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context",
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/FoodSearchModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "FoodSearchModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "FoodSearchModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/food-search-modal.md",
+      "consumers": [
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-macro-metric-card",
+      "name": "MacroMetricCard",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/MacroMetricCard.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MacroMetricCardProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MacroMetricCard",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/macro-metric-card.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-meal-item-row",
+      "name": "MealItemRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/MealItemRow.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MealItemRowProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MealItemRow",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/meal-item-row.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-patient-badge-header",
+      "name": "PatientBadgeHeader",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": [
+        "identity"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/PatientBadgeHeader.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "PatientBadgeHeaderProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "PatientBadgeHeader",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/patient-badge-header.md",
+      "consumers": [],
+      "primitiveBase": "atom-avatar",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-read-only-diet-modal",
+      "name": "ReadOnlyDietModal",
+      "nature": "domain",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": [
+        "read-only",
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/ReadOnlyDietModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ReadOnlyDietModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "ReadOnlyDietModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/read-only-diet-modal.md",
+      "consumers": [],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-recipe-card",
+      "name": "RecipeCard",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "interactive-surface",
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/RecipeCard.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "RecipeCardProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "RecipeCard",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/recipe-card.md",
+      "consumers": [],
+      "primitiveBase": "ui-card",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-recipe-ingredient-row",
+      "name": "RecipeIngredientRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/RecipeIngredientRow.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "RecipeIngredientRowProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "RecipeIngredientRow",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/recipe-ingredient-row.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-sidebar-brand",
+      "name": "SidebarBrand",
+      "nature": "product-generic",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "navigation",
+      "traits": [
+        "identity",
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/SidebarBrand.tsx",
+          "role": "reexport",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SidebarBrand",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/sidebar-brand.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-sidebar-nav-item",
+      "name": "SidebarNavItem",
+      "nature": "product-generic",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "navigation",
+      "traits": [
+        "collapsible",
+        "icon-only"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/SidebarNavItem.tsx",
+          "role": "reexport",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SidebarNavItem",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/sidebar-nav-item.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-sidebar-quick-actions",
+      "name": "SidebarQuickActions",
+      "nature": "product-generic",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "actions",
+      "traits": [
+        "collapsible",
+        "icon-only"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/SidebarQuickActions.tsx",
+          "role": "reexport",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SidebarQuickActions",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/sidebar-quick-actions.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-sidebar-user-profile",
+      "name": "SidebarUserProfile",
+      "nature": "product-generic",
+      "lifecycle": "migration-required",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "navigation",
+      "traits": [
+        "identity",
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/SidebarUserProfile.tsx",
+          "role": "reexport",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SidebarUserProfile",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/sidebar-user-profile.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-taco-search-input",
+      "name": "TacoSearchInput",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "fields",
+      "traits": [
+        "nutrition-context",
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/TacoSearchInput.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "TacoSearchInputProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "TacoSearchInput",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/taco-search-input.md",
+      "consumers": [],
+      "primitiveBase": "atom-input",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-macro-tracker-header",
+      "name": "MacroTrackerHeader",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/MacroTrackerHeader.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MacroTrackerHeaderProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MacroTrackerHeader",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/macro-tracker-header.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-meal-card-container",
+      "name": "MealCardContainer",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-macro",
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/MealCardContainer.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MealCardContainerProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MealCardContainer",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/meal-card-container.md",
+      "consumers": [],
+      "primitiveBase": "ui-card",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-sidebar-nav",
+      "name": "SidebarNav",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "navigation",
+      "traits": [
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/SidebarNav.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "useSidebarContext",
+          "kind": "hook",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarNavProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarBrandProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarNavItemProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarUserProfileProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarQuickActionsProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarNavComponent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarNav",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/sidebar-nav.md",
+      "consumers": [
+        "molecule-sidebar-brand",
+        "molecule-sidebar-nav-item",
+        "molecule-sidebar-quick-actions",
+        "molecule-sidebar-user-profile",
+        "template-app-layout-shell"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "template-app-layout-shell",
+      "name": "AppLayoutShell",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "template",
+      "targetLayer": "template",
+      "primaryCategory": "structure",
+      "traits": [
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/templates/AppLayoutShell.tsx",
+          "role": "implementation",
+          "discoveredLayer": "template"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AppLayoutShellProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "AppLayoutShell",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/templates/app-layout-shell.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "template-diet-builder-template",
+      "name": "DietBuilderTemplate",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "template",
+      "targetLayer": "template",
+      "primaryCategory": "structure",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/templates/DietBuilderTemplate.tsx",
+          "role": "implementation",
+          "discoveredLayer": "template"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "DietBuilderTemplateProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "DietBuilderTemplate",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/templates/diet-builder-template.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-textarea",
+      "name": "Textarea",
+      "nature": "ui-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "ui",
+      "primaryCategory": "fields",
+      "traits": [],
+      "sourceFiles": [],
+      "publicExports": [
+        {
+          "name": "TextareaProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Textarea",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/textarea.md",
+      "consumers": [],
+      "primitiveBase": "ui-input",
+      "specStatus": "specified",
+      "exceptions": []
+    },
+    {
+      "id": "atom-spinner",
+      "name": "Spinner",
+      "nature": "product-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "atom",
+      "primaryCategory": "loading",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [],
+      "publicExports": [
+        {
+          "name": "SpinnerProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Spinner",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/spinner.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "specified",
+      "exceptions": []
+    },
+    {
+      "id": "atom-skeleton",
+      "name": "Skeleton",
+      "nature": "product-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "atom",
+      "primaryCategory": "loading",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [],
+      "publicExports": [
+        {
+          "name": "SkeletonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Skeleton",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/skeleton.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "specified",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-form-field",
+      "name": "FormField",
+      "nature": "product-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "molecule",
+      "primaryCategory": "fields",
+      "traits": [],
+      "sourceFiles": [],
+      "publicExports": [
+        {
+          "name": "FormFieldProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "FormField",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/form-field.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "specified",
+      "exceptions": []
+    }
+  ]
+}

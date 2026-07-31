@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "baseline": { "currentSourceCount": 1, "capturedAt": "2026-07-31" },
+  "categories": [
+    {
+      "id": "actions",
+      "name": "Ações",
+      "lifecycle": "stable",
+      "document": "design-system/components/categories/actions.md",
+      "allowedTraits": [],
+      "relatedCategories": [],
+      "consumers": ["ui-button"],
+      "decisionRef": "CAT-TEST-ACTIONS"
+    }
+  ],
+  "traits": [],
+  "components": [
+    {
+      "id": "ui-button",
+      "name": "Button",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "actions",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/button.tsx",
+          "role": "implementation",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        { "name": "Button", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/ui/button.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    }
+  ]
+}

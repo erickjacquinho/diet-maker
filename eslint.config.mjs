@@ -53,6 +53,14 @@ export default [
     },
   },
   {
-    ignores: [".next/**", "node_modules/**", "out/**", "build/**"],
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "out/**",
+      "build/**",
+      "dist/**",
+      "coverage/**",
+      "**/*.min.js",
+    ],
   },
 ];
