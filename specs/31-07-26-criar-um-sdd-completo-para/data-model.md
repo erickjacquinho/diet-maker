@@ -138,3 +138,7 @@ Estado após MIG-002: `foundation-migrated`.
 | `evidence` | `.artifacts/design-system/stage-1-foundation.json` |
 
 Os warnings de camadas superiores permanecem fora do escopo de MIG-002 e não autorizam avançar seus próprios checkpoints sem migração e evidência.
+
+### User Story 1 — foundation conforme
+
+O último consumidor direto do runtime TypeScript antigo foi substituído na rota `/design-system`; `src/design-system/tokens.ts` foi removido e a entrada pública `@/design-system` tornou-se exclusiva. A auditoria LEG no escopo de foundation retornou zero findings em nove arquivos. A validação desktop em 1280×900 confirmou canvas, texto, fonte, foco visível e ausência de erros de console. US1 está `conforme`; o projeto completo ainda não está homologado porque ui, atoms, compostos e rotas permanecem nos checkpoints seguintes.

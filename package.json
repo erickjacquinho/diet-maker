@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "audit:atomic-design": "node scripts/audit-atomic-design.mjs",
     "verify:design-system": "node scripts/verify-design-system-components.mjs --strict",
+    "verify:design-system-legacy": "node scripts/verify-design-system-legacy.mjs --strict",
     "verify:links": "node scripts/verify-links.js",
     "type-check": "tsc --noEmit",
     "test": "vitest run",

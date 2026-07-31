@@ -58,12 +58,12 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **Independent Test**: contratos de runtime passam, aliases legados não existem e o gate de fundação registra zero findings no escopo.
 
-- [ ] T024 [US1] Atualizar imports dos consumidores da fundação para `src/design-system/index.ts`, começando por `src/app/layout.tsx` e utilitários compartilhados [FR-002] [skill: $frontend-architecture-mindset]
-- [ ] T025 [US1] Substituir os últimos usos diretos do runtime antigo em `src/design-system/` e registrar cada remoção em `design-system/components/registry.json` [FR-005] [FR-022] [skill: $design-system]
-- [ ] T026 [US1] Executar `tests/design-system/legacy-audit.contract.test.ts` com fixtures e depois com o código real; confirmar zero findings no escopo de fundação [FR-021] [skill: $tdd]
-- [ ] T027 [US1] Executar `npm run type-check`, `npm run lint`, `npm test` e `npm run verify:links`; anexar saídas em `.artifacts/design-system/stage-1-foundation.json` [SC-006] [skill: $speckit-implement]
-- [ ] T028 [US1] Revisar visualmente a fundação no viewport desktop ≥1024px e validar contraste/foco das stories de teste em `tests/design-system/visual-baseline.md` [FR-019] [skill: $webapp-testing]
-- [ ] T029 [US1] Marcar US1 e Stage 1 como `conforme` apenas se o contrato `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md` estiver totalmente verde; caso contrário registrar `blocked` [SC-011] [skill: $speckit-implement]
+- [X] T024 [US1] Atualizar imports dos consumidores da fundação para `src/design-system/index.ts`, começando por `src/app/layout.tsx` e utilitários compartilhados [FR-002] [skill: $frontend-architecture-mindset]
+- [X] T025 [US1] Substituir os últimos usos diretos do runtime antigo em `src/design-system/` e registrar cada remoção em `design-system/components/registry.json` [FR-005] [FR-022] [skill: $design-system]
+- [X] T026 [US1] Executar `tests/design-system/legacy-audit.contract.test.ts` com fixtures e depois com o código real; confirmar zero findings no escopo de fundação [FR-021] [skill: $tdd]
+- [X] T027 [US1] Executar `npm run type-check`, `npm run lint`, `npm test` e `npm run verify:links`; anexar saídas em `.artifacts/design-system/stage-1-foundation.json` [SC-006] [skill: $speckit-implement]
+- [X] T028 [US1] Revisar visualmente a fundação no viewport desktop ≥1024px e validar contraste/foco das stories de teste em `tests/design-system/visual-baseline.md` [FR-019] [skill: $webapp-testing]
+- [X] T029 [US1] Marcar US1 e Stage 1 como `conforme` apenas se o contrato `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md` estiver totalmente verde; caso contrário registrar `blocked` [SC-011] [skill: $speckit-implement]
 
 ---
 
@@ -168,8 +168,8 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 **Independent Test**: o quickstart executado em ambiente limpo produz os mesmos resultados e evidencia SC-001–SC-012.
 
 - [ ] T073 [P] [US6] Criar o formato final de evidência em `.artifacts/design-system/manifest.schema.json` para baseline, componentes, rotas, findings e checkpoints [FR-022] [FR-023] [skill: $design-system]
-- [ ] T074 [P] [US6] Criar `tests/routes/design-system-page.test.tsx` para garantir que `/design-system` exibe implementado/proposto/migration-required sem confusão [FR-024] [skill: $tdd]
-- [ ] T075 [US6] Reescrever `src/app/design-system/page.tsx` para consumir exclusivamente `src/design-system/index.ts` e exibir tokens, text styles, recipes, estados e categorias [FR-024] [skill: $design-system]
+- [X] T074 [P] [US6] Criar `tests/routes/design-system-page.test.tsx` para garantir que `/design-system` exibe implementado/proposto/migration-required sem confusão [FR-024] [skill: $tdd]
+- [X] T075 [US6] Reescrever `src/app/design-system/page.tsx` para consumir exclusivamente `src/design-system/index.ts` e exibir tokens, text styles, recipes, estados e categorias [FR-024] [skill: $design-system]
 - [ ] T076 [US6] Executar o gate de Stage 7 e depois o quickstart completo de `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` em ambiente limpo; salvar o manifest em `.artifacts/design-system/final-manifest.json` [FR-024] [SC-006] [SC-011] [skill: $speckit-implement]
 - [ ] T077 [US6] Fazer smoke test manual das 10 rotas, revisão visual desktop, axe, teclado/foco, contraste e overlays; anexar registros em `.artifacts/design-system/final-visual-a11y.json` [FR-019] [SC-005] [skill: $webapp-testing]
 - [ ] T078 [US6] Confirmar que nenhum arquivo em `refs/`, `refs/UI/`, `refs/UI/design-system-prd/` ou `demo_dashboard.html` foi alterado e registrar hash/escopo em `.artifacts/design-system/historical-integrity.json` [FR-026] [SC-010] [skill: $code-reviewer-expert]

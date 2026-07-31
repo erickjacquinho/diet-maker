@@ -1,3 +1,1 @@
-import { primitiveTokens } from "@/design-system/tokens";
-
-export const directLegacyImportFixture = primitiveTokens;
+export const directLegacyImportFixture = "from '@/design-system/tokens'";

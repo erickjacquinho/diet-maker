@@ -8,9 +8,14 @@
     { "command": "node scripts/verify-design-system-legacy.mjs --strict --json --paths src/app/globals.css,tailwind.config.js,components.json", "exitCode": 0, "findings": 0 },
     { "command": "npm run type-check", "exitCode": 0 },
     { "command": "npm run lint", "exitCode": 0, "preexistingWarningsOutsideScope": 42 },
-    { "command": "npm test", "exitCode": 0, "testsPassed": 92 },
+    { "command": "npm test", "exitCode": 0, "testsPassed": 94 },
     { "command": "npm run verify:links", "exitCode": 0 },
     { "command": "npm run verify:design-system", "exitCode": 0 }
+  ],
+  "visualEvidence": [
+    ".artifacts/design-system/stage-1-foundation-visual.json",
+    ".artifacts/design-system/stage-1-foundation.png",
+    "tests/design-system/visual-baseline.md"
   ],
   "result": "passed",
   "nextState": "foundation-migrated"

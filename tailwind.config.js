@@ -43,6 +43,7 @@ module.exports = {
         'macro-fat': 'var(--sys-color-macro-fat)', 'macro-fat-soft': 'var(--sys-color-macro-fat-soft)', 'macro-fat-border': 'var(--sys-color-macro-fat-border)',
       },
       spacing: { sidebar: '224px', 'sidebar-collapsed': '64px' },
+      maxWidth: { 'container-page': '1440px', 'container-workflow': '1200px', 'container-form': '960px', 'container-reading': '720px' },
       borderRadius: { compact: 'var(--sys-radius-compact)', control: 'var(--sys-radius-control)', surface: 'var(--sys-radius-surface)', round: 'var(--sys-radius-round)' },
       height: { 'control-compact': '32px', 'control-standard': '36px', 'table-row': '44px' },
       transitionDuration: { fast: 'var(--sys-motion-fast)', standard: 'var(--sys-motion-standard)', slow: 'var(--sys-motion-slow)' },

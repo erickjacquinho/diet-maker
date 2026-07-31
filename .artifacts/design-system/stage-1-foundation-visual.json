@@ -1,0 +1,16 @@
+{
+  "route": "/pacientes",
+  "viewport": { "width": 1280, "height": 900 },
+  "computed": {
+    "background": "rgb(245, 243, 238)",
+    "color": "rgb(28, 33, 31)",
+    "fontFamily": "Plus Jakarta Sans, system-ui, sans-serif"
+  },
+  "focus": {
+    "target": "Recolher Menu",
+    "visible": true,
+    "ringColor": "rgb(74, 100, 216)"
+  },
+  "consoleErrors": [],
+  "result": "passed"
+}
