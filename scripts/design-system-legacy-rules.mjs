@@ -9,4 +9,11 @@ export const legacyRules = [
   { code: 'LEG008', rule: 'legacy-alias', pattern: /\b(?:color-bg-app|color-surface-card|color-border-clean|warmSurface)\b/g, message: 'Use o alias semantic/system canônico.' },
   { code: 'LEG009', rule: 'direct-legacy-import', pattern: /(?:from\s+|import\s*)["']@\/design-system\/tokens["']/g, message: 'Importe somente de @/design-system.' },
   { code: 'LEG010', rule: 'legacy-font', pattern: /\b(?:Inter|Fira Code|Arial)\b/g, message: 'Use exclusivamente Plus Jakarta Sans e fallbacks de sistema.' },
+  { code: 'LEG011', rule: 'named-text-size', pattern: /\btext-(?:xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/g, message: 'Use textStyle() nomeado do design system.' },
+  { code: 'LEG012', rule: 'space-x-y', pattern: /\b(?:space-x|space-y)-[\w[\]]+\b/g, message: 'Use gap-* com a escala space-* da norma 06-geometry.' },
+  { code: 'LEG013', rule: 'text-transform', pattern: /\b(?:uppercase|lowercase|capitalize)\b/g, message: 'Use tracking-label/overline do text style ou remova a transformação não-semântica.' },
+  { code: 'LEG014', rule: 'tracking-wide', pattern: /\btracking-(?:wide|wider|widest)\b/g, message: 'Use tracking normal/label/overline do text style (norma 05-typography).' },
+  { code: 'LEG015', rule: 'opacity', pattern: /\b(?:[a-z-]*opacity)-(?!disabled|subdued|full)[\w[\]]+\b/g, message: 'Use opacity-disabled/subdued/full (norma 07-icons).' },
+  { code: 'LEG016', rule: 'leading-named', pattern: /\bleading-(?!none|tight|snug|normal|relaxed|loose)[\w-]+\b/g, message: 'A line-height vem do text style; remova o override leading-* (norma 05-typography).' },
+  { code: 'LEG017', rule: 'size-arbitrary', pattern: /\bsize-\[[^\]]+\]/g, message: 'Use tokens icon-* para dimensões de ícone/controle.' },
 ];

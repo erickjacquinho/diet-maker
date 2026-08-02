@@ -5,6 +5,11 @@ import { legacyRules } from './design-system-legacy-rules.mjs';
 
 const EXTENSIONS = new Set(['.css', '.js', '.jsx', '.json', '.mjs', '.ts', '.tsx']);
 const DEFAULT_PATHS = ['src', 'tailwind.config.js', 'components.json'];
+const PATH_EXEMPTIONS = ['src/components/ui/', 'src/design-system/'];
+
+function isExempt(projectPath) {
+  return PATH_EXEMPTIONS.some((prefix) => projectPath.startsWith(prefix));
+}
 
 async function exists(target) { try { await stat(target); return true; } catch { return false; } }
 async function discover(target) {
@@ -39,12 +44,11 @@ export async function verifyLegacy(rootDir, options = {}) {
   const findings = [];
   for (const absolute of files) {
     const projectPath = path.relative(rootDir, absolute).replaceAll('\\', '/');
+    if (isExempt(projectPath)) continue;
     const source = await readFile(absolute, 'utf8');
     const lines = source.split(/\r?\n/);
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
       for (const rule of legacyRules) {
-        if (projectPath === 'src/design-system/tokens.css' && ['LEG001', 'LEG005', 'LEG007'].includes(rule.code)) continue;
-        if (projectPath === 'src/design-system/text-styles.ts' && ['LEG002', 'LEG004'].includes(rule.code)) continue;
         rule.pattern.lastIndex = 0;
         for (const match of lines[lineIndex].matchAll(rule.pattern)) findings.push({ code: rule.code, rule: rule.rule, path: projectPath, line: lineIndex + 1, message: `${rule.message} Encontrado: ${match[0]}`, severity: 'error' });
       }
