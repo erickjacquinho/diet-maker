@@ -45,7 +45,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
   return (
     <div className="group/row flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-control p-3">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <Button
           type="button"
           onMouseDown={() => setIsActivated(true)}
@@ -54,10 +54,10 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           onTouchEnd={() => setIsActivated(false)}
           onClick={() => setIsActivated((prev) => !prev)}
           aria-label={`Reordenar ${name}`}
-          className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-text-muted hover:text-text-primary ${
+          className={`p-1 rounded-control cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary ${
             isActive
-              ? 'opacity-100 text-success bg-success/10 ring-1 ring-success/30'
-              : 'opacity-0 group-hover/row:opacity-100'
+              ? 'opacity-full text-success bg-success/10 ring-1 ring-success/30'
+              : 'invisible group-hover/row:visible'
           }`}
           title="Reordenar alimento"
         >
@@ -65,8 +65,8 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         </Button>
 
         <div>
-          <div className="text-xs font-bold text-text-primary">{name}</div>
-          <div className="text-style-legal text-text-secondary mt-0.5 flex items-center space-x-1.5">
+          <div className="text-style-legal font-bold text-text-primary">{name}</div>
+          <div className="text-style-legal text-text-secondary mt-0.5 flex items-center gap-1.5">
             <span className="text-macro-protein font-bold">P: {protein}g</span>
             <span className="text-text-muted font-normal">•</span>
             <span className="text-warning font-bold">C: {carbs}g</span>
@@ -78,9 +78,9 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         {isEditingGrams ? (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             <Input
               type="number"
               min={1}
@@ -91,10 +91,10 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSaveGrams();
               }}
-              className="w-16 h-7 px-1 text-center bg-surface border border-success rounded-lg text-xs font-bold text-text-primary focus:outline-none"
+              className="w-16 h-7 px-1 text-center bg-surface border border-success rounded-surface text-style-legal font-bold text-text-primary focus:outline-none"
               autoFocus
             />
-            <span className="text-xs font-bold text-text-muted">g</span>
+            <span className="text-style-legal font-bold text-text-muted">g</span>
           </div>
         ) : (
           <Button
@@ -103,7 +103,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               setTempGrams(quantityGrams);
               setIsEditingGrams(true);
             }}
-            className="bg-surface border border-border-hover hover:border-success rounded-control px-2.5 py-1 text-xs font-bold text-text-primary transition-colors duration-standard hover:scale-105"
+            className="bg-surface border border-border-hover hover:border-success rounded-control px-2.5 py-1 text-style-legal font-bold text-text-primary transition-colors duration-standard"
             title="Clique para editar gramatura"
           >
             {quantityGrams} <span className="text-text-muted font-normal">g</span>

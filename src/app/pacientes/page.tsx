@@ -92,12 +92,12 @@ export default function PatientsListPage() {
   );
 
   return (
-    <div className="p-6 p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 p-8 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Header Bar */}
       <div className="flex flex-col flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="font-bold text-2xl text-text-primary tracking-tight">Pacientes</h1>
-          <p className="text-xs text-text-muted mt-1 font-medium">
+          <h1 className="font-bold text-style-section-title text-text-primary tracking-tight">Pacientes</h1>
+          <p className="text-style-legal text-text-muted mt-1 font-medium">
             Gerencie o histórico, medições e prescrições alimentares de cada paciente.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function PatientsListPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar paciente por nome ou objetivo..."
-            className="pl-11 pr-4 h-11 bg-surface border-border-subtle rounded-control text-xs text-text-primary placeholder-text-muted"
+            className="pl-11 pr-4 h-11 bg-surface border-border-subtle rounded-control text-style-legal text-text-primary placeholder-text-muted"
           />
         </div>
       )}
@@ -126,13 +126,13 @@ export default function PatientsListPage() {
       {/* Empty State vs Patient Cards Grid */}
       {filteredPatients.length === 0 ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
-          <CardContent className="p-12 text-center space-y-4">
+          <CardContent className="p-12 text-center flex flex-col gap-4">
             <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <Users size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-base text-text-primary">Nenhum paciente cadastrado</h3>
-              <p className="text-xs text-text-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-style-body text-text-primary">Nenhum paciente cadastrado</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
                 Sua lista de pacientes está em branco. Cadastre seu primeiro paciente para iniciar o acompanhamento nutricional.
               </p>
             </div>
@@ -151,12 +151,12 @@ export default function PatientsListPage() {
               key={patient.id}
               className="bg-surface border-border-subtle rounded-surface p-0 hover:border-text-primary/30 transition-colors duration-standard flex flex-col justify-between"
             >
-              <CardContent className="p-5 space-y-4 flex flex-col justify-between h-full">
+              <CardContent className="p-5 gap-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <Avatar initials={patient.initials} variant="charcoal" size="md" className="rounded-control font-bold" />
                     <div>
-                      <h3 className="font-bold text-sm text-text-primary leading-snug">{patient.name}</h3>
+                      <h3 className="font-bold text-style-body-small text-text-primary leading-snug">{patient.name}</h3>
                       <span className="text-style-legal text-text-muted font-medium">
                         {patient.age} anos • {patient.gender}
                       </span>
@@ -166,21 +166,21 @@ export default function PatientsListPage() {
 
                 <div className="grid grid-cols-3 gap-2 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
                   <div>
-                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Weight size={10} />
                       <span>Peso</span>
                     </div>
-                    <div className="font-bold text-xs text-text-primary mt-0.5">{patient.weightKg} kg</div>
+                    <div className="font-bold text-style-legal text-text-primary mt-0.5">{patient.weightKg} kg</div>
                   </div>
                   <div>
-                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Target size={10} />
                       <span>Meta Kcal</span>
                     </div>
-                    <div className="font-bold text-xs text-text-muted mt-0.5">{patient.targetKcal} kcal</div>
+                    <div className="font-bold text-style-legal text-text-muted mt-0.5">{patient.targetKcal} kcal</div>
                   </div>
                   <div>
-                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Calendar size={10} />
                       <span>Última</span>
                     </div>
@@ -194,7 +194,7 @@ export default function PatientsListPage() {
                   </span>
                   <Link
                     href={`/pacientes/${patient.id}`}
-                    className="inline-flex items-center space-x-1 text-xs font-bold text-text-primary hover:text-success transition-colors"
+                    className="inline-flex items-center gap-1 text-style-legal font-bold text-text-primary hover:text-success transition-colors"
                   >
                     <span>Ver Perfil</span>
                     <ArrowRight size={14} />
@@ -210,19 +210,19 @@ export default function PatientsListPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary">Cadastrar Novo Paciente</DialogTitle>
+            <DialogTitle className="font-bold text-style-body text-text-primary">Cadastrar Novo Paciente</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreatePatient} className="space-y-3 pt-2">
+          <form onSubmit={handleCreatePatient} className="flex flex-col gap-3 pt-2">
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Nome Completo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Carlos Eduardo Silva"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-xs"
+                className="bg-surface-subtle border-border-subtle text-style-legal"
               />
             </div>
 
@@ -233,7 +233,7 @@ export default function PatientsListPage() {
                   type="number"
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
               <div>
@@ -242,7 +242,7 @@ export default function PatientsListPage() {
                   type="number"
                   value={formData.heightCm}
                   onChange={(e) => setFormData({ ...formData, heightCm: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
               <div>
@@ -252,18 +252,18 @@ export default function PatientsListPage() {
                   step="any"
                   value={formData.weightKg}
                   onChange={(e) => setFormData({ ...formData, weightKg: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
               <Select
                 value={formData.objective}
                 onValueChange={(val) => setFormData({ ...formData, objective: val })}
               >
-                <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold h-9 w-full">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
                   <SelectValue placeholder="Selecione o objetivo" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
@@ -277,13 +277,13 @@ export default function PatientsListPage() {
             </div>
 
 
-            <div className="pt-2 flex space-x-2">
+            <div className="pt-2 flex gap-2">
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
                 size="sm"
-                className="flex-1 text-xs"
+                className="flex-1 text-style-legal"
               >
                 Cancelar
               </Button>

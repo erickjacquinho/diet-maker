@@ -28,15 +28,15 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   onCopyMealsBetweenVariations,
 }) => {
   return (
-    <div className="bg-surface border border-border-subtle rounded-surface p-4 p-5 space-y-4 shadow-floating">
+    <div className="bg-surface border border-border-subtle rounded-surface p-4 p-5 flex flex-col gap-4 shadow-floating">
       {/* Primary Mode Toggle */}
       <div className="flex flex-col flex-row items-center justify-between gap-3 border-b border-border-subtle pb-4">
         <div>
-          <h3 className="font-bold text-sm text-text-primary uppercase tracking-wider flex items-center space-x-2">
+          <h3 className="font-bold text-style-body-small text-text-primary tracking-overline flex items-center gap-2">
             <Repeat size={16} className="text-success" />
             <span>Modelo de Dieta Prescrita</span>
           </h3>
-          <p className="text-xs text-text-muted mt-0.5">
+          <p className="text-style-legal text-text-muted mt-0.5">
             Alterne entre plano único diário ou ciclo de carboidratos com variações
           </p>
         </div>
@@ -45,7 +45,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           <Button
             type="button"
             onClick={() => onModeChange('simple')}
-            className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-surface text-style-legal font-bold ${
               mode === 'simple'
                 ? 'bg-surface text-text-primary shadow-floating border border-border-subtle'
                 : 'text-text-muted hover:text-text-primary'
@@ -58,7 +58,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           <Button
             type="button"
             onClick={() => onModeChange('carb_cycling')}
-            className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-surface text-style-legal font-bold ${
               mode === 'carb_cycling'
                 ? 'bg-surface text-success shadow-floating border border-border-subtle'
                 : 'text-text-muted hover:text-text-primary'
@@ -72,15 +72,15 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
 
       {/* Carb Cycling Options & Tabs */}
       {mode === 'carb_cycling' && (
-        <div className="space-y-3 pt-1">
+        <div className="flex flex-col gap-3 pt-1">
           <div className="flex flex-col flex-row items-center justify-between gap-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-text-muted uppercase">Número de Variações:</span>
-              <div className="flex items-center space-x-1 bg-surface-subtle p-0.5 rounded-lg border border-border-subtle">
+            <div className="flex items-center gap-2">
+              <span className="text-style-legal font-bold text-text-muted tracking-label">Número de Variações:</span>
+              <div className="flex items-center gap-1 bg-surface-subtle p-0.5 rounded-surface border border-border-subtle">
                 <Button
                   type="button"
                   onClick={() => onVariationsCountChange(2)}
-                  className={`px-2.5 py-1 rounded text-xs font-bold ${
+                  className={`px-2.5 py-1 rounded text-style-legal font-bold ${
                     variationsCount === 2
                       ? 'bg-surface text-text-primary border border-border-subtle shadow-floating'
                       : 'text-text-muted hover:text-text-primary'
@@ -91,7 +91,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
                 <Button
                   type="button"
                   onClick={() => onVariationsCountChange(3)}
-                  className={`px-2.5 py-1 rounded text-xs font-bold ${
+                  className={`px-2.5 py-1 rounded text-style-legal font-bold ${
                     variationsCount === 3
                       ? 'bg-surface text-text-primary border border-border-subtle shadow-floating'
                       : 'text-text-muted hover:text-text-primary'
@@ -107,7 +107,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onCopyMealsBetweenVariations}
-                className="text-xs font-bold border-border-subtle hover:bg-surface-subtle flex items-center space-x-1.5"
+                className="text-style-legal font-bold border-border-subtle hover:bg-surface-subtle flex items-center gap-1.5"
               >
                 <Copy size={13} />
                 <span>Copiar Refeições entre Dias</span>
@@ -122,7 +122,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
               const badgeColors = {
                 high: 'bg-warning-soft0/10 text-warning border-warning-soft0/20',
                 medium: 'bg-info-soft0/10 text-info border-info-soft0/20',
-                low: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
+                low: 'bg-primary/10 text-primary border-primary/20',
               };
 
               return (
@@ -137,13 +137,13 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-text-primary">{v.name}</span>
+                    <span className="font-bold text-style-legal text-text-primary">{v.name}</span>
                     <Badge variant="outline" className={`text-style-legal font-bold px-1.5 py-0 ${badgeColors[v.type]}`}>
                       {v.type === 'high' ? 'Alto Carbo' : v.type === 'medium' ? 'Médio Carbo' : 'Baixo Carbo'}
                     </Badge>
                   </div>
 
-                  <div className="text-style-legal text-text-muted mt-1 font-medium flex items-center space-x-2">
+                  <div className="text-style-legal text-text-muted mt-1 font-medium flex items-center gap-2">
                     <span>Meta: <strong>{v.targetKcal} kcal</strong></span>
                     <span>•</span>
                     <span className="text-warning font-bold">{v.targetCarbs}g C</span>

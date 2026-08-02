@@ -36,19 +36,19 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
   return (
     <Card className="bg-surface-subtle border-border-subtle p-0">
       <CardContent className="p-4">
-        <div className="flex justify-between text-xs font-semibold text-text-muted mb-1">
+        <div className="flex justify-between text-style-legal font-semibold text-text-muted mb-1">
           <span className={`${textColors[macroColor]} font-bold`}>{label}</span>
           {statusBadgeText && (
             <Badge variant={statusBadgeVariant}>{statusBadgeText}</Badge>
           )}
         </div>
 
-        <div className="text-3xl font-bold text-text-primary my-1">
-          {currentValue} <span className="text-xs font-normal text-text-muted">/ {targetValue}</span>
+        <div className="text-style-page-title font-bold text-text-primary my-1">
+          {currentValue} <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
         </div>
 
         {gPerKgRatio ? (
-          <div className={`text-xs font-bold ${textColors[macroColor]} mb-2`}>
+          <div className={`text-style-legal font-bold ${textColors[macroColor]} mb-2`}>
             {gPerKgRatio} <span className="text-style-legal text-text-muted font-normal">(meta: {gPerKgMeta})</span>
           </div>
         ) : (

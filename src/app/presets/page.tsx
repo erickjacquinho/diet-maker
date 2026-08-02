@@ -145,15 +145,15 @@ export default function PresetsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Header Bar */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Sparkles size={20} className="text-success" />
-            <h1 className="font-bold text-2xl text-text-primary tracking-tight">Presets de Dietas</h1>
+            <h1 className="font-bold text-style-section-title text-text-primary tracking-tight">Presets de Dietas</h1>
           </div>
-          <p className="text-xs text-text-muted mt-1 font-medium">
+          <p className="text-style-legal text-text-muted mt-1 font-medium">
             Biblioteca global de protocolos nutricionais completos para duplicação e aplicação rápida em pacientes.
           </p>
         </div>
@@ -171,21 +171,21 @@ export default function PresetsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar preset por nome ou categoria (ex: Low Carb, Bulking)..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-xs"
+            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal"
           />
         </div>
       )}
 
       {/* Empty State vs Presets Grid */}
       {filteredPresets.length === 0 ? (
-        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto space-y-4 my-8">
-          <CardContent className="p-0 space-y-4">
+        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
+          <CardContent className="p-0 flex flex-col gap-4">
             <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <Sparkles size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-base text-text-primary">Nenhum preset cadastrado</h3>
-              <p className="text-xs text-text-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-style-body text-text-primary">Nenhum preset cadastrado</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
                 Sua biblioteca de protocolos inteiros está em branco. Crie seu primeiro preset de dieta reutilizável.
               </p>
             </div>
@@ -199,44 +199,44 @@ export default function PresetsPage() {
           {filteredPresets.map((preset) => (
             <Card
               key={preset.id}
-              className="bg-surface border-border-subtle rounded-surface p-5 hover:border-border-hover transition-colors duration-standard flex flex-col justify-between space-y-4"
+              className="bg-surface border-border-subtle rounded-surface p-5 hover:border-border-hover transition-colors duration-standard flex flex-col justify-between gap-4"
             >
-              <CardContent className="p-0 space-y-4 flex flex-col justify-between h-full">
-                <div className="space-y-2">
+              <CardContent className="p-0 gap-4 flex flex-col justify-between h-full">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <Badge variant="default" className="text-style-legal font-bold bg-success/10 text-success">
                       {preset.category}
                     </Badge>
-                    <span className="text-style-legal font-semibold text-text-muted flex items-center space-x-1">
+                    <span className="text-style-legal font-semibold text-text-muted flex items-center gap-1">
                       <Utensils size={12} />
                       <span>{preset.mealsCount} refeições</span>
                     </span>
                   </div>
-                  <h3 className="font-bold text-sm text-text-primary leading-snug">{preset.title}</h3>
-                  <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{preset.description}</p>
+                  <h3 className="font-bold text-style-body-small text-text-primary leading-snug">{preset.title}</h3>
+                  <p className="text-style-legal text-text-muted leading-relaxed line-clamp-2">{preset.description}</p>
                 </div>
 
                 {/* Macro Summary */}
                 <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
                   <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Kcal</span>
-                    <span className="font-bold text-xs text-text-primary">{preset.targetKcal}</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Kcal</span>
+                    <span className="font-bold text-style-legal text-text-primary">{preset.targetKcal}</span>
                   </div>
                   <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Prot</span>
-                    <span className="font-bold text-xs text-macro-protein">
+                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Prot</span>
+                    <span className="font-bold text-style-legal text-macro-protein">
                       {preset.proteinMode === 'multiplicativo' ? `${preset.proteinValue ?? preset.proteinG}g/kg` : `${preset.proteinG}g`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Carb</span>
-                    <span className="font-bold text-xs text-warning">
+                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carb</span>
+                    <span className="font-bold text-style-legal text-warning">
                       {preset.carbsMode === 'multiplicativo' ? `${preset.carbsValue ?? preset.carbsG}g/kg` : `${preset.carbsG}g`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Gord</span>
-                    <span className="font-bold text-xs text-success">
+                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gord</span>
+                    <span className="font-bold text-style-legal text-success">
                       {preset.fatsMode === 'multiplicativo' ? `${preset.fatsValue ?? preset.fatsG}g/kg` : `${preset.fatsG}g`}
                     </span>
                   </div>
@@ -248,7 +248,7 @@ export default function PresetsPage() {
                     size="sm"
                     variant={copiedId === preset.id ? 'default' : 'primary'}
                     onClick={() => handleCopy(preset.id)}
-                    className={`inline-flex items-center space-x-1.5 text-xs font-bold transition-colors duration-standard ${
+                    className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
                       copiedId === preset.id
                         ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating scale-[1.02]'
                         : ''
@@ -285,26 +285,26 @@ export default function PresetsPage() {
           className="max-w-md bg-surface border-border-subtle p-6 rounded-surface max-h-[90vh] overflow-y-auto"
         >
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary">Novo Preset de Dieta</DialogTitle>
+            <DialogTitle className="font-bold text-style-body text-text-primary">Novo Preset de Dieta</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreatePreset} className="space-y-3.5 pt-2">
+          <form onSubmit={handleCreatePreset} className="flex flex-col gap-3.5 pt-2">
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Título do Protocolo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Título do Protocolo</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Protocolo Cutting Low Carb 1800kcal"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-xs"
+                className="bg-surface-subtle border-border-subtle text-style-legal"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Categoria</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Categoria</label>
               <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
-                <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -317,13 +317,13 @@ export default function PresetsPage() {
             </div>
 
             {/* Macronutrientes Section Header */}
-            <div className="space-y-2.5">
-              <label className="text-xs font-bold text-text-primary block">Macronutrientes</label>
+            <div className="flex flex-col gap-2.5">
+              <label className="text-style-legal font-bold text-text-primary block">Macronutrientes</label>
 
               {/* Proteína */}
-              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-macro-protein flex items-center space-x-1">
+                  <span className="text-style-legal font-bold text-macro-protein flex items-center gap-1">
                     <span>Proteínas</span>
                     {formData.proteinMode === 'multiplicativo' && (
                       <span className="text-style-legal text-text-muted font-normal">({proteinG}g est.)</span>
@@ -336,7 +336,7 @@ export default function PresetsPage() {
                     value={formData.proteinMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, proteinMode: val })}
                   >
-                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-style-legal h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -351,15 +351,15 @@ export default function PresetsPage() {
                     value={formData.proteinValue}
                     onChange={(e) => setFormData({ ...formData, proteinValue: Number(e.target.value) })}
                     placeholder={formData.proteinMode === 'multiplicativo' ? 'ex: 2.0' : 'ex: 160'}
-                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
                   />
                 </div>
               </div>
 
               {/* Carboidratos */}
-              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-warning flex items-center space-x-1">
+                  <span className="text-style-legal font-bold text-warning flex items-center gap-1">
                     <span>Carboidratos</span>
                     {formData.carbsMode === 'multiplicativo' && (
                       <span className="text-style-legal text-text-muted font-normal">({carbsG}g est.)</span>
@@ -372,7 +372,7 @@ export default function PresetsPage() {
                     value={formData.carbsMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, carbsMode: val })}
                   >
-                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-style-legal h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -387,15 +387,15 @@ export default function PresetsPage() {
                     value={formData.carbsValue}
                     onChange={(e) => setFormData({ ...formData, carbsValue: Number(e.target.value) })}
                     placeholder={formData.carbsMode === 'multiplicativo' ? 'ex: 3.0' : 'ex: 200'}
-                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
                   />
                 </div>
               </div>
 
               {/* Gorduras */}
-              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-success flex items-center space-x-1">
+                  <span className="text-style-legal font-bold text-success flex items-center gap-1">
                     <span>Gorduras</span>
                     {formData.fatsMode === 'multiplicativo' && (
                       <span className="text-style-legal text-text-muted font-normal">({fatsG}g est.)</span>
@@ -408,7 +408,7 @@ export default function PresetsPage() {
                     value={formData.fatsMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, fatsMode: val })}
                   >
-                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-style-legal h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -423,7 +423,7 @@ export default function PresetsPage() {
                     value={formData.fatsValue}
                     onChange={(e) => setFormData({ ...formData, fatsValue: Number(e.target.value) })}
                     placeholder={formData.fatsMode === 'multiplicativo' ? 'ex: 0.8' : 'ex: 60'}
-                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
                   />
                 </div>
               </div>
@@ -431,9 +431,9 @@ export default function PresetsPage() {
 
             {/* Peso de Referência (visível se algum macro for multiplicativo) */}
             {hasMultiplicative && (
-              <div className="p-2.5 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between space-x-2">
+              <div className="p-2.5 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between gap-2">
                 <div>
-                  <label className="text-xs font-bold text-text-primary block">Peso de Referência (kg)</label>
+                  <label className="text-style-legal font-bold text-text-primary block">Peso de Referência (kg)</label>
                   <span className="text-style-legal text-text-muted font-medium block">Estimativa para cálculo total (g/kg × kg)</span>
                 </div>
                 <Input
@@ -441,7 +441,7 @@ export default function PresetsPage() {
                   min={1}
                   value={formData.referenceWeight}
                   onChange={(e) => setFormData({ ...formData, referenceWeight: Number(e.target.value) })}
-                  className="bg-surface border-border-subtle text-xs font-bold text-center w-20 h-8 shrink-0"
+                  className="bg-surface border-border-subtle text-style-legal font-bold text-center w-20 h-8 shrink-0"
                 />
               </div>
             )}
@@ -449,26 +449,26 @@ export default function PresetsPage() {
             {/* Auto-calculated Kcal Display */}
             <div className="p-3 bg-surface-subtle border border-border-subtle rounded-control flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-text-primary block">Calorias Totais (Calculadas)</span>
+                <span className="text-style-legal font-bold text-text-primary block">Calorias Totais (Calculadas)</span>
                 <span className="text-style-legal text-text-muted font-medium block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
               </div>
-              <Badge variant="secondary" className="font-bold text-sm text-success bg-success-soft border-none px-3 py-1 shrink-0">
+              <Badge variant="secondary" className="font-bold text-style-body-small text-success bg-success-soft border-none px-3 py-1 shrink-0">
                 {calculatedKcal} kcal
               </Badge>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Descrição Breve</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Descrição Breve</label>
               <textarea
                 rows={2}
                 placeholder="Orientações e indicações deste preset..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
 
-            <div className="pt-2 flex space-x-2">
+            <div className="pt-2 flex gap-2">
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -490,12 +490,12 @@ export default function PresetsPage() {
       <Dialog open={isConfirmDiscardOpen} onOpenChange={setIsConfirmDiscardOpen}>
         <DialogContent className="max-w-sm bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader>
-            <DialogTitle className="font-bold text-base text-text-primary">Descartar alterações?</DialogTitle>
-            <div className="text-xs text-text-secondary pt-1">
+            <DialogTitle className="font-bold text-style-body text-text-primary">Descartar alterações?</DialogTitle>
+            <div className="text-style-legal text-text-secondary pt-1">
               Você possui dados preenchidos no formulário de preset. Se fechar agora, todas as informações não salvas serão perdidas.
             </div>
           </DialogHeader>
-          <div className="pt-4 flex space-x-2">
+          <div className="pt-4 flex gap-2">
             <Button
               type="button"
               variant="secondary"

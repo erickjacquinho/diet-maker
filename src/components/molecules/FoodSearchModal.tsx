@@ -78,11 +78,11 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl bg-surface border-border-subtle p-6 rounded-surface max-h-[85vh] flex flex-col">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
-          <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+          <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <Utensils size={18} className="text-success" />
             <span>Adicionar Alimento em "{mealTitle}"</span>
           </DialogTitle>
-          <DialogDescription className="text-xs text-text-muted">
+          <DialogDescription className="text-style-legal text-text-muted">
             Busque na base TACO de alimentos e insira a gramatura desejada.
           </DialogDescription>
         </DialogHeader>
@@ -94,16 +94,16 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
             placeholder="Digite o nome do alimento (ex: Frango, Arroz, Ovo, Aveia, Banana)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold"
+            className="pl-9 bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
             autoFocus
           />
           <Search size={14} className="absolute left-3 top-6 text-text-muted" />
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[300px] border border-border-subtle rounded-control p-2 my-3 space-y-1.5 bg-surface-subtle/50">
+        <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[300px] border border-border-subtle rounded-control p-2 my-3 flex flex-col gap-1.5 bg-surface-subtle/50">
           {searchResults.length === 0 ? (
-            <div className="p-8 text-center text-xs text-text-muted">
+            <div className="p-8 text-center text-style-legal text-text-muted">
               Nenhum alimento encontrado para "{query}". Tente buscar por termos genéricos como "Frango", "Arroz" ou "Batata".
             </div>
           ) : (
@@ -120,14 +120,14 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                       : 'bg-surface border-border-subtle hover:border-border-hover'
                   }`}
                 >
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-text-primary flex items-center space-x-2">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-style-legal font-bold text-text-primary flex items-center gap-2">
                       <span>{food.name}</span>
                       <Badge variant="outline" className="text-style-chart-micro font-semibold border-border-subtle text-text-muted">
                         {food.category}
                       </Badge>
                     </div>
-                    <div className="text-style-legal text-text-muted flex items-center space-x-2">
+                    <div className="text-style-legal text-text-muted flex items-center gap-2">
                       <span className="text-macro-protein font-semibold">P: {food.proteinG}g</span>
                       <span>•</span>
                       <span className="text-macro-carbohydrate font-semibold">C: {food.carbsG}g</span>
@@ -151,25 +151,25 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
         {/* Selected Food Grammage & Confirmation Section */}
         {selectedFood ? (
-          <div className="p-4 bg-surface-subtle border border-border-subtle rounded-control space-y-3 shrink-0">
+          <div className="p-4 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-3 shrink-0">
             <div className="flex flex-col flex-row items-center justify-between gap-3">
               <div>
-                <span className="text-style-legal font-bold text-text-muted uppercase block">Alimento Selecionado</span>
-                <span className="text-xs font-bold text-text-primary">{selectedFood.name}</span>
+                <span className="text-style-legal font-bold text-text-muted tracking-label block">Alimento Selecionado</span>
+                <span className="text-style-legal font-bold text-text-primary">{selectedFood.name}</span>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <label className="text-xs font-bold text-text-primary whitespace-nowrap">Gramatura:</label>
-                <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-2">
+                <label className="text-style-legal font-bold text-text-primary whitespace-nowrap">Gramatura:</label>
+                <div className="flex items-center gap-1">
                   <Input
                     type="number"
                     min={1}
                     max={5000}
                     value={quantityGrams}
                     onChange={(e) => setQuantityGrams(Number(e.target.value))}
-                    className="w-24 bg-surface border-border-subtle text-xs font-bold text-center"
+                    className="w-24 bg-surface border-border-subtle text-style-legal font-bold text-center"
                   />
-                  <span className="text-xs font-bold text-text-muted">g</span>
+                  <span className="text-style-legal font-bold text-text-muted">g</span>
                 </div>
               </div>
             </div>
@@ -177,34 +177,34 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
             {/* Calculated Macros Preview */}
             <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border-subtle text-center">
               <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Proteínas</span>
-                <span className="font-bold text-xs text-macro-protein">{calculatedMacros.protein}g</span>
+                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Proteínas</span>
+                <span className="font-bold text-style-legal text-macro-protein">{calculatedMacros.protein}g</span>
               </div>
               <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Carboidratos</span>
-                <span className="font-bold text-xs text-macro-carbohydrate">{calculatedMacros.carbs}g</span>
+                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carboidratos</span>
+                <span className="font-bold text-style-legal text-macro-carbohydrate">{calculatedMacros.carbs}g</span>
               </div>
               <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Gorduras</span>
-                <span className="font-bold text-xs text-macro-fat">{calculatedMacros.fats}g</span>
+                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gorduras</span>
+                <span className="font-bold text-style-legal text-macro-fat">{calculatedMacros.fats}g</span>
               </div>
               <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Calorias</span>
-                <span className="font-bold text-xs text-text-primary">{calculatedMacros.kcal} kcal</span>
+                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Calorias</span>
+                <span className="font-bold text-style-legal text-text-primary">{calculatedMacros.kcal} kcal</span>
               </div>
             </div>
 
             <Button
               onClick={handleConfirmAdd}
               variant="primary"
-              className="w-full text-xs font-bold py-2.5 rounded-control flex items-center justify-center space-x-2"
+              className="w-full text-style-legal font-bold py-2.5 rounded-control flex items-center justify-center gap-2"
             >
               <Plus size={15} />
               <span>Adicionar Alimento ({quantityGrams}g)</span>
             </Button>
           </div>
         ) : (
-          <div className="text-center py-2 text-xs text-text-muted italic shrink-0">
+          <div className="text-center py-2 text-style-legal text-text-muted italic shrink-0">
             Selecione um alimento da lista acima para ajustar a gramatura.
           </div>
         )}

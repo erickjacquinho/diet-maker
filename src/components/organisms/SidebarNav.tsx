@@ -49,11 +49,11 @@ const SidebarBrand: React.FC<SidebarBrandProps> = ({
       <div className="flex flex-col items-center gap-3 w-full mb-6">
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
-            <Link href="/pacientes" className="flex items-center justify-center rounded-control transition-transform hover:scale-105">
+            <Link href="/pacientes" className="flex items-center justify-center rounded-control transition-transform">
               <Avatar initials="N" variant="charcoal" size="md" className="rounded-control shrink-0 shadow-floating" />
             </Link>
           </TooltipTrigger>
-          <TooltipContent side="right" className="font-semibold text-xs bg-primary text-white border-text-primary">
+          <TooltipContent side="right" className="font-semibold text-style-legal bg-primary text-white border-text-primary">
             {title} {subtitle}
           </TooltipContent>
         </Tooltip>
@@ -64,13 +64,13 @@ const SidebarBrand: React.FC<SidebarBrandProps> = ({
               variant="ghost"
               size="icon"
               onClick={toggleCollapse}
-              className="h-7 w-7 border border-border-subtle text-text-muted hover:text-text-primary hover:bg-surface-subtle rounded-lg p-0"
+              className="h-7 w-7 border border-border-subtle text-text-muted hover:text-text-primary hover:bg-surface-subtle rounded-surface p-0"
               aria-label="Expandir Menu"
             >
               <ChevronRight size={14} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right" className="font-semibold text-xs">
+          <TooltipContent side="right" className="font-semibold text-style-legal">
             Expandir Menu
           </TooltipContent>
         </Tooltip>
@@ -80,11 +80,11 @@ const SidebarBrand: React.FC<SidebarBrandProps> = ({
 
   return (
     <div className="flex items-center justify-between mb-6 w-full">
-      <Link href="/pacientes" className="flex items-center space-x-3 overflow-hidden group">
-        <Avatar initials="N" variant="charcoal" size="md" className="rounded-control shrink-0 shadow-floating group-hover:scale-105 transition-transform" />
-        <div className="transition-opacity duration-200 min-w-0">
-          <h1 className="font-bold text-base text-text-primary tracking-tight leading-none truncate">{title}</h1>
-          <span className="text-style-legal font-bold text-success uppercase tracking-wider block">{subtitle}</span>
+      <Link href="/pacientes" className="flex items-center gap-3 overflow-hidden group">
+        <Avatar initials="N" variant="charcoal" size="md" className="rounded-control shrink-0 shadow-floating transition-transform" />
+        <div className="transition-opacity duration-standard min-w-0">
+          <h1 className="font-bold text-style-body text-text-primary tracking-tight leading-none truncate">{title}</h1>
+          <span className="text-style-legal font-bold text-success tracking-overline block">{subtitle}</span>
         </div>
       </Link>
       <Tooltip delayDuration={300}>
@@ -99,7 +99,7 @@ const SidebarBrand: React.FC<SidebarBrandProps> = ({
             <ChevronLeft size={16} />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="right" className="font-semibold text-xs">
+        <TooltipContent side="right" className="font-semibold text-style-legal">
           Recolher Menu
         </TooltipContent>
       </Tooltip>
@@ -143,12 +143,12 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
           <Link
             href={href}
             aria-label={label}
-            className={`flex items-center justify-center size-10 rounded-control text-xs transition-colors duration-standard mx-auto ${activeClass}`}
+            className={`flex items-center justify-center size-10 rounded-control text-style-legal transition-colors duration-standard mx-auto ${activeClass}`}
           >
             <Icon size={18} className="shrink-0" />
           </Link>
         </TooltipTrigger>
-        <TooltipContent side="right" sideOffset={12} className="font-bold text-xs bg-primary text-white border-text-primary shadow-floating">
+        <TooltipContent side="right" sideOffset={12} className="font-bold text-style-legal bg-primary text-white border-text-primary shadow-floating">
           {label}
         </TooltipContent>
       </Tooltip>
@@ -158,7 +158,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-control text-xs transition-colors duration-standard w-full ${activeClass}`}
+      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-control text-style-legal transition-colors duration-standard w-full ${activeClass}`}
     >
       <Icon size={18} className="shrink-0" />
       <span className="truncate">{label}</span>
@@ -189,7 +189,7 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
           </div>
         </TooltipTrigger>
         <TooltipContent side="right" sideOffset={12} className="p-2.5">
-          <div className="text-xs font-bold text-text-primary">{doctorName}</div>
+          <div className="text-style-legal font-bold text-text-primary">{doctorName}</div>
           <div className="text-style-legal text-text-muted">{doctorRole}</div>
         </TooltipContent>
       </Tooltip>
@@ -199,7 +199,7 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   return (
     <div className="flex items-center p-2 bg-surface-subtle border border-border-subtle rounded-control gap-2.5 w-full">
       <Avatar initials="DR" variant="emerald" size="sm" className="shrink-0" />
-      <div className="text-xs truncate min-w-0 flex-1">
+      <div className="text-style-legal truncate min-w-0 flex-1">
         <div className="font-bold text-text-primary truncate">{doctorName}</div>
         <div className="text-style-legal text-text-muted truncate">{doctorRole}</div>
       </div>
@@ -236,7 +236,7 @@ const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
               <Save size={15} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right" sideOffset={12} className="font-semibold text-xs">
+          <TooltipContent side="right" sideOffset={12} className="font-semibold text-style-legal">
             Salvar Arquivo Local
           </TooltipContent>
         </Tooltip>
@@ -253,7 +253,7 @@ const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
               <FolderOpen size={15} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right" sideOffset={12} className="font-semibold text-xs">
+          <TooltipContent side="right" sideOffset={12} className="font-semibold text-style-legal">
             Abrir Arquivo .diet
           </TooltipContent>
         </Tooltip>
@@ -318,7 +318,7 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
     >
       <TooltipProvider delayDuration={150}>
         <aside
-          className={`bg-surface border-r border-border-subtle h-screen sticky top-0 flex flex-col justify-between shrink-0 transition-colors duration-standard duration-300 z-30 ${
+          className={`bg-surface border-r border-border-subtle h-screen sticky top-0 flex flex-col justify-between shrink-0 transition-colors duration-standard z-30 ${
             isCollapsed ? 'w-20 px-3 py-4' : 'w-64 p-4'
           }`}
         >
@@ -326,14 +326,14 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
             <>
               <div className="flex flex-col w-full">
                 <SidebarBrand />
-                <nav className="space-y-1.5 w-full">
+                <nav className="flex flex-col gap-1.5 w-full">
                   {navItems.map((item) => (
                     <SidebarNavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
                   ))}
                 </nav>
               </div>
 
-              <div className="pt-4 border-t border-border-subtle space-y-3 w-full">
+              <div className="flex flex-col gap-3 pt-4 border-t border-border-subtle w-full">
                 <SidebarUserProfile doctorName={doctorName} doctorRole={doctorRole} />
                 <SidebarQuickActions onSave={onSave} onOpen={onOpen} />
               </div>

@@ -18,8 +18,8 @@ export const RecipeIngredientRow: React.FC<RecipeIngredientRowProps> = ({
   return (
     <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-control p-3 gap-2">
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-bold text-text-primary truncate">{ingredient.name}</div>
-        <div className="text-style-legal text-text-muted mt-0.5 flex items-center space-x-1.5 flex-wrap">
+        <div className="text-style-legal font-bold text-text-primary truncate">{ingredient.name}</div>
+        <div className="text-style-legal text-text-muted mt-0.5 flex items-center gap-1.5 flex-wrap">
           <span className="text-macro-protein font-bold">P: {ingredient.proteinG}g</span>
           <span>•</span>
           <span className="text-warning font-bold">C: {ingredient.carbsG}g</span>
@@ -30,16 +30,16 @@ export const RecipeIngredientRow: React.FC<RecipeIngredientRowProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center space-x-2 shrink-0">
-        <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1">
           <Input
             type="number"
             min={1}
             value={ingredient.amountGrams}
             onChange={(e) => onAmountChange(Number(e.target.value))}
-            className="w-16 h-8 text-center text-xs font-bold bg-surface border-border-subtle px-1"
+            className="w-16 h-8 text-center text-style-legal font-bold bg-surface border-border-subtle px-1"
           />
-          <span className="text-xs font-bold text-text-muted">g</span>
+          <span className="text-style-legal font-bold text-text-muted">g</span>
         </div>
 
         <Button

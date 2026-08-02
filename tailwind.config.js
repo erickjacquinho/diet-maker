@@ -53,7 +53,7 @@ module.exports = {
       width: { 'control-standard': '36px' },
       transitionDuration: { fast: 'var(--sys-motion-fast)', standard: 'var(--sys-motion-standard)', slow: 'var(--sys-motion-slow)' },
       transitionTimingFunction: { standard: 'var(--sys-ease-standard)', exit: 'var(--sys-ease-exit)' },
-      opacity: { disabled: 'var(--sys-opacity-disabled)' },
+      opacity: { disabled: 'var(--sys-opacity-disabled)', subdued: '0.72', full: '1' },
       zIndex: { base: '0', raised: '10', sticky: '20', navigation: '30', dropdown: '40', popover: '50', overlay: '60', modal: '70', toast: '80', tooltip: '90' },
       letterSpacing: { tight: '-0.01em', label: '0.04em', overline: '0.06em' },
     },

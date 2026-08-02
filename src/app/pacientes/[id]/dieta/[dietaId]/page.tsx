@@ -609,26 +609,26 @@ export default function DietBuilderPage() {
       <Dialog open={isScaleModalOpen} onOpenChange={setIsScaleModalOpen}>
         <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Percent size={18} className="text-success" />
               <span>Escalar Porcentagem da Dieta</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
+            <DialogDescription className="text-style-legal text-text-muted">
               Aumente ou reduza proporcionalmente a gramatura dos alimentos.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-3">
+          <div className="flex flex-col gap-4 py-3">
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-2">Porcentagem de Ajuste (%)</label>
-              <div className="flex items-center space-x-2">
+              <label className="text-style-legal font-bold text-text-primary block mb-2">Porcentagem de Ajuste (%)</label>
+              <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   value={scalePercentage}
                   onChange={(e) => setScalePercentage(Number(e.target.value))}
-                  className="bg-surface-subtle border-border-subtle text-sm font-bold text-center"
+                  className="bg-surface-subtle border-border-subtle text-style-body-small font-bold text-center"
                 />
-                <span className="text-sm font-bold text-text-muted">%</span>
+                <span className="text-style-body-small font-bold text-text-muted">%</span>
               </div>
             </div>
 
@@ -641,7 +641,7 @@ export default function DietBuilderPage() {
                   variant={scalePercentage === pct ? 'primary' : 'secondary'}
                   size="compact"
                   onClick={() => setScalePercentage(pct)}
-                  className="px-2.5 py-1 text-xs font-semibold"
+                  className="px-2.5 py-1 text-style-legal font-semibold"
                 >
                   {pct > 0 ? `+${pct}%` : `${pct}%`}
                 </Button>
@@ -665,20 +665,20 @@ export default function DietBuilderPage() {
       <Dialog open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
         <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Copy size={18} className="text-success" />
               <span>Copiar Refeições entre Dias</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
+            <DialogDescription className="text-style-legal text-text-muted">
               Copie o plano de refeições de um dia do ciclo para outro para fácil adaptação de gramaturas.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-3">
+          <div className="flex flex-col gap-4 py-3">
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Copiar De (Origem):</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Copiar De (Origem):</label>
               <Select value={copySourceId} onValueChange={setCopySourceId}>
-                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary">
+                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary">
                   <SelectValue placeholder="Selecione a origem" />
                 </SelectTrigger>
                 <SelectContent>
@@ -692,9 +692,9 @@ export default function DietBuilderPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-text-primary block mb-1">Copiar Para (Destino):</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Copiar Para (Destino):</label>
               <Select value={copyTargetId} onValueChange={setCopyTargetId}>
-                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary">
+                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary">
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
@@ -723,51 +723,51 @@ export default function DietBuilderPage() {
       <Dialog open={isAdjustGoalsModalOpen} onOpenChange={setIsAdjustGoalsModalOpen}>
         <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Edit3 size={18} className="text-success" />
               <span>Ajustar Metas Manuais de Macronutrientes</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
+            <DialogDescription className="text-style-legal text-text-muted">
               Altere as metas de Proteínas, Carboidratos e Gorduras da prescrição ativa.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-3">
+          <div className="flex flex-col gap-3 py-3">
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-xs font-bold text-macro-protein block mb-1">Proteínas (g)</label>
+                <label className="text-style-legal font-bold text-macro-protein block mb-1">Proteínas (g)</label>
                 <Input
                   type="number"
                   value={tempTargetProt}
                   onChange={(e) => setTempTargetProt(Number(e.target.value))}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-warning block mb-1">Carboidratos (g)</label>
+                <label className="text-style-legal font-bold text-warning block mb-1">Carboidratos (g)</label>
                 <Input
                   type="number"
                   value={tempTargetCarb}
                   onChange={(e) => setTempTargetCarb(Number(e.target.value))}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-info block mb-1">Gorduras (g)</label>
+                <label className="text-style-legal font-bold text-info block mb-1">Gorduras (g)</label>
                 <Input
                   type="number"
                   value={tempTargetFat}
                   onChange={(e) => setTempTargetFat(Number(e.target.value))}
-                  className="bg-surface-subtle border-border-subtle text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
             </div>
 
             <div className="p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-              <span className="text-style-legal font-bold text-text-muted uppercase block">Calorias Calculadas</span>
-              <span className="text-lg font-bold text-text-primary">
+              <span className="text-style-legal font-bold text-text-muted tracking-label block">Calorias Calculadas</span>
+              <span className="text-style-body-large font-bold text-text-primary">
                 {calculatePresetCalories(tempTargetProt, tempTargetCarb, tempTargetFat)} kcal
               </span>
             </div>
@@ -788,11 +788,11 @@ export default function DietBuilderPage() {
       <Dialog open={isWhatsAppModalOpen} onOpenChange={setIsWhatsAppModalOpen}>
         <DialogContent className="max-w-lg bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <MessageCircle size={18} className="text-success" />
               <span>Texto Formato para WhatsApp</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
+            <DialogDescription className="text-style-legal text-text-muted">
               Copie a prescrição formatada com emojis para enviar diretamente ao paciente.
             </DialogDescription>
           </DialogHeader>
@@ -802,7 +802,7 @@ export default function DietBuilderPage() {
               readOnly
               value={whatsAppText}
               rows={12}
-              className="w-full p-3 font-mono text-xs bg-surface-subtle border border-border-subtle rounded-control text-text-primary focus:outline-none resize-none"
+              className="w-full p-3 font-mono text-style-legal bg-surface-subtle border border-border-subtle rounded-control text-text-primary focus:outline-none resize-none"
             />
           </div>
 
@@ -810,7 +810,7 @@ export default function DietBuilderPage() {
             <Button variant="outline" size="sm" onClick={() => setIsWhatsAppModalOpen(false)}>
               Fechar
             </Button>
-            <Button variant="primary" onClick={handleCopyWhatsAppText} size="sm" className="flex items-center space-x-1.5">
+            <Button variant="primary" onClick={handleCopyWhatsAppText} size="sm" className="flex items-center gap-1.5">
               <Copy size={14} />
               <span>Copiar Texto</span>
             </Button>
