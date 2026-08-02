@@ -17,7 +17,6 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **PRD & Requirements** | [docs/prd/PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md) | Requisitos de produto, estórias de usuário e critérios de aceite |
 | **Domain Context** | [docs/context/CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md) | Termos nutricionais, tabela TACO, VET e fórmulas de macros |
 | **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-007 |
-| **Historical Visual Prototype** | [demo_dashboard.html](file:///c:/Programmer/diet-maker/demo_dashboard.html) | Artefato histórico e não normativo; não usar como fonte de tokens ou estilos |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
 ### Design System component catalog
@@ -36,12 +35,12 @@ When a component is new or changed, consult the category before the profile. The
 
 ```
 src/
-├── app/          # Next.js App Router (páginas & rotas)
-├── components/   # Hierarquia UI atômica (atoms, molecules, organisms, templates, ui)
-├── data/         # Datasets do domínio (ex: tabela TACO)
-└── lib/          # Utilitários compartilhados & funções auxiliares
-docs/             # Especificações do projeto (prd, context, adr)
-design-system/    # Fonte canônica do sistema visual (15 documentos normativos)
-tests/            # Suíte de testes do projeto
-refs/             # Materiais de referência & arquivos de pesquisa
+├── app/                  # Next.js App Router (páginas & rotas)
+├── components/           # Hierarquia UI atômica (atoms, molecules, organisms, templates, ui)
+├── data/                 # Datasets do domínio (ex: tabela TACO)
+└── lib/                  # Utilitários compartilhados & funções auxiliares
+docs/                     # Especificações do projeto (prd, context, adr)
+design-system/               # Fonte única da verdade do sistema visual (15 documentos normativos)
+tests/                    # Suíte de testes do projeto
+refs/                     # Materiais de referência & arquivos de pesquisa
 ```

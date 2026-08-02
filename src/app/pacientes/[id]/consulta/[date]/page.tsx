@@ -91,10 +91,10 @@ export default function DedicatedConsultationPage() {
 
   if (!patient || !consultation) {
     return (
-      <div className="min-h-screen bg-warm-inner flex items-center justify-center p-6 text-warm-muted text-sm">
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-8 max-w-md mx-auto text-center space-y-4 shadow-sm">
-          <h3 className="font-black text-base text-warm-charcoal">Registro de Consulta Não Encontrado</h3>
-          <p className="text-xs text-warm-muted leading-relaxed">
+      <div className="min-h-screen bg-surface-subtle flex items-center justify-center p-6 text-text-muted text-sm">
+        <Card className="bg-surface border-border-subtle rounded-surface p-8 max-w-md mx-auto text-center space-y-4 shadow-floating">
+          <h3 className="font-bold text-base text-text-primary">Registro de Consulta Não Encontrado</h3>
+          <p className="text-xs text-text-muted leading-relaxed">
             Não foi possível localizar o paciente ou o registro desta consulta.
           </p>
           <Link href="/pacientes" className="inline-block pt-2">
@@ -112,13 +112,13 @@ export default function DedicatedConsultationPage() {
   const bmi = (currentWeight / (heightM * heightM)).toFixed(1);
 
   return (
-    <div className="min-h-screen bg-warm-inner text-warm-charcoal p-4 md:p-8 space-y-6 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-surface-subtle text-text-primary p-4 p-8 space-y-6 max-w-6xl mx-auto">
       {/* Top Navigation Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-warm-card border border-warm-border p-4 md:p-5 rounded-2xl shadow-sm">
+      <div className="flex flex-col flex-row items-center justify-between gap-4 bg-surface border border-border-subtle p-4 p-5 rounded-surface shadow-floating">
         <div className="flex items-center space-x-3">
           <Link
             href={`/pacientes/${patient.id}`}
-            className="p-2 rounded-xl bg-warm-inner border border-warm-border text-warm-muted hover:text-warm-charcoal hover:border-warm-charcoal transition-colors"
+            className="p-2 rounded-control bg-surface-subtle border border-border-subtle text-text-muted hover:text-text-primary hover:border-text-primary transition-colors"
             title="Voltar para a Ficha do Paciente"
           >
             <ArrowLeft size={18} />
@@ -126,13 +126,13 @@ export default function DedicatedConsultationPage() {
 
           <div>
             <div className="flex items-center space-x-2">
-              <Calendar size={15} className="text-warm-emerald" />
-              <h1 className="font-black text-lg text-warm-charcoal">
+              <Calendar size={15} className="text-success" />
+              <h1 className="font-bold text-lg text-text-primary">
                 Registro de Consulta — {consultation.date}
               </h1>
             </div>
-            <p className="text-xs text-warm-muted font-medium">
-              Paciente: <strong className="text-warm-charcoal font-bold">{patient.name}</strong> • {patient.age} anos • {patient.objective}
+            <p className="text-xs text-text-muted font-medium">
+              Paciente: <strong className="text-text-primary font-bold">{patient.name}</strong> • {patient.age} anos • {patient.objective}
             </p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function DedicatedConsultationPage() {
         <div className="flex items-center space-x-2">
           <SecondaryActionButton
             onClick={() => toast.info('Função de impressão/exportação acionada')}
-            icon={<Printer size={14} className="text-warm-muted" />}
+            icon={<Printer size={14} className="text-text-muted" />}
           >
             Imprimir Prontuário
           </SecondaryActionButton>
@@ -163,21 +163,21 @@ export default function DedicatedConsultationPage() {
           
           {/* Card 1: Prescrição Dietética da Consulta */}
           {consultation.diet ? (
-            <Card className="bg-warm-card border-warm-border shadow-sm rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-warm-border bg-warm-inner/40 flex items-center justify-between">
+            <Card className="bg-surface border-border-subtle shadow-floating rounded-surface overflow-hidden">
+              <div className="p-5 border-b border-border-subtle bg-surface-subtle/40 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-xl bg-warm-emerald/10 text-warm-emerald">
+                  <div className="p-2 rounded-control bg-success/10 text-success">
                     <Utensils size={18} />
                   </div>
                   <div>
-                    <h2 className="font-bold text-sm text-warm-charcoal">{consultation.diet.name}</h2>
-                    <span className="text-[11px] text-warm-muted">Prescrição calculada para o ciclo atual</span>
+                    <h2 className="font-bold text-sm text-text-primary">{consultation.diet.name}</h2>
+                    <span className="text-style-legal text-text-muted">Prescrição calculada para o ciclo atual</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Badge
                     variant="outline"
-                    className="bg-warm-card text-warm-charcoal border-warm-border font-semibold text-[10px] px-2.5 py-0.5"
+                    className="bg-surface text-text-primary border-border-subtle font-semibold text-style-legal px-2.5 py-0.5"
                   >
                     Dieta
                   </Badge>
@@ -192,30 +192,30 @@ export default function DedicatedConsultationPage() {
 
               <CardContent className="p-5 space-y-5">
                 {/* Macro Summary Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Meta Calórica</span>
-                    <span className="font-bold text-sm text-warm-muted">{consultation.diet.targetKcal} kcal</span>
+                <div className="grid grid-cols-2 grid-cols-4 gap-3 text-center">
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Meta Calórica</span>
+                    <span className="font-bold text-sm text-text-muted">{consultation.diet.targetKcal} kcal</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Proteínas</span>
-                    <span className="font-black text-sm text-blue-600">{consultation.diet.proteinG}g</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Proteínas</span>
+                    <span className="font-bold text-sm text-macro-protein">{consultation.diet.proteinG}g</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Carboidratos</span>
-                    <span className="font-black text-sm text-orange-500">{consultation.diet.carbsG}g</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Carboidratos</span>
+                    <span className="font-bold text-sm text-orange-500">{consultation.diet.carbsG}g</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Gorduras</span>
-                    <span className="font-black text-sm text-emerald-700">{consultation.diet.fatsG}g</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Gorduras</span>
+                    <span className="font-bold text-sm text-success">{consultation.diet.fatsG}g</span>
                   </div>
                 </div>
 
                 {/* Meals Breakdown List */}
                 {consultation.diet.meals && (
                   <div className="space-y-3 pt-2">
-                    <h3 className="text-xs font-bold text-warm-charcoal uppercase tracking-wider flex items-center space-x-1.5">
-                      <Sparkles size={13} className="text-warm-emerald" />
+                    <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center space-x-1.5">
+                      <Sparkles size={13} className="text-success" />
                       <span>Refeições Programadas da Consulta</span>
                     </h3>
 
@@ -225,43 +225,43 @@ export default function DedicatedConsultationPage() {
                         return (
                           <div
                             key={idx}
-                            className="bg-warm-inner/70 border border-warm-border rounded-xl overflow-hidden transition-all duration-200"
+                            className="bg-surface-subtle/70 border border-border-subtle rounded-control overflow-hidden transition-colors duration-standard duration-200"
                           >
                             <div
                               onClick={() => toggleMealExpansion(idx)}
-                              className="p-3 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-warm-inner transition-colors"
+                              className="p-3 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-surface-subtle transition-colors"
                             >
                               <div className="flex items-center space-x-2">
-                                <span className="font-bold text-xs text-warm-charcoal">{meal.name}</span>
-                                <span className="text-[10px] font-semibold text-warm-muted bg-warm-card px-2 py-0.5 rounded-md border border-warm-border">
+                                <span className="font-bold text-xs text-text-primary">{meal.name}</span>
+                                <span className="text-style-legal font-semibold text-text-muted bg-surface px-2 py-0.5 rounded-md border border-border-subtle">
                                   {meal.time}
                                 </span>
                               </div>
 
                               <div className="flex items-center space-x-3 text-xs">
-                                <div className="text-warm-muted font-medium text-[11px] flex items-center space-x-1.5">
-                                  <span className="text-blue-600 font-bold">{meal.proteinG}g</span>
+                                <div className="text-text-muted font-medium text-style-legal flex items-center space-x-1.5">
+                                  <span className="text-macro-protein font-bold">{meal.proteinG}g</span>
                                   <span>•</span>
                                   <span className="text-orange-500 font-bold">{meal.carbsG}g</span>
                                   <span>•</span>
-                                  <span className="text-emerald-700 font-bold">{meal.fatsG}g</span>
+                                  <span className="text-success font-bold">{meal.fatsG}g</span>
                                 </div>
-                                <span className="font-semibold text-xs text-warm-muted bg-warm-inner border border-warm-border px-2.5 py-1 rounded-lg">
+                                <span className="font-semibold text-xs text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-1 rounded-lg">
                                   {meal.kcal} kcal
                                 </span>
-                                <div className="text-warm-muted hover:text-warm-charcoal transition-colors">
+                                <div className="text-text-muted hover:text-text-primary transition-colors">
                                   {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                 </div>
                               </div>
                             </div>
 
                             {isExpanded && (
-                              <div className="px-3.5 pb-3.5 pt-2 border-t border-warm-border/60 bg-warm-card/60 space-y-2">
-                                <div className="flex items-center space-x-1.5 text-[10px] font-bold text-warm-muted uppercase tracking-wider">
-                                  <Utensils size={12} className="text-warm-emerald" />
+                              <div className="px-3.5 pb-3.5 pt-2 border-t border-border-subtle/60 bg-surface/60 space-y-2">
+                                <div className="flex items-center space-x-1.5 text-style-legal font-bold text-text-muted uppercase tracking-wider">
+                                  <Utensils size={12} className="text-success" />
                                   <span>Composição e Alimentos da Refeição</span>
                                 </div>
-                                <p className="text-xs text-warm-charcoal leading-relaxed bg-warm-inner p-2.5 rounded-lg border border-warm-border/70">
+                                <p className="text-xs text-text-primary leading-relaxed bg-surface-subtle p-2.5 rounded-control border border-border-subtle/70">
                                   {meal.itemsSummary || 'Alimentos selecionados de acordo com o plano nutricional.'}
                                 </p>
                               </div>
@@ -275,27 +275,27 @@ export default function DedicatedConsultationPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-warm-card border border-dashed border-warm-border p-6 rounded-2xl text-center space-y-2">
-              <Utensils size={24} className="mx-auto text-warm-muted/50" />
-              <p className="text-xs text-warm-muted italic">Nenhuma prescrição dietética foi associada a este dia de consulta.</p>
+            <Card className="bg-surface border border-dashed border-border-subtle p-6 rounded-surface text-center space-y-2">
+              <Utensils size={24} className="mx-auto text-text-muted/50" />
+              <p className="text-xs text-text-muted italic">Nenhuma prescrição dietética foi associada a este dia de consulta.</p>
             </Card>
           )}
 
           {/* Card 2: Avaliação Física & Composição Corporal */}
           {consultation.assessment ? (
-            <Card className="bg-warm-card border-warm-border shadow-sm rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-warm-border bg-warm-inner/40 flex items-center justify-between">
+            <Card className="bg-surface border-border-subtle shadow-floating rounded-surface overflow-hidden">
+              <div className="p-5 border-b border-border-subtle bg-surface-subtle/40 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
+                  <div className="p-2 rounded-control bg-primary-soft text-primary">
                     <Scale size={18} />
                   </div>
                   <div>
-                    <h2 className="font-bold text-sm text-warm-charcoal">Avaliação Física & Antropometria</h2>
-                    <span className="text-[11px] text-warm-muted">Medições corporais efetuadas nesta consulta</span>
+                    <h2 className="font-bold text-sm text-text-primary">Avaliação Física & Antropometria</h2>
+                    <span className="text-style-legal text-text-muted">Medições corporais efetuadas nesta consulta</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-warm-emerald flex items-center space-x-1 bg-warm-emerald/10 px-2.5 py-1 rounded-lg">
+                  <span className="text-xs font-bold text-success flex items-center space-x-1 bg-success/10 px-2.5 py-1 rounded-lg">
                     <TrendingDown size={12} />
                     <span>Evolução Favorável</span>
                   </span>
@@ -304,30 +304,30 @@ export default function DedicatedConsultationPage() {
               </div>
 
               <CardContent className="p-5">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Peso Corporal</span>
-                    <span className="font-black text-sm text-warm-charcoal">{consultation.assessment.weightKg} kg</span>
+                <div className="grid grid-cols-2 grid-cols-4 gap-3 text-center">
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Peso Corporal</span>
+                    <span className="font-bold text-sm text-text-primary">{consultation.assessment.weightKg} kg</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">% Gordura (BF)</span>
-                    <span className="font-black text-sm text-warm-charcoal">{consultation.assessment.bodyFatPercent}%</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">% Gordura (BF)</span>
+                    <span className="font-bold text-sm text-text-primary">{consultation.assessment.bodyFatPercent}%</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Massa Magra</span>
-                    <span className="font-black text-sm text-warm-charcoal">{consultation.assessment.muscleMassKg} kg</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Massa Magra</span>
+                    <span className="font-bold text-sm text-text-primary">{consultation.assessment.muscleMassKg} kg</span>
                   </div>
-                  <div className="p-3 bg-warm-inner border border-warm-border/70 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block">Cintura</span>
-                    <span className="font-black text-sm text-warm-charcoal">{consultation.assessment.waistCm} cm</span>
+                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control space-y-1">
+                    <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block">Cintura</span>
+                    <span className="font-bold text-sm text-text-primary">{consultation.assessment.waistCm} cm</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-warm-card border border-dashed border-warm-border p-6 rounded-2xl text-center space-y-2">
-              <Activity size={24} className="mx-auto text-warm-muted/50" />
-              <p className="text-xs text-warm-muted italic">Nenhuma medição física foi registrada nesta consulta.</p>
+            <Card className="bg-surface border border-dashed border-border-subtle p-6 rounded-surface text-center space-y-2">
+              <Activity size={24} className="mx-auto text-text-muted/50" />
+              <p className="text-xs text-text-muted italic">Nenhuma medição física foi registrada nesta consulta.</p>
             </Card>
           )}
 
@@ -337,29 +337,29 @@ export default function DedicatedConsultationPage() {
         <div className="space-y-6">
           
           {/* Card 3: Anotações & Prontuário da Consulta */}
-          <Card className="bg-warm-card border-warm-border shadow-sm rounded-2xl p-5 space-y-4">
-            <div className="flex items-center space-x-2 border-b border-warm-border pb-3">
-              <ClipboardList size={16} className="text-warm-emerald" />
-              <h3 className="font-bold text-xs text-warm-charcoal uppercase tracking-wider">
+          <Card className="bg-surface border-border-subtle shadow-floating rounded-surface p-5 space-y-4">
+            <div className="flex items-center space-x-2 border-b border-border-subtle pb-3">
+              <ClipboardList size={16} className="text-success" />
+              <h3 className="font-bold text-xs text-text-primary uppercase tracking-wider">
                 Prontuário & Conduta Nutricional
               </h3>
             </div>
 
             <div className="space-y-3">
               <div>
-                <span className="text-[11px] font-bold text-warm-muted block mb-1">Evolução Clínica</span>
-                <p className="text-xs text-warm-charcoal leading-relaxed bg-warm-inner p-3 rounded-xl border border-warm-border">
+                <span className="text-style-legal font-bold text-text-muted block mb-1">Evolução Clínica</span>
+                <p className="text-xs text-text-primary leading-relaxed bg-surface-subtle p-3 rounded-control border border-border-subtle">
                   {consultation.notes}
                 </p>
               </div>
 
               {consultation.prescribedSupplements && consultation.prescribedSupplements.length > 0 && (
                 <div className="pt-2 space-y-2">
-                  <span className="text-[11px] font-bold text-warm-muted block">Suplementação Prescrita</span>
+                  <span className="text-style-legal font-bold text-text-muted block">Suplementação Prescrita</span>
                   <div className="space-y-1.5">
                     {consultation.prescribedSupplements.map((supp, i) => (
-                      <div key={i} className="flex items-center space-x-2 text-xs text-warm-charcoal">
-                        <CheckCircle2 size={13} className="text-warm-emerald shrink-0" />
+                      <div key={i} className="flex items-center space-x-2 text-xs text-text-primary">
+                        <CheckCircle2 size={13} className="text-success shrink-0" />
                         <span>{supp}</span>
                       </div>
                     ))}
@@ -370,23 +370,23 @@ export default function DedicatedConsultationPage() {
           </Card>
 
           {/* Quick Metrics Summary */}
-          <Card className="bg-warm-card border-warm-border shadow-sm rounded-2xl p-5 space-y-3">
-            <h3 className="font-bold text-xs text-warm-charcoal uppercase tracking-wider">
+          <Card className="bg-surface border-border-subtle shadow-floating rounded-surface p-5 space-y-3">
+            <h3 className="font-bold text-xs text-text-primary uppercase tracking-wider">
               Resumo Diagnóstico
             </h3>
 
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1.5 border-b border-warm-border/60">
-                <span className="text-warm-muted font-medium">Índice de Massa Corporal (IMC)</span>
-                <span className="font-bold text-warm-charcoal">{bmi} kg/m²</span>
+              <div className="flex justify-between py-1.5 border-b border-border-subtle/60">
+                <span className="text-text-muted font-medium">Índice de Massa Corporal (IMC)</span>
+                <span className="font-bold text-text-primary">{bmi} kg/m²</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-warm-border/60">
-                <span className="text-warm-muted font-medium">Status do Plano</span>
-                <span className="font-bold text-warm-emerald">{consultation.diet?.status || 'N/A'}</span>
+              <div className="flex justify-between py-1.5 border-b border-border-subtle/60">
+                <span className="text-text-muted font-medium">Status do Plano</span>
+                <span className="font-bold text-success">{consultation.diet?.status || 'N/A'}</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-warm-muted font-medium">Data do Registro</span>
-                <span className="font-bold text-warm-charcoal">{consultation.date}</span>
+                <span className="text-text-muted font-medium">Data do Registro</span>
+                <span className="font-bold text-text-primary">{consultation.date}</span>
               </div>
             </div>
           </Card>
@@ -397,13 +397,13 @@ export default function DedicatedConsultationPage() {
 
       {/* Edit Physical Assessment Dialog */}
       <Dialog open={isEditAssessmentOpen} onOpenChange={setIsEditAssessmentOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-bold text-base text-warm-charcoal flex items-center space-x-2">
-              <Scale size={18} className="text-warm-emerald" />
+        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+              <Scale size={18} className="text-success" />
               <span>Editar Medidas da Avaliação Física</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-warm-muted">
+            <DialogDescription className="text-xs text-text-muted">
               Atualize as medições corporais efetuadas nesta consulta.
             </DialogDescription>
           </DialogHeader>
@@ -412,50 +412,50 @@ export default function DedicatedConsultationPage() {
             <form onSubmit={handleSaveAssessment} className="space-y-4 pt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Peso Corporal (kg)</label>
+                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso Corporal (kg)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.weightKg}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, weightKg: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">% Gordura Corporal (BF)</label>
+                  <label className="text-style-legal font-semibold text-text-muted block mb-1">% Gordura Corporal (BF)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.bodyFatPercent}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, bodyFatPercent: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Massa Magra (kg)</label>
+                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Massa Magra (kg)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.muscleMassKg}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, muscleMassKg: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Cintura (cm)</label>
+                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Cintura (cm)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.waistCm}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, waistCm: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
               </div>
@@ -472,7 +472,7 @@ export default function DedicatedConsultationPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="emerald"
+                  variant="primary"
                   size="sm"
                   className="flex-1 text-xs font-bold"
                 >

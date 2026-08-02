@@ -73,8 +73,8 @@ class SpecKitStatus:
     launcher: str | None = None
 
 
-def slugify(value: str, max_words: int = 5) -> str:
-    """Convert free text to a lowercase ASCII hyphenated slug limited to max_words."""
+def slugify(value: str, max_chars: int = 40) -> str:
+    """Convert free text to a lowercase ASCII hyphenated slug limited by length."""
     ascii_value = (
         unicodedata.normalize("NFKD", value)
         .encode("ascii", "ignore")
@@ -84,10 +84,9 @@ def slugify(value: str, max_words: int = 5) -> str:
     slug = re.sub(r"-+", "-", slug).strip("-")
     if not slug:
         return ""
-    words = slug.split("-")
-    if len(words) > max_words:
-        words = words[:max_words]
-    return "-".join(words)
+    if max_chars < 1:
+        return ""
+    return slug[:max_chars].rstrip("-")
 
 
 def resolve_project_root(explicit: Path | None, start: Path) -> Path:

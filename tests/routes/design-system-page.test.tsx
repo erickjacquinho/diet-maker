@@ -10,6 +10,8 @@ describe("canonical design system route", () => {
     expect(screen.getByRole("heading", { name: "Camadas de tokens" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Text styles" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Recipes e estados" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Estados can/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Categorias can/ })).toBeInTheDocument();
     expect(screen.getByText(/proposed:/)).toBeInTheDocument();
     expect(screen.getByText(/migration-required:/)).toBeInTheDocument();
   });

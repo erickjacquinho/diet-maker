@@ -6,14 +6,25 @@ const motion = "transition-colors duration-fast ease-standard motion-reduce:dura
 const button = cva(`inline-flex items-center justify-center gap-2 rounded-control border ${focus} ${motion} disabled:pointer-events-none disabled:opacity-disabled`, {
   variants: {
     variant: {
-      primary: "border-primary bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed",
+      primary: "border-primary bg-primary text-on-primary text-white hover:bg-primary-hover active:bg-primary-pressed",
       secondary: "border-border-control bg-surface text-text-primary hover:border-border-hover hover:bg-surface-hover",
-      ghost: "border-transparent bg-transparent text-primary hover:bg-primary-soft",
-      danger: "border-error bg-error text-on-primary hover:bg-error",
+      quiet: "border-transparent bg-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary",
+      destructive: "border-error bg-error text-on-error text-white hover:bg-error/90 active:bg-error",
+      ghost: "border-transparent bg-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary",
+      danger: "border-error bg-error text-on-error text-white hover:bg-error/90 active:bg-error",
+      default: "border-primary bg-primary text-on-primary text-white hover:bg-primary-hover active:bg-primary-pressed",
+      outline: "border-border-control bg-surface text-text-primary hover:border-border-hover hover:bg-surface-hover",
+      terracotta: "border-primary bg-primary text-on-primary text-white hover:bg-primary-hover",
+      emerald: "border-primary bg-primary text-on-primary text-white hover:bg-primary-hover",
+      link: "border-transparent bg-transparent text-primary underline-offset-4 hover:underline",
     },
     size: {
       compact: "h-control-compact px-3 text-style-button-label-compact font-semibold",
       standard: "h-control-standard px-4 text-style-button-label font-semibold",
+      default: "h-control-standard px-4 text-style-button-label font-semibold",
+      sm: "h-control-compact px-3 text-style-button-label-compact font-semibold",
+      lg: "h-control-standard px-6 text-style-button-label font-semibold",
+      icon: "h-control-standard w-control-standard p-0",
     },
     state: {
       default: "",
@@ -59,4 +70,38 @@ const tableRow = cva("min-h-table-row border-b border-border-divider", {
   defaultVariants: { state: "default" },
 });
 
-export const recipes = { button, iconButton: button, input, textarea: input, badge, card, tableRow } as const;
+const avatar = cva("inline-flex shrink-0 items-center justify-center rounded-round border text-style-body-small font-bold", {
+  variants: {
+    size: { compact: "h-8 w-8", standard: "h-9 w-9", large: "h-11 w-11" },
+    tone: {
+      primary: "border-primary bg-primary text-on-primary",
+      success: "border-success bg-success text-on-primary",
+      neutral: "border-border-hover bg-surface-subtle text-text-primary",
+    },
+  },
+  defaultVariants: { size: "standard", tone: "neutral" },
+});
+
+const progress = cva("w-full overflow-hidden rounded-round bg-border-subtle", {
+  variants: {
+    tone: {
+      primary: "[&>[role=progressbar]]:bg-primary",
+      success: "[&>[role=progressbar]]:bg-success",
+      error: "[&>[role=progressbar]]:bg-error",
+      warning: "[&>[role=progressbar]]:bg-warning",
+      info: "[&>[role=progressbar]]:bg-info",
+      protein: "[&>[role=progressbar]]:bg-macro-protein",
+      carbohydrate: "[&>[role=progressbar]]:bg-macro-carbohydrate",
+      fat: "[&>[role=progressbar]]:bg-macro-fat",
+    },
+    size: { compact: "h-2", standard: "h-3" },
+  },
+  defaultVariants: { tone: "success", size: "compact" },
+});
+
+export const recipes = { button, iconButton: button, input, textarea: input, badge, card, tableRow, avatar, progress } as const;
+
+export type ButtonRecipeProps = Parameters<typeof button>[0];
+export type InputRecipeProps = Parameters<typeof input>[0];
+export type BadgeRecipeProps = Parameters<typeof badge>[0];
+export type CardRecipeProps = Parameters<typeof card>[0];

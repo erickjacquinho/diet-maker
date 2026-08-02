@@ -26,7 +26,7 @@ Cada fase possui um gate bloqueante. O gate combina auditoria de legado no escop
 
 **Performance Goals**: Auditorias determinísticas de baseline e legado concluídas em até 5 segundos no repositório atual; nenhuma regressão perceptível de navegação, interação ou build em relação ao baseline funcional
 
-**Constraints**: `design-system/` é a única fonte visual normativa; `refs/`, `refs/UI/design-system-prd/` e `demo_dashboard.html` permanecem históricos; sem regra visual inventada localmente; sem mudanças de domínio; primitives em `src/components/ui` permanecem genéricos; nenhuma dependência de camada superior; cada fase bloqueia a seguinte quando encontrar legado ou falha de qualidade
+**Constraints**: `design-system/` é a única fonte visual normativa; `refs/` permanece histórico; o protótipo histórico foi removido; sem regra visual inventada localmente; sem mudanças de domínio; primitives em `src/components/ui` permanecem genéricos; nenhuma dependência de camada superior; cada fase bloqueia a seguinte quando encontrar legado ou falha de qualidade
 
 **Scale/Scope**: 39 componentes atuais catalogados (14 ui, 6 atoms, 14 molecules, 3 organisms, 2 templates), 4 componentes propostos preservados como propostos, 10 rotas/telas incluindo `/design-system`, layouts, tokens globais, Tailwind, registry e scripts/testes de governança; arquivos auxiliares e reexports de `src/components/` ficam cobertos pela auditoria, mas não alteram a contagem do catálogo.
 

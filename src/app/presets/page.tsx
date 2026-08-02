@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Plus, Search, Copy, Utensils, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -144,121 +145,114 @@ export default function PresetsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <Sparkles size={20} className="text-warm-emerald" />
-            <h1 className="font-black text-2xl text-warm-charcoal tracking-tight">Presets de Dietas</h1>
+            <Sparkles size={20} className="text-success" />
+            <h1 className="font-bold text-2xl text-text-primary tracking-tight">Presets de Dietas</h1>
           </div>
-          <p className="text-xs text-warm-muted mt-1 font-medium">
+          <p className="text-xs text-text-muted mt-1 font-medium">
             Biblioteca global de protocolos nutricionais completos para duplicação e aplicação rápida em pacientes.
           </p>
         </div>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          variant="emerald"
-          size="sm"
-          className="flex items-center space-x-2 shrink-0 font-bold"
-        >
-          <Plus size={16} />
-          <span>Criar Novo Preset</span>
-        </Button>
+        <CreateButton onClick={() => setIsModalOpen(true)}>
+          Criar Novo Preset
+        </CreateButton>
       </div>
 
       {/* Search Input */}
       {presets.length > 0 && (
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar preset por nome ou categoria (ex: Low Carb, Bulking)..."
-            className="pl-11 pr-4 bg-warm-card border-warm-border text-xs"
+            className="pl-11 pr-4 bg-surface border-border-subtle text-xs"
           />
         </div>
       )}
 
       {/* Empty State vs Presets Grid */}
       {filteredPresets.length === 0 ? (
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-12 text-center max-w-md mx-auto space-y-4 my-8">
+        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto space-y-4 my-8">
           <CardContent className="p-0 space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-warm-inner border border-warm-border flex items-center justify-center mx-auto text-warm-muted">
+            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <Sparkles size={24} />
             </div>
             <div>
-              <h3 className="font-black text-base text-warm-charcoal">Nenhum preset cadastrado</h3>
-              <p className="text-xs text-warm-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-base text-text-primary">Nenhum preset cadastrado</h3>
+              <p className="text-xs text-text-muted mt-1 leading-relaxed">
                 Sua biblioteca de protocolos inteiros está em branco. Crie seu primeiro preset de dieta reutilizável.
               </p>
             </div>
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              variant="emerald"
-              size="sm"
-              className="inline-flex items-center space-x-2 text-xs font-bold"
-            >
-              <Plus size={16} />
-              <span>Criar Primeiro Preset</span>
-            </Button>
+            <CreateButton onClick={() => setIsModalOpen(true)}>
+              Criar Primeiro Preset
+            </CreateButton>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-3 gap-5">
           {filteredPresets.map((preset) => (
             <Card
               key={preset.id}
-              className="bg-warm-card border-warm-border rounded-2xl p-5 hover:border-warm-charcoal/30 transition-all flex flex-col justify-between space-y-4"
+              className="bg-surface border-border-subtle rounded-surface p-5 hover:border-border-hover transition-colors duration-standard flex flex-col justify-between space-y-4"
             >
               <CardContent className="p-0 space-y-4 flex flex-col justify-between h-full">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Badge variant="default" className="text-[10px] font-extrabold bg-warm-emerald/10 text-warm-emerald">
+                    <Badge variant="default" className="text-style-legal font-bold bg-success/10 text-success">
                       {preset.category}
                     </Badge>
-                    <span className="text-[11px] font-semibold text-warm-muted flex items-center space-x-1">
+                    <span className="text-style-legal font-semibold text-text-muted flex items-center space-x-1">
                       <Utensils size={12} />
                       <span>{preset.mealsCount} refeições</span>
                     </span>
                   </div>
-                  <h3 className="font-bold text-sm text-warm-charcoal leading-snug">{preset.title}</h3>
-                  <p className="text-xs text-warm-muted leading-relaxed line-clamp-2">{preset.description}</p>
+                  <h3 className="font-bold text-sm text-text-primary leading-snug">{preset.title}</h3>
+                  <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{preset.description}</p>
                 </div>
 
                 {/* Macro Summary */}
-                <div className="grid grid-cols-4 gap-1.5 p-3 bg-warm-inner border border-warm-border rounded-xl text-center">
+                <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Kcal</span>
-                    <span className="font-black text-xs text-warm-charcoal">{preset.targetKcal}</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Kcal</span>
+                    <span className="font-bold text-xs text-text-primary">{preset.targetKcal}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Prot</span>
-                    <span className="font-black text-xs text-blue-600">
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Prot</span>
+                    <span className="font-bold text-xs text-macro-protein">
                       {preset.proteinMode === 'multiplicativo' ? `${preset.proteinValue ?? preset.proteinG}g/kg` : `${preset.proteinG}g`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Carb</span>
-                    <span className="font-black text-xs text-amber-700">
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Carb</span>
+                    <span className="font-bold text-xs text-warning">
                       {preset.carbsMode === 'multiplicativo' ? `${preset.carbsValue ?? preset.carbsG}g/kg` : `${preset.carbsG}g`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Gord</span>
-                    <span className="font-black text-xs text-emerald-700">
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Gord</span>
+                    <span className="font-bold text-xs text-success">
                       {preset.fatsMode === 'multiplicativo' ? `${preset.fatsValue ?? preset.fatsG}g/kg` : `${preset.fatsG}g`}
                     </span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between border-t border-warm-border">
-                  <span className="text-[10px] text-warm-muted font-medium">Reutilizável em 1 clique</span>
+                <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
+                  <span className="text-style-legal text-text-muted font-medium">Reutilizável em 1 clique</span>
                   <Button
                     size="sm"
+                    variant={copiedId === preset.id ? 'default' : 'primary'}
                     onClick={() => handleCopy(preset.id)}
-                    className="inline-flex items-center space-x-1.5 text-xs font-bold"
+                    className={`inline-flex items-center space-x-1.5 text-xs font-bold transition-colors duration-standard ${
+                      copiedId === preset.id
+                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating scale-[1.02]'
+                        : ''
+                    }`}
                   >
                     {copiedId === preset.id ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedId === preset.id ? 'Copiado!' : 'Aplicar Preset'}</span>
@@ -288,29 +282,29 @@ export default function PresetsPage() {
               setIsConfirmDiscardOpen(true);
             }
           }}
-          className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl max-h-[90vh] overflow-y-auto"
+          className="max-w-md bg-surface border-border-subtle p-6 rounded-surface max-h-[90vh] overflow-y-auto"
         >
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-warm-charcoal">Novo Preset de Dieta</DialogTitle>
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-text-primary">Novo Preset de Dieta</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleCreatePreset} className="space-y-3.5 pt-2">
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Título do Protocolo</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Título do Protocolo</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Protocolo Cutting Low Carb 1800kcal"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs"
+                className="bg-surface-subtle border-border-subtle text-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Categoria</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Categoria</label>
               <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,25 +318,25 @@ export default function PresetsPage() {
 
             {/* Macronutrientes Section Header */}
             <div className="space-y-2.5">
-              <label className="text-xs font-bold text-warm-charcoal block">Macronutrientes</label>
+              <label className="text-xs font-bold text-text-primary block">Macronutrientes</label>
 
               {/* Proteína */}
-              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-600 flex items-center space-x-1">
+                  <span className="text-xs font-bold text-macro-protein flex items-center space-x-1">
                     <span>Proteínas</span>
                     {formData.proteinMode === 'multiplicativo' && (
-                      <span className="text-[10px] text-warm-muted font-normal">({proteinG}g est.)</span>
+                      <span className="text-style-legal text-text-muted font-normal">({proteinG}g est.)</span>
                     )}
                   </span>
-                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                  <span className="text-style-legal font-semibold text-text-muted">Modo de Cálculo</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={formData.proteinMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, proteinMode: val })}
                   >
-                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -357,28 +351,28 @@ export default function PresetsPage() {
                     value={formData.proteinValue}
                     onChange={(e) => setFormData({ ...formData, proteinValue: Number(e.target.value) })}
                     placeholder={formData.proteinMode === 'multiplicativo' ? 'ex: 2.0' : 'ex: 160'}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
                   />
                 </div>
               </div>
 
               {/* Carboidratos */}
-              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-700 flex items-center space-x-1">
+                  <span className="text-xs font-bold text-warning flex items-center space-x-1">
                     <span>Carboidratos</span>
                     {formData.carbsMode === 'multiplicativo' && (
-                      <span className="text-[10px] text-warm-muted font-normal">({carbsG}g est.)</span>
+                      <span className="text-style-legal text-text-muted font-normal">({carbsG}g est.)</span>
                     )}
                   </span>
-                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                  <span className="text-style-legal font-semibold text-text-muted">Modo de Cálculo</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={formData.carbsMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, carbsMode: val })}
                   >
-                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -393,28 +387,28 @@ export default function PresetsPage() {
                     value={formData.carbsValue}
                     onChange={(e) => setFormData({ ...formData, carbsValue: Number(e.target.value) })}
                     placeholder={formData.carbsMode === 'multiplicativo' ? 'ex: 3.0' : 'ex: 200'}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
                   />
                 </div>
               </div>
 
               {/* Gorduras */}
-              <div className="p-2.5 bg-warm-inner border border-warm-border rounded-xl space-y-1.5">
+              <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-700 flex items-center space-x-1">
+                  <span className="text-xs font-bold text-success flex items-center space-x-1">
                     <span>Gorduras</span>
                     {formData.fatsMode === 'multiplicativo' && (
-                      <span className="text-[10px] text-warm-muted font-normal">({fatsG}g est.)</span>
+                      <span className="text-style-legal text-text-muted font-normal">({fatsG}g est.)</span>
                     )}
                   </span>
-                  <span className="text-[10px] font-semibold text-warm-muted">Modo de Cálculo</span>
+                  <span className="text-style-legal font-semibold text-text-muted">Modo de Cálculo</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={formData.fatsMode}
                     onValueChange={(val: MacroMode) => setFormData({ ...formData, fatsMode: val })}
                   >
-                    <SelectTrigger className="bg-warm-card border-warm-border text-xs h-8">
+                    <SelectTrigger className="bg-surface border-border-subtle text-xs h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -429,7 +423,7 @@ export default function PresetsPage() {
                     value={formData.fatsValue}
                     onChange={(e) => setFormData({ ...formData, fatsValue: Number(e.target.value) })}
                     placeholder={formData.fatsMode === 'multiplicativo' ? 'ex: 0.8' : 'ex: 60'}
-                    className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+                    className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
                   />
                 </div>
               </div>
@@ -437,40 +431,40 @@ export default function PresetsPage() {
 
             {/* Peso de Referência (visível se algum macro for multiplicativo) */}
             {hasMultiplicative && (
-              <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between space-x-2">
+              <div className="p-2.5 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between space-x-2">
                 <div>
-                  <label className="text-xs font-bold text-warm-charcoal block">Peso de Referência (kg)</label>
-                  <span className="text-[10px] text-warm-muted font-medium block">Estimativa para cálculo total (g/kg × kg)</span>
+                  <label className="text-xs font-bold text-text-primary block">Peso de Referência (kg)</label>
+                  <span className="text-style-legal text-text-muted font-medium block">Estimativa para cálculo total (g/kg × kg)</span>
                 </div>
                 <Input
                   type="number"
                   min={1}
                   value={formData.referenceWeight}
                   onChange={(e) => setFormData({ ...formData, referenceWeight: Number(e.target.value) })}
-                  className="bg-warm-card border-warm-border text-xs font-bold text-center w-20 h-8 shrink-0"
+                  className="bg-surface border-border-subtle text-xs font-bold text-center w-20 h-8 shrink-0"
                 />
               </div>
             )}
 
             {/* Auto-calculated Kcal Display */}
-            <div className="p-3 bg-warm-inner border border-warm-border rounded-xl flex items-center justify-between">
+            <div className="p-3 bg-surface-subtle border border-border-subtle rounded-control flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-warm-charcoal block">Calorias Totais (Calculadas)</span>
-                <span className="text-[10px] text-warm-muted font-medium block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
+                <span className="text-xs font-bold text-text-primary block">Calorias Totais (Calculadas)</span>
+                <span className="text-style-legal text-text-muted font-medium block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
               </div>
-              <Badge variant="secondary" className="font-black text-sm text-warm-emerald bg-warm-emerald/10 border-none px-3 py-1 shrink-0">
+              <Badge variant="secondary" className="font-bold text-sm text-success bg-success-soft border-none px-3 py-1 shrink-0">
                 {calculatedKcal} kcal
               </Badge>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Descrição Breve</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Descrição Breve</label>
               <textarea
                 rows={2}
                 placeholder="Orientações e indicações deste preset..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 bg-warm-inner border border-warm-border rounded-xl text-xs text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-warm-charcoal resize-none"
+                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
 
@@ -480,11 +474,11 @@ export default function PresetsPage() {
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
                 size="sm"
-                className="flex-1 text-xs"
+                className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
+              <Button type="submit" variant="primary" size="sm" className="flex-1">
                 Salvar Preset
               </Button>
             </div>
@@ -494,20 +488,20 @@ export default function PresetsPage() {
 
       {/* Modal de Confirmação de Descarte ao Clicar Fora */}
       <Dialog open={isConfirmDiscardOpen} onOpenChange={setIsConfirmDiscardOpen}>
-        <DialogContent className="sm:max-w-sm bg-warm-card border-warm-border p-6 rounded-2xl">
+        <DialogContent className="max-w-sm bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader>
-            <DialogTitle className="font-black text-base text-warm-charcoal">Descartar alterações?</DialogTitle>
-            <div className="text-xs text-warm-secondary pt-1">
+            <DialogTitle className="font-bold text-base text-text-primary">Descartar alterações?</DialogTitle>
+            <div className="text-xs text-text-secondary pt-1">
               Você possui dados preenchidos no formulário de preset. Se fechar agora, todas as informações não salvas serão perdidas.
             </div>
           </DialogHeader>
           <div className="pt-4 flex space-x-2">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => setIsConfirmDiscardOpen(false)}
-              className="flex-1 text-xs font-bold"
+              className="flex-1"
             >
               Continuar Editando
             </Button>
@@ -532,7 +526,7 @@ export default function PresetsPage() {
                   description: '',
                 });
               }}
-              className="flex-1 text-xs font-bold"
+              className="flex-1"
             >
               Descartar
             </Button>

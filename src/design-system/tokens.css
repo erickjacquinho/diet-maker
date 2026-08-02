@@ -82,15 +82,19 @@
   --sys-color-info: var(--ref-color-info-500);
   --sys-color-info-soft: var(--ref-color-info-50);
   --sys-color-info-border: var(--ref-color-info-200);
+  --sys-color-on-info: var(--ref-color-warm-0);
   --sys-color-success: var(--ref-color-success-500);
   --sys-color-success-soft: var(--ref-color-success-50);
   --sys-color-success-border: var(--ref-color-success-200);
+  --sys-color-on-success: var(--ref-color-warm-0);
   --sys-color-warning: var(--ref-color-warning-500);
   --sys-color-warning-soft: var(--ref-color-warning-50);
   --sys-color-warning-border: var(--ref-color-warning-200);
+  --sys-color-on-warning: var(--ref-color-warm-0);
   --sys-color-error: var(--ref-color-error-500);
   --sys-color-error-soft: var(--ref-color-error-50);
   --sys-color-error-border: var(--ref-color-error-200);
+  --sys-color-on-error: var(--ref-color-warm-0);
   --sys-color-macro-protein: var(--ref-color-protein-500);
   --sys-color-macro-protein-soft: var(--ref-color-protein-50);
   --sys-color-macro-protein-border: var(--ref-color-protein-200);
@@ -100,6 +104,7 @@
   --sys-color-macro-fat: var(--ref-color-fat-500);
   --sys-color-macro-fat-soft: var(--ref-color-fat-50);
   --sys-color-macro-fat-border: var(--ref-color-fat-200);
+  --sys-space-component: var(--ref-space-4);
   --sys-radius-compact: var(--ref-radius-4);
   --sys-radius-control: var(--ref-radius-6);
   --sys-radius-surface: var(--ref-radius-8);

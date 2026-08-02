@@ -57,7 +57,7 @@
 
 ## Decision 6 — Histórico preservado fora do runtime
 
-**Decision**: `refs/UI/`, `refs/UI/design-system-prd/` e `demo_dashboard.html` permanecem versionados como históricos, sem importação nem participação em gates de runtime.
+**Decision**: `refs/UI/` e `refs/UI/design-system-prd/` permanecem versionados como históricos, sem importação nem participação em gates de runtime; o protótipo histórico foi removido.
 
 **Rationale**: Preserva rastreabilidade sem permitir que fontes substituídas concorram com `design-system/`.
 
@@ -69,7 +69,7 @@
 
 ## Regras operacionais aplicáveis à execução
 
-- `design-system/` é a única fonte visual normativa; `refs/` e `demo_dashboard.html` permanecem históricos e somente leitura.
+- `design-system/` é a única fonte visual normativa; `refs/` permanece histórico e somente leitura.
 - O alvo é web desktop a partir de 1024px, sem mobile, tablet ou dark mode.
 - A dependência de UI é estritamente descendente: `ui → atoms → molecules → organisms → templates → app`; nenhuma camada importa uma camada superior.
 - Primitives em `src/components/ui/` permanecem genéricos, sem regras de domínio, dados nutricionais ou estilização ad hoc; especializações vivem em wrappers catalogados.

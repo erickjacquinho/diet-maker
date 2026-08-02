@@ -75,19 +75,19 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 ### Tests first
 
-- [ ] T030 [P] [US2] Criar testes de contrato de API e estados para os 14 primitives em `tests/components/ui/` antes de editar os componentes [FR-007] [FR-008] [skill: $tdd]
-- [ ] T031 [P] [US2] Criar testes de estados para os 6 atoms em `tests/components/atoms/` antes de editar os componentes [FR-007] [FR-008] [skill: $tdd]
-- [ ] T032 [P] [US2] Criar testes de isolamento Shadcn em `tests/components/ui/shadcn-isolation.test.ts` para bloquear imports de atoms, molecules, domínio e página [FR-010] [skill: $shadcn]
+- [X] T030 [P] [US2] Criar testes de contrato de API e estados para os 14 primitives em `tests/components/ui/` antes de editar os componentes [FR-007] [FR-008] [skill: $tdd]
+- [X] T031 [P] [US2] Criar testes de estados para os 6 atoms em `tests/components/atoms/` antes de editar os componentes [FR-007] [FR-008] [skill: $tdd]
+- [X] T032 [P] [US2] Criar testes de isolamento Shadcn em `tests/components/ui/shadcn-isolation.test.ts` para bloquear imports de atoms, molecules, domínio e página [FR-010] [skill: $shadcn]
 
 ### Implementation
 
-- [ ] T033 [P] [US2] Migrar os primitives de `src/components/ui/` para `src/design-system/recipes.ts`, preservando semântica e API pública [FR-007] [FR-009] [skill: $shadcn]
-- [ ] T034 [P] [US2] Migrar os atoms de `src/components/atoms/` para tokens, text styles e recipes canônicos, sem classes visuais livres [FR-007] [FR-009] [skill: $ui-styling]
-- [ ] T035 [US2] Implementar estados default, hover, pressed, focus-visible, disabled, loading, error, empty e read-only aplicáveis em `src/components/ui/` e `src/components/atoms/` [FR-008] [skill: $design-system]
-- [ ] T036 [US2] Atualizar testes de acessibilidade e teclado para ui/atoms em `tests/components/ui/accessibility.test.tsx` e `tests/components/atoms/accessibility.test.tsx` [FR-008] [FR-019] [skill: $webapp-testing]
-- [ ] T037 [US2] Executar auditoria LEG001–LEG010 limitada a `src/components/ui/` e `src/components/atoms/`, `npm run audit:atomic-design`, type-check, lint e testes [FR-020] [SC-001] [skill: $speckit-implement]
-- [ ] T038 [US2] Fazer revisão visual desktop e axe dos ui/atoms e salvar evidência em `.artifacts/design-system/stage-2-ui-atoms.json` [FR-019] [SC-006] [skill: $webapp-testing]
-- [ ] T039 [US2] Atualizar `design-system/components/registry.json` com 20 registros conformes e avançar checkpoint somente se T030–T038 estiverem verdes [FR-022] [FR-023] [skill: $design-system]
+- [X] T033 [P] [US2] Migrar os primitives de `src/components/ui/` para `src/design-system/recipes.ts`, preservando semântica e API pública [FR-007] [FR-009] [skill: $shadcn]
+- [X] T034 [P] [US2] Migrar os atoms de `src/components/atoms/` para tokens, text styles e recipes canônicos, sem classes visuais livres [FR-007] [FR-009] [skill: $ui-styling]
+- [X] T035 [US2] Implementar estados default, hover, pressed, focus-visible, disabled, loading, error, empty e read-only aplicáveis em `src/components/ui/` e `src/components/atoms/` [FR-008] [skill: $design-system]
+- [X] T036 [US2] Atualizar testes de acessibilidade e teclado para ui/atoms em `tests/components/ui/accessibility.test.tsx` e `tests/components/atoms/accessibility.test.tsx` [FR-008] [FR-019] [skill: $webapp-testing]
+- [X] T037 [US2] Executar auditoria LEG001–LEG010 limitada a `src/components/ui/` e `src/components/atoms/`, `npm run audit:atomic-design`, type-check, lint e testes [FR-020] [SC-001] [skill: $speckit-implement]
+- [X] T038 [US2] Fazer revisão visual desktop e axe dos ui/atoms e salvar evidência em `.artifacts/design-system/stage-2-ui-atoms.json` [FR-019] [SC-006] [skill: $webapp-testing]
+- [X] T039 [US2] Atualizar `design-system/components/registry.json` com 20 registros conformes e avançar checkpoint somente se T030–T038 estiverem verdes [FR-022] [FR-023] [skill: $design-system]
 
 ---
 
@@ -99,20 +99,20 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 ### Tests first
 
-- [ ] T040 [P] [US3] Criar testes de composição para as 14 molecules em `tests/components/molecules/` antes da migração [FR-011] [FR-012] [skill: $tdd]
-- [ ] T041 [P] [US3] Criar testes de integração para 3 organisms e 2 templates em `tests/components/organisms/` e `tests/components/templates/` [FR-011] [FR-012] [skill: $tdd]
-- [ ] T042 [P] [US3] Criar cenários de Dialog, Sheet, Popover, Select, Sidebar e modais nutricionais em `tests/components/overlays-accessibility.test.tsx` [FR-012] [FR-019] [skill: $webapp-testing]
+- [X] T040 [P] [US3] Criar testes de composição para as 14 molecules em `tests/components/molecules/` antes da migração [FR-011] [FR-012] [skill: $tdd]
+- [X] T041 [P] [US3] Criar testes de integração para 3 organisms e 2 templates em `tests/components/organisms/` e `tests/components/templates/` [FR-011] [FR-012] [skill: $tdd]
+- [X] T042 [P] [US3] Criar cenários de Dialog, Sheet, Popover, Select, Sidebar e modais nutricionais em `tests/components/overlays-accessibility.test.tsx` [FR-012] [FR-019] [skill: $webapp-testing]
 
 ### Implementation
 
-- [ ] T043 [P] [US3] Migrar os 14 arquivos de `src/components/molecules/` por categoria e perfil, removendo classes legadas e valores visuais locais [FR-011] [skill: $ui-styling]
-- [ ] T044 [P] [US3] Migrar os 3 arquivos de `src/components/organisms/` para compor apenas primitives, atoms e molecules permitidos [FR-011] [FR-013] [skill: $frontend-architecture-mindset]
-- [ ] T045 [P] [US3] Migrar os 2 arquivos de `src/components/templates/` preservando shell, navegação e slots funcionais [FR-011] [FR-013] [skill: $nextjs-fullstack-master]
-- [ ] T046 [US3] Aplicar recipes de categoria/perfil em `src/components/molecules/`, `src/components/organisms/` e `src/components/templates/`, com estados de loading/error/empty/read-only e tokens de macro sem inventar cor local [FR-011] [FR-012] [skill: $design-system]
-- [ ] T047 [US3] Validar focus trap, dismissal, keyboard navigation, nome/role/value e foco visível nos overlays em `tests/components/overlays-accessibility.test.tsx` [FR-012] [FR-019] [skill: $webapp-testing]
-- [ ] T048 [US3] Executar auditoria LEG001–LEG010 no escopo molecules/organisms/templates, `audit:atomic-design`, type-check, lint e testes [FR-020] [SC-001] [skill: $speckit-implement]
-- [ ] T049 [US3] Fazer revisão visual desktop de compostos e registrar evidência em `.artifacts/design-system/stage-3-composites.json` [FR-019] [SC-006] [skill: $webapp-testing]
-- [ ] T050 [US3] Sincronizar `design-system/components/registry.json` com camada, perfil, dependências e lifecycle dos 19 componentes compostos; avançar somente com gate verde [FR-013] [FR-022] [skill: $design-system]
+- [X] T043 [P] [US3] Migrar os 14 arquivos de `src/components/molecules/` por categoria e perfil, removendo classes legadas e valores visuais locais [FR-011] [skill: $ui-styling]
+- [X] T044 [P] [US3] Migrar os 3 arquivos de `src/components/organisms/` para compor apenas primitives, atoms e molecules permitidos [FR-011] [FR-013] [skill: $frontend-architecture-mindset]
+- [X] T045 [P] [US3] Migrar os 2 arquivos de `src/components/templates/` preservando shell, navegação e slots funcionais [FR-011] [FR-013] [skill: $nextjs-fullstack-master]
+- [X] T046 [US3] Aplicar recipes de categoria/perfil em `src/components/molecules/`, `src/components/organisms/` e `src/components/templates/`, com estados de loading/error/empty/read-only e tokens de macro sem inventar cor local [FR-011] [FR-012] [skill: $design-system]
+- [X] T047 [US3] Validar focus trap, dismissal, keyboard navigation, nome/role/value e foco visível nos overlays em `tests/components/overlays-accessibility.test.tsx` [FR-012] [FR-019] [skill: $webapp-testing]
+- [X] T048 [US3] Executar auditoria LEG001–LEG010 no escopo molecules/organisms/templates, `audit:atomic-design`, type-check, lint e testes [FR-020] [SC-001] [skill: $speckit-implement]
+- [X] T049 [US3] Fazer revisão visual desktop de compostos e registrar evidência em `.artifacts/design-system/stage-3-composites.json` [FR-019] [SC-006] [skill: $webapp-testing]
+- [X] T050 [US3] Sincronizar `design-system/components/registry.json` com camada, perfil, dependências e lifecycle dos 19 componentes compostos; avançar somente com gate verde [FR-013] [FR-022] [skill: $design-system]
 
 ---
 
@@ -124,21 +124,21 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 ### Tests first
 
-- [ ] T051 [P] [US4] Criar matriz de estados por rota em `tests/routes/route-acceptance-matrix.ts` para default, loading, vazio, erro e read-only aplicáveis [FR-015] [FR-016] [skill: $tdd]
-- [ ] T052 [P] [US4] Criar testes de navegação, links e contratos de URL em `tests/routes/navigation.test.tsx` [FR-016] [FR-018] [skill: $tdd]
-- [ ] T053 [P] [US4] Criar smoke tests das 10 rotas em `tests/routes/route-smoke.test.tsx` com captura de erros de runtime [FR-015] [FR-018] [skill: $webapp-testing]
+- [X] T051 [P] [US4] Criar matriz de estados por rota em `tests/routes/route-acceptance-matrix.ts` para default, loading, vazio, erro e read-only aplicáveis [FR-015] [FR-016] [skill: $tdd]
+- [X] T052 [P] [US4] Criar testes de navegação, links e contratos de URL em `tests/routes/navigation.test.tsx` [FR-016] [FR-018] [skill: $tdd]
+- [X] T053 [P] [US4] Criar smoke tests das 10 rotas em `tests/routes/route-smoke.test.tsx` com captura de erros de runtime [FR-015] [FR-018] [skill: $webapp-testing]
 
 ### Implementation
 
-- [ ] T054 [US4] Migrar `src/app/layout.tsx` e layouts aplicáveis para tokens, recipes e providers canônicos sem mudar metadata ou domínio [FR-014] [FR-017] [skill: $nextjs-fullstack-master]
-- [ ] T055 [P] [US4] Migrar `src/app/page.tsx`, `src/app/alimentos/page.tsx`, `src/app/pacientes/page.tsx`, `src/app/presets/page.tsx`, `src/app/receitas/page.tsx` e `src/app/refeicoes-prontas/page.tsx` [FR-014] [FR-015] [skill: $ui-styling]
-- [ ] T056 [P] [US4] Migrar `src/app/pacientes/[id]/page.tsx`, `src/app/pacientes/[id]/consulta/[date]/page.tsx` e `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx` [FR-014] [FR-015] [skill: $ui-styling]
-- [ ] T057 [US4] Substituir classes `warm-*`, text sizes arbitrários, radius/sombra/peso/breakpoint/transition legados em todo `src/app/` por APIs canônicas [FR-014] [FR-020] [skill: $design-system]
-- [ ] T058 [US4] Validar busca, filtros, formulários, navegação, persistência, dados nutricionais e URLs sem alterar regras de negócio em `tests/routes/behavior-preservation.test.tsx` [FR-017] [skill: $tdd]
-- [ ] T059 [US4] Executar auditoria de legado por rota e global, `npm run verify:links`, type-check, lint, testes e `npm run build` [FR-020] [SC-001] [SC-006] [skill: $speckit-implement]
-- [ ] T060 [US4] Executar revisão visual desktop, axe, teclado/foco e estados críticos das 10 rotas; registrar um `RouteAcceptanceRecord` por rota em `.artifacts/design-system/routes/` [FR-015] [FR-019] [FR-024] [skill: $webapp-testing]
-- [ ] T061 [US4] Atualizar `design-system/components/registry.json` e o catálogo de telas com as evidências das 10 rotas, sem marcar proposta como implementada [FR-022] [FR-024] [skill: $design-system]
-- [ ] T062 [US4] Avançar checkpoint para `route-migrated` somente quando cada `RouteAcceptanceRecord` estiver completo e todos os gates passarem [FR-023] [SC-011] [skill: $speckit-implement]
+- [X] T054 [US4] Migrar `src/app/layout.tsx` e layouts aplicáveis para tokens, recipes e providers canônicos sem mudar metadata ou domínio [FR-014] [FR-017] [skill: $nextjs-fullstack-master]
+- [X] T055 [P] [US4] Migrar `src/app/page.tsx`, `src/app/alimentos/page.tsx`, `src/app/pacientes/page.tsx`, `src/app/presets/page.tsx`, `src/app/receitas/page.tsx` e `src/app/refeicoes-prontas/page.tsx` [FR-014] [FR-015] [skill: $ui-styling]
+- [X] T056 [P] [US4] Migrar `src/app/pacientes/[id]/page.tsx`, `src/app/pacientes/[id]/consulta/[date]/page.tsx` e `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx` [FR-014] [FR-015] [skill: $ui-styling]
+- [X] T057 [US4] Substituir classes `warm-*`, text sizes arbitrários, radius/sombra/peso/breakpoint/transition legados em todo `src/app/` por APIs canônicas [FR-014] [FR-020] [skill: $design-system]
+- [X] T058 [US4] Validar busca, filtros, formulários, navegação, persistência, dados nutricionais e URLs sem alterar regras de negócio em `tests/routes/behavior-preservation.test.tsx` [FR-017] [skill: $tdd]
+- [X] T059 [US4] Executar auditoria de legado por rota e global, `npm run verify:links`, type-check, lint, testes e `npm run build` [FR-020] [SC-001] [SC-006] [skill: $speckit-implement]
+- [X] T060 [US4] Executar revisão visual desktop, axe, teclado/foco e estados críticos das 10 rotas; registrar um `RouteAcceptanceRecord` por rota em `.artifacts/design-system/routes/` [FR-015] [FR-019] [FR-024] [skill: $webapp-testing]
+- [X] T061 [US4] Atualizar `design-system/components/registry.json` e o catálogo de telas com as evidências das 10 rotas, sem marcar proposta como implementada [FR-022] [FR-024] [skill: $design-system]
+- [X] T062 [US4] Avançar checkpoint para `route-migrated` somente quando cada `RouteAcceptanceRecord` estiver completo e todos os gates passarem [FR-023] [SC-011] [skill: $speckit-implement]
 
 ---
 
@@ -148,16 +148,16 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **Independent Test**: auditor global encontra zero findings e falha de forma determinística quando qualquer fixture legada é inserida.
 
-- [ ] T063 [P] [US5] Consolidar padrões e exceções autorizadas em `scripts/design-system-legacy-rules.mjs`, com códigos LEG001–LEG010 e mensagens acionáveis [FR-021] [skill: $code-reviewer-expert]
-- [ ] T064 [US5] Implementar `scripts/verify-design-system-legacy.mjs` com flags `--json` e `--paths`, JSON estável e exit codes 0/1/2 conforme contrato [FR-021] [skill: $code-reviewer-expert]
-- [ ] T065 [P] [US5] Adicionar teste de integração do auditor em `tests/design-system/legacy-audit.test.ts` cobrindo cada fixture e o repositório real [FR-021] [skill: $tdd]
-- [ ] T066 [US5] Remover arquivos, exports, aliases e helpers antigos sem consumidor em `src/design-system/`, `src/app/`, `src/components/` e `tailwind.config.js` [FR-020] [FR-025] [skill: $design-system]
-- [ ] T067 [US5] Atualizar scripts `package.json` com `verify:design-system-legacy` e integrar o auditor aos gates sem remover verificações existentes [FR-021] [FR-026] [skill: $speckit-implement]
-- [ ] T068 [US5] Executar o auditor contra `tests/fixtures/design-system-legacy/` e confirmar que cada LEG001–LEG010 falha antes de restaurá-las, sem alterar código histórico [FR-021] [SC-007] [skill: $tdd]
-- [ ] T069 [US5] Executar `node scripts/verify-design-system-legacy.mjs --json` no repositório inteiro e confirmar zero findings em código, config, testes de produção e DOM de smoke [FR-020] [SC-001] [skill: $speckit-implement]
-- [ ] T070 [US5] Executar type-check, lint, test, build, links, `audit:atomic-design` e `verify:design-system --strict`; salvar `.artifacts/design-system/stage-8-removal.json` [SC-006] [skill: $speckit-implement]
-- [ ] T071 [US5] Registrar todos os itens antigos como `removed`/`deprecated` com evidência em `design-system/components/registry.json` e `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-022] [FR-025] [skill: $design-system]
-- [ ] T072 [US5] Avançar checkpoint para `homologated-candidate` somente com zero findings e teste negativo reproduzível [FR-023] [SC-011] [skill: $speckit-implement]
+- [X] T063 [P] [US5] Consolidar padrões e exceções autorizadas em `scripts/design-system-legacy-rules.mjs`, com códigos LEG001–LEG010 e mensagens acionáveis [FR-021] [skill: $code-reviewer-expert]
+- [X] T064 [US5] Implementar `scripts/verify-design-system-legacy.mjs` com flags `--json` e `--paths`, JSON estável e exit codes 0/1/2 conforme contrato [FR-021] [skill: $code-reviewer-expert]
+- [X] T065 [P] [US5] Adicionar teste de integração do auditor em `tests/design-system/legacy-audit.test.ts` cobrindo cada fixture e o repositório real [FR-021] [skill: $tdd]
+- [X] T066 [US5] Remover arquivos, exports, aliases e helpers antigos sem consumidor em `src/design-system/`, `src/app/`, `src/components/` e `tailwind.config.js` [FR-020] [FR-025] [skill: $design-system]
+- [X] T067 [US5] Atualizar scripts `package.json` com `verify:design-system-legacy` e integrar o auditor aos gates sem remover verificações existentes [FR-021] [FR-026] [skill: $speckit-implement]
+- [X] T068 [US5] Executar o auditor contra `tests/fixtures/design-system-legacy/` e confirmar que cada LEG001–LEG010 falha antes de restaurá-las, sem alterar código histórico [FR-021] [SC-007] [skill: $tdd]
+- [X] T069 [US5] Executar `node scripts/verify-design-system-legacy.mjs --json` no repositório inteiro e confirmar zero findings em código, config, testes de produção e DOM de smoke [FR-020] [SC-001] [skill: $speckit-implement]
+- [X] T070 [US5] Executar type-check, lint, test, build, links, `audit:atomic-design` e `verify:design-system --strict`; salvar `.artifacts/design-system/stage-8-removal.json` [SC-006] [skill: $speckit-implement]
+- [X] T071 [US5] Registrar todos os itens antigos como `removed`/`deprecated` com evidência em `design-system/components/registry.json` e `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-022] [FR-025] [skill: $design-system]
+- [X] T072 [US5] Avançar checkpoint para `homologated-candidate` somente com zero findings e teste negativo reproduzível [FR-023] [SC-011] [skill: $speckit-implement]
 
 ---
 
@@ -167,14 +167,14 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **Independent Test**: o quickstart executado em ambiente limpo produz os mesmos resultados e evidencia SC-001–SC-012.
 
-- [ ] T073 [P] [US6] Criar o formato final de evidência em `.artifacts/design-system/manifest.schema.json` para baseline, componentes, rotas, findings e checkpoints [FR-022] [FR-023] [skill: $design-system]
+- [X] T073 [P] [US6] Criar o formato final de evidência em `.artifacts/design-system/manifest.schema.json` para baseline, componentes, rotas, findings e checkpoints [FR-022] [FR-023] [skill: $design-system]
 - [X] T074 [P] [US6] Criar `tests/routes/design-system-page.test.tsx` para garantir que `/design-system` exibe implementado/proposto/migration-required sem confusão [FR-024] [skill: $tdd]
 - [X] T075 [US6] Reescrever `src/app/design-system/page.tsx` para consumir exclusivamente `src/design-system/index.ts` e exibir tokens, text styles, recipes, estados e categorias [FR-024] [skill: $design-system]
-- [ ] T076 [US6] Executar o gate de Stage 7 e depois o quickstart completo de `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` em ambiente limpo; salvar o manifest em `.artifacts/design-system/final-manifest.json` [FR-024] [SC-006] [SC-011] [skill: $speckit-implement]
-- [ ] T077 [US6] Fazer smoke test manual das 10 rotas, revisão visual desktop, axe, teclado/foco, contraste e overlays; anexar registros em `.artifacts/design-system/final-visual-a11y.json` [FR-019] [SC-005] [skill: $webapp-testing]
-- [ ] T078 [US6] Confirmar que nenhum arquivo em `refs/`, `refs/UI/`, `refs/UI/design-system-prd/` ou `demo_dashboard.html` foi alterado e registrar hash/escopo em `.artifacts/design-system/historical-integrity.json` [FR-026] [SC-010] [skill: $code-reviewer-expert]
-- [ ] T079 [US6] Validar SC-001–SC-012 contra `spec.md`, `plan.md`, `data-model.md`, contratos e manifest final; listar qualquer critério não comprovado em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` [SC-001] [SC-012] [skill: $speckit-analyze]
-- [ ] T080 [US6] Criar checkpoint final, registrar estado `homologated` e impedir conclusão se qualquer evidência estiver ausente em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-023] [SC-011] [skill: $git-commit]
+- [X] T076 [US6] Executar o gate de Stage 7 e depois o quickstart completo de `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` em ambiente limpo; salvar o manifest em `.artifacts/design-system/final-manifest.json` [FR-024] [SC-006] [SC-011] [skill: $speckit-implement]
+- [X] T077 [US6] Fazer smoke test manual das 10 rotas, revisão visual desktop, axe, teclado/foco, contraste e overlays; anexar registros em `.artifacts/design-system/final-visual-a11y.json` [FR-019] [SC-005] [skill: $webapp-testing]
+- [X] T078 [US6] Confirmar a integridade dos arquivos em `refs/`, registrar hash/escopo em `.artifacts/design-system/historical-integrity.json` e documentar a remoção intencional do protótipo histórico [FR-026] [SC-010] [skill: $code-reviewer-expert]
+- [X] T079 [US6] Validar SC-001–SC-012 contra `spec.md`, `plan.md`, `data-model.md`, contratos e manifest final; listar qualquer critério não comprovado em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` [SC-001] [SC-012] [skill: $speckit-analyze]
+- [X] T080 [US6] Criar checkpoint final, registrar estado `homologated` e impedir conclusão se qualquer evidência estiver ausente em `specs/31-07-26-criar-um-sdd-completo-para/data-model.md` [FR-023] [SC-011] [skill: $git-commit]
 
 ---
 
@@ -182,20 +182,20 @@ description: "Tarefas para migração integral do runtime legado para o Design S
 
 **Purpose**: fechar documentação, prevenir regressões e repetir o gate completo antes da entrega.
 
-- [ ] T081 [P] Atualizar `design-system/README.md` apenas se for necessário documentar o contrato de runtime implementado, sem duplicar regras normativas [FR-026] [skill: $design-system]
-- [ ] T082 [P] Atualizar `AGENTS.md` somente se o roteamento de fontes de verdade ou comandos de validação tiver mudado, registrando a razão [FR-026] [skill: $speckit-implement]
-- [ ] T083 [P] Revisar todos os exports públicos e remover dead code detectado em `src/design-system/`, `src/components/` e `src/app/`, sem adicionar decisão visual local [FR-025] [skill: $code-reviewer-expert]
-- [ ] T084 [P] Executar `npm run verify:design-system-legacy -- --json`, `npm run verify:design-system`, `npm run audit:atomic-design` e `npm run verify:links` no estado final [SC-001] [skill: $speckit-implement]
-- [ ] T085 Executar `npm run type-check`, `npm run lint`, `npm test` e `npm run build` no estado final e salvar saídas em `.artifacts/design-system/final-quality.json` [SC-006] [skill: $speckit-implement]
-- [ ] T086 Executar o quickstart novamente sem mudanças e comparar o manifest com `.artifacts/design-system/final-manifest.json`; divergência não explicada bloqueia a entrega [SC-011] [skill: $speckit-analyze]
-- [ ] T087 Revisar o diff final e salvar a conclusão em `.artifacts/design-system/final-diff-review.md`, confirmando que nenhuma regra de negócio, URL, contrato de dados, referência histórica ou escopo mobile/tablet/dark foi introduzido [FR-017] [FR-026] [skill: $code-reviewer-expert]
-- [ ] T088 Confirmar que todos os 39 componentes atuais, 4 propostas e 10 rotas têm estado documental correto em `design-system/components/registry.json` e nos artefatos finais [SC-002] [SC-003] [skill: $design-system]
-- [ ] T089 Registrar o relatório final de gates e o ponto de rollback em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` sem declarar conformidade sem evidência [FR-023] [FR-025] [skill: $speckit-analyze]
-- [ ] T090 Executar o gate de qualidade preliminar em `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md` após T081–T089; se houver falha, manter a fase `blocked` até as verificações finais [SC-011] [skill: $speckit-implement]
+- [X] T081 [P] Atualizar `design-system/README.md` apenas se for necessário documentar o contrato de runtime implementado, sem duplicar regras normativas [FR-026] [skill: $design-system]
+- [X] T082 [P] Atualizar `AGENTS.md` somente se o roteamento de fontes de verdade ou comandos de validação tiver mudado, registrando a razão [FR-026] [skill: $speckit-implement]
+- [X] T083 [P] Revisar todos os exports públicos e remover dead code detectado em `src/design-system/`, `src/components/` e `src/app/`, sem adicionar decisão visual local [FR-025] [skill: $code-reviewer-expert]
+- [X] T084 [P] Executar `npm run verify:design-system-legacy -- --json`, `npm run verify:design-system`, `npm run audit:atomic-design` e `npm run verify:links` no estado final [SC-001] [skill: $speckit-implement]
+- [X] T085 Executar `npm run type-check`, `npm run lint`, `npm test` e `npm run build` no estado final e salvar saídas em `.artifacts/design-system/final-quality.json` [SC-006] [skill: $speckit-implement]
+- [X] T086 Executar o quickstart novamente sem mudanças e comparar o manifest com `.artifacts/design-system/final-manifest.json`; divergência não explicada bloqueia a entrega [SC-011] [skill: $speckit-analyze]
+- [X] T087 Revisar o diff final e salvar a conclusão em `.artifacts/design-system/final-diff-review.md`, confirmando que nenhuma regra de negócio, URL, contrato de dados, referência histórica ou escopo mobile/tablet/dark foi introduzido [FR-017] [FR-026] [skill: $code-reviewer-expert]
+- [X] T088 Confirmar que todos os 39 componentes atuais, 4 propostas e 10 rotas têm estado documental correto em `design-system/components/registry.json` e nos artefatos finais [SC-002] [SC-003] [skill: $design-system]
+- [X] T089 Registrar o relatório final de gates e o ponto de rollback em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` sem declarar conformidade sem evidência [FR-023] [FR-025] [skill: $speckit-analyze]
+- [X] T090 Executar o gate de qualidade preliminar em `specs/31-07-26-criar-um-sdd-completo-para/contracts/migration-gate.contract.md` após T081–T089; se houver falha, manter a fase `blocked` até as verificações finais [SC-011] [skill: $speckit-implement]
 
-- [ ] T091 Verificar em `tests/routes/design-system-page.test.tsx` e `.artifacts/design-system/final-manifest.json` que `/design-system` demonstra 100% do vocabulário canônico necessário e nenhuma referência anterior [SC-008] [skill: $tdd]
-- [ ] T092 Verificar em `design-system/components/registry.json` e `.artifacts/design-system/final-manifest.json` que nenhum arquivo executável fora do registry expõe export visual público sem perfil/categoria [SC-009] [skill: $code-reviewer-expert]
-- [ ] T093 Encerrar o fluxo em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` solicitando validação humana do SDD e da implementação somente com todos os gates verdes; qualquer falha mantém o checkpoint bloqueado [SC-011] [skill: $speckit-implement]
+- [X] T091 Verificar em `tests/routes/design-system-page.test.tsx` e `.artifacts/design-system/final-manifest.json` que `/design-system` demonstra 100% do vocabulário canônico necessário e nenhuma referência anterior [SC-008] [skill: $tdd]
+- [X] T092 Verificar em `design-system/components/registry.json` e `.artifacts/design-system/final-manifest.json` que nenhum arquivo executável fora do registry expõe export visual público sem perfil/categoria [SC-009] [skill: $code-reviewer-expert]
+- [X] T093 Encerrar o fluxo em `specs/31-07-26-criar-um-sdd-completo-para/quickstart.md` solicitando validação humana do SDD e da implementação somente com todos os gates verdes; qualquer falha mantém o checkpoint bloqueado [SC-011] [skill: $speckit-implement]
 
 ---
 
@@ -244,3 +244,10 @@ O MVP técnico é Phase 1 + Phase 2 + US1 (T001–T029): fundação canônica at
 - Testes de contrato/fixture devem ser escritos e observar falha antes da implementação correspondente.
 - Componentes propostos continuam `proposed`; não devem ser criados apenas para satisfazer a contagem.
 - Referências históricas são somente leitura nesta migração.
+## Phase 10: Convergence
+
+- [X] T094 CRITICAL: Complete the canonical runtime token contract across src/design-system/tokens.css, types.ts and index.ts; every public token id maps to a CSS variable. [skill: $design-system]
+- [X] T095 Add typed TextStyleContract metadata for allowed elements, tones, weights, sizes, line-heights and forbidden alternatives, with coverage tests. [skill: $design-system]
+- [X] T096 Add compile-time negative fixtures for invalid text styles, token ids, recipe variants and arbitrary visual props. [skill: $tdd]
+- [X] T097 Audit the baseline capture against all LEG001-LEG010 families and persist an immutable supplement documenting authorized primitive/runtime exceptions. [skill: $speckit-analyze]
+- [X] T098 Complete the /design-system catalog page and route tests for all token layers, text styles, recipes, states and registry categories without promoting proposals. [skill: $speckit-implement]

@@ -1,4 +1,6 @@
 import React from 'react';
+import { recipes } from '@/design-system';
+import { cn } from '@/lib/utils';
 
 export interface ProgressBarProps {
   value: number; // 0 a 100
@@ -11,26 +13,19 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   colorVariant = 'emerald',
   className = '',
 }) => {
-  const colors = {
-    emerald: 'bg-warm-emerald',
-    rose: 'bg-warm-rose',
-    amber: 'bg-warm-amber',
-    teal: 'bg-warm-teal',
-    blue: 'bg-blue-600',
-  };
+  const tones = { emerald: 'success', rose: 'error', amber: 'warning', teal: 'info', blue: 'protein' } as const;
 
   const clampedValue = Math.min(100, Math.max(0, value));
 
   return (
     <div
-      className={`w-full bg-warm-border h-2 rounded-full overflow-hidden ${className}`}
-      role="progressbar"
-      aria-valuenow={clampedValue}
-      aria-valuemin={0}
-      aria-valuemax={100}
+      className={cn(recipes.progress({ tone: tones[colorVariant], size: 'compact' }), className)}
     >
       <div
-        className={`${colors[colorVariant]} h-full transition-all duration-300`}
+        role="progressbar"
+        aria-valuenow={clampedValue}
+        aria-valuemin={0}
+        aria-valuemax={100}
         style={{ width: `${clampedValue}%` }}
       />
     </div>

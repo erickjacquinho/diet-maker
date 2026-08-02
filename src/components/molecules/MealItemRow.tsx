@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export interface MealItemRowProps {
   id?: string;
@@ -43,9 +44,9 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   };
 
   return (
-    <div className="group/row flex items-center justify-between bg-warm-inner border border-warm-border rounded-xl p-3">
+    <div className="group/row flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-control p-3">
       <div className="flex items-center space-x-2">
-        <button
+        <Button
           type="button"
           onMouseDown={() => setIsActivated(true)}
           onMouseUp={() => setIsActivated(false)}
@@ -53,25 +54,25 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           onTouchEnd={() => setIsActivated(false)}
           onClick={() => setIsActivated((prev) => !prev)}
           aria-label={`Reordenar ${name}`}
-          className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-warm-muted hover:text-warm-charcoal ${
+          className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-text-muted hover:text-text-primary ${
             isActive
-              ? 'opacity-100 text-warm-emerald bg-warm-emerald/10 ring-1 ring-warm-emerald/30'
+              ? 'opacity-100 text-success bg-success/10 ring-1 ring-success/30'
               : 'opacity-0 group-hover/row:opacity-100'
           }`}
           title="Reordenar alimento"
         >
           <GripVertical size={14} />
-        </button>
+        </Button>
 
         <div>
-          <div className="text-xs font-bold text-warm-charcoal">{name}</div>
-          <div className="text-[11px] text-warm-secondary mt-0.5 flex items-center space-x-1.5">
-            <span className="text-blue-600 font-bold">P: {protein}g</span>
-            <span className="text-warm-muted font-normal">•</span>
-            <span className="text-amber-600 font-bold">C: {carbs}g</span>
-            <span className="text-warm-muted font-normal">•</span>
-            <span className="text-teal-600 font-bold">G: {fats}g</span>
-            <span className="text-warm-muted font-normal">•</span>
+          <div className="text-xs font-bold text-text-primary">{name}</div>
+          <div className="text-style-legal text-text-secondary mt-0.5 flex items-center space-x-1.5">
+            <span className="text-macro-protein font-bold">P: {protein}g</span>
+            <span className="text-text-muted font-normal">•</span>
+            <span className="text-warning font-bold">C: {carbs}g</span>
+            <span className="text-text-muted font-normal">•</span>
+            <span className="text-info font-bold">G: {fats}g</span>
+            <span className="text-text-muted font-normal">•</span>
             <span>{kcal} kcal</span>
           </div>
         </div>
@@ -80,7 +81,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
       <div className="flex items-center space-x-2">
         {isEditingGrams ? (
           <div className="flex items-center space-x-1">
-            <input
+            <Input
               type="number"
               min={1}
               max={5000}
@@ -90,23 +91,23 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSaveGrams();
               }}
-              className="w-16 h-7 px-1 text-center bg-warm-card border border-warm-emerald rounded-lg text-xs font-black text-warm-charcoal focus:outline-none"
+              className="w-16 h-7 px-1 text-center bg-surface border border-success rounded-lg text-xs font-bold text-text-primary focus:outline-none"
               autoFocus
             />
-            <span className="text-xs font-bold text-warm-muted">g</span>
+            <span className="text-xs font-bold text-text-muted">g</span>
           </div>
         ) : (
-          <button
+          <Button
             type="button"
             onClick={() => {
               setTempGrams(quantityGrams);
               setIsEditingGrams(true);
             }}
-            className="bg-warm-card border border-warm-borderDark hover:border-warm-emerald rounded-xl px-2.5 py-1 text-xs font-bold text-warm-charcoal transition-all hover:scale-105"
+            className="bg-surface border border-border-hover hover:border-success rounded-control px-2.5 py-1 text-xs font-bold text-text-primary transition-colors duration-standard hover:scale-105"
             title="Clique para editar gramatura"
           >
-            {quantityGrams} <span className="text-warm-muted font-normal">g</span>
-          </button>
+            {quantityGrams} <span className="text-text-muted font-normal">g</span>
+          </Button>
         )}
 
         <Button
@@ -114,7 +115,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           size="icon"
           onClick={onRemove}
           aria-label={`Remover ${name}`}
-          className="text-warm-muted hover:text-warm-rose h-7 w-7 p-0"
+          className="text-text-muted hover:text-error h-7 w-7 p-0"
         >
           <Trash2 size={14} />
         </Button>

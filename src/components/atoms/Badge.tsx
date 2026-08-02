@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge as ShadcnBadge, BadgeProps as ShadcnBadgeProps } from '@/components/ui/badge';
 
-export interface BadgeProps extends ShadcnBadgeProps {
+export type BadgeProps = Omit<ShadcnBadgeProps, 'variant'> & {
   variant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue' | 'neutral' | 'default' | 'secondary' | 'destructive' | 'outline';
 }
 

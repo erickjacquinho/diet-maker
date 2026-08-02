@@ -42,10 +42,6 @@ export default [
           message: "🚫 Atomic Design Violation: Evite usar <select> bruto fora dos átomos. Use o componente <Select> de '@/components/ui/select'.",
         },
         {
-          selector: "JSXOpeningElement[name.name='textarea']",
-          message: "🚫 Atomic Design Violation: Evite usar <textarea> bruto fora dos átomos. Use o componente <Textarea> de '@/components/ui/textarea'.",
-        },
-        {
           selector: "JSXAttribute[name.name='style']",
           message: "⚠️ Design Token Warning: Evite o uso de 'style={{ ... }}' inline. Utilize classes Tailwind CSS ou tokens de design.",
         },

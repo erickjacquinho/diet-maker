@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={plusJakartaSans.variable} suppressHydrationWarning>
-      <body className="bg-warm-bg text-warm-charcoal font-sans antialiased min-h-screen">
+      <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
         <AppLayoutShell>{children}</AppLayoutShell>
         <Toaster position="bottom-right" richColors />
       </body>

@@ -1,5 +1,5 @@
 import registry from "../../../design-system/components/registry.json";
-import { recipes, textStyle, textStyleIds, tokenNames } from "@/design-system";
+import { recipes, textStyle, textStyleContracts, textStyleIds, tokenNames, type RecipeState } from "@/design-system";
 
 const layers = [
   { id: "reference", title: "Reference", values: tokenNames.reference },
@@ -15,7 +15,22 @@ const recipeExamples = [
   { name: "Card standard", className: recipes.card({ density: "standard" }) },
 ] as const;
 
-const lifecycleCounts = registry.components.reduce<Record<string, number>>((counts, component) => {
+const canonicalStates: readonly RecipeState[] = ["default", "hover", "pressed", "focus-visible", "selected", "disabled", "loading", "error", "empty", "read-only"];
+
+interface RegistryComponent {
+  id: string;
+  lifecycle: string;
+}
+
+interface RegistryCategory {
+  id: string;
+  name: string;
+  lifecycle: string;
+  consumers: string[];
+  allowedTraits: string[];
+}
+
+const lifecycleCounts = (registry.components as RegistryComponent[]).reduce<Record<string, number>>((counts, component) => {
   counts[component.lifecycle] = (counts[component.lifecycle] ?? 0) + 1;
   return counts;
 }, {});
@@ -51,6 +66,27 @@ export default function DesignSystemPage() {
           {textStyleIds.map((styleId) => (
             <article key={styleId} className={recipes.card({ density: "compact" })}>
               <p className={textStyle(styleId)}>{styleId}</p>
+              <span className={textStyle("metadata")}>{textStyleContracts[styleId].allowedElements.slice(0, 3).join(", ")}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4" aria-labelledby="states-title">
+        <h2 id="states-title" className={textStyle("section-title")}>Estados canônicos</h2>
+        <ul className="grid grid-cols-5 gap-2" aria-label="Estados de interação">
+          {canonicalStates.map((state) => <li key={state} className={recipes.badge({ tone: state === "error" ? "error" : state === "loading" ? "info" : "default" })}>{state}</li>)}
+        </ul>
+      </section>
+
+      <section className="flex flex-col gap-4" aria-labelledby="categories-title">
+        <h2 id="categories-title" className={textStyle("section-title")}>Categorias canônicas</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {(registry.categories as RegistryCategory[]).map((category) => (
+            <article key={category.id} className={recipes.card({ density: "compact" })} data-lifecycle={category.lifecycle}>
+              <h3 className={textStyle("card-title")}>{category.name}</h3>
+              <p className={textStyle("metadata")}>{category.id} · {category.lifecycle}</p>
+              <p className={textStyle("body-secondary")}>{category.consumers.length} consumidores · {category.allowedTraits.length} traits</p>
             </article>
           ))}
         </div>

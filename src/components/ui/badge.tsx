@@ -1,41 +1,16 @@
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
+import { recipes } from "@/design-system"
 
-const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-  {
-    variants: {
-      variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground border-warm-border",
-        emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        rose: "bg-rose-50 text-rose-700 border-rose-200",
-        amber: "bg-amber-50 text-amber-700 border-amber-200",
-        teal: "bg-teal-50 text-teal-700 border-teal-200",
-        blue: "bg-blue-50 text-blue-700 border-blue-200",
-        neutral: "bg-warm-inner text-warm-charcoal border-warm-border",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+const badgeVariants = recipes.badge
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "emerald" | "rose" | "amber" | "teal" | "blue" | "neutral"
+export type BadgeProps = React.HTMLAttributes<HTMLDivElement> & { variant?: BadgeVariant }
 
 function Badge({ className, variant, ...props }: BadgeProps) {
+  const tone = variant === "emerald" ? "success" : variant === "rose" ? "error" : variant === "amber" ? "warning" : variant === "teal" ? "info" : variant === "blue" ? "primary" : variant === "destructive" ? "error" : variant === "secondary" || variant === "outline" || variant === "neutral" ? "default" : variant;
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ tone }), className)} {...props} />
   )
 }
 

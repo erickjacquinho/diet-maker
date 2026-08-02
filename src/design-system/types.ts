@@ -16,9 +16,23 @@ export type RecipeVariant = "primary" | "secondary" | "ghost" | "danger";
 export type Tone = "default" | "secondary" | "muted" | "primary" | "info" | "success" | "warning" | "error" | MacroKind | "inverse";
 
 export type ReferenceTokenId = `ref.${"color" | "space" | "radius" | "duration" | "font"}.${string}`;
-export type SystemTokenId = `sys.${"color" | "space" | "radius" | "motion" | "shadow" | "z" | "opacity"}.${string}`;
+export type SystemTokenId = `sys.${"color" | "space" | "radius" | "motion" | "shadow" | "z" | "opacity" | "ease" | "backdrop"}.${string}`;
 export type ComponentTokenId = `cmp.${string}`;
 export type TokenId = ReferenceTokenId | SystemTokenId | ComponentTokenId;
+
+export type TokenLayer = "reference" | "system" | "component";
+
+export interface TextStyleContract {
+  id: TextStyleId;
+  className: string;
+  allowedElements: readonly (keyof HTMLElementTagNameMap)[];
+  tones: readonly Tone[];
+  forbiddenAlternatives: readonly string[];
+  color: string;
+  weight: 400 | 500 | 600 | 700;
+  size: string;
+  lineHeight: string;
+}
 
 export interface LegacyFinding {
   code: `LEG${string}`;

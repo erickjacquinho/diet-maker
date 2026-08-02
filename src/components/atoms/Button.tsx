@@ -2,32 +2,40 @@ import React from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button as ShadcnButton, ButtonProps as ShadcnButtonProps } from '@/components/ui/button';
 
-export interface ButtonProps extends Omit<ShadcnButtonProps, 'variant' | 'size'> {
-  variant?: 'primary' | 'secondary' | 'terracotta' | 'emerald' | 'ghost' | 'danger' | 'default' | 'destructive' | 'outline' | 'link';
-  size?: 'sm' | 'md' | 'lg' | 'default' | 'icon';
+export type ButtonProps = Omit<ShadcnButtonProps, 'variant' | 'size'> & {
+  variant?: 'primary' | 'secondary' | 'quiet' | 'terracotta' | 'emerald' | 'ghost' | 'danger' | 'default' | 'destructive' | 'outline' | 'link';
+  size?: 'sm' | 'md' | 'lg' | 'default' | 'icon' | 'compact' | 'standard';
   ref?: React.Ref<HTMLButtonElement>;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'secondary',
-  size = 'md',
+  size = 'standard',
   className = '',
   ref,
   ...props
 }) => {
   let shadcnVariant: ShadcnButtonProps['variant'] = 'secondary';
-  if (variant === 'primary' || variant === 'default') shadcnVariant = 'default';
-  else if (variant === 'terracotta') shadcnVariant = 'terracotta';
-  else if (variant === 'emerald') shadcnVariant = 'emerald';
-  else if (variant === 'danger' || variant === 'destructive') shadcnVariant = 'destructive';
-  else if (variant === 'ghost') shadcnVariant = 'ghost';
-  else if (variant === 'outline') shadcnVariant = 'outline';
-  else if (variant === 'link') shadcnVariant = 'link';
+  if (variant === 'primary' || variant === 'default' || variant === 'terracotta' || variant === 'emerald') {
+    shadcnVariant = 'primary';
+  } else if (variant === 'danger' || variant === 'destructive') {
+    shadcnVariant = 'destructive';
+  } else if (variant === 'ghost' || variant === 'quiet') {
+    shadcnVariant = 'quiet';
+  } else if (variant === 'outline' || variant === 'secondary') {
+    shadcnVariant = 'secondary';
+  } else if (variant === 'link') {
+    shadcnVariant = 'link';
+  }
 
-  let shadcnSize: ShadcnButtonProps['size'] = 'default';
-  if (size === 'sm') shadcnSize = 'sm';
-  else if (size === 'lg') shadcnSize = 'lg';
-  else if (size === 'icon') shadcnSize = 'icon';
+  let shadcnSize: ShadcnButtonProps['size'] = 'standard';
+  if (size === 'sm' || size === 'compact') {
+    shadcnSize = 'compact';
+  } else if (size === 'lg' || size === 'standard' || size === 'default') {
+    shadcnSize = 'standard';
+  } else if (size === 'icon') {
+    shadcnSize = 'icon';
+  }
 
   return (
     <ShadcnButton
@@ -59,11 +67,12 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
 }) => (
   <ShadcnButton
     ref={ref}
-    variant="emerald"
-    className={`inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] cursor-pointer ${className}`}
+    variant="primary"
+    size="standard"
+    className={`gap-1.5 cursor-pointer ${className}`}
     {...props}
   >
-    {icon !== null && (icon || <Plus size={14} className="shrink-0" />)}
+    {icon !== null && (icon || <Plus size={14} className="shrink-0 text-on-primary text-white" />)}
     <span>{children}</span>
   </ShadcnButton>
 );
@@ -87,8 +96,9 @@ export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
 }) => (
   <ShadcnButton
     ref={ref}
-    variant="outline"
-    className={`inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] cursor-pointer ${className}`}
+    variant="secondary"
+    size="standard"
+    className={`gap-1.5 cursor-pointer ${className}`}
     {...props}
   >
     {icon}
@@ -96,7 +106,7 @@ export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
   </ShadcnButton>
 );
 
-export interface IconButtonProps extends ShadcnButtonProps {
+export type IconButtonProps = ShadcnButtonProps & {
   'aria-label'?: string;
   title?: string;
   icon?: React.ReactNode;
@@ -112,7 +122,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   className = '',
   'aria-label': ariaLabel,
   title,
-  variant = 'ghost',
+  variant = 'quiet',
   ref,
   ...props
 }) => {
@@ -124,7 +134,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       size="icon"
       aria-label={label}
       title={title || ariaLabel}
-      className={`h-8 w-8 rounded-lg shrink-0 cursor-pointer active:scale-95 transition-all ${className}`}
+      className={`shrink-0 cursor-pointer ${className}`}
       {...props}
     >
       {icon || children}
@@ -132,7 +142,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   );
 };
 
-export interface ExplicitIconButtonProps extends Omit<IconButtonProps, 'icon'> {
+export type ExplicitIconButtonProps = Omit<IconButtonProps, 'icon'> & {
   ref?: React.Ref<HTMLButtonElement>;
 }
 
@@ -149,10 +159,10 @@ export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
     ref={ref}
     title={title}
     aria-label={title}
-    className={`bg-warm-inner border border-warm-border text-warm-muted hover:text-warm-charcoal hover:bg-warm-card hover:border-warm-borderDark transition-all cursor-pointer ${className}`}
+    className={`bg-surface-subtle border border-border-subtle text-text-muted hover:text-text-primary hover:bg-surface hover:border-border-hover transition-colors duration-standard cursor-pointer ${className}`}
     {...props}
   >
-    <Pencil size={14} className="text-warm-muted" />
+    <Pencil size={14} className="text-text-muted" />
   </IconButton>
 );
 
@@ -169,9 +179,9 @@ export const DeleteIconButton: React.FC<ExplicitIconButtonProps> = ({
     ref={ref}
     title={title}
     aria-label={title}
-    className={`bg-warm-inner border border-warm-border text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer ${className}`}
+    className={`bg-surface-subtle border border-border-subtle text-error hover:bg-error-soft hover:border-error-border transition-colors duration-standard cursor-pointer ${className}`}
     {...props}
   >
-    <Trash2 size={14} />
+    <Trash2 size={14} className="text-error" />
   </IconButton>
 );

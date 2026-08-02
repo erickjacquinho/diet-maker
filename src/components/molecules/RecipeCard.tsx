@@ -24,24 +24,24 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   const summary = calculateRecipeNutrients(recipe.ingredients, recipe.servings);
 
   return (
-    <Card className="bg-warm-card border-warm-border rounded-2xl p-5 hover:border-warm-emerald/40 transition-all flex flex-col justify-between space-y-4">
+    <Card className="bg-surface border-border-subtle rounded-surface p-5 hover:border-success/40 transition-colors duration-standard flex flex-col justify-between space-y-4">
       <CardContent className="p-0 space-y-3.5 flex flex-col justify-between h-full">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-[10px] font-bold bg-warm-inner border-warm-border text-warm-charcoal">
+            <Badge variant="outline" className="text-style-legal font-bold bg-surface-subtle border-border-subtle text-text-primary">
               {recipe.category}
             </Badge>
-            <div className="flex items-center space-x-1 text-[11px] text-warm-muted font-medium">
+            <div className="flex items-center space-x-1 text-style-legal text-text-muted font-medium">
               <Users size={12} />
               <span>{recipe.servings} porções</span>
             </div>
 
           </div>
 
-          <h3 className="font-bold text-sm text-warm-charcoal leading-snug">{recipe.name}</h3>
+          <h3 className="font-bold text-sm text-text-primary leading-snug">{recipe.name}</h3>
 
           {recipe.instructions && (
-            <p className="text-xs text-warm-muted leading-relaxed line-clamp-2 italic">
+            <p className="text-xs text-text-muted leading-relaxed line-clamp-2 italic">
               "{recipe.instructions}"
             </p>
           )}
@@ -49,36 +49,36 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
 
         {/* Macros Per Portion */}
         <div className="space-y-1.5">
-          <div className="text-[10px] font-extrabold text-warm-muted uppercase tracking-wider">
+          <div className="text-style-legal font-bold text-text-muted uppercase tracking-wider">
             Valores por 1 porção ({recipe.ingredients.length} ingredientes)
           </div>
-          <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-warm-inner border border-warm-border rounded-xl text-center">
+          <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-surface-subtle border border-border-subtle rounded-control text-center">
             <div>
-              <span className="text-[9px] font-bold text-warm-muted block uppercase">Kcal</span>
-              <span className="font-black text-xs text-warm-emerald">{summary.portionKcal}</span>
+              <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Kcal</span>
+              <span className="font-bold text-xs text-success">{summary.portionKcal}</span>
             </div>
             <div>
-              <span className="text-[9px] font-bold text-warm-muted block uppercase">Prot</span>
-              <span className="font-black text-xs text-blue-600">{summary.portionProteinG}g</span>
+              <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Prot</span>
+              <span className="font-bold text-xs text-macro-protein">{summary.portionProteinG}g</span>
             </div>
             <div>
-              <span className="text-[9px] font-bold text-warm-muted block uppercase">Carb</span>
-              <span className="font-black text-xs text-amber-600">{summary.portionCarbsG}g</span>
+              <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Carb</span>
+              <span className="font-bold text-xs text-warning">{summary.portionCarbsG}g</span>
             </div>
             <div>
-              <span className="text-[9px] font-bold text-warm-muted block uppercase">Gord</span>
-              <span className="font-black text-xs text-emerald-600">{summary.portionFatsG}g</span>
+              <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Gord</span>
+              <span className="font-bold text-xs text-success">{summary.portionFatsG}g</span>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-warm-border text-xs gap-2">
+        <div className="flex items-center justify-between pt-2 border-t border-border-subtle text-xs gap-2">
           {onInsert && (
             <Button
               type="button"
               onClick={onInsert}
-              variant="emerald"
+              variant="primary"
               size="sm"
               className="flex-1 font-bold text-xs flex items-center justify-center space-x-1.5 h-8"
             >

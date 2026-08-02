@@ -357,13 +357,13 @@ export default function PatientDetailPage() {
   if (!patient) {
     return (
       <div className="p-6 md:p-8 max-w-md mx-auto my-12 text-center">
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-8 space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-warm-inner border border-warm-border flex items-center justify-center mx-auto text-warm-muted">
-            <AlertTriangle size={24} className="text-amber-500" />
+        <Card className="bg-surface border-border-subtle rounded-surface p-8 space-y-4">
+          <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
+            <AlertTriangle size={24} className="text-warning" />
           </div>
           <div>
-            <h3 className="font-black text-base text-warm-charcoal">Paciente Não Encontrado</h3>
-            <p className="text-xs text-warm-muted mt-1 leading-relaxed">
+            <h3 className="font-bold text-base text-text-primary">Paciente Não Encontrado</h3>
+            <p className="text-xs text-text-muted mt-1 leading-relaxed">
               O paciente solicitado não existe ou foi removido do sistema.
             </p>
           </div>
@@ -384,37 +384,37 @@ export default function PatientDetailPage() {
         <div className="flex items-center space-x-3">
           <Link
             href="/pacientes"
-            className="p-2 rounded-xl bg-warm-card border border-warm-border hover:border-warm-charcoal text-warm-muted hover:text-warm-charcoal transition-all"
+            className="p-2 rounded-surface bg-surface border border-border-subtle hover:border-text-primary text-text-muted hover:text-text-primary transition-all"
           >
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider">Prontuário do Paciente</span>
-            <h1 className="font-black text-xl text-warm-charcoal tracking-tight leading-none">{patient.name}</h1>
+            <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider">Prontuário do Paciente</span>
+            <h1 className="font-bold text-xl text-text-primary tracking-tight leading-none">{patient.name}</h1>
           </div>
         </div>
       </div>
 
       {/* 1-COLUMN LAYOUT: INTEGRATED PATIENT HEADER CARD */}
-      <Card className="bg-warm-card border-warm-border rounded-2xl p-0 shadow-sm overflow-hidden">
+      <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating overflow-hidden">
         <CardContent className="p-6 space-y-6">
           {/* Row 1: Profile & Actions */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-warm-border/70 pb-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border-subtle/70 pb-5">
             <div className="flex items-center space-x-4">
-              <Avatar initials={patient.initials} variant="charcoal" size="lg" className="rounded-2xl font-black text-xl shrink-0 h-16 w-16" />
+              <Avatar initials={patient.initials} variant="charcoal" size="lg" className="rounded-surface font-bold text-xl shrink-0 h-16 w-16" />
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <h2 className="font-black text-lg text-warm-charcoal tracking-tight">{patient.name}</h2>
-                  <Badge variant="outline" className="text-[10px] font-bold border-warm-border text-warm-muted">
+                  <h2 className="font-bold text-lg text-text-primary tracking-tight">{patient.name}</h2>
+                  <Badge variant="outline" className="text-style-legal font-bold border-border-subtle text-text-muted">
                     {patient.gender}
                   </Badge>
                 </div>
-                <div className="text-xs font-medium text-warm-muted flex flex-wrap items-center gap-x-3 gap-y-1">
+                <div className="text-xs font-medium text-text-muted flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span>{patient.age} anos</span>
                   <span>•</span>
                   <span>{patient.heightCm} cm</span>
                   <span>•</span>
-                  <span>Objetivo: <strong className="font-bold text-warm-charcoal">{patient.objective || 'Acompanhamento'}</strong></span>
+                  <span>Objetivo: <strong className="font-bold text-text-primary">{patient.objective || 'Acompanhamento'}</strong></span>
                 </div>
               </div>
             </div>
@@ -425,11 +425,11 @@ export default function PatientDetailPage() {
                 <CreateButton>Nova Dieta</CreateButton>
               </Link>
 
-              <SecondaryActionButton icon={<Activity size={14} className="text-warm-emerald" />}>
+              <SecondaryActionButton icon={<Activity size={14} className="text-success" />}>
                 Nova Avaliação Física
               </SecondaryActionButton>
 
-              <div className="h-6 w-px bg-warm-border hidden sm:block mx-1" />
+              <div className="h-6 w-px bg-border-subtle hidden sm:block mx-1" />
 
               <EditIconButton onClick={handleOpenEditModal} title="Editar Cadastro" />
               <DeleteIconButton onClick={() => setIsDeleteModalOpen(true)} title="Excluir Paciente" />
@@ -438,46 +438,46 @@ export default function PatientDetailPage() {
 
           {/* Row 2: Active Target Macros & Current Indicators */}
           <div>
-            <span className="text-[10px] font-bold text-warm-muted uppercase tracking-wider block mb-2.5">
+            <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider block mb-2.5">
               Metas Manuais & Indicadores Atuais
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <div className="p-3 bg-warm-inner border border-warm-border rounded-xl text-center sm:text-left">
-                <div className="text-[10px] font-bold text-warm-muted uppercase flex items-center justify-center sm:justify-start space-x-1">
-                  <Weight size={12} className="text-warm-charcoal" />
+              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center sm:text-left">
+                <div className="text-style-legal font-bold text-text-muted uppercase flex items-center justify-center sm:justify-start space-x-1">
+                  <Weight size={12} className="text-text-primary" />
                   <span>Peso Atual</span>
                 </div>
-                <div className="font-black text-base text-warm-charcoal mt-0.5">{patient.weightKg} kg</div>
+                <div className="font-bold text-base text-text-primary mt-0.5">{patient.weightKg} kg</div>
               </div>
 
-              <div className="p-3 bg-warm-inner border border-warm-border rounded-xl text-center sm:text-left">
-                <div className="text-[10px] font-bold text-warm-muted uppercase flex items-center justify-center sm:justify-start space-x-1">
-                  <Flame size={12} className="text-warm-emerald" />
+              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center sm:text-left">
+                <div className="text-style-legal font-bold text-text-muted uppercase flex items-center justify-center sm:justify-start space-x-1">
+                  <Flame size={12} className="text-success" />
                   <span>Meta Kcal</span>
                 </div>
-                <div className="font-bold text-base text-warm-muted mt-0.5">{patient.targetKcal} kcal</div>
+                <div className="font-bold text-base text-text-muted mt-0.5">{patient.targetKcal} kcal</div>
               </div>
 
-              <div className="p-3 bg-warm-inner border border-warm-border rounded-xl text-center sm:text-left">
-                <div className="text-[10px] font-bold text-warm-muted uppercase">Proteína</div>
-                <div className="font-black text-base text-blue-600 mt-0.5">{patient.targetProtein}g</div>
-                <span className="text-[9px] font-semibold text-warm-muted block">
+              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center sm:text-left">
+                <div className="text-style-legal font-bold text-text-muted uppercase">Proteína</div>
+                <div className="font-bold text-base text-macro-protein mt-0.5">{patient.targetProtein}g</div>
+                <span className="text-style-chart-micro font-semibold text-text-muted block">
                   {(patient.targetProtein / (patient.weightKg || 1)).toFixed(1)} g/kg
                 </span>
               </div>
 
-              <div className="p-3 bg-warm-inner border border-warm-border rounded-xl text-center sm:text-left">
-                <div className="text-[10px] font-bold text-warm-muted uppercase">Carboidratos</div>
-                <div className="font-black text-base text-orange-500 mt-0.5">{patient.targetCarbs}g</div>
-                <span className="text-[9px] font-semibold text-warm-muted block">
+              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center sm:text-left">
+                <div className="text-style-legal font-bold text-text-muted uppercase">Carboidratos</div>
+                <div className="font-bold text-base text-macro-carbohydrate mt-0.5">{patient.targetCarbs}g</div>
+                <span className="text-style-chart-micro font-semibold text-text-muted block">
                   {(patient.targetCarbs / (patient.weightKg || 1)).toFixed(1)} g/kg
                 </span>
               </div>
 
-              <div className="p-3 bg-warm-inner border border-warm-border rounded-xl text-center sm:text-left col-span-2 sm:col-span-1">
-                <div className="text-[10px] font-bold text-warm-muted uppercase">Gorduras</div>
-                <div className="font-black text-base text-emerald-700 mt-0.5">{patient.targetFats}g</div>
-                <span className="text-[9px] font-semibold text-warm-muted block">
+              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center sm:text-left col-span-2 sm:col-span-1">
+                <div className="text-style-legal font-bold text-text-muted uppercase">Gorduras</div>
+                <div className="font-bold text-base text-macro-fat mt-0.5">{patient.targetFats}g</div>
+                <span className="text-style-chart-micro font-semibold text-text-muted block">
                   {(patient.targetFats / (patient.weightKg || 1)).toFixed(1)} g/kg
                 </span>
               </div>
@@ -487,14 +487,14 @@ export default function PatientDetailPage() {
       </Card>
 
       {/* 1-COLUMN LAYOUT: TABELA UNIFICADA INTELIGENTE POR CONSULTA / DATA */}
-      <Card className="bg-warm-card border-warm-border rounded-2xl p-0 shadow-sm">
+      <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating">
         <CardContent className="p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-warm-border/70 pb-4">
+          <div className="flex items-center justify-between border-b border-border-subtle/70 pb-4">
             <div className="flex items-center space-x-2">
-              <FileSpreadsheet size={18} className="text-warm-emerald" />
+              <FileSpreadsheet size={18} className="text-success" />
               <div>
-                <h3 className="font-black text-base text-warm-charcoal">Atualizações de Consulta & Histórico Unificado</h3>
-                <p className="text-xs text-warm-muted">Tabela combinada com prescrições dietéticas e avaliações físicas por data</p>
+                <h3 className="font-bold text-base text-text-primary">Atualizações de Consulta & Histórico Unificado</h3>
+                <p className="text-xs text-text-muted">Tabela combinada com prescrições dietéticas e avaliações físicas por data</p>
               </div>
             </div>
             <Badge variant="secondary" className="text-xs font-bold px-2.5 py-1">
@@ -503,23 +503,22 @@ export default function PatientDetailPage() {
           </div>
 
           {consolidatedUpdates.length === 0 ? (
-            <div className="p-10 text-center bg-warm-inner border border-warm-border rounded-xl space-y-3">
-              <p className="text-xs text-warm-muted">Nenhum histórico registrado para este paciente até o momento.</p>
+            <div className="p-10 text-center bg-surface-subtle border border-border-subtle rounded-surface space-y-3">
+              <p className="text-xs text-text-muted">Nenhum histórico registrado para este paciente até o momento.</p>
               <div className="flex justify-center space-x-3">
-                <Link
-                  href={`/pacientes/${patient.id}/dieta/nova`}
-                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-warm-charcoal text-white rounded-xl text-xs font-bold hover:bg-black transition-colors"
-                >
-                  <Plus size={14} />
-                  <span>Criar Dieta</span>
-                </Link>
+                <Button asChild variant="primary" size="standard">
+                  <Link href={`/pacientes/${patient.id}/dieta/nova`}>
+                    <Plus size={14} />
+                    <span>Criar Dieta</span>
+                  </Link>
+                </Button>
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto border border-warm-border rounded-xl">
+            <div className="overflow-x-auto border border-border-subtle rounded-surface">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-warm-inner border-b border-warm-border text-[11px] font-bold text-warm-muted uppercase tracking-wider">
+                  <tr className="bg-surface-subtle border-b border-border-subtle text-[11px] font-bold text-text-muted uppercase tracking-wider">
                     <th className="py-3 px-4">Data / Consulta</th>
                     <th className="py-3 px-4">Tipo de Registro</th>
                     <th className="py-3 px-4">Dados Dietéticos</th>
@@ -527,7 +526,7 @@ export default function PatientDetailPage() {
                     <th className="py-3 px-4 text-right">Ação / Detalhes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-warm-border/70">
+                <tbody className="divide-y divide-border-subtle/70">
                   {consolidatedUpdates.map((update) => {
                     const isExpanded = expandedRowDate === update.date;
                     const isActiveDietRow = update.diet?.status === 'Ativa';
@@ -538,14 +537,14 @@ export default function PatientDetailPage() {
                           onClick={() => toggleRowExpansion(update.date)}
                           className={`transition-colors cursor-pointer border-l-4 ${
                             isActiveDietRow 
-                              ? 'border-l-warm-emerald bg-warm-emerald/[0.04] hover:bg-warm-emerald/[0.08]' 
-                              : 'border-l-transparent hover:bg-warm-inner/60'
+                              ? 'border-l-success bg-success/[0.04] hover:bg-success/[0.08]' 
+                              : 'border-l-transparent hover:bg-surface-subtle/60'
                           }`}
                         >
                           {/* Col 1: Date */}
-                          <td className="py-3.5 px-4 font-bold text-warm-charcoal whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-bold text-text-primary whitespace-nowrap">
                             <div className="flex items-center space-x-1.5">
-                              <Calendar size={13} className="text-warm-muted" />
+                              <Calendar size={13} className="text-text-muted" />
                               <span>{update.date}</span>
                             </div>
                           </td>
@@ -556,7 +555,7 @@ export default function PatientDetailPage() {
                               {update.diet && (
                                 <Badge 
                                   variant="outline" 
-                                  className="pointer-events-none bg-warm-card text-warm-charcoal border-warm-border font-semibold text-[10px] tracking-wide px-2 py-0.5 shadow-none"
+                                  className="pointer-events-none bg-surface text-text-primary border-border-subtle font-semibold text-[10px] tracking-wide px-2 py-0.5 shadow-none"
                                 >
                                   Dieta
                                 </Badge>
@@ -564,7 +563,7 @@ export default function PatientDetailPage() {
                               {update.assessment && (
                                 <Badge 
                                   variant="outline" 
-                                  className="pointer-events-none bg-warm-card text-warm-charcoal border-warm-border font-semibold text-[10px] tracking-wide px-2 py-0.5 shadow-none"
+                                  className="pointer-events-none bg-surface text-text-primary border-border-subtle font-semibold text-[10px] tracking-wide px-2 py-0.5 shadow-none"
                                 >
                                   Avaliação Física
                                 </Badge>
@@ -576,51 +575,51 @@ export default function PatientDetailPage() {
                           <td className="py-3.5 px-4 whitespace-nowrap">
                             {update.diet ? (
                               <div className="text-xs font-semibold flex items-center space-x-1.5">
-                                <span className="text-blue-600 font-bold">{update.diet.proteinG}g</span>
-                                <span className="text-warm-muted font-normal">•</span>
-                                <span className="text-orange-500 font-bold">{update.diet.carbsG}g</span>
-                                <span className="text-warm-muted font-normal">•</span>
-                                <span className="text-emerald-700 font-bold">{update.diet.fatsG}g</span>
-                                <span className="text-warm-muted font-normal">•</span>
-                                <span className="text-warm-muted font-bold">{update.diet.targetKcal} kcal</span>
+                                <span className="text-macro-protein font-bold">{update.diet.proteinG}g</span>
+                                <span className="text-text-muted font-normal">•</span>
+                                <span className="text-macro-carbohydrate font-bold">{update.diet.carbsG}g</span>
+                                <span className="text-text-muted font-normal">•</span>
+                                <span className="text-macro-fat font-bold">{update.diet.fatsG}g</span>
+                                <span className="text-text-muted font-normal">•</span>
+                                <span className="text-text-muted font-bold">{update.diet.targetKcal} kcal</span>
                               </div>
                             ) : (
-                              <span className="text-warm-muted/70 italic text-[11px]">Sem alteração dietética</span>
+                              <span className="text-text-muted/70 italic text-[11px]">Sem alteração dietética</span>
                             )}
                           </td>
 
                           {/* Col 4: Body Values */}
                           <td className="py-3.5 px-4 whitespace-nowrap">
                             {update.assessment ? (
-                              <div className="text-xs font-bold text-warm-charcoal flex items-center space-x-1.5">
+                              <div className="text-xs font-bold text-text-primary flex items-center space-x-1.5">
                                 <span>{update.assessment.weightKg} kg</span>
-                                <span className="text-warm-muted font-normal">•</span>
+                                <span className="text-text-muted font-normal">•</span>
                                 <span>{update.assessment.bodyFatPercent}% BF</span>
                               </div>
                             ) : (
-                              <span className="text-warm-muted/70 italic text-[11px]">Sem medição corporal</span>
+                              <span className="text-text-muted/70 italic text-[11px]">Sem medição corporal</span>
                             )}
                           </td>
 
                           {/* Col 5: Actions */}
                           <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end space-x-2">
-                              <Link
-                                href={`/pacientes/${patient.id}/consulta/${encodeURIComponent(update.date.replace(/\//g, '-'))}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-warm-inner border border-warm-border text-warm-charcoal font-bold text-[11px] hover:border-warm-charcoal transition-colors"
-                              >
-                                <span>Abrir</span>
-                                <ChevronRight size={12} />
-                              </Link>
+                              <Button asChild variant="secondary" size="compact" onClick={(e) => e.stopPropagation()}>
+                                <Link
+                                  href={`/pacientes/${patient.id}/consulta/${encodeURIComponent(update.date.replace(/\//g, '-'))}`}
+                                >
+                                  <span>Abrir</span>
+                                  <ChevronRight size={12} />
+                                </Link>
+                              </Button>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleRowExpansion(update.date);
                                 }}
-                                className="h-7 w-7 p-0 rounded-lg text-warm-muted hover:text-warm-charcoal"
+                                className="h-7 w-7 rounded-control text-text-muted hover:text-text-primary"
                               >
                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                               </Button>
@@ -630,16 +629,16 @@ export default function PatientDetailPage() {
 
                         {/* Accordion Expanded Detail View */}
                         {isExpanded && (
-                          <tr className="bg-warm-inner/40">
-                            <td colSpan={5} className="p-4 border-t border-b border-warm-border/50">
+                          <tr className="bg-surface-subtle/40">
+                            <td colSpan={5} className="p-4 border-t border-b border-border-subtle/50">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Diet Detail Card */}
                                 {update.diet ? (
-                                  <div className="p-4 bg-warm-card border border-warm-border rounded-xl space-y-3">
+                                  <div className="p-4 bg-surface border border-border-subtle rounded-surface space-y-3">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center space-x-2">
-                                        <Utensils size={15} className="text-warm-emerald" />
-                                        <span className="font-bold text-warm-charcoal text-xs">{update.diet.name}</span>
+                                        <Utensils size={15} className="text-success" />
+                                        <span className="font-bold text-text-primary text-xs">{update.diet.name}</span>
                                       </div>
                                       <Badge variant="secondary" className="text-[9px] font-extrabold">
                                         {update.diet.status}
@@ -647,33 +646,30 @@ export default function PatientDetailPage() {
                                     </div>
                                     
                                     <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Calorias</span>
-                                        <span className="font-black text-xs text-warm-charcoal">{update.diet.targetKcal} kcal</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Calorias</span>
+                                        <span className="font-bold text-xs text-text-primary">{update.diet.targetKcal} kcal</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Proteínas</span>
-                                        <span className="font-black text-xs text-blue-600">{update.diet.proteinG}g</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Proteínas</span>
+                                        <span className="font-bold text-xs text-macro-protein">{update.diet.proteinG}g</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Carbo</span>
-                                        <span className="font-black text-xs text-orange-500">{update.diet.carbsG}g</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Carbo</span>
+                                        <span className="font-bold text-xs text-macro-carbohydrate">{update.diet.carbsG}g</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Gorduras</span>
-                                        <span className="font-black text-xs text-emerald-700">{update.diet.fatsG}g</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Gorduras</span>
+                                        <span className="font-bold text-xs text-macro-fat">{update.diet.fatsG}g</span>
                                       </div>
                                     </div>
 
                                     <div className="pt-2 flex items-center justify-between">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenReadOnlyDietModal(update.diet!)}
-                                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-warm-charcoal text-white rounded-lg text-xs font-bold hover:bg-black transition-colors"
+                                      <Button type="button" variant="primary" size="compact" onClick={() => handleOpenReadOnlyDietModal(update.diet!)}
                                       >
                                         <Eye size={14} />
                                         <span>Ver Dieta</span>
-                                      </button>
+                                      </Button>
                                       <Link
                                         href={`/pacientes/${patient.id}/dieta/${update.diet.id}`}
                                         title="Editar no Construtor de Dietas"
@@ -683,41 +679,41 @@ export default function PatientDetailPage() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="p-4 bg-warm-card/50 border border-dashed border-warm-border rounded-xl flex items-center justify-center text-warm-muted text-xs italic">
+                                  <div className="p-4 bg-surface/50 border border-dashed border-border-subtle rounded-surface flex items-center justify-center text-text-muted text-xs italic">
                                     Nenhuma prescrição dietética foi criada nesta data.
                                   </div>
                                 )}
 
                                 {/* Body Assessment Detail Card */}
                                 {update.assessment ? (
-                                  <div className="p-4 bg-warm-card border border-warm-border rounded-xl space-y-3">
+                                  <div className="p-4 bg-surface border border-border-subtle rounded-surface space-y-3">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center space-x-2">
-                                        <Scale size={15} className="text-warm-emerald" />
-                                        <span className="font-bold text-warm-charcoal text-xs">Avaliação Física & Valores</span>
+                                        <Scale size={15} className="text-success" />
+                                        <span className="font-bold text-text-primary text-xs">Avaliação Física & Valores</span>
                                       </div>
-                                      <span className="text-[10px] font-bold text-warm-emerald flex items-center space-x-1">
+                                      <span className="text-style-legal font-bold text-success flex items-center space-x-1">
                                         <TrendingDown size={11} />
                                         <span>Evolução Favorável</span>
                                       </span>
                                     </div>
 
                                     <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Peso</span>
-                                        <span className="font-black text-xs text-warm-charcoal">{update.assessment.weightKg} kg</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Peso</span>
+                                        <span className="font-bold text-xs text-text-primary">{update.assessment.weightKg} kg</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">% Gordura</span>
-                                        <span className="font-black text-xs text-warm-charcoal">{update.assessment.bodyFatPercent}%</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">% Gordura</span>
+                                        <span className="font-bold text-xs text-text-primary">{update.assessment.bodyFatPercent}%</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Massa Magra</span>
-                                        <span className="font-black text-xs text-warm-charcoal">{update.assessment.muscleMassKg} kg</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Massa Magra</span>
+                                        <span className="font-bold text-xs text-text-primary">{update.assessment.muscleMassKg} kg</span>
                                       </div>
-                                      <div className="p-2 bg-warm-inner rounded-lg">
-                                        <span className="text-[9px] font-bold text-warm-muted block uppercase">Cintura</span>
-                                        <span className="font-black text-xs text-warm-charcoal">{update.assessment.waistCm} cm</span>
+                                      <div className="p-2 bg-surface-subtle rounded-control">
+                                        <span className="text-[9px] font-bold text-text-muted block uppercase">Cintura</span>
+                                        <span className="font-bold text-xs text-text-primary">{update.assessment.waistCm} cm</span>
                                       </div>
                                     </div>
 
@@ -726,7 +722,7 @@ export default function PatientDetailPage() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="p-4 bg-warm-card/50 border border-dashed border-warm-border rounded-xl flex items-center justify-center text-warm-muted text-xs italic">
+                                  <div className="p-4 bg-surface/50 border border-dashed border-border-subtle rounded-surface flex items-center justify-center text-text-muted text-xs italic">
                                     Nenhuma avaliação física foi realizada nesta data.
                                   </div>
                                 )}
@@ -758,7 +754,7 @@ export default function PatientDetailPage() {
         }}
       >
         <DialogContent
-          className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl"
+          className="sm:max-w-md bg-surface border-border-subtle p-6 rounded-surface"
           onPointerDownOutside={(e) => {
             if (hasUnsavedChanges) {
               e.preventDefault();
@@ -772,12 +768,12 @@ export default function PatientDetailPage() {
             }
           }}
         >
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-warm-charcoal flex items-center space-x-2">
-              <Pencil size={18} className="text-warm-emerald" />
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+              <Pencil size={18} className="text-success" />
               <span>Editar Dados do Paciente</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-warm-muted">
+            <DialogDescription className="text-xs text-text-muted">
               Altere as informações cadastrais e metas do paciente.
             </DialogDescription>
           </DialogHeader>
@@ -785,54 +781,54 @@ export default function PatientDetailPage() {
           {editFormData && (
             <form onSubmit={handleSaveEdit} className="space-y-3 pt-2">
               <div>
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome Completo do Paciente</label>
+                <label className="text-xs font-bold text-text-primary block mb-1">Nome Completo do Paciente</label>
                 <Input
                   type="text"
                   required
                   value={editFormData.name}
                   onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold"
+                  className="bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Idade</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Idade</label>
                   <Input
                     type="number"
                     value={editFormData.age}
                     onChange={(e) => setEditFormData({ ...editFormData, age: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Altura (cm)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Altura (cm)</label>
                   <Input
                     type="number"
                     value={editFormData.heightCm}
                     onChange={(e) => setEditFormData({ ...editFormData, heightCm: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Peso (kg)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Peso (kg)</label>
                   <Input
                     type="number"
                     step="any"
                     value={editFormData.weightKg}
                     onChange={(e) => setEditFormData({ ...editFormData, weightKg: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Gênero</label>
+                <label className="text-[11px] font-semibold text-text-muted block mb-1">Gênero</label>
                 <Select
                   value={editFormData.gender || 'Masculino'}
                   onValueChange={(val) => setEditFormData({ ...editFormData, gender: val })}
                 >
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold h-9 w-full">
+                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold h-9 w-full">
                     <SelectValue placeholder="Selecione o gênero" />
                   </SelectTrigger>
                   <SelectContent>
@@ -846,14 +842,14 @@ export default function PatientDetailPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">Objetivo Clínico / Esportivo</label>
+                <label className="text-xs font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
                 <div className="flex items-center space-x-1.5">
                   <div className="flex-1 min-w-0">
                     <Select
                       value={editFormData.objective || ''}
                       onValueChange={(val) => setEditFormData({ ...editFormData, objective: val })}
                     >
-                      <SelectTrigger className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold h-9 w-full">
+                      <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold h-9 w-full">
                         <SelectValue placeholder="Selecione o objetivo" />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
@@ -868,7 +864,7 @@ export default function PatientDetailPage() {
                   <SecondaryActionButton
                     type="button"
                     onClick={() => setIsAddObjectiveModalOpen(true)}
-                    icon={<Plus size={14} className="text-warm-emerald" />}
+                    icon={<Plus size={14} className="text-success" />}
                     className="h-9 px-2.5 shrink-0"
                     title="Adicionar Novo Objetivo"
                   >
@@ -910,13 +906,13 @@ export default function PatientDetailPage() {
 
       {/* Confirmation Dialog for Discarding Unsaved Edits */}
       <Dialog open={isDiscardConfirmOpen} onOpenChange={setIsDiscardConfirmOpen}>
-        <DialogContent className="sm:max-w-sm bg-warm-card border-warm-border p-6 rounded-2xl">
+        <DialogContent className="sm:max-w-sm bg-surface border-border-subtle p-6 rounded-surface">
           <DialogHeader className="pb-2">
-            <DialogTitle className="font-black text-base text-warm-charcoal flex items-center space-x-2">
-              <AlertTriangle size={18} className="text-amber-500 shrink-0" />
+            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+              <AlertTriangle size={18} className="text-warning shrink-0" />
               <span>Descartar alterações?</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-warm-muted pt-1">
+            <DialogDescription className="text-xs text-text-muted pt-1">
               Você possui alterações não salvas nos dados do paciente. Deseja descartar as alterações e sair?
             </DialogDescription>
           </DialogHeader>
@@ -924,18 +920,16 @@ export default function PatientDetailPage() {
             <Button
               type="button"
               variant="secondary"
-              size="sm"
+              size="compact"
               onClick={handleCancelDiscard}
-              className="text-xs font-semibold"
             >
               Não
             </Button>
             <Button
               type="button"
-              size="sm"
+              size="compact"
               onClick={handleConfirmDiscard}
               variant="destructive"
-              className="text-xs font-bold bg-red-600 text-white hover:bg-red-700"
             >
               Sim, descartar
             </Button>
@@ -945,20 +939,20 @@ export default function PatientDetailPage() {
 
       {/* Add Custom Objective Dialog Popup */}
       <Dialog open={isAddObjectiveModalOpen} onOpenChange={setIsAddObjectiveModalOpen}>
-        <DialogContent className="sm:max-w-xs bg-warm-card border-warm-border p-5 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-2">
-            <DialogTitle className="font-bold text-sm text-warm-charcoal flex items-center space-x-1.5">
-              <Plus size={16} className="text-warm-emerald" />
+        <DialogContent className="sm:max-w-xs bg-surface border-border-subtle p-5 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-2">
+            <DialogTitle className="font-bold text-sm text-text-primary flex items-center space-x-1.5">
+              <Plus size={16} className="text-success" />
               <span>Novo Objetivo</span>
             </DialogTitle>
-            <DialogDescription className="text-[11px] text-warm-muted">
+            <DialogDescription className="text-[11px] text-text-muted">
               Digite um novo objetivo clínico ou esportivo para incluir na lista.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleAddNewObjective} className="space-y-3 pt-2">
             <div>
-              <label className="text-[11px] font-bold text-warm-charcoal block mb-1">Descrição do Objetivo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Descrição do Objetivo</label>
               <Input
                 type="text"
                 required
@@ -966,7 +960,7 @@ export default function PatientDetailPage() {
                 placeholder="Ex: Preparação para Maratona"
                 value={newObjectiveInput}
                 onChange={(e) => setNewObjectiveInput(e.target.value)}
-                className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold"
+                className="bg-surface-subtle border-border-subtle text-xs text-text-primary font-semibold"
               />
             </div>
 
@@ -998,33 +992,33 @@ export default function PatientDetailPage() {
 
       {/* Delete Patient Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-rose-600 flex items-center space-x-2">
-              <AlertTriangle size={20} className="text-rose-600" />
+        <DialogContent className="sm:max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-error flex items-center space-x-2">
+              <AlertTriangle size={20} className="text-error" />
               <span>Confirmar Exclusão de Paciente</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-warm-muted pt-1">
+            <DialogDescription className="text-xs text-text-muted pt-1">
               Esta ação é permanente e desfaz o cadastro deste paciente.
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-3 space-y-2">
-            <p className="text-xs text-warm-charcoal leading-relaxed">
+            <p className="text-xs text-text-primary leading-relaxed">
               Tem certeza que deseja excluir o paciente <strong className="font-bold text-black">{patient.name}</strong>?
             </p>
-            <p className="text-[11px] text-warm-muted bg-rose-50 border border-rose-200 rounded-xl p-3 text-rose-800">
+            <p className="text-[11px] text-text-muted bg-error-soft border border-error-border rounded-surface p-3 text-error">
               ⚠️ Todos os dados cadastrais, prescrições de dietas e histórico de avaliações físicas associadas a este paciente serão removidos.
             </p>
           </div>
 
-          <div className="flex space-x-2 pt-2 border-t border-warm-border">
+          <div className="flex space-x-2 pt-2 border-t border-border-subtle">
             <Button
               type="button"
               onClick={() => setIsDeleteModalOpen(false)}
               variant="secondary"
-              size="sm"
-              className="flex-1 text-xs font-bold"
+              size="compact"
+              className="flex-1"
             >
               Cancelar
             </Button>
@@ -1032,8 +1026,8 @@ export default function PatientDetailPage() {
               type="button"
               onClick={handleDeletePatient}
               variant="destructive"
-              size="sm"
-              className="flex-1 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
+              size="compact"
+              className="flex-1"
             >
               Sim, Excluir Paciente
             </Button>
@@ -1042,13 +1036,13 @@ export default function PatientDetailPage() {
       </Dialog>
       {/* Edit Physical Assessment Dialog */}
       <Dialog open={isEditAssessmentOpen} onOpenChange={setIsEditAssessmentOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-bold text-base text-warm-charcoal flex items-center space-x-2">
-              <Scale size={18} className="text-warm-emerald" />
+        <DialogContent className="sm:max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-text-primary flex items-center space-x-2">
+              <Scale size={18} className="text-success" />
               <span>Editar Avaliação Física</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-warm-muted">
+            <DialogDescription className="text-xs text-text-muted">
               Atualize as medições corporais do paciente nesta data.
             </DialogDescription>
           </DialogHeader>
@@ -1057,50 +1051,50 @@ export default function PatientDetailPage() {
             <form onSubmit={handleSaveAssessment} className="space-y-4 pt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Peso Corporal (kg)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Peso Corporal (kg)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.weightKg}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, weightKg: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">% Gordura Corporal (BF)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">% Gordura Corporal (BF)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.bodyFatPercent}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, bodyFatPercent: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Massa Magra (kg)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Massa Magra (kg)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.muscleMassKg}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, muscleMassKg: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-warm-muted block mb-1">Cintura (cm)</label>
+                  <label className="text-[11px] font-semibold text-text-muted block mb-1">Cintura (cm)</label>
                   <Input
                     type="number"
                     step="any"
                     required
                     value={editingAssessment.waistCm}
                     onChange={(e) => setEditingAssessment({ ...editingAssessment, waistCm: Number(e.target.value) })}
-                    className="bg-warm-inner border-warm-border text-xs font-bold text-warm-charcoal"
+                    className="bg-surface-subtle border-border-subtle text-xs font-bold text-text-primary"
                   />
                 </div>
               </div>

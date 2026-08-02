@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { UtensilsCrossed, Plus, Search, Clock, PlusCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -99,115 +100,108 @@ export default function ReadyMealsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <UtensilsCrossed size={20} className="text-warm-emerald" />
-            <h1 className="font-black text-2xl text-warm-charcoal tracking-tight">Refeições Prontas</h1>
+            <UtensilsCrossed size={20} className="text-success" />
+            <h1 className="font-bold text-2xl text-text-primary tracking-tight">Refeições Prontas</h1>
           </div>
-          <p className="text-xs text-warm-muted mt-1 font-medium">
+          <p className="text-xs text-text-muted mt-1 font-medium">
             Catálogo de blocos de refeição reutilizáveis para inserção direta na prescrição de qualquer paciente.
           </p>
         </div>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          variant="emerald"
-          size="sm"
-          className="flex items-center space-x-2 shrink-0 font-bold"
-        >
-          <Plus size={16} />
-          <span>Criar Bloco de Refeição</span>
-        </Button>
+        <CreateButton onClick={() => setIsModalOpen(true)}>
+          Criar Bloco de Refeição
+        </CreateButton>
       </div>
 
       {/* Search Input */}
       {meals.length > 0 && (
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar refeição pronta por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-warm-card border-warm-border text-xs"
+            className="pl-11 pr-4 bg-surface border-border-subtle text-xs"
           />
         </div>
       )}
 
       {/* Empty State vs Ready Meals Grid */}
       {filteredMeals.length === 0 ? (
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-12 text-center max-w-md mx-auto space-y-4 my-8">
+        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto space-y-4 my-8">
           <CardContent className="p-0 space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-warm-inner border border-warm-border flex items-center justify-center mx-auto text-warm-muted">
+            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <UtensilsCrossed size={24} />
             </div>
             <div>
-              <h3 className="font-black text-base text-warm-charcoal">Nenhuma refeição cadastrada</h3>
-              <p className="text-xs text-warm-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-base text-text-primary">Nenhuma refeição cadastrada</h3>
+              <p className="text-xs text-text-muted mt-1 leading-relaxed">
                 Seu catálogo de blocos de refeições prontas está em branco. Crie seu primeiro bloco de refeição reutilizável.
               </p>
             </div>
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              variant="emerald"
-              size="sm"
-              className="inline-flex items-center space-x-2 text-xs font-bold"
-            >
-              <Plus size={16} />
-              <span>Criar Primeiro Bloco</span>
-            </Button>
+            <CreateButton onClick={() => setIsModalOpen(true)}>
+              Criar Primeiro Bloco
+            </CreateButton>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-3 gap-5">
           {filteredMeals.map((meal) => (
             <Card
               key={meal.id}
-              className="bg-warm-card border-warm-border rounded-2xl p-5 hover:border-warm-charcoal/30 transition-all flex flex-col justify-between space-y-4"
+              className="bg-surface border-border-subtle rounded-surface p-5 hover:border-border-hover transition-colors duration-standard flex flex-col justify-between space-y-4"
             >
               <CardContent className="p-0 space-y-4 flex flex-col justify-between h-full">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-warm-muted flex items-center space-x-1">
+                    <span className="text-style-legal font-semibold text-text-muted flex items-center space-x-1">
                       <Clock size={12} />
                       <span>Horário sugerido: {meal.suggestedTime}</span>
                     </span>
-                    <Badge variant="outline" className="text-[9px] font-bold">
+                    <Badge variant="outline" className="text-style-chart-micro font-bold">
                       {meal.itemsCount} alimentos
                     </Badge>
                   </div>
-                  <h3 className="font-bold text-sm text-warm-charcoal leading-snug">{meal.name}</h3>
-                  <p className="text-xs text-warm-muted leading-relaxed line-clamp-2">{meal.itemsPreview}</p>
+                  <h3 className="font-bold text-sm text-text-primary leading-snug">{meal.name}</h3>
+                  <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{meal.itemsPreview}</p>
                 </div>
 
                 {/* Macro Summary */}
-                <div className="grid grid-cols-4 gap-1.5 p-3 bg-warm-inner border border-warm-border rounded-xl text-center">
+                <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Kcal</span>
-                    <span className="font-black text-xs text-warm-charcoal">{meal.kcal}</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Kcal</span>
+                    <span className="font-bold text-xs text-text-primary">{meal.kcal}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Prot</span>
-                    <span className="font-black text-xs text-blue-600">{meal.proteinG}g</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Prot</span>
+                    <span className="font-bold text-xs text-macro-protein">{meal.proteinG}g</span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Carb</span>
-                    <span className="font-black text-xs text-amber-700">{meal.carbsG}g</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Carb</span>
+                    <span className="font-bold text-xs text-warning">{meal.carbsG}g</span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-bold text-warm-muted block uppercase">Gord</span>
-                    <span className="font-black text-xs text-emerald-700">{meal.fatsG}g</span>
+                    <span className="text-style-chart-micro font-bold text-text-muted block uppercase">Gord</span>
+                    <span className="font-bold text-xs text-success">{meal.fatsG}g</span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between border-t border-warm-border">
-                  <span className="text-[10px] text-warm-muted font-medium">Bloco de 1 clique</span>
+                <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
+                  <span className="text-style-legal text-text-muted font-medium">Bloco de 1 clique</span>
                   <Button
                     size="sm"
+                    variant={insertedId === meal.id ? 'default' : 'primary'}
                     onClick={() => handleInsert(meal.id)}
-                    className="inline-flex items-center space-x-1.5 text-xs font-bold"
+                    className={`inline-flex items-center space-x-1.5 text-xs font-bold transition-colors duration-standard ${
+                      insertedId === meal.id
+                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating scale-[1.02]'
+                        : ''
+                    }`}
                   >
                     {insertedId === meal.id ? <Check size={14} /> : <PlusCircle size={14} />}
                     <span>{insertedId === meal.id ? 'Inserido!' : 'Inserir na Dieta'}</span>
@@ -221,32 +215,32 @@ export default function ReadyMealsPage() {
 
       {/* Modal Criar Refeição Shadcn Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-warm-charcoal">Novo Bloco de Refeição</DialogTitle>
+        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-base text-text-primary">Novo Bloco de Refeição</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleCreateMeal} className="space-y-3 pt-2">
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome do Bloco de Refeição</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Nome do Bloco de Refeição</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Café da Manhã Proteico Padrão"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs"
+                className="bg-surface-subtle border-border-subtle text-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Horário Sugerido</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Horário Sugerido</label>
               <Input
                 type="text"
                 placeholder="08:00"
                 value={formData.suggestedTime}
                 onChange={(e) => setFormData({ ...formData, suggestedTime: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs font-bold"
+                className="bg-surface-subtle border-border-subtle text-xs font-bold"
               />
             </div>
 
@@ -260,15 +254,14 @@ export default function ReadyMealsPage() {
               onFatsChange={(val) => setFormData({ ...formData, fatsG: val })}
             />
 
-
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Alimentos Incluídos (Resumo)</label>
+              <label className="text-xs font-bold text-text-primary block mb-1">Alimentos Incluídos (Resumo)</label>
               <textarea
                 rows={2}
                 placeholder="Ex: Ovo cozido (150g), Aveia em flocos (40g), Banana (100g)"
                 value={formData.itemsPreview}
                 onChange={(e) => setFormData({ ...formData, itemsPreview: e.target.value })}
-                className="w-full px-3 py-2 bg-warm-inner border border-warm-border rounded-xl text-xs text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-warm-charcoal resize-none"
+                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
 
@@ -278,11 +271,11 @@ export default function ReadyMealsPage() {
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
                 size="sm"
-                className="flex-1 text-xs"
+                className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
+              <Button type="submit" variant="primary" size="sm" className="flex-1">
                 Salvar Refeição
               </Button>
             </div>

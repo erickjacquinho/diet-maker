@@ -311,7 +311,7 @@ export default function FoodsPage() {
           const food = row.original;
           const isActivated = activeReorderId === food.id;
           return (
-            <button
+            <Button
               type="button"
               onMouseDown={() => setActiveReorderId(food.id)}
               onMouseUp={() => setActiveReorderId(null)}
@@ -319,15 +319,15 @@ export default function FoodsPage() {
               onTouchEnd={() => setActiveReorderId(null)}
               onClick={() => setActiveReorderId((prev) => (prev === food.id ? null : food.id))}
               aria-label={`Reordenar ${food.name}`}
-              className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-warm-muted hover:text-warm-charcoal ${
+              className={`p-1 rounded-md cursor-grab active:cursor-grabbing transition-opacity duration-150 text-text-muted hover:text-text-primary ${
                 isActivated
-                  ? 'opacity-100 text-warm-emerald bg-warm-emerald/10 ring-1 ring-warm-emerald/30'
+                  ? 'opacity-100 text-success bg-success/10 ring-1 ring-success/30'
                   : 'opacity-0 group-hover/row:opacity-100'
               }`}
               title="Reordenar alimento"
             >
               <GripVertical size={14} />
-            </button>
+            </Button>
           );
         },
         enableSorting: false,
@@ -342,12 +342,12 @@ export default function FoodsPage() {
               variant="ghost"
               size="icon"
               onClick={() => handleToggleFavorite(food.id)}
-              className="h-6 w-6 p-0 hover:bg-warm-inner/80 rounded-lg transition-colors"
+              className="h-6 w-6 p-0 hover:bg-surface-subtle/80 rounded-lg transition-colors"
               title={food.isFavorite ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
             >
               <Star
                 size={14}
-                className={food.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-warm-muted/50 hover:text-warm-muted'}
+                className={food.isFavorite ? 'fill-warning text-warning-soft0' : 'text-text-muted/50 hover:text-text-muted'}
               />
             </Button>
           );
@@ -361,19 +361,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-text-primary"
           >
             <span>Alimento</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowUp size={12} className="ml-1 text-success font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowDown size={12} className="ml-1 text-success font-bold" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
+              <ArrowUpDown size={12} className="ml-1 text-text-muted opacity-60" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <span className="font-bold text-warm-charcoal text-xs">{row.original.name}</span>,
+        cell: ({ row }) => <span className="font-bold text-text-primary text-xs">{row.original.name}</span>,
       },
       {
         accessorKey: 'preparo',
@@ -382,20 +382,20 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-text-primary"
           >
             <span>Preparo</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowUp size={12} className="ml-1 text-success font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowDown size={12} className="ml-1 text-success font-bold" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
+              <ArrowUpDown size={12} className="ml-1 text-text-muted opacity-60" />
             )}
           </Button>
         ),
         cell: ({ row }) => (
-          <Badge variant="outline" className="text-[10px] font-bold border-warm-border bg-warm-inner text-warm-charcoal px-2 py-0.5 rounded-md">
+          <Badge variant="outline" className="text-style-legal font-bold border-border-subtle bg-surface-subtle text-text-primary px-2 py-0.5 rounded-md">
             {row.original.preparo}
           </Badge>
         ),
@@ -407,30 +407,30 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-warm-charcoal"
+            className="p-0 h-6 font-bold hover:bg-transparent text-xs text-text-primary"
           >
             <span>Categoria</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowUp size={12} className="ml-1 text-success font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowDown size={12} className="ml-1 text-success font-bold" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
+              <ArrowUpDown size={12} className="ml-1 text-text-muted opacity-60" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <span className="text-warm-muted font-semibold text-xs">{row.original.category}</span>,
+        cell: ({ row }) => <span className="text-text-muted font-semibold text-xs">{row.original.category}</span>,
       },
       {
         accessorKey: 'source',
-        header: () => <span className="text-center block text-xs font-bold text-warm-charcoal">Origem</span>,
+        header: () => <span className="text-center block text-xs font-bold text-text-primary">Origem</span>,
         cell: ({ row }) => (
           <Badge
             variant={row.original.source === 'TACO' ? 'secondary' : 'default'}
-            className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
+            className={`text-style-chart-micro font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
               row.original.source === 'TACO'
-                ? 'bg-warm-inner text-warm-muted border border-warm-border'
-                : 'bg-warm-emerald/10 text-warm-emerald border border-warm-emerald/20'
+                ? 'bg-surface-subtle text-text-muted border border-border-subtle'
+                : 'bg-success/10 text-success border border-success/20'
             }`}
           >
             {row.original.source}
@@ -445,19 +445,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-warm-charcoal"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-text-primary"
           >
             <span>Kcal</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowUp size={12} className="ml-1 text-success font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowDown size={12} className="ml-1 text-success font-bold" />
             ) : (
-              <ArrowUpDown size={12} className="ml-1 text-warm-muted opacity-60" />
+              <ArrowUpDown size={12} className="ml-1 text-text-muted opacity-60" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-black text-warm-charcoal text-xs">{row.original.kcal} <span className="text-[10px] text-warm-muted font-bold">kcal</span></div>,
+        cell: ({ row }) => <div className="text-right font-bold text-text-primary text-xs">{row.original.kcal} <span className="text-style-legal text-text-muted font-bold">kcal</span></div>,
       },
       {
         accessorKey: 'proteinG',
@@ -466,19 +466,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-blue-600 text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-protein text-xs"
           >
             <span>Proteína</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-blue-600 font-black" />
+              <ArrowUp size={12} className="ml-1 text-macro-protein font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-blue-600 font-black" />
+              <ArrowDown size={12} className="ml-1 text-macro-protein font-bold" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-bold text-blue-600 text-xs">{row.original.proteinG}g</div>,
+        cell: ({ row }) => <div className="text-right font-bold text-macro-protein text-xs">{row.original.proteinG}g</div>,
       },
       {
         accessorKey: 'carbsG',
@@ -487,19 +487,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-orange-500 text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-carbohydrate text-xs"
           >
             <span>Carbo</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-orange-500 font-black" />
+              <ArrowUp size={12} className="ml-1 text-macro-carbohydrate font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-orange-500 font-black" />
+              <ArrowDown size={12} className="ml-1 text-macro-carbohydrate font-bold" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-bold text-orange-500 text-xs">{row.original.carbsG}g</div>,
+        cell: ({ row }) => <div className="text-right font-bold text-macro-carbohydrate text-xs">{row.original.carbsG}g</div>,
       },
       {
         accessorKey: 'fatsG',
@@ -508,19 +508,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-emerald-700 text-xs"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-fat text-xs"
           >
             <span>Gordura</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-emerald-700 font-black" />
+              <ArrowUp size={12} className="ml-1 text-macro-fat font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-emerald-700 font-black" />
+              <ArrowDown size={12} className="ml-1 text-macro-fat font-bold" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right font-bold text-emerald-700 text-xs">{row.original.fatsG}g</div>,
+        cell: ({ row }) => <div className="text-right font-bold text-macro-fat text-xs">{row.original.fatsG}g</div>,
       },
       {
         accessorKey: 'fiberG',
@@ -529,19 +529,19 @@ export default function FoodsPage() {
             variant="ghost"
             size="sm"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-warm-charcoal"
+            className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-xs text-text-primary"
           >
             <span>Fibra</span>
             {column.getIsSorted() === 'asc' ? (
-              <ArrowUp size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowUp size={12} className="ml-1 text-success font-bold" />
             ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown size={12} className="ml-1 text-warm-emerald font-black" />
+              <ArrowDown size={12} className="ml-1 text-success font-bold" />
             ) : (
               <ArrowUpDown size={12} className="ml-1 opacity-40" />
             )}
           </Button>
         ),
-        cell: ({ row }) => <div className="text-right text-warm-muted font-medium text-xs">{row.original.fiberG}g</div>,
+        cell: ({ row }) => <div className="text-right text-text-muted font-medium text-xs">{row.original.fiberG}g</div>,
       },
       {
         id: 'actions',
@@ -589,103 +589,109 @@ export default function FoodsPage() {
     sorting.length > 0;
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 p-6 max-w-7xl mx-auto space-y-4">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-warm-emerald/10 text-warm-emerald">
-              <BookOpen size={20} />
-            </div>
-            <h1 className="font-black text-xl text-warm-charcoal tracking-tight">Tabela de Alimentos (TACO)</h1>
+      <div>
+        <div className="flex items-center space-x-2.5">
+          <div className="p-2 rounded-control bg-success/10 text-success">
+            <BookOpen size={20} />
           </div>
-          <p className="text-xs text-warm-muted font-medium mt-1">
-            Biblioteca oficial TACO e alimentos customizados para prescrição de dietas.
-          </p>
+          <h1 className="font-bold text-xl text-text-primary tracking-tight">Tabela de Alimentos (TACO)</h1>
         </div>
-        <CreateButton
-          onClick={handleOpenCreateModal}
-          icon={<Plus size={14} />}
-        >
-          Cadastrar Alimento
-        </CreateButton>
+        <p className="text-xs text-text-muted font-medium mt-1">
+          Biblioteca oficial TACO e alimentos customizados para prescrição de dietas.
+        </p>
       </div>
 
       {/* Filter Controls Card */}
-      <Card className="bg-warm-card border-warm-border p-4 rounded-2xl shadow-xs">
+      <Card className="bg-surface border-border-subtle p-4 rounded-surface shadow-floating">
         <CardContent className="p-0 space-y-3">
-          {/* Row 1: Primary Tabs & Clear Button */}
-          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-warm-border pb-3">
+          {/* Row 1: Primary Tabs, Clear Button & Create Button */}
+          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-border-subtle pb-3">
             <div className="flex items-center space-x-1.5 overflow-x-auto">
-              <button
+              <Button
                 type="button"
+                size="compact"
                 onClick={() => setActiveTab('all')}
-                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all ${
+                className={
                   activeTab === 'all'
-                    ? 'bg-warm-charcoal text-white shadow-xs'
-                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
-                }`}
+                    ? 'bg-primary text-white shadow-floating'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
+                }
               >
                 Todos ({foods.length})
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                size="compact"
                 onClick={() => setActiveTab('favorites')}
-                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1.5 ${
+                className={`flex items-center space-x-1.5 ${
                   activeTab === 'favorites'
-                    ? 'bg-warm-charcoal text-white shadow-xs'
-                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
+                    ? 'bg-primary text-white shadow-floating'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
                 }`}
               >
-                <Star size={12} className="fill-amber-400 text-amber-400" />
+                <Star size={12} className="fill-warning text-warning" />
                 <span>Favoritos ⭐ ({foods.filter((f) => f.isFavorite).length})</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                size="compact"
                 onClick={() => setActiveTab('custom')}
-                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all ${
+                className={
                   activeTab === 'custom'
-                    ? 'bg-warm-charcoal text-white shadow-xs'
-                    : 'bg-warm-inner text-warm-muted hover:text-warm-charcoal hover:bg-warm-border/60 border border-warm-border'
-                }`}
+                    ? 'bg-primary text-white shadow-floating'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
+                }
               >
                 Customizados ({foods.filter((f) => f.source === 'CUSTOM').length})
-              </button>
+              </Button>
             </div>
 
-            {isFiltered && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1 transition-colors"
+            <div className="flex items-center space-x-2">
+              {isFiltered && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="compact"
+                  onClick={resetFilters}
+                  className="text-error hover:text-rose-800 hover:bg-error-soft flex items-center space-x-1"
+                >
+                  <RotateCcw size={12} />
+                  <span>Limpar filtros</span>
+                </Button>
+              )}
+
+              <CreateButton
+                onClick={handleOpenCreateModal}
+                icon={<Plus size={14} />}
               >
-                <RotateCcw size={12} />
-                <span>Limpar Filtros</span>
-              </button>
-            )}
+                Cadastrar alimento
+              </CreateButton>
+            </div>
           </div>
 
           {/* Row 2: Search Input & Select Dropdowns */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
+          <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
             {/* Search */}
-            <div className="md:col-span-6 relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
+            <div className="col-span-6 relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
               <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Pesquisa rápida (ex: pao, feijao, frango, grelhado)..."
-                className="pl-8 pr-3 bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal placeholder:text-warm-muted focus-visible:ring-warm-emerald"
+                className="pl-8 pr-3 bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary placeholder:text-text-muted focus-visible:ring-success"
               />
             </div>
 
             {/* Category Dropdown Filter */}
-            <div className="md:col-span-3">
+            <div className="col-span-3">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-semibold">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary font-semibold">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
-                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs shadow-md">
+                <SelectContent className="bg-surface border-border-subtle text-text-primary text-xs shadow-floating">
                   <SelectItem value="all">Todas as Categorias ({categoriesList.length})</SelectItem>
                   {categoriesList.map((cat) => (
                     <SelectItem key={cat} value={cat}>
@@ -697,12 +703,12 @@ export default function FoodsPage() {
             </div>
 
             {/* Preparo Dropdown Filter */}
-            <div className="md:col-span-3">
+            <div className="col-span-3">
               <Select value={preparoFilter} onValueChange={setPreparoFilter}>
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-semibold">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary font-semibold">
                   <SelectValue placeholder="Preparo" />
                 </SelectTrigger>
-                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs shadow-md">
+                <SelectContent className="bg-surface border-border-subtle text-text-primary text-xs shadow-floating">
                   <SelectItem value="all">Todos os Preparos ({preparosList.length})</SelectItem>
                   {preparosList.map((prep) => (
                     <SelectItem key={prep} value={prep}>
@@ -716,71 +722,75 @@ export default function FoodsPage() {
 
           {/* Row 3: Essential Macro Preset Shortcuts */}
           <div className="flex items-center space-x-2 pt-1 overflow-x-auto">
-            <span className="text-[10px] font-black text-warm-muted uppercase tracking-wider shrink-0 flex items-center space-x-1">
-              <Filter size={11} className="text-warm-emerald" />
+            <span className="text-style-legal font-bold text-text-muted uppercase tracking-wider shrink-0 flex items-center space-x-1">
+              <Filter size={11} className="text-success" />
               <span>Macros:</span>
             </span>
 
-            <button
+            <Button
               type="button"
+              size="compact"
               onClick={() => setMacroPreset(macroPreset === 'high-protein' ? 'all' : 'high-protein')}
-              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+              className={`shrink-0 ${
                 macroPreset === 'high-protein'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-warm-inner text-blue-600 border border-blue-200 hover:bg-blue-50'
+                  ? 'bg-macro-protein text-white shadow-floating'
+                  : 'bg-surface-subtle text-macro-protein border border-macro-protein-border hover:bg-macro-protein-soft'
               }`}
             >
-              🥩 Proteína Alta
-            </button>
+              🥩 Proteína alta
+            </Button>
 
-            <button
+            <Button
               type="button"
+              size="compact"
               onClick={() => setMacroPreset(macroPreset === 'high-carb' ? 'all' : 'high-carb')}
-              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+              className={`shrink-0 ${
                 macroPreset === 'high-carb'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-warm-inner text-amber-600 border border-amber-200 hover:bg-amber-50'
+                  ? 'bg-macro-carbohydrate text-white shadow-floating'
+                  : 'bg-surface-subtle text-macro-carbohydrate border border-macro-carbohydrate-border hover:bg-macro-carbohydrate-soft'
               }`}
             >
-              🍞 Carboidrato Alto
-            </button>
+              🍞 Carboidrato alto
+            </Button>
 
-            <button
+            <Button
               type="button"
+              size="compact"
               onClick={() => setMacroPreset(macroPreset === 'high-fat' ? 'all' : 'high-fat')}
-              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+              className={`shrink-0 ${
                 macroPreset === 'high-fat'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-warm-inner text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+                  ? 'bg-macro-fat text-white shadow-floating'
+                  : 'bg-surface-subtle text-macro-fat border border-macro-fat-border hover:bg-macro-fat-soft'
               }`}
             >
-              🧀 Gordura Alta
-            </button>
+              🧀 Gordura alta
+            </Button>
 
-            <button
+            <Button
               type="button"
+              size="compact"
               onClick={() => setMacroPreset(macroPreset === 'high-fiber' ? 'all' : 'high-fiber')}
-              className={`text-xs px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+              className={`shrink-0 ${
                 macroPreset === 'high-fiber'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'bg-warm-inner text-teal-700 border border-teal-200 hover:bg-teal-50'
+                  ? 'bg-info text-on-info shadow-floating'
+                  : 'bg-surface-subtle text-info border border-info-border hover:bg-info-soft'
               }`}
             >
-              🌾 Fibra Alta
-            </button>
+              🌾 Fibra alta
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Spreadsheet Table */}
-      <Card className="bg-warm-card border-warm-border rounded-2xl overflow-hidden shadow-xs p-0">
+      <Card className="bg-surface border-border-subtle rounded-surface overflow-hidden shadow-floating p-0">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-warm-inner/80 border-b border-warm-border">
+            <TableHeader className="bg-surface-subtle/80 border-b border-border-subtle">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b border-warm-border hover:bg-transparent">
+                <TableRow key={headerGroup.id} className="border-b border-border-subtle hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="py-2.5 px-3 select-none text-[10px] uppercase font-black text-warm-muted tracking-wider">
+                    <TableHead key={header.id} className="py-2.5 px-3 select-none text-style-legal uppercase font-bold text-text-muted tracking-wider">
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -789,16 +799,16 @@ export default function FoodsPage() {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody className="divide-y divide-warm-border text-warm-charcoal font-medium">
+            <TableBody className="divide-y divide-border-subtle text-text-primary font-medium">
               {table.getRowModel().rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="py-8 text-center text-warm-muted font-semibold text-xs italic">
+                  <TableCell colSpan={columns.length} className="py-8 text-center text-text-muted font-semibold text-xs italic">
                     Nenhum alimento encontrado para os filtros selecionados.
                   </TableCell>
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="group/row hover:bg-warm-inner/50 transition-colors border-b border-warm-border/60">
+                  <TableRow key={row.id} className="group/row hover:bg-surface-subtle/50 transition-colors border-b border-border-subtle/60">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-2.5 px-3 text-xs">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -812,22 +822,22 @@ export default function FoodsPage() {
         </div>
 
         {/* Compact Pagination Bar */}
-        <div className="py-3 px-4 border-t border-warm-border bg-warm-inner/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="flex items-center space-x-2 text-warm-muted font-medium text-[11px]">
+        <div className="py-3 px-4 border-t border-border-subtle bg-surface-subtle/50 flex flex-col flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center space-x-2 text-text-muted font-medium text-style-legal">
             <span>
-              <strong className="text-warm-charcoal font-bold">{filteredFoods.length}</strong> alimentos
+              <strong className="text-text-primary font-bold">{filteredFoods.length}</strong> alimentos
             </span>
             <span>•</span>
             <span>
-              Página <strong className="text-warm-charcoal font-bold">{table.getState().pagination.pageIndex + 1}</strong> de{' '}
-              <strong className="text-warm-charcoal font-bold">{table.getPageCount() || 1}</strong>
+              Página <strong className="text-text-primary font-bold">{table.getState().pagination.pageIndex + 1}</strong> de{' '}
+              <strong className="text-text-primary font-bold">{table.getPageCount() || 1}</strong>
             </span>
           </div>
 
           <div className="flex items-center space-x-3">
             {/* Page Size Selector */}
             <div className="flex items-center space-x-1.5">
-              <span className="text-warm-muted font-bold text-[10px]">Por página:</span>
+              <span className="text-text-muted font-bold text-style-legal">Por página:</span>
               <Select
                 value={table.getState().pagination.pageSize > 100 ? 'all' : String(table.getState().pagination.pageSize)}
                 onValueChange={(val) => {
@@ -838,10 +848,10 @@ export default function FoodsPage() {
                   }
                 }}
               >
-                <SelectTrigger className="h-7 w-20 bg-warm-card border-warm-border text-xs font-bold text-warm-charcoal rounded-lg">
+                <SelectTrigger className="h-7 w-20 bg-surface border-border-subtle text-xs font-bold text-text-primary rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
+                <SelectContent className="bg-surface border-border-subtle text-text-primary text-xs">
                   <SelectItem value="15">15</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
@@ -859,7 +869,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-lg"
                 title="Primeira Página"
               >
                 <ChevronsLeft size={14} />
@@ -869,7 +879,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-lg"
                 title="Página Anterior"
               >
                 <ChevronLeft size={14} />
@@ -879,7 +889,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-lg"
                 title="Próxima Página"
               >
                 <ChevronRight size={14} />
@@ -889,7 +899,7 @@ export default function FoodsPage() {
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7 bg-warm-card border-warm-border text-warm-charcoal hover:bg-warm-inner rounded-lg"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-lg"
                 title="Última Página"
               >
                 <ChevronsRight size={14} />
@@ -901,13 +911,13 @@ export default function FoodsPage() {
 
       {/* Modal Cadastro/Edição de Alimento Customizado Shadcn Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-lg bg-warm-card border-warm-border p-6 rounded-2xl shadow-xl">
-          <DialogHeader className="border-b border-warm-border pb-3 flex flex-row items-center justify-between">
+        <DialogContent className="max-w-lg bg-surface border-border-subtle p-6 rounded-surface shadow-overlay">
+          <DialogHeader className="border-b border-border-subtle pb-3 flex flex-row items-center justify-between">
             <div>
-              <DialogTitle className="font-black text-base text-warm-charcoal">
+              <DialogTitle className="font-bold text-base text-text-primary">
                 {editingFoodId ? 'Editar Alimento Customizado' : 'Novo Alimento Customizado'}
               </DialogTitle>
-              <p className="text-[11px] text-warm-muted font-medium mt-0.5">
+              <p className="text-style-legal text-text-muted font-medium mt-0.5">
                 {editingFoodId
                   ? 'Atualize os dados e composição nutricional do alimento.'
                   : 'Cadastre um produto comercial ou suplemento manipulado na biblioteca.'}
@@ -917,10 +927,10 @@ export default function FoodsPage() {
 
           <form onSubmit={handleSaveCustomFood} className="space-y-3.5 pt-2">
             {/* Row 1: Name, Portion & Unit */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
-              <div className="md:col-span-6">
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">
-                  Nome do Alimento / Suplemento <span className="text-rose-500">*</span>
+            <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
+              <div className="col-span-6">
+                <label className="text-xs font-bold text-text-primary block mb-1">
+                  Nome do Alimento / Suplemento <span className="text-error-soft0">*</span>
                 </label>
                 <Input
                   type="text"
@@ -928,11 +938,11 @@ export default function FoodsPage() {
                   placeholder="Ex: Whey Protein 80% Max"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal font-medium placeholder:text-warm-muted focus:border-warm-emerald"
+                  className="bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary font-medium placeholder:text-text-muted focus:border-success"
                 />
               </div>
-              <div className="md:col-span-3">
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">
+              <div className="col-span-3">
+                <label className="text-xs font-bold text-text-primary block mb-1">
                   Qtd. Porção
                 </label>
                 <Input
@@ -940,18 +950,18 @@ export default function FoodsPage() {
                   placeholder="Ex: 100 ou 1"
                   value={formData.portion}
                   onChange={(e) => setFormData({ ...formData, portion: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal"
+                  className="bg-surface-subtle border-border-subtle text-xs font-bold h-9 rounded-control text-text-primary"
                 />
               </div>
-              <div className="md:col-span-3">
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">
+              <div className="col-span-3">
+                <label className="text-xs font-bold text-text-primary block mb-1">
                   Unidade
                 </label>
                 <Select value={formData.unit} onValueChange={(val) => setFormData({ ...formData, unit: val })}>
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal">
+                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs font-bold h-9 rounded-control text-text-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
+                  <SelectContent className="bg-surface border-border-subtle text-text-primary text-xs">
                     <SelectItem value="g">g (Grama)</SelectItem>
                     <SelectItem value="ml">ml (Mililitro)</SelectItem>
                     <SelectItem value="un">un (Unidade)</SelectItem>
@@ -967,14 +977,14 @@ export default function FoodsPage() {
             </div>
 
             {/* Row 2: Category and Preparo */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
-              <div className="md:col-span-6">
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">Categoria</label>
+            <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
+              <div className="col-span-6">
+                <label className="text-xs font-bold text-text-primary block mb-1">Categoria</label>
                 <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal">
+                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-warm-card border-warm-border text-warm-charcoal text-xs">
+                  <SelectContent className="bg-surface border-border-subtle text-text-primary text-xs">
                     <SelectItem value="Carnes, Pescados & Ovos">Carnes, Pescados & Ovos</SelectItem>
                     <SelectItem value="Verduras & Legumes">Verduras & Legumes</SelectItem>
                     <SelectItem value="Frutas">Frutas</SelectItem>
@@ -988,14 +998,14 @@ export default function FoodsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="md:col-span-6">
-                <label className="text-xs font-bold text-warm-charcoal block mb-1">Forma de Preparo</label>
+              <div className="col-span-6">
+                <label className="text-xs font-bold text-text-primary block mb-1">Forma de Preparo</label>
                 <Input
                   type="text"
                   placeholder="Ex: Grelhado, Cozido, Cru, Air Fryer"
                   value={formData.preparo}
                   onChange={(e) => setFormData({ ...formData, preparo: e.target.value })}
-                  className="bg-warm-inner border-warm-border text-xs h-9 rounded-xl text-warm-charcoal"
+                  className="bg-surface-subtle border-border-subtle text-xs h-9 rounded-control text-text-primary"
                 />
               </div>
             </div>
@@ -1012,7 +1022,7 @@ export default function FoodsPage() {
 
             {/* FIBER */}
             <div>
-              <label className="text-xs font-semibold text-warm-muted block mb-1">Fibra Alimentar (opcional)</label>
+              <label className="text-xs font-semibold text-text-muted block mb-1">Fibra Alimentar (opcional)</label>
               <Input
                 type="number"
                 step="any"
@@ -1020,35 +1030,35 @@ export default function FoodsPage() {
                 placeholder="Ex: 2"
                 value={formData.fiberG}
                 onChange={(e) => setFormData({ ...formData, fiberG: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs font-bold h-9 rounded-xl text-warm-charcoal"
+                className="bg-surface-subtle border-border-subtle text-xs font-bold h-9 rounded-control text-text-primary"
               />
             </div>
 
             <div className="pt-2 flex items-center space-x-2">
               {editingFoodId && (
-                <button
+                <Button
                   type="button"
                   onClick={() => handleDeleteCustomFood(editingFoodId)}
-                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1"
+                  className="px-3 py-2 bg-error-soft hover:bg-rose-100 text-error rounded-control text-xs font-bold transition-colors flex items-center space-x-1"
                   title="Excluir Alimento"
                 >
                   <Trash2 size={13} />
                   <span>Excluir</span>
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-2 bg-warm-inner hover:bg-warm-border text-warm-charcoal rounded-xl text-xs font-bold transition-colors"
+                className="flex-1 px-4 py-2 bg-surface-subtle hover:bg-border-subtle text-text-primary rounded-control text-xs font-bold transition-colors"
               >
                 Cancelar
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="flex-1 px-4 py-2 bg-warm-emerald hover:bg-warm-emerald/90 text-white rounded-xl text-xs font-bold transition-colors shadow-xs border-none"
+                className="flex-1 px-4 py-2 bg-success hover:bg-success/90 text-white rounded-control text-xs font-bold transition-colors shadow-floating border-none"
               >
                 {editingFoodId ? 'Salvar Alterações' : 'Salvar Alimento'}
-              </button>
+              </Button>
             </div>
           </form>
         </DialogContent>

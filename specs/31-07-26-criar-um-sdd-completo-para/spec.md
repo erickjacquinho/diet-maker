@@ -29,7 +29,7 @@ Incluído:
 
 Excluído:
 
-- `refs/UI/`, `refs/UI/design-system-prd/` e `demo_dashboard.html`, que permanecem históricos e não normativos;
+- `refs/UI/` e `refs/UI/design-system-prd/`, que permanecem históricos e não normativos;
 - redesign de fluxos, alteração de regras de negócio ou mudança de contratos de dados;
 - suporte mobile, tablet ou dark mode;
 - criação de novos componentes sem necessidade comprovada pelo registry;
@@ -160,7 +160,7 @@ Como revisor, quero uma evidência por etapa e por rota para aprovar a substitui
 - **FR-023**: O encerramento MUST remover arquivos, exports, aliases e configurações que representem o sistema legado do código executável.
 - **FR-024**: O encerramento MUST produzir zero ocorrência legada na auditoria e zero arquivo fora do registry entre as fontes públicas de componentes.
 - **FR-025**: A migração MUST permanecer restrita à plataforma web desktop a partir de 1024px, sem criar mobile, tablet ou dark mode.
-- **FR-026**: Nenhuma regra visual nova MUST ser adicionada a `refs/UI`, `demo_dashboard.html` ou outra fonte histórica durante a migração.
+- **FR-026**: Nenhuma regra visual nova MUST ser adicionada a `refs/UI` ou outra fonte histórica durante a migração.
 
 ### Key Entities
 
@@ -192,7 +192,7 @@ Como revisor, quero uma evidência por etapa e por rota para aprovar a substitui
 
 ## Assumptions
 
-- Os artefatos em `refs/UI/` e `demo_dashboard.html` permanecem disponíveis como histórico, mas nunca são consultados pelo runtime nem tratados como fonte normativa.
+- Os artefatos em `refs/UI/` permanecem disponíveis como histórico, mas nunca são consultados pelo runtime nem tratados como fonte normativa; o protótipo histórico foi removido.
 - A API funcional e os dados existentes serão preservados; mudanças de API visual serão compatíveis ou terão migração documentada.
 - O produto continua web desktop, com garantia de layout a partir de 1024px.
 - O registry canônico e os perfis atuais são a fonte de classificação dos componentes; nenhum componente novo será criado apenas para facilitar a migração.

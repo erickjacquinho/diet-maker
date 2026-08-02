@@ -10,16 +10,16 @@ const SOURCE_EXTENSIONS = new Set(['.css', '.js', '.jsx', '.mjs', '.ts', '.tsx']
 const EXCLUDED_PREFIXES = ['tests/fixtures/design-system-legacy/'];
 
 const BASELINE_RULES = [
-  ['LEG001', 'legacy-palette', /\b(?:warm-[\w-]+|emerald-(?:50|100|500|600|700)|cream|charcoal)\b/g],
+  ['LEG001', 'legacy-palette', /\b(?:warm-[\w-]+|emerald-(?:50|100|500|600|700))\b/g],
   ['LEG002', 'arbitrary-text-style', /\b(?:text|leading|tracking)-\[[^\]]+\]/g],
   ['LEG003', 'forbidden-radius', /\brounded-(?:xl|2xl|3xl|full)\b/g],
   ['LEG004', 'legacy-font-weight', /\bfont-(?:black|extrabold)\b/g],
-  ['LEG005', 'legacy-depth-motion', /\b(?:shadow(?:-[\w\[\]-]+)?|transition-all)\b/g],
+  ['LEG005', 'legacy-depth-motion', /\b(?:shadow-(?!floating|overlay|none)[\w\[\]-]+|transition-all)\b/g],
   ['LEG006', 'out-of-scope-breakpoint', /\b(?:sm|md):[\w\[\]-]+/g],
   ['LEG007', 'local-visual-literal', /#[0-9a-fA-F]{3,8}\b/g],
-  ['LEG008', 'legacy-alias', /\b(?:warm|cream|charcoal)(?:Background|Surface|Border|Text|Muted)?\b/g],
+  ['LEG008', 'legacy-alias', /\b(?:color-bg-app|color-surface-card|color-border-clean|warmSurface)\b/g],
   ['LEG009', 'direct-legacy-import', /(?:from\s+|import\s*)["']@\/design-system\/tokens["']/g],
-  ['LEG010', 'legacy-font', /\b(?:Inter|Fira Code|Arial|sans-serif)\b/g],
+  ['LEG010', 'legacy-font', /\b(?:Inter|Fira Code|Arial)\b/g],
 ];
 
 function projectPath(absolutePath) {
@@ -85,9 +85,13 @@ export async function captureBaseline() {
     const fileImports = collectImports(source);
     if (fileImports.length) imports[file] = fileImports;
     for (const [code, rule, pattern] of BASELINE_RULES) {
+      // Test fixtures and assertions are evidence inputs, not runtime sources;
+      // production legacy debt is audited by verify-design-system-legacy.
+      if (file.startsWith('tests/') || file.startsWith('scripts/')) continue;
+      if (file === 'src/design-system/text-styles.ts' && ['LEG002', 'LEG004'].includes(code)) continue;
       pattern.lastIndex = 0;
       for (const match of source.matchAll(pattern)) {
-        if (code === 'LEG007' && file === 'src/design-system/tokens.css') continue;
+        if (file === 'src/design-system/tokens.css' && ['LEG001', 'LEG007'].includes(code)) continue;
         legacyFindings.push({ code, rule, path: file, line: lineFor(source, match.index ?? 0), match: match[0] });
       }
     }

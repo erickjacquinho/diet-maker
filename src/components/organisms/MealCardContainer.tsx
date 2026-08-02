@@ -59,30 +59,30 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   return (
-    <Card className="bg-warm-card border-warm-border rounded-2xl p-0 shadow-xs flex flex-col justify-between">
-      <CardContent className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between">
+    <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating flex flex-col justify-between">
+      <CardContent className="p-5 p-6 space-y-4 flex-1 flex flex-col justify-between">
         <div className="space-y-4">
           {/* Meal Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-warm-border gap-2">
+          <div className="flex flex-col flex-row items-center justify-between pb-3 border-b border-border-subtle gap-2">
             {isEditingTitle ? (
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <div className="flex items-center space-x-2 w-full w-auto">
                 <Input
                   type="text"
                   value={tempTitle}
                   onChange={(e) => setTempTitle(e.target.value)}
-                  className="h-8 text-xs font-bold bg-warm-inner border-warm-border w-36"
+                  className="h-8 text-xs font-bold bg-surface-subtle border-border-subtle w-36"
                   placeholder="Nome da refeição"
                 />
                 <Input
                   type="text"
                   value={tempTime}
                   onChange={(e) => setTempTime(e.target.value)}
-                  className="h-8 text-xs font-bold bg-warm-inner border-warm-border w-20 text-center"
+                  className="h-8 text-xs font-bold bg-surface-subtle border-border-subtle w-20 text-center"
                   placeholder="08:00"
                 />
                 <Button
                   size="sm"
-                  variant="emerald"
+                  variant="primary"
                   onClick={handleSaveTitleTime}
                   className="h-8 px-2"
                 >
@@ -91,23 +91,23 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
               </div>
             ) : (
               <div className="flex items-center space-x-2.5">
-                <h4 className="text-base font-black text-warm-charcoal">{title}</h4>
-                <span className="text-xs text-warm-muted bg-warm-inner border border-warm-border px-2.5 py-0.5 rounded-full font-mono flex items-center space-x-1">
+                <h4 className="text-base font-bold text-text-primary">{title}</h4>
+                <span className="text-xs text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-0.5 rounded-round font-mono flex items-center space-x-1">
                   <Clock size={11} />
                   <span>{time}</span>
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     setTempTitle(title);
                     setTempTime(time);
                     setIsEditingTitle(true);
                   }}
-                  className="text-warm-muted hover:text-warm-charcoal p-1 rounded-md transition-colors"
+                  className="text-text-muted hover:text-text-primary p-1 rounded-md transition-colors"
                   title="Editar nome e horário"
                 >
                   <Pencil size={12} />
-                </button>
+                </Button>
               </div>
             )}
 
@@ -122,7 +122,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           {/* Items List */}
           <div className="space-y-2 min-h-[50px]">
             {items.length === 0 ? (
-              <div className="p-4 text-center border border-dashed border-warm-border rounded-xl text-warm-muted text-xs italic">
+              <div className="p-4 text-center border border-dashed border-border-subtle rounded-control text-text-muted text-xs italic">
                 Nenhum alimento nesta refeição. Clique em "+ Adicionar Alimento" abaixo.
               </div>
             ) : (
@@ -142,15 +142,15 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
             type="button"
             variant="outline"
             onClick={onAddFoodClick}
-            className="w-full border-dashed border-warm-borderDark bg-warm-inner/60 hover:bg-warm-inner text-warm-charcoal font-bold text-xs py-2 rounded-xl flex items-center justify-center space-x-1.5"
+            className="w-full border-dashed border-border-hover bg-surface-subtle/60 hover:bg-surface-subtle text-text-primary font-bold text-xs py-2 rounded-control flex items-center justify-center space-x-1.5"
           >
-            <Plus size={14} className="text-warm-emerald" />
+            <Plus size={14} className="text-success" />
             <span>+ Adicionar Alimento da Base TACO</span>
           </Button>
         </div>
 
         {/* Meal Footer Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-warm-border text-xs">
+        <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-xs">
           <div className="flex space-x-2">
             <Button onClick={onDuplicate} variant="secondary" size="sm" className="flex items-center space-x-1 text-xs">
               <Copy size={12} />

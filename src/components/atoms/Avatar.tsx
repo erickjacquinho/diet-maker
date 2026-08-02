@@ -1,4 +1,6 @@
 import React from 'react';
+import { recipes } from '@/design-system';
+import { cn } from '@/lib/utils';
 
 export interface AvatarProps {
   initials: string;
@@ -13,21 +15,13 @@ export const Avatar: React.FC<AvatarProps> = ({
   variant = 'inner',
   className = '',
 }) => {
-  const sizes = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-9 h-9 text-sm',
-    lg: 'w-11 h-11 text-sm',
-  };
-
-  const variants = {
-    emerald: 'bg-warm-emerald text-white font-bold',
-    charcoal: 'bg-warm-charcoal text-white font-black',
-    inner: 'bg-warm-inner border border-warm-borderDark text-warm-charcoal font-black',
-  };
+  const sizeMap = { sm: 'compact', md: 'standard', lg: 'large' } as const;
+  const toneMap = { emerald: 'success', charcoal: 'primary', inner: 'neutral' } as const;
 
   return (
     <div
-      className={`rounded-full flex items-center justify-center shrink-0 ${sizes[size]} ${variants[variant]} ${className}`}
+      className={cn(recipes.avatar({ size: sizeMap[size], tone: toneMap[variant] }), className)}
+      aria-label={initials}
     >
       {initials}
     </div>

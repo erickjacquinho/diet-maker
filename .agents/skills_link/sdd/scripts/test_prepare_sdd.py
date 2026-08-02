@@ -44,17 +44,30 @@ class PreparationTests(unittest.TestCase):
     def test_slugify_normalizes_portuguese(self) -> None:
         self.assertEqual(slugify("Criação do Catálogo"), "criacao-do-catalogo")
 
-    def test_slugify_limits_to_five_words_by_default(self) -> None:
+    def test_slugify_limits_to_forty_characters_by_default(self) -> None:
         self.assertEqual(
             slugify("Criar uma nova funcionalidade de busca e filtro para produtos"),
-            "criar-uma-nova-funcionalidade-de",
+            "criar-uma-nova-funcionalidade-de-busca-e",
+        )
+        self.assertLessEqual(
+            len(slugify("Criar uma nova funcionalidade de busca e filtro")),
+            40,
         )
 
-    def test_slugify_allows_custom_max_words(self) -> None:
+    def test_slugify_does_not_limit_the_number_of_words(self) -> None:
         self.assertEqual(
-            slugify("Criar uma nova funcionalidade de busca", max_words=3),
-            "criar-uma-nova",
+            slugify("a b c d e f g h i j k l m n o"),
+            "a-b-c-d-e-f-g-h-i-j-k-l-m-n-o",
         )
+
+    def test_slugify_allows_custom_max_characters(self) -> None:
+        self.assertEqual(slugify("Criar nova busca", max_chars=10), "criar-nova")
+
+    def test_slugify_preserves_semantic_slug_within_limit(self) -> None:
+        slug = slugify("implementacao-sdd-design-system")
+
+        self.assertEqual(slug, "implementacao-sdd-design-system")
+        self.assertEqual(len(slug), 31)
 
     def test_resolve_project_root_prefers_explicit_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

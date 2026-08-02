@@ -1,4 +1,4 @@
-import { textStyleIds, type TextStyleId } from "./types";
+import { textStyleIds, type TextStyleContract, type TextStyleId, type Tone } from "./types";
 
 const tone = {
   primary: "text-text-primary",
@@ -55,8 +55,37 @@ export const textStyles: Readonly<Record<TextStyleId, string>> = {
   "chart-micro": `text-style-chart-micro font-semibold ${tone.muted}`,
 };
 
+const allowedElements = ["p", "span", "div", "label", "h1", "h2", "h3", "h4", "th", "td"] as const;
+const forbiddenAlternatives = ["text-[...]", "font-black", "font-extrabold", "leading-[...]", "tracking-[...]"] as const;
+const toneFor = (id: TextStyleId): readonly Tone[] => {
+  if (id.includes("error")) return ["error"];
+  if (id.includes("success")) return ["success"];
+  if (id.includes("metric")) return ["default", "protein", "carbohydrate", "fat"];
+  if (id.includes("secondary") || id === "caption" || id === "helper" || id === "legal" || id === "metadata" || id === "chart-label" || id === "chart-micro") return ["secondary", "muted"];
+  return ["default", "primary"];
+};
+
+export const textStyleContracts: Readonly<Record<TextStyleId, TextStyleContract>> = textStyleIds.reduce((result, id) => {
+  result[id] = {
+    id,
+    className: textStyles[id],
+    allowedElements,
+    tones: toneFor(id),
+    forbiddenAlternatives,
+    color: id.includes("error") ? "error" : id.includes("success") ? "success" : "text-primary",
+    weight: id.includes("strong") || id.includes("title") || id.includes("label") || id.includes("metric") ? 600 : 400,
+    size: id.includes("micro") ? "chart-micro" : id.includes("small") || id.includes("caption") || id.includes("legal") ? "body-small" : "body",
+    lineHeight: id.includes("micro") ? "14px" : id.includes("small") || id.includes("caption") || id.includes("legal") ? "18px" : "22px",
+  };
+  return result;
+}, {} as Record<TextStyleId, TextStyleContract>);
+
 export function textStyle(styleId: TextStyleId): string {
   return textStyles[styleId];
+}
+
+export function textStyleContract(styleId: TextStyleId): TextStyleContract {
+  return textStyleContracts[styleId];
 }
 
 export { textStyleIds };

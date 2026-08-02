@@ -30,18 +30,18 @@ export const AutoKcalSection: React.FC<AutoKcalSectionProps> = ({
   const isReadOnly = readOnly || (!onProteinChange && !onCarbsChange && !onFatsChange);
 
   return (
-    <div className={`p-3 bg-warm-inner border border-warm-border rounded-xl space-y-2.5 ${className}`}>
+    <div className={`p-3 bg-surface-subtle border border-border-subtle rounded-control space-y-2.5 ${className}`}>
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold text-warm-charcoal uppercase tracking-wider block">
+        <span className="text-style-legal font-bold text-text-primary uppercase tracking-wider block">
           {title}
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         <div>
-          <span className="text-[10px] font-bold text-blue-600 block uppercase mb-1 text-center">Prot (g)</span>
+          <span className="text-style-legal font-bold text-macro-protein block uppercase mb-1 text-center">Prot (g)</span>
           {isReadOnly ? (
-            <div className="bg-warm-card border border-warm-border rounded-lg h-8 flex items-center justify-center font-black text-xs text-blue-600 shadow-xs">
+            <div className="bg-surface border border-border-subtle rounded-control h-8 flex items-center justify-center font-bold text-xs text-macro-protein shadow-floating">
               {proteinG}g
             </div>
           ) : (
@@ -50,15 +50,15 @@ export const AutoKcalSection: React.FC<AutoKcalSectionProps> = ({
               min={0}
               value={proteinG}
               onChange={(e) => onProteinChange?.(Number(e.target.value))}
-              className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+              className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
             />
           )}
         </div>
 
         <div>
-          <span className="text-[10px] font-bold text-amber-600 block uppercase mb-1 text-center">Carb (g)</span>
+          <span className="text-style-legal font-bold text-warning block uppercase mb-1 text-center">Carb (g)</span>
           {isReadOnly ? (
-            <div className="bg-warm-card border border-warm-border rounded-lg h-8 flex items-center justify-center font-black text-xs text-amber-600 shadow-xs">
+            <div className="bg-surface border border-border-subtle rounded-lg h-8 flex items-center justify-center font-bold text-xs text-warning shadow-floating">
               {carbsG}g
             </div>
           ) : (
@@ -67,15 +67,15 @@ export const AutoKcalSection: React.FC<AutoKcalSectionProps> = ({
               min={0}
               value={carbsG}
               onChange={(e) => onCarbsChange?.(Number(e.target.value))}
-              className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+              className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
             />
           )}
         </div>
 
         <div>
-          <span className="text-[10px] font-bold text-emerald-600 block uppercase mb-1 text-center">Gord (g)</span>
+          <span className="text-style-legal font-bold text-success block uppercase mb-1 text-center">Gord (g)</span>
           {isReadOnly ? (
-            <div className="bg-warm-card border border-warm-border rounded-lg h-8 flex items-center justify-center font-black text-xs text-emerald-600 shadow-xs">
+            <div className="bg-surface border border-border-subtle rounded-lg h-8 flex items-center justify-center font-bold text-xs text-success shadow-floating">
               {fatsG}g
             </div>
           ) : (
@@ -84,18 +84,18 @@ export const AutoKcalSection: React.FC<AutoKcalSectionProps> = ({
               min={0}
               value={fatsG}
               onChange={(e) => onFatsChange?.(Number(e.target.value))}
-              className="bg-warm-card border-warm-border text-xs font-bold text-center h-8"
+              className="bg-surface border-border-subtle text-xs font-bold text-center h-8"
             />
           )}
         </div>
       </div>
 
-      <div className="p-2 bg-warm-card border border-warm-border rounded-lg flex items-center justify-between text-[11px]">
+      <div className="p-2 bg-surface border border-border-subtle rounded-lg flex items-center justify-between text-style-legal">
         <div>
-          <span className="font-bold text-warm-charcoal block">Calorias Totais (Calculadas)</span>
-          <span className="text-[9px] text-warm-muted block font-medium">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
+          <span className="font-bold text-text-primary block">Calorias Totais (Calculadas)</span>
+          <span className="text-style-chart-micro text-text-muted block font-medium">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
         </div>
-        <span className="font-black text-xs text-warm-emerald">{calculatedKcal} kcal</span>
+        <span className="font-bold text-xs text-success">{calculatedKcal} kcal</span>
       </div>
     </div>
   );
