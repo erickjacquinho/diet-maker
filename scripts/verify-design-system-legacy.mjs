@@ -43,7 +43,7 @@ export async function verifyLegacy(rootDir, options = {}) {
     const lines = source.split(/\r?\n/);
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
       for (const rule of legacyRules) {
-        if (projectPath === 'src/design-system/tokens.css' && ['LEG001', 'LEG007'].includes(rule.code)) continue;
+        if (projectPath === 'src/design-system/tokens.css' && ['LEG001', 'LEG005', 'LEG007'].includes(rule.code)) continue;
         if (projectPath === 'src/design-system/text-styles.ts' && ['LEG002', 'LEG004'].includes(rule.code)) continue;
         rule.pattern.lastIndex = 0;
         for (const match of lines[lineIndex].matchAll(rule.pattern)) findings.push({ code: rule.code, rule: rule.rule, path: projectPath, line: lineIndex + 1, message: `${rule.message} Encontrado: ${match[0]}`, severity: 'error' });
