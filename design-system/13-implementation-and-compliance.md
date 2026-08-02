@@ -255,7 +255,8 @@ Também deve verificar:
 - testes;
 - dependências Atomic;
 - componentes do registro sem arquivo;
-- arquivo implementado sem entrada no registro.
+- arquivo implementado sem entrada no registro;
+- as 17 regras legadas LEG001–LEG017 via `npm run verify:design-system-legacy` (lista em §18.1).
 
 ## 13. Auditoria inicial do código
 
@@ -336,3 +337,55 @@ npm test -- tests/design-system/component-catalog.test.mjs
 O primeiro comando executa o modo estrito e exige 39 fontes atuais cobertas, zero export visual descoberto, 11 categorias homologadas, quatro propostas `specified` e zero finding bloqueante. O segundo executa as fixtures válidas e inválidas, incluindo exit codes 0/1/2, lifecycle e exceções expiradas.
 
 O gate valida documentação e rastreabilidade. Ele não declara que `src` já recebeu a migração visual; essa distinção permanece explícita no registry e na Definition of Done de cada tela.
+
+## 18. Estado verificado (2026-08-02)
+
+A auditoria legada foi ampliada de 10 para 17 regras nomeadas (LEG001–LEG017) e o runtime migrado até zerar os findings fora das exceções registradas. Este documento descreve o estado verificado sem declarar conformidade além da evidência disponível: a evidência cobre as 17 regras de auditoria, não aspectos não auditados (posicionamento de camada, semântica de cor macro, etc.).
+
+### 18.1 Regras de auditoria (LEG001–LEG017)
+
+| ID | Regra | Detecta | Canônico |
+| --- | --- | --- | --- |
+| LEG001 | `legacy-palette` | paleta antiga `warm-*` e paleta default Tailwind | tokens semânticos |
+| LEG002 | `arbitrary-text-style` | `text-[...]`, `leading-[...]`, `tracking-[...]` | `textStyle()` nomeado |
+| LEG003 | `forbidden-radius` | `rounded-lg/xl/2xl/3xl/full` e `rounded-[10/12/16px]` | `rounded-compact/control/surface/round` |
+| LEG004 | `legacy-font-weight` | `font-black`, `font-extrabold` | pesos do text style (400–700) |
+| LEG005 | `legacy-depth-motion` | `transition-all`, `hover:scale-*`, `duration-*` não canônico, `shadow-*` fora das receitas | `duration-fast/standard/slow`, `shadow-floating/overlay/none` |
+| LEG006 | `out-of-scope-breakpoint` | `sm:`/`md:` | remoção (código morto; produto inicia em 1024px) |
+| LEG007 | `local-visual-literal` | hex em TSX | camada reference de `tokens.css` |
+| LEG008 | `legacy-alias` | aliases legados (`color-bg-app`, `warmSurface`, …) | alias semantic/system canônico |
+| LEG009 | `direct-legacy-import` | import de `@/design-system/tokens` | import único de `@/design-system` |
+| LEG010 | `legacy-font` | `Inter`, `Fira Code`, `Arial` | Plus Jakarta Sans + fallbacks de sistema |
+| LEG011 | `named-text-size` | `text-xs`…`text-9xl` | `textStyle()` nomeado |
+| LEG012 | `space-x-y` | `space-x-*`, `space-y-*` | `gap-*` com a escala `space-*` (norma 06-geometry) |
+| LEG013 | `text-transform` | `uppercase/lowercase/capitalize` | `tracking-label/overline` ou remoção |
+| LEG014 | `tracking-wide` | `tracking-wide/wider/widest` | `tracking-normal/label/overline` (norma 05-typography) |
+| LEG015 | `opacity` | opacidade numérica em qualquer variante | `opacity-disabled/subdued/full` (norma 07-icons) |
+| LEG016 | `leading-named` | `leading-*` nomeado fora dos permitidos | herdado do text style |
+| LEG017 | `size-arbitrary` | `size-[...]` | tokens `icon-*` |
+
+Cada regra possui fixture de aceitação e rejeição em `tests/fixtures/design-system-legacy/` e o teste `tests/design-system/legacy-audit.test.ts` exige exatamente as 17 regras ativas.
+
+### 18.2 Exceções de caminho registradas
+
+| Caminho | Motivo | Registro |
+| --- | --- | --- |
+| `src/components/ui/**` | primitivos shadcn preservados por design | spec §Clarifications (2026-08-02); baseline do registry |
+| `src/design-system/**` | fontes do próprio sistema de design (não-runtime) | baseline do registry |
+
+As isenções são aplicadas por prefixo de caminho em `PATH_EXEMPTIONS` no auditor. `tests/fixtures/**` nunca é isento.
+
+### 18.3 Evidência
+
+Em 2026-08-02, após a migração dos 20 arquivos de runtime:
+
+```text
+npm run verify:design-system-legacy   → 0 legacy findings across 69 files
+node scripts/verify-design-system-legacy.mjs --strict --paths "src/components/ui"    → 0 findings
+node scripts/verify-design-system-legacy.mjs --strict --paths "src/design-system"    → 0 findings
+node scripts/verify-design-system-legacy.mjs --strict --paths "tests/fixtures/design-system-legacy" → 17 códigos
+npm run test                          → suíte completa verde, incluindo o teste "zero findings"
+npm run type-check                    → 0 erros
+```
+
+Os números da seção 13 são o snapshot histórico de partida (31/07/2026) e não refletem o estado atual; a referência verificada é esta seção.

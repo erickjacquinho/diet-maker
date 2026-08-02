@@ -8,54 +8,54 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 As 7 categorias não computadas estão explicitamente enumeradas e mapeadas para regras LEG011–LEG017 no spec? [Completeness, Spec §FR-001, §Executive Summary]
-- [ ] CHK002 O spec define explicitamente o que "zero findings" significa (escopo = runtime fora das exceções registradas)? [Clarity, Spec §FR-004, §Clarifications]
-- [ ] CHK003 O spec identifica os arquivos a migrar (12 componentes + 8 páginas) ou a fonte da contagem é rastreável? [Gap, Spec §FR-003, §SC-002]
-- [ ] CHK004 O spec define que `src/design-system/**` e `src/app/design-system/page.tsx` são intocáveis? [Completeness, Spec §FR-007]
-- [ ] CHK005 O spec exige fixture por regra (aceitação/rejeição) para garantir determinismo da auditoria? [Completeness, Spec §FR-001, §Edge Cases]
-- [ ] CHK006 O spec define a exigência de registro das exceções no registry/baseline documental? [Gap, Spec §FR-006]
+- [X] CHK001 As 7 categorias não computadas estão explicitamente enumeradas e mapeadas para regras LEG011–LEG017 no spec? [Completeness, Spec §FR-001, §Executive Summary]
+- [X] CHK002 O spec define explicitamente o que "zero findings" significa (escopo = runtime fora das exceções registradas)? [Clarity, Spec §FR-004, §Clarifications]
+- [X] CHK003 O spec identifica os arquivos a migrar (12 componentes + 8 páginas) ou a fonte da contagem é rastreável? [Gap, Spec §FR-003, §SC-002]
+- [X] CHK004 O spec define que `src/design-system/**` e `src/app/design-system/page.tsx` são intocáveis? [Completeness, Spec §FR-007]
+- [X] CHK005 O spec exige fixture por regra (aceitação/rejeição) para garantir determinismo da auditoria? [Completeness, Spec §FR-001, §Edge Cases]
+- [X] CHK006 O spec define a exigência de registro das exceções no registry/baseline documental? [Gap, Spec §FR-006]
 
 ## Requirement Clarity
 
-- [ ] CHK007 A fronteira entre código isento (`src/components/ui/**`) e código a migrar está sem ambiguidade? [Clarity, Spec §FR-002, §FR-003]
-- [ ] CHK008 Os counts de baseline (~798 = 86 + 712) são apresentados de forma consistente e verificável? [Clarity, Spec §Executive Summary, §Assumptions]
-- [ ] CHK009 O termo "exceção registrada e permanente" é usado de forma consistente no spec e na doc-alvo? [Consistency, Spec §FR-002, §Assumptions]
+- [X] CHK007 A fronteira entre código isento (`src/components/ui/**`) e código a migrar está sem ambiguidade? [Clarity, Spec §FR-002, §FR-003]
+- [X] CHK008 Os counts de baseline (~798 = 86 + 712) são apresentados de forma consistente e verificável? [Clarity, Spec §Executive Summary, §Assumptions]
+- [X] CHK009 O termo "exceção registrada e permanente" é usado de forma consistente no spec e na doc-alvo? [Consistency, Spec §FR-002, §Assumptions]
 
 ## Requirement Consistency
 
-- [ ] CHK010 O número total (~798) e a distribuição por categoria não contradizem as seções Executive Summary, Requirements e Assumptions? [Consistency, Spec §Executive Summary, §FR-001, §Assumptions]
-- [ ] CHK011 A isenção de `src/components/ui/**` como "não-dívida" não conflita com a meta de "zero findings em todo o runtime"? [Consistency, Spec §FR-002, §FR-004, §SC-001]
-- [ ] CHK012 A atualização documental (FR-006) não conflita com os princípios de governança da constituição (V)? [Consistency, Spec §FR-006, Spec Kit constitution.md]
+- [X] CHK010 O número total (~798) e a distribuição por categoria não contradizem as seções Executive Summary, Requirements e Assumptions? [Consistency, Spec §Executive Summary, §FR-001, §Assumptions]
+- [X] CHK011 A isenção de `src/components/ui/**` como "não-dívida" não conflita com a meta de "zero findings em todo o runtime"? [Consistency, Spec §FR-002, §FR-004, §SC-001]
+- [X] CHK012 A atualização documental (FR-006) não conflita com os princípios de governança da constituição (V)? [Consistency, Spec §FR-006, Spec Kit constitution.md]
 
 ## Acceptance Criteria Quality
 
-- [ ] CHK013 Os critérios de sucesso (SC-001 a SC-005) são mensuráveis e verificáveis sem depender de inspeção manual? [Acceptance Criteria, Spec §Success Criteria]
-- [ ] CHK014 O gate "legacy-audit.test.ts passa" é mensurável e sua relação com as 17 regras está explícita? [Measurability, Spec §FR-005, §SC-003]
+- [X] CHK013 Os critérios de sucesso (SC-001 a SC-005) são mensuráveis e verificáveis sem depender de inspeção manual? [Acceptance Criteria, Spec §Success Criteria]
+- [X] CHK014 O gate "legacy-audit.test.ts passa" é mensurável e sua relação com as 17 regras está explícita? [Measurability, Spec §FR-005, §SC-003]
 
 ## Scenario Coverage
 
-- [ ] CHK015 Os fluxos de detecção, migração e documentação possuem user stories independentes e testáveis? [Coverage, Spec §User Scenarios]
-- [ ] CHK016 Existe requisito cobrindo o ciclo "auditoria → migração → re-auditoria" até zerar? [Gap, Spec §US-2]
+- [X] CHK015 Os fluxos de detecção, migração e documentação possuem user stories independentes e testáveis? [Coverage, Spec §User Scenarios]
+- [X] CHK016 Existe requisito cobrindo o ciclo "auditoria → migração → re-auditoria" até zerar? [Gap, Spec §US-2]
 
 ## Edge Case Coverage
 
-- [ ] CHK017 O spec trata desvios sem token/text style equivalente (ex.: `text-[9px]`)? [Edge Case, Spec §Edge Cases]
-- [ ] CHK018 O spec trata falsos positivos de regex (ex.: `z-5` vs `z-50`)? [Edge Case, Spec §Edge Cases, §FR-001]
-- [ ] CHK019 O spec trata o caso de múltiplas categorias acumuladas no mesmo arquivo? [Edge Case, Spec §Edge Cases]
+- [X] CHK017 O spec trata desvios sem token/text style equivalente (ex.: `text-[9px]`)? [Edge Case, Spec §Edge Cases]
+- [X] CHK018 O spec trata falsos positivos de regex (ex.: `z-5` vs `z-50`)? [Edge Case, Spec §Edge Cases, §FR-001]
+- [X] CHK019 O spec trata o caso de múltiplas categorias acumuladas no mesmo arquivo? [Edge Case, Spec §Edge Cases]
 
 ## Non-Functional Requirements
 
-- [ ] CHK020 Os gates de qualidade (`tsc --noEmit`, `vitest run`) estão definidos como critérios de aceitação não-regressivos? [Measurability, Spec §FR-008, §SC-004]
+- [X] CHK020 Os gates de qualidade (`tsc --noEmit`, `vitest run`) estão definidos como critérios de aceitação não-regressivos? [Measurability, Spec §FR-008, §SC-004]
 
 ## Dependencies & Assumptions
 
-- [ ] CHK021 As suposições (desktop-only ≥1024, remoção de `sm:`/`md:`, mapa de conversão) estão documentadas e validáveis? [Assumption, Spec §Assumptions]
-- [ ] CHK022 A dependência do baseline levantado por varredura/gap-analysis está registrada como suposição revalidável? [Assumption, Spec §Assumptions]
+- [X] CHK021 As suposições (desktop-only ≥1024, remoção de `sm:`/`md:`, mapa de conversão) estão documentadas e validáveis? [Assumption, Spec §Assumptions]
+- [X] CHK022 A dependência do baseline levantado por varredura/gap-analysis está registrada como suposição revalidável? [Assumption, Spec §Assumptions]
 
 ## Ambiguities & Conflicts
 
-- [ ] CHK023 Não há marcadores [NEEDS CLARIFICATION] pendentes nem TODO's não resolvidos no spec? [Ambiguity, Spec §checklist requirements.md]
-- [ ] CHK024 As seções novas (## Clarifications) não contradizem o corpo do spec? [Consistency, Spec §Clarifications]
+- [X] CHK023 Não há marcadores [NEEDS CLARIFICATION] pendentes nem TODO's não resolvidos no spec? [Ambiguity, Spec §checklist requirements.md]
+- [X] CHK024 As seções novas (## Clarifications) não contradizem o corpo do spec? [Consistency, Spec §Clarifications]
 
 ## Notes
 

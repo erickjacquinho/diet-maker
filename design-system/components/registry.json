@@ -2,7 +2,24 @@
   "schemaVersion": 1,
   "baseline": {
     "currentSourceCount": 39,
-    "capturedAt": "2026-07-31"
+    "capturedAt": "2026-07-31",
+    "legacyAudit": {
+      "findings": 0,
+      "rules": 17,
+      "filesScanned": 69,
+      "capturedAt": "2026-08-02",
+      "exemptions": [
+        {
+          "pathPattern": "src/components/ui/",
+          "reason": "primitivos shadcn preservados por design",
+          "source": "spec §Clarifications (2026-08-02)"
+        },
+        {
+          "pathPattern": "src/design-system/",
+          "reason": "fontes do próprio sistema de design (não-runtime)"
+        }
+      ]
+    }
   },
   "categories": [
     {

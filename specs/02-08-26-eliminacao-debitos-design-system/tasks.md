@@ -27,8 +27,8 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Congelar o estado T0 e garantir gates verdes antes de qualquer mudança
 
-- [ ] T001 [skill: general] Capturar baseline T0: `node scripts/verify-design-system-legacy.mjs --strict --json` + varredura das 7 categorias (gap-scan) salvos em `specs/02-08-26-eliminacao-debitos-design-system/baseline/t0.json` (esperado: 86 findings regras + ~712 categorias; 20 arquivos)
-- [ ] T002 [skill: general] Confirmar gates no estado T0: `npm run type-check` e `npm run test` verdes; o teste "zero findings" de `tests/design-system/legacy-audit.test.ts` falha (esperado)
+- [X] T001 [skill: general] Capturar baseline T0: `node scripts/verify-design-system-legacy.mjs --strict --json` + varredura das 7 categorias (gap-scan) salvos em `specs/02-08-26-eliminacao-debitos-design-system/baseline/t0.json` (esperado: 86 findings regras + ~712 categorias; 20 arquivos)
+- [X] T002 [skill: general] Confirmar gates no estado T0: `npm run type-check` e `npm run test` verdes; o teste "zero findings" de `tests/design-system/legacy-audit.test.ts` falha (esperado)
 
 ---
 
@@ -42,18 +42,18 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Escrever os testes/fixtures ANTES de considerar a US1 concluída**
 
-- [ ] T003 [skill: general] [P] [US1] Adicionar regra LEG011 (`named-text-size`) em `scripts/design-system-legacy-rules.mjs` com matcher de `text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)` ancorado em token (sem `\b` após `]`, sem casar `text-style-*`)
-- [ ] T004 [skill: general] [P] [US1] Adicionar regra LEG012 (`space-x-y`) em `scripts/design-system-legacy-rules.mjs` com matcher `space-[xy]-*` (canônico: `gap-*` com escala `space-*`, norma 06-geometry)
-- [ ] T005 [skill: general] [P] [US1] Adicionar regra LEG013 (`text-transform`) em `scripts/design-system-legacy-rules.mjs` com matcher `uppercase|lowercase|capitalize` (canônico: `tracking-label/overline` ou remoção)
-- [ ] T006 [skill: general] [P] [US1] Adicionar regra LEG014 (`tracking-wide`) em `scripts/design-system-legacy-rules.mjs` com matcher `tracking-(wide|wider|widest)` (norma 05-typography: só tight/normal/label/overline)
-- [ ] T007 [skill: general] [P] [US1] Adicionar regra LEG015 (`opacity`) em `scripts/design-system-legacy-rules.mjs` (permite `opacity-disabled|subdued|full`; norma 07-icons)
-- [ ] T008 [skill: general] [P] [US1] Adicionar regra LEG016 (`leading-named`) em `scripts/design-system-legacy-rules.mjs` (line-height vem do text style; norma 05-typography)
-- [ ] T009 [skill: general] [P] [US1] Adicionar regra LEG017 (`size-arbitrary`) em `scripts/design-system-legacy-rules.mjs` (canônico: tokens `icon-*`)
-- [ ] T010 [skill: general] [US1] Implementar PATH_EXEMPTIONS em `scripts/verify-design-system-legacy.mjs`: isentar prefixos `src/components/ui/` e `src/design-system/` (todas as regras); REMOVER as exceções por arquivo (`tokens.css` → LEG001/005/007 e `text-styles.ts` → LEG002/004); garantir que `tests/fixtures/**` nunca é isento
-- [ ] T011 [skill: tdd] [P] [US1] Criar fixtures `tests/fixtures/design-system-legacy/LEG011.fixture.tsx` … `LEG017.fixture.tsx` (uma ocorrência mínima por categoria, formato dos fixtures existentes)
-- [ ] T012 [skill: tdd] [P] [US1] Adicionar fixture de REJEIÇÃO por regra nova (ex.: LEG011 não casa `text-style-body`; LEG015 não casa `opacity-disabled`) em `tests/fixtures/design-system-legacy/rejections.fixture.tsx`
-- [ ] T013 [skill: tdd] [US1] Atualizar `tests/design-system/legacy-audit.test.ts`: cobertura passa a exigir exatamente `{LEG001..LEG017}`; adicionar testes de isenção (`paths: ["src/components/ui"]` e `paths: ["src/design-system"]` → 0 findings)
-- [ ] T014 [skill: general] [US1] Rodar `npm run test`: cobertura 17 regras PASS, isenções PASS, zero-findings global FAIL (esperado); corrigir matchers até sem falsos positivos/negativos
+- [X] T003 [skill: general] [P] [US1] Adicionar regra LEG011 (`named-text-size`) em `scripts/design-system-legacy-rules.mjs` com matcher de `text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)` ancorado em token (sem `\b` após `]`, sem casar `text-style-*`)
+- [X] T004 [skill: general] [P] [US1] Adicionar regra LEG012 (`space-x-y`) em `scripts/design-system-legacy-rules.mjs` com matcher `space-[xy]-*` (canônico: `gap-*` com escala `space-*`, norma 06-geometry)
+- [X] T005 [skill: general] [P] [US1] Adicionar regra LEG013 (`text-transform`) em `scripts/design-system-legacy-rules.mjs` com matcher `uppercase|lowercase|capitalize` (canônico: `tracking-label/overline` ou remoção)
+- [X] T006 [skill: general] [P] [US1] Adicionar regra LEG014 (`tracking-wide`) em `scripts/design-system-legacy-rules.mjs` com matcher `tracking-(wide|wider|widest)` (norma 05-typography: só tight/normal/label/overline)
+- [X] T007 [skill: general] [P] [US1] Adicionar regra LEG015 (`opacity`) em `scripts/design-system-legacy-rules.mjs` (permite `opacity-disabled|subdued|full`; norma 07-icons)
+- [X] T008 [skill: general] [P] [US1] Adicionar regra LEG016 (`leading-named`) em `scripts/design-system-legacy-rules.mjs` (line-height vem do text style; norma 05-typography)
+- [X] T009 [skill: general] [P] [US1] Adicionar regra LEG017 (`size-arbitrary`) em `scripts/design-system-legacy-rules.mjs` (canônico: tokens `icon-*`)
+- [X] T010 [skill: general] [US1] Implementar PATH_EXEMPTIONS em `scripts/verify-design-system-legacy.mjs`: isentar prefixos `src/components/ui/` e `src/design-system/` (todas as regras); REMOVER as exceções por arquivo (`tokens.css` → LEG001/005/007 e `text-styles.ts` → LEG002/004); garantir que `tests/fixtures/**` nunca é isento
+- [X] T011 [skill: tdd] [P] [US1] Criar fixtures `tests/fixtures/design-system-legacy/LEG011.fixture.tsx` … `LEG017.fixture.tsx` (uma ocorrência mínima por categoria, formato dos fixtures existentes)
+- [X] T012 [skill: tdd] [P] [US1] Adicionar fixture de REJEIÇÃO por regra nova (ex.: LEG011 não casa `text-style-body`; LEG015 não casa `opacity-disabled`) em `tests/fixtures/design-system-legacy/rejections.fixture.tsx`
+- [X] T013 [skill: tdd] [US1] Atualizar `tests/design-system/legacy-audit.test.ts`: cobertura passa a exigir exatamente `{LEG001..LEG017}`; adicionar testes de isenção (`paths: ["src/components/ui"]` e `paths: ["src/design-system"]` → 0 findings)
+- [X] T014 [skill: general] [US1] Rodar `npm run test`: cobertura 17 regras PASS, isenções PASS, zero-findings global FAIL (esperado); corrigir matchers até sem falsos positivos/negativos
 
 **Checkpoint**: US1 completa — a auditoria detecta TODAS as categorias; baseline congelado.
 
@@ -67,34 +67,34 @@ description: "Task list template for feature implementation"
 
 ### Migração — Páginas (8)
 
-- [ ] T015 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/page.tsx` (121 ocorrências: text-named-size 59, space-x-y 38, text-transform 16, tracking 5, leading 3)
-- [ ] T016 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/consulta/[date]/page.tsx` (105: text 36, space 42, transform 12, tracking 12, leading 3)
-- [ ] T017 [skill: frontend-design] [P] [US2] Migrar `src/app/alimentos/page.tsx` (77: text 46, space 16, transform 3, tracking 3, opacity 9)
-- [ ] T018 [skill: frontend-design] [P] [US2] Migrar `src/app/presets/page.tsx` (63: text 35, space 20, transform 4, leading 3, size 1)
-- [ ] T019 [skill: frontend-design] [P] [US2] Migrar `src/app/refeicoes-prontas/page.tsx` (37: text 19, space 11, transform 4, leading 3)
-- [ ] T020 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx` (34: text 24, space 9, transform 1)
-- [ ] T021 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/page.tsx` (31: text 18, space 10, leading 2, size 1)
-- [ ] T022 [skill: frontend-design] [P] [US2] Migrar `src/app/receitas/page.tsx` (30: text 15, space 11, transform 1, tracking 1, leading 1, size 1)
+- [X] T015 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/page.tsx` (121 ocorrências: text-named-size 59, space-x-y 38, text-transform 16, tracking 5, leading 3)
+- [X] T016 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/consulta/[date]/page.tsx` (105: text 36, space 42, transform 12, tracking 12, leading 3)
+- [X] T017 [skill: frontend-design] [P] [US2] Migrar `src/app/alimentos/page.tsx` (77: text 46, space 16, transform 3, tracking 3, opacity 9)
+- [X] T018 [skill: frontend-design] [P] [US2] Migrar `src/app/presets/page.tsx` (63: text 35, space 20, transform 4, leading 3, size 1)
+- [X] T019 [skill: frontend-design] [P] [US2] Migrar `src/app/refeicoes-prontas/page.tsx` (37: text 19, space 11, transform 4, leading 3)
+- [X] T020 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx` (34: text 24, space 9, transform 1)
+- [X] T021 [skill: frontend-design] [P] [US2] Migrar `src/app/pacientes/page.tsx` (31: text 18, space 10, leading 2, size 1)
+- [X] T022 [skill: frontend-design] [P] [US2] Migrar `src/app/receitas/page.tsx` (30: text 15, space 11, transform 1, tracking 1, leading 1, size 1)
 
 ### Migração — Componentes (12)
 
-- [ ] T023 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/ReadOnlyDietModal.tsx` (39: text 13, space 12, transform 7, tracking 5, leading 1, size 1)
-- [ ] T024 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/FoodSearchModal.tsx` (32: text 15, space 9, transform 5, size 3)
-- [ ] T025 [skill: frontend-design] [P] [US2] Migrar `src/components/organisms/MealCardContainer.tsx` (24: text 11, space 12, size 1)
-- [ ] T026 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/RecipeCard.tsx` (23: text 8, space 7, transform 5, tracking 1, leading 2)
-- [ ] T027 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/DietModeSwitcher.tsx` (22: text 9, space 9, transform 2, tracking 1, size 1)
-- [ ] T028 [skill: frontend-design] [P] [US2] Migrar `src/components/templates/DietBuilderTemplate.tsx` (19: text 7, space 12)
-- [ ] T029 [skill: frontend-design] [P] [US2] Migrar `src/components/organisms/SidebarNav.tsx` (17: text 11, space 3, transform 1, tracking 1, leading 1)
-- [ ] T030 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/AutoKcalSection.tsx` (13: text 7, space 1, transform 4, tracking 1)
-- [ ] T031 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/MealItemRow.tsx` (9: text 4, space 4, opacity 1)
-- [ ] T032 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/PatientBadgeHeader.tsx` (6: text 3, space 3)
-- [ ] T033 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/RecipeIngredientRow.tsx` (6: text 3, space 3)
-- [ ] T034 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/MacroMetricCard.tsx` (4: text 4)
+- [X] T023 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/ReadOnlyDietModal.tsx` (39: text 13, space 12, transform 7, tracking 5, leading 1, size 1)
+- [X] T024 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/FoodSearchModal.tsx` (32: text 15, space 9, transform 5, size 3)
+- [X] T025 [skill: frontend-design] [P] [US2] Migrar `src/components/organisms/MealCardContainer.tsx` (24: text 11, space 12, size 1)
+- [X] T026 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/RecipeCard.tsx` (23: text 8, space 7, transform 5, tracking 1, leading 2)
+- [X] T027 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/DietModeSwitcher.tsx` (22: text 9, space 9, transform 2, tracking 1, size 1)
+- [X] T028 [skill: frontend-design] [P] [US2] Migrar `src/components/templates/DietBuilderTemplate.tsx` (19: text 7, space 12)
+- [X] T029 [skill: frontend-design] [P] [US2] Migrar `src/components/organisms/SidebarNav.tsx` (17: text 11, space 3, transform 1, tracking 1, leading 1)
+- [X] T030 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/AutoKcalSection.tsx` (13: text 7, space 1, transform 4, tracking 1)
+- [X] T031 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/MealItemRow.tsx` (9: text 4, space 4, opacity 1)
+- [X] T032 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/PatientBadgeHeader.tsx` (6: text 3, space 3)
+- [X] T033 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/RecipeIngredientRow.tsx` (6: text 3, space 3)
+- [X] T034 [skill: frontend-design] [P] [US2] Migrar `src/components/molecules/MacroMetricCard.tsx` (4: text 4)
 
 ### Validação US2
 
-- [ ] T035 [skill: general] [US2] Rodar auditoria full `npm run verify:design-system-legacy`: 0 findings em todo o runtime fora das exceções; conferir que `src/components/ui/**` e `src/design-system/**` seguem isentos (0 findings) e fixtures continuam detectando as 17 regras
-- [ ] T036 [skill: general] [US2] Rodar `npm run type-check` e `npm run test` completos: sem regressões; o teste "zero findings" passa agora
+- [X] T035 [skill: general] [US2] Rodar auditoria full `npm run verify:design-system-legacy`: 0 findings em todo o runtime fora das exceções; conferir que `src/components/ui/**` e `src/design-system/**` seguem isentos (0 findings) e fixtures continuam detectando as 17 regras
+- [X] T036 [skill: general] [US2] Rodar `npm run type-check` e `npm run test` completos: sem regressões; o teste "zero findings" passa agora
 
 **Checkpoint**: US2 completa — auditoria zerada e gates verdes.
 
@@ -108,9 +108,9 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T037 [skill: general] [US3] Atualizar `design-system/components/registry.json`: `baseline` → zero findings; registrar a exceção `src/components/ui/**` (justificativa: "primitivos shadcn preservados por design" — spec §Clarifications) nos componentes `ui-*` afetados e/ou no baseline
-- [ ] T038 [skill: general] [US3] Atualizar `design-system/13-implementation-and-compliance.md`: descrever as 17 regras LEG001–LEG017, as exceções de caminho (`src/components/ui/`, `src/design-system/`) e o estado verificado, sem declarar conformidade além da evidência
-- [ ] T039 [skill: general] [US3] Rodar validação final conforme `quickstart.md` Etapa C: `verify:design-system-legacy` (0 findings), `npm run test` (verde, 17 regras + zero-findings), `npm run type-check`, `npm run verify:design-system`, `npm run audit:atomic-design` (≥96%), `npm run build`
+- [X] T037 [skill: general] [US3] Atualizar `design-system/components/registry.json`: `baseline` → zero findings; registrar a exceção `src/components/ui/**` (justificativa: "primitivos shadcn preservados por design" — spec §Clarifications) nos componentes `ui-*` afetados e/ou no baseline
+- [X] T038 [skill: general] [US3] Atualizar `design-system/13-implementation-and-compliance.md`: descrever as 17 regras LEG001–LEG017, as exceções de caminho (`src/components/ui/`, `src/design-system/`) e o estado verificado, sem declarar conformidade além da evidência
+- [X] T039 [skill: general] [US3] Rodar validação final conforme `quickstart.md` Etapa C: `verify:design-system-legacy` (0 findings), `npm run test` (verde, 17 regras + zero-findings), `npm run type-check`, `npm run verify:design-system`, `npm run audit:atomic-design` (≥96%), `npm run build`
 
 **Checkpoint**: US3 completa — documentação reflete o estado real.
 
@@ -120,7 +120,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Consolidação e não-regressão
 
-- [ ] T040 [skill: general] Confirmar que `src/design-system/**` e `src/app/design-system/page.tsx` não sofreram alterações (git status/diff) e que `tests/fixtures/design-system-legacy/` cobre as 17 regras
+- [X] T040 [skill: general] Confirmar que `src/design-system/**` e `src/app/design-system/page.tsx` não sofreram alterações (git status/diff) e que `tests/fixtures/design-system-legacy/` cobre as 17 regras
 
 ---
 
