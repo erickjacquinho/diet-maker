@@ -1,0 +1,6 @@
+{
+  "task": "Refatorar a pasta design-system: converter o que for possível em regras operacionais em .agents/rules (tokens, cores, tipografia, geometria, ícones/motion/camadas, estados/acessibilidade, decisão de componentes) e simplificar o restante em um plano consolidado em docs/plan (fundamentals, tokens-reference, governance, migration-plan), reescrevendo o README como índice e mantendo os dados executáveis de design-system/components/ intactos. Base do relatorio.md.",
+  "slug": "refatorar-design-system-rules-plano",
+  "feature_dir": "specs/02-08-26-refatorar-design-system-rules-plano",
+  "date": "2026-08-02"
+}

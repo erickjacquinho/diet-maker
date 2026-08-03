@@ -5,7 +5,7 @@ Este documento registra os termos do domínio de nutrição clínica e arquitetu
 > 📌 **Links de Referência**:
 > - 📄 **PRD**: [PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md)
 > - 🏛️ **ADRs**: [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/)
-> - 🤖 **Mapa para Agentes**: [AGENTS_PATHS.md](file:///c:/Programmer/diet-maker/AGENTS_PATHS.md)
+> - 🤖 **Mapa para Agentes**: [AGENTS.md](file:///c:/Programmer/diet-maker/AGENTS.md)
 
 ---
 

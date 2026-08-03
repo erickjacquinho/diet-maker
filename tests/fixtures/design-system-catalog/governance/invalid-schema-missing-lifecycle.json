@@ -1,0 +1,6 @@
+{
+  "target": "components[0]",
+  "operation": "remove",
+  "field": "lifecycle",
+  "expectedFinding": "REG001"
+}

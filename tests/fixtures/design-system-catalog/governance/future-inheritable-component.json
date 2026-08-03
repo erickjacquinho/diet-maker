@@ -1,0 +1,9 @@
+{
+  "id": "ui-future-inheritable",
+  "lifecycle": "proposed",
+  "currentLayer": null,
+  "targetLayer": "ui",
+  "primaryCategory": "actions",
+  "sourceFiles": [],
+  "specStatus": "specified"
+}

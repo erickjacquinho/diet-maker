@@ -210,15 +210,15 @@ export default function RecipesPage() {
   }, [recipes, searchTerm, selectedCategory]);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <Utensils size={22} className="text-warm-emerald" />
-            <h1 className="font-black text-2xl text-warm-charcoal tracking-tight">Receitas Culinárias</h1>
+          <div className="flex items-center gap-2">
+            <Utensils size={22} className="text-success" />
+            <h1 className="font-bold text-style-section-title text-text-primary tracking-tight">Receitas Culinárias</h1>
           </div>
-          <p className="text-xs text-warm-muted mt-1 font-medium">
+          <p className="text-style-legal text-text-muted mt-1 font-medium">
             Catálogo de receitas preparadas com cálculo automático de macronutrientes por porção.
           </p>
         </div>
@@ -228,56 +228,53 @@ export default function RecipesPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar receita por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-warm-card border-warm-border text-xs w-full"
+            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal w-full"
           />
         </div>
 
-        <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-auto">
           {CATEGORIES.map((cat) => (
-            <button
+            <Button
               key={cat}
+              variant={selectedCategory === cat ? 'primary' : 'secondary'}
+              size="compact"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedCategory === cat
-                  ? 'bg-warm-charcoal text-white'
-                  : 'bg-warm-card border border-warm-border text-warm-muted hover:text-warm-charcoal'
-              }`}
+              className="whitespace-nowrap cursor-pointer"
             >
               {cat}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Grid or Empty State */}
       {filteredRecipes.length === 0 ? (
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-12 text-center max-w-md mx-auto space-y-4 my-8">
-          <CardContent className="p-0 space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-warm-inner border border-warm-border flex items-center justify-center mx-auto text-warm-muted">
+        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
+          <CardContent className="p-0 flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <BookOpen size={24} />
             </div>
             <div>
-              <h3 className="font-black text-base text-warm-charcoal">Nenhuma receita encontrada</h3>
-              <p className="text-xs text-warm-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-style-body text-text-primary">Nenhuma receita encontrada</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
                 Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.
               </p>
             </div>
             <CreateButton onClick={handleOpenCreateModal}>
               Criar Primeira Receita
             </CreateButton>
-
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-3 gap-5">
           {filteredRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
@@ -293,34 +290,34 @@ export default function RecipesPage() {
 
       {/* Modal Criar/Editar Receita */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-lg bg-warm-card border-warm-border p-6 rounded-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-warm-charcoal">
+        <DialogContent className="max-w-lg bg-surface border-border-subtle p-6 rounded-surface max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-style-body text-text-primary">
               {editingRecipeId ? 'Editar Receita Culinária' : 'Nova Receita Culinária'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSaveRecipe} className="space-y-4 pt-2">
+          <form onSubmit={handleSaveRecipe} className="flex flex-col gap-4 pt-2">
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome da Receita</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Nome da Receita</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Bolo de Banana com Aveia e Whey"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs"
+                className="bg-surface-subtle border-border-subtle text-style-legal"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Categoria</label>
+                <label className="text-style-legal font-semibold text-text-muted block mb-1">Categoria</label>
                 <Select
                   value={formData.category}
                   onValueChange={(val) => setFormData({ ...formData, category: val })}
                 >
-                  <SelectTrigger className="bg-warm-inner border-warm-border text-xs h-9">
+                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -334,54 +331,55 @@ export default function RecipesPage() {
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Rendimento (Porções)</label>
+                <label className="text-style-legal font-semibold text-text-muted block mb-1">Rendimento (Porções)</label>
                 <Input
                   type="number"
                   min={1}
                   value={formData.servings}
                   onChange={(e) => setFormData({ ...formData, servings: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
             </div>
 
             {/* Ingredient Search Input */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-warm-charcoal block">Adicionar Ingredientes</label>
+            <div className="flex flex-col gap-2">
+              <label className="text-style-legal font-bold text-text-primary block">Adicionar Ingredientes</label>
               <div className="relative">
                 <TacoSearchInput
                   value={foodQuery}
                   onChange={(e) => handleSearchFoods(e.target.value)}
                   placeholder="Buscar ingrediente (ex: ovo, frango, aveia)..."
-                  className="bg-warm-inner border-warm-border text-xs"
+                  className="bg-surface-subtle border-border-subtle text-style-legal"
                 />
 
                 {searchResults.length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-warm-card border border-warm-border rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto p-1 space-y-1">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-control z-20 max-h-48 overflow-y-auto p-1 flex flex-col gap-1">
                     {searchResults.map((food) => (
-                      <button
+                      <Button
                         key={food.id}
                         type="button"
+                        variant="quiet"
+                        size="standard"
                         onClick={() => handleAddIngredient(food)}
-                        className="w-full text-left p-2 hover:bg-warm-inner rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer"
+                        className="w-full text-left justify-between p-2 hover:bg-surface-hover rounded-control text-style-legal flex items-center transition-colors cursor-pointer"
                       >
-                        <span className="font-bold text-warm-charcoal truncate">{food.name}</span>
-                        <span className="text-[10px] text-warm-emerald font-bold shrink-0">{food.kcal} kcal/100g</span>
-                      </button>
+                        <span className="font-bold text-text-primary truncate">{food.name}</span>
+                        <span className="text-style-legal text-success font-bold shrink-0">{food.kcal} kcal/100g</span>
+                      </Button>
                     ))}
                   </div>
                 )}
               </div>
             </div>
 
-
             {/* Ingredients List */}
             {formData.ingredients.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[11px] font-bold text-warm-charcoal uppercase tracking-wider block">
+              <div className="flex flex-col gap-2">
+                <span className="text-style-legal font-bold text-text-primary tracking-overline block">
                   Ingredientes Adicionados ({formData.ingredients.length})
                 </span>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
                   {formData.ingredients.map((ing, idx) => (
                     <RecipeIngredientRow
                       key={idx}
@@ -403,32 +401,30 @@ export default function RecipesPage() {
               readOnly
             />
 
-
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Modo de Preparo / Orientações</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Modo de Preparo / Orientações</label>
               <textarea
                 rows={3}
                 placeholder="Descreva o passo a passo do preparo da receita..."
                 value={formData.instructions}
                 onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                className="w-full px-3 py-2 bg-warm-inner border border-warm-border rounded-xl text-xs text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-warm-charcoal resize-none"
+                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
 
-            <div className="pt-2 flex space-x-2">
+            <div className="pt-2 flex gap-2">
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
                 size="sm"
-                className="flex-1 text-xs"
+                className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
+              <Button type="submit" variant="primary" size="sm" className="flex-1">
                 Salvar Receita
               </Button>
-
             </div>
           </form>
         </DialogContent>

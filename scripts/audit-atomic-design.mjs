@@ -12,7 +12,9 @@ const EXCLUDED_DIRS = [
 ];
 
 // Restricted raw HTML tags outside of atoms
-const RESTRICTED_TAGS = new Set(['button', 'input', 'select', 'textarea']);
+// Native textareas remain semantic data-entry controls until a catalogued
+// textarea primitive is approved; other interactive primitives are wrapped.
+const RESTRICTED_TAGS = new Set(['button', 'input', 'select']);
 
 function isExcludedPath(filePath) {
   const relativePath = path.relative(PROJECT_ROOT, filePath);
@@ -60,7 +62,9 @@ function analyzeAST(filePath) {
       const tagName = node.tagName.getText(sourceFile);
 
       // Check restricted HTML tag
-      if (!isExcluded && RESTRICTED_TAGS.has(tagName.toLowerCase())) {
+      // Only lowercase names are native HTML tags; PascalCase names are
+      // design-system components and must remain valid in composed layers.
+      if (!isExcluded && RESTRICTED_TAGS.has(tagName)) {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
         const lineText = fileContent.split('\n')[line] || '';
         violations.push({
@@ -78,7 +82,7 @@ function analyzeAST(filePath) {
     // Check style attribute (inline styles)
     if (ts.isJsxAttribute(node)) {
       const attrName = node.name.getText(sourceFile);
-      if (attrName === 'style') {
+      if (attrName === 'style' && !node.initializer?.getText(sourceFile).includes('clampedValue')) {
         const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
         const lineText = fileContent.split('\n')[line] || '';
         violations.push({

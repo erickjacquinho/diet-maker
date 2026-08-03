@@ -49,5 +49,5 @@ c:\Programmer\diet-maker\design-system\nutridiet\
 ---
 
 ## 3. Plano de Validação
-- **Verificação Visual**: Validação através de leitores Markdown e conferência contra o protótipo [demo_dashboard.html](file:///c:/Programmer/diet-maker/demo_dashboard.html).
+- **Verificação Visual**: Validação através de leitores Markdown e conferência contra o Design System canônico documentado em `design-system/`.
 - **Consistência de Tokens**: Garantir que nenhum token no `MASTER.md` original seja descontinuado ou alterado inadvertidamente.

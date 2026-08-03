@@ -19,24 +19,24 @@ export const PatientBadgeHeader: React.FC<PatientBadgeHeaderProps> = ({
   goalDescription,
   onAdjustGoals,
 }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-warm-border gap-3">
-    <div className="flex items-center space-x-3.5">
+  <div className="flex flex-col flex-row items-center justify-between pb-4 mb-5 border-b border-border-subtle gap-3">
+    <div className="flex items-center gap-3.5">
       <Avatar initials={initials} size="lg" variant="inner" />
       <div>
-        <div className="flex items-center space-x-2">
-          <h3 className="text-lg font-black text-warm-charcoal">{name}</h3>
-          <Badge variant="outline" className="text-xs font-bold px-2.5 py-0.5 border-warm-border">
+        <div className="flex items-center gap-2">
+          <h3 className="text-style-body-large font-bold text-text-primary">{name}</h3>
+          <Badge variant="outline" className="text-style-legal font-bold px-2.5 py-0.5 border-border-subtle">
             {weightKg} kg
           </Badge>
         </div>
-        <p className="text-xs text-warm-secondary">{goalDescription}</p>
+        <p className="text-style-legal text-text-secondary">{goalDescription}</p>
       </div>
     </div>
     <Button
       onClick={onAdjustGoals}
       variant="secondary"
       size="sm"
-      className="flex items-center space-x-1.5"
+      className="flex items-center gap-1.5"
     >
       <Edit3 size={13} />
       <span>Ajustar Metas</span>

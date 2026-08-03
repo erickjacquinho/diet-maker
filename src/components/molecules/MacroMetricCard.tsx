@@ -26,30 +26,30 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
   macroColor,
 }) => {
   const textColors = {
-    emerald: 'text-warm-emerald',
-    rose: 'text-warm-rose',
-    amber: 'text-warm-amber',
-    teal: 'text-warm-teal',
-    blue: 'text-blue-600',
+    emerald: 'text-success',
+    rose: 'text-error',
+    amber: 'text-warning',
+    teal: 'text-info',
+    blue: 'text-macro-protein',
   };
 
   return (
-    <Card className="bg-warm-inner border-warm-border p-0">
+    <Card className="bg-surface-subtle border-border-subtle p-0">
       <CardContent className="p-4">
-        <div className="flex justify-between text-xs font-semibold text-warm-muted mb-1">
+        <div className="flex justify-between text-style-legal font-semibold text-text-muted mb-1">
           <span className={`${textColors[macroColor]} font-bold`}>{label}</span>
           {statusBadgeText && (
             <Badge variant={statusBadgeVariant}>{statusBadgeText}</Badge>
           )}
         </div>
 
-        <div className="text-3xl font-black text-warm-charcoal my-1">
-          {currentValue} <span className="text-xs font-normal text-warm-muted">/ {targetValue}</span>
+        <div className="text-style-page-title font-bold text-text-primary my-1">
+          {currentValue} <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
         </div>
 
         {gPerKgRatio ? (
-          <div className={`text-xs font-bold ${textColors[macroColor]} mb-2`}>
-            {gPerKgRatio} <span className="text-[10px] text-warm-muted font-normal">(meta: {gPerKgMeta})</span>
+          <div className={`text-style-legal font-bold ${textColors[macroColor]} mb-2`}>
+            {gPerKgRatio} <span className="text-style-legal text-text-muted font-normal">(meta: {gPerKgMeta})</span>
           </div>
         ) : (
           <div className="h-4 mb-2" /> // Spacing preservation

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "baseline": { "currentSourceCount": 0, "capturedAt": "2026-07-31" },
+  "categories": [],
+  "traits": [],
+  "components": [
+    {
+      "id": "duplicate",
+      "name": "One",
+      "nature": "ui-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "ui",
+      "primaryCategory": "actions",
+      "traits": [],
+      "sourceFiles": [],
+      "publicExports": [{ "name": "One", "kind": "component", "documentedBy": "profile" }],
+      "profile": "design-system/components/profiles/ui/one.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "inventoried",
+      "exceptions": []
+    },
+    {
+      "id": "duplicate",
+      "name": "Two",
+      "nature": "ui-generic",
+      "lifecycle": "proposed",
+      "currentLayer": null,
+      "targetLayer": "ui",
+      "primaryCategory": "actions",
+      "traits": [],
+      "sourceFiles": [],
+      "publicExports": [{ "name": "Two", "kind": "component", "documentedBy": "profile" }],
+      "profile": "design-system/components/profiles/ui/two.md",
+      "consumers": [],
+      "primitiveBase": null,
+      "specStatus": "inventoried",
+      "exceptions": []
+    }
+  ]
+}

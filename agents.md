@@ -1,64 +1,46 @@
-# AGENTS.md - Diretrizes para Agentes de IA
+# AGENTS.md - AI Agent Direct File Router
 
-Este documento define as regras fundamentais, arquiteturais e organizacionais para todos os agentes de IA que atuarem no projeto **NutriDiet Local Pro**.
+All AI agents working on this codebase MUST read and strictly follow the target documentation files based on task scope:
 
----
+## Documentation & Architecture (Sources of Truth)
 
-## 🚨 REGRA PRIORITÁRIA Nº 1: Padronização Atomic Design (Brad Frost - Capítulo 2)
+| Scope | Direct Target File | Description |
+| :--- | :--- | :--- |
+| **Design System — Guia Mestre** | [design-system/README.md](file:///c:/Programmer/diet-maker/design-system/README.md) | Índice canônico, escopo, decisões fixadas e ordem de leitura |
+| **Design System — Fundamentos** | [design-system/01-principles-and-scope.md](file:///c:/Programmer/diet-maker/design-system/01-principles-and-scope.md) | Princípios, linguagem visual e limites do produto desktop |
+| **Design System — Tokens** | [design-system/03-token-architecture.md](file:///c:/Programmer/diet-maker/design-system/03-token-architecture.md) | Arquitetura reference → system → component; cores, tipografia e geometria nos documentos 04–08 |
+| **Design System — Componentes** | [design-system/09-component-decision-model.md](file:///c:/Programmer/diet-maker/design-system/09-component-decision-model.md) | Decisão, arquitetura, contrato, especificações e registro nos documentos 09–12 e 15 |
+| **Design System — Implementação** | [design-system/13-implementation-and-compliance.md](file:///c:/Programmer/diet-maker/design-system/13-implementation-and-compliance.md) | Migração, conformidade, validação e critérios de homologação |
+| **Design System — Governança** | [design-system/14-lifecycle-and-governance.md](file:///c:/Programmer/diet-maker/design-system/14-lifecycle-and-governance.md) | Proposta, revisão, versionamento, depreciação e remoção |
+| **Atomic Design Rules** | [.agents/rules/atomic-design.md](file:///c:/Programmer/diet-maker/.agents/rules/atomic-design.md) | Regras estritas da hierarquia de 5 níveis de componentes |
+| **Shadcn UI Rules** | [.agents/rules/shadcn-preservation.md](file:///c:/Programmer/diet-maker/.agents/rules/shadcn-preservation.md) | Manter primitivos limpos em `src/components/ui`, estender via wrappers/filhos |
+| **PRD & Requirements** | [docs/prd/PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md) | Requisitos de produto, estórias de usuário e critérios de aceite |
+| **Domain Context** | [docs/context/CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md) | Termos nutricionais, tabela TACO, VET e fórmulas de macros |
+| **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-007 |
+| **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
-> 📄 **Regra Detalhada**: [.agents/rules/atomic-design.md](file:///c:/Programmer/diet-maker/.agents/rules/atomic-design.md)
-> 📘 **Metodologia de Referência**: [Atomic Design por Brad Frost (Capítulo 2)](https://atomicdesign.bradfrost.com/chapter-2/)
+### Design System component catalog
 
-Toda a interface e componentes visuais desenvolvidos no projeto **MUST** seguir estritamente a hierarquia de 5 níveis do Atomic Design:
+| Scope | Direct target |
+| :--- | :--- |
+| Visual category contract | `design-system/components/categories/<category>.md` |
+| Individual component profile | `design-system/components/profiles/<layer>/<component>.md` |
+| Component IDs, layers, traits, sources and exports | `design-system/components/registry.json` |
+| Category lifecycle and creation decisions | `design-system/components/category-decisions.md` |
+| Catalog audit contract | `design-system/components/audit-contract.md` |
+
+When a component is new or changed, consult the category before the profile. The Atomic layer and visual category are independent axes; do not create a visual rule in a layer document or a duplicate state/token table in a profile.
+
+## Repository Layout
 
 ```
-src/components/
-├── atoms/          # Level 1: Átomos
-├── molecules/      # Level 2: Moléculas
-├── organisms/      # Level 3: Organismos
-└── templates/      # Level 4: Templates
-src/app/            # Level 5: Páginas (Next.js App Router)
+src/
+├── app/                  # Next.js App Router (páginas & rotas)
+├── components/           # Hierarquia UI atômica (atoms, molecules, organisms, templates, ui)
+├── data/                 # Datasets do domínio (ex: tabela TACO)
+└── lib/                  # Utilitários compartilhados & funções auxiliares
+docs/                     # Especificações do projeto (prd, context, adr)
+design-system/               # Fonte única da verdade do sistema visual (15 documentos normativos)
+tests/                    # Suíte de testes do projeto
+refs/                     # Materiais de referência & arquivos de pesquisa
 ```
-
-### Resumo dos Níveis:
-1. **⚛️ Átomos (`src/components/atoms/`)**: Componentes primitivos indivisíveis (`Button`, `Input`, `Label`, `Badge`, `Avatar`, `ProgressBar`, `IconButton`).
-2. **🧬 Moléculas (`src/components/molecules/`)**: Combinações simples de 2+ átomos (`MacroMetricCard`, `MealItemRow`, `PatientBadgeHeader`, `TacoSearchInput`).
-3. **🦠 Organismos (`src/components/organisms/`)**: Seções complexas de interface (`SidebarNav`, `MacroTrackerHeader`, `MealCardContainer`).
-4. **📐 Templates (`src/components/templates/`)**: Esqueleto de layout de página sem dados hardcoded (`DietBuilderTemplate`).
-5. **📄 Páginas (`src/app/`)**: Rotas Next.js App Router injetando dados reais.
-
----
-
-## 🛡️ REGRA PRIORITÁRIA Nº 2: Preservação do Shadcn UI & Criação de Componentes Filhos
-
-> 📄 **Regra Detalhada**: [.agents/rules/shadcn-preservation.md](file:///c:/Programmer/diet-maker/.agents/rules/shadcn-preservation.md)
-> 💡 **Manutenção, Escala e Identidade Visual**: Os componentes base do Shadcn UI (`src/components/ui/` ou primitivos) devem ser estritamente preservados em seu estado limpo. Componentes filhos especializados/compostos devem ser criados para atender a novas demandas de manutenção e escala, seguindo 100% a identidade do projeto.
-
-1. **Preservação dos Componentes Base (Shadcn UI)**:
-   - Os componentes nativos e primitivos do Shadcn UI (gerados em `src/components/ui/` ou integrados na camada base) **MUST** ser preservados sem poluição por regras de negócio específicas ou customizações ad-hoc que limitem seu reuso.
-
-2. **Criação de Componentes Filhos para Manutenção e Escala**:
-   - Sempre que uma funcionalidade exigir comportamentos de domínio, variações de layout ou composições complexas, crie **componentes filhos** (moléculas, organismos ou wrappers) que estendem e compõem os componentes base do Shadcn UI.
-
-3. **Fidelidade Total à Identidade do Projeto**:
-   - Todos os componentes filhos e customizações desenvolvidas **MUST** seguir rigorosamente os tokens do [Design System NutriDiet](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md).
-
----
-
-## 📌 Regras Complementares de Organização de Arquivos
-
-1. **Testes**:
-   - Todos os testes devem ser mantidos estritamente dentro da pasta `/tests`.
-   - **Caminho**: `c:/Programmer/diet-maker/tests`.
-
-2. **Referências**:
-   - Todas as referências, materiais de consulta, documentações externas e arquivos de apoio devem ser salvos estritamente dentro da pasta `/refs`.
-   - **Caminho**: `c:/Programmer/diet-maker/refs`.
-
----
-
-## 🔗 Mapeamento e Fontes da Verdade
-- **Regra Atomic Design**: [atomic-design.md](file:///c:/Programmer/diet-maker/.agents/rules/atomic-design.md)
-- **Regra Shadcn UI & Componentes Filhos**: [shadcn-preservation.md](file:///c:/Programmer/diet-maker/.agents/rules/shadcn-preservation.md)
-- **Design System Mestre**: [MASTER.md](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md)
-- **Mapeamento de Rotas e Paths**: [AGENTS_PATHS.md](file:///c:/Programmer/diet-maker/AGENTS_PATHS.md)

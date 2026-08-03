@@ -7,8 +7,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    maxWorkers: 1,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: [
+      'src/**/*.{test,spec}.{ts,tsx}',
+      'tests/**/*.{test,spec}.{js,mjs,cjs,ts,tsx}',
+    ],
     exclude: ['node_modules', '.agents', '.next', 'dist'],
   },
   resolve: {

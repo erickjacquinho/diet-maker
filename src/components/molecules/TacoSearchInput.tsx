@@ -18,7 +18,7 @@ export const TacoSearchInput: React.FC<TacoSearchInputProps> = ({
         className={`pr-9 ${className}`}
         {...props}
       />
-      <div className="absolute right-3 text-warm-muted pointer-events-none">
+      <div className="absolute right-3 text-text-muted pointer-events-none">
         <Search size={14} />
       </div>
     </div>

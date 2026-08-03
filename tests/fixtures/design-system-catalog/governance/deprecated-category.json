@@ -1,0 +1,6 @@
+{
+  "category": "actions",
+  "lifecycle": "deprecated",
+  "newConsumersAllowed": false,
+  "replacement": "selection"
+}

@@ -20,16 +20,25 @@ As regras desta skill determinam a ordem global. Dentro de cada estado, seguir i
 ## Estado 0: preparar
 
 1. Identificar a raiz do projeto. Se nenhum projeto puder ser identificado com segurança, pedir o caminho da raiz antes de modificar arquivos.
-2. Executar `scripts/prepare_sdd.py` a partir do diretório desta skill, passando o pedido completo e a raiz do projeto:
+2. Gerar `TASK_SLUG` como um resumo semântico do objetivo técnico da tarefa:
+   - expressar a ação e o objeto ou domínio principal da mudança;
+   - priorizar termos técnicos distintivos presentes no pedido ou no contexto;
+   - remover palavras de enquadramento que não descrevem o resultado, como `criar tarefa`, `solicitação`, `para implementar` e equivalentes;
+   - usar letras minúsculas, números e hífens;
+   - respeitar o máximo de 40 caracteres, sem limitar a quantidade de palavras;
+   - preferir palavras completas e remover detalhes secundários antes de abreviar um termo.
+
+   Exemplo: para uma tarefa de criação de uma tarefa que implemente o design system no fluxo SDD, usar `implementacao-sdd-design-system`, não `criacao-de-tarefa-para-imp`.
+3. Executar `scripts/prepare_sdd.py` a partir do diretório desta skill, passando o pedido completo, o slug semântico e a raiz do projeto:
 
    ```text
-   python <skill-dir>/scripts/prepare_sdd.py --project-root <project-root> --task <TASK_PROMPT>
+   python <skill-dir>/scripts/prepare_sdd.py --project-root <project-root> --task <TASK_PROMPT> --slug <TASK_SLUG>
    ```
 
-   Passar os argumentos como valores literais; usar a forma de escape segura do shell atual para que o conteúdo de `TASK_PROMPT` nunca seja executado como comando.
-3. Ler o JSON emitido e guardar `project_root`, `task_dir` e `feature_dir`.
-4. Confirmar que `speckit.configured` é `true`. Se a preparação informar um erro, resolver a dependência indicada e executar novamente este estado.
-5. Confirmar a existência destes arquivos:
+   Passar os argumentos como valores literais; usar a forma de escape segura do shell atual para que o conteúdo de `TASK_PROMPT` e `TASK_SLUG` nunca seja executado como comando.
+4. Ler o JSON emitido e guardar `project_root`, `task_dir` e `feature_dir`.
+5. Confirmar que `speckit.configured` é `true`. Se a preparação informar um erro, resolver a dependência indicada e executar novamente este estado.
+6. Confirmar a existência destes arquivos:
 
    ```text
    <project-root>/.agents/skills/speckit-specify/SKILL.md

@@ -1,0 +1,6 @@
+{
+  "task": "crie um /sdd que revisa completamente os componentes, um a um e compara com as regras de design system. garanra que tudo está corretamente formatado, aplicado e estilizado de forma correta no projeto. itens como tabelas, textos e botoes ainda estado fora de design. entre em loop até concluir",
+  "slug": "revisao-componentes-design-system",
+  "feature_dir": "specs/31-07-26-revisao-componentes-design-system",
+  "date": "2026-07-31"
+}

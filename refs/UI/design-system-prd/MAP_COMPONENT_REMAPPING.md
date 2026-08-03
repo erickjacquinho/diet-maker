@@ -52,9 +52,9 @@ export interface IconButtonProps extends ShadcnButtonProps {
 ```
 
 #### 🎨 Mapeamento Exato de Classes por Tokens Semânticos
-* **`primary` / `default`**: `bg-charcoal-900 text-white hover:bg-charcoal-800 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring-warm-focus focus-visible:ring-offset-2 focus-visible:ring-offset-warm-bg rounded-control transition-all duration-150`
+* **`primary` / `default`**: `bg-charcoal-900 text-white hover:bg-charcoal-800 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-warm-focus focus-visible:ring-offset-2 focus-visible:ring-offset-warm-bg rounded-control transition-all duration-150`
 * **`emerald` / `highlight`**: `bg-emerald-700 text-white hover:bg-emerald-600 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 focus-visible:ring-offset-warm-bg rounded-control transition-all duration-150`
-* **`outline` / `secondary`**: `bg-warm-card text-warm-main border border-warm-border hover:bg-warm-inner hover:border-warm-borderDark active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring-warm-focus rounded-control transition-all duration-150`
+* **`outline` / `secondary`**: `bg-warm-card text-warm-main border border-warm-border hover:bg-warm-inner hover:border-warm-borderDark active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-warm-focus rounded-control transition-all duration-150`
 * **`ghost`**: `bg-transparent text-warm-secondary hover:bg-warm-inner hover:text-warm-main active:scale-[0.98] rounded-control transition-all duration-150`
 * **`pill`**: `bg-warm-inner text-warm-secondary border border-warm-border hover:bg-warm-card hover:text-warm-main hover:border-warm-borderDark rounded-pill px-3.5 py-1.5 text-xs font-body font-medium active:scale-[0.96] transition-all duration-150`
 * **`destructive`**: `bg-nutri-error-bg text-nutri-error-text border border-nutri-error-border hover:bg-rose-700 hover:text-white active:scale-[0.98] rounded-control transition-all duration-150`
@@ -80,7 +80,7 @@ export interface IconButtonProps extends ShadcnButtonProps {
 ### 1.3 `Input.tsx` (Wrapper `NutriInput`)
 
 #### 🎨 Mapeamento de Classes por Tokens
-* **Classes Tailwind**: `w-full h-10 px-3 py-2 bg-warm-card border border-warm-border rounded-control text-sm font-body text-warm-main placeholder:text-warm-muted focus:outline-none focus:border-warm-main focus:ring-1 focus:ring-ring-warm-focus transition-all duration-150 disabled:opacity-50 disabled:bg-warm-inner`
+* **Classes Tailwind**: `w-full h-10 px-3 py-2 bg-warm-card border border-warm-border rounded-control text-sm font-body text-warm-main placeholder:text-warm-muted focus-visible:outline-none focus-visible:border-warm-borderDark focus-visible:ring-2 focus-visible:ring-warm-focus focus-visible:ring-offset-2 transition-all duration-150 disabled:opacity-50 disabled:bg-warm-inner`
 
 ---
 

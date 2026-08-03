@@ -92,12 +92,12 @@ export default function PatientsListPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 p-8 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="font-black text-2xl text-warm-charcoal tracking-tight">Pacientes</h1>
-          <p className="text-xs text-warm-muted mt-1 font-medium">
+          <h1 className="font-bold text-style-section-title text-text-primary tracking-tight">Pacientes</h1>
+          <p className="text-style-legal text-text-muted mt-1 font-medium">
             Gerencie o histórico, medições e prescrições alimentares de cada paciente.
           </p>
         </div>
@@ -112,27 +112,27 @@ export default function PatientsListPage() {
       {/* Search Input */}
       {patients.length > 0 && (
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar paciente por nome ou objetivo..."
-            className="pl-11 pr-4 h-11 bg-warm-card border-warm-border rounded-xl text-xs text-warm-charcoal placeholder-warm-muted"
+            className="pl-11 pr-4 h-11 bg-surface border-border-subtle rounded-control text-style-legal text-text-primary placeholder-text-muted"
           />
         </div>
       )}
 
       {/* Empty State vs Patient Cards Grid */}
       {filteredPatients.length === 0 ? (
-        <Card className="bg-warm-card border-warm-border rounded-2xl p-0 max-w-md mx-auto my-8">
-          <CardContent className="p-12 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-warm-inner border border-warm-border flex items-center justify-center mx-auto text-warm-muted">
+        <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
+          <CardContent className="p-12 text-center flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
               <Users size={24} />
             </div>
             <div>
-              <h3 className="font-black text-base text-warm-charcoal">Nenhum paciente cadastrado</h3>
-              <p className="text-xs text-warm-muted mt-1 leading-relaxed">
+              <h3 className="font-bold text-style-body text-text-primary">Nenhum paciente cadastrado</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
                 Sua lista de pacientes está em branco. Cadastre seu primeiro paciente para iniciar o acompanhamento nutricional.
               </p>
             </div>
@@ -145,56 +145,56 @@ export default function PatientsListPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredPatients.map((patient) => (
             <Card
               key={patient.id}
-              className="bg-warm-card border-warm-border rounded-2xl p-0 hover:border-warm-charcoal/30 transition-all flex flex-col justify-between"
+              className="bg-surface border-border-subtle rounded-surface p-0 hover:border-text-primary/30 transition-colors duration-standard flex flex-col justify-between"
             >
-              <CardContent className="p-5 space-y-4 flex flex-col justify-between h-full">
+              <CardContent className="p-5 gap-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Avatar initials={patient.initials} variant="charcoal" size="md" className="rounded-xl font-bold" />
+                  <div className="flex items-center gap-3">
+                    <Avatar initials={patient.initials} variant="charcoal" size="md" className="rounded-control font-bold" />
                     <div>
-                      <h3 className="font-bold text-sm text-warm-charcoal leading-snug">{patient.name}</h3>
-                      <span className="text-[11px] text-warm-muted font-medium">
+                      <h3 className="font-bold text-style-body-small text-text-primary leading-snug">{patient.name}</h3>
+                      <span className="text-style-legal text-text-muted font-medium">
                         {patient.age} anos • {patient.gender}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 p-3 bg-warm-inner border border-warm-border rounded-xl text-center">
+                <div className="grid grid-cols-3 gap-2 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
                   <div>
-                    <div className="text-[10px] font-semibold text-warm-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Weight size={10} />
                       <span>Peso</span>
                     </div>
-                    <div className="font-black text-xs text-warm-charcoal mt-0.5">{patient.weightKg} kg</div>
+                    <div className="font-bold text-style-legal text-text-primary mt-0.5">{patient.weightKg} kg</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-semibold text-warm-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Target size={10} />
                       <span>Meta Kcal</span>
                     </div>
-                    <div className="font-bold text-xs text-warm-muted mt-0.5">{patient.targetKcal} kcal</div>
+                    <div className="font-bold text-style-legal text-text-muted mt-0.5">{patient.targetKcal} kcal</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-semibold text-warm-muted flex items-center justify-center space-x-1">
+                    <div className="text-style-legal font-semibold text-text-muted flex items-center justify-center gap-1">
                       <Calendar size={10} />
                       <span>Última</span>
                     </div>
-                    <div className="font-bold text-[11px] text-warm-charcoal mt-0.5">{patient.lastConsultation}</div>
+                    <div className="font-bold text-style-legal text-text-primary mt-0.5">{patient.lastConsultation}</div>
                   </div>
                 </div>
 
-                <div className="pt-1 flex items-center justify-between border-t border-warm-border">
-                  <span className="text-[11px] font-semibold text-warm-muted truncate max-w-[180px]">
+                <div className="pt-1 flex items-center justify-between border-t border-border-subtle">
+                  <span className="text-style-legal font-semibold text-text-muted truncate max-w-[180px]">
                     🎯 {patient.objective}
                   </span>
                   <Link
                     href={`/pacientes/${patient.id}`}
-                    className="inline-flex items-center space-x-1 text-xs font-bold text-warm-charcoal hover:text-warm-emerald transition-colors"
+                    className="inline-flex items-center gap-1 text-style-legal font-bold text-text-primary hover:text-success transition-colors"
                   >
                     <span>Ver Perfil</span>
                     <ArrowRight size={14} />
@@ -208,62 +208,62 @@ export default function PatientsListPage() {
 
       {/* Modal Cadastrar Paciente Shadcn Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md bg-warm-card border-warm-border p-6 rounded-2xl">
-          <DialogHeader className="border-b border-warm-border pb-3">
-            <DialogTitle className="font-black text-base text-warm-charcoal">Cadastrar Novo Paciente</DialogTitle>
+        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="font-bold text-style-body text-text-primary">Cadastrar Novo Paciente</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreatePatient} className="space-y-3 pt-2">
+          <form onSubmit={handleCreatePatient} className="flex flex-col gap-3 pt-2">
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Nome Completo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo</label>
               <Input
                 type="text"
                 required
                 placeholder="Ex: Carlos Eduardo Silva"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-warm-inner border-warm-border text-xs"
+                className="bg-surface-subtle border-border-subtle text-style-legal"
               />
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Idade</label>
+                <label className="text-style-legal font-semibold text-text-muted block mb-1">Idade</label>
                 <Input
                   type="number"
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Altura (cm)</label>
+                <label className="text-style-legal font-semibold text-text-muted block mb-1">Altura (cm)</label>
                 <Input
                   type="number"
                   value={formData.heightCm}
                   onChange={(e) => setFormData({ ...formData, heightCm: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-warm-muted block mb-1">Peso (kg)</label>
+                <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso (kg)</label>
                 <Input
                   type="number"
                   step="any"
                   value={formData.weightKg}
                   onChange={(e) => setFormData({ ...formData, weightKg: Number(e.target.value) })}
-                  className="bg-warm-inner border-warm-border text-xs font-bold"
+                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-warm-charcoal block mb-1">Objetivo Clínico / Esportivo</label>
+              <label className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
               <Select
                 value={formData.objective}
                 onValueChange={(val) => setFormData({ ...formData, objective: val })}
               >
-                <SelectTrigger className="bg-warm-inner border-warm-border text-xs text-warm-charcoal font-semibold h-9 w-full">
+                <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
                   <SelectValue placeholder="Selecione o objetivo" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
@@ -277,18 +277,18 @@ export default function PatientsListPage() {
             </div>
 
 
-            <div className="pt-2 flex space-x-2">
+            <div className="pt-2 flex gap-2">
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
                 size="sm"
-                className="flex-1 text-xs"
+                className="flex-1 text-style-legal"
               >
                 Cancelar
               </Button>
 
-              <Button type="submit" variant="emerald" size="sm" className="flex-1 text-xs font-bold">
+              <Button type="submit" variant="primary" size="sm" className="flex-1">
                 Salvar Paciente
               </Button>
             </div>

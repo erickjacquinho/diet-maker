@@ -25,7 +25,7 @@ src/app/            # Level 5: Páginas / Rotas (Next.js App Router)
 - **Regras de Isolamento**:
   - **NÃO** podem importar ou depender de moléculas, organismos ou regras de negócio.
   - Devem ser 100% genéricos, agnósticos ao domínio da aplicação e reutilizáveis.
-  - Estilizados exclusivamente com os tokens do [Design System NutriDiet](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md).
+  - Estilizados exclusivamente com os tokens do [Design System NutriDiet](file:///c:/Programmer/diet-maker/design-system/README.md).
 
 ### 2. 🧬 Moléculas (`src/components/molecules/`)
 - **Definição**: Grupos simples de dois ou mais átomos integrados que funcionam como uma unidade funcional com propósito único (ex: `TacoSearchInput` = Input + SearchIcon; `MealItemRow` = Text + Badge + Input + TrashIcon; `MacroMetricCard` = Label + Badge + Value + ProgressBar).
@@ -53,6 +53,6 @@ src/app/            # Level 5: Páginas / Rotas (Next.js App Router)
 
 ## 🔗 Referências
 - Metodologia Oficial: [Atomic Design (Brad Frost - Chapter 2)](https://atomicdesign.bradfrost.com/chapter-2/)
-- Documentação do Design System: [MASTER.md](file:///c:/Programmer/diet-maker/design-system/nutridiet/MASTER.md)
+- Documentação do Design System: [README.md](file:///c:/Programmer/diet-maker/design-system/README.md)
 - Regra de Preservação Shadcn UI: [shadcn-preservation.md](file:///c:/Programmer/diet-maker/.agents/rules/shadcn-preservation.md)
 - Diretrizes Globais: [agents.md](file:///c:/Programmer/diet-maker/agents.md)
