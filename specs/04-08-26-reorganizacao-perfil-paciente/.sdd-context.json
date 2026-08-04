@@ -1,0 +1,6 @@
+{
+  "task": "Refatorar estruturalmente a página de perfil do paciente para priorizar informações clínicas e pessoais que ajudam o nutricionista no acompanhamento. Avaliar e substituir o grande quadro de metas nutricionais atuais (Kcal, proteína, carboidratos e gorduras) por uma apresentação mais útil e contextual: manter o perfil focado em dados pessoais, indicadores corporais atuais, última consulta e próximo acompanhamento; quando houver uma dieta ativa, mostrar apenas um resumo compacto do plano atual, com origem temporal/status claros e acesso à dieta detalhada; quando não houver dieta ativa, orientar a criação sem inventar macros. Manter os macros detalhados na página/fluxo da dieta e no histórico. Usar componentes e tokens existentes, preservar o design system, acessibilidade e a arquitetura atual, sem criar componentes de produto desnecessários. Criar especificação SDD completa (spec, clarify, checklist, plan, tasks, atribuição de skills e análise de consistência), sem implementar a mudança nesta etapa.",
+  "slug": "reorganizacao-perfil-paciente",
+  "feature_dir": "specs/04-08-26-reorganizacao-perfil-paciente",
+  "date": "2026-08-04"
+}

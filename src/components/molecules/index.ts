@@ -1,4 +1,5 @@
 export * from './MacroMetricCard';
+export * from './MetricBox';
 export * from './MealItemRow';
 export * from './PatientBadgeHeader';
 export * from './TacoSearchInput';
@@ -12,3 +13,4 @@ export * from './RecipeIngredientRow';
 export * from './RecipeCard';
 export * from './DietModeSwitcher';
 export * from './FoodSearchModal';
+export * from './DatePickerField';

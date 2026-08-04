@@ -10,29 +10,33 @@ import {
   Activity, 
   Calendar, 
   Weight, 
+  Mars,
+  Venus,
   Flame, 
   ChevronRight,
   ChevronDown,
   ChevronUp,
   TrendingDown,
   Scale,
+  Ruler,
   Pencil,
   Trash2,
   AlertTriangle,
   FileSpreadsheet,
   Eye
 } from 'lucide-react';
-import { Avatar, EditIconButton, DeleteIconButton, CreateButton, SecondaryActionButton } from '@/components/atoms';
-import { ReadOnlyDietModal, AutoKcalSection } from '@/components/molecules';
+import { Avatar, EditIconButton, DeleteIconButton, CreateButton, SecondaryActionButton, IconButton } from '@/components/atoms';
+import { ReadOnlyDietModal, AutoKcalSection, MetricBox, DatePickerField } from '@/components/molecules';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -50,7 +54,12 @@ import {
   getPatientById, 
   updatePatientInStorage, 
   deletePatientFromStorage, 
+  getPatientAssessmentsFromStorage,
+  savePatientAssessmentToStorage,
   Patient,
+  PatientNextEvent,
+  PatientNextEventType,
+  BodyAssessment,
   DEFAULT_OBJECTIVES,
 } from '@/lib/patientsStore';
 
@@ -66,19 +75,22 @@ interface HistoricalDiet {
   status: 'Ativa' | 'Histórica';
 }
 
-interface BodyAssessment {
-  id: string;
-  date: string;
-  weightKg: number;
-  bodyFatPercent: number;
-  muscleMassKg: number;
-  waistCm: number;
-}
-
 interface ConsolidatedUpdate {
   date: string;
   diet?: HistoricalDiet;
   assessment?: BodyAssessment;
+}
+
+function toComparableDate(value: string): string {
+  const normalized = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(normalized)) return normalized.slice(0, 10);
+
+  const [day, month, year] = normalized.split(/[/-]/);
+  if (day && month && year?.length === 4) {
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  return normalized;
 }
 
 export default function PatientDetailPage() {
@@ -99,6 +111,11 @@ export default function PatientDetailPage() {
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
   const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
+  const [isNextEventModalOpen, setIsNextEventModalOpen] = useState(false);
+  const [nextEventDraft, setNextEventDraft] = useState<PatientNextEvent>({
+    date: '',
+    type: 'assessment-update',
+  });
   const [isAddObjectiveModalOpen, setIsAddObjectiveModalOpen] = useState(false);
   const [newObjectiveInput, setNewObjectiveInput] = useState('');
   const [editFormData, setEditFormData] = useState<Patient | null>(null);
@@ -119,13 +136,45 @@ export default function PatientDetailPage() {
 
   const handleSaveAssessment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingAssessment) {
-      setBodyAssessments((prev) =>
-        prev.map((a) => (a.id === editingAssessment.id ? editingAssessment : a))
-      );
+    if (editingAssessment && patient) {
+      const updatedAssessments = savePatientAssessmentToStorage(patient.id, editingAssessment);
+      setBodyAssessments(updatedAssessments);
       setIsEditAssessmentOpen(false);
       toast.success('Avaliação física atualizada com sucesso!');
     }
+  };
+
+  const handleOpenNextEventModal = () => {
+    if (!patient) return;
+
+    setNextEventDraft(patient.nextEvent
+      ? { ...patient.nextEvent }
+      : { date: '', type: 'assessment-update' });
+    setIsNextEventModalOpen(true);
+  };
+
+  const handleSaveNextEvent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!patient || !nextEventDraft.date) return;
+
+    const saved = updatePatientInStorage({
+      ...patient,
+      nextEvent: { ...nextEventDraft },
+    });
+    setPatient(saved);
+    setNextEventDraft({ ...saved.nextEvent! });
+    setIsNextEventModalOpen(false);
+    toast.success('Próximo acompanhamento salvo.');
+  };
+
+  const handleClearNextEvent = () => {
+    if (!patient) return;
+
+    const saved = updatePatientInStorage({ ...patient, nextEvent: null });
+    setPatient(saved);
+    setNextEventDraft({ date: '', type: 'assessment-update' });
+    setIsNextEventModalOpen(false);
+    toast.success('Próximo acompanhamento removido.');
   };
 
   const [customObjectives, setCustomObjectives] = useState<string[]>(() => {
@@ -191,6 +240,8 @@ export default function PatientDetailPage() {
     if (patientId) {
       const found = getPatientById(patientId);
       setPatient(found);
+      setBodyAssessments(getPatientAssessmentsFromStorage(patientId));
+      setNextEventDraft(found?.nextEvent ?? { date: '', type: 'assessment-update' });
 
       if (typeof window !== 'undefined') {
         try {
@@ -354,6 +405,13 @@ export default function PatientDetailPage() {
     setExpandedRowDate(expandedRowDate === date ? null : date);
   };
 
+  const latestAssessment = useMemo(() => {
+    return bodyAssessments.reduce<BodyAssessment | null>((latest, assessment) => {
+      if (!latest) return assessment;
+      return toComparableDate(assessment.date) > toComparableDate(latest.date) ? assessment : latest;
+    }, null);
+  }, [bodyAssessments]);
+
   if (!patient) {
     return (
       <div className="p-6 max-w-md mx-auto my-12 text-center">
@@ -377,6 +435,13 @@ export default function PatientDetailPage() {
     );
   }
 
+  const normalizedGender = patient.gender.trim().toLocaleLowerCase('pt-BR');
+  const GenderIcon = normalizedGender === 'feminino' || normalizedGender === 'female'
+    ? Venus
+    : normalizedGender === 'masculino' || normalizedGender === 'male'
+      ? Mars
+      : null;
+
   return (
     <div className="flex flex-col p-6 max-w-6xl mx-auto gap-6">
       {/* Top Navigation Bar */}
@@ -389,32 +454,44 @@ export default function PatientDetailPage() {
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <span className="text-style-legal font-bold text-text-muted tracking-overline">Prontuário do Paciente</span>
-            <h1 className="font-bold text-style-subsection-title text-text-primary tracking-tight leading-none">{patient.name}</h1>
+            <span className="text-style-legal font-bold text-text-muted tracking-overline">Pacientes / Perfil</span>
+            <h1 className="font-bold text-style-subsection-title text-text-primary tracking-tight leading-none">Perfil do paciente</h1>
           </div>
         </div>
       </div>
 
-      {/* 1-COLUMN LAYOUT: INTEGRATED PATIENT HEADER CARD */}
-      <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating overflow-hidden">
+      {/* Patient summary */}
+      <Card className="bg-surface border-border-subtle rounded-surface p-0 overflow-hidden">
         <CardContent className="p-6 flex flex-col gap-6">
           {/* Row 1: Profile & Actions */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border-subtle/70 pb-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border-divider pb-5">
             <div className="flex items-center gap-4">
               <Avatar initials={patient.initials} variant="charcoal" size="lg" className="rounded-surface font-bold text-style-subsection-title shrink-0 h-16 w-16" />
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-bold text-style-body-large text-text-primary tracking-tight">{patient.name}</h2>
-                  <Badge variant="outline" className="text-style-legal font-bold border-border-subtle text-text-muted">
-                    {patient.gender}
+                  {GenderIcon && (
+                    <span
+                      role="img"
+                      aria-label={patient.gender}
+                      title={patient.gender}
+                      className="flex items-center justify-center text-text-muted"
+                    >
+                      <GenderIcon size={14} strokeWidth={1.8} aria-hidden="true" />
+                    </span>
+                  )}
+                  <Badge variant="secondary" className="text-style-legal font-semibold whitespace-nowrap">
+                    {patient.objective || 'Acompanhamento'}
                   </Badge>
                 </div>
-                <div className="text-style-legal font-medium text-text-muted flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span>{patient.age} anos</span>
-                  <span>•</span>
-                  <span>{patient.heightCm} cm</span>
-                  <span>•</span>
-                  <span>Objetivo: <strong className="font-bold text-text-primary">{patient.objective || 'Acompanhamento'}</strong></span>
+                <div className="flex items-center gap-2 text-style-legal text-text-muted" aria-label="Dados cadastrais">
+                  <span aria-label={`Idade: ${patient.age} anos`} className="font-semibold text-text-primary">
+                    {patient.age} anos
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span aria-label={`Altura: ${patient.heightCm} centímetros`} className="font-semibold text-text-primary">
+                    {patient.heightCm} cm
+                  </span>
                 </div>
               </div>
             </div>
@@ -425,7 +502,21 @@ export default function PatientDetailPage() {
                 <CreateButton>Nova Dieta</CreateButton>
               </Link>
 
-              <SecondaryActionButton icon={<Activity size={14} className="text-success" />}>
+              <SecondaryActionButton
+                icon={<Activity size={14} className="text-success" />}
+                onClick={() => {
+                  const today = new Date().toISOString().slice(0, 10);
+                  setEditingAssessment({
+                    id: `assessment-${Date.now()}`,
+                    date: today,
+                    weightKg: patient.weightKg,
+                    bodyFatPercent: 0,
+                    muscleMassKg: 0,
+                    waistCm: 0,
+                  });
+                  setIsEditAssessmentOpen(true);
+                }}
+              >
                 Nova Avaliação Física
               </SecondaryActionButton>
 
@@ -436,69 +527,163 @@ export default function PatientDetailPage() {
             </div>
           </div>
 
-          {/* Row 2: Active Target Macros & Current Indicators */}
+          {/* Current follow-up indicators */}
+          <section className="flex flex-col gap-3" aria-labelledby="current-indicators-title">
+            <div>
+              <h3 id="current-indicators-title" className="text-style-body-small font-semibold text-text-primary">
+                Indicadores atuais
+              </h3>
+              <p className="text-style-legal text-text-muted">
+                Medições que acompanham a evolução do paciente.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-4 divide-x divide-border-divider overflow-hidden rounded-control border border-border-divider bg-surface">
+              <MetricBox
+                size="standard"
+                layout="split"
+                surface="inline"
+                icon={<Weight size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
+                label="Peso atual"
+                value={latestAssessment && latestAssessment.weightKg > 0 ? `${latestAssessment.weightKg} kg` : `${patient.weightKg} kg`}
+                className="min-w-0 px-3 py-3"
+              />
+              <MetricBox
+                size="standard"
+                layout="split"
+                surface="inline"
+                icon={<Activity size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
+                label="% de gordura"
+                value={latestAssessment && latestAssessment.bodyFatPercent > 0 ? `${latestAssessment.bodyFatPercent}%` : 'Sem avaliação'}
+                tone={latestAssessment && latestAssessment.bodyFatPercent > 0 ? 'default' : 'muted'}
+                className="min-w-0 px-3 py-3"
+              />
+              <MetricBox
+                size="standard"
+                layout="split"
+                surface="inline"
+                icon={<Scale size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
+                label="Massa magra"
+                value={latestAssessment && latestAssessment.muscleMassKg > 0 ? `${latestAssessment.muscleMassKg} kg` : 'Sem avaliação'}
+                tone={latestAssessment && latestAssessment.muscleMassKg > 0 ? 'default' : 'muted'}
+                className="min-w-0 px-3 py-3"
+              />
+              <MetricBox
+                size="standard"
+                layout="split"
+                surface="inline"
+                icon={<Ruler size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
+                label="Cintura"
+                value={latestAssessment && latestAssessment.waistCm > 0 ? `${latestAssessment.waistCm} cm` : 'Sem avaliação'}
+                tone={latestAssessment && latestAssessment.waistCm > 0 ? 'default' : 'muted'}
+                className="min-w-0 px-3 py-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <MetricBox
+                size="standard"
+                layout="split"
+                surface="raised"
+                icon={<Calendar size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
+                label="Última consulta"
+                value={patient.lastConsultation || 'Não informada'}
+              />
+              <section
+                className="col-span-2 flex h-full items-center justify-between gap-3 rounded-control border border-border-divider bg-surface-subtle px-3 py-3"
+                aria-label="Próximo acompanhamento"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <Calendar size={12} strokeWidth={1.75} className={patient.nextEvent ? 'text-primary' : 'text-warning'} aria-hidden="true" />
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="text-style-legal font-semibold text-text-primary whitespace-nowrap">
+                      Próximo acompanhamento
+                    </span>
+                    <span className="text-style-legal text-text-secondary truncate">
+                      {patient.nextEvent
+                        ? `${patient.nextEvent.date.split('-').reverse().join('/')} · ${patient.nextEvent.type === 'diet-update' ? 'Atualização de dieta' : 'Atualização de avaliação'}`
+                        : 'Sem próximo evento'}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="compact"
+                  onClick={handleOpenNextEventModal}
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  {patient.nextEvent ? 'Reagendar' : 'Definir acompanhamento'}
+                </Button>
+              </section>
+            </div>
+          </section>
+
+        </CardContent>
+      </Card>
+
+      {/* Current nutrition targets */}
+      <Card className="bg-surface border-border-subtle rounded-surface p-0">
+        <CardContent className="p-6 flex flex-col gap-4">
           <div>
-            <span className="text-style-legal font-bold text-text-muted tracking-overline block mb-2.5">
-              Metas Manuais & Indicadores Atuais
-            </span>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center">
-                <div className="text-style-legal font-bold text-text-muted tracking-label flex items-center justify-center gap-1">
-                  <Weight size={12} className="text-text-primary" />
-                  <span>Peso Atual</span>
-                </div>
-                <div className="font-bold text-style-body text-text-primary mt-0.5">{patient.weightKg} kg</div>
-              </div>
+            <h2 className="text-style-section-title font-bold tracking-tight text-text-primary">
+              Metas nutricionais atuais
+            </h2>
+            <p className="text-style-legal text-text-muted mt-1 mb-3">
+              Metas manuais usadas para orientar a prescrição diária.
+            </p>
+            <div className="grid grid-cols-4 gap-3">
+              <MetricBox
+                size="large"
+                tone="muted"
+                icon={<Flame size={12} className="text-success" />}
+                label="Meta Kcal"
+                value={`${patient.targetKcal} kcal`}
+              />
 
-              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center">
-                <div className="text-style-legal font-bold text-text-muted tracking-label flex items-center justify-center gap-1">
-                  <Flame size={12} className="text-success" />
-                  <span>Meta Kcal</span>
-                </div>
-                <div className="font-bold text-style-body text-text-muted mt-0.5">{patient.targetKcal} kcal</div>
-              </div>
+              <MetricBox
+                size="large"
+                tone="protein"
+                label="Proteína"
+                value={`${patient.targetProtein}g`}
+                caption={`${(patient.targetProtein / (patient.weightKg || 1)).toFixed(1)} g/kg`}
+              />
 
-              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center">
-                <div className="text-style-legal font-bold text-text-muted tracking-label">Proteína</div>
-                <div className="font-bold text-style-body text-macro-protein mt-0.5">{patient.targetProtein}g</div>
-                <span className="text-style-chart-micro font-semibold text-text-muted block">
-                  {(patient.targetProtein / (patient.weightKg || 1)).toFixed(1)} g/kg
-                </span>
-              </div>
+              <MetricBox
+                size="large"
+                tone="carbohydrate"
+                label="Carboidratos"
+                value={`${patient.targetCarbs}g`}
+                caption={`${(patient.targetCarbs / (patient.weightKg || 1)).toFixed(1)} g/kg`}
+              />
 
-              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center">
-                <div className="text-style-legal font-bold text-text-muted tracking-label">Carboidratos</div>
-                <div className="font-bold text-style-body text-macro-carbohydrate mt-0.5">{patient.targetCarbs}g</div>
-                <span className="text-style-chart-micro font-semibold text-text-muted block">
-                  {(patient.targetCarbs / (patient.weightKg || 1)).toFixed(1)} g/kg
-                </span>
-              </div>
-
-              <div className="p-3 bg-surface-subtle border border-border-subtle rounded-surface text-center col-span-2">
-                <div className="text-style-legal font-bold text-text-muted tracking-label">Gorduras</div>
-                <div className="font-bold text-style-body text-macro-fat mt-0.5">{patient.targetFats}g</div>
-                <span className="text-style-chart-micro font-semibold text-text-muted block">
-                  {(patient.targetFats / (patient.weightKg || 1)).toFixed(1)} g/kg
-                </span>
-              </div>
+              <MetricBox
+                size="large"
+                tone="fat"
+                label="Gorduras"
+                value={`${patient.targetFats}g`}
+                caption={`${(patient.targetFats / (patient.weightKg || 1)).toFixed(1)} g/kg`}
+              />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 1-COLUMN LAYOUT: TABELA UNIFICADA INTELIGENTE POR CONSULTA / DATA */}
-      <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating">
+      {/* Consultation history */}
+      <Card className="bg-surface border-border-subtle rounded-surface p-0">
         <CardContent className="p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-border-subtle/70 pb-4">
+          <div className="flex items-center justify-between border-b border-border-divider pb-4">
             <div className="flex items-center gap-2">
               <FileSpreadsheet size={18} className="text-success" />
               <div>
-                <h3 className="font-bold text-style-body text-text-primary">Atualizações de Consulta & Histórico Unificado</h3>
-                <p className="text-style-legal text-text-muted">Tabela combinada com prescrições dietéticas e avaliações físicas por data</p>
+                <h2 className="font-bold text-style-body text-text-primary">Histórico de consultas</h2>
+                <p className="text-style-legal text-text-muted">Dietas e avaliações físicas organizadas por data</p>
               </div>
             </div>
             <Badge variant="secondary" className="text-style-legal font-bold px-2.5 py-1">
-              {consolidatedUpdates.length} consultas registradas
+              {consolidatedUpdates.length === 1
+                ? '1 consulta registrada'
+                : `${consolidatedUpdates.length} consultas registradas`}
             </Badge>
           </div>
 
@@ -538,7 +723,7 @@ export default function PatientDetailPage() {
                           className={`transition-colors cursor-pointer border-l-4 ${
                             isActiveDietRow 
                               ? 'border-l-success bg-success/[0.04] hover:bg-success/[0.08]' 
-                              : 'border-l-transparent hover:bg-surface-subtle/60'
+                              : 'border-l-transparent hover:bg-surface-hover'
                           }`}
                         >
                           {/* Col 1: Date */}
@@ -612,9 +797,8 @@ export default function PatientDetailPage() {
                                   <ChevronRight size={12} />
                                 </Link>
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
+                              <IconButton
+                                aria-label={isExpanded ? 'Recolher consulta' : 'Expandir consulta'}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleRowExpansion(update.date);
@@ -622,7 +806,7 @@ export default function PatientDetailPage() {
                                 className="h-7 w-7 rounded-control text-text-muted hover:text-text-primary"
                               >
                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                              </Button>
+                              </IconButton>
                             </div>
                           </td>
                         </tr>
@@ -646,22 +830,10 @@ export default function PatientDetailPage() {
                                     </div>
                                     
                                     <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Calorias</span>
-                                        <span className="font-bold text-style-legal text-text-primary">{update.diet.targetKcal} kcal</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Proteínas</span>
-                                        <span className="font-bold text-style-legal text-macro-protein">{update.diet.proteinG}g</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Carbo</span>
-                                        <span className="font-bold text-style-legal text-macro-carbohydrate">{update.diet.carbsG}g</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Gorduras</span>
-                                        <span className="font-bold text-style-legal text-macro-fat">{update.diet.fatsG}g</span>
-                                      </div>
+                                      <MetricBox size="compact" label="Calorias" value={`${update.diet.targetKcal} kcal`} />
+                                      <MetricBox size="compact" tone="protein" label="Proteínas" value={`${update.diet.proteinG}g`} />
+                                      <MetricBox size="compact" tone="carbohydrate" label="Carbo" value={`${update.diet.carbsG}g`} />
+                                      <MetricBox size="compact" tone="fat" label="Gorduras" value={`${update.diet.fatsG}g`} />
                                     </div>
 
                                     <div className="pt-2 flex items-center justify-between">
@@ -699,22 +871,10 @@ export default function PatientDetailPage() {
                                     </div>
 
                                     <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Peso</span>
-                                        <span className="font-bold text-style-legal text-text-primary">{update.assessment.weightKg} kg</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">% Gordura</span>
-                                        <span className="font-bold text-style-legal text-text-primary">{update.assessment.bodyFatPercent}%</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Massa Magra</span>
-                                        <span className="font-bold text-style-legal text-text-primary">{update.assessment.muscleMassKg} kg</span>
-                                      </div>
-                                      <div className="p-2 bg-surface-subtle rounded-control">
-                                        <span className="text-style-legal font-bold text-text-muted block tracking-label">Cintura</span>
-                                        <span className="font-bold text-style-legal text-text-primary">{update.assessment.waistCm} cm</span>
-                                      </div>
+                                      <MetricBox size="compact" label="Peso" value={`${update.assessment.weightKg} kg`} />
+                                      <MetricBox size="compact" label="% Gordura" value={`${update.assessment.bodyFatPercent}%`} />
+                                      <MetricBox size="compact" label="Massa Magra" value={`${update.assessment.muscleMassKg} kg`} />
+                                      <MetricBox size="compact" label="Cintura" value={`${update.assessment.waistCm} cm`} />
                                     </div>
 
                                     <div className="pt-2 flex justify-end">
@@ -739,6 +899,67 @@ export default function PatientDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Next event dialog */}
+      <Dialog open={isNextEventModalOpen} onOpenChange={setIsNextEventModalOpen}>
+        <DialogContent className="bg-surface border-border-subtle p-6 rounded-surface">
+          <DialogHeader className="border-b border-border-subtle pb-3">
+            <DialogTitle className="flex items-center gap-2 font-bold text-style-body text-text-primary">
+              <Calendar size={16} strokeWidth={1.75} className="text-primary" aria-hidden="true" />
+              <span>{patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir próximo acompanhamento'}</span>
+            </DialogTitle>
+            <DialogDescription className="text-style-legal text-text-muted">
+              Escolha a data e o tipo da próxima atualização deste paciente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveNextEvent} className="flex flex-col gap-4 pt-1">
+            <div className="grid grid-cols-2 gap-3">
+              <DatePickerField
+                id="next-event-date"
+                label="Data"
+                required
+                value={nextEventDraft.date}
+                onValueChange={(value) => setNextEventDraft((current) => ({ ...current, date: value }))}
+              />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="next-event-type" className="text-style-legal font-semibold text-text-secondary">
+                  Tipo
+                </label>
+                <Select
+                  value={nextEventDraft.type}
+                  onValueChange={(value: PatientNextEventType) => setNextEventDraft((current) => ({ ...current, type: value }))}
+                >
+                  <SelectTrigger id="next-event-type" className="h-10 bg-surface border-border-subtle text-style-legal">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="assessment-update">Atualização de avaliação</SelectItem>
+                      <SelectItem value="diet-update">Atualização de dieta</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter className="flex items-center gap-2 pt-2">
+              {patient.nextEvent && (
+                <Button type="button" variant="quiet" size="compact" onClick={handleClearNextEvent} className="mr-auto">
+                  Remover data
+                </Button>
+              )}
+              <Button type="button" variant="secondary" size="compact" onClick={() => setIsNextEventModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" variant="primary" size="compact">
+                Salvar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Patient Dialog */}
       <Dialog
@@ -889,13 +1110,13 @@ export default function PatientDetailPage() {
                   type="button"
                   onClick={handleAttemptCloseEditModal}
                   variant="secondary"
-                  size="sm"
+                  size="compact"
                   className="flex-1 text-style-legal"
                 >
                   Cancelar
                 </Button>
 
-                <Button type="submit" variant="emerald" size="sm" className="flex-1 text-style-legal font-bold">
+                <Button type="submit" variant="primary" size="compact" className="flex-1 text-style-legal font-bold">
                   Salvar Alterações
                 </Button>
               </div>
@@ -971,16 +1192,16 @@ export default function PatientDetailPage() {
                   setNewObjectiveInput('');
                   setIsAddObjectiveModalOpen(false);
                 }}
-                variant="secondary"
-                size="sm"
-                className="flex-1 text-style-legal"
-              >
-                Cancelar
-              </Button>
+                  variant="secondary"
+                  size="compact"
+                  className="flex-1 text-style-legal"
+                >
+                  Cancelar
+                </Button>
               <Button
                 type="submit"
-                variant="emerald"
-                size="sm"
+                variant="primary"
+                size="compact"
                 className="flex-1 text-style-legal font-bold"
               >
                 Adicionar
@@ -1104,15 +1325,15 @@ export default function PatientDetailPage() {
                   type="button"
                   onClick={() => setIsEditAssessmentOpen(false)}
                   variant="secondary"
-                  size="sm"
+                  size="compact"
                   className="flex-1 text-style-legal"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  variant="emerald"
-                  size="sm"
+                  variant="primary"
+                  size="compact"
                   className="flex-1 text-style-legal font-bold"
                 >
                   Salvar Alterações

@@ -16,6 +16,22 @@ export interface Patient {
   objective: string;
   lastConsultation: string;
   initials: string;
+  nextEvent?: PatientNextEvent | null;
+  lastActivity?: PatientLastActivity | null;
+}
+
+export type PatientNextEventType = 'diet-update' | 'assessment-update';
+
+export interface PatientNextEvent {
+  date: string;
+  type: PatientNextEventType;
+}
+
+export type PatientLastActivityType = 'diet' | 'assessment';
+
+export interface PatientLastActivity {
+  at: string;
+  type: PatientLastActivityType;
 }
 
 export const DEFAULT_OBJECTIVES = [
@@ -64,12 +80,55 @@ export interface ConsultationRecord {
 }
 
 const PATIENTS_KEY = 'nutridiet_patients';
+const PATIENT_ASSESSMENTS_KEY_PREFIX = 'nutridiet_assessments_';
+const PATIENT_DIETS_KEY_PREFIX = 'nutridiet_diets_';
+
+export interface StoredDietRecord {
+  id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface PatientRecordHistory {
+  assessments: BodyAssessment[];
+  hasDiet: boolean;
+}
+
+function normalizePatient(patient: Patient): Patient {
+  return {
+    ...patient,
+    nextEvent: patient.nextEvent ?? null,
+    lastActivity: patient.lastActivity ?? null,
+  };
+}
+
+function writePatients(patients: Patient[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(PATIENTS_KEY, JSON.stringify(patients));
+  }
+}
+
+function normalizeDateKey(value: string): string {
+  const decoded = decodeURIComponent(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(decoded)) return decoded;
+
+  const parts = decoded.split(/[/-]/).map((part) => part.trim());
+  if (parts.length !== 3) return decoded;
+
+  const [first, second, third] = parts;
+  if (third.length === 4) {
+    return `${third}-${second.padStart(2, '0')}-${first.padStart(2, '0')}`;
+  }
+
+  return decoded;
+}
 
 export function getPatientsFromStorage(): Patient[] {
   if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(PATIENTS_KEY);
-    return saved ? JSON.parse(saved) : [];
+    return saved ? (JSON.parse(saved) as Patient[]).map(normalizePatient) : [];
   } catch {
     return [];
   }
@@ -90,12 +149,12 @@ export function savePatientToStorage(newPatient: Omit<Patient, 'id' | 'initials'
     id: `pat-${Date.now()}-${uniqueSuffix}`,
     initials,
     lastConsultation: today,
+    nextEvent: newPatient.nextEvent ?? null,
+    lastActivity: newPatient.lastActivity ?? null,
   };
 
   const updated = [created, ...current];
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(PATIENTS_KEY, JSON.stringify(updated));
-  }
+  writePatients(updated);
   return created;
 }
 
@@ -112,7 +171,7 @@ export function updatePatientInStorage(updatedPatient: Patient): Patient {
     : nameParts[0].slice(0, 2).toUpperCase();
 
   const patientToSave: Patient = {
-    ...updatedPatient,
+    ...normalizePatient(updatedPatient),
     initials,
   };
 
@@ -121,17 +180,88 @@ export function updatePatientInStorage(updatedPatient: Patient): Patient {
   const exists = current.some((p) => p.id === updatedPatient.id);
   const finalList = exists ? updatedList : [patientToSave, ...current];
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(PATIENTS_KEY, JSON.stringify(finalList));
-  }
+  writePatients(finalList);
   return patientToSave;
+}
+
+export function recordPatientActivity(
+  patientId: string,
+  type: PatientLastActivityType,
+  at = new Date().toISOString(),
+): Patient | null {
+  const current = getPatientsFromStorage();
+  const index = current.findIndex((patient) => patient.id === patientId);
+  if (index < 0) return null;
+
+  const updatedPatient = {
+    ...current[index],
+    lastActivity: { at, type },
+  };
+  const updated = [...current];
+  updated[index] = updatedPatient;
+  writePatients(updated);
+  return updatedPatient;
+}
+
+export function getPatientAssessmentsFromStorage(patientId: string): BodyAssessment[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? (parsed as BodyAssessment[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function getPatientDietsFromStorage(patientId: string): StoredDietRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? (parsed as StoredDietRecord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function getPatientRecordHistory(patientId: string): PatientRecordHistory {
+  const assessments = getPatientAssessmentsFromStorage(patientId);
+  const diets = getPatientDietsFromStorage(patientId);
+
+  return {
+    assessments,
+    hasDiet: diets.length > 0,
+  };
+}
+
+export function savePatientAssessmentToStorage(
+  patientId: string,
+  assessment: BodyAssessment,
+): BodyAssessment[] {
+  const current = getPatientAssessmentsFromStorage(patientId);
+  const existingIndex = current.findIndex((item) => item.id === assessment.id);
+  const updated = [...current];
+
+  if (existingIndex >= 0) {
+    updated[existingIndex] = assessment;
+  } else {
+    updated.unshift(assessment);
+  }
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`, JSON.stringify(updated));
+  }
+  recordPatientActivity(patientId, 'assessment');
+  return updated;
 }
 
 export function deletePatientFromStorage(id: string): void {
   const current = getPatientsFromStorage();
   const updatedList = current.filter((p) => p.id !== id);
+  writePatients(updatedList);
   if (typeof window !== 'undefined') {
-    localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedList));
+    localStorage.removeItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
   }
 }
 
@@ -144,7 +274,7 @@ export function getConsultationRecord(patientId: string, rawDateParam: string): 
   // Retrieve saved patient diets if available
   if (typeof window !== 'undefined') {
     try {
-      const savedDietsRaw = localStorage.getItem(`nutridiet_diets_${patientId}`);
+      const savedDietsRaw = localStorage.getItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`);
       if (savedDietsRaw) {
         const savedDiets = JSON.parse(savedDietsRaw);
         const match = savedDiets.find((d: any) => d.createdAt === normalizedDate || d.updatedAt === normalizedDate);
@@ -189,6 +319,11 @@ export function getConsultationRecord(patientId: string, rawDateParam: string): 
           };
         }
       }
+
+      const savedAssessments = getPatientAssessmentsFromStorage(patientId);
+      assessment = savedAssessments.find(
+        (item) => normalizeDateKey(item.date) === normalizeDateKey(rawDateParam),
+      );
     } catch {
       // Ignore JSON parse errors
     }
@@ -202,4 +337,3 @@ export function getConsultationRecord(patientId: string, rawDateParam: string): 
     prescribedSupplements: [],
   };
 }
-
