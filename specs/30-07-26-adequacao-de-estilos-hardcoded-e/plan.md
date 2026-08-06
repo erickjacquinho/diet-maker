@@ -6,7 +6,7 @@
 
 ## Summary
 
-Substituir utilitários de cores brutas (ex: `text-blue-600`, `text-orange-500`, `text-emerald-700`, `bg-rose-50`) e tamanhos arbitrários (`text-[10px]`, `text-[11px]`, `text-[9px]`, `max-h-[90vh]`) em 100% dos 12 arquivos de `src/app` por tokens semânticos e utilitários padronizados do Design System NutriDiet. Desacoplar modais e formulários inline das páginas de rota para a hierarquia do Atomic Design (`src/components/molecules` e `src/components/organisms`), reduzindo acoplamento e preservando os componentes base do Shadcn UI limpos.
+Substituir utilitários de cores brutas (ex: `text-blue-600`, `text-orange-500`, `text-emerald-700`, `bg-rose-50`) e tamanhos arbitrários (`text-[10px]`, `text-[11px]`, `text-[9px]`, `max-h-[90vh]`) em 100% dos 10 arquivos de rota existentes em `src/app` por tokens semânticos e utilitários padronizados do Design System NutriDiet. Desacoplar modais e formulários inline das páginas de rota para a hierarquia do Atomic Design (`src/components/molecules` e `src/components/organisms`), reduzindo acoplamento e preservando os componentes base do Shadcn UI limpos.
 
 ## Technical Context
 
@@ -26,7 +26,7 @@ Substituir utilitários de cores brutas (ex: `text-blue-600`, `text-orange-500`,
 
 **Constraints**: Preservação de 100% dos dados existentes no `localStorage` e fidelidade estética total ao tema Swiss Flat Minimalist
 
-**Scale/Scope**: 12 arquivos sob `src/app` e componentes auxiliares em `src/components/`
+**Scale/Scope**: 10 arquivos de rota sob `src/app` e componentes auxiliares em `src/components/`
 
 ## Constitution Check
 
@@ -67,7 +67,7 @@ src/
 │   └── ui/              # Shadcn UI Base Primitivos (Preservados)
 └── design-system/
     ├── nutridiet/MASTER.md
-    └── tokens.ts        # Fonte da verdade dos tokens de design
+    └── tokens.css       # Fonte da verdade dos tokens de design
 ```
 
 **Structure Decision**: Padrão Atomic Design com Next.js App Router. As páginas em `src/app/` injetam dados e invocam compostos desacoplados em `src/components/`.

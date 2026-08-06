@@ -213,7 +213,7 @@ export default function DedicatedConsultationPage() {
                                   <span>•</span>
                                   <span className="text-macro-carbohydrate font-bold">{meal.carbsG}g</span>
                                   <span>•</span>
-                                  <span className="text-success font-bold">{meal.fatsG}g</span>
+                                  <span className="text-macro-fat font-bold">{meal.fatsG}g</span>
                                 </div>
                                 <span className="font-semibold text-style-legal text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-1 rounded-surface">
                                   {meal.kcal} kcal

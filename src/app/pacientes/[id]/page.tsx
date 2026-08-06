@@ -18,7 +18,6 @@ import {
   TrendingDown,
   Scale,
   Ruler,
-  Pencil,
   Trash2,
   AlertTriangle,
   FileSpreadsheet,
@@ -27,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Avatar, EditIconButton, DeleteIconButton, CreateButton, SecondaryActionButton, IconButton } from '@/components/atoms';
 import { EditAssessmentModal, ReadOnlyDietModal, MetricBox, DatePickerField, PageContextHeader } from '@/components/molecules';
+import { EditPatientModal } from '@/components/molecules/EditPatientModal';
 import { MetricBoxGroup } from '@/components/organisms';
 import { textStyle } from '@/design-system';
 import { calculatePresetCalories } from '@/lib/presetUtils';
@@ -70,7 +70,7 @@ import {
   selectActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
-import { formatWhatsappContact, getWhatsappUrl } from '@/lib/whatsapp';
+import { getWhatsappUrl } from '@/lib/whatsapp';
 
 
 interface HistoricalDiet {
@@ -105,7 +105,6 @@ export default function PatientDetailPage() {
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
   const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
   const [assessmentMode, setAssessmentMode] = useState<'create' | 'edit'>('edit');
@@ -116,7 +115,7 @@ export default function PatientDetailPage() {
   });
   const [isAddObjectiveModalOpen, setIsAddObjectiveModalOpen] = useState(false);
   const [newObjectiveInput, setNewObjectiveInput] = useState('');
-  const [editFormData, setEditFormData] = useState<Patient | null>(null);
+  const [objectiveToApply, setObjectiveToApply] = useState<string | undefined>();
 
   // Read-Only Diet Modal state
   const [selectedReadOnlyDiet, setSelectedReadOnlyDiet] = useState<HistoricalDiet | null>(null);
@@ -187,32 +186,6 @@ export default function PatientDetailPage() {
     return [];
   });
 
-  const availableObjectives = useMemo(() => {
-    const currentObj = editFormData?.objective;
-    const list = [...DEFAULT_OBJECTIVES, ...customObjectives];
-    if (currentObj && !list.includes(currentObj)) {
-      list.push(currentObj);
-    }
-    return Array.from(new Set(list.filter(Boolean)));
-  }, [customObjectives, editFormData?.objective]);
-
-  const hasUnsavedChanges = useMemo(() => {
-    if (!editFormData || !patient) return false;
-    return (
-      editFormData.name !== patient.name ||
-      editFormData.age !== patient.age ||
-      editFormData.heightCm !== patient.heightCm ||
-      editFormData.weightKg !== patient.weightKg ||
-      (editFormData.gender || 'Masculino') !== (patient.gender || 'Masculino') ||
-      (editFormData.objective || '') !== (patient.objective || '') ||
-      formatWhatsappContact(editFormData.whatsapp) !== formatWhatsappContact(patient.whatsapp) ||
-      editFormData.targetKcal !== patient.targetKcal ||
-      editFormData.targetProtein !== patient.targetProtein ||
-      editFormData.targetCarbs !== patient.targetCarbs ||
-      editFormData.targetFats !== patient.targetFats
-    );
-  }, [editFormData, patient]);
-
   const handleAddNewObjective = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = newObjectiveInput.trim();
@@ -226,10 +199,7 @@ export default function PatientDetailPage() {
       }
     }
 
-    if (editFormData) {
-      setEditFormData({ ...editFormData, objective: trimmed });
-    }
-
+    setObjectiveToApply(trimmed);
     setNewObjectiveInput('');
     setIsAddObjectiveModalOpen(false);
     toast.success(`Objetivo "${trimmed}" adicionado e selecionado!`);
@@ -342,44 +312,11 @@ export default function PatientDetailPage() {
   }, [dietHistory, bodyAssessments]);
 
   const handleOpenEditModal = () => {
-    if (patient) {
-      setEditFormData({
-        ...patient,
-        whatsapp: formatWhatsappContact(patient.whatsapp) || undefined,
-      });
-      setIsEditModalOpen(true);
-      setIsDiscardConfirmOpen(false);
-    }
+    if (patient) setIsEditModalOpen(true);
   };
 
-  const handleAttemptCloseEditModal = () => {
-    if (hasUnsavedChanges) {
-      setIsDiscardConfirmOpen(true);
-    } else {
-      setIsEditModalOpen(false);
-    }
-  };
-
-  const handleConfirmDiscard = () => {
-    setIsDiscardConfirmOpen(false);
-    setIsEditModalOpen(false);
-    if (patient) {
-      setEditFormData({ ...patient });
-    }
-  };
-
-  const handleCancelDiscard = () => {
-    setIsDiscardConfirmOpen(false);
-  };
-
-  const handleSaveEdit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editFormData || !editFormData.name.trim()) return;
-
-    const saved = updatePatientInStorage({
-      ...editFormData,
-      whatsapp: formatWhatsappContact(editFormData.whatsapp) || undefined,
-    });
+  const handleSaveEdit = (patientDraft: Patient) => {
+    const saved = updatePatientInStorage(patientDraft);
     setPatient(saved);
     setIsEditModalOpen(false);
   };
@@ -946,199 +883,15 @@ export default function PatientDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Patient Dialog */}
-      <Dialog
+      <EditPatientModal
         open={isEditModalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            if (hasUnsavedChanges) {
-              setIsDiscardConfirmOpen(true);
-              return;
-            }
-          }
-          setIsEditModalOpen(open);
-        }}
-      >
-        <DialogContent
-          className="bg-surface border-border-subtle p-6 rounded-surface"
-          onPointerDownOutside={(e) => {
-            if (hasUnsavedChanges) {
-              e.preventDefault();
-              setIsDiscardConfirmOpen(true);
-            }
-          }}
-          onEscapeKeyDown={(e) => {
-            if (hasUnsavedChanges) {
-              e.preventDefault();
-              setIsDiscardConfirmOpen(true);
-            }
-          }}
-        >
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
-              <Pencil size={18} className="text-success" />
-              <span>Editar Dados do Paciente</span>
-            </DialogTitle>
-            <DialogDescription className="text-style-legal text-text-muted">
-              Altere as informações cadastrais e metas do paciente.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editFormData && (
-            <form onSubmit={handleSaveEdit} className="flex flex-col gap-3 pt-2">
-              <div>
-                <label htmlFor="edit-patient-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo do Paciente</label>
-                <Input
-                  id="edit-patient-name"
-                  type="text"
-                  required
-                  value={editFormData.name}
-                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="edit-patient-whatsapp" className="text-style-legal font-bold text-text-primary block mb-1">WhatsApp</label>
-                <Input
-                  id="edit-patient-whatsapp"
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  placeholder="(11) 99999-9999"
-                  value={editFormData.whatsapp ?? ''}
-                  onChange={(e) => setEditFormData({
-                    ...editFormData,
-                    whatsapp: formatWhatsappContact(e.target.value),
-                  })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Idade</label>
-                  <Input
-                    type="number"
-                    value={editFormData.age}
-                    onChange={(e) => setEditFormData({ ...editFormData, age: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Altura (cm)</label>
-                  <Input
-                    type="number"
-                    value={editFormData.heightCm}
-                    onChange={(e) => setEditFormData({ ...editFormData, heightCm: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Gênero</label>
-                  <Select
-                    value={editFormData.gender || 'Masculino'}
-                    onValueChange={(val) => setEditFormData({ ...editFormData, gender: val })}
-                  >
-                    <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
-                      <SelectValue placeholder="Selecione o gênero" />
-                    </SelectTrigger>
-                    <SelectContent className="!z-modal">
-                      <SelectItem value="Masculino">Masculino</SelectItem>
-                      <SelectItem value="Feminino">Feminino</SelectItem>
-                      {editFormData.gender && !['Masculino', 'Feminino'].includes(editFormData.gender) && (
-                        <SelectItem value={editFormData.gender}>{editFormData.gender}</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
-                <div className="flex items-center gap-1.5">
-                  <div className="flex-1 min-w-0">
-                    <Select
-                      value={editFormData.objective || ''}
-                      onValueChange={(val) => setEditFormData({ ...editFormData, objective: val })}
-                    >
-                      <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
-                        <SelectValue placeholder="Selecione o objetivo" />
-                      </SelectTrigger>
-                      <SelectContent className="!z-modal max-h-60">
-                        {availableObjectives.map((obj) => (
-                          <SelectItem key={obj} value={obj}>
-                            {obj}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <SecondaryActionButton
-                    type="button"
-                    onClick={() => setIsAddObjectiveModalOpen(true)}
-                    icon={<Plus size={14} className="text-success" />}
-                    className="h-9 px-2.5 shrink-0"
-                    title="Adicionar Novo Objetivo"
-                  >
-                    Novo
-                  </SecondaryActionButton>
-                </div>
-              </div>
-
-              <div className="pt-2 flex gap-2">
-                <Button
-                  type="button"
-                  onClick={handleAttemptCloseEditModal}
-                  variant="secondary"
-                  size="compact"
-                  className="flex-1 text-style-legal"
-                >
-                  Cancelar
-                </Button>
-
-                <Button type="submit" variant="primary" size="compact" className="flex-1 text-style-legal font-bold">
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirmation Dialog for Discarding Unsaved Edits */}
-      <Dialog open={isDiscardConfirmOpen} onOpenChange={setIsDiscardConfirmOpen}>
-        <DialogContent className="bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
-              <AlertTriangle size={18} className="text-warning shrink-0" />
-              <span>Descartar alterações?</span>
-            </DialogTitle>
-            <DialogDescription className="text-style-legal text-text-muted pt-1">
-              Você possui alterações não salvas nos dados do paciente. Deseja descartar as alterações e sair?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="pt-4 flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              size="compact"
-              onClick={handleCancelDiscard}
-            >
-              Não
-            </Button>
-            <Button
-              type="button"
-              size="compact"
-              onClick={handleConfirmDiscard}
-              variant="destructive"
-            >
-              Sim, descartar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+        patient={patient}
+        objectives={customObjectives}
+        objectiveToApply={objectiveToApply}
+        onOpenChange={setIsEditModalOpen}
+        onSave={handleSaveEdit}
+        onRequestAddObjective={() => setIsAddObjectiveModalOpen(true)}
+      />
       {/* Add Custom Objective Dialog Popup */}
       <Dialog open={isAddObjectiveModalOpen} onOpenChange={setIsAddObjectiveModalOpen}>
         <DialogContent className="bg-surface border-border-subtle p-5 rounded-surface">
@@ -1207,7 +960,7 @@ export default function PatientDetailPage() {
 
           <div className="py-3 flex flex-col gap-2">
             <p className="text-style-legal text-text-primary leading-relaxed">
-              Tem certeza que deseja excluir o paciente <strong className="font-bold text-black">{patient.name}</strong>?
+              Tem certeza que deseja excluir o paciente <strong className="font-bold text-text-primary">{patient.name}</strong>?
             </p>
             <p className="text-style-legal text-text-muted bg-error-soft border border-error-border rounded-surface p-3 text-error">
               ⚠️ Todos os dados cadastrais, prescrições de dietas e histórico de avaliações físicas associadas a este paciente serão removidos.

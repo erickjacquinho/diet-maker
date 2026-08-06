@@ -17,15 +17,20 @@ export interface EditPatientModalProps {
   onOpenChange: (open: boolean) => void;
   onSave: (patient: Patient) => void;
   onRequestAddObjective: () => void;
+  objectiveToApply?: string;
 }
 
-export function EditPatientModal({ open, patient, objectives, onOpenChange, onSave, onRequestAddObjective }: EditPatientModalProps) {
+export function EditPatientModal({ open, patient, objectives, onOpenChange, onSave, onRequestAddObjective, objectiveToApply }: EditPatientModalProps) {
   const [draft, setDraft] = useState<Patient | null>(patient);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (open && patient) setDraft({ ...patient, whatsapp: formatWhatsappContact(patient.whatsapp) || undefined });
   }, [open, patient]);
+
+  useEffect(() => {
+    if (objectiveToApply && draft) setDraft((current) => current ? { ...current, objective: objectiveToApply } : current);
+  }, [objectiveToApply]);
 
   const hasUnsavedChanges = Boolean(draft && patient && (
     draft.name !== patient.name || draft.age !== patient.age || draft.heightCm !== patient.heightCm || draft.weightKg !== patient.weightKg ||

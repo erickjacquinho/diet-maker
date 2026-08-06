@@ -2,7 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { AutoKcalSection, RecipeIngredientRow, TacoSearchInput } from '@/components/molecules';
+import { AutoKcalSection } from './AutoKcalSection';
+import { RecipeIngredientRow } from './RecipeIngredientRow';
+import { TacoSearchInput } from './TacoSearchInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';

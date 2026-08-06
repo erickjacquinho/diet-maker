@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 50,
+    "currentSourceCount": 56,
     "capturedAt": "2026-07-31",
     "legacyAudit": {
       "findings": 0,
@@ -3169,6 +3169,260 @@
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
       "exceptions": ["no-padding-grid-shell"]
+    },
+    {
+      "id": "molecule-custom-food-modal",
+      "name": "CustomFoodModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context",
+        "destructive"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/CustomFoodModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "CustomFoodFormData",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CustomFoodPayload",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CustomFoodModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CustomFoodModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/custom-food-modal.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-create-patient-modal",
+      "name": "CreatePatientModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/CreatePatientModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "CreatePatientFormData",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreatePatientModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreatePatientModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/create-patient-modal.md",
+      "consumers": [
+        "src/app/pacientes/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-edit-patient-modal",
+      "name": "EditPatientModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/EditPatientModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "EditPatientModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "EditPatientModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/edit-patient-modal.md",
+      "consumers": [
+        "src/app/pacientes/[id]/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-create-preset-modal",
+      "name": "CreatePresetModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/CreatePresetModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "CreatePresetData",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreatePresetModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreatePresetModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/create-preset-modal.md",
+      "consumers": [
+        "src/app/presets/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-create-recipe-modal",
+      "name": "CreateRecipeModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/CreateRecipeModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "CreateRecipeModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreateRecipeModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/create-recipe-modal.md",
+      "consumers": [
+        "src/app/receitas/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-create-ready-meal-modal",
+      "name": "CreateReadyMealModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/CreateReadyMealModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ReadyMealFormData",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreateReadyMealModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CreateReadyMealModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/create-ready-meal-modal.md",
+      "consumers": [
+        "src/app/refeicoes-prontas/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
     }
   ]
 }

@@ -7,13 +7,7 @@ import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
+import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/molecules/CreateReadyMealModal';
 import { MetricBox } from '@/components/molecules';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 
@@ -37,16 +31,6 @@ export default function ReadyMealsPage() {
   const [insertedId, setInsertedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    suggestedTime: '08:00',
-    proteinG: 30,
-    carbsG: 40,
-    fatsG: 12,
-    itemsCount: 3,
-    itemsPreview: '',
-  });
-
   useEffect(() => {
     try {
       const saved = localStorage.getItem(MEALS_KEY);
@@ -56,10 +40,7 @@ export default function ReadyMealsPage() {
     }
   }, []);
 
-  const handleCreateMeal = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
+  const handleCreateMeal = (formData: ReadyMealFormData) => {
     const calculatedKcal = calculatePresetCalories(
       Number(formData.proteinG),
       Number(formData.carbsG),
@@ -78,15 +59,6 @@ export default function ReadyMealsPage() {
     setMeals(updated);
     localStorage.setItem(MEALS_KEY, JSON.stringify(updated));
     setIsModalOpen(false);
-    setFormData({
-      name: '',
-      suggestedTime: '08:00',
-      proteinG: 30,
-      carbsG: 40,
-      fatsG: 12,
-      itemsCount: 3,
-      itemsPreview: '',
-    });
   };
 
 
@@ -188,7 +160,7 @@ export default function ReadyMealsPage() {
                     onClick={() => handleInsert(meal.id)}
                     className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
                       insertedId === meal.id
-                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating scale-[1.02]'
+                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating'
                         : ''
                     }`}
                   >
@@ -202,75 +174,11 @@ export default function ReadyMealsPage() {
         </div>
       )}
 
-      {/* Modal Criar Refeição Shadcn Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary">Novo Bloco de Refeição</DialogTitle>
-          </DialogHeader>
-
-          <form onSubmit={handleCreateMeal} className="flex flex-col gap-3 pt-2">
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Nome do Bloco de Refeição</label>
-              <Input
-                type="text"
-                required
-                placeholder="Ex: Café da Manhã Proteico Padrão"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal"
-              />
-            </div>
-
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Horário Sugerido</label>
-              <Input
-                type="text"
-                placeholder="08:00"
-                value={formData.suggestedTime}
-                onChange={(e) => setFormData({ ...formData, suggestedTime: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-              />
-            </div>
-
-            <AutoKcalSection
-              title="Macronutrientes & Calorias Calculadas"
-              proteinG={formData.proteinG}
-              carbsG={formData.carbsG}
-              fatsG={formData.fatsG}
-              onProteinChange={(val) => setFormData({ ...formData, proteinG: val })}
-              onCarbsChange={(val) => setFormData({ ...formData, carbsG: val })}
-              onFatsChange={(val) => setFormData({ ...formData, fatsG: val })}
-            />
-
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Alimentos Incluídos (Resumo)</label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Ovo cozido (150g), Aveia em flocos (40g), Banana (100g)"
-                value={formData.itemsPreview}
-                onChange={(e) => setFormData({ ...formData, itemsPreview: e.target.value })}
-                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              />
-            </div>
-
-            <div className="pt-2 flex gap-2">
-              <Button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                variant="secondary"
-                size="compact"
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" size="compact" className="flex-1">
-                Salvar Refeição
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreateReadyMealModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSave={handleCreateMeal}
+      />
     </div>
   );
 }

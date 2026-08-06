@@ -746,7 +746,7 @@ export default function DietBuilderPage() {
               </div>
 
               <div>
-                <label className="text-style-legal font-bold text-warning block mb-1">Carboidratos (g)</label>
+              <label className="text-style-legal font-bold text-macro-carbohydrate block mb-1">Carboidratos (g)</label>
                 <Input
                   type="number"
                   value={tempTargetCarb}

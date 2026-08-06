@@ -43,13 +43,7 @@ import {
   TableCell,
   TableHead,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
+import { CustomFoodModal, type CustomFoodPayload } from '@/components/molecules/CustomFoodModal';
 
 import {
   Select,
@@ -89,20 +83,6 @@ export default function FoodsPage() {
   const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
   const [activeReorderId, setActiveReorderId] = useState<string | null>(null);
 
-  // Custom Food Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    portion: '',
-    unit: 'g',
-    preparo: 'inNatura',
-    category: 'Suplementos',
-    proteinG: '',
-    carbsG: '',
-    fatsG: '',
-    fiberG: '',
-    isFavorite: false,
-  });
-
   useEffect(() => {
     setFoods(getAllFoods());
   }, []);
@@ -114,122 +94,20 @@ export default function FoodsPage() {
 
   const handleOpenCreateModal = () => {
     setEditingFoodId(null);
-    setFormData({
-      name: '',
-      portion: '',
-      unit: 'g',
-      preparo: 'inNatura',
-      category: 'Suplementos',
-      proteinG: '',
-      carbsG: '',
-      fatsG: '',
-      fiberG: '',
-      isFavorite: false,
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (food: FoodItem) => {
     setEditingFoodId(food.id);
-
-    let cleanName = food.name;
-    let portionVal = '';
-    let unitVal = 'g';
-    const match = food.name.match(/^(.*?)(?:\s*\((.*?)\))?$/);
-    if (match) {
-      if (match[1]) cleanName = match[1].trim();
-      if (match[2]) {
-        const portionMatch = match[2].match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
-        if (portionMatch) {
-          portionVal = portionMatch[1];
-          unitVal = portionMatch[2] || 'g';
-        } else {
-          unitVal = match[2];
-        }
-      }
-    }
-
-    const validUnits = ['g', 'ml', 'un', 'scoop', 'fatia', 'colher (sopa)', 'colher (chá)', 'xícara', 'porção'];
-    const safeUnit = validUnits.includes(unitVal) ? unitVal : 'g';
-
-    const validCategories = [
-      'Carnes, Pescados & Ovos',
-      'Verduras & Legumes',
-      'Frutas',
-      'Cereais & Tubérculos',
-      'Leguminosas',
-      'Leite & Derivados',
-      'Gorduras, Nozes & Sementes',
-      'Doces, Bebidas & Processados',
-      'Suplementos',
-      'Manipulados & Produtos',
-    ];
-    const safeCategory = validCategories.includes(food.category) ? food.category : 'Suplementos';
-
-    setFormData({
-      name: cleanName,
-      portion: portionVal,
-      unit: safeUnit,
-      preparo: food.preparo || 'Personalizado',
-      category: safeCategory,
-      proteinG: String(food.proteinG ?? ''),
-      carbsG: String(food.carbsG ?? ''),
-      fatsG: String(food.fatsG ?? ''),
-      fiberG: String(food.fiberG ?? ''),
-      isFavorite: food.isFavorite || false,
-    });
     setIsModalOpen(true);
   };
 
-
-  // Automatic Calorie Calculation via Atwater Factors: (4 * P) + (4 * C) + (9 * G)
-  const calculatedKcal = Math.round(
-    (Number(formData.proteinG) || 0) * 4 +
-      (Number(formData.carbsG) || 0) * 4 +
-      (Number(formData.fatsG) || 0) * 9
-  );
-
-  const handleSaveCustomFood = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    const portionVal = formData.portion.trim();
-    const portionStr = portionVal ? `${portionVal}${formData.unit}` : formData.unit;
-    const fullName = `${formData.name.trim()} (${portionStr})`;
-
-    const foodPayload = {
-      name: fullName,
-      preparo: formData.preparo.trim() || 'Personalizado',
-      category: formData.category,
-      kcal: calculatedKcal,
-      proteinG: Number(formData.proteinG) || 0,
-      carbsG: Number(formData.carbsG) || 0,
-      fatsG: Number(formData.fatsG) || 0,
-      fiberG: Number(formData.fiberG) || 0,
-      isFavorite: formData.isFavorite,
-    };
-
-    if (editingFoodId) {
-      updateCustomFood(editingFoodId, foodPayload);
-    } else {
-      addCustomFood(foodPayload);
-    }
-
+  const handleSaveCustomFood = (foodId: string | null, foodPayload: CustomFoodPayload) => {
+    if (foodId) updateCustomFood(foodId, foodPayload);
+    else addCustomFood(foodPayload);
     setFoods(getAllFoods());
     setIsModalOpen(false);
     setEditingFoodId(null);
-    setFormData({
-      name: '',
-      portion: '',
-      unit: 'g',
-      preparo: 'inNatura',
-      category: 'Suplementos',
-      proteinG: '',
-      carbsG: '',
-      fatsG: '',
-      fiberG: '',
-      isFavorite: false,
-    });
   };
 
   const handleDeleteCustomFood = (id: string) => {
@@ -613,7 +491,7 @@ export default function FoodsPage() {
                 onClick={() => setActiveTab('all')}
                 className={
                   activeTab === 'all'
-                    ? 'bg-primary text-white shadow-floating'
+                    ? 'bg-primary text-on-primary shadow-floating'
                     : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }
               >
@@ -625,7 +503,7 @@ export default function FoodsPage() {
                 onClick={() => setActiveTab('favorites')}
                 className={`flex items-center gap-1.5 ${
                   activeTab === 'favorites'
-                    ? 'bg-primary text-white shadow-floating'
+                    ? 'bg-primary text-on-primary shadow-floating'
                     : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }`}
               >
@@ -638,7 +516,7 @@ export default function FoodsPage() {
                 onClick={() => setActiveTab('custom')}
                 className={
                   activeTab === 'custom'
-                    ? 'bg-primary text-white shadow-floating'
+                    ? 'bg-primary text-on-primary shadow-floating'
                     : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }
               >
@@ -731,7 +609,7 @@ export default function FoodsPage() {
               onClick={() => setMacroPreset(macroPreset === 'high-protein' ? 'all' : 'high-protein')}
               className={`shrink-0 ${
                 macroPreset === 'high-protein'
-                  ? 'bg-macro-protein text-white shadow-floating'
+                  ? 'bg-macro-protein text-on-primary shadow-floating'
                   : 'bg-surface-subtle text-macro-protein border border-macro-protein-border hover:bg-macro-protein-soft'
               }`}
             >
@@ -744,7 +622,7 @@ export default function FoodsPage() {
               onClick={() => setMacroPreset(macroPreset === 'high-carb' ? 'all' : 'high-carb')}
               className={`shrink-0 ${
                 macroPreset === 'high-carb'
-                  ? 'bg-macro-carbohydrate text-white shadow-floating'
+                  ? 'bg-macro-carbohydrate text-on-primary shadow-floating'
                   : 'bg-surface-subtle text-macro-carbohydrate border border-macro-carbohydrate-border hover:bg-macro-carbohydrate-soft'
               }`}
             >
@@ -757,7 +635,7 @@ export default function FoodsPage() {
               onClick={() => setMacroPreset(macroPreset === 'high-fat' ? 'all' : 'high-fat')}
               className={`shrink-0 ${
                 macroPreset === 'high-fat'
-                  ? 'bg-macro-fat text-white shadow-floating'
+                  ? 'bg-macro-fat text-on-primary shadow-floating'
                   : 'bg-surface-subtle text-macro-fat border border-macro-fat-border hover:bg-macro-fat-soft'
               }`}
             >
@@ -903,160 +781,16 @@ export default function FoodsPage() {
         </div>
       </Card>
 
-      {/* Modal Cadastro/Edição de Alimento Customizado Shadcn Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="max-w-lg">
-          <DialogHeader className="border-b border-border-subtle pb-3 flex flex-row items-center justify-between">
-            <div>
-              <DialogTitle className="font-bold text-style-body text-text-primary">
-                {editingFoodId ? 'Editar Alimento Customizado' : 'Novo Alimento Customizado'}
-              </DialogTitle>
-              <p className="text-style-legal text-text-muted font-medium mt-0.5">
-                {editingFoodId
-                  ? 'Atualize os dados e composição nutricional do alimento.'
-                  : 'Cadastre um produto comercial ou suplemento manipulado na biblioteca.'}
-              </p>
-            </div>
-          </DialogHeader>
-
-          <form onSubmit={handleSaveCustomFood} className="flex flex-col gap-3.5 pt-2">
-            {/* Row 1: Name, Portion & Unit */}
-            <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
-              <div className="col-span-6">
-                <label className="text-style-legal font-bold text-text-primary block mb-1">
-                  Nome do Alimento / Suplemento <span className="text-error-soft0">*</span>
-                </label>
-                <Input
-                  type="text"
-                  required
-                  placeholder="Ex: Whey Protein 80% Max"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal h-9 rounded-control text-text-primary font-medium placeholder:text-text-muted focus:border-success"
-                />
-              </div>
-              <div className="col-span-3">
-                <label className="text-style-legal font-bold text-text-primary block mb-1">
-                  Qtd. Porção
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Ex: 100 ou 1"
-                  value={formData.portion}
-                  onChange={(e) => setFormData({ ...formData, portion: e.target.value })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold h-9 rounded-control text-text-primary"
-                />
-              </div>
-              <div className="col-span-3">
-                <label className="text-style-legal font-bold text-text-primary block mb-1">
-                  Unidade
-                </label>
-                <Select value={formData.unit} onValueChange={(val) => setFormData({ ...formData, unit: val })}>
-                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal font-bold h-9 rounded-control text-text-primary">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-surface border-border-subtle text-text-primary text-style-legal">
-                    <SelectItem value="g">g (Grama)</SelectItem>
-                    <SelectItem value="ml">ml (Mililitro)</SelectItem>
-                    <SelectItem value="un">un (Unidade)</SelectItem>
-                    <SelectItem value="scoop">scoop (Dosador)</SelectItem>
-                    <SelectItem value="fatia">fatia (Fatia)</SelectItem>
-                    <SelectItem value="colher (sopa)">colher (sopa)</SelectItem>
-                    <SelectItem value="colher (chá)">colher (chá)</SelectItem>
-                    <SelectItem value="xícara">xícara</SelectItem>
-                    <SelectItem value="porção">porção</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Row 2: Category and Preparo */}
-            <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
-              <div className="col-span-6">
-                <label className="text-style-legal font-bold text-text-primary block mb-1">Categoria</label>
-                <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val })}>
-                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal h-9 rounded-control text-text-primary">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-surface border-border-subtle text-text-primary text-style-legal">
-                    <SelectItem value="Carnes, Pescados & Ovos">Carnes, Pescados & Ovos</SelectItem>
-                    <SelectItem value="Verduras & Legumes">Verduras & Legumes</SelectItem>
-                    <SelectItem value="Frutas">Frutas</SelectItem>
-                    <SelectItem value="Cereais & Tubérculos">Cereais & Tubérculos</SelectItem>
-                    <SelectItem value="Leguminosas">Leguminosas</SelectItem>
-                    <SelectItem value="Leite & Derivados">Leite & Derivados</SelectItem>
-                    <SelectItem value="Gorduras, Nozes & Sementes">Gorduras, Nozes & Sementes</SelectItem>
-                    <SelectItem value="Doces, Bebidas & Processados">Doces, Bebidas & Processados</SelectItem>
-                    <SelectItem value="Suplementos">Suplementos</SelectItem>
-                    <SelectItem value="Manipulados & Produtos">Manipulados & Produtos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-6">
-                <label className="text-style-legal font-bold text-text-primary block mb-1">Forma de Preparo</label>
-                <Input
-                  type="text"
-                  placeholder="Ex: Grelhado, Cozido, Cru, Air Fryer"
-                  value={formData.preparo}
-                  onChange={(e) => setFormData({ ...formData, preparo: e.target.value })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal h-9 rounded-control text-text-primary"
-                />
-              </div>
-            </div>
-
-            <AutoKcalSection
-              title="Macronutrientes da Porção & Calorias Calculadas"
-              proteinG={Number(formData.proteinG) || 0}
-              carbsG={Number(formData.carbsG) || 0}
-              fatsG={Number(formData.fatsG) || 0}
-              onProteinChange={(val) => setFormData({ ...formData, proteinG: String(val) })}
-              onCarbsChange={(val) => setFormData({ ...formData, carbsG: String(val) })}
-              onFatsChange={(val) => setFormData({ ...formData, fatsG: String(val) })}
-            />
-
-            {/* FIBER */}
-            <div>
-                <label className="text-style-legal font-semibold text-text-muted block mb-1">Fibra Alimentar (opcional)</label>
-              <Input
-                type="number"
-                step="any"
-                min="0"
-                placeholder="Ex: 2"
-                value={formData.fiberG}
-                onChange={(e) => setFormData({ ...formData, fiberG: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal font-bold h-9 rounded-control text-text-primary"
-              />
-            </div>
-
-            <div className="pt-2 flex items-center gap-2">
-              {editingFoodId && (
-                <Button
-                  type="button"
-                  onClick={() => handleDeleteCustomFood(editingFoodId)}
-                  className="px-3 py-2 bg-error-soft hover:bg-error text-error rounded-control text-style-legal font-bold transition-colors flex items-center gap-1"
-                  title="Excluir Alimento"
-                >
-                  <Trash2 size={13} />
-                  <span>Excluir</span>
-                </Button>
-              )}
-              <Button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-2 bg-surface-subtle hover:bg-surface-hover text-text-primary rounded-control text-style-legal font-bold transition-colors"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 px-4 py-2 bg-success hover:bg-success/90 text-white rounded-control text-style-legal font-bold transition-colors shadow-floating border-none"
-              >
-                {editingFoodId ? 'Salvar Alterações' : 'Salvar Alimento'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CustomFoodModal
+        open={isModalOpen}
+        food={foods.find((food) => food.id === editingFoodId) ?? null}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) setEditingFoodId(null);
+        }}
+        onSave={handleSaveCustomFood}
+        onDelete={handleDeleteCustomFood}
+      />
     </div>
   );
 }

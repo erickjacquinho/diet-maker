@@ -8,25 +8,12 @@ import { CreateButton } from '@/components/atoms/Button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { CreatePatientModal, type CreatePatientFormData } from '@/components/molecules/CreatePatientModal';
 import {
   getPatientRecordHistory,
   getPatientsFromStorage,
   savePatientToStorage,
   Patient,
-  DEFAULT_OBJECTIVES,
 } from '@/lib/patientsStore';
 import { buildPatientListRows, filterPatients } from '@/lib/patientListView';
 import type { PatientListHistoryInput } from '@/lib/patientListView';
@@ -40,20 +27,6 @@ export default function PatientsListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [patientHistoryById, setPatientHistoryById] = useState<Record<string, PatientListHistoryInput>>({});
-
-  // New Patient Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    age: 30,
-    gender: 'Masculino',
-    heightCm: 175,
-    weightKg: 75,
-    targetProtein: 150,
-    targetCarbs: 220,
-    targetFats: 60,
-    whatsapp: '',
-    objective: 'Recomposição Corporal',
-  });
 
   const loadPatients = useCallback(() => {
     const loadedPatients = getPatientsFromStorage();
@@ -77,10 +50,7 @@ export default function PatientsListPage() {
     loadPatients();
   }, [loadPatients]);
 
-  const handleCreatePatient = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
+  const handleCreatePatient = (formData: CreatePatientFormData) => {
     const calculatedKcal = calculatePresetCalories(
       Number(formData.targetProtein),
       Number(formData.targetCarbs),
@@ -103,18 +73,6 @@ export default function PatientsListPage() {
 
     loadPatients();
     setIsModalOpen(false);
-    setFormData({
-      name: '',
-      age: 30,
-      gender: 'Masculino',
-      heightCm: 175,
-      weightKg: 75,
-      targetProtein: 150,
-      targetCarbs: 220,
-      targetFats: 60,
-      whatsapp: '',
-      objective: 'Recomposição Corporal',
-    });
   };
 
 
@@ -213,110 +171,11 @@ export default function PatientsListPage() {
         </section>
       )}
 
-      {/* Modal Cadastrar Paciente Shadcn Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary">Cadastrar Novo Paciente</DialogTitle>
-          </DialogHeader>
-
-          <form onSubmit={handleCreatePatient} className="flex flex-col gap-3 pt-2">
-            <div>
-              <label htmlFor="new-patient-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo</label>
-              <Input
-                id="new-patient-name"
-                type="text"
-                required
-                placeholder="Ex: Carlos Eduardo Silva"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="new-patient-whatsapp" className="text-style-legal font-bold text-text-primary block mb-1">WhatsApp</label>
-              <Input
-                id="new-patient-whatsapp"
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel"
-                placeholder="(11) 99999-9999"
-                value={formData.whatsapp}
-                onChange={(e) => setFormData({ ...formData, whatsapp: formatWhatsappContact(e.target.value) })}
-                className="bg-surface-subtle border-border-subtle text-style-legal"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="text-style-legal font-semibold text-text-muted block mb-1">Idade</label>
-                <Input
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-style-legal font-semibold text-text-muted block mb-1">Altura (cm)</label>
-                <Input
-                  type="number"
-                  value={formData.heightCm}
-                  onChange={(e) => setFormData({ ...formData, heightCm: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso (kg)</label>
-                <Input
-                  type="number"
-                  step="any"
-                  value={formData.weightKg}
-                  onChange={(e) => setFormData({ ...formData, weightKg: Number(e.target.value) })}
-                  className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
-              <Select
-                value={formData.objective}
-                onValueChange={(val) => setFormData({ ...formData, objective: val })}
-              >
-                <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
-                  <SelectValue placeholder="Selecione o objetivo" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  {DEFAULT_OBJECTIVES.map((obj) => (
-                    <SelectItem key={obj} value={obj}>
-                      {obj}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-
-            <div className="pt-2 flex gap-2">
-              <Button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                variant="secondary"
-                size="compact"
-                className="flex-1 text-style-legal"
-              >
-                Cancelar
-              </Button>
-
-              <Button type="submit" variant="primary" size="compact" className="flex-1">
-                Salvar Paciente
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreatePatientModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSave={handleCreatePatient}
+      />
     </div>
   );
 }
