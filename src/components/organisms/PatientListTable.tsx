@@ -143,7 +143,7 @@ export function PatientListTable({ rows, onNavigate }: PatientListTableProps) {
                   href={row.href}
                   tabIndex={-1}
                   aria-label={`Ver perfil de ${row.patient.name}`}
-                  className="relative z-10 flex min-w-0 items-center gap-3 text-text-primary focus-visible:outline-none"
+                  className="flex min-w-0 items-center gap-3 text-text-primary focus-visible:outline-none"
                 >
                   <RecordIndicators row={row} />
                   <span className="flex min-w-0 flex-col gap-1">

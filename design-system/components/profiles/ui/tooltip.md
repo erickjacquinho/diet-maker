@@ -24,6 +24,11 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Parts públicas: provider, root, trigger e content; content não aceita controles.
 
+## Visual contract
+
+- `TooltipContent` usa `z-tooltip` como camada transitória superior e não recebe override modal.
+- Tooltip complementa nome/descrição acessível e não é usado como workaround para conflitos de portal.
+
 ## Allowed variants
 
 ## Family contract

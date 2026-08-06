@@ -84,7 +84,8 @@ function DatePickerField({
         <PopoverContent
           align="start"
           side="bottom"
-          className="z-modal w-auto overflow-hidden rounded-surface border-border-subtle bg-surface p-0 shadow-floating"
+          layer="modal"
+          className="w-auto overflow-hidden rounded-surface border-border-subtle bg-surface p-0 shadow-floating"
         >
           <Calendar
             mode="single"

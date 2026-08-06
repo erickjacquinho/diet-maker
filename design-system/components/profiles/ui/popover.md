@@ -24,6 +24,12 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Root `Popover` e exports visuais registrados: `Popover`, `PopoverTrigger`, `PopoverContent`. Sem primitive base; compõe somente dependências permitidas pela layer.
 
+## Visual contract
+
+- `PopoverContent` usa `surface`, `border-subtle`, `rounded-control`, `shadow-floating` e `z-popover` por padrão.
+- `layer="modal"` resolve explicitamente para `z-modal` quando o conteúdo é aberto dentro de um `Dialog` ou `Sheet`; o contexto não é inferido pela árvore de DOM do portal.
+- O consumidor não aplica z-index arbitrário para compensar o portal; foco, teclado, dismiss e retorno de foco continuam sob responsabilidade do Radix.
+
 ## Allowed variants
 
 ## Family contract

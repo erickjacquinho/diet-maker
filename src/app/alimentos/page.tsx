@@ -551,7 +551,7 @@ export default function FoodsPage() {
           <div className="grid grid-cols-1 grid-cols-12 gap-2.5">
             {/* Search */}
             <div className="col-span-6 relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               <Input
                 type="text"
                 value={searchTerm}

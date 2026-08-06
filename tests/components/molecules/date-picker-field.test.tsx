@@ -40,6 +40,7 @@ describe('DatePickerField', () => {
     fireEvent.click(trigger);
 
     expect(screen.getByRole('dialog')).toHaveClass(
+      'z-modal',
       'rounded-surface',
       'border-border-subtle',
       'shadow-floating',

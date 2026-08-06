@@ -24,6 +24,11 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Parts públicas cobrem root/trigger/portal/overlay/content, header/footer/title/description e close; o content lateral é a única região de painel.
 
+## Visual contract
+
+- `SheetOverlay` usa `overlay-backdrop` e `z-overlay`, sem blur.
+- `SheetContent` usa `surface`, `border-subtle`, `shadow-overlay` e `z-modal`, permanecendo acima do próprio backdrop.
+
 ## Allowed variants
 
 ## Family contract

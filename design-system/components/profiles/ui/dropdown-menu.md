@@ -24,6 +24,11 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Parts públicas cobrem root/trigger/content, group, label, item, checkbox/radio item, separator, shortcut e submenu; cada item conserva semântica própria.
 
+## Visual contract
+
+- `DropdownMenuContent` e `DropdownMenuSubContent` usam `z-dropdown`, `surface`, `border-subtle`, `rounded-control` e `shadow-floating`/`shadow-overlay` conforme o papel.
+- Dropdowns não recebem `z-popover` ou valores arbitrários; a camada contextual modal é responsabilidade de um primitivo que ofereça contrato explícito.
+
 ## Allowed variants
 
 ## Family contract

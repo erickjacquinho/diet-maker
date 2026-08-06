@@ -1,0 +1,18 @@
+# Implementation Log: Adequação da Hierarquia de Camadas
+
+## 2026-08-06 — Initialization
+
+- Feature directory: specs/06-08-26-adequar-z-index-design-system
+- Checkpoint commit: 8736f3d (`chore(z-index): checkpoint before implementing layer hierarchy`)
+- Checklists: 2 passed, 35/35 items complete.
+- Preflight: explicit feature prerequisites passed with `SPECIFY_FEATURE_DIRECTORY` pointing to the z-index feature directory.
+- Global `.specify/feature.json` was intentionally not overwritten because it points to another active feature (`06-08-26-adequar-sidebar-design-system`).
+- Mechanical correction: T002 no longer carries `[P]` because it writes the same file as T001; T016 now references the feature-relative contract path explicitly.
+- Initial Spec Kit analysis: no critical coverage gaps; 19 tasks mapped to the specification. The shared-file parallelism warning was corrected before implementation.
+
+## 2026-08-06 — Phases 1 and 2
+
+- T001–T004: added the inventory, forbidden-value contract, overlay layer contract and accessibility regression coverage.
+- Red evidence: the new tests failed on raw z-10, dropdown/select z-popover, SheetContent z-overlay and modal Popover behavior.
+- T005–T009: corrected SheetContent, DropdownMenu, SelectContent and PopoverContent while preserving Dialog, Tooltip and Calendar semantics.
+- Green evidence: `npx vitest run --pool=threads --maxWorkers=1 tests/design-system/z-index-contract.test.ts tests/components/ui/overlay-layer-contract.test.tsx tests/components/overlays-accessibility.test.tsx` passed 13/13 tests.

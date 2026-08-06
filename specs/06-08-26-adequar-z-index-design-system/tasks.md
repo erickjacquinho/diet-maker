@@ -6,18 +6,18 @@
 
 ## Phase 1 — Contract and failing coverage
 
-- [ ] T001 [P] [US2] Criar o inventário determinístico de LayerToken, LayerContext e LayerOccurrence conforme data-model.md em tests/design-system/z-index-contract.test.ts, cobrindo as 22 declarações atuais e a regra de localização/linha [skill: tdd]
-- [ ] T002 [P] [US3] Criar testes de contrato para rejeitar z-10, z-[N], style.zIndex, dropdown/select com z-popover e SheetContent com z-overlay em tests/design-system/z-index-contract.test.ts [skill: tdd]
-- [ ] T003 [P] [US1] Adicionar testes de camadas padrão e contexto modal para Dialog, Sheet, DropdownMenu, Select, Popover e Tooltip em tests/components/ui/overlay-layer-contract.test.tsx [skill: tdd]
-- [ ] T004 [P] [US1] Estender os testes de acessibilidade para verificar portal, foco, teclado, dismiss e retorno de foco em Select/Calendar dentro de Dialog e conteúdo de Sheet em tests/components/overlays-accessibility.test.tsx [skill: tdd]
+- [X] T001 [P] [US2] Criar o inventário determinístico de LayerToken, LayerContext e LayerOccurrence conforme data-model.md em tests/design-system/z-index-contract.test.ts, cobrindo as 22 declarações atuais e a regra de localização/linha [skill: tdd]
+- [X] T002 [US3] Criar testes de contrato para rejeitar z-10, z-[N], style.zIndex, dropdown/select com z-popover e SheetContent com z-overlay em tests/design-system/z-index-contract.test.ts [skill: tdd]
+- [X] T003 [P] [US1] Adicionar testes de camadas padrão e contexto modal para Dialog, Sheet, DropdownMenu, Select, Popover e Tooltip em tests/components/ui/overlay-layer-contract.test.tsx [skill: tdd]
+- [X] T004 [P] [US1] Estender os testes de acessibilidade para verificar portal, foco, teclado, dismiss e retorno de foco em Select/Calendar dentro de Dialog e conteúdo de Sheet em tests/components/overlays-accessibility.test.tsx [skill: tdd]
 
 ## Phase 2 — Primitive layer correction
 
-- [ ] T005 [US1] Corrigir a separação semântica entre backdrop e conteúdo em src/components/ui/sheet.tsx, mantendo SheetOverlay em z-overlay e SheetContent em z-modal [skill: ui-styling]
-- [ ] T006 [US1] Corrigir DropdownMenuContent e DropdownMenuSubContent para z-dropdown em src/components/ui/dropdown-menu.tsx, preservando submenu, portal e navegação de teclado [skill: ui-styling]
-- [ ] T007 [US1] Harmonizar o token padrão e a opção contextual de SelectContent em src/components/ui/select.tsx, mantendo z-dropdown fora de modal e z-modal somente quando explicitamente solicitado [skill: frontend-architecture-mindset]
-- [ ] T008 [US1] Adicionar ao contrato reutilizável de PopoverContent em src/components/ui/popover.tsx a resolução modal explícita, mantendo z-popover como padrão e sem alterar dismiss ou portal [skill: frontend-architecture-mindset]
-- [ ] T009 [US1] Revalidar e ajustar apenas se necessário os tokens já compatíveis em src/components/ui/dialog.tsx, src/components/ui/tooltip.tsx e src/components/ui/calendar.tsx, sem mudanças numéricas ou regressão de acessibilidade [skill: code-reviewer-expert]
+- [X] T005 [US1] Corrigir a separação semântica entre backdrop e conteúdo em src/components/ui/sheet.tsx, mantendo SheetOverlay em z-overlay e SheetContent em z-modal [skill: ui-styling]
+- [X] T006 [US1] Corrigir DropdownMenuContent e DropdownMenuSubContent para z-dropdown em src/components/ui/dropdown-menu.tsx, preservando submenu, portal e navegação de teclado [skill: ui-styling]
+- [X] T007 [US1] Harmonizar o token padrão e a opção contextual de SelectContent em src/components/ui/select.tsx, mantendo z-dropdown fora de modal e z-modal somente quando explicitamente solicitado [skill: frontend-architecture-mindset]
+- [X] T008 [US1] Adicionar ao contrato reutilizável de PopoverContent em src/components/ui/popover.tsx a resolução modal explícita, mantendo z-popover como padrão e sem alterar dismiss ou portal [skill: frontend-architecture-mindset]
+- [X] T009 [US1] Revalidar e ajustar apenas se necessário os tokens já compatíveis em src/components/ui/dialog.tsx, src/components/ui/tooltip.tsx e src/components/ui/calendar.tsx, sem mudanças numéricas ou regressão de acessibilidade [skill: code-reviewer-expert]
 
 ## Phase 3 — Consumer cleanup
 
@@ -30,7 +30,7 @@
 
 - [ ] T014 [US2] Atualizar as regras canônicas e perfis de overlay para eliminar conflitos entre z-dropdown, z-popover, z-overlay e z-modal em design-system/07-icons-motion-and-layers.md, design-system/components/categories/overlays.md, design-system/components/profiles/ui/select.md, design-system/components/profiles/ui/popover.md, design-system/components/profiles/ui/dropdown-menu.md e design-system/components/profiles/ui/dialog.md [skill: design-system]
 - [ ] T015 [US2] Atualizar o registro de componentes somente se a API pública de camada mudar, preservando os contratos de Atomic Design e shadcn em design-system/components/registry.json, .agents/rules/atomic-design.md e .agents/rules/shadcn-preservation.md [skill: design-system]
-- [ ] T016 [US3] Implementar o auditor determinístico com findings de arquivo, linha, ocorrência, severidade, regra e correção em scripts/audit-z-index.mjs, usando a matriz de contracts/layer-contract.md [skill: code-reviewer-expert]
+- [ ] T016 [US3] Implementar o auditor determinístico com findings de arquivo, linha, ocorrência, severidade, regra e correção em scripts/audit-z-index.mjs, usando a matriz de specs/06-08-26-adequar-z-index-design-system/contracts/layer-contract.md [skill: code-reviewer-expert]
 - [ ] T017 [US3] Expor a execução do auditor no fluxo do projeto em package.json e cobrir seu comando nominal e seus achados negativos em tests/design-system/z-index-audit.test.mjs [skill: code-reviewer-expert]
 
 ## Phase 5 — Verification and handoff
@@ -47,4 +47,3 @@
 - T016–T017 dependem do inventário e do contrato; T018–T019 são tarefas finais de verificação.
 - T011, T012 e T015 podem ser paralelas quando não houver sobreposição no mesmo arquivo.
 - Nenhuma tarefa desta lista deve ser executada antes da validação humana deste SDD.
-

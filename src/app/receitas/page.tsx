@@ -100,7 +100,7 @@ export default function RecipesPage() {
       {/* Filter & Search Bar */}
       <div className="flex flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}

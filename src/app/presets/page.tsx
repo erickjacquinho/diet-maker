@@ -92,7 +92,7 @@ export default function PresetsPage() {
       {/* Search Input */}
       {presets.length > 0 && (
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
