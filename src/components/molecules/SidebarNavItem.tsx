@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 
 import {
@@ -10,6 +9,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 export interface SidebarNavItemProps {
   href: string;
@@ -19,10 +19,6 @@ export interface SidebarNavItemProps {
   isCollapsed?: boolean;
 }
 
-function defaultRouteMatch(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
 export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   href,
   label,
@@ -30,13 +26,16 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   isActive: customIsActive,
   isCollapsed = false,
 }) => {
-  const pathname = usePathname() ?? '';
-  const isActive = customIsActive ?? defaultRouteMatch(pathname, href);
+  const isActive = customIsActive ?? false;
 
   const link = (
-    <SidebarMenuButton asChild isActive={isActive} className={isCollapsed ? 'mx-auto justify-center' : undefined}>
+    <SidebarMenuButton
+      asChild
+      isActive={isActive}
+      className={cn('h-control-standard', isCollapsed ? 'mx-auto justify-center' : undefined)}
+    >
       <Link href={href} aria-label={isCollapsed ? label : undefined} aria-current={isActive ? 'page' : undefined}>
-        <Icon aria-hidden="true" />
+        <Icon aria-hidden="true" className="size-4" />
         <span className={isCollapsed ? 'sr-only' : 'truncate'}>{label}</span>
       </Link>
     </SidebarMenuButton>

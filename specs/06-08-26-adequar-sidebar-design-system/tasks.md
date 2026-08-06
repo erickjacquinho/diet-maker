@@ -12,9 +12,9 @@
 
 **Purpose**: Fixar os fixtures, referências canônicas e pontos de entrada necessários para a correção.
 
-- [ ] T001 [skill: $frontend-architecture-mindset] Registrar no fixture compartilhado de `tests/components/organisms/sidebar-navigation-fixtures.ts` as seis rotas flat, uma nested patient route, um grupo futuro válido e um grupo vazio, alinhados a `data-model.md`.
-- [ ] T002 [P] [skill: $design-system] Mapear em `src/design-system/tokens.css` e `tailwind.config.js` apenas os aliases já normatizados para sidebar-expanded/sidebar-collapsed, border-divider, icon-16, 36px menu item, focus ring e reduced motion; documentar qualquer ausência antes de criar token.
-- [ ] T003 [P] [skill: $ui-ux-pro-max:ui-ux-pro-max] Comparar a implementação atual com `design-system/components/categories/navigation.md` e registrar no comentário da tarefa de implementação os deltas visuais que exigem inspeção manual: rail, tipografia, density, focus, clipping e motion.
+- [X] T001 [skill: $frontend-architecture-mindset] Registrar no fixture compartilhado de `tests/components/organisms/sidebar-navigation-fixtures.ts` as seis rotas flat, uma nested patient route, um grupo futuro válido e um grupo vazio, alinhados a `data-model.md`.
+- [X] T002 [P] [skill: $design-system] Mapear em `src/design-system/tokens.css` e `tailwind.config.js` apenas os aliases já normatizados para sidebar-expanded/sidebar-collapsed, border-divider, icon-16, 36px menu item, focus ring e reduced motion; documentar qualquer ausência antes de criar token.
+- [X] T003 [P] [skill: $ui-ux-pro-max:ui-ux-pro-max] Comparar a implementação atual com `design-system/components/categories/navigation.md` e registrar no comentário da tarefa de implementação os deltas visuais que exigem inspeção manual: rail, tipografia, density, focus, clipping e motion.
 
 ---
 
@@ -24,10 +24,10 @@
 
 **⚠️ CRITICAL**: Nenhuma user story deve ser implementada antes desta fase.
 
-- [ ] T004 [P] [skill: $tdd] Escrever testes de contrato do modelo em `tests/components/organisms/sidebar-navigation-model.test.ts` para match exato/prefixado documentado, rota desconhecida, ancestor current, IDs/hrefs inválidos e omissão de grupo vazio.
-- [ ] T005 [P] [skill: $tdd] Escrever testes de fronteira em `tests/components/app/sidebar-navigation-adapter.test.tsx` que exijam pathname/items explícitos e falhem se `SidebarNav.tsx` importar ou chamar `usePathname`.
-- [ ] T006 [P] [skill: $tdd] Estender `tests/components/ui/sidebar.test.tsx` com contratos failing para 224/64, border-divider do rail, icon-16, focus ring, 36px submenu e reduced-motion sem listener de Ctrl/Cmd+B/persistência.
-- [ ] T007 [skill: $frontend-architecture-mindset] Consolidar os tipos e invariantes descritos em `specs/06-08-26-adequar-sidebar-design-system/data-model.md` em `src/components/organisms/sidebar-navigation-model.ts`, deixando a configuração de produção fora do organismo.
+- [X] T004 [P] [skill: $tdd] Escrever testes de contrato do modelo em `tests/components/organisms/sidebar-navigation-model.test.ts` para match exato/prefixado documentado, rota desconhecida, ancestor current, IDs/hrefs inválidos e omissão de grupo vazio.
+- [X] T005 [P] [skill: $tdd] Escrever testes de fronteira em `tests/components/app/sidebar-navigation-adapter.test.tsx` que exijam pathname/items explícitos e falhem se `SidebarNav.tsx` importar ou chamar `usePathname`.
+- [X] T006 [P] [skill: $tdd] Estender `tests/components/ui/sidebar.test.tsx` com contratos failing para 224/64, border-divider do rail, icon-16, focus ring, 36px submenu e reduced-motion sem listener de Ctrl/Cmd+B/persistência.
+- [X] T007 [skill: $frontend-architecture-mindset] Consolidar os tipos e invariantes descritos em `specs/06-08-26-adequar-sidebar-design-system/data-model.md` em `src/components/organisms/sidebar-navigation-model.ts`, deixando a configuração de produção fora do organismo.
 
 **Checkpoint**: Fixtures, modelo puro, contrato do adapter e testes failing estão prontos; o primitivo ainda não recebeu correções de produto.
 
@@ -41,15 +41,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] [skill: $tdd] Criar `tests/components/organisms/sidebar-nav-conformance.test.tsx` para rail border, widths 224/64, typography roles, icon-16, tokenized spacing, focus ring, collapsed brand name e reduced-motion nos subcomponentes.
-- [ ] T009 [P] [US1] [skill: $tdd] Atualizar `tests/components/organisms/sidebar-nav.test.tsx` para provar que os seis destinos continuam alcançáveis, que current state não depende só de cor e que o organismo aceita pathname/items do contrato.
+- [X] T008 [P] [US1] [skill: $tdd] Criar `tests/components/organisms/sidebar-nav-conformance.test.tsx` para rail border, widths 224/64, typography roles, icon-16, tokenized spacing, focus ring, collapsed brand name e reduced-motion nos subcomponentes.
+- [X] T009 [P] [US1] [skill: $tdd] Atualizar `tests/components/organisms/sidebar-nav.test.tsx` para provar que os seis destinos continuam alcançáveis, que current state não depende só de cor e que o organismo aceita pathname/items do contrato.
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] [skill: $ui-styling] Corrigir `src/components/ui/sidebar.tsx` somente nos contratos genéricos de rail border, width aliases, icon-16, focus ring/offset, 36px submenu e reduced-motion, sem inserir labels/rotas/callbacks do NutriDiet.
-- [ ] T011 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarBrand.tsx` para roles tipográficos canônicos, espaçamento/token geometry, icon-16 e accessible name completo no collapsed state, preservando link e toggle.
-- [ ] T012 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarNavItem.tsx` para links reais, current/focus semantics, icon-16, altura/spacing de navigation e labels completos em tooltip/collapsed.
-- [ ] T013 [US1] [skill: $vercel-composition-patterns] Refatorar `src/components/organisms/SidebarNav.tsx` para consumir `pathname`/`navigationItems` por props, preservar flat default por dados recebidos e manter composição compound sem importar contexto de rota.
+- [X] T010 [P] [US1] [skill: $ui-styling] Corrigir `src/components/ui/sidebar.tsx` somente nos contratos genéricos de rail border, width aliases, icon-16, focus ring/offset, 36px submenu e reduced-motion, sem inserir labels/rotas/callbacks do NutriDiet.
+- [X] T011 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarBrand.tsx` para roles tipográficos canônicos, espaçamento/token geometry, icon-16 e accessible name completo no collapsed state, preservando link e toggle.
+- [X] T012 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarNavItem.tsx` para links reais, current/focus semantics, icon-16, altura/spacing de navigation e labels completos em tooltip/collapsed.
+- [X] T013 [US1] [skill: $vercel-composition-patterns] Refatorar `src/components/organisms/SidebarNav.tsx` para consumir `pathname`/`navigationItems` por props, preservar flat default por dados recebidos e manter composição compound sem importar contexto de rota.
 - [ ] T014 [US1] [skill: $webapp-testing] Executar e estabilizar os testes focados de `tests/components/ui/sidebar.test.tsx`, `tests/components/organisms/sidebar-nav-conformance.test.tsx` e `tests/components/organisms/sidebar-nav.test.tsx`, mantendo a falha útil para qualquer valor não canônico.
 
 **Checkpoint**: A sidebar visual e navegacional é um MVP independente, com seis rotas preservadas, nomes acessíveis, tokens/geometry corrigidos e sem acoplamento de pathname no organismo.

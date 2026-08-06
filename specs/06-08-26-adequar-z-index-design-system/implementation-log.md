@@ -16,3 +16,20 @@
 - Red evidence: the new tests failed on raw z-10, dropdown/select z-popover, SheetContent z-overlay and modal Popover behavior.
 - T005–T009: corrected SheetContent, DropdownMenu, SelectContent and PopoverContent while preserving Dialog, Tooltip and Calendar semantics.
 - Green evidence: `npx vitest run --pool=threads --maxWorkers=1 tests/design-system/z-index-contract.test.ts tests/components/ui/overlay-layer-contract.test.tsx tests/components/overlays-accessibility.test.tsx` passed 13/13 tests.
+
+## 2026-08-06 — Phases 3 and 4
+
+- T010–T013: made modal context explicit for DatePickerField, retained the recipe ingredient dropdown, removed unnecessary local numeric layers and added consumer coverage.
+- T014: aligned the canonical layer document, overlays category and Select, Popover, DropdownMenu, Sheet and Tooltip profiles.
+- T015: registry structure and public exports remained unchanged; the new optional layer context is documented in the component profiles and does not require a registry schema extension.
+- T016–T017: added `scripts/audit-z-index.mjs`, its `audit:z-index` package command and deterministic CLI/source-contract tests.
+- Verification evidence: `npm run verify:design-system` passed with 0 blocking findings; `node scripts/audit-z-index.mjs --strict --json --paths src,tests,tailwind.config.js` passed with 0 findings across 193 files.
+
+## 2026-08-06 — Final validation
+
+- `npm run lint`, `npm run audit:z-index`, `npm run verify:design-system`, `npm run audit:atomic-design` and `npm run verify:links` passed.
+- Focused regression suites passed: 13/13 layer/accessibility tests and 10/10 affected consumer tests.
+- T019 passed: the final strict inventory contains no forbidden raw numeric/arbitrary layer or inline `style.zIndex` finding outside the canonical Tailwind map, and all baseline consumers are classified in the inventory contract test.
+- Full `npm run type-check` is blocked by the unrelated untracked Sidebar test importing missing `src/app/navigation/SidebarNavigationAdapter`.
+- Full `npm test` exceeded the execution limit; the timed-out process from this execution was stopped. A separate Sidebar Vitest process was preserved.
+- `npm run build` compiled successfully but failed at page data collection for `/alimentos` with `PageNotFoundError`; this is outside the layer contract and requires separate investigation.

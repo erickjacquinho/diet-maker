@@ -1,7 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
+import {
+  Sidebar,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarProvider,
+  useSidebar,
+} from '@/components/ui/sidebar';
 
 function StateProbe() {
   const { state, toggleSidebar } = useSidebar();
@@ -82,6 +88,27 @@ describe('Sidebar primitive contract', () => {
     if (!provider) throw new Error('SidebarProvider was not rendered');
     expect(provider).toHaveClass('[--sidebar-width:var(--cmp-sidebar-width-expanded)]');
     expect(provider).toHaveClass('[--sidebar-width-collapsed:var(--cmp-sidebar-width-collapsed)]');
+  });
+
+  it('keeps the left rail border, reduced-motion fallback, and canonical submenu height', () => {
+    render(
+      <SidebarProvider defaultOpen>
+        <Sidebar>
+          <SidebarMenuSub>
+            <li>
+              <SidebarMenuSubButton href="/design-system">Guia Design System</SidebarMenuSubButton>
+            </li>
+          </SidebarMenuSub>
+        </Sidebar>
+      </SidebarProvider>,
+    );
+
+    const rail = document.querySelector('[data-sidebar="sidebar"]');
+    expect(rail).toHaveClass('border-r', 'motion-reduce:transition-none');
+    expect(document.querySelector('[data-sidebar="menu-sub-button"]')).toHaveClass(
+      'h-control-standard',
+      '[&>svg]:size-4',
+    );
   });
 
   it('does not persist state or register Ctrl+B/Cmd+B by default', () => {

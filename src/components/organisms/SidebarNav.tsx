@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 
 import { SidebarBrand } from '@/components/molecules/SidebarBrand';
@@ -10,7 +9,6 @@ import { SidebarNavItem } from '@/components/molecules/SidebarNavItem';
 import { SidebarQuickActions } from '@/components/molecules/SidebarQuickActions';
 import { SidebarUserProfile } from '@/components/molecules/SidebarUserProfile';
 import {
-  DEFAULT_NAVIGATION_ITEMS,
   getRenderableNavigationItems,
   isSidebarNavigationItemActive,
   type SidebarNavigationItem,
@@ -53,12 +51,14 @@ export function useSidebarContext(): SidebarContextValue | undefined {
 }
 
 export interface SidebarNavProps {
+  pathname: string;
+  navigationItems: SidebarNavigationItem[];
   doctorName?: string;
   doctorRole?: string;
   onSave?: () => void;
   onOpen?: () => void;
+  onOpenAccount?: () => void;
   initialCollapsed?: boolean;
-  navigationItems?: SidebarNavigationItem[];
   children?: React.ReactNode;
 }
 
@@ -119,7 +119,7 @@ function SidebarGroupRoute({
     <SidebarMenuSubItem>
       <SidebarMenuSubButton asChild isActive={isActive}>
         <Link href={item.href} aria-current={isActive ? 'page' : undefined}>
-          <Icon aria-hidden="true" />
+          <Icon aria-hidden="true" className="size-4" />
           <span className="truncate">{item.label}</span>
         </Link>
       </SidebarMenuSubButton>
@@ -155,7 +155,7 @@ function SidebarNavigationGroup({
               aria-label={accessibleLabel}
               className="mx-auto justify-center"
             >
-              {Icon ? <Icon aria-hidden="true" /> : null}
+              {Icon ? <Icon aria-hidden="true" className="size-4" /> : null}
               <span className="sr-only">{item.label}</span>
             </SidebarMenuButton>
           </PopoverTrigger>
@@ -174,11 +174,11 @@ function SidebarNavigationGroup({
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton type="button" isActive={isActive} aria-label={accessibleLabel}>
-            {Icon ? <Icon aria-hidden="true" /> : null}
+            {Icon ? <Icon aria-hidden="true" className="size-4" /> : null}
             <span className="truncate">{item.label}</span>
             <ChevronRight
               aria-hidden="true"
-              className="ml-auto transition-transform duration-fast group-data-[state=open]/collapsible:rotate-90"
+              className="ml-auto size-4 transition-transform duration-fast motion-reduce:transition-none motion-reduce:duration-0 group-data-[state=open]/collapsible:rotate-90"
             />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -193,13 +193,13 @@ function SidebarNavigationGroup({
 function SidebarNavContent({
   doctorName,
   doctorRole,
+  pathname,
   onSave,
   onOpen,
   navigationItems,
   children,
 }: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
-  Pick<SidebarNavProps, 'onSave' | 'onOpen' | 'children'>) {
-  const pathname = usePathname() ?? '';
+  Pick<SidebarNavProps, 'pathname' | 'onSave' | 'onOpen' | 'children'>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -241,12 +241,13 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   UserProfile: typeof SidebarUserProfile;
   QuickActions: typeof SidebarQuickActions;
 } = ({
+  pathname,
+  navigationItems,
   doctorName = 'Dr. Lucas',
   doctorRole = 'Nutricionista',
   onSave,
   onOpen,
   initialCollapsed = false,
-  navigationItems = DEFAULT_NAVIGATION_ITEMS,
   children,
 }) => {
   return (
@@ -254,6 +255,7 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
       <SidebarNavContent
         doctorName={doctorName}
         doctorRole={doctorRole}
+        pathname={pathname}
         onSave={onSave}
         onOpen={onOpen}
         navigationItems={navigationItems}

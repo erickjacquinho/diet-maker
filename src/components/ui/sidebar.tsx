@@ -151,7 +151,7 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         data-side={side}
         data-variant={variant}
         className={cn(
-          "group/sidebar flex min-h-screen shrink-0 flex-col border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-standard ease-standard",
+          "group/sidebar flex min-h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-standard ease-standard motion-reduce:transition-none motion-reduce:duration-0",
           effectiveState === "collapsed" ? "w-sidebar-collapsed" : "w-sidebar",
           side === "right" && "border-l border-r-0",
           variant === "floating" && "rounded-control border",
@@ -239,7 +239,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.LiHTMLAttributes<H
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-control p-2 text-left text-style-nav-item text-sidebar-foreground outline-none transition-colors duration-fast ease-standard [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar disabled:pointer-events-none disabled:opacity-disabled data-[active=true]:bg-sidebar-primary-soft data-[active=true]:text-sidebar-primary data-[active=true]:font-semibold",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-control p-2 text-left text-style-nav-item text-sidebar-foreground outline-none transition-colors duration-fast ease-standard motion-reduce:transition-none motion-reduce:duration-0 [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar disabled:pointer-events-none disabled:opacity-disabled data-[active=true]:bg-sidebar-primary-soft data-[active=true]:text-sidebar-primary data-[active=true]:font-semibold",
   {
     variants: {
       variant: {
@@ -285,7 +285,7 @@ const SidebarMenuSub = React.forwardRef<HTMLUListElement, React.HTMLAttributes<H
     <ul
       ref={ref}
       data-sidebar="menu-sub"
-      className={cn("mx-3 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5", className)}
+      className={cn("mx-3 flex min-w-0 flex-col gap-1 border-l border-sidebar-border px-3 py-1", className)}
       {...props}
     />
   ),
@@ -300,7 +300,7 @@ const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.LiHTMLAttribute
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
 
 const sidebarMenuSubButtonVariants = cva(
-  "flex h-7 min-w-0 items-center gap-2 overflow-hidden rounded-control px-2 text-style-legal text-sidebar-foreground outline-none transition-colors duration-fast ease-standard [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-sidebar data-[active=true]:bg-sidebar-primary-soft data-[active=true]:text-sidebar-primary",
+  "flex h-control-standard min-w-0 items-center gap-2 overflow-hidden rounded-control px-2 text-style-legal text-sidebar-foreground outline-none transition-colors duration-fast ease-standard motion-reduce:transition-none motion-reduce:duration-0 [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar data-[active=true]:bg-sidebar-primary-soft data-[active=true]:text-sidebar-primary",
   {
     variants: {
       size: { sm: "text-style-legal", md: "text-style-nav-item" },

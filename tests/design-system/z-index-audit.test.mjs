@@ -47,10 +47,9 @@ describe('z-index audit contract', () => {
       [script, '--strict', '--json', '--paths', 'src/components/ui/dialog.tsx,tailwind.config.js'],
       { cwd: root, encoding: 'utf8' },
     );
-    const result = JSON.parse(output) as { findings: unknown[]; counts: { files: number } };
+    const result = JSON.parse(output);
 
     expect(result.findings).toEqual([]);
     expect(result.counts.files).toBe(2);
   });
 });
-

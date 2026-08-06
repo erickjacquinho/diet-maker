@@ -6,6 +6,7 @@ import {
   getRenderableNavigationItems,
   isSidebarNavigationItemActive,
   isSidebarRouteActive,
+  validateSidebarNavigationItems,
   type SidebarGroupItem,
   type SidebarRouteItem,
 } from '@/components/organisms/sidebar-navigation-model';
@@ -75,5 +76,22 @@ describe('sidebar navigation model', () => {
     };
 
     expect(getRenderableNavigationItems([emptyGroup, patients])).toEqual([patients]);
+  });
+
+  it('reports invalid navigation ids, labels, hrefs, and duplicate route destinations', () => {
+    expect(
+      validateSidebarNavigationItems([
+        { kind: 'route', href: 'pacientes', label: '', icon: Users },
+        { kind: 'group', id: '', label: 'Grupo', children: [] },
+        { kind: 'route', href: '/pacientes', label: 'Original', icon: Users },
+        { kind: 'route', href: '/pacientes', label: 'Duplicado', icon: Users },
+      ]),
+    ).toEqual([
+      'Route item at index 0 must have a non-empty label.',
+      'Route item at index 0 must use an absolute pathname href.',
+      'Group item at index 1 must have a stable id.',
+      'Group item at index 1 must have at least one child route.',
+      'Route href "/pacientes" is duplicated.',
+    ]);
   });
 });

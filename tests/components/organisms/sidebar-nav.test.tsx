@@ -1,44 +1,45 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
-const routeState = vi.hoisted(() => ({ pathname: '/pacientes' }));
-
-vi.mock('next/navigation', () => ({
-  usePathname: () => routeState.pathname,
-}));
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { SidebarNav, SidebarNavComponent } from '@/components/organisms/SidebarNav';
+import { sidebarNestedPatientPathname, sidebarProductionRoutes } from './sidebar-navigation-fixtures';
+
+function renderSidebar(
+  props: Partial<React.ComponentProps<typeof SidebarNav>> = {},
+) {
+  return render(
+    <SidebarNav
+      pathname="/pacientes"
+      navigationItems={sidebarProductionRoutes}
+      {...props}
+    />,
+  );
+}
 
 describe('SidebarNav preservation contract', () => {
-  afterEach(() => {
-    routeState.pathname = '/pacientes';
-  });
-
   it('keeps all six current destinations reachable in the documented order', () => {
-    render(<SidebarNav />);
+    renderSidebar();
 
     expect(
-      screen
+      within(screen.getByRole('navigation', { name: 'Navegação principal' }))
         .getAllByRole('link')
-        .map((link) => link.getAttribute('href'))
-        .filter((href) => href !== '/pacientes'),
+        .map((link) => link.getAttribute('href')),
     ).toEqual([
+      '/pacientes',
       '/presets',
       '/refeicoes-prontas',
       '/receitas',
       '/alimentos',
       '/design-system',
     ]);
-    expect(screen.getByRole('link', { name: /Pacientes/ })).toHaveAttribute('href', '/pacientes');
   });
 
   it.each([
     ['/design-system', '/design-system'],
     ['/design-system/tokens', '/design-system'],
-    ['/pacientes/123/dieta/1', '/pacientes'],
+    [sidebarNestedPatientPathname, '/pacientes'],
   ])('marks the matching destination current for %s', (pathname, href) => {
-    routeState.pathname = pathname;
-    render(<SidebarNav />);
+    renderSidebar({ pathname });
 
     expect(screen.getByRole('link', { name: new RegExp(href === '/pacientes' ? 'Pacientes' : 'Guia Design System') })).toHaveAttribute(
       'aria-current',
@@ -47,8 +48,7 @@ describe('SidebarNav preservation contract', () => {
   });
 
   it('does not mark an unrelated destination current', () => {
-    routeState.pathname = '/unknown';
-    render(<SidebarNav />);
+    renderSidebar({ pathname: '/unknown' });
 
     expect(screen.queryByRole('link', { current: 'page' })).toBeNull();
   });
@@ -56,7 +56,12 @@ describe('SidebarNav preservation contract', () => {
   it('preserves brand, profile, quick actions and optional callback safety', () => {
     const onSave = vi.fn();
     const onOpen = vi.fn();
-    render(<SidebarNav doctorName="Dr. Ana" doctorRole="Nutricionista clínica" onSave={onSave} onOpen={onOpen} />);
+    renderSidebar({
+      doctorName: 'Dr. Ana',
+      doctorRole: 'Nutricionista clínica',
+      onSave,
+      onOpen,
+    });
 
     expect(screen.getByRole('link', { name: /NutriDiet/ })).toHaveAttribute('href', '/pacientes');
     expect(screen.getByText('Dr. Ana')).toBeInTheDocument();
@@ -73,7 +78,7 @@ describe('SidebarNav preservation contract', () => {
   });
 
   it('preserves collapsed labels, tooltips and the visible toggle transition', () => {
-    render(<SidebarNav initialCollapsed />);
+    renderSidebar({ initialCollapsed: true });
 
     expect(document.querySelector('[data-sidebar="sidebar"]')).toHaveAttribute('data-state', 'collapsed');
     expect(screen.getByRole('link', { name: 'Pacientes' })).toBeInTheDocument();

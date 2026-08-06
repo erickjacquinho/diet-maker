@@ -50,3 +50,16 @@ Os testes devem cobrir:
 
 A tarefa só pode ser considerada concluída quando o auditor de camadas e os verificadores existentes não apresentarem findings de camada ou de contrato documental.
 
+## Execution evidence — 2026-08-06
+
+- Focused layer contracts: 13/13 tests passed in `tests/design-system/z-index-contract.test.ts`, `tests/components/ui/overlay-layer-contract.test.tsx` and `tests/components/overlays-accessibility.test.tsx`.
+- Focused consumers: 10/10 tests passed in Select, DatePickerField, PatientListTable, EditPatientModal and CreateRecipeModal coverage.
+- `npm run lint`: passed.
+- `npm run audit:z-index`: passed with 0 findings across 197 files in the current working tree.
+- `npm run verify:design-system`: passed with 0 blocking findings.
+- `npm run audit:atomic-design`: passed with 100% conformity.
+- `npm run verify:links`: passed with 0 broken local links.
+- `npm run type-check`: blocked by the unrelated untracked `tests/components/app/sidebar-navigation-adapter.test.tsx`, which imports the missing `src/app/navigation/SidebarNavigationAdapter`.
+- `npm test`: exceeded the execution limit with Vitest processes still active; the timed-out processes from this execution were stopped without touching the parallel Sidebar test process.
+- `npm run build`: compiled successfully, then failed during page data collection with `PageNotFoundError` for `/alimentos`; no z-index compilation error was reported.
+- Final inventory confirmation: T019 passed; all baseline consumers are classified in `tests/design-system/z-index-contract.test.ts`, and the strict auditor reports no raw numeric/arbitrary layer or inline `style.zIndex` findings outside the canonical Tailwind map.

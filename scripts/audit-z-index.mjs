@@ -28,6 +28,11 @@ function isSkipped(projectPath) {
   return SKIPPED_PATH_PREFIXES.some((prefix) => normalized.startsWith(prefix) || normalized === prefix);
 }
 
+function matchesProjectPath(projectPath, suffix) {
+  const normalized = normalize(projectPath);
+  return normalized === suffix || normalized.endsWith('/' + suffix);
+}
+
 async function exists(target) {
   try {
     await stat(target);
@@ -71,7 +76,7 @@ function auditLayerSources(sources) {
     if (isSkipped(pathname)) continue;
 
     const lines = sourceEntry.source.split(/\r?\n/);
-    const sheetVariantsStart = pathname.endsWith('/src/components/ui/sheet.tsx')
+    const sheetVariantsStart = matchesProjectPath(pathname, 'src/components/ui/sheet.tsx')
       ? lines.findIndex((line) => line.includes('const sheetVariants'))
       : -1;
     const sheetContentBoundary = sheetVariantsStart >= 0
@@ -97,11 +102,11 @@ function auditLayerSources(sources) {
         findings.push(finding(pathname, lineIndex + 1, 'ZI002', 'inline-z-index', 'Inline zIndex styles bypass the canonical layer contract.', 'semantic z-* token'));
       }
 
-      if (pathname.endsWith('/src/components/ui/dropdown-menu.tsx') && line.includes('z-popover')) {
+      if (matchesProjectPath(pathname, 'src/components/ui/dropdown-menu.tsx') && line.includes('z-popover')) {
         findings.push(finding(pathname, lineIndex + 1, 'ZI003', 'dropdown-layer', 'DropdownMenu content must use z-dropdown, not z-popover.', 'z-dropdown'));
       }
 
-      if (pathname.endsWith('/src/components/ui/select.tsx') && line.includes('z-popover')) {
+      if (matchesProjectPath(pathname, 'src/components/ui/select.tsx') && line.includes('z-popover')) {
         findings.push(finding(pathname, lineIndex + 1, 'ZI004', 'select-layer', 'SelectContent must use z-dropdown by default.', 'z-dropdown or explicit z-modal'));
       }
 
@@ -116,7 +121,7 @@ function auditLayerSources(sources) {
       }
     }
 
-    if (pathname.endsWith('/src/components/molecules/DatePickerField.tsx')) {
+    if (matchesProjectPath(pathname, 'src/components/molecules/DatePickerField.tsx')) {
       const hasModalContext = /layer\s*=\s*["']modal["']/.test(sourceEntry.source);
       if (!hasModalContext) {
         const line = lines.findIndex((item) => item.includes('PopoverContent'));
