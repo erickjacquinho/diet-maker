@@ -196,10 +196,11 @@ function SidebarNavContent({
   pathname,
   onSave,
   onOpen,
+  onOpenAccount,
   navigationItems,
   children,
 }: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
-  Pick<SidebarNavProps, 'pathname' | 'onSave' | 'onOpen' | 'children'>) {
+  Pick<SidebarNavProps, 'pathname' | 'onSave' | 'onOpen' | 'onOpenAccount' | 'children'>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -225,6 +226,7 @@ function SidebarNavContent({
                 doctorName={doctorName}
                 doctorRole={doctorRole}
                 isCollapsed={isCollapsed}
+                onOpenAccount={onOpenAccount}
               />
               <SidebarQuickActions onSave={onSave} onOpen={onOpen} isCollapsed={isCollapsed} />
             </SidebarFooter>
@@ -247,6 +249,7 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   doctorRole = 'Nutricionista',
   onSave,
   onOpen,
+  onOpenAccount,
   initialCollapsed = false,
   children,
 }) => {
@@ -258,6 +261,7 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
         pathname={pathname}
         onSave={onSave}
         onOpen={onOpen}
+        onOpenAccount={onOpenAccount}
         navigationItems={navigationItems}
       >
         {children}

@@ -12,6 +12,9 @@ export interface SidebarQuickActionsProps {
   isCollapsed?: boolean;
 }
 
+const saveDisabledReason = 'A ação Salvar ainda não está disponível nesta tela.';
+const openDisabledReason = 'A ação Abrir ainda não está disponível nesta tela.';
+
 export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
   onSave,
   onOpen,
@@ -24,10 +27,12 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
           <TooltipTrigger asChild>
             <IconButton
               onClick={onSave}
+              disabled={!onSave}
               variant="secondary"
-              className="size-9 rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
+              className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
               aria-label="Salvar Arquivo Local"
-              icon={<Save />}
+              aria-describedby={!onSave ? 'sidebar-save-unavailable' : undefined}
+              icon={<Save aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
@@ -39,30 +44,53 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
           <TooltipTrigger asChild>
             <IconButton
               onClick={onOpen}
+              disabled={!onOpen}
               variant="secondary"
-              className="size-9 rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
+              className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
               aria-label="Abrir Arquivo .diet"
-              icon={<FolderOpen />}
+              aria-describedby={!onOpen ? 'sidebar-open-unavailable' : undefined}
+              icon={<FolderOpen aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
             Abrir Arquivo .diet
           </TooltipContent>
         </Tooltip>
+
+        {!onSave ? <span id="sidebar-save-unavailable" className="sr-only">{saveDisabledReason}</span> : null}
+        {!onOpen ? <span id="sidebar-open-unavailable" className="sr-only">{openDisabledReason}</span> : null}
       </div>
     );
   }
 
   return (
-    <div className="flex w-full items-center gap-1.5">
-      <Button onClick={onSave} variant="secondary" size="compact" className="flex h-8 flex-1 items-center justify-center gap-1 rounded-control text-style-legal font-semibold">
-        <Save />
+    <div className="flex w-full items-center gap-2">
+      <Button
+        onClick={onSave}
+        disabled={!onSave}
+        variant="secondary"
+        size="compact"
+        aria-label="Salvar Arquivo Local"
+        aria-describedby={!onSave ? 'sidebar-save-unavailable' : undefined}
+        className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
+      >
+        <Save aria-hidden="true" className="size-4" />
         <span>Salvar</span>
       </Button>
-      <Button onClick={onOpen} variant="secondary" size="compact" className="flex h-8 flex-1 items-center justify-center gap-1 rounded-control text-style-legal font-semibold">
-        <FolderOpen />
+      <Button
+        onClick={onOpen}
+        disabled={!onOpen}
+        variant="secondary"
+        size="compact"
+        aria-label="Abrir Arquivo .diet"
+        aria-describedby={!onOpen ? 'sidebar-open-unavailable' : undefined}
+        className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
+      >
+        <FolderOpen aria-hidden="true" className="size-4" />
         <span>Abrir</span>
       </Button>
+      {!onSave ? <span id="sidebar-save-unavailable" className="sr-only">{saveDisabledReason}</span> : null}
+      {!onOpen ? <span id="sidebar-open-unavailable" className="sr-only">{openDisabledReason}</span> : null}
     </div>
   );
 };
