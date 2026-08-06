@@ -34,6 +34,8 @@ Obrigatórios: landmark, lista de destinos, item com label e indicação da rota
 
 Sidebar expanded usa `sidebar-expanded` (224), collapsed `sidebar-collapsed` (64). Item tem altura 36, padding inline `control-inline`, gap `space-inline`, radius `radius-control`, sem borda por padrão. Grupos usam `space-related`; divisões usam `space-component` e `border-divider` de 1px. Overflow vertical é interno à lista.
 
+Rail usa `border-divider` de 1px; transições de largura, disclosure e surfaces devem respeitar `reduced-motion`. Subitens futuros mantêm a mesma altura de controle de 36px, icon-16 e offset de foco da navegação principal.
+
 ## Typography
 
 Item usa `nav-item`; grupo `overline`; marca `subsection-title`; identidade principal `body-small-strong`; metadado `caption`. Labels collapsed ficam apenas acessíveis/tooltip.
@@ -76,6 +78,8 @@ Links ativam por Enter e preservam semântica de abrir em nova aba. Tab percorre
 ## Accessibility
 
 Use `nav` com nome, links reais e `aria-current=page`. Ícone é decorativo quando há label. Collapsed conserva accessible name e tooltip. Ordem visual igual à DOM; foco 2px/offset 2; target mínimo 32 e contraste AA.
+
+Controles indisponíveis permanecem visíveis e usam `disabled` nativo com descrição acessível; identidade sem callback não recebe role de botão, cursor ou hover de ação.
 
 ## Composition
 

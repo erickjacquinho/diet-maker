@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 const routeState = vi.hoisted(() => ({ pathname: '/pacientes' }));
@@ -20,14 +20,17 @@ describe('SidebarNavigationAdapter boundary', () => {
       'href',
       '/design-system',
     );
-    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+    expect(
+      within(screen.getByRole('navigation'))
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual([
       '/pacientes',
       '/presets',
       '/refeicoes-prontas',
       '/receitas',
       '/alimentos',
       '/design-system',
-      '/pacientes',
     ]);
   });
 

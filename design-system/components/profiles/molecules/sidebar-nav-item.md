@@ -36,6 +36,8 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 The molecule owns route-item rendering and receives collapse/active state by props. It does not reexport or import the `SidebarNav` organism; route matching remains overridable by `isActive`.
 
+The item receives `isActive` from the organism, renders a real Next link, exposes `aria-current="page"` for the current destination and preserves the complete label in collapsed tooltip/name semantics.
+
 Com `ui-sidebar` como primitive base, compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

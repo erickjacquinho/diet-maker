@@ -60,7 +60,7 @@ As partes da sidebar continuam molecules e `SidebarNav` continua organism; a rel
 
 ## Migração de sidebar — 2026-08-06
 
-`organism-sidebar-nav` compõe `ui-sidebar` como primitive base, enquanto `SidebarNavItem` usa `SidebarMenuItem`/`SidebarMenuButton`. `SidebarBrand`, `SidebarQuickActions` e `SidebarUserProfile` permanecem molecules independentes com contratos públicos; o organismo não reexporta suas implementações. A navegação default continua flat com as seis rotas de produção. Grupos futuros são suportados pelo contrato `SidebarNavigationItem`, `ui-collapsible` e `ui-popover`, sem alterar a topologia default.
+`organism-sidebar-nav` compõe `ui-sidebar` como primitive base, enquanto `SidebarNavItem` usa `SidebarMenuItem`/`SidebarMenuButton`. `SidebarBrand`, `SidebarQuickActions` e `SidebarUserProfile` permanecem molecules independentes com contratos públicos; o organismo não reexporta suas implementações. `SidebarNavigationAdapter` é o consumer de aplicação que lê pathname e injeta a configuração flat com as seis rotas de produção; o organismo não possui default de rota. Grupos futuros são suportados pelo contrato `SidebarNavigationItem`, `ui-collapsible` e `ui-popover`, sem alterar a topologia default.
 
 O registro documenta a migração estrutural e a cobertura de exports. A conformidade visual não é inferida pelo registro: requer a aceitação manual desktop prevista no quickstart da feature.
 

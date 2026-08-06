@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { SidebarNavigationAdapter } from "@/app/navigation/SidebarNavigationAdapter";
 import { AppLayoutShell } from "@/components/templates";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={plusJakartaSans.variable} suppressHydrationWarning>
       <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
-        <AppLayoutShell>{children}</AppLayoutShell>
+        <AppLayoutShell sidebar={<SidebarNavigationAdapter />}>{children}</AppLayoutShell>
         <Toaster position="bottom-right" richColors />
       </body>
     </html>

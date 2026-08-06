@@ -3043,7 +3043,8 @@
         "molecule-sidebar-nav-item",
         "molecule-sidebar-quick-actions",
         "molecule-sidebar-user-profile",
-        "template-app-layout-shell"
+        "template-app-layout-shell",
+        "src/app/navigation/SidebarNavigationAdapter.tsx"
       ],
       "primitiveBase": "ui-sidebar",
       "specStatus": "homologated",
@@ -3080,7 +3081,9 @@
         }
       ],
       "profile": "design-system/components/profiles/templates/app-layout-shell.md",
-      "consumers": [],
+      "consumers": [
+        "src/app/layout.tsx"
+      ],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []

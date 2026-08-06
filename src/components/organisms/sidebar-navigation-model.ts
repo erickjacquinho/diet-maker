@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react';
-import { BookOpen, Palette, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
 
 export type SidebarRouteMatch = 'exact' | 'prefix' | 'patients-prefix';
 
@@ -21,27 +20,6 @@ export interface SidebarGroupItem {
 }
 
 export type SidebarNavigationItem = SidebarRouteItem | SidebarGroupItem;
-
-export const DEFAULT_NAVIGATION_ITEMS: SidebarRouteItem[] = [
-  { kind: 'route', href: '/pacientes', label: 'Pacientes', icon: Users, match: 'patients-prefix' },
-  { kind: 'route', href: '/presets', label: 'Presets de Dietas', icon: Sparkles, match: 'prefix' },
-  {
-    kind: 'route',
-    href: '/refeicoes-prontas',
-    label: 'Refeições Prontas',
-    icon: UtensilsCrossed,
-    match: 'prefix',
-  },
-  { kind: 'route', href: '/receitas', label: 'Receitas Culinárias', icon: Utensils, match: 'prefix' },
-  {
-    kind: 'route',
-    href: '/alimentos',
-    label: 'Planilha de Alimentos',
-    icon: BookOpen,
-    match: 'prefix',
-  },
-  { kind: 'route', href: '/design-system', label: 'Guia Design System', icon: Palette, match: 'prefix' },
-];
 
 function isSegmentPrefix(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);

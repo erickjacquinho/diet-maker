@@ -21,7 +21,7 @@ describe('SidebarNav preservation contract', () => {
     renderSidebar();
 
     expect(
-      within(screen.getByRole('navigation', { name: 'Navegação principal' }))
+      within(screen.getByRole('navigation', { name: /principal/ }))
         .getAllByRole('link')
         .map((link) => link.getAttribute('href')),
     ).toEqual([
@@ -66,14 +66,14 @@ describe('SidebarNav preservation contract', () => {
     expect(screen.getByRole('link', { name: /NutriDiet/ })).toHaveAttribute('href', '/pacientes');
     expect(screen.getByText('Dr. Ana')).toBeInTheDocument();
     expect(screen.getByText('Nutricionista clínica')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar Arquivo Local' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir Arquivo .diet' }));
     expect(onSave).toHaveBeenCalledTimes(1);
     expect(onOpen).toHaveBeenCalledTimes(1);
 
     expect(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Salvar' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Abrir' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Salvar Arquivo Local' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Abrir Arquivo .diet' }));
     }).not.toThrow();
   });
 

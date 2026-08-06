@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed. A lista default permanece flat com as seis rotas de produção atuais; grupos só aparecem quando fornecidos por `navigationItems`.
+Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed. O organismo recebe `pathname` e `navigationItems` explicitamente; a configuração flat das seis rotas de produção pertence ao adapter da aplicação. Grupos só aparecem quando fornecidos por `navigationItems`.
 
 ## Allowed variants
 
@@ -41,6 +41,8 @@ Primitive base: `ui-sidebar`. Compõe somente dependências permitidas pela laye
 ## Content rules
 
 Labels nomeiam destinos; estado current é programático; collapsed conserva nome completo.
+
+`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSave`, `onOpen`, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
 
 ## Exceptions
 

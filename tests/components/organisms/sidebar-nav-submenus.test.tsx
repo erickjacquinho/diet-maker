@@ -1,15 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BookOpen, Palette } from 'lucide-react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
-const routeState = vi.hoisted(() => ({ pathname: '/pacientes' }));
-
-vi.mock('next/navigation', () => ({
-  usePathname: () => routeState.pathname,
-}));
+import { describe, expect, it } from 'vitest';
 
 import { SidebarNav } from '@/components/organisms/SidebarNav';
 import type { SidebarGroupItem } from '@/components/organisms/sidebar-navigation-model';
+import { sidebarProductionRoutes } from './sidebar-navigation-fixtures';
 
 const libraryGroup: SidebarGroupItem = {
   kind: 'group',
@@ -29,12 +24,8 @@ const libraryGroup: SidebarGroupItem = {
 };
 
 describe('SidebarNav future submenu contract', () => {
-  afterEach(() => {
-    routeState.pathname = '/pacientes';
-  });
-
   it('exposes an expanded state and keyboard-operable disclosure for future groups', () => {
-    render(<SidebarNav navigationItems={[libraryGroup]} />);
+    render(<SidebarNav pathname="/pacientes" navigationItems={[libraryGroup]} />);
 
     const trigger = screen.getByRole('button', { name: 'Biblioteca' });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -46,8 +37,7 @@ describe('SidebarNav future submenu contract', () => {
   });
 
   it('marks an active child current and makes its ancestor discoverable', () => {
-    routeState.pathname = '/biblioteca/guia';
-    render(<SidebarNav navigationItems={[libraryGroup]} />);
+    render(<SidebarNav pathname="/biblioteca/guia" navigationItems={[libraryGroup]} />);
 
     const trigger = screen.getByRole('button', { name: /Biblioteca/ });
     expect(trigger).toHaveAttribute('data-active', 'true');
@@ -58,24 +48,21 @@ describe('SidebarNav future submenu contract', () => {
     );
   });
 
-  it('omits empty groups and keeps the production navigation flat by default', () => {
+  it('omits empty groups and keeps production navigation data explicit', () => {
     render(
       <SidebarNav
-        navigationItems={[
-          { ...libraryGroup, children: [] },
-        ]}
+        pathname="/pacientes"
+        navigationItems={[{ ...libraryGroup, children: [] }]}
       />,
     );
-
     expect(screen.queryByRole('button', { name: 'Biblioteca' })).toBeNull();
 
-    render(<SidebarNav />);
-    expect(screen.queryByRole('button', { name: 'Biblioteca' })).toBeNull();
+    render(<SidebarNav pathname="/pacientes" navigationItems={sidebarProductionRoutes} />);
     expect(screen.getByRole('link', { name: 'Pacientes' })).toBeInTheDocument();
   });
 
   it('keeps future group children discoverable through a collapsed keyboard surface', () => {
-    render(<SidebarNav initialCollapsed navigationItems={[libraryGroup]} />);
+    render(<SidebarNav pathname="/pacientes" initialCollapsed navigationItems={[libraryGroup]} />);
 
     const trigger = screen.getByRole('button', { name: 'Biblioteca' });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');

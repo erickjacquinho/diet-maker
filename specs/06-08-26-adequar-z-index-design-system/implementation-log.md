@@ -33,3 +33,13 @@
 - Full `npm run type-check` is blocked by the unrelated untracked Sidebar test importing missing `src/app/navigation/SidebarNavigationAdapter`.
 - Full `npm test` exceeded the execution limit; the timed-out process from this execution was stopped. A separate Sidebar Vitest process was preserved.
 - `npm run build` compiled successfully but failed at page data collection for `/alimentos` with `PageNotFoundError`; this is outside the layer contract and requires separate investigation.
+
+## 2026-08-06 — T020 convergence
+
+- Root cause of the original type-check/build blockers: the Sidebar migration had made `SidebarNav` require explicit `pathname` and `navigationItems`, while `RootLayout` still rendered `AppLayoutShell` without its required `sidebar` slot and the app route adapter was incomplete. The adapter/configuration now supplies route context at the `app` boundary and `RootLayout` renders it through the shell slot.
+- `npm run type-check`: passed.
+- `npm run build`: passed; `/alimentos` was compiled and statically generated successfully.
+- `npm run lint`, `npm run audit:z-index`, `npm run verify:design-system`, `npm run audit:atomic-design` and `npm run verify:links`: passed.
+- Focused Sidebar convergence suites passed individually: adapter 2/2, `SidebarNav` 8/8, shortcut 4/4 and submenus 4/4.
+- `npm test`: still blocked by execution duration; the official command exceeded 300 seconds without a completion report. A grouped `forks` run also exceeded 180 seconds, while the affected suites pass when isolated. No additional z-index or Sidebar assertion failure was reproduced in the isolated runs.
+- T020 remains pending until the full repository suite completes within the project's execution envelope or its runner-duration strategy is explicitly revised.

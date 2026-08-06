@@ -36,6 +36,8 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 The molecule owns its props contract and can be consumed without importing `SidebarNav`; the organism passes collapse state and the toggle callback downward. It remains responsible only for product identity and the visible collapse action.
 
+Expanded uses `subsection-title`/`caption`; collapsed keeps the full `NutriDiet Pro Local` accessible name on the home link. The collapse action uses the standard control size and icon-16 in both states.
+
 Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

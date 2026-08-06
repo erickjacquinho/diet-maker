@@ -42,6 +42,8 @@ The default provider is intentionally in-memory and has no cookie, localStorage 
 
 Expanded uses `--cmp-sidebar-width-expanded` (224px); collapsed uses `--cmp-sidebar-width-collapsed` (64px). Menu buttons expose `data-active`, preserve focus-visible ring treatment, and keep their accessible label when the visual text is hidden. The provider does not install shortcut behavior unless `shortcutKey` is supplied, and editable targets are excluded.
 
+The left rail uses the canonical 1px divider border. Submenu buttons use the standard 36px control height and 16px icons. Rail, menu and submenu transitions include a reduced-motion fallback; focus-visible keeps the ring offset inside the sidebar surface.
+
 ## Composition
 
 This file documents generic UI only. Product navigation is composed in `organism-sidebar-nav`; route matching, labels, groups, identity, quick actions and profile data must remain outside `src/components/ui`.

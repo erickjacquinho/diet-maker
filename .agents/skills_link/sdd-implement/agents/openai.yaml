@@ -1,7 +1,7 @@
 interface:
   display_name: "SDD Implement"
-  short_description: "Implementar e convergir tarefas do Spec Kit"
-  default_prompt: "Use $sdd-implement para executar as tarefas do Spec Kit, corrigir falhas e validar o resultado completo."
+  short_description: "Implementar até uma convergência final limpa"
+  default_prompt: "Use $sdd-implement para executar as tarefas do Spec Kit e repetir a skill local speckit-converge até uma passada final sem achados."
 
 policy:
   allow_implicit_invocation: false

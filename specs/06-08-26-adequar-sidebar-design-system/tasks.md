@@ -50,7 +50,7 @@
 - [X] T011 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarBrand.tsx` para roles tipográficos canônicos, espaçamento/token geometry, icon-16 e accessible name completo no collapsed state, preservando link e toggle.
 - [X] T012 [P] [US1] [skill: $ui-styling] Ajustar `src/components/molecules/SidebarNavItem.tsx` para links reais, current/focus semantics, icon-16, altura/spacing de navigation e labels completos em tooltip/collapsed.
 - [X] T013 [US1] [skill: $vercel-composition-patterns] Refatorar `src/components/organisms/SidebarNav.tsx` para consumir `pathname`/`navigationItems` por props, preservar flat default por dados recebidos e manter composição compound sem importar contexto de rota.
-- [ ] T014 [US1] [skill: $webapp-testing] Executar e estabilizar os testes focados de `tests/components/ui/sidebar.test.tsx`, `tests/components/organisms/sidebar-nav-conformance.test.tsx` e `tests/components/organisms/sidebar-nav.test.tsx`, mantendo a falha útil para qualquer valor não canônico.
+- [X] T014 [US1] [skill: $webapp-testing] Executar e estabilizar os testes focados de `tests/components/ui/sidebar.test.tsx`, `tests/components/organisms/sidebar-nav-conformance.test.tsx` e `tests/components/organisms/sidebar-nav.test.tsx`, mantendo a falha útil para qualquer valor não canônico.
 
 **Checkpoint**: A sidebar visual e navegacional é um MVP independente, com seis rotas preservadas, nomes acessíveis, tokens/geometry corrigidos e sem acoplamento de pathname no organismo.
 
@@ -64,16 +64,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T015 [P] [US2] [skill: $tdd] Adicionar cenários em `tests/components/molecules/sidebar-user-profile.test.tsx` para `onOpenAccount` presente/ausente, semantics de controle, ausência de cursor/hover no modo informativo e callback único.
-- [ ] T016 [P] [US2] [skill: $tdd] Adicionar cenários em `tests/components/molecules/sidebar-quick-actions.test.tsx` para cada combinação de onSave/onOpen, disabled nativo, descrição acessível da indisponibilidade e callback correspondente.
-- [ ] T017 [P] [US2] [skill: $tdd] Atualizar `tests/components/templates/app-layout-shell.test.tsx` para slot de sidebar, skip link, `main#main-content`, focusability e scroll independente.
+- [X] T015 [P] [US2] [skill: $tdd] Adicionar cenários em `tests/components/molecules/sidebar-user-profile.test.tsx` para `onOpenAccount` presente/ausente, semantics de controle, ausência de cursor/hover no modo informativo e callback único.
+- [X] T016 [P] [US2] [skill: $tdd] Adicionar cenários em `tests/components/molecules/sidebar-quick-actions.test.tsx` para cada combinação de onSave/onOpen, disabled nativo, descrição acessível da indisponibilidade e callback correspondente.
+- [X] T017 [P] [US2] [skill: $tdd] Atualizar `tests/components/templates/app-layout-shell.test.tsx` para slot de sidebar, skip link, `main#main-content`, focusability e scroll independente.
 
 ### Implementation for User Story 2
 
-- [ ] T018 [P] [US2] [skill: $ui-styling] Atualizar `src/components/molecules/SidebarUserProfile.tsx` com `onOpenAccount?: () => void`; renderizar entrada semântica e keyboard-operable somente quando o callback existir, sem aparência interativa no fallback.
-- [ ] T019 [P] [US2] [skill: $ui-styling] Atualizar `src/components/molecules/SidebarQuickActions.tsx` para manter Salvar/Abrir visíveis, usar disabled quando o handler faltar, anunciar os motivos definidos no contrato e preservar tooltips/labels collapsed.
-- [ ] T020 [US2] [skill: $frontend-architecture-mindset] Alterar `src/components/templates/AppLayoutShell.tsx` para receber `sidebar: React.ReactNode`, adicionar skip link em pt-BR e `main id="main-content" tabIndex={-1}`, preservando o scroll desktop.
-- [ ] T021 [US2] [skill: $webapp-testing] Estabilizar os testes de `tests/components/molecules/sidebar-user-profile.test.tsx`, `tests/components/molecules/sidebar-quick-actions.test.tsx` e `tests/components/templates/app-layout-shell.test.tsx` em ambos os estados da sidebar.
+- [X] T018 [P] [US2] [skill: $ui-styling] Atualizar `src/components/molecules/SidebarUserProfile.tsx` com `onOpenAccount?: () => void`; renderizar entrada semântica e keyboard-operable somente quando o callback existir, sem aparência interativa no fallback.
+- [X] T019 [P] [US2] [skill: $ui-styling] Atualizar `src/components/molecules/SidebarQuickActions.tsx` para manter Salvar/Abrir visíveis, usar disabled quando o handler faltar, anunciar os motivos definidos no contrato e preservar tooltips/labels collapsed.
+- [X] T020 [US2] [skill: $frontend-architecture-mindset] Alterar `src/components/templates/AppLayoutShell.tsx` para receber `sidebar: React.ReactNode`, adicionar skip link em pt-BR e `main id="main-content" tabIndex={-1}`, preservando o scroll desktop.
+- [X] T021 [US2] [skill: $webapp-testing] Estabilizar os testes de `tests/components/molecules/sidebar-user-profile.test.tsx`, `tests/components/molecules/sidebar-quick-actions.test.tsx` e `tests/components/templates/app-layout-shell.test.tsx` em ambos os estados da sidebar.
 
 **Checkpoint**: Perfil, Salvar/Abrir e skip link comunicam corretamente seus estados, são operáveis por teclado e não geram no-ops ou erros.
 
@@ -87,15 +87,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T022 [P] [US3] [skill: $tdd] Completar `tests/components/app/sidebar-navigation-adapter.test.tsx` para pathname injection, seis destinos flat, ausência de configuração de rota dentro do organism e integração do adapter com o shell.
-- [ ] T023 [P] [US3] [skill: $tdd] Criar `tests/components/organisms/sidebar-nav-submenus.test.tsx` para `aria-expanded`, Enter/Space, child `aria-current`, ancestor discoverability, grupo vazio, 36px e surface acessível no collapsed state.
+- [X] T022 [P] [US3] [skill: $tdd] Completar `tests/components/app/sidebar-navigation-adapter.test.tsx` para pathname injection, seis destinos flat, ausência de configuração de rota dentro do organism e integração do adapter com o shell.
+- [X] T023 [P] [US3] [skill: $tdd] Criar `tests/components/organisms/sidebar-nav-submenus.test.tsx` para `aria-expanded`, Enter/Space, child `aria-current`, ancestor discoverability, grupo vazio, 36px e surface acessível no collapsed state.
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] [skill: $frontend-architecture-mindset] Criar `src/app/navigation/sidebar-navigation-config.ts` com a configuração flat dos seis destinos e `src/app/navigation/SidebarNavigationAdapter.tsx` como owner de pathname/items, sem alterar URLs/ordem.
-- [ ] T025 [US3] [skill: $frontend-architecture-mindset] Atualizar `src/app/layout.tsx` para passar `<SidebarNavigationAdapter />` ao slot `sidebar` de `AppLayoutShell`, mantendo callbacks ausentes conforme decisão e sem import genérico do primitive em páginas.
-- [ ] T026 [US3] [skill: $vercel-composition-patterns] Completar `src/components/organisms/SidebarNav.tsx` e `src/components/organisms/sidebar-navigation-model.ts` para groups futuros, active ancestor, disclosure/accessibility e collapsed surface sem reorganizar o modelo flat de produção.
-- [ ] T027 [US3] [skill: $webapp-testing] Executar e estabilizar `tests/components/app/sidebar-navigation-adapter.test.tsx` e `tests/components/organisms/sidebar-nav-submenus.test.tsx`, incluindo pathname desconhecido, nested patient route e grupo sem filhos.
+- [X] T024 [US3] [skill: $frontend-architecture-mindset] Criar `src/app/navigation/sidebar-navigation-config.ts` com a configuração flat dos seis destinos e `src/app/navigation/SidebarNavigationAdapter.tsx` como owner de pathname/items, sem alterar URLs/ordem.
+- [X] T025 [US3] [skill: $frontend-architecture-mindset] Atualizar `src/app/layout.tsx` para passar `<SidebarNavigationAdapter />` ao slot `sidebar` de `AppLayoutShell`, mantendo callbacks ausentes conforme decisão e sem import genérico do primitive em páginas.
+- [X] T026 [US3] [skill: $vercel-composition-patterns] Completar `src/components/organisms/SidebarNav.tsx` e `src/components/organisms/sidebar-navigation-model.ts` para groups futuros, active ancestor, disclosure/accessibility e collapsed surface sem reorganizar o modelo flat de produção.
+- [X] T027 [US3] [skill: $webapp-testing] Executar e estabilizar `tests/components/app/sidebar-navigation-adapter.test.tsx` e `tests/components/organisms/sidebar-nav-submenus.test.tsx`, incluindo pathname desconhecido, nested patient route e grupo sem filhos.
 
 **Checkpoint**: O adapter é o único owner do contexto de rota, a produção continua flat e o contrato de submenu futuro é testável e acessível.
 
@@ -105,13 +105,13 @@
 
 **Purpose**: Sincronizar o catálogo, validar toda a feature e registrar evidência sem declarar conformidade visual sem revisão humana.
 
-- [ ] T028 [P] [skill: $design-system] Atualizar `design-system/components/categories/navigation.md` e `design-system/components/profiles/ui/sidebar.md` com border do rail, reduced motion, focus, 36px submenu e boundary genérico efetivamente implementados.
-- [ ] T029 [P] [skill: $design-system] Atualizar `design-system/components/profiles/organisms/sidebar-nav.md` e `design-system/components/profiles/molecules/sidebar-{brand,nav-item,user-profile,quick-actions}.md` com props, callbacks, states, sources e consumers reais.
-- [ ] T030 [P] [skill: $design-system] Atualizar `design-system/components/profiles/templates/app-layout-shell.md`, `design-system/components/registry.json` e `design-system/15-component-registry.md` para registrar adapter/app consumer, slot sidebar, exports e lifecycle status.
-- [ ] T031 [P] [skill: $code-reviewer-expert] Executar `npm run type-check`, `npm run lint`, `npm run audit:atomic-design` e `npm run verify:design-system-legacy`; resolver todos os findings atribuíveis aos arquivos da feature.
-- [ ] T032 [skill: $code-reviewer-expert] Executar `npm run verify:design-system` e a suíte focada/completa de Vitest descrita em `specs/06-08-26-adequar-sidebar-design-system/quickstart.md`; registrar resultados e nenhum bloqueio restante.
-- [ ] T033 [skill: $webapp-testing] Executar os cinco cenários manuais do `specs/06-08-26-adequar-sidebar-design-system/quickstart.md` em 1024px+, com teclado e reduced motion, registrando evidências em `specs/06-08-26-adequar-sidebar-design-system/implementation-log.md`.
-- [ ] T034 [skill: $ui-ux-pro-max:ui-ux-pro-max] Fazer revisão visual final contra `design-system/components/categories/navigation.md`, `design-system/07-icons-motion-and-layers.md` e `design-system/08-states-and-accessibility.md`; registrar qualquer decisão residual no implementation log antes de considerar a feature pronta.
+- [X] T028 [P] [skill: $design-system] Atualizar `design-system/components/categories/navigation.md` e `design-system/components/profiles/ui/sidebar.md` com border do rail, reduced motion, focus, 36px submenu e boundary genérico efetivamente implementados.
+- [X] T029 [P] [skill: $design-system] Atualizar `design-system/components/profiles/organisms/sidebar-nav.md` e `design-system/components/profiles/molecules/sidebar-{brand,nav-item,user-profile,quick-actions}.md` com props, callbacks, states, sources e consumers reais.
+- [X] T030 [P] [skill: $design-system] Atualizar `design-system/components/profiles/templates/app-layout-shell.md`, `design-system/components/registry.json` e `design-system/15-component-registry.md` para registrar adapter/app consumer, slot sidebar, exports e lifecycle status.
+- [X] T031 [P] [skill: $code-reviewer-expert] Executar `npm run type-check`, `npm run lint`, `npm run audit:atomic-design` e `npm run verify:design-system-legacy`; resolver todos os findings atribuíveis aos arquivos da feature.
+- [X] T032 [skill: $code-reviewer-expert] Executar `npm run verify:design-system` e a suíte focada/completa de Vitest descrita em `specs/06-08-26-adequar-sidebar-design-system/quickstart.md`; registrar resultados e nenhum bloqueio restante.
+- [X] T033 [skill: $webapp-testing] Executar os cinco cenários manuais do `specs/06-08-26-adequar-sidebar-design-system/quickstart.md` em 1024px+, com teclado e reduced motion, registrando evidências em `specs/06-08-26-adequar-sidebar-design-system/implementation-log.md`.
+- [X] T034 [skill: $ui-ux-pro-max:ui-ux-pro-max] Fazer revisão visual final contra `design-system/components/categories/navigation.md`, `design-system/07-icons-motion-and-layers.md` e `design-system/08-states-and-accessibility.md`; registrar qualquer decisão residual no implementation log antes de considerar a feature pronta.
 
 ---
 
@@ -166,3 +166,8 @@
 ### Task Format Validation
 
 Todos os itens possuem checkbox, ID sequencial, marcador `[P]` somente quando aplicável, `[USx]` nas phases de user story, caminho de arquivo e tag de skill disponível no catálogo.
+
+## Phase 7: Convergence
+
+- [X] T035 [skill: $webapp-testing] Reexecutar a aceitação manual completa em servidor estável, cobrindo geometria/identidade, foco e reduced motion, conta e ações com/sem callbacks, skip link/shell e continuidade de rotas com rota desconhecida; registrar evidências de teclado, tooltip/popover, `aria-current` e `#main-content` conforme FR-022, SC-006 e T033 (partial).
+- [X] T036 [skill: $code-reviewer-expert] Consolidar o `implementation-log.md` em um único registro coerente para T032–T034, preservando os resultados passados e o bloqueio de ambiente, e alinhar o status final ao ledger sem declarar a feature pronta antes de T035 conforme Constitution V e T032–T034 (partial).

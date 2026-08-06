@@ -1,14 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
-const routeState = { pathname: '/design-system' };
-
-vi.mock('next/navigation', () => ({
-  usePathname: () => routeState.pathname,
-}));
+import { describe, expect, it } from 'vitest';
 
 import { SidebarNav, useSidebarContext } from '@/components/organisms/SidebarNav';
 import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
+import { sidebarProductionRoutes } from './sidebar-navigation-fixtures';
 
 function StateProbe() {
   const { state } = useSidebar();
@@ -25,12 +20,8 @@ function ProductToggleProbe() {
 }
 
 describe('SidebarNav shortcut readiness', () => {
-  afterEach(() => {
-    document.cookie = 'sidebar_state=; Max-Age=0; path=/';
-  });
-
   it('keeps the visible toggle operable and preserves route context', () => {
-    render(<SidebarNav />);
+    render(<SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes} />);
 
     const toggle = screen.getByRole('button', { name: 'Recolher Menu' });
     expect(screen.getByRole('link', { name: 'Guia Design System' })).toHaveAttribute(
@@ -55,7 +46,7 @@ describe('SidebarNav shortcut readiness', () => {
   });
 
   it('does not activate Ctrl+B/Cmd+B or persistence in the current product wrapper', () => {
-    render(<SidebarNav />);
+    render(<SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes} />);
 
     fireEvent.keyDown(window, { key: 'b', ctrlKey: true });
     fireEvent.keyDown(window, { key: 'b', metaKey: true });
@@ -83,7 +74,7 @@ describe('SidebarNav shortcut readiness', () => {
 
   it('exposes the same product-owned toggle action for a future adapter', () => {
     render(
-      <SidebarNav>
+      <SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes}>
         <ProductToggleProbe />
       </SidebarNav>,
     );

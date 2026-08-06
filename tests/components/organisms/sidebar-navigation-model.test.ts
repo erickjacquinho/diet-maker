@@ -1,8 +1,7 @@
-import { BookOpen, Palette, Sparkles, Users } from 'lucide-react';
+import { BookOpen, Palette, Users } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 
 import {
-  DEFAULT_NAVIGATION_ITEMS,
   getRenderableNavigationItems,
   isSidebarNavigationItemActive,
   isSidebarRouteActive,
@@ -10,6 +9,7 @@ import {
   type SidebarGroupItem,
   type SidebarRouteItem,
 } from '@/components/organisms/sidebar-navigation-model';
+import { sidebarProductionRoutes } from './sidebar-navigation-fixtures';
 
 const patients: SidebarRouteItem = {
   kind: 'route',
@@ -28,7 +28,7 @@ const designSystem: SidebarRouteItem = {
 
 describe('sidebar navigation model', () => {
   it('keeps the six current destinations flat and ordered', () => {
-    expect(DEFAULT_NAVIGATION_ITEMS.map((item) => item.kind)).toEqual([
+    expect(sidebarProductionRoutes.map((item) => item.kind)).toEqual([
       'route',
       'route',
       'route',
@@ -36,7 +36,7 @@ describe('sidebar navigation model', () => {
       'route',
       'route',
     ]);
-    expect(DEFAULT_NAVIGATION_ITEMS.map((item) => item.href)).toEqual([
+    expect(sidebarProductionRoutes.map((item) => item.href)).toEqual([
       '/pacientes',
       '/presets',
       '/refeicoes-prontas',
@@ -50,7 +50,7 @@ describe('sidebar navigation model', () => {
     expect(isSidebarRouteActive('/design-system', designSystem)).toBe(true);
     expect(isSidebarRouteActive('/design-system/tokens', designSystem)).toBe(false);
     expect(isSidebarRouteActive('/pacientes/123/dieta/1', patients)).toBe(true);
-    expect(isSidebarRouteActive('/presets-extra', DEFAULT_NAVIGATION_ITEMS[1])).toBe(false);
+    expect(isSidebarRouteActive('/presets-extra', sidebarProductionRoutes[1])).toBe(false);
     expect(isSidebarRouteActive('/unknown', patients)).toBe(false);
   });
 

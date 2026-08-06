@@ -64,7 +64,7 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       size="standard"
       onClick={onOpenAccount}
       aria-label={accountLabel}
-      className="h-auto w-full justify-start p-0 text-left hover:bg-transparent"
+      className="flex h-auto w-full items-center justify-start gap-2.5 rounded-control border border-border-subtle bg-surface-subtle p-2 text-left hover:border-text-muted hover:bg-surface-subtle"
     >
       {profileContent}
     </Button>

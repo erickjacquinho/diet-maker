@@ -1,11 +1,11 @@
 ---
 name: sdd-implement
-description: Execute and converge an approved Spec Kit implementation until validation passes or a safe blocker is documented.
+description: Execute an approved Spec Kit implementation and repeatedly apply the project-local speckit-converge skill until a clean pass confirms that nothing remains to fix, or a safe blocker is documented.
 ---
 
 # SDD Implement
 
-Executar um plano Spec Kit já aprovado, tarefa por tarefa, incorporando o ciclo de convergência dentro da implementação. Trabalhar até concluir todos os critérios verificáveis ou documentar um bloqueio que exige decisão humana.
+Executar um plano Spec Kit já aprovado, tarefa por tarefa, incorporando o ciclo de convergência dentro da implementação. Ao final, aplicar `speckit-converge` repetidamente até obter uma passada limpa, sem achados para correção. Trabalhar até concluir todos os critérios verificáveis ou documentar um bloqueio que exige decisão humana.
 
 ## Contrato
 
@@ -15,6 +15,7 @@ Executar um plano Spec Kit já aprovado, tarefa por tarefa, incorporando o ciclo
 - Priorizar as instruções locais do projeto e das skills Spec Kit quando estiverem presentes.
 - Fazer mudanças apenas dentro do escopo aprovado, salvo correções técnicas necessárias para manter os contratos existentes.
 - Registrar evidências antes de declarar uma tarefa ou a implementação como concluída.
+- Não declarar a implementação concluída antes de uma execução completa de `speckit-converge` terminar sem encontrar nenhuma correção necessária.
 
 ## Estado 0: localizar e preparar
 
@@ -149,13 +150,33 @@ Executar uma auditoria final abrangente:
 7. Reexecutar `speckit-analyze` se algum artefato Spec Kit tiver mudado.
 8. Escrever em `implementation-log.md` o resultado final, comandos executados e limitações conhecidas.
 
-**Critério de conclusão:** todos os critérios aplicáveis passam, nenhuma tarefa implementável permanece pendente, a análise final não aponta conflito crítico e o log contém evidências suficientes para reproduzir a validação.
+**Critério de conclusão:** todos os critérios aplicáveis passam, nenhuma tarefa implementável permanece pendente, a análise final não aponta conflito crítico e o log contém evidências suficientes para reproduzir a validação. Passar obrigatoriamente ao Estado 6; este estado não autoriza a saída `Concluído`.
+
+## Estado 6: loop obrigatório de `speckit-converge`
+
+Usar `<project-root>/.agents/skills/speckit-converge/SKILL.md` como autoridade operacional desta etapa. Não substituir sua execução por uma revisão informal ou apenas pelos comandos do Estado 5.
+
+1. Confirmar que a skill local existe e reler seu `SKILL.md` por completo antes da primeira iteração, mesmo que já tenha sido lido no Estado 0.
+2. Aplicar integralmente `speckit-converge` à implementação e aos artefatos atuais da feature, preservando `<feature-dir>` como o diretório ativo da especificação.
+3. Registrar em `implementation-log.md`, para cada iteração, os achados, as correções efetuadas, os comandos executados e os resultados.
+4. Quando a execução encontrar qualquer item corrigível dentro do escopo:
+   - corrigir todos os achados aplicáveis seguindo a própria `speckit-converge` e as instruções do projeto;
+   - atualizar `tasks.md`, checklists e demais artefatos somente quando a evidência justificar a mudança;
+   - retornar ao Estado 5 e repetir toda a validação final sobre o novo estado;
+   - iniciar uma nova iteração completa de `speckit-converge` a partir do estado atualizado, sem reutilizar como prova a auditoria anterior.
+5. Quando a execução encontrar um bloqueio, usar os critérios de parada da própria `speckit-converge` e do Estado 3. Documentar o bloqueio e sair como `Bloqueado`; não converter achados não resolvidos em limitações não bloqueantes.
+6. Quando uma iteração completa terminar sem encontrar correções necessárias, registrar explicitamente a passada limpa e sua evidência no `implementation-log.md`.
+7. Somente após essa passada limpa, permitir a saída `Concluído`.
+
+Não impor um número arbitrário de iterações enquanto houver progresso observável. Considerar o loop bloqueado quando a mesma condição impedir progresso segundo os limites do Estado 3, quando a correção exigir decisão humana ou quando a skill local não existir ou não puder ser lida. Nesse último caso, informar exatamente o caminho esperado e não declarar conclusão.
+
+**Critério de conclusão:** a iteração mais recente de `speckit-converge` percorreu todo o seu fluxo e terminou com zero achados para correção; as verificações afetadas continuam passando; a passada limpa está registrada com evidências reproduzíveis.
 
 ## Estados de saída
 
 ### Concluído
 
-Informar o diretório da feature, resumo das mudanças, quantidade de tarefas concluídas, comandos de validação e limitações não bloqueantes.
+Informar o diretório da feature, resumo das mudanças, quantidade de tarefas concluídas, comandos de validação, quantidade de iterações de `speckit-converge`, evidência da passada limpa final e limitações não bloqueantes.
 
 ### Bloqueado
 
@@ -165,6 +186,7 @@ Informar o diretório da feature, tarefa e arquivo afetados, causa raiz ou hipó
 
 - Preferir evidência executável a inferência.
 - Manter o loop apertado: falha específica → diagnóstico → correção → mesmo teste → regressão.
+- Reiniciar `speckit-converge` após qualquer correção e exigir uma passada completa sem achados como condição terminal.
 - Usar os comandos reais do projeto; registrar comandos inexistentes como limitação em vez de inventá-los.
 - Preservar alterações anteriores do usuário e separar claramente mudanças próprias.
 - Manter uma única fonte de verdade para escopo e critérios: os artefatos Spec Kit.
