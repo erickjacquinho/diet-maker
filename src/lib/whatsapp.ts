@@ -14,6 +14,19 @@ function getLocalDigits(value: string | undefined): string {
   return withoutCountryCode.slice(0, MAX_LOCAL_DIGITS);
 }
 
+function getWhatsappPhoneNumber(value: string | undefined): string | null {
+  const digits = getDigits(value);
+  const localDigits = digits.startsWith(BRAZIL_COUNTRY_CODE) && digits.length > MAX_LOCAL_DIGITS
+    ? digits.slice(BRAZIL_COUNTRY_CODE.length)
+    : digits;
+
+  if (localDigits.length !== 10 && localDigits.length !== 11) {
+    return null;
+  }
+
+  return `${BRAZIL_COUNTRY_CODE}${localDigits}`;
+}
+
 /**
  * Formats a Brazilian WhatsApp number while the user types.
  * The visible value intentionally stays local; the country code is added when opening WhatsApp.
@@ -36,18 +49,10 @@ export function formatWhatsappContact(value: string | undefined): string {
 }
 
 /**
- * Returns a wa.me URL for a valid Brazilian landline or mobile number.
+ * Returns a direct WhatsApp Web URL for a valid Brazilian landline or mobile number.
  * Accepts both local numbers and values that already include country code 55.
  */
 export function getWhatsappUrl(value: string | undefined): string | null {
-  const digits = getDigits(value);
-  const localDigits = digits.startsWith(BRAZIL_COUNTRY_CODE) && digits.length > MAX_LOCAL_DIGITS
-    ? digits.slice(BRAZIL_COUNTRY_CODE.length)
-    : digits;
-
-  if (localDigits.length !== 10 && localDigits.length !== 11) {
-    return null;
-  }
-
-  return `https://wa.me/${BRAZIL_COUNTRY_CODE}${localDigits}`;
+  const phoneNumber = getWhatsappPhoneNumber(value);
+  return phoneNumber ? `https://web.whatsapp.com/send?phone=${phoneNumber}` : null;
 }

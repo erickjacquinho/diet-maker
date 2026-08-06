@@ -14,12 +14,12 @@ describe('WhatsApp contact formatting', () => {
     expect(formatWhatsappContact('+55 (11) 99999-9999')).toBe('(11) 99999-9999');
   });
 
-  it('returns a wa.me URL with country code for a local number', () => {
-    expect(getWhatsappUrl('(11) 99999-9999')).toBe('https://wa.me/5511999999999');
+  it('returns a direct WhatsApp Web URL with country code for a local number', () => {
+    expect(getWhatsappUrl('(11) 99999-9999')).toBe('https://web.whatsapp.com/send?phone=5511999999999');
   });
 
-  it('does not duplicate an existing country code', () => {
-    expect(getWhatsappUrl('+55 11 99999-9999')).toBe('https://wa.me/5511999999999');
+  it('does not duplicate an existing country code in the Web URL', () => {
+    expect(getWhatsappUrl('+55 11 99999-9999')).toBe('https://web.whatsapp.com/send?phone=5511999999999');
   });
 
   it('rejects empty and incomplete contacts', () => {

@@ -31,7 +31,7 @@ describe('PatientDetailPage WhatsApp action', () => {
   });
 
   it('opens the patient WhatsApp conversation with the Brazilian country code', async () => {
-    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const open = vi.spyOn(window, 'open').mockReturnValue({} as Window);
 
     render(<PatientDetailPage />);
 
@@ -45,7 +45,7 @@ describe('PatientDetailPage WhatsApp action', () => {
     fireEvent.click(button);
 
     expect(open).toHaveBeenCalledWith(
-      'https://wa.me/5511999999999',
+      'https://web.whatsapp.com/send?phone=5511999999999',
       '_blank',
       'noopener,noreferrer',
     );

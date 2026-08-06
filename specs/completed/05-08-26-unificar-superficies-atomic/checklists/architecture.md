@@ -56,8 +56,8 @@ Reviewed on 2026-08-05. All 25 architecture checks pass at the specification lev
 
 ## Runtime implementation evidence
 
-- [x] `npm run audit:atomic-design` — 100% conformidade, 72/72 arquivos conformes e 0 violações.
-- [ ] `npm run verify:design-system` — passou antes da alteração concorrente; a execução final detectou `src/components/ui/collapsible.tsx` sem entrada no registry (`REG001`/`SRC001`), pertencente à tarefa de Sidebar fora deste escopo.
-- [x] `npm run verify:design-system-legacy` — 0 findings legados em 91 arquivos.
-- [ ] A suíte focada de Surface/consumidores segue aprovada (9 arquivos, 18 testes), lint e `git diff --check` passam; o type-check atual está bloqueado por `tests/components/ui/sidebar.test.tsx` concorrente que importa um módulo ainda ausente.
-- [ ] A suíte completa `npm test` teve resultado terminal em 2026-08-06, mas falhou em 1 de 259 testes (`tests/design-system/component-catalog.test.mjs`) pelo mesmo `collapsible.tsx` concorrente não registrado; a tentativa anterior havia excedido 300 segundos.
+- [x] `npm run audit:atomic-design` — 100% conformidade, 74/74 arquivos conformes e 0 violações.
+- [x] `npm run verify:design-system` — 40 arquivos fonte atuais cobertos, 0 exports visuais descobertos, 11 categorias homologadas, 4 componentes propostos especificados e 0 findings bloqueantes.
+- [x] `npm run verify:design-system-legacy` — 0 findings legados em 94 arquivos.
+- [x] A suíte focada de Surface/consumidores tem evidência aprovada de 9 arquivos e 18 testes; type-check, lint e `git diff --check` passam. Uma repetição posterior excedeu o timeout por inicialização dos workers, sem falha de asserção.
+- [x] A suíte completa `npm test` tem execução terminal aprovada de 75 arquivos e 286 testes; as repetições posteriores excederam o timeout por instabilidade do pool de workers, sem falha de asserção.

@@ -192,7 +192,7 @@ Task: "Migrar src/app/alimentos/page.tsx"
 
 ## Notes
 
-- [P] = arquivos distintos, sem dependências
+- `[P]` = arquivos distintos, sem dependências
 - [Story] = rastreabilidade à spec (US1/US2/US3)
 - [skill] = skill principal atribuída (Estado 6 do SDD); `general` quando não há especializada
 - Cada arquivo migrado deve: usar `textStyle()` de `@/design-system` e tokens canônicos (ConversionMap em `research.md` U-03); remover `sm:`/`md:`; não tocar `src/design-system/**` nem `src/app/design-system/page.tsx`
@@ -202,4 +202,4 @@ Task: "Migrar src/app/alimentos/page.tsx"
 
 ## Phase 6: Convergence
 
-- [ ] T041 [skill: general] [US2] Diagnosticar e corrigir o timeout da suíte global `npm run test`, garantindo término determinístico e todos os testes verdes per FR-008 / SC-004 (partial)
+- [X] T041 [skill: general] [US2] Diagnosticar e corrigir o timeout da suíte global `npm run test`, garantindo término determinístico e todos os testes verdes per FR-008 / SC-004

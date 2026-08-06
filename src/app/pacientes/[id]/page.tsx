@@ -372,6 +372,12 @@ export default function PatientDetailPage() {
   const nextEventSummary = buildNextEventSummary(patient.nextEvent);
   const whatsappUrl = getWhatsappUrl(patient.whatsapp);
 
+  const handleOpenWhatsapp = () => {
+    if (!whatsappUrl) return;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="flex flex-col p-6 max-w-6xl mx-auto gap-6">
       <PageContextHeader
@@ -448,11 +454,7 @@ export default function PatientDetailPage() {
                 disabled={!whatsappUrl}
                 title={whatsappUrl ? 'Abrir conversa no WhatsApp' : 'Cadastre um WhatsApp para entrar em contato'}
                 aria-label={whatsappUrl ? 'Abrir conversa no WhatsApp' : 'WhatsApp indisponÃ­vel: cadastre um nÃºmero'}
-                onClick={() => {
-                  if (whatsappUrl) {
-                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-                  }
-                }}
+                onClick={handleOpenWhatsapp}
               >
                 WhatsApp
               </SecondaryActionButton>
@@ -856,7 +858,7 @@ export default function PatientDetailPage() {
                   <SelectTrigger id="next-event-type">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="!z-modal">
+                  <SelectContent layer="modal">
                     <SelectGroup>
                       <SelectItem value="assessment-update">Atualização de avaliação</SelectItem>
                       <SelectItem value="diet-update">Atualização de dieta</SelectItem>

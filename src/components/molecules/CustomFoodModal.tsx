@@ -159,7 +159,7 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
               <label htmlFor="custom-food-unit" className="text-style-legal font-bold text-text-primary block mb-1">Unidade</label>
               <Select value={formData.unit} onValueChange={(value) => update('unit', value)}>
                 <SelectTrigger id="custom-food-unit"><SelectValue /></SelectTrigger>
-                <SelectContent>{UNITS.map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
+                <SelectContent layer="modal">{UNITS.map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
@@ -169,7 +169,7 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
               <label htmlFor="custom-food-category" className="text-style-legal font-bold text-text-primary block mb-1">Categoria</label>
               <Select value={formData.category} onValueChange={(value) => update('category', value)}>
                 <SelectTrigger id="custom-food-category"><SelectValue /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
+                <SelectContent layer="modal">{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="col-span-6">

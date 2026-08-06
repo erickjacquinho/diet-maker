@@ -91,12 +91,25 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
             <div><label className="text-style-legal font-semibold text-text-muted block mb-1">Peso (kg)</label><Input type="number" step="any" value={formData.weightKg} onChange={(event) => update('weightKg', Number(event.target.value))} /></div>
           </div>
 
-          <div>
-            <label htmlFor="new-patient-objective" className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
-            <Select value={formData.objective} onValueChange={(value) => update('objective', value)}>
-              <SelectTrigger id="new-patient-objective"><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger>
-              <SelectContent>{DEFAULT_OBJECTIVES.map((objective) => <SelectItem key={objective} value={objective}>{objective}</SelectItem>)}</SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label htmlFor="new-patient-objective" className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
+              <Select value={formData.objective} onValueChange={(value) => update('objective', value)}>
+                <SelectTrigger id="new-patient-objective"><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger>
+                <SelectContent layer="modal">{DEFAULT_OBJECTIVES.map((objective) => <SelectItem key={objective} value={objective}>{objective}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label htmlFor="new-patient-gender" className="text-style-legal font-bold text-text-primary block mb-1">Gênero</label>
+              <Select value={formData.gender} onValueChange={(value) => update('gender', value)}>
+                <SelectTrigger id="new-patient-gender"><SelectValue placeholder="Selecione o gênero" /></SelectTrigger>
+                <SelectContent layer="modal">
+                  <SelectItem value="Masculino">Masculino</SelectItem>
+                  <SelectItem value="Feminino">Feminino</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-2">

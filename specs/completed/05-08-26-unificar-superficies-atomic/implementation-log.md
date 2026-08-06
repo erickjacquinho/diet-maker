@@ -56,3 +56,17 @@
 
 - Full `npm test` now has a terminal result but remains blocked by the concurrent Sidebar catalog finding described above.
 - `.audit-report.*` and `specs/05-08-26-migrar-sidebar-shadcn-submenus/implementation-log.md` are concurrent worktree changes from another task and were preserved outside this feature's scope.
+
+## Final validation after concurrent Sidebar completion (2026-08-06)
+
+- Checkpoint in place: `81b0cdd chore(design-system): checkpoint before test convergence`.
+- `npm run type-check`: passed.
+- `npm run lint`: passed.
+- `git diff --check`: passed.
+- Focused Surface validation has terminal evidence of 9 files and 18 tests passing. A later retry with the current Windows worker pool exceeded its timeout without an assertion failure; one isolated Surface test passed with 1 file and 3 tests using the forks pool.
+- `npm test`: terminal green evidence from the resolved concurrent worktree is 75 files and 286 tests passed. Later retries with threads and forks exceeded 480 seconds and left no assertion failure; orphaned Vitest workers were terminated after each timeout.
+- `npm run audit:atomic-design`: passed; 74/74 files conforming and 0 violations.
+- `npm run verify:design-system`: passed; 40 current source files covered, 0 uncovered public visual exports, 11 categories homologated, 4 proposed components specified and 0 blocking findings.
+- `npm run verify:design-system-legacy`: passed; 0 legacy findings across 94 files.
+- `npm run build`: passed; Next.js production build compiled successfully and generated all 10 routes.
+- The earlier catalog/type-check blockers were caused by the concurrent Sidebar migration and are resolved in the current checkpoint; no Surface source scope was expanded.

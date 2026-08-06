@@ -101,8 +101,8 @@ description: "Implementation tasks for the reusable surface foundation and Atomi
 
 **Purpose**: Close the feature with reproducible checks and documentation consistency.
 
-- [ ] T027 [skill: $tdd] Run the complete validation commands listed in `specs/05-08-26-unificar-superficies-atomic/quickstart.md` (`npm run type-check`, `npm run lint`, focused tests, `npm test`, and `git diff --check`) and resolve failures without expanding scope.
-- [ ] T028 [skill: $code-reviewer-expert] Run the final design-system and Atomic catalog audits, confirm the success criteria in `specs/05-08-26-unificar-superficies-atomic/spec.md`, and record evidence in `specs/05-08-26-unificar-superficies-atomic/checklists/architecture.md`.
+- [X] T027 [skill: $tdd] Run the complete validation commands listed in `specs/05-08-26-unificar-superficies-atomic/quickstart.md` (`npm run type-check`, `npm run lint`, focused tests, `npm test`, and `git diff --check`) and resolve failures without expanding scope.
+- [X] T028 [skill: $code-reviewer-expert] Run the final design-system and Atomic catalog audits, confirm the success criteria in `specs/05-08-26-unificar-superficies-atomic/spec.md`, and record evidence in `specs/05-08-26-unificar-superficies-atomic/checklists/architecture.md`.
 - [X] T029 [skill: $design-system] Update implementation/compliance notes in `design-system/13-implementation-and-compliance.md` only if the migration introduces a new reusable surface rule, and ensure all component profiles and registry metadata remain synchronized.
 
 ## Dependencies and execution order
