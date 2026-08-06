@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-05
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Padronizar o header contextual para fluxos que abrem sequencialmente, começando pelo fluxo de pacientes, perfil, dieta e consulta, com botão voltar, título e breadcrumb; documentar o padrão para páginas futuras e criar uma especificação SDD para sua implementação."
 
@@ -100,5 +100,11 @@ Como usuário do fluxo de dieta ou consulta, quero continuar acessando as açõe
 - O nome dinâmico do paciente será usado no breadcrumb, por exemplo `Pacientes > João > Dieta`.
 - A solução será uma molécula de produto chamada `PageContextHeader`, composta sobre primitivos genéricos da camada UI.
 - O produto continua restrito ao desktop a partir de 1024px, sem criar comportamento mobile neste escopo.
-- O componente será aplicado por execução posterior do plano aprovado via `/speckit-implement`; este SDD não declara a implementação concluída.
+- O componente foi aplicado pela execução do plano aprovado via `/speckit-implement` e validado pelo ciclo `$sdd-implement`; este SDD registra a implementação concluída e suas evidências em `implementation-log.md`.
 - Alterações pré-existentes no worktree não fazem parte desta tarefa e não devem ser revertidas ou sobrescritas.
+
+## Implementation Status
+
+- **Status**: Implemented.
+- **Evidence**: testes direcionados e suíte completa (69 arquivos, 259 testes), type-check, lint, build, auditorias de design system/Atomic Design e validação Playwright dos três consumidores em 1024px, 1280px e 1440px.
+- **Scope**: perfil, dieta e consulta adotam `PageContextHeader`; modal de alimento e destinos globais permanecem fora do padrão.

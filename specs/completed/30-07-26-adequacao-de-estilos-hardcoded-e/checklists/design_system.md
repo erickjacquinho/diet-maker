@@ -23,4 +23,4 @@
 ## Non-Functional Requirements & Build Safety
 
 - [X] CHK008 - O critério de aceite de build sem erros ou warnings (`npm run build`) está explicitamente configurado como porta de entrada para conclusão? [Measurability, Spec §SC-004]
-- [ ] CHK009 - O comportamento responsivo e legibilidade em laptops pequenos é garantido após a refatoração? [Edge Case, Spec §Edge Cases]
+- [X] CHK009 - O comportamento responsivo e legibilidade em laptops pequenos é garantido após a refatoração? [Edge Case, Spec §Edge Cases]

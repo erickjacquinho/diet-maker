@@ -54,5 +54,9 @@ As entradas seguintes serão adicionadas somente após cada alteração ser vali
 
 ## T018 — validação visual
 
-- A tentativa de validar as telas com Playwright foi feita conforme o skill `webapp-testing`, incluindo os comandos `with_server.py --help` e tentativas em servidor dev/produção.
-- O ambiente local não respondeu às rotas no Playwright: o servidor dev ficou sem resposta e o servidor de produção encerrou/recusou a conexão durante a execução. Nenhuma conclusão visual foi inventada; T018 e CHK009 permanecem pendentes até uma sessão web responsiva estar disponível.
+- A validação foi concluída com Playwright conforme o skill `webapp-testing`, usando o servidor de produção gerado por `npm run build` e `with_server.py`.
+- As 7 rotas públicas (`/`, `/alimentos`, `/pacientes`, `/presets`, `/receitas`, `/refeicoes-prontas` e `/design-system`) passaram em viewports de `1366x768` e `1024x768`.
+- Os cinco fluxos de abertura de modal (`alimentos`, `pacientes`, `presets`, `receitas` e `refeições prontas`) também passaram nos dois viewports: diálogo dentro da tela, sem overflow horizontal e sem erros de console.
+- Foram gerados e inspecionados screenshots das telas e dos modais. Resultado: `VISUAL_VALIDATION_PASS routes=7 viewports=2 screenshots=14`; T018 e CHK009 concluídos.
+- Additional dynamic route validation: `/pacientes/visual-check`, `/pacientes/visual-check/consulta/2026-08-06` and `/pacientes/visual-check/dieta/visual-diet` passed at `1366x768` and `1024x768` with no horizontal overflow or console errors (`DYNAMIC_VISUAL_VALIDATION_PASS routes=3 viewports=2 screenshots=6`).
+- Aggregate visual evidence: 14 public-route screenshots, 6 dynamic-route screenshots and 10 modal screenshots were generated and inspected.

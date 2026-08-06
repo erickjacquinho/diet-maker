@@ -36,7 +36,7 @@ Instalar o primitivo Shadcn `Breadcrumb`, criar a molécula de produto `PageCont
 - **Canonical Design System**: PASS. Breadcrumb e header herdam a categoria `navigation`; a documentação adicionará um perfil, sem duplicar o contrato da categoria.
 - **Desktop Scope and Accessibility**: PASS. A solução preserva a faixa desktop, link semântico, foco visível, nomes acessíveis, heading hierarchy e operação por teclado.
 - **Test-First Quality and Isolation**: PASS. O plano prevê teste do contrato do componente e dos consumidores sem persistência ou dependências externas.
-- **Spec-Driven Execution**: PASS. A execução posterior será feita exclusivamente por `/speckit-implement`; este plano não declara o código implementado.
+- **Spec-Driven Execution**: PASS. O plano foi executado por `/speckit-implement` dentro do ciclo `$sdd-implement`, com evidências registradas em `implementation-log.md`.
 
 ## Project Structure
 
@@ -130,7 +130,13 @@ As decisões estão registradas em [research.md](./research.md). Não há `NEEDS
 - **Canonical Design System**: PASS. A categoria `navigation` continua fonte do contrato, o perfil registra apenas particularidades e o registry será atualizado junto com a fonte.
 - **Desktop Scope and Accessibility**: PASS. O contrato inclui link semântico, foco, teclado, heading único e tratamento de overflow desktop.
 - **Test-First Quality and Isolation**: PASS. A verificação cobre o componente isolado e os consumidores sem dados externos.
-- **Spec-Driven Execution**: PASS. As tarefas deverão ser executadas por `/speckit-implement`; nenhum código será alterado nesta fase documental.
+- **Spec-Driven Execution**: PASS. As tarefas foram executadas por `/speckit-implement`; implementação e validações finais foram concluídas.
+
+## Implementation Status
+
+- **Status**: Implemented and validated.
+- **Evidence**: `npm test` (69 arquivos, 259 testes), `npm run type-check`, `npm run lint`, `npm run build`, auditorias de design system/Atomic Design e Playwright em 1024px, 1280px e 1440px.
+- **Determinism**: o script `npm test` usa o pool `threads` com oito workers para evitar a contenção do pool padrão observada no ambiente.
 
 ## Complexity Tracking
 

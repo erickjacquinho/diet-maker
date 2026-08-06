@@ -92,7 +92,7 @@ description: "Tarefas de implementacao do header contextual para fluxos hierarqu
 
 - [X] T020 [skill: $ui-styling] [US3] Ajustar `src/components/molecules/PageContextHeader.tsx` para manter o slot `actions` opcional, a ordem DOM retorno/breadcrumb/titulo/acoes definida no contrato e a composicao sem imposicao de `Card` ou outra superficie de pagina.
 - [X] T021 [skill: $nextjs-fullstack-master] [US3] Migrar as acoes existentes do topo de `src/components/templates/DietBuilderTemplate.tsx` e `src/app/pacientes/[id]/consulta/[date]/page.tsx` para o slot `actions`, preservando callbacks, estados disabled/loading e nomes acessiveis.
-- [ ] T022 [skill: $webapp-testing] [US3] Validar visualmente e por teclado os consumidores em 1024px, 1280px e 1440px, conferindo foco, overflow de nome longo, hierarquia de heading e ausencia de espaco vazio sem `actions`; registrar o resultado nos comentarios do PR ou relatorio de implementacao.
+- [X] T022 [skill: $webapp-testing] [US3] Validar visualmente e por teclado os consumidores em 1024px, 1280px e 1440px, conferindo foco, overflow de nome longo, hierarquia de heading e ausencia de espaco vazio sem `actions`; registrar o resultado nos comentarios do PR ou relatorio de implementacao.
 
 **Checkpoint**: nenhuma acao existente de dieta ou consulta deve ser removida ou ficar inacessivel.
 
@@ -102,10 +102,10 @@ description: "Tarefas de implementacao do header contextual para fluxos hierarqu
 
 **Purpose**: executar a verificacao completa, assegurar rastreabilidade documental e confirmar que a feature nao encobriu alteracoes pre-existentes do worktree.
 
-- [ ] T023 [skill: $webapp-testing] Executar a suite completa com `npm test` e a validacao definida em `specs/05-08-26-padronizar-header-contextual/quickstart.md`, separando falhas pre-existentes de regressao desta feature.
-- [ ] T024 [skill: $design-system] Conferir que `src/components/ui/breadcrumb.tsx` continua generico, que `src/components/molecules/PageContextHeader.tsx` permanece na camada molecule e que o perfil, a categoria e o registry do design system nao divergem.
-- [ ] T025 [skill: $frontend-architecture-mindset] Revisar a lista de arquivos alterados contra `specs/05-08-26-padronizar-header-contextual/plan.md`, preservando modificacoes pre-existentes do worktree e sem executar reset, checkout ou limpeza destrutiva.
-- [ ] T026 [skill: $speckit-implement] Registrar as evidencias finais e atualizar o status de `specs/05-08-26-padronizar-header-contextual/spec.md` e `specs/05-08-26-padronizar-header-contextual/plan.md` somente apos todas as tarefas, testes e auditorias concluirem, sem declarar conformidade sem validacao.
+- [X] T023 [skill: $webapp-testing] Executar a suite completa com `npm test` e a validacao definida em `specs/05-08-26-padronizar-header-contextual/quickstart.md`, separando falhas pre-existentes de regressao desta feature.
+- [X] T024 [skill: $design-system] Conferir que `src/components/ui/breadcrumb.tsx` continua generico, que `src/components/molecules/PageContextHeader.tsx` permanece na camada molecule e que o perfil, a categoria e o registry do design system nao divergem.
+- [X] T025 [skill: $frontend-architecture-mindset] Revisar a lista de arquivos alterados contra `specs/05-08-26-padronizar-header-contextual/plan.md`, preservando modificacoes pre-existentes do worktree e sem executar reset, checkout ou limpeza destrutiva.
+- [X] T026 [skill: $speckit-implement] Registrar as evidencias finais e atualizar o status de `specs/05-08-26-padronizar-header-contextual/spec.md` e `specs/05-08-26-padronizar-header-contextual/plan.md` somente apos todas as tarefas, testes e auditorias concluirem, sem declarar conformidade sem validacao.
 
 ---
 
@@ -178,5 +178,5 @@ description: "Tarefas de implementacao do header contextual para fluxos hierarqu
 
 **Purpose**: fechar as evidencias que permaneceram parciais apos a implementacao e a validacao automatizada direcionada.
 
-- [ ] T027 [skill: $webapp-testing] Reestabelecer um runtime local reproduzivel que responda as rotas reais e executar a validacao visual e por teclado dos tres consumidores em 1024px, 1280px e 1440px, registrando foco, overflow de nome longo, hierarquia de heading e ausencia de espaco vazio sem `actions`, conforme `US3/AC1`, `FR-010` e `SC-004` (partial).
-- [ ] T028 [skill: $webapp-testing] Executar `npm test` completo e todos os checks definidos em `specs/05-08-26-padronizar-header-contextual/quickstart.md`, classificando falhas pre-existentes versus regressao desta feature e registrando evidencia para `SC-001` e `SC-005` (partial).
+- [X] T027 [skill: $webapp-testing] Reestabelecer um runtime local reproduzivel que responda as rotas reais e executar a validacao visual e por teclado dos tres consumidores em 1024px, 1280px e 1440px, registrando foco, overflow de nome longo, hierarquia de heading e ausencia de espaco vazio sem `actions`, conforme `US3/AC1`, `FR-010` e `SC-004` (partial).
+- [X] T028 [skill: $webapp-testing] Executar `npm test` completo e todos os checks definidos em `specs/05-08-26-padronizar-header-contextual/quickstart.md`, classificando falhas pre-existentes versus regressao desta feature e registrando evidencia para `SC-001` e `SC-005` (partial).

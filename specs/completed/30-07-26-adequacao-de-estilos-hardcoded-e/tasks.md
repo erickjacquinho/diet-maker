@@ -32,4 +32,4 @@
 ## Phase 4: Polish & Build Validation
 
 - [X] T017 [skill: code-reviewer-expert] Validar compilação limpa do projeto Next.js executando `npm run build`
-- [ ] T018 [skill: ui-ux-pro-max] Verificar ausência de regressões visuais ou de responsividade em tela
+- [X] T018 [skill: ui-ux-pro-max] Verificar ausência de regressões visuais ou de responsividade em tela
