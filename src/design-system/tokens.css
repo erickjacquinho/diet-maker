@@ -133,6 +133,17 @@
   --cmp-card-padding-default: var(--ref-space-4);
   --cmp-card-background-hover: var(--sys-color-surface-hover);
   --cmp-card-details-surface: var(--sys-color-surface-soft);
+  --cmp-sidebar-width-expanded: 224px;
+  --cmp-sidebar-width-collapsed: 64px;
+  --cmp-sidebar-background: var(--sys-color-surface);
+  --cmp-sidebar-foreground: var(--sys-color-text-secondary);
+  --cmp-sidebar-primary: var(--sys-color-action-primary);
+  --cmp-sidebar-primary-foreground: var(--sys-color-on-primary);
+  --cmp-sidebar-primary-soft: var(--sys-color-action-primary-soft);
+  --cmp-sidebar-accent: var(--sys-color-surface-hover);
+  --cmp-sidebar-accent-foreground: var(--sys-color-text-primary);
+  --cmp-sidebar-border: var(--sys-color-border-divider);
+  --cmp-sidebar-ring: var(--sys-color-action-primary-focus);
 
   --background: var(--sys-color-canvas);
   --foreground: var(--sys-color-text-primary);

@@ -53,3 +53,11 @@
 ## Review result
 
 Reviewed on 2026-08-05. All 25 architecture checks pass at the specification level; runtime conformance remains a `/speckit-implement` validation responsibility.
+
+## Runtime implementation evidence
+
+- [x] `npm run audit:atomic-design` — 100% conformidade, 72/72 arquivos conformes e 0 violações.
+- [ ] `npm run verify:design-system` — passou antes da alteração concorrente; a execução final detectou `src/components/ui/collapsible.tsx` sem entrada no registry (`REG001`/`SRC001`), pertencente à tarefa de Sidebar fora deste escopo.
+- [x] `npm run verify:design-system-legacy` — 0 findings legados em 91 arquivos.
+- [ ] A suíte focada de Surface/consumidores segue aprovada (9 arquivos, 18 testes), lint e `git diff --check` passam; o type-check atual está bloqueado por `tests/components/ui/sidebar.test.tsx` concorrente que importa um módulo ainda ausente.
+- [ ] A suíte completa `npm test` teve resultado terminal em 2026-08-06, mas falhou em 1 de 259 testes (`tests/design-system/component-catalog.test.mjs`) pelo mesmo `collapsible.tsx` concorrente não registrado; a tentativa anterior havia excedido 300 segundos.

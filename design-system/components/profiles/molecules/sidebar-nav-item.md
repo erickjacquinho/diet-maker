@@ -6,11 +6,11 @@
 | --- | --- |
 | Component ID | `molecule-sidebar-nav-item` |
 | Nature | `product-generic` |
-| Lifecycle | `migration-required` |
+| Lifecycle | `implemented` |
 | Current layer | `molecule` |
 | Target layer | `molecule` |
 | Sources | `src/components/molecules/SidebarNavItem.tsx` |
-| Public exports | `SidebarNavItem` (component) |
+| Public exports | `SidebarNavItemProps` (type), `SidebarNavItem` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Root `SidebarNavItem` e exports visuais registrados: `SidebarNavItem`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `SidebarNavItem` e exports visuais registrados: `SidebarNavItem`. Primitive base: `ui-sidebar`; compõe `SidebarMenuItem`, `SidebarMenuButton` e `Tooltip` com links reais do Next.
 
 ## Allowed variants
 
@@ -34,9 +34,9 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-The molecule owns route-item rendering and receives collapse/active state by props. It does not reexport or import the `SidebarNav` organism.
+The molecule owns route-item rendering and receives collapse/active state by props. It does not reexport or import the `SidebarNav` organism; route matching remains overridable by `isActive`.
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Com `ui-sidebar` como primitive base, compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -60,5 +60,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `molecule`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `molecule`; perfil homologado. Expanded preserva o label visual; collapsed preserva accessible name, tooltip e a semântica de link.
 

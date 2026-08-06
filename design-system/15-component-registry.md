@@ -30,7 +30,7 @@ O arquivo executável é [`components/registry.json`](./components/registry.json
 | `actions` | comando imediato | Button, IconButton, SidebarQuickActions |
 | `fields` | entrada/edição/busca | Input, TacoSearchInput, Textarea proposta |
 | `selection` | escolha persistente | Select, Tabs, DietModeSwitcher |
-| `navigation` | destinos/contexto | SidebarNav e partes |
+| `navigation` | destinos/contexto | SidebarNav, Sidebar e partes |
 | `surfaces` | agrupamento local | Card, ScrollArea, Separator |
 | `data-display` | dados/identidade genéricos | Table, Avatar, PatientBadgeHeader |
 | `feedback` | status/severidade | Badge |
@@ -57,6 +57,12 @@ O arquivo executável é [`components/registry.json`](./components/registry.json
 | `organism-read-only-diet-modal` | `molecule` | `organism` | `migration-required` |
 
 As partes da sidebar continuam molecules e `SidebarNav` continua organism; a relação é registrada no campo `consumers` e não constitui nova migração de layer.
+
+## Migração de sidebar — 2026-08-06
+
+`organism-sidebar-nav` compõe `ui-sidebar` como primitive base, enquanto `SidebarNavItem` usa `SidebarMenuItem`/`SidebarMenuButton`. `SidebarBrand`, `SidebarQuickActions` e `SidebarUserProfile` permanecem molecules independentes com contratos públicos; o organismo não reexporta suas implementações. A navegação default continua flat com as seis rotas de produção. Grupos futuros são suportados pelo contrato `SidebarNavigationItem`, `ui-collapsible` e `ui-popover`, sem alterar a topologia default.
+
+O registro documenta a migração estrutural e a cobertura de exports. A conformidade visual não é inferida pelo registro: requer a aceitação manual desktop prevista no quickstart da feature.
 
 ## Como consultar uma entrada
 

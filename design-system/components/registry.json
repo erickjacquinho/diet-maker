@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 56,
+    "currentSourceCount": 58,
     "capturedAt": "2026-07-31",
     "legacyAudit": {
       "findings": 0,
@@ -452,6 +452,8 @@
       ],
       "consumers": [
         "ui-breadcrumb",
+        "ui-sidebar",
+        "ui-collapsible",
         "molecule-page-context-header",
         "molecule-sidebar-brand",
         "molecule-sidebar-nav-item",
@@ -1368,6 +1370,178 @@
       "profile": "design-system/components/profiles/ui/scroll-area.md",
       "consumers": [
         "src/app/design-system/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-collapsible",
+      "name": "Collapsible",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "navigation",
+      "traits": [
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/collapsible.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "Collapsible",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CollapsibleTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "CollapsibleContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/collapsible.md",
+      "consumers": [
+        "organism-sidebar-nav"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-sidebar",
+      "name": "Sidebar",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "navigation",
+      "traits": [
+        "collapsible"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/sidebar.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SidebarProviderProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarProvider",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Sidebar",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarGroup",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarGroupLabel",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarGroupContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenu",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenuItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenuButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarMenuButton",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenuSub",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenuSubItem",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarMenuSubButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SidebarMenuSubButton",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "SidebarTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "useSidebar",
+          "kind": "hook",
+          "documentedBy": "non-visual"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/sidebar.md",
+      "consumers": [
+        "molecule-sidebar-nav-item",
+        "organism-sidebar-nav"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -2522,7 +2696,7 @@
       "id": "molecule-sidebar-brand",
       "name": "SidebarBrand",
       "nature": "product-generic",
-      "lifecycle": "migration-required",
+      "lifecycle": "implemented",
       "currentLayer": "molecule",
       "targetLayer": "molecule",
       "primaryCategory": "navigation",
@@ -2559,7 +2733,7 @@
       "id": "molecule-sidebar-nav-item",
       "name": "SidebarNavItem",
       "nature": "product-generic",
-      "lifecycle": "migration-required",
+      "lifecycle": "implemented",
       "currentLayer": "molecule",
       "targetLayer": "molecule",
       "primaryCategory": "navigation",
@@ -2587,7 +2761,9 @@
         }
       ],
       "profile": "design-system/components/profiles/molecules/sidebar-nav-item.md",
-      "consumers": [],
+      "consumers": [
+        "organism-sidebar-nav"
+      ],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2596,7 +2772,7 @@
       "id": "molecule-sidebar-quick-actions",
       "name": "SidebarQuickActions",
       "nature": "product-generic",
-      "lifecycle": "migration-required",
+      "lifecycle": "implemented",
       "currentLayer": "molecule",
       "targetLayer": "molecule",
       "primaryCategory": "actions",
@@ -2633,7 +2809,7 @@
       "id": "molecule-sidebar-user-profile",
       "name": "SidebarUserProfile",
       "nature": "product-generic",
-      "lifecycle": "migration-required",
+      "lifecycle": "implemented",
       "currentLayer": "molecule",
       "targetLayer": "molecule",
       "primaryCategory": "navigation",
@@ -2734,7 +2910,9 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/macro-tracker-header.md",
-      "consumers": [],
+      "consumers": [
+        "organism-sidebar-nav"
+      ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
       "exceptions": []
@@ -2771,7 +2949,9 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/meal-card-container.md",
-      "consumers": [],
+      "consumers": [
+        "organism-sidebar-nav"
+      ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
       "exceptions": []
@@ -2832,6 +3012,11 @@
       ],
       "publicExports": [
         {
+          "name": "SidebarContextValue",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
           "name": "useSidebarContext",
           "kind": "hook",
           "documentedBy": "non-visual"
@@ -2860,7 +3045,7 @@
         "molecule-sidebar-user-profile",
         "template-app-layout-shell"
       ],
-      "primitiveBase": null,
+      "primitiveBase": "ui-sidebar",
       "specStatus": "homologated",
       "exceptions": []
     },
@@ -2931,7 +3116,9 @@
         }
       ],
       "profile": "design-system/components/profiles/templates/diet-builder-template.md",
-      "consumers": [],
+      "consumers": [
+        "organism-sidebar-nav"
+      ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
       "exceptions": ["dashed-empty-state"]

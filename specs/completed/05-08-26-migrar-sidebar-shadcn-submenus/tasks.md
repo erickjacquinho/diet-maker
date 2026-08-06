@@ -11,9 +11,9 @@
 **Purpose**: Prepare the local Shadcn source and token integration without overwriting existing project primitives.
 
 - [x] T001 [skill: $shadcn] Review the Shadcn Sidebar and Collapsible dry-run/diff output and record the selective-adoption decisions in `specs/05-08-26-migrar-sidebar-shadcn-submenus/research.md`.
-- [ ] T002 [skill: $shadcn] Add the `@radix-ui/react-collapsible` dependency and update `package.json` plus `package-lock.json` without changing unrelated dependency versions.
-- [ ] T003 [skill: $shadcn] [P] Add the desktop-relevant generic Shadcn support source in `src/components/ui/collapsible.tsx`, preserving the project aliases and Radix base; do not add the generated mobile-only `use-mobile` or skeleton sources.
-- [ ] T004 [skill: $design-system] [P] Add canonical Sidebar width aliases to `src/design-system/tokens.css` and map Sidebar semantic color roles to existing tokens in `tailwind.config.js` without adding dark-mode palette variables.
+- [x] T002 [skill: $shadcn] Add the `@radix-ui/react-collapsible` dependency and update `package.json` plus `package-lock.json` without changing unrelated dependency versions.
+- [x] T003 [skill: $shadcn] [P] Add the desktop-relevant generic Shadcn support source in `src/components/ui/collapsible.tsx`, preserving the project aliases and Radix base; do not add the generated mobile-only `use-mobile` or skeleton sources.
+- [x] T004 [skill: $design-system] [P] Add canonical Sidebar width aliases to `src/design-system/tokens.css` and map Sidebar semantic color roles to existing tokens in `tailwind.config.js` without adding dark-mode palette variables.
 
 ---
 
@@ -23,10 +23,10 @@
 
 **Checkpoint**: Generic primitives, token mapping, data shape, and baseline tests are ready before user-story implementation begins.
 
-- [ ] T005 [skill: $shadcn] Add the adapted generic Shadcn primitive in `src/components/ui/sidebar.tsx`, preserving the official composition API while making persistence and keyboard shortcut registration opt-in and disabled by default.
-- [ ] T006 [skill: $tdd] [P] Create the failing primitive contract tests in `tests/components/ui/sidebar.test.tsx` for controlled/uncontrolled state projection, 224/64 width variables, no cookie/local-storage writes, and no Ctrl+B/Cmd+B listener when no shortcut option is provided.
-- [ ] T007 [skill: $tdd] [P] Create the failing navigation-model tests in `tests/components/organisms/sidebar-navigation-model.test.ts` for route matching, patient-prefix matching, unmatched routes, flat defaults, empty groups, and active future ancestors.
-- [ ] T008 [skill: $frontend-architecture-mindset] Define `SidebarNavigationItem`, route/group invariants, `DEFAULT_NAVIGATION_ITEMS`, and pure route/ancestor helpers in `src/components/organisms/sidebar-navigation-model.ts` without changing the current default route order.
+- [x] T005 [skill: $shadcn] Add the adapted generic Shadcn primitive in `src/components/ui/sidebar.tsx`, preserving the official composition API while making persistence and keyboard shortcut registration opt-in and disabled by default.
+- [x] T006 [skill: $tdd] [P] Create the failing primitive contract tests in `tests/components/ui/sidebar.test.tsx` for controlled/uncontrolled state projection, 224/64 width variables, no cookie/local-storage writes, and no Ctrl+B/Cmd+B listener when no shortcut option is provided.
+- [x] T007 [skill: $tdd] [P] Create the failing navigation-model tests in `tests/components/organisms/sidebar-navigation-model.test.ts` for route matching, patient-prefix matching, unmatched routes, flat defaults, empty groups, and active future ancestors.
+- [x] T008 [skill: $frontend-architecture-mindset] Define `SidebarNavigationItem`, route/group invariants, `DEFAULT_NAVIGATION_ITEMS`, and pure route/ancestor helpers in `src/components/organisms/sidebar-navigation-model.ts` without changing the current default route order.
 
 ---
 
@@ -38,18 +38,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [skill: $tdd] [P] [US1] Write failing preservation tests in `tests/components/organisms/sidebar-nav.test.tsx` for all six first-level routes, exact/nested/patient current state, brand, profile, Save/Open callbacks, absent callbacks, accessible collapsed labels, and public compound parts.
-- [ ] T010 [skill: $tdd] [P] [US1] Write failing shell integration assertions in `tests/components/templates/app-layout-shell.test.tsx` for persistent SidebarNav placement, independent `main` scroll region, and no page-level import of `src/components/ui/sidebar.tsx`.
+- [x] T009 [skill: $tdd] [P] [US1] Write failing preservation tests in `tests/components/organisms/sidebar-nav.test.tsx` for all six first-level routes, exact/nested/patient current state, brand, profile, Save/Open callbacks, absent callbacks, accessible collapsed labels, and public compound parts.
+- [x] T010 [skill: $tdd] [P] [US1] Write failing shell integration assertions in `tests/components/templates/app-layout-shell.test.tsx` for persistent SidebarNav placement, independent `main` scroll region, and no page-level import of `src/components/ui/sidebar.tsx`.
 
 ### Implementation for User Story 1
 
 - [x] T011 [skill: $ui-styling] [P] [US1] Convert `src/components/molecules/SidebarBrand.tsx` from an organism reexport into a real lower-layer molecule that preserves NutriDiet labels, brand route, expanded/collapsed identity, tooltip, and toggle callback.
-- [ ] T012 [skill: $ui-styling] [P] [US1] Convert `src/components/molecules/SidebarNavItem.tsx` from an organism reexport into a real lower-layer molecule that uses real links, active route semantics, Shadcn `SidebarMenuButton`, and collapsed accessible labels.
+- [x] T012 [skill: $ui-styling] [P] [US1] Convert `src/components/molecules/SidebarNavItem.tsx` from an organism reexport into a real lower-layer molecule that uses real links, active route semantics, Shadcn `SidebarMenuButton`, and collapsed accessible labels.
 - [x] T013 [skill: $ui-styling] [P] [US1] Convert `src/components/molecules/SidebarUserProfile.tsx` from an organism reexport into a real lower-layer molecule that preserves doctor name, role, avatar, and collapsed accessible information.
 - [x] T014 [skill: $ui-styling] [P] [US1] Convert `src/components/molecules/SidebarQuickActions.tsx` from an organism reexport into a real lower-layer molecule that preserves Save/Open labels, icon-only names, optional callbacks, and tooltip behavior.
-- [ ] T015 [skill: $vercel-composition-patterns] [US1] Refactor `src/components/organisms/SidebarNav.tsx` to own the Shadcn `SidebarProvider`, `Sidebar`, header/content/footer composition, compatibility `useSidebarContext` projection, and `initialCollapsed` mapping while preserving all public exports.
-- [ ] T016 [skill: $frontend-architecture-mindset] [US1] Preserve the existing shell contract in `src/components/templates/AppLayoutShell.tsx`, changing only the minimum layout classes required for the SidebarProvider child to retain 224/64 geometry and the current main scroll region.
-- [ ] T017 [skill: $webapp-testing] [US1] Run and stabilize the focused User Story 1 tests in `tests/components/organisms/sidebar-nav.test.tsx` and `tests/components/templates/app-layout-shell.test.tsx` until all preservation assertions pass.
+- [x] T015 [skill: $vercel-composition-patterns] [US1] Refactor `src/components/organisms/SidebarNav.tsx` to own the Shadcn `SidebarProvider`, `Sidebar`, header/content/footer composition, compatibility `useSidebarContext` projection, and `initialCollapsed` mapping while preserving all public exports.
+- [x] T016 [skill: $frontend-architecture-mindset] [US1] Preserve the existing shell contract in `src/components/templates/AppLayoutShell.tsx`, changing only the minimum layout classes required for the SidebarProvider child to retain 224/64 geometry and the current main scroll region.
+- [x] T017 [skill: $webapp-testing] [US1] Run and stabilize the focused User Story 1 tests in `tests/components/organisms/sidebar-nav.test.tsx` and `tests/components/templates/app-layout-shell.test.tsx` until all preservation assertions pass.
 
 **Checkpoint**: The Shadcn-backed sidebar is an independently testable MVP with no route, label, callback, or shell regression.
 
@@ -63,13 +63,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T018 [skill: $tdd] [P] [US2] Write failing future-group contract tests in `tests/components/organisms/sidebar-nav-submenus.test.tsx` for `aria-expanded`, keyboard disclosure, child links, active ancestor, empty-group omission, flat default routes, and collapsed keyboard-operable child discoverability.
+- [x] T018 [skill: $tdd] [P] [US2] Write failing future-group contract tests in `tests/components/organisms/sidebar-nav-submenus.test.tsx` for `aria-expanded`, keyboard disclosure, child links, active ancestor, empty-group omission, flat default routes, and collapsed keyboard-operable child discoverability.
 
 ### Implementation for User Story 2
 
-- [ ] T019 [skill: $vercel-composition-patterns] [US2] Add future group rendering to `src/components/organisms/SidebarNav.tsx` using `Collapsible`, `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton`, while keeping `DEFAULT_NAVIGATION_ITEMS` entirely first-level.
-- [ ] T020 [skill: $ui-styling] [US2] Add the collapsed future-group sub-navigation surface in `src/components/organisms/SidebarNav.tsx` using the existing Shadcn Popover primitive, with no child route hidden without an accessible path.
-- [ ] T021 [skill: $webapp-testing] [US2] Stabilize future-group semantics and default-flat behavior in `tests/components/organisms/sidebar-nav-submenus.test.tsx`, including deep child current state and no empty disclosure control.
+- [x] T019 [skill: $vercel-composition-patterns] [US2] Add future group rendering to `src/components/organisms/SidebarNav.tsx` using `Collapsible`, `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton`, while keeping `DEFAULT_NAVIGATION_ITEMS` entirely first-level.
+- [x] T020 [skill: $ui-styling] [US2] Add the collapsed future-group sub-navigation surface in `src/components/organisms/SidebarNav.tsx` using the existing Shadcn Popover primitive, with no child route hidden without an accessible path.
+- [x] T021 [skill: $webapp-testing] [US2] Stabilize future-group semantics and default-flat behavior in `tests/components/organisms/sidebar-nav-submenus.test.tsx`, including deep child current state and no empty disclosure control.
 
 **Checkpoint**: Future submenu capability is structurally ready and tested, but no current production route has moved into a visible group.
 
@@ -83,13 +83,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T022 [skill: $tdd] [P] [US3] Write failing shortcut-readiness tests in `tests/components/organisms/sidebar-nav-shortcut.test.tsx` for visible toggle keyboard activation, Ctrl+B/Cmd+B non-activation, editable-control boundaries, no persistence, and route preservation.
+- [x] T022 [skill: $tdd] [P] [US3] Write failing shortcut-readiness tests in `tests/components/organisms/sidebar-nav-shortcut.test.tsx` for visible toggle keyboard activation, Ctrl+B/Cmd+B non-activation, editable-control boundaries, no persistence, and route preservation.
 
 ### Implementation for User Story 3
 
-- [ ] T023 [skill: $frontend-architecture-mindset] [US3] Expose and document the product-owned toggle action in `src/components/organisms/SidebarNav.tsx` through the Shadcn-backed state projection without enabling a global keyboard listener.
-- [ ] T024 [skill: $shadcn] [US3] Stabilize provider shortcut and persistence options in `src/components/ui/sidebar.tsx` so future opt-in activation can delegate to the same toggle action while current tests remain non-active.
-- [ ] T025 [skill: $webapp-testing] [US3] Stabilize the visible toggle focus and keyboard behavior in `tests/components/organisms/sidebar-nav-shortcut.test.tsx` and preserve route context across both presentation states.
+- [x] T023 [skill: $frontend-architecture-mindset] [US3] Expose and document the product-owned toggle action in `src/components/organisms/SidebarNav.tsx` through the Shadcn-backed state projection without enabling a global keyboard listener.
+- [x] T024 [skill: $shadcn] [US3] Stabilize provider shortcut and persistence options in `src/components/ui/sidebar.tsx` so future opt-in activation can delegate to the same toggle action while current tests remain non-active.
+- [x] T025 [skill: $webapp-testing] [US3] Stabilize the visible toggle focus and keyboard behavior in `tests/components/organisms/sidebar-nav-shortcut.test.tsx` and preserve route context across both presentation states.
 
 **Checkpoint**: Keyboard shortcut readiness exists as an explicit seam, while the current product has no active Ctrl+B/Cmd+B behavior.
 
@@ -99,13 +99,13 @@
 
 **Purpose**: Synchronize the design-system catalog, run all validation gates, and close traceability gaps.
 
-- [ ] T026 [skill: $design-system] [P] Update `design-system/components/profiles/ui/sidebar.md` and `design-system/components/profiles/ui/collapsible.md` with primitive APIs, generic boundaries, state/focus behavior, and lifecycle status.
-- [ ] T027 [skill: $design-system] [P] Update `design-system/components/profiles/organisms/sidebar-nav.md` and the four `design-system/components/profiles/molecules/sidebar-*.md` files with the new composition, primitive base, real molecule sources, public exports, flat default topology, and migration status.
-- [ ] T028 [skill: $design-system] Update `design-system/components/registry.json` with `ui-sidebar`, `ui-collapsible`, updated `organism-sidebar-nav.primitiveBase`, source/export metadata, consumers, and the molecule implementation roles.
-- [ ] T029 [skill: $design-system] Update `design-system/components/categories/navigation.md`, `design-system/15-component-registry.md`, and `design-system/13-implementation-and-compliance.md` so category consumers, structural boundaries, and migration evidence match the implemented source without declaring unverified visual conformity.
-- [ ] T030 [skill: $code-reviewer-expert] [P] Run `npm run type-check`, `npm run lint`, `npm run audit:atomic-design`, and `npm run verify:design-system-legacy`, recording any findings against the changed files.
-- [ ] T031 [skill: $code-reviewer-expert] Run `npm run verify:design-system` and the focused/full Vitest suites from `specs/05-08-26-migrar-sidebar-shadcn-submenus/quickstart.md`, resolving every changed-file finding before completion.
-- [ ] T032 [skill: $webapp-testing] Run the manual desktop acceptance scenarios in `specs/05-08-26-migrar-sidebar-shadcn-submenus/quickstart.md` at `>=1024px` and record the final evidence for route continuity, 224/64 geometry, accessibility, no shortcut activation, and shell scroll behavior.
+- [x] T026 [skill: $design-system] [P] Update `design-system/components/profiles/ui/sidebar.md` and `design-system/components/profiles/ui/collapsible.md` with primitive APIs, generic boundaries, state/focus behavior, and lifecycle status.
+- [x] T027 [skill: $design-system] [P] Update `design-system/components/profiles/organisms/sidebar-nav.md` and the four `design-system/components/profiles/molecules/sidebar-*.md` files with the new composition, primitive base, real molecule sources, public exports, flat default topology, and migration status.
+- [x] T028 [skill: $design-system] Update `design-system/components/registry.json` with `ui-sidebar`, `ui-collapsible`, updated `organism-sidebar-nav.primitiveBase`, source/export metadata, consumers, and the molecule implementation roles.
+- [x] T029 [skill: $design-system] Update `design-system/components/categories/navigation.md`, `design-system/15-component-registry.md`, and `design-system/13-implementation-and-compliance.md` so category consumers, structural boundaries, and migration evidence match the implemented source without declaring unverified visual conformity.
+- [x] T030 [skill: $code-reviewer-expert] [P] Run `npm run type-check`, `npm run lint`, `npm run audit:atomic-design`, and `npm run verify:design-system-legacy`, recording any findings against the changed files.
+- [x] T031 [skill: $code-reviewer-expert] Run `npm run verify:design-system` and the focused/full Vitest suites from `specs/05-08-26-migrar-sidebar-shadcn-submenus/quickstart.md`, resolving every changed-file finding before completion.
+- [x] T032 [skill: $webapp-testing] Run the manual desktop acceptance scenarios in `specs/05-08-26-migrar-sidebar-shadcn-submenus/quickstart.md` at `>=1024px` and record the final evidence for route continuity, 224/64 geometry, accessibility, no shortcut activation, and shell scroll behavior.
 
 ---
 

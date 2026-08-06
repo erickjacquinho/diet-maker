@@ -1,23 +1,55 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
-import { BookOpen, Palette, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 
 import { SidebarBrand } from '@/components/molecules/SidebarBrand';
 import { SidebarNavItem } from '@/components/molecules/SidebarNavItem';
 import { SidebarQuickActions } from '@/components/molecules/SidebarQuickActions';
 import { SidebarUserProfile } from '@/components/molecules/SidebarUserProfile';
+import {
+  DEFAULT_NAVIGATION_ITEMS,
+  getRenderableNavigationItems,
+  isSidebarNavigationItemActive,
+  type SidebarNavigationItem,
+} from '@/components/organisms/sidebar-navigation-model';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-interface SidebarContextValue {
+export interface SidebarContextValue {
   isCollapsed: boolean;
   toggleCollapse: () => void;
 }
 
-const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
-
 export function useSidebarContext(): SidebarContextValue | undefined {
-  return useContext(SidebarContext);
+  try {
+    const { state, toggleSidebar } = useSidebar();
+    return { isCollapsed: state === 'collapsed', toggleCollapse: toggleSidebar };
+  } catch (error) {
+    if (error instanceof Error && error.message === 'useSidebar must be used within a SidebarProvider') {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 export interface SidebarNavProps {
@@ -26,17 +58,182 @@ export interface SidebarNavProps {
   onSave?: () => void;
   onOpen?: () => void;
   initialCollapsed?: boolean;
+  navigationItems?: SidebarNavigationItem[];
   children?: React.ReactNode;
 }
 
-const navItems = [
-  { href: '/pacientes', label: 'Pacientes', icon: Users },
-  { href: '/presets', label: 'Presets de Dietas', icon: Sparkles },
-  { href: '/refeicoes-prontas', label: 'RefeiÃ§Ãµes Prontas', icon: UtensilsCrossed },
-  { href: '/receitas', label: 'Receitas CulinÃ¡rias', icon: Utensils },
-  { href: '/alimentos', label: 'Planilha de Alimentos', icon: BookOpen },
-  { href: '/design-system', label: 'Guia Design System', icon: Palette },
-];
+function SidebarNavigation({
+  items,
+  pathname,
+  isCollapsed,
+}: {
+  items: SidebarNavigationItem[];
+  pathname: string;
+  isCollapsed: boolean;
+}) {
+  const renderableItems = getRenderableNavigationItems(items);
+
+  return (
+    <nav aria-label="Navegação principal" className="flex w-full flex-col">
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {renderableItems.map((item) => {
+              if (item.kind === 'group') {
+                return (
+                  <SidebarNavigationGroup
+                    key={item.id}
+                    item={item}
+                    pathname={pathname}
+                    isCollapsed={isCollapsed}
+                  />
+                );
+              }
+              return (
+                <SidebarNavItem
+                  key={item.href}
+                  {...item}
+                  isCollapsed={isCollapsed}
+                  isActive={isSidebarNavigationItemActive(pathname, item)}
+                />
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </nav>
+  );
+}
+
+function SidebarGroupRoute({
+  item,
+  pathname,
+}: {
+  item: Extract<SidebarNavigationItem, { kind: 'route' }>;
+  pathname: string;
+}) {
+  const isActive = isSidebarNavigationItemActive(pathname, item);
+  const Icon = item.icon;
+
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton asChild isActive={isActive}>
+        <Link href={item.href} aria-current={isActive ? 'page' : undefined}>
+          <Icon aria-hidden="true" />
+          <span className="truncate">{item.label}</span>
+        </Link>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  );
+}
+
+function SidebarNavigationGroup({
+  item,
+  pathname,
+  isCollapsed,
+}: {
+  item: Extract<SidebarNavigationItem, { kind: 'group' }>;
+  pathname: string;
+  isCollapsed: boolean;
+}) {
+  const isActive = isSidebarNavigationItemActive(pathname, item);
+  const accessibleLabel = isActive ? `${item.label}, contém destino atual` : item.label;
+  const Icon = item.icon;
+
+  const children = item.children.map((child) => (
+    <SidebarGroupRoute key={child.href} item={child} pathname={pathname} />
+  ));
+
+  if (isCollapsed) {
+    return (
+      <Popover>
+        <SidebarMenuItem>
+          <PopoverTrigger asChild>
+            <SidebarMenuButton
+              type="button"
+              isActive={isActive}
+              aria-label={accessibleLabel}
+              className="mx-auto justify-center"
+            >
+              {Icon ? <Icon aria-hidden="true" /> : null}
+              <span className="sr-only">{item.label}</span>
+            </SidebarMenuButton>
+          </PopoverTrigger>
+          <PopoverContent side="right" align="start" sideOffset={12} className="w-56 p-2">
+            <nav aria-label={item.label}>
+              <SidebarMenuSub className="m-0 border-0 px-0 py-0">{children}</SidebarMenuSub>
+            </nav>
+          </PopoverContent>
+        </SidebarMenuItem>
+      </Popover>
+    );
+  }
+
+  return (
+    <Collapsible defaultOpen={isActive || item.defaultOpen === true} className="group/collapsible">
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton type="button" isActive={isActive} aria-label={accessibleLabel}>
+            {Icon ? <Icon aria-hidden="true" /> : null}
+            <span className="truncate">{item.label}</span>
+            <ChevronRight
+              aria-hidden="true"
+              className="ml-auto transition-transform duration-fast group-data-[state=open]/collapsible:rotate-90"
+            />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>{children}</SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
+
+function SidebarNavContent({
+  doctorName,
+  doctorRole,
+  onSave,
+  onOpen,
+  navigationItems,
+  children,
+}: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
+  Pick<SidebarNavProps, 'onSave' | 'onOpen' | 'children'>) {
+  const pathname = usePathname() ?? '';
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === 'collapsed';
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Sidebar collapsible="icon">
+        {children || (
+          <>
+            <SidebarHeader>
+              <SidebarBrand isCollapsed={isCollapsed} onToggleCollapse={toggleSidebar} />
+            </SidebarHeader>
+
+            <SidebarContent>
+              <SidebarNavigation
+                items={navigationItems}
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+              />
+            </SidebarContent>
+
+            <SidebarFooter>
+              <SidebarUserProfile
+                doctorName={doctorName}
+                doctorRole={doctorRole}
+                isCollapsed={isCollapsed}
+              />
+              <SidebarQuickActions onSave={onSave} onOpen={onOpen} isCollapsed={isCollapsed} />
+            </SidebarFooter>
+          </>
+        )}
+      </Sidebar>
+    </TooltipProvider>
+  );
+}
 
 export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   Brand: typeof SidebarBrand;
@@ -49,43 +246,21 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   onSave,
   onOpen,
   initialCollapsed = false,
+  navigationItems = DEFAULT_NAVIGATION_ITEMS,
   children,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
-  const toggleCollapse = () => setIsCollapsed((previous) => !previous);
-
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggleCollapse }}>
-      <TooltipProvider delayDuration={150}>
-        <aside
-          className={`sticky top-0 z-navigation flex h-screen shrink-0 flex-col justify-between border-r border-border-subtle bg-surface transition-colors duration-standard ${
-            isCollapsed ? 'w-20 px-3 py-4' : 'w-64 p-4'
-          }`}
-        >
-          {children || (
-            <>
-              <div className="flex w-full flex-col">
-                <SidebarBrand isCollapsed={isCollapsed} onToggleCollapse={toggleCollapse} />
-                <nav className="flex w-full flex-col gap-1.5">
-                  {navItems.map((item) => (
-                    <SidebarNavItem key={item.href} {...item} isCollapsed={isCollapsed} />
-                  ))}
-                </nav>
-              </div>
-
-              <div className="flex w-full flex-col gap-3 border-t border-border-subtle pt-4">
-                <SidebarUserProfile
-                  doctorName={doctorName}
-                  doctorRole={doctorRole}
-                  isCollapsed={isCollapsed}
-                />
-                <SidebarQuickActions onSave={onSave} onOpen={onOpen} isCollapsed={isCollapsed} />
-              </div>
-            </>
-          )}
-        </aside>
-      </TooltipProvider>
-    </SidebarContext.Provider>
+    <SidebarProvider defaultOpen={!initialCollapsed} className="shrink-0">
+      <SidebarNavContent
+        doctorName={doctorName}
+        doctorRole={doctorRole}
+        onSave={onSave}
+        onOpen={onOpen}
+        navigationItems={navigationItems}
+      >
+        {children}
+      </SidebarNavContent>
+    </SidebarProvider>
   );
 };
 

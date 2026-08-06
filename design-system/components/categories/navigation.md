@@ -4,7 +4,7 @@ Category ID: `navigation`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-navigation`  
 Allowed traits: `collapsible`, `identity`, `icon-only`  
-Current consumers: `ui-breadcrumb`, `molecule-page-context-header`, `molecule-sidebar-brand`, `molecule-sidebar-nav-item`, `molecule-sidebar-user-profile`, `organism-sidebar-nav`
+Current consumers: `ui-breadcrumb`, `ui-sidebar`, `ui-collapsible`, `molecule-page-context-header`, `molecule-sidebar-brand`, `molecule-sidebar-nav-item`, `molecule-sidebar-user-profile`, `organism-sidebar-nav`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 
@@ -107,7 +107,7 @@ Uma nova página recebe o header contextual quando representa um nível sequenci
 
 ## Current examples
 
-`organism-sidebar-nav` agrega `sidebar-brand`, `sidebar-nav-item` e `sidebar-user-profile`; quick actions continuam na categoria `actions`.
+`organism-sidebar-nav` agrega `ui-sidebar`, `ui-collapsible`, `sidebar-brand`, `sidebar-nav-item` e `sidebar-user-profile`; quick actions continuam na categoria `actions`. A topologia de produção permanece flat; grupos são contrato futuro fornecido por dados.
 
 ## Category acceptance
 

@@ -199,3 +199,7 @@ Task: "Migrar src/app/alimentos/page.tsx"
 - Fixtures/testes ANTES da migração (constituição IV)
 - Commitar por tarefa ou grupo lógico
 - Ao concluir cada arquivo: re-rodar auditoria e confirmar decréscimo
+
+## Phase 6: Convergence
+
+- [ ] T041 [skill: general] [US2] Diagnosticar e corrigir o timeout da suíte global `npm run test`, garantindo término determinístico e todos os testes verdes per FR-008 / SC-004 (partial)
