@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  Calendar,
   Utensils,
   Activity,
   Scale,
@@ -22,21 +21,15 @@ import {
   Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EditAssessmentModal, MetricBox, PageContextHeader } from '@/components/molecules';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { EditIconButton, CreateButton, SecondaryActionButton } from '@/components/atoms';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   getPatientById,
   getConsultationRecord,
+  savePatientAssessmentToStorage,
   Patient,
   ConsultationRecord,
   BodyAssessment
@@ -67,12 +60,13 @@ export default function DedicatedConsultationPage() {
     }
   };
 
-  const handleSaveAssessment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingAssessment && consultation) {
+  const handleSaveAssessment = (assessment: BodyAssessment) => {
+    if (consultation) {
+      const savedAssessments = savePatientAssessmentToStorage(patientId, assessment);
+      const savedAssessment = savedAssessments.find((item) => item.id === assessment.id) ?? assessment;
       setConsultation({
         ...consultation,
-        assessment: { ...editingAssessment },
+        assessment: savedAssessment,
       });
       setIsEditAssessmentOpen(false);
       toast.success('Avaliação física atualizada com sucesso!');
@@ -91,7 +85,7 @@ export default function DedicatedConsultationPage() {
 
   if (!patient || !consultation) {
     return (
-      <div className="min-h-screen bg-surface-subtle flex items-center justify-center p-6 text-text-muted text-style-body-small">
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-6 text-text-muted text-style-body-small">
         <Card className="bg-surface border-border-subtle rounded-surface p-8 max-w-md mx-auto text-center flex flex-col gap-4 shadow-floating">
           <h3 className="font-bold text-style-body text-text-primary">Registro de Consulta Não Encontrado</h3>
           <p className="text-style-legal text-text-muted leading-relaxed">
@@ -112,48 +106,35 @@ export default function DedicatedConsultationPage() {
   const bmi = (currentWeight / (heightM * heightM)).toFixed(1);
 
   return (
-    <div className="min-h-screen bg-surface-subtle text-text-primary p-4 p-8 flex flex-col gap-6 max-w-6xl mx-auto">
-      {/* Top Navigation Bar */}
-      <div className="flex flex-col flex-row items-center justify-between gap-4 bg-surface border border-border-subtle p-4 p-5 rounded-surface shadow-floating">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/pacientes/${patient.id}`}
-            className="p-2 rounded-control bg-surface-subtle border border-border-subtle text-text-muted hover:text-text-primary hover:border-text-primary transition-colors"
-            title="Voltar para a Ficha do Paciente"
-          >
-            <ArrowLeft size={18} />
-          </Link>
+    <div className="min-h-screen bg-canvas text-text-primary p-4 p-8 flex flex-col gap-6 max-w-6xl mx-auto">
+      <PageContextHeader
+        title={`Registro de Consulta — ${consultation.date}`}
+        backHref={`/pacientes/${patient.id}`}
+        backLabel={`Voltar para a ficha de ${patient.name}`}
+        breadcrumbs={[
+          { label: 'Pacientes', href: '/pacientes' },
+          { label: patient.name, href: `/pacientes/${patient.id}` },
+          { label: 'Consulta' },
+        ]}
+        actions={(
+          <>
+            <SecondaryActionButton
+              onClick={() => toast.info('Função de impressão/exportação acionada')}
+              icon={<Printer size={14} className="text-text-muted" />}
+            >
+              Imprimir Prontuário
+            </SecondaryActionButton>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <Calendar size={15} className="text-success" />
-              <h1 className="font-bold text-style-body-large text-text-primary">
-                Registro de Consulta — {consultation.date}
-              </h1>
-            </div>
-            <p className="text-style-legal text-text-muted font-medium">
-              Paciente: <strong className="text-text-primary font-bold">{patient.name}</strong> • {patient.age} anos • {patient.objective}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <SecondaryActionButton
-            onClick={() => toast.info('Função de impressão/exportação acionada')}
-            icon={<Printer size={14} className="text-text-muted" />}
-          >
-            Imprimir Prontuário
-          </SecondaryActionButton>
-
-          {consultation.diet && (
-            <Link href={`/pacientes/${patient.id}/dieta/${consultation.diet.id}`}>
-              <CreateButton icon={<Utensils size={14} />}>
-                Abrir no Construtor de Dietas
-              </CreateButton>
-            </Link>
-          )}
-        </div>
-      </div>
+            {consultation.diet && (
+              <Link href={`/pacientes/${patient.id}/dieta/${consultation.diet.id}`}>
+                <CreateButton icon={<Utensils size={14} />}>
+                  Abrir no Construtor de Dietas
+                </CreateButton>
+              </Link>
+            )}
+          </>
+        )}
+      />
 
       {/* Main Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -192,23 +173,11 @@ export default function DedicatedConsultationPage() {
 
               <CardContent className="p-5 flex flex-col gap-5">
                 {/* Macro Summary Grid */}
-                <div className="grid grid-cols-2 grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Meta Calórica</span>
-                    <span className="font-bold text-style-body-small text-text-muted">{consultation.diet.targetKcal} kcal</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Proteínas</span>
-                    <span className="font-bold text-style-body-small text-macro-protein">{consultation.diet.proteinG}g</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Carboidratos</span>
-                    <span className="font-bold text-style-body-small text-macro-carbohydrate">{consultation.diet.carbsG}g</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Gorduras</span>
-                    <span className="font-bold text-style-body-small text-success">{consultation.diet.fatsG}g</span>
-                  </div>
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <MetricBox size="standard" tone="muted" label="Meta Calórica" value={`${consultation.diet.targetKcal} kcal`} />
+                  <MetricBox size="standard" tone="protein" label="Proteínas" value={`${consultation.diet.proteinG}g`} />
+                  <MetricBox size="standard" tone="carbohydrate" label="Carboidratos" value={`${consultation.diet.carbsG}g`} />
+                  <MetricBox size="standard" tone="success" label="Gorduras" value={`${consultation.diet.fatsG}g`} />
                 </div>
 
                 {/* Meals Breakdown List */}
@@ -229,7 +198,7 @@ export default function DedicatedConsultationPage() {
                           >
                             <div
                               onClick={() => toggleMealExpansion(idx)}
-                              className="p-3 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-surface-subtle transition-colors"
+                              className="p-3 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-surface-hover transition-colors"
                             >
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-style-legal text-text-primary">{meal.name}</span>
@@ -304,23 +273,11 @@ export default function DedicatedConsultationPage() {
               </div>
 
               <CardContent className="p-5">
-                <div className="grid grid-cols-2 grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Peso Corporal</span>
-                    <span className="font-bold text-style-body-small text-text-primary">{consultation.assessment.weightKg} kg</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">% Gordura (BF)</span>
-                    <span className="font-bold text-style-body-small text-text-primary">{consultation.assessment.bodyFatPercent}%</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Massa Magra</span>
-                    <span className="font-bold text-style-body-small text-text-primary">{consultation.assessment.muscleMassKg} kg</span>
-                  </div>
-                  <div className="p-3 bg-surface-subtle border border-border-subtle/70 rounded-control flex flex-col gap-1">
-                    <span className="text-style-legal font-bold text-text-muted tracking-overline block">Cintura</span>
-                    <span className="font-bold text-style-body-small text-text-primary">{consultation.assessment.waistCm} cm</span>
-                  </div>
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <MetricBox size="standard" label="Peso Corporal" value={`${consultation.assessment.weightKg} kg`} />
+                  <MetricBox size="standard" label="% Gordura (BF)" value={`${consultation.assessment.bodyFatPercent}%`} />
+                  <MetricBox size="standard" label="Massa Magra" value={`${consultation.assessment.muscleMassKg} kg`} />
+                  <MetricBox size="standard" label="Cintura" value={`${consultation.assessment.waistCm} cm`} />
                 </div>
               </CardContent>
             </Card>
@@ -395,94 +352,14 @@ export default function DedicatedConsultationPage() {
 
       </div>
 
-      {/* Edit Physical Assessment Dialog */}
-      <Dialog open={isEditAssessmentOpen} onOpenChange={setIsEditAssessmentOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
-              <Scale size={18} className="text-success" />
-              <span>Editar Medidas da Avaliação Física</span>
-            </DialogTitle>
-            <DialogDescription className="text-style-legal text-text-muted">
-              Atualize as medições corporais efetuadas nesta consulta.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editingAssessment && (
-            <form onSubmit={handleSaveAssessment} className="flex flex-col gap-4 pt-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso Corporal (kg)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.weightKg}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, weightKg: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">% Gordura Corporal (BF)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.bodyFatPercent}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, bodyFatPercent: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Massa Magra (kg)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.muscleMassKg}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, muscleMassKg: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Cintura (cm)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.waistCm}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, waistCm: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Button
-                  type="button"
-                  onClick={() => setIsEditAssessmentOpen(false)}
-                  variant="secondary"
-                  size="sm"
-                  className="flex-1 text-style-legal"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  className="flex-1 text-style-legal font-bold"
-                >
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditAssessmentModal
+        open={isEditAssessmentOpen}
+        patient={patient}
+        assessment={editingAssessment}
+        mode="edit"
+        onOpenChange={setIsEditAssessmentOpen}
+        onSave={handleSaveAssessment}
+      />
     </div>
   );
 }

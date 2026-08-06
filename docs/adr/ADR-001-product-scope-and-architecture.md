@@ -17,7 +17,9 @@ Focar 100% o produto em um **Aplicativo Local de Criação e Escala Rápida de D
 - Prontuário eletrônico completo ou anamnese médica estendida.
 - Gestão financeira de consultório, emissão de notas ou agendamento de consultas.
 - Aplicativo/Login de acesso direto para pacientes.
+- Interface mobile ou tablet; o produto será desenvolvido exclusivamente para desktop, a partir de `1024px`.
 
 ## Consequências
 - A interface é otimizada para velocidade, atalhos visuais e poucos cliques.
+- Layouts e componentes serão especificados para desktop; mobile e tablet não terão experiências dedicadas.
 - Sem dependência de infraestrutura em nuvem complexa ou mensalidades.

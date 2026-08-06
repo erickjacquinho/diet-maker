@@ -8,6 +8,9 @@ describe("overlay accessibility contract", () => {
       expect(source).toMatch(/@radix-ui\/react-/);
       expect(source).toMatch(/Portal|Content|Trigger/);
     }
+    const calendar = readFileSync('src/components/ui/calendar.tsx', 'utf8');
+    expect(calendar).toContain('CalendarDayButton');
+    expect(calendar).toContain('data-selected-single');
     for (const file of ["FoodSearchModal", "ReadOnlyDietModal"]) {
       const source = readFileSync(`src/components/molecules/${file}.tsx`, "utf8");
       expect(source).toContain("Dialog");

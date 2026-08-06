@@ -26,6 +26,10 @@ Root `Popover` e exports visuais registrados: `Popover`, `PopoverTrigger`, `Popo
 
 ## Allowed variants
 
+## Family contract
+
+`Popover` provides anchored open state. `PopoverTrigger` owns invocation and `PopoverContent` owns the temporary surface; both remain context-bound parts.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

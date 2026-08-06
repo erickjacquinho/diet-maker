@@ -1,4 +1,6 @@
 import React from 'react';
+import { Surface } from '@/components/atoms';
+import type { SurfaceDensity } from '@/design-system';
 import { cn } from '@/lib/utils';
 
 export type MetricBoxTone = 'default' | 'muted' | 'protein' | 'carbohydrate' | 'fat' | 'success' | 'warning';
@@ -16,33 +18,6 @@ export interface MetricBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   surface?: MetricBoxSurface;
   layout?: MetricBoxLayout;
 }
-
-const surfaceClasses: Record<MetricBoxSurface, Record<MetricBoxSize, string>> = {
-  boxed: {
-    compact: 'p-2 bg-surface-subtle rounded-control',
-    standard: 'p-3 bg-surface-subtle border border-border-subtle rounded-control',
-    large: 'p-3 bg-surface-subtle border border-border-subtle rounded-control',
-    hero: 'p-3 bg-surface-subtle border border-border-subtle rounded-control',
-  },
-  raised: {
-    compact: 'p-2 bg-surface border border-border-subtle rounded-control',
-    standard: 'p-3 bg-surface border border-border-subtle rounded-control',
-    large: 'p-3 bg-surface border border-border-subtle rounded-control',
-    hero: 'p-3 bg-surface border border-border-subtle rounded-control',
-  },
-  tinted: {
-    compact: 'p-2 border rounded-control',
-    standard: 'p-3 border rounded-control',
-    large: 'p-3 border rounded-control',
-    hero: 'p-3 border rounded-control',
-  },
-  inline: {
-    compact: '',
-    standard: '',
-    large: '',
-    hero: '',
-  },
-};
 
 const tintedToneClasses: Record<MetricBoxTone, string> = {
   default: 'bg-surface-subtle/60 border-border-subtle',
@@ -71,6 +46,13 @@ const toneClasses: Record<MetricBoxTone, string> = {
   warning: 'text-warning',
 };
 
+const densityBySize: Record<MetricBoxSize, SurfaceDensity> = {
+  compact: 'compact',
+  standard: 'standard',
+  large: 'standard',
+  hero: 'highlight',
+};
+
 export const MetricBox: React.FC<MetricBoxProps> = ({
   label,
   value,
@@ -86,17 +68,12 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
   const isTinted = surface === 'tinted';
   const isSplit = layout === 'split';
 
-  return (
-    <div
-      className={cn(
-        'flex gap-1',
-        isSplit ? 'items-center justify-between w-full' : 'flex-col items-center text-center',
-        surfaceClasses[surface][size],
-        isTinted && tintedToneClasses[tone],
-        className
-      )}
-      {...props}
-    >
+  const layoutClasses = cn(
+    'flex gap-1',
+    isSplit ? 'items-center justify-between w-full' : 'flex-col items-center text-center',
+  );
+  const content = (
+    <>
       <div className={cn('flex flex-col gap-1', isSplit ? 'items-start' : 'items-center')}>
         <div className="flex items-center gap-1 text-style-legal font-bold text-text-muted tracking-label">
           {icon && <span className="shrink-0">{icon}</span>}
@@ -110,6 +87,25 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
       {!isSplit && caption && (
         <span className="text-style-chart-micro font-semibold text-text-muted block">{caption}</span>
       )}
-    </div>
+    </>
+  );
+
+  if (surface === 'inline') {
+    return (
+      <div className={cn(layoutClasses, className)} {...props}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Surface
+      variant={surface === 'raised' ? 'default' : 'subtle'}
+      density={densityBySize[size]}
+      className={cn(layoutClasses, isTinted && tintedToneClasses[tone], className)}
+      {...props}
+    >
+      {content}
+    </Surface>
   );
 };

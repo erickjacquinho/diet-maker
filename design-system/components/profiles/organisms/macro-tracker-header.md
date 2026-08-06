@@ -34,7 +34,7 @@ Metas ausentes geram estado partial explícito; nenhum macro desaparece silencio
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compõe `Surface`, `PatientBadgeHeader` e `MacroMetricCard`; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 

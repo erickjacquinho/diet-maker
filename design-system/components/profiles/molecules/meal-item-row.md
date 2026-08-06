@@ -22,7 +22,7 @@ Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). Tr
 
 ## Specific anatomy
 
-Root `MealItemRow` e exports visuais registrados: `MealItemRow`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `MealItemRow` e exports visuais registrados: `MealItemRow`. Base declarada: `atom-surface`; inputs e actions continuam componentes próprios.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Quantidade ausente é dado incompleto, não zero; remoção pending bloqueia ape
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 

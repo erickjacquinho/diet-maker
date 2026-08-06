@@ -34,6 +34,8 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
+The organism owns the collapse context and composes the four sidebar molecules through their public prop contracts; it no longer defines or reexports their implementations.
+
 Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

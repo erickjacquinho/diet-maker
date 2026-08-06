@@ -34,7 +34,7 @@ Uma cor não deve trocar de significado apenas para atender uma preferência vis
 
 | Token conceitual | Valor | Função |
 | --- | --- | --- |
-| `canvas` | `#F5F3EE` | Fundo principal da aplicação |
+| `canvas` | `#FAF8F4` | Fundo principal da aplicação |
 | `surface` | `#FFFFFF` | Cards, painéis, dialogs e conteúdo elevado |
 | `surface-subtle` | `#FAF8F4` | Subáreas e agrupamentos internos |
 | `surface-hover` | `#F0EDE6` | Hover neutro |

@@ -76,7 +76,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl bg-surface border-border-subtle p-6 rounded-surface max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-xl max-h-[85vh] flex flex-col">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <Utensils size={18} className="text-success" />
@@ -94,14 +94,14 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
             placeholder="Digite o nome do alimento (ex: Frango, Arroz, Ovo, Aveia, Banana)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
+            className="pl-9 text-style-legal font-semibold"
             autoFocus
           />
           <Search size={14} className="absolute left-3 top-6 text-text-muted" />
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[300px] border border-border-subtle rounded-control p-2 my-3 flex flex-col gap-1.5 bg-surface-subtle/50">
+        <div className="my-3 flex min-h-[220px] max-h-[300px] flex-1 flex-col gap-1.5 overflow-y-auto rounded-control border border-border-subtle bg-surface-subtle p-2">
           {searchResults.length === 0 ? (
             <div className="p-8 text-center text-style-legal text-text-muted">
               Nenhum alimento encontrado para "{query}". Tente buscar por termos genéricos como "Frango", "Arroz" ou "Batata".
@@ -116,7 +116,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                   onClick={() => setSelectedFood(food)}
                   className={`w-full text-left p-3 rounded-control border transition-colors duration-standard flex items-center justify-between ${
                     isSelected
-                      ? 'bg-surface border-success ring-2 ring-success/20 shadow-floating'
+                      ? 'bg-surface border-success-border ring-2 ring-success shadow-floating'
                       : 'bg-surface border-border-subtle hover:border-border-hover'
                   }`}
                 >
@@ -139,7 +139,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                   </div>
 
                   {isSelected && (
-                    <div className="h-6 w-6 rounded-round bg-success text-white flex items-center justify-center shrink-0">
+                    <div className="size-6 rounded-round bg-success text-on-primary flex items-center justify-center shrink-0">
                       <Check size={14} />
                     </div>
                   )}

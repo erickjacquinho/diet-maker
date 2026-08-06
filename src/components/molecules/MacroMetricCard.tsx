@@ -1,6 +1,5 @@
 import React from 'react';
-import { Badge, ProgressBar } from '../atoms';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge, ProgressBar, Surface } from '../atoms';
 
 export interface MacroMetricCardProps {
   label: string;
@@ -34,8 +33,8 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
   };
 
   return (
-    <Card className="bg-surface-subtle border-border-subtle p-0">
-      <CardContent className="p-4">
+    <Surface variant="subtle" density="standard" className="p-0">
+      <div className="p-4">
         <div className="flex justify-between text-style-legal font-semibold text-text-muted mb-1">
           <span className={`${textColors[macroColor]} font-bold`}>{label}</span>
           {statusBadgeText && (
@@ -56,7 +55,7 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
         )}
 
         <ProgressBar value={percentage} colorVariant={macroColor} />
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 };

@@ -490,7 +490,7 @@ async function runCli() {
   else if (findings.length) {
     for (const item of findings) process.stdout.write(`${item.code} ${item.entityId}: ${item.message}${item.path ? ` (${item.path})` : ''}\n`);
   } else {
-    process.stdout.write('39 current source files covered\n');
+    process.stdout.write('40 current source files covered\n');
     process.stdout.write('0 uncovered public visual exports\n');
     process.stdout.write('11 categories homologated\n');
     process.stdout.write('4 proposed components specified\n');

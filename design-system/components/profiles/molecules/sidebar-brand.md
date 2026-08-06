@@ -34,6 +34,8 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
+The molecule owns its props contract and can be consumed without importing `SidebarNav`; the organism passes collapse state and the toggle callback downward.
+
 Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

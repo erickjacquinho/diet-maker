@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
-import { Button, Input } from '@/components/atoms';
+import { IconButton } from '@/components/atoms';
+import { Input } from '@/components/ui/input';
 import { RecipeIngredient } from '@/lib/recipesStore';
 
 
@@ -42,16 +43,14 @@ export const RecipeIngredientRow: React.FC<RecipeIngredientRowProps> = ({
           <span className="text-style-legal font-bold text-text-muted">g</span>
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
+        <IconButton
+          variant="quiet"
           onClick={onRemove}
           aria-label={`Remover ${ingredient.name}`}
           className="text-text-muted hover:text-error h-7 w-7 p-0"
         >
           <Trash2 size={14} />
-        </Button>
+        </IconButton>
       </div>
     </div>
   );

@@ -26,6 +26,10 @@ Parts públicas: `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableHead`
 
 ## Allowed variants
 
+## Family contract
+
+`Table` owns the semantic table root and overflow wrapper. Header, body, footer, head, row, cell and caption are structural or visual slots that remain one compound family.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

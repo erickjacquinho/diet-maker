@@ -34,6 +34,8 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
+The molecule owns identity fallback rendering and receives doctor metadata and collapse state by props. It does not depend on the `SidebarNav` organism.
+
 Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

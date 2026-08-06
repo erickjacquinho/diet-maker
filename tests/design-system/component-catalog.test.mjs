@@ -255,8 +255,8 @@ describe('canonical visual categories', () => {
     const proposed = registry.components.filter((component) => component.lifecycle === 'proposed');
     const currentSources = current.flatMap((component) => component.sourceFiles.map(({ path }) => path));
 
-    expect(currentSources).toHaveLength(39);
-    expect(new Set(currentSources).size).toBe(39);
+    expect(currentSources).toHaveLength(50);
+    expect(new Set(currentSources).size).toBe(50);
     expect(proposed.map(({ id }) => id).sort()).toEqual(
       ['atom-skeleton', 'atom-spinner', 'molecule-form-field', 'ui-textarea'].sort(),
     );
@@ -335,7 +335,7 @@ describe('canonical visual categories', () => {
       await readFile(path.resolve('design-system/components/registry.json'), 'utf8'),
     );
 
-    expect(registry.components).toHaveLength(43);
+    expect(registry.components).toHaveLength(54);
     for (const component of registry.components) {
       const markdown = await readFile(path.resolve(component.profile), 'utf8');
       expect(markdown, component.id).toContain(`| Component ID | \`${component.id}\` |`);

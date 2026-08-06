@@ -5,6 +5,9 @@ import {
   getPatientById,
   updatePatientInStorage,
   deletePatientFromStorage,
+  getPatientAssessmentsFromStorage,
+  savePatientAssessmentToStorage,
+  recordPatientActivity,
   Patient,
 } from '../patientsStore';
 
@@ -145,4 +148,65 @@ describe('Patient Domain Seam: patientsStore', () => {
     expect(list).toHaveLength(1);
     expect(list[0].id).toBe(p2.id);
   });
+
+  it('keeps next event backward compatible and persists last clinical activity', () => {
+    const saved = savePatientToStorage({
+      name: 'Paciente Agenda',
+      age: 34,
+      gender: 'Feminino',
+      heightCm: 168,
+      weightKg: 70,
+      targetKcal: 1900,
+      targetProtein: 120,
+      targetCarbs: 210,
+      targetFats: 60,
+      objective: 'Manutenção',
+    });
+
+    expect(saved.nextEvent).toBeNull();
+    expect(saved.lastActivity).toBeNull();
+
+    const updated = updatePatientInStorage({
+      ...saved,
+      nextEvent: { date: '2026-08-20', type: 'assessment-update' },
+    });
+    expect(getPatientById(updated.id)?.nextEvent).toEqual({
+      date: '2026-08-20',
+      type: 'assessment-update',
+    });
+
+    const activity = recordPatientActivity(updated.id, 'diet', '2026-08-03T12:00:00.000Z');
+    expect(activity?.lastActivity).toEqual({
+      at: '2026-08-03T12:00:00.000Z',
+      type: 'diet',
+    });
+  });
+
+  it('persists physical assessments and updates the patient activity source', () => {
+    const saved = savePatientToStorage({
+      name: 'Paciente Avaliação',
+      age: 41,
+      gender: 'Masculino',
+      heightCm: 180,
+      weightKg: 86,
+      targetKcal: 2300,
+      targetProtein: 160,
+      targetCarbs: 250,
+      targetFats: 70,
+      objective: 'Hipertrofia',
+    });
+
+    const assessment = {
+      id: 'assessment-1',
+      date: '2026-08-03',
+      weightKg: 85,
+      bodyFatPercent: 18,
+      muscleMassKg: 42,
+      waistCm: 84,
+    };
+    expect(savePatientAssessmentToStorage(saved.id, assessment)).toEqual([assessment]);
+    expect(getPatientAssessmentsFromStorage(saved.id)).toEqual([assessment]);
+    expect(getPatientById(saved.id)?.lastActivity?.type).toBe('assessment');
+  });
+
 });

@@ -34,7 +34,7 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface` para a região de contexto. Compõe `Surface`, organismos, molecules e primitives UI permitidos; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -42,7 +42,8 @@ Slots são nomeados pela responsabilidade; títulos e landmarks preservam ordem 
 
 ## Exceptions
 
-Nenhuma exceção aprovada.
+`dashed-empty-state`: o estado vazio de refeições mantém uma anatomia dashed própria, registrada como exceção de empty-state e não como nova variante de `Surface`.
+ExceptionRecord: dashed-empty-state reviewAt: 2026-09-30 owner: design-system-maintainers
 
 ## Consumers
 

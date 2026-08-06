@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pacientes — Lista contínua por prioridade</title>
+<script src="https://unpkg.com/lucide@0.475.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root { --canvas:#fcfaf7; --surface:#fff; --subtle:#f8f6f2; --border:#d6d0c5; --divider:#e3ded5; --sys-color-text-primary:#201c18; --sys-color-text-secondary:#4b463f; --sys-color-text-muted:#615b53; --primary:#2746b3; --info:#3157a4; --success:#237a4b; --warning:#8a5d00; --error:#b42318; --font:"Plus Jakarta Sans",system-ui,sans-serif; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--canvas); color:var(--sys-color-text-primary); font-family:var(--font); line-height:1.5; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .doc-wrap { max-width:1280px; margin:0 auto; padding:40px 32px 24px; }
+  .eyebrow { color:var(--sys-color-text-muted); font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; }
+  h1 { margin-top:8px; color:var(--sys-color-text-primary); font-size:28px; font-weight:600; line-height:36px; }
+  .lede { max-width:86ch; margin-top:10px; color:var(--sys-color-text-secondary); font-size:14px; line-height:22px; }
+  .app { display:flex; margin-top:28px; overflow:hidden; border:1px solid var(--border); border-radius:8px; background:var(--canvas); }
+  .sidebar { width:224px; flex-shrink:0; min-height:640px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid var(--border); background:var(--surface); }
+  .brand { display:flex; align-items:center; gap:8px; margin-bottom:24px; color:var(--sys-color-text-primary); font-size:14px; font-weight:600; }
+  .brand-mark { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:var(--primary); color:white; }
+  nav { display:flex; flex-direction:column; gap:6px; }
+  nav a { min-height:36px; padding:0 12px; display:flex; align-items:center; border-radius:6px; color:var(--sys-color-text-muted); font-size:13px; font-weight:500; text-decoration:none; }
+  nav a.active { background:var(--primary); color:white; }
+  .user { padding:10px; border:1px solid var(--border); border-radius:6px; background:var(--subtle); color:var(--sys-color-text-muted); font-size:11px; }
+  .content { flex:1; min-width:0; padding:32px; }
+  .content-inner { display:flex; flex-direction:column; gap:24px; }
+  .page-title { color:var(--sys-color-text-primary); font-size:28px; font-weight:600; line-height:36px; }
+  .page-subtitle { margin-top:4px; color:var(--sys-color-text-secondary); font-size:14px; }
+  .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  .primary-action { min-height:40px; padding:0 14px; display:inline-flex; align-items:center; gap:8px; border:1px solid var(--primary); border-radius:6px; background:var(--primary); color:#fff; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap; }
+  .primary-action:hover { filter:brightness(.94); }
+  .primary-action svg { width:16px; height:16px; stroke-width:2; }
+  .toolbar .primary-action { margin-left:auto; }
+  .patient-panel { overflow:hidden; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .panel-header { min-height:60px; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--divider); background:var(--surface); }
+  .panel-title { color:var(--sys-color-text-primary); font-size:13px; font-weight:600; }
+  .panel-subtitle { margin-top:2px; color:var(--sys-color-text-muted); font-size:11px; }
+  .toolbar { display:flex; align-items:center; gap:12px; }
+  .search { position:relative; flex:1; max-width:430px; }
+  .search input { width:100%; height:40px; padding:0 12px 0 38px; border:1px solid #7a7369; border-radius:6px; background:var(--surface); color:var(--sys-color-text-primary); font:inherit; font-size:13px; }
+  .search svg { position:absolute; top:12px; left:12px; color:var(--sys-color-text-muted); }
+  .count { color:var(--sys-color-text-muted); font-size:12px; white-space:nowrap; }
+  .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .patient-panel .table-wrap { border:0; border-radius:0; }
+  table { width:100%; table-layout:fixed; border-collapse:collapse; font-size:13px; }
+  caption { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  th { height:44px; padding:8px 16px; background:var(--subtle); color:var(--sys-color-text-secondary); text-align:left; font-size:11px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; }
+  td { min-height:52px; padding:10px 16px; border-top:1px solid var(--divider); vertical-align:middle; }
+  tr.patient-row { cursor:pointer; }
+  tr.patient-row:hover { background:var(--subtle); }
+  tr.patient-row:focus-visible { outline:2px solid var(--primary); outline-offset:-2px; }
+  .patient { display:flex; flex-direction:column; gap:2px; order:2; }
+  .patient-row-content { display:flex; align-items:flex-start; gap:8px; }
+  .record-dots { width:8px; flex:0 0 8px; display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:3px; order:1; }
+  .record-dot { width:6px; height:6px; display:block; border-radius:50%; }
+  .record-dot-assessment { background:var(--sys-color-text-secondary); }
+  .record-dot-diet { background:var(--info); }
+  .record-dot-empty { background:transparent; }
+  .patient-name { color:var(--sys-color-text-secondary); font-weight:600; }
+  .patient-meta, .tracking-secondary, .event-type { color:var(--sys-color-text-muted); font-size:11px; }
+  .gender-icon { width:14px; height:14px; display:inline-block; vertical-align:-2px; color:var(--sys-color-text-secondary); stroke-width:1.75; }
+  .tracking { display:flex; flex-direction:column; gap:2px; }
+  .tracking-primary { color:var(--sys-color-text-secondary); font-weight:600; }
+  .tracking-unavailable { color:var(--sys-color-text-muted); }
+  .objective { color:var(--sys-color-text-secondary); }
+  .objective-label { max-width:100%; min-height:24px; padding:3px 8px; display:inline-flex; align-items:center; overflow:hidden; border:1px solid var(--border); border-radius:4px; background:var(--subtle); color:var(--sys-color-text-secondary); font-size:11px; font-weight:500; line-height:16px; text-overflow:ellipsis; white-space:nowrap; }
+  .event { display:flex; align-items:flex-start; gap:8px; color:var(--sys-color-text-secondary); }
+  .event-status { display:block; font-weight:600; }
+  .event-date { margin-left:4px; color:var(--sys-color-text-secondary); font-size:11px; }
+  .event.overdue { color:var(--error); }
+  .event.today { color:var(--primary); }
+  .event.empty { color:var(--warning); }
+  .row-action { width:48px; color:var(--sys-color-text-muted); text-align:right; }
+  .row-chevron { width:16px; height:16px; vertical-align:middle; stroke-width:1.75; }
+  .row-link { display:block; color:inherit; text-decoration:none; }
+  .notes { margin-top:24px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .note { padding:14px 16px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--sys-color-text-secondary); font-size:13px; line-height:20px; }
+  .note strong { display:block; margin-bottom:4px; color:var(--sys-color-text-muted); font-size:11px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; }
+  .wide { grid-column:1/-1; }
+</style>
+</head>
+<body>
+<div class="doc-wrap">
+  <div class="eyebrow">Refs · Pacientes · lista contínua por prioridade</div>
+  <h1>Pacientes — próximo acompanhamento</h1>
+  <p class="lede">Referência estática da página <code>/pacientes</code>. A tabela é contínua: não há grupos ou separadores. A ordenação é atrasados, hoje, próximos por data e sem próximo evento. Cada linha informa o estado textual, o tipo e a data.</p>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div><div class="brand"><span class="brand-mark">N</span>NutriDiet</div><nav aria-label="Navegação principal"><a class="active" href="#">Pacientes</a><a href="#">Presets de Dietas</a><a href="#">Refeições Prontas</a><a href="#">Receitas Culinárias</a><a href="#">Planilha de Alimentos</a></nav></div>
+      <div class="user">DR · Dr. Lucas<br>Nutricionista</div>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <header class="page-header"><div><div class="page-title">Pacientes</div><p class="page-subtitle">Organize os próximos acompanhamentos para preparar o atendimento.</p></div></header>
+        <div class="toolbar"><label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span class="sr-only">Buscar pacientes</span><input type="search" placeholder="Buscar por nome ou objetivo..." aria-label="Buscar pacientes"></label><span class="count">7 pacientes</span><a class="primary-action" href="#" aria-label="Cadastrar novo paciente"><i data-lucide="plus" aria-hidden="true"></i><span>Novo paciente</span></a></div>
+
+        <section class="patient-panel" aria-label="Lista de pacientes">
+          <div class="table-wrap">
+          <table>
+            <caption>Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento</caption>
+            <thead><tr><th style="width:27%">Paciente</th><th style="width:19%">Objetivo</th><th style="width:20%">Evolução de gordura</th><th style="width:29%">Próximo acompanhamento</th><th style="width:5%"><span class="sr-only">Abrir perfil</span></th></tr></thead>
+            <tbody>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de João Pedro Ramos"><td><a class="row-link" href="/pacientes/pat-joao"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Avaliação física e dieta registradas"><span class="record-dot record-dot-assessment" title="Avaliação física registrada"></span><span class="record-dot record-dot-diet" title="Dieta registrada"></span></span><span class="patient"><span class="patient-name">João Pedro Ramos</span><span class="patient-meta"><i class="gender-icon" data-lucide="mars" aria-hidden="true"></i> 52 anos · 1a 2m 29d</span></span></span></a></td><td class="objective"><span class="objective-label">Recomposição</span></td><td><span class="tracking"><span class="tracking-primary">30,2% BF</span><span class="tracking-secondary">−1,2% 30d</span></span></td><td><span class="event overdue"><span aria-hidden="true">!</span><span><span class="event-status">Atrasado há 4 dias</span><span class="event-type">Atualização de avaliação <span class="event-date">30/07</span></span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Rafael Torres"><td><a class="row-link" href="/pacientes/pat-rafael"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Dieta registrada; sem avaliação física"><span class="record-dot record-dot-empty" aria-hidden="true"></span><span class="record-dot record-dot-diet" title="Dieta registrada"></span></span><span class="patient"><span class="patient-name">Rafael Torres</span><span class="patient-meta"><i class="gender-icon" data-lucide="mars" aria-hidden="true"></i> 41 anos · 8m 4d</span></span></span></a></td><td class="objective"><span class="objective-label">Bulking</span></td><td><span class="tracking"><span class="tracking-primary">18,8% BF</span><span class="tracking-secondary">+0,6% 18d</span></span></td><td><span class="event overdue"><span aria-hidden="true">!</span><span><span class="event-status">Atrasado há 1 dia</span><span class="event-type">Atualização de dieta <span class="event-date">02/08</span></span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Ana Beatriz Lima"><td><a class="row-link" href="/pacientes/pat-ana"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Avaliação física registrada; sem dieta"><span class="record-dot record-dot-assessment" title="Avaliação física registrada"></span><span class="record-dot record-dot-empty" aria-hidden="true"></span></span><span class="patient"><span class="patient-name">Ana Beatriz Lima</span><span class="patient-meta"><i class="gender-icon" data-lucide="venus" aria-hidden="true"></i> 23 anos · 5m 1d</span></span></span></a></td><td class="objective"><span class="objective-label">Manutenção</span></td><td><span class="tracking"><span class="tracking-primary">24,7% BF</span><span class="tracking-secondary">−0,4% 20d</span></span></td><td><span class="event today"><span aria-hidden="true">•</span><span><span class="event-status">Hoje</span><span class="event-type">Atualização de avaliação <span class="event-date">03/08</span></span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Carlos Eduardo Silva"><td><a class="row-link" href="/pacientes/pat-carlos"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Avaliação física e dieta registradas"><span class="record-dot record-dot-assessment" title="Avaliação física registrada"></span><span class="record-dot record-dot-diet" title="Dieta registrada"></span></span><span class="patient"><span class="patient-name">Carlos Eduardo Silva</span><span class="patient-meta"><i class="gender-icon" data-lucide="mars" aria-hidden="true"></i> 34 anos · 11m 26d</span></span></span></a></td><td class="objective"><span class="objective-label">Recomposição</span></td><td><span class="tracking"><span class="tracking-primary">20,7% BF</span><span class="tracking-secondary">+0,3% 25d</span></span></td><td><span class="event"><span aria-hidden="true">•</span><span><span class="event-status">Em 5 dias</span><span class="event-type">Atualização de dieta <span class="event-date">08/08</span></span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Mariana Souza"><td><a class="row-link" href="/pacientes/pat-mariana"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Avaliação física registrada; sem dieta"><span class="record-dot record-dot-assessment" title="Avaliação física registrada"></span><span class="record-dot record-dot-empty" aria-hidden="true"></span></span><span class="patient"><span class="patient-name">Mariana Souza</span><span class="patient-meta"><i class="gender-icon" data-lucide="venus" aria-hidden="true"></i> 27 anos · 6m 13d</span></span></span></a></td><td class="objective"><span class="objective-label">Cutting</span></td><td><span class="tracking"><span class="tracking-primary">26,8% BF</span><span class="tracking-secondary">−0,8% 17d</span></span></td><td><span class="event"><span aria-hidden="true">•</span><span><span class="event-status">Em 17 dias</span><span class="event-type">Atualização de avaliação <span class="event-date">20/08</span></span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Fernanda Alves"><td><a class="row-link" href="/pacientes/pat-fernanda"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Sem avaliação física ou dieta registrada"><span class="record-dot record-dot-empty" aria-hidden="true"></span><span class="record-dot record-dot-empty" aria-hidden="true"></span></span><span class="patient"><span class="patient-name">Fernanda Alves</span><span class="patient-meta"><i class="gender-icon" data-lucide="venus" aria-hidden="true"></i> 35 anos · 5m 20d</span></span></span></a></td><td class="objective"><span class="objective-label">Cutting</span></td><td><span class="tracking"><span class="tracking-primary">32,0% BF</span><span class="tracking-secondary">−0,1% 30d</span></span></td><td><span class="event empty"><span aria-hidden="true">!</span><span><span class="event-status">Sem próximo evento</span><span class="event-type">Defina o tipo e a data no perfil</span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+              <tr class="patient-row" tabindex="0" role="link" aria-label="Abrir perfil de Gustavo Nogueira"><td><a class="row-link" href="/pacientes/pat-gustavo"><span class="patient-row-content"><span class="record-dots" role="img" aria-label="Dieta registrada; sem avaliação física"><span class="record-dot record-dot-empty" aria-hidden="true"></span><span class="record-dot record-dot-diet" title="Dieta registrada"></span></span><span class="patient"><span class="patient-name">Gustavo Nogueira</span><span class="patient-meta"><i class="gender-icon" data-lucide="mars" aria-hidden="true"></i> 29 anos · 1m 8d</span></span></span></a></td><td class="objective"><span class="objective-label">Bulking</span></td><td><span class="tracking tracking-unavailable"><span class="tracking-primary">Sem avaliação corporal recente</span></span></td><td><span class="event empty"><span aria-hidden="true">!</span><span><span class="event-status">Sem próximo evento</span><span class="event-type">Defina o tipo e a data no perfil</span></span></span></td><td class="row-action" aria-hidden="true"><i class="row-chevron" data-lucide="chevron-right"></i></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="notes"><div class="note"><strong>Lista contínua</strong>Os estados não criam divisões visuais; cada paciente ocupa uma única linha da mesma tabela.</div><div class="note"><strong>Ordenação única</strong>A prioridade é atrasados, hoje, próximos por data e sem próximo evento.</div><div class="note wide"><strong>Evolução corporal</strong>A tabela exibe o percentual de gordura atual e sua variação. Sem dados suficientes, informa a ausência de avaliação recente.</div></div>
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>

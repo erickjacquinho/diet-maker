@@ -136,7 +136,7 @@ export default function PresetsPage() {
   const filteredPresets = presets.filter(
     (p) =>
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+      (p.category ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCopy = (id: string) => {
@@ -245,8 +245,8 @@ export default function PresetsPage() {
                 <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
                   <span className="text-style-legal text-text-muted font-medium">Reutilizável em 1 clique</span>
                   <Button
-                    size="sm"
-                    variant={copiedId === preset.id ? 'default' : 'primary'}
+                    size="compact"
+                    variant="primary"
                     onClick={() => handleCopy(preset.id)}
                     className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
                       copiedId === preset.id
@@ -473,12 +473,12 @@ export default function PresetsPage() {
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
-                size="sm"
+                size="compact"
                 className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="sm" className="flex-1">
+              <Button type="submit" variant="primary" size="compact" className="flex-1">
                 Salvar Preset
               </Button>
             </div>
@@ -499,7 +499,7 @@ export default function PresetsPage() {
             <Button
               type="button"
               variant="secondary"
-              size="sm"
+              size="compact"
               onClick={() => setIsConfirmDiscardOpen(false)}
               className="flex-1"
             >
@@ -508,7 +508,7 @@ export default function PresetsPage() {
             <Button
               type="button"
               variant="destructive"
-              size="sm"
+              size="compact"
               onClick={() => {
                 setIsConfirmDiscardOpen(false);
                 setIsModalOpen(false);

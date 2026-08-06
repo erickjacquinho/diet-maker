@@ -12,7 +12,6 @@ import {
   Weight, 
   Mars,
   Venus,
-  Flame, 
   ChevronRight,
   ChevronDown,
   ChevronUp,
@@ -23,10 +22,13 @@ import {
   Trash2,
   AlertTriangle,
   FileSpreadsheet,
-  Eye
+  Eye,
+  MessageCircle,
 } from 'lucide-react';
 import { Avatar, EditIconButton, DeleteIconButton, CreateButton, SecondaryActionButton, IconButton } from '@/components/atoms';
-import { ReadOnlyDietModal, AutoKcalSection, MetricBox, DatePickerField } from '@/components/molecules';
+import { EditAssessmentModal, ReadOnlyDietModal, MetricBox, DatePickerField, PageContextHeader } from '@/components/molecules';
+import { MetricBoxGroup } from '@/components/organisms';
+import { textStyle } from '@/design-system';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +64,13 @@ import {
   BodyAssessment,
   DEFAULT_OBJECTIVES,
 } from '@/lib/patientsStore';
+import {
+  buildNextEventSummary,
+  normalizePatientDateKey,
+  selectActivePlan,
+  selectLatestAssessment,
+} from '@/lib/patientProfileSelectors';
+import { formatWhatsappContact, getWhatsappUrl } from '@/lib/whatsapp';
 
 
 interface HistoricalDiet {
@@ -79,18 +88,6 @@ interface ConsolidatedUpdate {
   date: string;
   diet?: HistoricalDiet;
   assessment?: BodyAssessment;
-}
-
-function toComparableDate(value: string): string {
-  const normalized = value.trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(normalized)) return normalized.slice(0, 10);
-
-  const [day, month, year] = normalized.split(/[/-]/);
-  if (day && month && year?.length === 4) {
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  }
-
-  return normalized;
 }
 
 export default function PatientDetailPage() {
@@ -111,6 +108,7 @@ export default function PatientDetailPage() {
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
   const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
+  const [assessmentMode, setAssessmentMode] = useState<'create' | 'edit'>('edit');
   const [isNextEventModalOpen, setIsNextEventModalOpen] = useState(false);
   const [nextEventDraft, setNextEventDraft] = useState<PatientNextEvent>({
     date: '',
@@ -131,13 +129,13 @@ export default function PatientDetailPage() {
 
   const handleOpenEditAssessment = (assessment: BodyAssessment) => {
     setEditingAssessment({ ...assessment });
+    setAssessmentMode('edit');
     setIsEditAssessmentOpen(true);
   };
 
-  const handleSaveAssessment = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveAssessment = (assessment: BodyAssessment) => {
     if (editingAssessment && patient) {
-      const updatedAssessments = savePatientAssessmentToStorage(patient.id, editingAssessment);
+      const updatedAssessments = savePatientAssessmentToStorage(patient.id, assessment);
       setBodyAssessments(updatedAssessments);
       setIsEditAssessmentOpen(false);
       toast.success('Avaliação física atualizada com sucesso!');
@@ -207,6 +205,7 @@ export default function PatientDetailPage() {
       editFormData.weightKg !== patient.weightKg ||
       (editFormData.gender || 'Masculino') !== (patient.gender || 'Masculino') ||
       (editFormData.objective || '') !== (patient.objective || '') ||
+      formatWhatsappContact(editFormData.whatsapp) !== formatWhatsappContact(patient.whatsapp) ||
       editFormData.targetKcal !== patient.targetKcal ||
       editFormData.targetProtein !== patient.targetProtein ||
       editFormData.targetCarbs !== patient.targetCarbs ||
@@ -325,28 +324,29 @@ export default function PatientDetailPage() {
 
   // Consolidate updates by date for the unified table view
   const consolidatedUpdates: ConsolidatedUpdate[] = useMemo(() => {
-    const mapByDate = new Map<string, { diet?: HistoricalDiet; assessment?: BodyAssessment }>();
+    const mapByDate = new Map<string, ConsolidatedUpdate>();
 
     dietHistory.forEach((diet) => {
-      const existing = mapByDate.get(diet.date) || {};
-      mapByDate.set(diet.date, { ...existing, diet });
+      const key = normalizePatientDateKey(diet.date) ?? diet.date;
+      const existing = mapByDate.get(key);
+      mapByDate.set(key, { date: existing?.date ?? diet.date, diet, assessment: existing?.assessment });
     });
 
     bodyAssessments.forEach((assess) => {
-      const existing = mapByDate.get(assess.date) || {};
-      mapByDate.set(assess.date, { ...existing, assessment: assess });
+      const key = normalizePatientDateKey(assess.date) ?? assess.date;
+      const existing = mapByDate.get(key);
+      mapByDate.set(key, { date: existing?.date ?? assess.date, diet: existing?.diet, assessment: assess });
     });
 
-    return Array.from(mapByDate.entries()).map(([date, data]) => ({
-      date,
-      diet: data.diet,
-      assessment: data.assessment,
-    }));
+    return Array.from(mapByDate.values());
   }, [dietHistory, bodyAssessments]);
 
   const handleOpenEditModal = () => {
     if (patient) {
-      setEditFormData({ ...patient });
+      setEditFormData({
+        ...patient,
+        whatsapp: formatWhatsappContact(patient.whatsapp) || undefined,
+      });
       setIsEditModalOpen(true);
       setIsDiscardConfirmOpen(false);
     }
@@ -376,18 +376,10 @@ export default function PatientDetailPage() {
     e.preventDefault();
     if (!editFormData || !editFormData.name.trim()) return;
 
-    const calculatedKcal = calculatePresetCalories(
-      Number(editFormData.targetProtein),
-      Number(editFormData.targetCarbs),
-      Number(editFormData.targetFats)
-    );
-
-    const updatedData = {
+    const saved = updatePatientInStorage({
       ...editFormData,
-      targetKcal: calculatedKcal,
-    };
-
-    const saved = updatePatientInStorage(updatedData);
+      whatsapp: formatWhatsappContact(editFormData.whatsapp) || undefined,
+    });
     setPatient(saved);
     setIsEditModalOpen(false);
   };
@@ -406,11 +398,10 @@ export default function PatientDetailPage() {
   };
 
   const latestAssessment = useMemo(() => {
-    return bodyAssessments.reduce<BodyAssessment | null>((latest, assessment) => {
-      if (!latest) return assessment;
-      return toComparableDate(assessment.date) > toComparableDate(latest.date) ? assessment : latest;
-    }, null);
+    return selectLatestAssessment(bodyAssessments);
   }, [bodyAssessments]);
+
+  const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
 
   if (!patient) {
     return (
@@ -441,24 +432,17 @@ export default function PatientDetailPage() {
     : normalizedGender === 'masculino' || normalizedGender === 'male'
       ? Mars
       : null;
+  const nextEventSummary = buildNextEventSummary(patient.nextEvent);
+  const whatsappUrl = getWhatsappUrl(patient.whatsapp);
 
   return (
     <div className="flex flex-col p-6 max-w-6xl mx-auto gap-6">
-      {/* Top Navigation Bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/pacientes"
-            className="p-2 rounded-surface bg-surface border border-border-subtle hover:border-text-primary text-text-muted hover:text-text-primary transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </Link>
-          <div>
-            <span className="text-style-legal font-bold text-text-muted tracking-overline">Pacientes / Perfil</span>
-            <h1 className="font-bold text-style-subsection-title text-text-primary tracking-tight leading-none">Perfil do paciente</h1>
-          </div>
-        </div>
-      </div>
+      <PageContextHeader
+        title="Perfil do paciente"
+        backHref="/pacientes"
+        backLabel="Voltar para Pacientes"
+        breadcrumbs={[{ label: 'Pacientes', href: '/pacientes' }, { label: patient.name }]}
+      />
 
       {/* Patient summary */}
       <Card className="bg-surface border-border-subtle rounded-surface p-0 overflow-hidden">
@@ -506,13 +490,14 @@ export default function PatientDetailPage() {
                 icon={<Activity size={14} className="text-success" />}
                 onClick={() => {
                   const today = new Date().toISOString().slice(0, 10);
+                  setAssessmentMode('create');
                   setEditingAssessment({
                     id: `assessment-${Date.now()}`,
                     date: today,
                     weightKg: patient.weightKg,
-                    bodyFatPercent: 0,
-                    muscleMassKg: 0,
-                    waistCm: 0,
+                    bodyFatPercent: Number.NaN,
+                    muscleMassKg: Number.NaN,
+                    waistCm: Number.NaN,
                   });
                   setIsEditAssessmentOpen(true);
                 }}
@@ -520,10 +505,29 @@ export default function PatientDetailPage() {
                 Nova Avaliação Física
               </SecondaryActionButton>
 
+              <SecondaryActionButton
+                type="button"
+                icon={<MessageCircle size={14} className="text-success" />}
+                disabled={!whatsappUrl}
+                title={whatsappUrl ? 'Abrir conversa no WhatsApp' : 'Cadastre um WhatsApp para entrar em contato'}
+                aria-label={whatsappUrl ? 'Abrir conversa no WhatsApp' : 'WhatsApp indisponÃ­vel: cadastre um nÃºmero'}
+                onClick={() => {
+                  if (whatsappUrl) {
+                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+              >
+                WhatsApp
+              </SecondaryActionButton>
+
               <div className="h-6 w-px bg-border-subtle hidden mx-1" />
 
-              <EditIconButton onClick={handleOpenEditModal} title="Editar Cadastro" />
-              <DeleteIconButton onClick={() => setIsDeleteModalOpen(true)} title="Excluir Paciente" />
+              <EditIconButton onClick={handleOpenEditModal} title="Editar Cadastro" variant="secondary" />
+              <DeleteIconButton
+                onClick={() => setIsDeleteModalOpen(true)}
+                title="Excluir Paciente"
+                variant="destructive-outline"
+              />
             </div>
           </div>
 
@@ -538,47 +542,34 @@ export default function PatientDetailPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-4 divide-x divide-border-divider overflow-hidden rounded-control border border-border-divider bg-surface">
-              <MetricBox
-                size="standard"
-                layout="split"
-                surface="inline"
-                icon={<Weight size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
-                label="Peso atual"
-                value={latestAssessment && latestAssessment.weightKg > 0 ? `${latestAssessment.weightKg} kg` : `${patient.weightKg} kg`}
-                className="min-w-0 px-3 py-3"
-              />
-              <MetricBox
-                size="standard"
-                layout="split"
-                surface="inline"
-                icon={<Activity size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
-                label="% de gordura"
-                value={latestAssessment && latestAssessment.bodyFatPercent > 0 ? `${latestAssessment.bodyFatPercent}%` : 'Sem avaliação'}
-                tone={latestAssessment && latestAssessment.bodyFatPercent > 0 ? 'default' : 'muted'}
-                className="min-w-0 px-3 py-3"
-              />
-              <MetricBox
-                size="standard"
-                layout="split"
-                surface="inline"
-                icon={<Scale size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
-                label="Massa magra"
-                value={latestAssessment && latestAssessment.muscleMassKg > 0 ? `${latestAssessment.muscleMassKg} kg` : 'Sem avaliação'}
-                tone={latestAssessment && latestAssessment.muscleMassKg > 0 ? 'default' : 'muted'}
-                className="min-w-0 px-3 py-3"
-              />
-              <MetricBox
-                size="standard"
-                layout="split"
-                surface="inline"
-                icon={<Ruler size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />}
-                label="Cintura"
-                value={latestAssessment && latestAssessment.waistCm > 0 ? `${latestAssessment.waistCm} cm` : 'Sem avaliação'}
-                tone={latestAssessment && latestAssessment.waistCm > 0 ? 'default' : 'muted'}
-                className="min-w-0 px-3 py-3"
-              />
-            </div>
+            <MetricBoxGroup
+              items={[
+                {
+                  icon: <Weight size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />,
+                  label: "Peso atual",
+                  value: latestAssessment && latestAssessment.weightKg > 0 ? `${latestAssessment.weightKg} kg` : 'Sem avaliação',
+                  tone: latestAssessment && latestAssessment.weightKg > 0 ? 'default' : 'muted',
+                },
+                {
+                  icon: <Activity size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />,
+                  label: "% de gordura",
+                  value: latestAssessment && latestAssessment.bodyFatPercent > 0 ? `${latestAssessment.bodyFatPercent}%` : 'Sem avaliação',
+                  tone: latestAssessment && latestAssessment.bodyFatPercent > 0 ? 'default' : 'muted',
+                },
+                {
+                  icon: <Scale size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />,
+                  label: "Massa magra",
+                  value: latestAssessment && latestAssessment.muscleMassKg > 0 ? `${latestAssessment.muscleMassKg} kg` : 'Sem avaliação',
+                  tone: latestAssessment && latestAssessment.muscleMassKg > 0 ? 'default' : 'muted',
+                },
+                {
+                  icon: <Ruler size={12} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />,
+                  label: "Cintura",
+                  value: latestAssessment && latestAssessment.waistCm > 0 ? `${latestAssessment.waistCm} cm` : 'Sem avaliação',
+                  tone: latestAssessment && latestAssessment.waistCm > 0 ? 'default' : 'muted',
+                },
+              ]}
+            />
 
             <div className="grid grid-cols-3 gap-3">
               <MetricBox
@@ -600,8 +591,8 @@ export default function PatientDetailPage() {
                       Próximo acompanhamento
                     </span>
                     <span className="text-style-legal text-text-secondary truncate">
-                      {patient.nextEvent
-                        ? `${patient.nextEvent.date.split('-').reverse().join('/')} · ${patient.nextEvent.type === 'diet-update' ? 'Atualização de dieta' : 'Atualização de avaliação'}`
+                      {nextEventSummary
+                        ? `${nextEventSummary.date} · ${nextEventSummary.label}`
                         : 'Sem próximo evento'}
                     </span>
                   </div>
@@ -622,86 +613,79 @@ export default function PatientDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Current nutrition targets */}
+      {/* Current plan and consultation history */}
       <Card className="bg-surface border-border-subtle rounded-surface p-0">
-        <CardContent className="p-6 flex flex-col gap-4">
-          <div>
-            <h2 className="text-style-section-title font-bold tracking-tight text-text-primary">
-              Metas nutricionais atuais
-            </h2>
-            <p className="text-style-legal text-text-muted mt-1 mb-3">
-              Metas manuais usadas para orientar a prescrição diária.
-            </p>
-            <div className="grid grid-cols-4 gap-3">
-              <MetricBox
-                size="large"
-                tone="muted"
-                icon={<Flame size={12} className="text-success" />}
-                label="Meta Kcal"
-                value={`${patient.targetKcal} kcal`}
-              />
-
-              <MetricBox
-                size="large"
-                tone="protein"
-                label="Proteína"
-                value={`${patient.targetProtein}g`}
-                caption={`${(patient.targetProtein / (patient.weightKg || 1)).toFixed(1)} g/kg`}
-              />
-
-              <MetricBox
-                size="large"
-                tone="carbohydrate"
-                label="Carboidratos"
-                value={`${patient.targetCarbs}g`}
-                caption={`${(patient.targetCarbs / (patient.weightKg || 1)).toFixed(1)} g/kg`}
-              />
-
-              <MetricBox
-                size="large"
-                tone="fat"
-                label="Gorduras"
-                value={`${patient.targetFats}g`}
-                caption={`${(patient.targetFats / (patient.weightKg || 1)).toFixed(1)} g/kg`}
-              />
+        <CardContent className="p-6 flex flex-col gap-6">
+          <section aria-labelledby="current-plan-title" className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between gap-3">
+              <h2 id="current-plan-title" className="text-style-section-title font-bold tracking-tight text-text-primary">
+                Plano alimentar atual
+              </h2>
+              {activePlan && (
+                <Badge variant="secondary" className="text-style-legal font-semibold text-success whitespace-nowrap">
+                  Plano vigente
+                </Badge>
+              )}
             </div>
+            <p className="text-style-legal text-text-muted">
+              {activePlan
+                ? `Resumo da dieta registrada em ${activePlan.date}.`
+                : 'Nenhuma dieta ativa está vinculada a este paciente.'}
+            </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Consultation history */}
-      <Card className="bg-surface border-border-subtle rounded-surface p-0">
-        <CardContent className="p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-border-divider pb-4">
+          {activePlan && (
+            <div className="flex flex-col gap-2 border-t border-border-subtle pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-style-body-small font-semibold text-text-primary truncate">{activePlan.name}</p>
+                  <p className="text-style-legal text-text-muted">Atualizado em {activePlan.date}</p>
+                </div>
+                <Button asChild variant="secondary" size="compact" className="shrink-0">
+                  <Link href={`/pacientes/${patient.id}/dieta/${activePlan.dietId}`}>Abrir dieta</Link>
+                </Button>
+              </div>
+              <p className="text-style-legal text-text-secondary" aria-label="Resumo de metas da dieta vigente">
+                {activePlan.targetKcal > 0 ? `${activePlan.targetKcal} kcal` : 'Kcal sem definição'}
+                {' · '}
+                {activePlan.proteinG > 0 ? `${activePlan.proteinG}g P` : 'P sem definição'}
+                {' · '}
+                {activePlan.carbsG > 0 ? `${activePlan.carbsG}g C` : 'C sem definição'}
+                {' · '}
+                {activePlan.fatsG > 0 ? `${activePlan.fatsG}g G` : 'G sem definição'}
+              </p>
+            </div>
+          )}
+          </section>
+          <section
+            role="region"
+            aria-labelledby="consultation-history-title"
+            className="flex flex-col gap-4 border-t border-border-divider pt-6"
+          >
+            <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <FileSpreadsheet size={18} className="text-success" />
+              <FileSpreadsheet size={18} className="text-text-secondary" />
               <div>
-                <h2 className="font-bold text-style-body text-text-primary">Histórico de consultas</h2>
+                <h2 id="consultation-history-title" className="font-bold text-style-body text-text-primary">Histórico de consultas</h2>
                 <p className="text-style-legal text-text-muted">Dietas e avaliações físicas organizadas por data</p>
               </div>
             </div>
-            <Badge variant="secondary" className="text-style-legal font-bold px-2.5 py-1">
+            <span className="text-style-legal text-text-muted whitespace-nowrap">
               {consolidatedUpdates.length === 1
-                ? '1 consulta registrada'
-                : `${consolidatedUpdates.length} consultas registradas`}
-            </Badge>
+                ? '1 consulta'
+                : `${consolidatedUpdates.length} consultas`}
+            </span>
           </div>
 
           {consolidatedUpdates.length === 0 ? (
-            <div className="p-10 text-center bg-surface-subtle border border-border-subtle rounded-surface flex flex-col gap-3">
-              <p className="text-style-legal text-text-muted">Nenhum histórico registrado para este paciente até o momento.</p>
-              <div className="flex justify-center gap-3">
-                <Button asChild variant="primary" size="standard">
-                  <Link href={`/pacientes/${patient.id}/dieta/nova`}>
-                    <Plus size={14} />
-                    <span>Criar Dieta</span>
-                  </Link>
-                </Button>
-              </div>
-            </div>
+            <p className="py-2 text-style-legal text-text-muted">
+              Nenhum histórico registrado para este paciente até o momento.
+            </p>
           ) : (
             <div className="overflow-x-auto border border-border-subtle rounded-surface">
-              <table className="w-full text-left text-style-legal border-collapse">
+              <table aria-label="Histórico de consultas por data" className="w-full text-left text-style-legal border-collapse">
+                <caption className="sr-only">Histórico de consultas por data</caption>
                 <thead>
                   <tr className="bg-surface-subtle border-b border-border-subtle text-style-legal font-bold text-text-muted tracking-overline">
                     <th className="py-3 px-4">Data / Consulta</th>
@@ -718,9 +702,8 @@ export default function PatientDetailPage() {
 
                     return (
                       <React.Fragment key={update.date}>
-                        <tr 
-                          onClick={() => toggleRowExpansion(update.date)}
-                          className={`transition-colors cursor-pointer border-l-4 ${
+                        <tr
+                          className={`transition-colors border-l-4 ${
                             isActiveDietRow 
                               ? 'border-l-success bg-success/[0.04] hover:bg-success/[0.08]' 
                               : 'border-l-transparent hover:bg-surface-hover'
@@ -799,6 +782,7 @@ export default function PatientDetailPage() {
                               </Button>
                               <IconButton
                                 aria-label={isExpanded ? 'Recolher consulta' : 'Expandir consulta'}
+                                aria-expanded={isExpanded}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleRowExpansion(update.date);
@@ -897,24 +881,25 @@ export default function PatientDetailPage() {
               </table>
             </div>
           )}
+          </section>
         </CardContent>
       </Card>
 
       {/* Next event dialog */}
       <Dialog open={isNextEventModalOpen} onOpenChange={setIsNextEventModalOpen}>
-        <DialogContent className="bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="flex items-center gap-2 font-bold text-style-body text-text-primary">
-              <Calendar size={16} strokeWidth={1.75} className="text-primary" aria-hidden="true" />
+        <DialogContent>
+          <DialogHeader className="border-b border-border-divider pb-4">
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar strokeWidth={1.75} className="size-4 text-primary" aria-hidden="true" />
               <span>{patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir próximo acompanhamento'}</span>
             </DialogTitle>
-            <DialogDescription className="text-style-legal text-text-muted">
+            <DialogDescription>
               Escolha a data e o tipo da próxima atualização deste paciente.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSaveNextEvent} className="flex flex-col gap-4 pt-1">
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={handleSaveNextEvent} className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <DatePickerField
                 id="next-event-date"
                 label="Data"
@@ -923,18 +908,18 @@ export default function PatientDetailPage() {
                 onValueChange={(value) => setNextEventDraft((current) => ({ ...current, date: value }))}
               />
 
-              <div className="flex flex-col gap-1">
-                <label htmlFor="next-event-type" className="text-style-legal font-semibold text-text-secondary">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="next-event-type" className={textStyle('field-label')}>
                   Tipo
                 </label>
                 <Select
                   value={nextEventDraft.type}
                   onValueChange={(value: PatientNextEventType) => setNextEventDraft((current) => ({ ...current, type: value }))}
                 >
-                  <SelectTrigger id="next-event-type" className="h-10 bg-surface border-border-subtle text-style-legal">
+                  <SelectTrigger id="next-event-type">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="!z-modal">
                     <SelectGroup>
                       <SelectItem value="assessment-update">Atualização de avaliação</SelectItem>
                       <SelectItem value="diet-update">Atualização de dieta</SelectItem>
@@ -944,16 +929,16 @@ export default function PatientDetailPage() {
               </div>
             </div>
 
-            <DialogFooter className="flex items-center gap-2 pt-2">
+            <DialogFooter className="items-center">
               {patient.nextEvent && (
-                <Button type="button" variant="quiet" size="compact" onClick={handleClearNextEvent} className="mr-auto">
+                <Button type="button" variant="quiet" size="standard" onClick={handleClearNextEvent} className="mr-auto">
                   Remover data
                 </Button>
               )}
-              <Button type="button" variant="secondary" size="compact" onClick={() => setIsNextEventModalOpen(false)}>
+              <Button type="button" variant="secondary" size="standard" onClick={() => setIsNextEventModalOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="compact">
+              <Button type="submit" variant="primary" size="standard">
                 Salvar
               </Button>
             </DialogFooter>
@@ -1002,12 +987,30 @@ export default function PatientDetailPage() {
           {editFormData && (
             <form onSubmit={handleSaveEdit} className="flex flex-col gap-3 pt-2">
               <div>
-                <label className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo do Paciente</label>
+                <label htmlFor="edit-patient-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo do Paciente</label>
                 <Input
+                  id="edit-patient-name"
                   type="text"
                   required
                   value={editFormData.name}
                   onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-patient-whatsapp" className="text-style-legal font-bold text-text-primary block mb-1">WhatsApp</label>
+                <Input
+                  id="edit-patient-whatsapp"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  placeholder="(11) 99999-9999"
+                  value={editFormData.whatsapp ?? ''}
+                  onChange={(e) => setEditFormData({
+                    ...editFormData,
+                    whatsapp: formatWhatsappContact(e.target.value),
+                  })}
                   className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold"
                 />
               </div>
@@ -1032,34 +1035,23 @@ export default function PatientDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso (kg)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={editFormData.weightKg}
-                    onChange={(e) => setEditFormData({ ...editFormData, weightKg: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-                  />
+                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Gênero</label>
+                  <Select
+                    value={editFormData.gender || 'Masculino'}
+                    onValueChange={(val) => setEditFormData({ ...editFormData, gender: val })}
+                  >
+                    <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
+                      <SelectValue placeholder="Selecione o gênero" />
+                    </SelectTrigger>
+                    <SelectContent className="!z-modal">
+                      <SelectItem value="Masculino">Masculino</SelectItem>
+                      <SelectItem value="Feminino">Feminino</SelectItem>
+                      {editFormData.gender && !['Masculino', 'Feminino'].includes(editFormData.gender) && (
+                        <SelectItem value={editFormData.gender}>{editFormData.gender}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-
-              <div>
-                <label className="text-style-legal font-semibold text-text-muted block mb-1">Gênero</label>
-                <Select
-                  value={editFormData.gender || 'Masculino'}
-                  onValueChange={(val) => setEditFormData({ ...editFormData, gender: val })}
-                >
-                  <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
-                    <SelectValue placeholder="Selecione o gênero" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Masculino">Masculino</SelectItem>
-                    <SelectItem value="Feminino">Feminino</SelectItem>
-                    {editFormData.gender && !['Masculino', 'Feminino'].includes(editFormData.gender) && (
-                      <SelectItem value={editFormData.gender}>{editFormData.gender}</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div>
@@ -1073,7 +1065,7 @@ export default function PatientDetailPage() {
                       <SelectTrigger className="bg-surface-subtle border-border-subtle text-style-legal text-text-primary font-semibold h-9 w-full">
                         <SelectValue placeholder="Selecione o objetivo" />
                       </SelectTrigger>
-                      <SelectContent className="max-h-60">
+                      <SelectContent className="!z-modal max-h-60">
                         {availableObjectives.map((obj) => (
                           <SelectItem key={obj} value={obj}>
                             {obj}
@@ -1093,17 +1085,6 @@ export default function PatientDetailPage() {
                   </SecondaryActionButton>
                 </div>
               </div>
-
-              <AutoKcalSection
-                title="Metas & Cálculo Calórico"
-                proteinG={editFormData.targetProtein}
-                carbsG={editFormData.targetCarbs}
-                fatsG={editFormData.targetFats}
-                onProteinChange={(val) => setEditFormData({ ...editFormData, targetProtein: val })}
-                onCarbsChange={(val) => setEditFormData({ ...editFormData, targetCarbs: val })}
-                onFatsChange={(val) => setEditFormData({ ...editFormData, targetFats: val })}
-              />
-
 
               <div className="pt-2 flex gap-2">
                 <Button
@@ -1255,94 +1236,14 @@ export default function PatientDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
-      {/* Edit Physical Assessment Dialog */}
-      <Dialog open={isEditAssessmentOpen} onOpenChange={setIsEditAssessmentOpen}>
-        <DialogContent className="bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
-              <Scale size={18} className="text-success" />
-              <span>Editar Avaliação Física</span>
-            </DialogTitle>
-            <DialogDescription className="text-style-legal text-text-muted">
-              Atualize as medições corporais do paciente nesta data.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editingAssessment && (
-            <form onSubmit={handleSaveAssessment} className="flex flex-col gap-4 pt-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Peso Corporal (kg)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.weightKg}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, weightKg: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">% Gordura Corporal (BF)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.bodyFatPercent}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, bodyFatPercent: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Massa Magra (kg)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.muscleMassKg}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, muscleMassKg: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-style-legal font-semibold text-text-muted block mb-1">Cintura (cm)</label>
-                  <Input
-                    type="number"
-                    step="any"
-                    required
-                    value={editingAssessment.waistCm}
-                    onChange={(e) => setEditingAssessment({ ...editingAssessment, waistCm: Number(e.target.value) })}
-                    className="bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Button
-                  type="button"
-                  onClick={() => setIsEditAssessmentOpen(false)}
-                  variant="secondary"
-                  size="compact"
-                  className="flex-1 text-style-legal"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="compact"
-                  className="flex-1 text-style-legal font-bold"
-                >
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditAssessmentModal
+        open={isEditAssessmentOpen}
+        patient={patient}
+        assessment={editingAssessment}
+        mode={assessmentMode}
+        onOpenChange={setIsEditAssessmentOpen}
+        onSave={handleSaveAssessment}
+      />
 
       {/* Read-Only Diet View Modal */}
       <ReadOnlyDietModal

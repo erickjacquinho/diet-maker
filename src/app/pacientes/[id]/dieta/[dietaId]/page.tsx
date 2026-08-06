@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DietBuilderTemplate } from '@/components/templates';
-import { MacroMetricCardProps } from '@/components/molecules';
+import { MacroMetricCardProps, MetricBox } from '@/components/molecules';
 import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
 import { getPatientById, Patient } from '@/lib/patientsStore';
 import {
@@ -607,7 +607,7 @@ export default function DietBuilderPage() {
 
       {/* Scale Diet Modal */}
       <Dialog open={isScaleModalOpen} onOpenChange={setIsScaleModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+      <DialogContent className="max-w-md">
           <DialogHeader className="border-b border-border-subtle pb-3">
             <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Percent size={18} className="text-success" />
@@ -650,11 +650,11 @@ export default function DietBuilderPage() {
           </div>
 
           <DialogFooter className="border-t border-border-subtle pt-3">
-            <Button variant="outline" size="sm" onClick={() => setIsScaleModalOpen(false)}>
+            <Button variant="secondary" size="compact" onClick={() => setIsScaleModalOpen(false)}>
               Cancelar
             </Button>
 
-            <Button variant="primary" onClick={handleExecuteScale} size="sm">
+            <Button variant="primary" onClick={handleExecuteScale} size="compact">
               Aplicar Escala ({scalePercentage > 0 ? '+' : ''}{scalePercentage}%)
             </Button>
           </DialogFooter>
@@ -663,7 +663,7 @@ export default function DietBuilderPage() {
 
       {/* Copy Meals Between Carb Cycling Variations Modal */}
       <Dialog open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+      <DialogContent className="max-w-md">
           <DialogHeader className="border-b border-border-subtle pb-3">
             <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Copy size={18} className="text-success" />
@@ -678,7 +678,7 @@ export default function DietBuilderPage() {
             <div>
               <label className="text-style-legal font-bold text-text-primary block mb-1">Copiar De (Origem):</label>
               <Select value={copySourceId} onValueChange={setCopySourceId}>
-                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary">
+            <SelectTrigger className="w-full h-control-standard">
                   <SelectValue placeholder="Selecione a origem" />
                 </SelectTrigger>
                 <SelectContent>
@@ -694,7 +694,7 @@ export default function DietBuilderPage() {
             <div>
               <label className="text-style-legal font-bold text-text-primary block mb-1">Copiar Para (Destino):</label>
               <Select value={copyTargetId} onValueChange={setCopyTargetId}>
-                <SelectTrigger className="w-full h-control-standard bg-surface-subtle border-border-subtle text-style-legal font-bold text-text-primary">
+            <SelectTrigger className="w-full h-control-standard">
                   <SelectValue placeholder="Selecione o destino" />
                 </SelectTrigger>
                 <SelectContent>
@@ -709,10 +709,11 @@ export default function DietBuilderPage() {
           </div>
 
           <DialogFooter className="border-t border-border-subtle pt-3">
-            <Button variant="outline" size="sm" onClick={() => setIsCopyModalOpen(false)}>
+            <Button variant="secondary" size="compact" onClick={() => setIsCopyModalOpen(false)}>
               Cancelar
             </Button>
-            <Button variant="primary" onClick={handleExecuteCopyMeals} size="sm">
+
+            <Button variant="primary" onClick={handleExecuteCopyMeals} size="compact">
               Confirmar Cópia
             </Button>
           </DialogFooter>
@@ -721,7 +722,7 @@ export default function DietBuilderPage() {
 
       {/* Adjust Target Goals Modal */}
       <Dialog open={isAdjustGoalsModalOpen} onOpenChange={setIsAdjustGoalsModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
+      <DialogContent className="max-w-md">
           <DialogHeader className="border-b border-border-subtle pb-3">
             <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <Edit3 size={18} className="text-success" />
@@ -765,19 +766,19 @@ export default function DietBuilderPage() {
               </div>
             </div>
 
-            <div className="p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-              <span className="text-style-legal font-bold text-text-muted tracking-label block">Calorias Calculadas</span>
-              <span className="text-style-body-large font-bold text-text-primary">
-                {calculatePresetCalories(tempTargetProt, tempTargetCarb, tempTargetFat)} kcal
-              </span>
-            </div>
+            <MetricBox
+              size="hero"
+              label="Calorias Calculadas"
+              value={`${calculatePresetCalories(tempTargetProt, tempTargetCarb, tempTargetFat)} kcal`}
+            />
           </div>
 
           <DialogFooter className="border-t border-border-subtle pt-3">
-            <Button variant="outline" size="sm" onClick={() => setIsAdjustGoalsModalOpen(false)}>
+            <Button variant="secondary" size="compact" onClick={() => setIsAdjustGoalsModalOpen(false)}>
               Cancelar
             </Button>
-            <Button variant="primary" onClick={handleSaveAdjustedGoals} size="sm">
+
+            <Button variant="primary" onClick={handleSaveAdjustedGoals} size="compact">
               Salvar Novas Metas
             </Button>
           </DialogFooter>
@@ -786,7 +787,7 @@ export default function DietBuilderPage() {
 
       {/* WhatsApp Share Text Modal */}
       <Dialog open={isWhatsAppModalOpen} onOpenChange={setIsWhatsAppModalOpen}>
-        <DialogContent className="max-w-lg bg-surface border-border-subtle p-6 rounded-surface">
+      <DialogContent className="max-w-lg">
           <DialogHeader className="border-b border-border-subtle pb-3">
             <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
               <MessageCircle size={18} className="text-success" />
@@ -807,10 +808,11 @@ export default function DietBuilderPage() {
           </div>
 
           <DialogFooter className="border-t border-border-subtle pt-3">
-            <Button variant="outline" size="sm" onClick={() => setIsWhatsAppModalOpen(false)}>
-              Fechar
+            <Button variant="secondary" size="compact" onClick={() => setIsWhatsAppModalOpen(false)}>
+              Cancelar
             </Button>
-            <Button variant="primary" onClick={handleCopyWhatsAppText} size="sm" className="flex items-center gap-1.5">
+
+            <Button variant="primary" onClick={handleCopyWhatsAppText} size="compact" className="flex items-center gap-1.5">
               <Copy size={14} />
               <span>Copiar Texto</span>
             </Button>

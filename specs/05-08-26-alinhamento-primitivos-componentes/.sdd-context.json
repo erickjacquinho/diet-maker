@@ -1,0 +1,6 @@
+{
+  "task": "Alinhar a arquitetura das pastas de componentes primitivos e seus filhos. Auditar e organizar src/components/ui, atoms, molecules, organisms e templates; consolidar contratos dos componentes compound e seus filhos; reduzir wrappers transparentes; corrigir a direção de dependências entre camadas; padronizar o consumo de ui versus atoms; migrar os primitivos para os tokens atuais; atualizar o registry e os testes para todas as famílias. Não alterar as rules existentes, pois elas estão fora do escopo desta tarefa.",
+  "slug": "alinhamento-primitivos-componentes",
+  "feature_dir": "specs/05-08-26-alinhamento-primitivos-componentes",
+  "date": "2026-08-05"
+}

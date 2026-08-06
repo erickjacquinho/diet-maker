@@ -26,6 +26,10 @@ Parts públicas: provider, root, trigger e content; content não aceita controle
 
 ## Allowed variants
 
+## Family contract
+
+`TooltipProvider` establishes shared timing context, `Tooltip` owns local state, and `TooltipTrigger`/`TooltipContent` are the associated context-bound parts. Tooltip never replaces an accessible name.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

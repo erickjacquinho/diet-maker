@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paleta warm → off-white — antes e depois</title>
+<style>
+  :root {
+    --bg: #fcfaf7;
+    --surface: #ffffff;
+    --ink: #201c18;
+    --ink-2: #4b463f;
+    --ink-3: #615b53;
+    --line: #e3ded5;
+    --accent: #2746b3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 48px 24px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header { margin-bottom: 40px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 8px;
+  }
+  h1 { font-size: 34px; letter-spacing: -0.02em; line-height: 1.1; }
+  .lede { margin-top: 10px; color: var(--ink-2); max-width: 60ch; font-size: 15px; }
+  h2 { font-size: 18px; letter-spacing: -0.01em; margin: 40px 0 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } .side { flex-direction: column !important; } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 20px; min-width: 0;
+  }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .panel-title { font-size: 13px; font-weight: 600; }
+  .panel-sub { font-size: 12px; color: var(--ink-3); }
+  .verdict { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 4px; }
+  .verdict.bad { background: #fdecea; color: #b42318; }
+  .verdict.good { background: #e8f5ed; color: #237a4b; }
+
+  .row { display: grid; grid-template-columns: 64px 1fr 1fr; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid #f3f0ea; }
+  .row:first-of-type { border-top: none; }
+  .swatch { height: 34px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.06); }
+  .swatch.rowspan { grid-row: span 1; }
+  .swatch:hover { transform: scaleY(1.15); transition: transform 120ms; }
+  .token { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .hex { font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .hue { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  .hue-bar { display: flex; border-radius: 6px; overflow: hidden; height: 26px; margin-top: 12px; border: 1px solid var(--line); }
+  .hue-bar div { flex: 1; height: 100%; }
+  .hue-caption { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+  td.better { color: #237a4b; font-weight: 600; }
+  td.worse { color: #b42318; }
+  td code { background: #f3f0ea; border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+
+  .mini { border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .mini-label { font-size: 12px; color: var(--ink-2); font-weight: 600; margin-bottom: 2px; }
+  .mini-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .mini-card .m-title { font-size: 13px; font-weight: 600; }
+  .mini-card .m-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .mini-btn { display: inline-block; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: var(--accent); color: #fff; align-self: flex-start; }
+  .mini-input { border: 1px solid #7a7369; border-radius: 6px; padding: 6px 10px; font-size: 13px; background: #fff; color: var(--ink); }
+  .mini-input::placeholder { color: #615b53; }
+  .bar-track { height: 8px; background: #f3f0ea; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 62%; background: #2746b3; border-radius: 4px; }
+  .foot { margin-top: 48px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 16px; }
+  .dim { opacity: 0.6; }
+  .note { font-size: 12.5px; color: var(--ink-2); background: #f3f0ea; border-radius: 6px; padding: 10px 12px; margin-top: 12px; }
+  .arrow { font-size: 20px; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Refs · Design system · proposta de cores</div>
+    <h1>Paleta <code>warm</code> → inteira off-white</h1>
+    <p class="lede">Diagnóstico e proposta de recolor da rampa de neutros. A rampa atual é cindida: os claros são quentes (hue 38–45°) e os escuros derivam para o verde (hue 110–156°). A proposta unifica tudo em um único off-white quente e suas sombras (hue 30–40°).</p>
+  </header>
+
+  <h2>Diagnóstico — o tom esconde o verde</h2>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Rampa atual</span>
+        <span class="verdict bad">cinza-verde nos escuros</span>
+      </div>
+      <div class="hue-bar">
+        <div style="background:#FFFFFF"></div>
+        <div style="background:#FCFBF8"></div>
+        <div style="background:#FAF8F4"></div>
+        <div style="background:#F5F3EE"></div>
+        <div style="background:#F0EDE6"></div>
+        <div style="background:#ECE8E1"></div>
+        <div style="background:#E4E0D8"></div>
+        <div style="background:#CBC5BA"></div>
+        <div style="background:#9FA39F"></div>
+        <div style="background:#858A84"></div>
+        <div style="background:#686F69"></div>
+        <div style="background:#5E645F"></div>
+        <div style="background:#1C211F"></div>
+      </div>
+      <div class="hue-caption"><span>claros quentes · 38–45°</span><span class="dim">escuros verdes · 110–156°</span></div>
+      <p class="note">O hue 156° do <code>#1C211F</code> (preto de sombra e backdrop) vaza verde por toda a interface — inclusive nas sombras de elevação.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Rampa proposta</span>
+        <span class="verdict good">hue único 30–40°</span>
+      </div>
+      <div class="hue-bar">
+        <div style="background:#FFFFFF"></div>
+        <div style="background:#FCFAF7"></div>
+        <div style="background:#F8F6F2"></div>
+        <div style="background:#F3F0EA"></div>
+        <div style="background:#ECE8E0"></div>
+        <div style="background:#E3DED5"></div>
+        <div style="background:#D6D0C5"></div>
+        <div style="background:#B8B1A5"></div>
+        <div style="background:#948D81"></div>
+        <div style="background:#7A7369"></div>
+        <div style="background:#615B53"></div>
+        <div style="background:#4B463F"></div>
+        <div style="background:#201C18"></div>
+      </div>
+      <div class="hue-caption"><span>bone → ivory → oat</span><span>taupe → stone → charcoal quente</span></div>
+      <p class="note">Uma única cor off-white e suas sombras. Os escuros descem para o taupe/pedra quente, não para o verde.</p>
+    </div>
+  </div>
+
+  <h2>Escala token a token</h2>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Antes</span><span class="panel-sub">ref.color.warm.*</span></div>
+      <div id="before-rows"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Depois</span><span class="panel-sub">ref.color.warm.*</span></div>
+      <div id="after-rows"></div>
+    </div>
+  </div>
+
+  <h2>Contraste sobre o canvas (antes → depois)</h2>
+  <div class="panel" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr><th>Papel semântico</th><th>Antes</th><th>Depois</th><th>Variação</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>text-primary</code> sobre canvas</td><td>15.77:1</td><td>16.25:1</td><td class="better">▲ mantido</td></tr>
+        <tr><td><code>text-secondary</code> sobre canvas</td><td>5.86:1</td><td>8.97:1</td><td class="better">▲ folga maior</td></tr>
+        <tr><td><code>text-muted</code> sobre canvas</td><td>4.99:1</td><td>6.44:1</td><td class="better">▲ hierarquia preservada</td></tr>
+        <tr><td><code>disabled</code> sobre canvas</td><td>2.47:1</td><td>3.16:1</td><td>○ continua secundário</td></tr>
+        <tr><td><code>border-control-essential</code> sobre surface</td><td>3.52:1</td><td>4.68:1</td><td class="better">▲ acima de 4.5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Simulação — mesma tela, neutros diferentes</h2>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Antes</span></div>
+      <div class="mini" style="background:#FCFBF8; border-color:#ECE8E1;">
+        <span class="mini-label">Plano do dia</span>
+        <div class="mini-card" style="background:#FFFFFF; border-color:#E4E0D8;">
+          <div class="m-title" style="color:#1C211F;">Almoço · 720 kcal</div>
+          <div class="m-sub" style="color:#686F69;">Proteínas 42g · Carboidratos 88g</div>
+        </div>
+        <div class="mini-card" style="background:#F0EDE6; border-color:#ECE8E1;">
+          <div class="m-title" style="color:#1C211F;">Progresso diário</div>
+          <div class="bar-track" style="background:#F0EDE6;"><div class="bar-fill"></div></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input class="mini-input" style="background:#FFFFFF; border-color:#858A84; color:#5E645F;" placeholder="Ex.: arroz integral" value="">
+          <span class="mini-btn" style="background:#2746B3;">Adicionar</span>
+        </div>
+      </div>
+      <p class="note">Escuros verdes: <code>#5E645F</code> no placeholder, <code>#686F69</code> no subtítulo, <code>#1C211F</code> nos títulos.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Depois</span></div>
+      <div class="mini" style="background:#FCFAF7; border-color:#E3DED5;">
+        <span class="mini-label" style="color:#4B463F;">Plano do dia</span>
+        <div class="mini-card" style="background:#FFFFFF; border-color:#D6D0C5;">
+          <div class="m-title" style="color:#201C18;">Almoço · 720 kcal</div>
+          <div class="m-sub" style="color:#615B53;">Proteínas 42g · Carboidratos 88g</div>
+        </div>
+        <div class="mini-card" style="background:#ECE8E0; border-color:#E3DED5;">
+          <div class="m-title" style="color:#201C18;">Progresso diário</div>
+          <div class="bar-track" style="background:#ECE8E0;"><div class="bar-fill"></div></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input class="mini-input" style="background:#FFFFFF; border-color:#7A7369; color:#4B463F;" placeholder="Ex.: arroz integral" value="">
+          <span class="mini-btn" style="background:#2746B3;">Adicionar</span>
+        </div>
+      </div>
+      <p class="note">Tudo descende do bone <code>#FCFAF7</code>: taupe <code>#615B53</code>, charcoal <code>#4B463F</code>, near-black <code>#201C18</code>. Nenhum vazamento verde.</p>
+    </div>
+  </div>
+
+  <h2>O que não muda</h2>
+  <div class="panel">
+    <p class="lede" style="font-size:14px;">Azul primário, cores de macronutrientes e feedback semântico permanecem intactos — agora com mais presença sobre neutros mais puros.</p>
+    <div class="hue-bar" style="margin-top:12px;">
+      <div style="background:#2746B3"></div>
+      <div style="background:#B8325A"></div>
+      <div style="background:#A55B00"></div>
+      <div style="background:#0F766E"></div>
+      <div style="background:#B42318"></div>
+    </div>
+    <div class="hue-caption"><span>primary · protein · carboidrato · gordura · erro</span></div>
+  </div>
+
+  <div class="foot">
+    Ajuste adicional: as sombras e o backdrop em <code>tokens.css</code> usam o preto-verde <code>rgb(28 33 31 / …)</code> e devem passar a <code>rgb(32 28 24 / …)</code> (novo <code>warm.950</code>).
+  </div>
+</div>
+
+<script>
+  const BEFORE = [
+    ["0",   "#FFFFFF", "0°"],
+    ["15",  "#FCFBF8", "45°"],
+    ["25",  "#FAF8F4", "40°"],
+    ["50",  "#F5F3EE", "43°"],
+    ["100", "#F0EDE6", "42°"],
+    ["150", "#ECE8E1", "38°"],
+    ["200", "#E4E0D8", "40°"],
+    ["300", "#CBC5BA", "39°"],
+    ["500", "#9FA39F", "120°"],
+    ["600", "#858A84", "110°"],
+    ["700", "#686F69", "129°"],
+    ["800", "#5E645F", "130°"],
+    ["950", "#1C211F", "156°"]
+  ];
+  const AFTER = [
+    ["0",   "#FFFFFF", "0°"],
+    ["15",  "#FCFAF7", "36°"],
+    ["25",  "#F8F6F2", "40°"],
+    ["50",  "#F3F0EA", "40°"],
+    ["100", "#ECE8E0", "40°"],
+    ["150", "#E3DED5", "39°"],
+    ["200", "#D6D0C5", "39°"],
+    ["300", "#B8B1A5", "38°"],
+    ["500", "#948D81", "38°"],
+    ["600", "#7A7369", "35°"],
+    ["700", "#615B53", "34°"],
+    ["800", "#4B463F", "35°"],
+    ["950", "#201C18", "30°"]
+  ];
+
+  function render(rows, el) {
+    el.innerHTML = rows.map(function (r) {
+      var green = parseInt(r[2]) >= 90;
+      var hue = green ? '<span class="hue" style="color:#b42318">' + r[2] + ' <b>verde</b></span>'
+                      : '<span class="hue">' + r[2] + '</span>';
+      return '<div class="row">' +
+        '<span class="token">' + r[0] + '</span>' +
+        '<div class="swatch" style="background:' + r[1] + '"></div>' +
+        '<span class="hex">' + r[1] + ' <span style="font-weight:400;color:#615b53">·</span> ' + hue + '</span>' +
+      '</div>';
+    }).join("");
+  }
+  render(BEFORE, document.getElementById("before-rows"));
+  render(AFTER, document.getElementById("after-rows"));
+</script>
+</body>
+</html>

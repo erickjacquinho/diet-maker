@@ -14,3 +14,5 @@ export * from './RecipeCard';
 export * from './DietModeSwitcher';
 export * from './FoodSearchModal';
 export * from './DatePickerField';
+export * from './EditAssessmentModal';
+export * from './PageContextHeader';

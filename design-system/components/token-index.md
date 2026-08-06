@@ -4,7 +4,7 @@ Este arquivo é o índice executável dos tokens que podem ser referenciados por
 
 ## Cores e semântica
 
-`canvas`, `surface`, `surface-subtle`, `surface-hover`, `border-divider`, `border-subtle`, `border-hover`, `border-control-essential`, `text-primary`, `text-secondary`, `text-muted`, `disabled`, `disabled-soft`, `primary`, `primary-hover`, `primary-pressed`, `primary-focus`, `primary-soft`, `primary-border`, `on-primary`, `info`, `info-soft`, `info-border`, `on-info`, `success`, `success-soft`, `success-border`, `on-success`, `warning`, `warning-soft`, `warning-border`, `on-warning`, `error`, `error-soft`, `error-border`, `on-error`, `macro-protein`, `macro-protein-soft`, `macro-protein-border`, `macro-carbohydrate`, `macro-carbohydrate-soft`, `macro-carbohydrate-border`, `macro-fat`, `macro-fat-soft`, `macro-fat-border`.
+`canvas`, `surface`, `surface-subtle`, `surface-soft`, `surface-hover`, `border-divider`, `border-subtle`, `border-hover`, `border-control-essential`, `text-primary`, `text-secondary`, `text-muted`, `disabled`, `disabled-soft`, `primary`, `primary-hover`, `primary-pressed`, `primary-focus`, `primary-soft`, `primary-border`, `on-primary`, `info`, `info-soft`, `info-border`, `on-info`, `success`, `success-soft`, `success-border`, `on-success`, `warning`, `warning-soft`, `warning-border`, `on-warning`, `error`, `error-soft`, `error-border`, `on-error`, `macro-protein`, `macro-protein-soft`, `macro-protein-border`, `macro-carbohydrate`, `macro-carbohydrate-soft`, `macro-carbohydrate-border`, `macro-fat`, `macro-fat-soft`, `macro-fat-border`, `button-secondary-background-hover`, `button-secondary-border-hover`, `card-background-hover`, `card-details-surface`.
 
 ## Tipografia, spacing e geometria
 

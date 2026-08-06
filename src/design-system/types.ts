@@ -11,8 +11,11 @@ export const textStyleIds = [
 export type TextStyleId = (typeof textStyleIds)[number];
 export type MacroKind = "protein" | "carbohydrate" | "fat";
 export type ControlSize = "compact" | "standard";
+export type SurfaceVariant = "default" | "subtle";
+export type SurfaceDensity = "compact" | "standard" | "highlight";
+export type SurfaceElevationPolicy = "shadow-none";
 export type RecipeState = "default" | "hover" | "pressed" | "focus-visible" | "selected" | "disabled" | "loading" | "error" | "empty" | "read-only";
-export type RecipeVariant = "primary" | "secondary" | "ghost" | "danger";
+export type RecipeVariant = "primary" | "secondary" | "quiet" | "destructive" | "destructive-outline";
 export type Tone = "default" | "secondary" | "muted" | "primary" | "info" | "success" | "warning" | "error" | MacroKind | "inverse";
 
 export type ReferenceTokenId = `ref.${"color" | "space" | "radius" | "duration" | "font"}.${string}`;

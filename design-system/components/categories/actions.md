@@ -44,20 +44,21 @@ Use somente `button-label-compact` na altura compacta e `button-label` na standa
 | secondary root | background/text/border | `surface` / `text-primary` / `border-control-essential` |
 | quiet root | background/text | `transparent` / `text-secondary` |
 | destructive root | background/text | `error` / `on-error` |
+| destructive-outline root | background/text/border | `surface` / `error` / `error` |
 | focus | ring/offset | `primary-focus` / `focus-ring-offset` |
 | icon | color/size | `currentColor` / `icon-16` |
 | disabled | foreground/background | `disabled` / `disabled-soft` |
 
 ## Allowed variants
 
-`primary` para a ação principal única da região; `secondary` para alternativas; `quiet` para baixa ênfase; `destructive` apenas para perda de dados; `icon` apenas com nome acessível. Tamanhos `compact` e `standard`. Uma região não possui mais de uma ação `primary` concorrente.
+`primary` para a ação principal única da região; `secondary` para alternativas; `quiet` para baixa ênfase; `destructive` para perda de dados com alta ênfase; `destructive-outline` para perda de dados com ênfase contida; `icon` apenas com nome acessível. Tamanhos `compact` e `standard`. Uma região não possui mais de uma ação `primary` concorrente.
 
 ## State matrix
 
 | State | Background | Text | Border | Icon | Cursor | Motion | Semantic announcement |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | default | token da variante | token da variante | 1px da variante | `currentColor` | pointer | none | nome da ação |
-| hover | `primary-hover` ou `surface-hover` | preservado | `border-hover` quando bordered | preservado | pointer | color 120ms | none |
+| hover | `primary-hover`; secundário `button-secondary-background-hover`; quiet `surface-hover` | preservado | `border-hover`; secundário `button-secondary-border-hover` | preservado | pointer | color 120ms | none |
 | pressed | `primary-pressed` ou `surface-subtle` | preservado | preservado | preservado | pointer | color 120ms | none |
 | focus-visible | preservado | preservado | 1px preservada + ring | preservado | pointer | none | nome da ação |
 | selected | N/A — ação não guarda escolha | N/A | N/A | N/A | N/A | N/A | N/A |

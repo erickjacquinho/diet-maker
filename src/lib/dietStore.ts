@@ -1,6 +1,7 @@
 'use client';
 
 import { calculatePresetCalories } from './presetUtils';
+import { recordPatientActivity } from './patientsStore';
 
 export interface DietItem {
   foodId?: string;
@@ -121,6 +122,8 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
   if (typeof window !== 'undefined') {
     localStorage.setItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, JSON.stringify(updatedList));
   }
+
+  recordPatientActivity(diet.patientId, 'diet');
 
   return updatedDiet;
 }

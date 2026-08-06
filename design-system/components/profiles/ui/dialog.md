@@ -24,7 +24,19 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Parts públicas cobrem root, portal, overlay, trigger, content, header, footer, title, description e close; `Title` é obrigatório no uso modal.
 
+## Visual contract
+
+- `DialogOverlay` usa `overlay-backdrop` e `z-overlay`, sem blur.
+- `DialogContent` usa `surface`, `border-subtle`, `rounded-surface`, `shadow-overlay`, `p-6` e `z-modal`.
+- `DialogHeader` usa alinhamento a esquerda e `gap-2`; `DialogTitle` usa `dialog-title`; `DialogDescription` usa `body-secondary`.
+- `DialogFooter` usa `gap-2` entre acoes, sem `space-x-*`; a acao primaria permanece por ultimo.
+- O close e uma area de foco de 32px com `text-muted`, `surface-hover`, `primary-focus` e nome acessivel.
+
 ## Allowed variants
+
+## Family contract
+
+`Dialog` provides context and open state. `DialogPortal`, `DialogOverlay`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle` and `DialogDescription` are context-bound slots; `DialogTrigger` and `DialogClose` are context-bound triggers.
 
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 

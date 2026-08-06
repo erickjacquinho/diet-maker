@@ -9,6 +9,7 @@ import {
   FullDietPlan,
   DietMeal,
 } from '../dietStore';
+import { getPatientById, savePatientToStorage } from '../patientsStore';
 
 describe('Diet Domain: dietStore', () => {
   beforeEach(() => {
@@ -88,5 +89,32 @@ describe('Diet Domain: dietStore', () => {
 
     const allPatientDiets = getPatientDietsFromStorage('pat-999');
     expect(allPatientDiets).toHaveLength(1);
+  });
+
+  it('records diet activity when a plan is saved for a known patient', () => {
+    const patient = savePatientToStorage({
+      name: 'Paciente Dieta',
+      age: 29,
+      gender: 'Feminino',
+      heightCm: 164,
+      weightKg: 61,
+      targetKcal: 1800,
+      targetProtein: 110,
+      targetCarbs: 200,
+      targetFats: 55,
+      objective: 'Manutenção',
+    });
+    const plan = createInitialDietPlan(patient.id, {
+      weightKg: patient.weightKg,
+      targetKcal: patient.targetKcal,
+      targetProtein: patient.targetProtein,
+      targetCarbs: patient.targetCarbs,
+      targetFats: patient.targetFats,
+    });
+
+    saveDietToStorage(plan);
+
+    expect(getPatientById(patient.id)?.lastActivity?.type).toBe('diet');
+    expect(getPatientById(patient.id)?.lastActivity?.at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 });

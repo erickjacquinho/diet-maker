@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Badge } from '../atoms';
+import { Surface } from '@/components/atoms';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MealItemRow, MealItemRowProps } from '../molecules';
 import { Copy, Percent, Trash2, Plus, Clock, Pencil, Check } from 'lucide-react';
@@ -59,8 +59,8 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   return (
-    <Card className="bg-surface border-border-subtle rounded-surface p-0 shadow-floating flex flex-col justify-between">
-      <CardContent className="p-5 p-6 gap-4 flex-1 flex flex-col justify-between">
+    <Surface variant="default" density="highlight" className="p-0 flex flex-col justify-between">
+      <div className="p-5 p-6 gap-4 flex-1 flex flex-col justify-between">
         <div className="flex flex-col gap-4">
           {/* Meal Header */}
           <div className="flex flex-col flex-row items-center justify-between pb-3 border-b border-border-subtle gap-2">
@@ -81,7 +81,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                   placeholder="08:00"
                 />
                 <Button
-                  size="sm"
+                  size="compact"
                   variant="primary"
                   onClick={handleSaveTitleTime}
                   className="h-8 px-2"
@@ -140,9 +140,9 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           {/* Add Food Button */}
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={onAddFoodClick}
-            className="w-full border-dashed border-border-hover bg-surface-subtle/60 hover:bg-surface-subtle text-text-primary font-bold text-style-legal py-2 rounded-control flex items-center justify-center gap-1.5"
+            className="w-full border-dashed border-border-hover bg-surface-subtle/60 hover:bg-surface-hover text-text-primary font-bold text-style-legal py-2 rounded-control flex items-center justify-center gap-1.5"
           >
             <Plus size={14} className="text-success" />
             <span>+ Adicionar Alimento da Base TACO</span>
@@ -152,21 +152,21 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
         {/* Meal Footer Actions */}
         <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-style-legal">
           <div className="flex gap-2">
-            <Button onClick={onDuplicate} variant="secondary" size="sm" className="flex items-center gap-1 text-style-legal">
+            <Button onClick={onDuplicate} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
               <Copy size={12} />
               <span>Duplicar</span>
             </Button>
-            <Button onClick={onScale} variant="secondary" size="sm" className="flex items-center gap-1 text-style-legal">
+            <Button onClick={onScale} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
               <Percent size={12} />
               <span>Escalar</span>
             </Button>
           </div>
-          <Button onClick={onDeleteMeal} variant="destructive" size="sm" className="flex items-center gap-1 text-style-legal">
+          <Button onClick={onDeleteMeal} variant="destructive" size="compact" className="flex items-center gap-1 text-style-legal">
             <Trash2 size={12} />
             <span>Excluir</span>
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 };

@@ -63,3 +63,15 @@ O modo estrito válido informa, no mínimo:
 4 proposed components specified
 0 blocking findings
 ```
+
+## Primitive-family contract checks
+
+For the primitive-alignment initiative, `registry.json.primitiveFamilies` is the executable contract for the 16 families. A catalog audit or contract test MUST report an actionable finding when:
+
+- a family ID is duplicated or its source is missing;
+- the root or a listed public part is not exported by the family source;
+- a part has no role, state list or root-context declaration;
+- a consumer path is stale, omitted or uses a deprecated atom alias;
+- a family imports a higher Atomic layer or domain module.
+
+`breadcrumb.tsx` remains catalogued in `components` as a navigation source, but is intentionally outside the 16-family initiative inventory. The `atomWrappers` registry section records the added value and migration decision for each atom wrapper; `importPolicy` defines the canonical `ui` versus `atoms` choice.

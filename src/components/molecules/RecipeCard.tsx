@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button, Badge, EditIconButton, DeleteIconButton } from '@/components/atoms';
+import { Button, Badge, EditIconButton, DeleteIconButton, Surface } from '@/components/atoms';
 import { Users, PlusCircle, Check } from 'lucide-react';
 import { Recipe, calculateRecipeNutrients } from '@/lib/recipesStore';
 
@@ -24,8 +23,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   const summary = calculateRecipeNutrients(recipe.ingredients, recipe.servings);
 
   return (
-    <Card className="bg-surface border-border-subtle rounded-surface p-5 hover:border-success/40 transition-colors duration-standard flex flex-col justify-between gap-4">
-      <CardContent className="p-0 gap-3.5 flex flex-col justify-between h-full">
+    <Surface variant="default" density="highlight" className="hover:border-success/40 transition-colors duration-standard flex flex-col justify-between gap-4">
+      <div className="p-0 gap-3.5 flex flex-col justify-between h-full">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <Badge variant="outline" className="text-style-legal font-bold bg-surface-subtle border-border-subtle text-text-primary">
@@ -79,7 +78,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
               type="button"
               onClick={onInsert}
               variant="primary"
-              size="sm"
+              size="compact"
               className="flex-1 font-bold text-style-legal flex items-center justify-center gap-1.5 h-8"
             >
               {isInserted ? <Check size={14} /> : <PlusCircle size={14} />}
@@ -93,7 +92,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           </div>
 
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 };

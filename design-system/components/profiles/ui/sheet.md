@@ -26,6 +26,10 @@ Parts públicas cobrem root/trigger/portal/overlay/content, header/footer/title/
 
 ## Allowed variants
 
+## Family contract
+
+`Sheet` provides side-panel context and open state. Portal, overlay, content, header, footer, title, description, trigger and close are context-bound parts of this family.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

@@ -1,10 +1,6 @@
-import React from 'react';
-import { Input as ShadcnInput } from '@/components/ui/input';
-
-export type InputProps = React.ComponentProps<typeof ShadcnInput>;
-
-export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => (
-  <ShadcnInput ref={ref} {...props} />
-));
-
-Input.displayName = 'Input';
+/**
+ * @deprecated Import Input from `@/components/ui/input` for generic fields.
+ * This named compatibility export remains only while external consumers migrate.
+ */
+export { Input } from '@/components/ui/input';
+export type { InputProps } from '@/components/ui/input';

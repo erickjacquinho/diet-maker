@@ -6,7 +6,7 @@
 
 ## Phase 1: Setup & Auditoria de Tokens
 
-- [ ] T001 [skill: vercel-composition-patterns] Mapear utilitários semânticos no Design System e em `src/app/globals.css` para substituição de cores e tamanhos brutas em [src/app/globals.css](file:///c:/Programmer/diet-maker/src/app/globals.css)
+- [X] T001 [skill: vercel-composition-patterns] Mapear utilitários semânticos no Design System e em `src/app/globals.css` para substituição de cores e tamanhos brutas em [src/app/globals.css](file:///c:/Programmer/diet-maker/src/app/globals.css)
 
 ## Phase 2: Foundational Components (Atomic Design Level 2 & 3)
 

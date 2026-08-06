@@ -18,35 +18,39 @@ Uma cor não deve trocar de significado apenas para atender uma preferência vis
 | Token | Valor |
 | --- | --- |
 | `ref.color.warm.0` | `#FFFFFF` |
-| `ref.color.warm.25` | `#FAF8F4` |
-| `ref.color.warm.50` | `#F5F3EE` |
-| `ref.color.warm.100` | `#F0EDE6` |
-| `ref.color.warm.150` | `#ECE8E1` |
-| `ref.color.warm.200` | `#E4E0D8` |
-| `ref.color.warm.300` | `#CBC5BA` |
-| `ref.color.warm.500` | `#9FA39F` |
-| `ref.color.warm.600` | `#858A84` |
-| `ref.color.warm.700` | `#686F69` |
-| `ref.color.warm.800` | `#5E645F` |
-| `ref.color.warm.950` | `#1C211F` |
+| `ref.color.warm.15` | `#FCFAF7` |
+| `ref.color.warm.25` | `#F8F6F2` |
+| `ref.color.warm.50` | `#F3F0EA` |
+| `ref.color.warm.100` | `#ECE8E0` |
+| `ref.color.warm.150` | `#E3DED5` |
+| `ref.color.warm.200` | `#D6D0C5` |
+| `ref.color.warm.300` | `#B8B1A5` |
+| `ref.color.warm.500` | `#948D81` |
+| `ref.color.warm.600` | `#7A7369` |
+| `ref.color.warm.700` | `#615B53` |
+| `ref.color.warm.800` | `#4B463F` |
+| `ref.color.warm.950` | `#201C18` |
+
+Todos os passos compartilham o mesmo hue quente (~40°): a rampa é um único off-white e suas sombras. Os escuros descem para taupe/pedra quente — não para cinza esverdeado.
 
 ### 2.2 Tokens semânticos
 
 | Token conceitual | Valor | Função |
 | --- | --- | --- |
-| `canvas` | `#F5F3EE` | Fundo principal da aplicação |
+| `canvas` | `#FCFAF7` | Fundo principal da aplicação |
 | `surface` | `#FFFFFF` | Cards, painéis, dialogs e conteúdo elevado |
-| `surface-subtle` | `#FAF8F4` | Subáreas e agrupamentos internos |
-| `surface-hover` | `#F0EDE6` | Hover neutro |
-| `border-divider` | `#ECE8E1` | Separadores internos |
-| `border-subtle` | `#E4E0D8` | Bordas padrão de superfícies |
-| `border-hover` | `#CBC5BA` | Hover neutro |
-| `border-control-essential` | `#858A84` | Fronteira acessível de controles |
-| `text-primary` | `#1C211F` | Títulos, valores e texto principal |
-| `text-secondary` | `#5E645F` | Texto de leitura secundário |
-| `text-muted` | `#686F69` | Metadados e legendas |
-| `disabled` | `#9FA39F` | Conteúdo indisponível e não essencial |
-| `disabled-soft` | `#F0EDE6` | Superfície de controle indisponível |
+| `surface-subtle` | `#F8F6F2` | Subáreas e agrupamentos internos |
+| `surface-hover` | `#FCFAF7` | Hover central (único token de hover de superfície) |
+| `surface-soft` | `#ECE8E0` | Superfície sutil estática (muted shadcn, detalhes) |
+| `border-divider` | `#E3DED5` | Separadores internos |
+| `border-subtle` | `#D6D0C5` | Bordas padrão de superfícies |
+| `border-hover` | `#B8B1A5` | Hover neutro |
+| `border-control-essential` | `#7A7369` | Fronteira acessível de controles |
+| `text-primary` | `#201C18` | Títulos, valores e texto principal |
+| `text-secondary` | `#4B463F` | Texto de leitura secundário |
+| `text-muted` | `#615B53` | Metadados e legendas |
+| `disabled` | `#948D81` | Conteúdo indisponível e não essencial |
+| `disabled-soft` | `#ECE8E0` | Superfície de controle indisponível |
 
 `disabled` não deve ser usado para conteúdo necessário à compreensão.
 
@@ -81,7 +85,7 @@ Combinações validadas:
 
 - `on-primary` sobre `primary`: **8.04:1**;
 - `primary` sobre `surface`: **8.04:1**;
-- `primary` sobre `canvas`: **7.25:1**;
+- `primary` sobre `canvas`: **7.77:1**;
 - `primary` sobre `primary-soft`: **6.90:1**.
 
 ## 4. Macronutrientes
@@ -161,7 +165,7 @@ Usar `text-muted`, `border-subtle` e diferenças de superfície em:
 - divisores;
 - agrupamento visual.
 
-`text-muted` possui contraste mínimo de **4.66:1** sobre `canvas`. Bordas e fundos não substituem texto quando a distinção precisa ser percebida.
+`text-muted` possui contraste mínimo de **6.44:1** sobre `canvas`. Bordas e fundos não substituem texto quando a distinção precisa ser percebida.
 
 ## 7. Visualização de dados
 

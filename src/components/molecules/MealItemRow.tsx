@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Trash2, GripVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, IconButton, Surface } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 
 export interface MealItemRowProps {
@@ -44,7 +44,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   };
 
   return (
-    <div className="group/row flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-control p-3">
+    <Surface variant="subtle" density="compact" className="group/row flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Button
           type="button"
@@ -110,16 +110,15 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          size="icon"
+        <IconButton
+          variant="quiet"
           onClick={onRemove}
           aria-label={`Remover ${name}`}
           className="text-text-muted hover:text-error h-7 w-7 p-0"
         >
           <Trash2 size={14} />
-        </Button>
+        </IconButton>
       </div>
-    </div>
+    </Surface>
   );
 };

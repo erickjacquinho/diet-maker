@@ -5,8 +5,8 @@ import { CalendarDays } from 'lucide-react';
 import { ptBR } from 'date-fns/locale/pt-BR';
 
 import { textStyle } from '@/design-system';
+import { FieldTrigger } from '@/components/atoms';
 import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -63,27 +63,29 @@ function DatePickerField({
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <FieldTrigger
             id={id}
             type="button"
-            variant="secondary"
-            size="standard"
+            state={error ? 'error' : 'default'}
             disabled={disabled}
             aria-haspopup="dialog"
             aria-expanded={open}
             aria-required={required || undefined}
             aria-invalid={error ? true : undefined}
             aria-describedby={descriptionIds}
-            className="w-full justify-start text-left font-regular"
           >
             <CalendarDays aria-hidden="true" data-icon className="size-4 shrink-0" />
             <span className={displayedValue ? textStyle('field-value') : textStyle('field-placeholder')}>
               {displayedValue || placeholder}
             </span>
-          </Button>
+          </FieldTrigger>
         </PopoverTrigger>
 
-        <PopoverContent align="start" className="w-auto p-0">
+        <PopoverContent
+          align="start"
+          side="bottom"
+          className="z-modal w-auto overflow-hidden rounded-surface border-border-subtle bg-surface p-0 shadow-floating"
+        >
           <Calendar
             mode="single"
             locale={ptBR}

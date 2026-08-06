@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
+import { MetricBox } from '@/components/molecules';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 
 interface ReadyMeal {
@@ -173,29 +174,17 @@ export default function ReadyMealsPage() {
 
                 {/* Macro Summary */}
                 <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Kcal</span>
-                    <span className="font-bold text-style-legal text-text-primary">{meal.kcal}</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Prot</span>
-                    <span className="font-bold text-style-legal text-macro-protein">{meal.proteinG}g</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carb</span>
-                    <span className="font-bold text-style-legal text-warning">{meal.carbsG}g</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gord</span>
-                    <span className="font-bold text-style-legal text-success">{meal.fatsG}g</span>
-                  </div>
+                  <MetricBox surface="inline" size="compact" label="Kcal" value={`${meal.kcal}`} />
+                  <MetricBox surface="inline" size="compact" tone="protein" label="Prot" value={`${meal.proteinG}g`} />
+                  <MetricBox surface="inline" size="compact" tone="warning" label="Carb" value={`${meal.carbsG}g`} />
+                  <MetricBox surface="inline" size="compact" tone="success" label="Gord" value={`${meal.fatsG}g`} />
                 </div>
 
                 <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
                   <span className="text-style-legal text-text-muted font-medium">Bloco de 1 clique</span>
                   <Button
-                    size="sm"
-                    variant={insertedId === meal.id ? 'default' : 'primary'}
+                    size="compact"
+                    variant="primary"
                     onClick={() => handleInsert(meal.id)}
                     className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
                       insertedId === meal.id
@@ -270,12 +259,12 @@ export default function ReadyMealsPage() {
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
-                size="sm"
+                size="compact"
                 className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="sm" className="flex-1">
+              <Button type="submit" variant="primary" size="compact" className="flex-1">
                 Salvar Refeição
               </Button>
             </div>

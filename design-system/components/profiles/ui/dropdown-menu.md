@@ -26,6 +26,10 @@ Parts públicas cobrem root/trigger/content, group, label, item, checkbox/radio 
 
 ## Allowed variants
 
+## Family contract
+
+`DropdownMenu` provides menu context and keyboard navigation. Trigger, content, item, group, portal, submenu, label, separator, shortcut and radio parts require that context and are never independent families.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

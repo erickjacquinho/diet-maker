@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Utensils, Plus, Search, Clock, Users, Check, BookOpen, Trash2, PlusCircle } from 'lucide-react';
-import { CreateButton, Button, Input, Badge } from '@/components/atoms';
+import { CreateButton, Button, Badge } from '@/components/atoms';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
@@ -417,12 +418,12 @@ export default function RecipesPage() {
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 variant="secondary"
-                size="sm"
+                size="compact"
                 className="flex-1"
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="sm" className="flex-1">
+              <Button type="submit" variant="primary" size="compact" className="flex-1">
                 Salvar Receita
               </Button>
             </div>

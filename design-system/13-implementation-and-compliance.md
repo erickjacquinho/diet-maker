@@ -97,7 +97,7 @@ popover             → surface
 primary             → primary
 primary-foreground  → on-primary
 secondary           → surface-subtle
-muted               → surface-hover
+muted               → surface-soft
 muted-foreground    → text-muted
 destructive         → error
 border              → border-subtle

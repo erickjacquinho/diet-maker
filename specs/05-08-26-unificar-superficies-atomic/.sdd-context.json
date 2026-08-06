@@ -1,0 +1,6 @@
+{
+  "task": "Criar um SDD de merge para unificar a base visual das superfícies/boxes do app e adequar Card, MetricBox, MacroMetricCard e componentes relacionados ao padrão Atomic Design do projeto, seguindo composição reutilizável e evitando divs com estilos de caixa hardcoded.",
+  "slug": "unificar-superficies-atomic",
+  "feature_dir": "specs/05-08-26-unificar-superficies-atomic",
+  "date": "2026-08-05"
+}

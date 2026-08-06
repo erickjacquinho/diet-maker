@@ -14,6 +14,7 @@ export interface Patient {
   targetCarbs: number;
   targetFats: number;
   objective: string;
+  whatsapp?: string;
   lastConsultation: string;
   initials: string;
   nextEvent?: PatientNextEvent | null;
@@ -67,8 +68,22 @@ export interface BodyAssessment {
   date: string;
   weightKg: number;
   bodyFatPercent: number;
+  fatMassKg?: number;
   muscleMassKg: number;
   waistCm: number;
+  neckCm?: number;
+  scapulaCm?: number;
+  bustCm?: number;
+  leftArmCm?: number;
+  rightArmCm?: number;
+  abdomenCm?: number;
+  hipCm?: number;
+  leftProximalThighCm?: number;
+  rightProximalThighCm?: number;
+  leftDistalThighCm?: number;
+  rightDistalThighCm?: number;
+  leftCalfCm?: number;
+  rightCalfCm?: number;
 }
 
 export interface ConsultationRecord {

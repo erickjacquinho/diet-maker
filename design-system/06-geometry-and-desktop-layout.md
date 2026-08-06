@@ -147,10 +147,10 @@ Toda borda existente possui `1px`.
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `border-divider` | `#ECE8E1` | Separador interno |
-| `border-subtle` | `#E4E0D8` | Card e superfície |
-| `border-hover` | `#CBC5BA` | Hover neutro |
-| `border-control-essential` | `#858A84` | Fronteira que precisa ser reconhecida |
+| `border-divider` | `#E3DED5` | Separador interno |
+| `border-subtle` | `#D6D0C5` | Card e superfície |
+| `border-hover` | `#B8B1A5` | Hover neutro |
+| `border-control-essential` | `#7A7369` | Fronteira que precisa ser reconhecida |
 | `primary-border` | `#C8D2FF` | Contexto primário suave |
 | `error-border` | `#E6B8B2` | Campo em erro com mensagem |
 

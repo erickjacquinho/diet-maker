@@ -36,11 +36,11 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl bg-surface border-border-subtle p-6 shadow-overlay rounded-surface max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-col gap-3 border-b border-border-subtle pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-control bg-success/10 text-success">
+              <div className="p-2.5 rounded-control bg-success-soft text-success">
                 <Utensils size={20} />
               </div>
               <div>
@@ -66,19 +66,19 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
           {/* Macro Summary Header */}
           <div className="grid grid-cols-4 gap-2 pt-2 text-center">
-            <div className="p-2.5 bg-surface-subtle/60 border border-border-subtle/60 rounded-control">
+          <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control">
               <span className="text-style-chart-micro font-bold text-text-muted block tracking-overline">Calorias</span>
               <span className="font-bold text-style-body-small text-text-primary">{displayKcal} kcal</span>
             </div>
-            <div className="p-2.5 bg-primary-soft/50 border border-primary-border rounded-control">
+          <div className="p-2.5 bg-primary-soft border border-primary-border rounded-control">
               <span className="text-style-chart-micro font-bold text-macro-protein block tracking-overline">Proteínas</span>
               <span className="font-bold text-style-body-small text-macro-protein">{diet.proteinG}g</span>
             </div>
-            <div className="p-2.5 bg-warning-soft/50 border border-warning-border rounded-control">
+          <div className="p-2.5 bg-warning-soft border border-warning-border rounded-control">
               <span className="text-style-chart-micro font-bold text-warning block tracking-overline">Carboidratos</span>
               <span className="font-bold text-style-body-small text-warning">{diet.carbsG}g</span>
             </div>
-            <div className="p-2.5 bg-success-soft/50 border border-success-border rounded-control">
+          <div className="p-2.5 bg-success-soft border border-success-border rounded-control">
               <span className="text-style-chart-micro font-bold text-success block tracking-overline">Gorduras</span>
               <span className="font-bold text-style-body-small text-success">{diet.fatsG}g</span>
             </div>
@@ -96,7 +96,7 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
           {displayMeals.length === 0 ? (
             <div className="p-8 text-center bg-surface-subtle border border-dashed border-border-subtle rounded-control flex flex-col gap-2">
-              <Utensils size={24} className="mx-auto text-text-muted/50" />
+            <Utensils size={24} className="mx-auto text-text-muted opacity-subdued" />
               <p className="text-style-legal text-text-muted font-medium">Nenhuma refeição cadastrada neste plano alimentar.</p>
             </div>
           ) : (
@@ -116,13 +116,13 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
                         <span className="font-bold text-style-legal text-text-primary">{meal.time}</span>
                         <span className="text-style-legal font-bold text-text-primary">• {meal.name}</span>
                       </div>
-                      <span className="text-style-legal font-bold text-success bg-success/10 px-2 py-0.5 rounded-md">
+                  <span className="text-style-legal font-bold text-success bg-success-soft px-2 py-0.5 rounded-control">
                         {mealKcal} kcal
                       </span>
                     </div>
 
                     {meal.itemsSummary && (
-                      <p className="text-style-legal text-text-primary/90 leading-relaxed font-medium bg-surface-subtle/40 p-2.5 rounded-surface border border-border-subtle/40">
+              <p className="text-style-legal text-text-primary font-medium bg-surface-subtle p-2.5 rounded-surface border border-border-subtle">
                         {meal.itemsSummary}
                       </p>
                     )}
@@ -150,7 +150,7 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
           <Button
             onClick={onClose}
-            className="px-4 py-2 bg-surface-subtle hover:bg-border-subtle text-text-primary rounded-control text-style-legal font-bold transition-colors"
+            className="px-4 py-2 bg-surface-subtle hover:bg-surface-hover text-text-primary rounded-control text-style-legal font-bold transition-colors"
           >
             Fechar Visualização
           </Button>

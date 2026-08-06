@@ -1,0 +1,6 @@
+{
+  "task": "Criar um SDD a partir de docs/superpowers/specs/2026-08-05-diet-builder-header-design.md para reorganizar o cabeçalho e a distribuição de ações da tela de criação de nova dieta, reutilizando a estrutura da tela do paciente e componentes existentes. O SDD deve encerrar antes da implementação.",
+  "slug": "reorganizar-cabecalho-nova-dieta",
+  "feature_dir": "specs/05-08-26-reorganizar-cabecalho-nova-dieta",
+  "date": "2026-08-05"
+}

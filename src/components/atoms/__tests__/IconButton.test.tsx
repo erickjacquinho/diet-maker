@@ -10,6 +10,16 @@ describe('Component UI Seam: IconButton, EditIconButton & DeleteIconButton', () 
     expect(btn).toBeInTheDocument();
   });
 
+  it('requires an explicit accessible name without generic fallback', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(() => render(<IconButton icon={<span>Icon</span>} />)).toThrow();
+    } finally {
+      errorSpy.mockRestore();
+    }
+    expect(screen.queryByRole('button', { name: /botão de ação/i })).toBeNull();
+  });
+
   it('renders EditIconButton with default title "Editar"', () => {
     const handleClick = vi.fn();
     render(<EditIconButton onClick={handleClick} />);

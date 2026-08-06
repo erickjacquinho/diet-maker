@@ -26,6 +26,10 @@ Root `Input` e exports visuais registrados: `Input`. Sem primitive base; compõe
 
 ## Allowed variants
 
+## Family contract
+
+`Input` is the visual root and owns the generic field recipe, native value semantics and focus/error affordances. It has no context-dependent child.
+
 Tipos HTML text, number, search e password; compact apenas em tabela/toolbar.
 
 ## Particular states

@@ -1,0 +1,6 @@
+{
+  "task": "Adequar a sidebar atual do NutriDiet ao componente Sidebar do shadcn/ui sem perder nenhuma funcionalidade existente. A migração deve preservar a navegação global, brand NutriDiet, modo expandido e recolhido, larguras e identidade visual do design system, estado ativo por rota, tooltips no modo recolhido, perfil do nutricionista, ações Salvar/Abrir, integração com AppLayoutShell e compatibilidade desktop. O novo desenho deve permitir submenus de navegação e o atalho de teclado Ctrl+B no Windows/Cmd+B no macOS para alternar a sidebar. Manter SidebarNav como organismo e wrapper de produto; usar o Sidebar do shadcn como primitivo interno, sem espalhar dependência genérica pelas páginas. Não implementar agora: produzir um SDD completo com spec, clarificações, checklists, plano, tarefas rastreáveis e análise final.",
+  "slug": "migrar-sidebar-shadcn-submenus",
+  "feature_dir": "specs/05-08-26-migrar-sidebar-shadcn-submenus",
+  "date": "2026-08-05"
+}

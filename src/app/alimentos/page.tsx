@@ -33,7 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { CreateButton, EditIconButton, DeleteIconButton } from '@/components/atoms';
+import { CreateButton, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
 
 import {
   Table,
@@ -338,18 +338,16 @@ export default function FoodsPage() {
         cell: ({ row }) => {
           const food = row.original;
           return (
-            <Button
-              variant="ghost"
-              size="icon"
+            <IconButton
               onClick={() => handleToggleFavorite(food.id)}
-              className="h-6 w-6 p-0 hover:bg-surface-subtle/80 rounded-surface transition-colors"
+              className="h-6 w-6 p-0 hover:bg-surface-hover rounded-surface transition-colors"
               title={food.isFavorite ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
             >
               <Star
                 size={14}
                 className={food.isFavorite ? 'fill-warning text-warning-soft0' : 'text-text-muted/50 hover:text-text-muted'}
               />
-            </Button>
+            </IconButton>
           );
         },
         enableSorting: false,
@@ -358,8 +356,8 @@ export default function FoodsPage() {
         accessorKey: 'name',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent text-style-legal text-text-primary"
           >
@@ -379,8 +377,8 @@ export default function FoodsPage() {
         accessorKey: 'preparo',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent text-style-legal text-text-primary"
           >
@@ -404,8 +402,8 @@ export default function FoodsPage() {
         accessorKey: 'category',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent text-style-legal text-text-primary"
           >
@@ -442,8 +440,8 @@ export default function FoodsPage() {
         accessorKey: 'kcal',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-style-legal text-text-primary"
           >
@@ -463,8 +461,8 @@ export default function FoodsPage() {
         accessorKey: 'proteinG',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-protein text-style-legal"
           >
@@ -484,8 +482,8 @@ export default function FoodsPage() {
         accessorKey: 'carbsG',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-carbohydrate text-style-legal"
           >
@@ -505,8 +503,8 @@ export default function FoodsPage() {
         accessorKey: 'fatsG',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-macro-fat text-style-legal"
           >
@@ -526,8 +524,8 @@ export default function FoodsPage() {
         accessorKey: 'fiberG',
         header: ({ column }) => (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="quiet"
+            size="compact"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="p-0 h-6 font-bold hover:bg-transparent ml-auto text-style-legal text-text-primary"
           >
@@ -604,7 +602,7 @@ export default function FoodsPage() {
       </div>
 
       {/* Filter Controls Card */}
-      <Card className="bg-surface border-border-subtle p-4 rounded-surface shadow-floating">
+      <Card className="p-4">
         <CardContent className="p-0 flex flex-col gap-3">
           {/* Row 1: Primary Tabs, Clear Button & Create Button */}
           <div className="flex items-center justify-between flex-wrap gap-2 border-b border-border-subtle pb-3">
@@ -616,7 +614,7 @@ export default function FoodsPage() {
                 className={
                   activeTab === 'all'
                     ? 'bg-primary text-white shadow-floating'
-                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }
               >
                 Todos ({foods.length})
@@ -628,7 +626,7 @@ export default function FoodsPage() {
                 className={`flex items-center gap-1.5 ${
                   activeTab === 'favorites'
                     ? 'bg-primary text-white shadow-floating'
-                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }`}
               >
                 <Star size={12} className="fill-warning text-warning" />
@@ -641,7 +639,7 @@ export default function FoodsPage() {
                 className={
                   activeTab === 'custom'
                     ? 'bg-primary text-white shadow-floating'
-                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-border-subtle/60 border border-border-subtle'
+                    : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-subtle'
                 }
               >
                 Customizados ({foods.filter((f) => f.source === 'CUSTOM').length})
@@ -652,7 +650,7 @@ export default function FoodsPage() {
               {isFiltered && (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="quiet"
                   size="compact"
                   onClick={resetFilters}
                   className="text-error hover:text-error hover:bg-error-soft flex items-center gap-1"
@@ -783,7 +781,7 @@ export default function FoodsPage() {
       </Card>
 
       {/* Spreadsheet Table */}
-      <Card className="bg-surface border-border-subtle rounded-surface overflow-hidden shadow-floating p-0">
+      <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-surface-subtle/80 border-b border-border-subtle">
@@ -808,7 +806,7 @@ export default function FoodsPage() {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="group/row hover:bg-surface-subtle/50 transition-colors border-b border-border-subtle/60">
+                  <TableRow key={row.id} className="group/row hover:bg-surface-hover transition-colors border-b border-border-subtle/60">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-2.5 px-3 text-style-legal">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -864,46 +862,42 @@ export default function FoodsPage() {
 
             {/* Pagination Controls */}
             <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon"
+              <IconButton
+                variant="secondary"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-surface"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-hover rounded-surface"
                 title="Primeira Página"
               >
                 <ChevronsLeft size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
+              </IconButton>
+              <IconButton
+                variant="secondary"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-surface"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-hover rounded-surface"
                 title="Página Anterior"
               >
                 <ChevronLeft size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
+              </IconButton>
+              <IconButton
+                variant="secondary"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-surface"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-hover rounded-surface"
                 title="Próxima Página"
               >
                 <ChevronRight size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
+              </IconButton>
+              <IconButton
+                variant="secondary"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-subtle rounded-surface"
+                className="h-7 w-7 bg-surface border-border-subtle text-text-primary hover:bg-surface-hover rounded-surface"
                 title="Última Página"
               >
                 <ChevronsRight size={14} />
-              </Button>
+              </IconButton>
             </div>
           </div>
         </div>
@@ -911,7 +905,7 @@ export default function FoodsPage() {
 
       {/* Modal Cadastro/Edição de Alimento Customizado Shadcn Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-lg bg-surface border-border-subtle p-6 rounded-surface shadow-overlay">
+      <DialogContent className="max-w-lg">
           <DialogHeader className="border-b border-border-subtle pb-3 flex flex-row items-center justify-between">
             <div>
               <DialogTitle className="font-bold text-style-body text-text-primary">
@@ -1049,7 +1043,7 @@ export default function FoodsPage() {
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-2 bg-surface-subtle hover:bg-border-subtle text-text-primary rounded-control text-style-legal font-bold transition-colors"
+                className="flex-1 px-4 py-2 bg-surface-subtle hover:bg-surface-hover text-text-primary rounded-control text-style-legal font-bold transition-colors"
               >
                 Cancelar
               </Button>
