@@ -14,11 +14,14 @@ export interface Patient {
   targetCarbs: number;
   targetFats: number;
   objective: string;
+  phone?: string;
   whatsapp?: string;
   lastConsultation: string;
   initials: string;
   nextEvent?: PatientNextEvent | null;
   lastActivity?: PatientLastActivity | null;
+  dietHistory?: HistoricalDiet[];
+  bodyAssessments?: BodyAssessment[];
 }
 
 export type PatientNextEventType = 'diet-update' | 'assessment-update';

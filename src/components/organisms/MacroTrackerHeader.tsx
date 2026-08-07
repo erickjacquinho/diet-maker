@@ -7,6 +7,9 @@ export interface MacroTrackerHeaderProps {
   patientName: string;
   patientWeightKg: number;
   patientGoalDescription: string;
+  patientAge?: number;
+  patientHeightCm?: number;
+  patientGender?: string;
   onAdjustGoals?: () => void;
   metrics: MacroMetricCardProps[];
   showPatientContext?: boolean;
@@ -17,6 +20,9 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
   patientName,
   patientWeightKg,
   patientGoalDescription,
+  patientAge,
+  patientHeightCm,
+  patientGender,
   onAdjustGoals,
   metrics,
   showPatientContext = true,
@@ -30,6 +36,8 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
             name={patientName}
             weightKg={patientWeightKg}
             goalDescription={patientGoalDescription}
+            age={patientAge}
+            heightCm={patientHeightCm}
             onAdjustGoals={onAdjustGoals}
           />
         )}
@@ -43,4 +51,3 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
     </Surface>
   );
 };
-

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Surface } from '@/components/atoms';
-import type { SurfaceDensity } from '@/design-system';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export type MetricBoxTone = 'default' | 'muted' | 'protein' | 'carbohydrate' | 'fat' | 'success' | 'warning';
@@ -46,11 +45,11 @@ const toneClasses: Record<MetricBoxTone, string> = {
   warning: 'text-warning',
 };
 
-const densityBySize: Record<MetricBoxSize, SurfaceDensity> = {
-  compact: 'compact',
-  standard: 'standard',
-  large: 'standard',
-  hero: 'highlight',
+const paddingBySize: Record<MetricBoxSize, string> = {
+  compact: 'p-3',
+  standard: 'p-4',
+  large: 'p-4',
+  hero: 'p-5',
 };
 
 export const MetricBox: React.FC<MetricBoxProps> = ({
@@ -99,13 +98,18 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
   }
 
   return (
-    <Surface
-      variant={surface === 'raised' ? 'default' : 'subtle'}
-      density={densityBySize[size]}
-      className={cn(layoutClasses, isTinted && tintedToneClasses[tone], className)}
+    <Card
+      className={cn(
+        layoutClasses,
+        paddingBySize[size],
+        surface === 'raised' ? 'bg-surface border-border-subtle shadow-sm' : 'bg-surface-subtle border-border-subtle',
+        isTinted && tintedToneClasses[tone],
+        className,
+      )}
       {...props}
     >
       {content}
-    </Surface>
+    </Card>
   );
 };
+

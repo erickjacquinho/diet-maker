@@ -4,6 +4,7 @@ import React from 'react';
 import {
   MacroTrackerHeader,
   MealCardContainer,
+  PatientProfileHeader,
   MacroTrackerHeaderProps,
   MealCardContainerProps,
 } from '../organisms';
@@ -12,16 +13,17 @@ import {
   DietModeSwitcherProps,
   PatientBadgeHeader,
   PageContextHeader,
+  MacroMetricCardProps,
 } from '../molecules';
 import { Surface } from '@/components/atoms';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   Plus,
   Percent,
   MessageCircle,
   FileText,
   Save,
-  ArrowLeft,
   Utensils,
   MoreHorizontal,
   Edit3,
@@ -32,34 +34,76 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Link from 'next/link';
 
 export interface DietBuilderTemplateProps {
+  patient?: {
+    id?: string;
+    name?: string;
+    initials?: string;
+    age?: number;
+    heightCm?: number;
+    weightKg?: number;
+    gender?: string;
+    objective?: string;
+  };
   patientId?: string;
   patientName?: string;
+  patientInitials?: string;
+  patientObjective?: string;
+  patientAge?: number;
+  patientHeightCm?: number;
+  patientGender?: string;
   dietaId?: string;
+  mode?: 'simple' | 'carb_cycling';
+  onModeChange?: (mode: 'simple' | 'carb_cycling') => void;
   dietModeProps?: DietModeSwitcherProps;
-  macroTrackerData: MacroTrackerHeaderProps;
-  mealsData: MealCardContainerProps[];
+  macroTrackerData?: MacroTrackerHeaderProps;
+  macroMetrics?: MacroMetricCardProps[];
+  mealsData?: MealCardContainerProps[];
+  meals?: any[];
   onAddMeal?: () => void;
+  onRemoveMeal?: (index: number) => void;
+  onUpdateMealHeader?: (index: number, title: string, time: string) => void;
+  onAddFoodClick?: (index: number) => void;
+  onUpdateItemGram?: (mealIndex: number, itemIndex: number, newGrams: number) => void;
+  onRemoveItem?: (mealIndex: number, itemIndex: number) => void;
   onScaleDiet?: () => void;
+  onOpenScaleModal?: () => void;
+  onOpenCopyModal?: () => void;
+  onOpenAdjustGoalsModal?: () => void;
+  onOpenWhatsAppModal?: () => void;
   onWhatsAppShare?: () => void;
   onExportPDF?: () => void;
   onSaveDiet?: () => void;
+  onBackClick?: () => void;
+  carbCyclingVariations?: any[];
+  activeVariationId?: string;
+  onSelectVariation?: (id: string) => void;
   onOpenFoodSearchForMeal?: (mealIndex: number) => void;
 }
 
 export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
+  patient,
   patientId = 'pat-1',
-  patientName = 'Paciente',
+  patientName,
+  patientInitials,
+  patientObjective,
+  patientAge,
+  patientHeightCm,
+  patientGender,
   dietModeProps,
   macroTrackerData,
-  mealsData,
+  macroMetrics,
+  mealsData = [],
   onAddMeal,
   onScaleDiet,
+  onOpenScaleModal,
+  onOpenAdjustGoalsModal,
+  onOpenWhatsAppModal,
   onWhatsAppShare,
   onExportPDF,
   onSaveDiet,
+  onBackClick,
 }) => {
   const defaultDietModeProps: DietModeSwitcherProps = {
     mode: 'simple',
@@ -72,6 +116,19 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   };
 
   const activeDietModeProps = dietModeProps || defaultDietModeProps;
+
+  const resolvedName = patient?.name || patientName || macroTrackerData?.patientName || 'Paciente';
+  const resolvedInitials = patient?.initials || patientInitials || macroTrackerData?.patientInitials || 'P';
+  const resolvedObjective = patient?.objective || patientObjective || macroTrackerData?.patientGoalDescription || 'Prescrição Alimentar';
+  const resolvedAge = patient?.age ?? patientAge ?? macroTrackerData?.patientAge;
+  const resolvedHeightCm = patient?.heightCm ?? patientHeightCm ?? macroTrackerData?.patientHeightCm;
+  const resolvedGender = patient?.gender ?? patientGender ?? macroTrackerData?.patientGender;
+  const resolvedWeightKg = patient?.weightKg ?? macroTrackerData?.patientWeightKg;
+
+  const metricsToRender = macroMetrics || macroTrackerData?.metrics || [];
+  const handleAdjustGoals = onOpenAdjustGoalsModal || macroTrackerData?.onAdjustGoals;
+  const handleScale = onOpenScaleModal || onScaleDiet;
+  const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
 
   const headerActions = (
     <>
@@ -95,7 +152,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
-          <DropdownMenuItem onSelect={() => onWhatsAppShare?.()}>
+          <DropdownMenuItem onSelect={() => handleWhatsApp?.()}>
             <MessageCircle size={14} aria-hidden="true" />
             <span>WhatsApp</span>
           </DropdownMenuItem>
@@ -108,8 +165,6 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
     </>
   );
 
-  const resolvedPatientName = patientName || 'Paciente';
-
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <main
@@ -118,11 +173,12 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
       >
         <PageContextHeader
           title="Elaboração de Dieta"
-          backHref={`/pacientes/${patientId}`}
-          backLabel={`Voltar para a ficha de ${resolvedPatientName}`}
+          backHref={onBackClick ? undefined : `/pacientes/${patientId}`}
+          onBackClick={onBackClick}
+          backLabel={`Voltar para a ficha de ${resolvedName}`}
           breadcrumbs={[
             { label: 'Pacientes', href: '/pacientes' },
-            { label: resolvedPatientName, href: `/pacientes/${patientId}` },
+            { label: resolvedName, href: `/pacientes/${patientId}` },
             { label: 'Dieta' },
           ]}
           actions={headerActions}
@@ -132,42 +188,61 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           aria-label="Contexto da dieta"
           data-testid="diet-context-card"
         >
-          <Surface variant="default" density="highlight" className="p-0">
-            <div className="p-4 lg:p-6">
-              <div className="grid grid-cols-12 items-start gap-4">
-                <div className="col-span-5 flex min-w-0 items-start pr-4">
-                  <PatientBadgeHeader
-                    initials={macroTrackerData.patientInitials}
-                    name={macroTrackerData.patientName}
-                    weightKg={macroTrackerData.patientWeightKg}
-                    goalDescription={macroTrackerData.patientGoalDescription}
-                    compact
-                    showAdjustGoals={false}
-                  />
-                </div>
+          <Surface variant="default" density="compact" className="p-6">
+            <PatientProfileHeader.Root
+              patient={{
+                name: resolvedName,
+                initials: resolvedInitials,
+                objective: resolvedObjective,
+                age: resolvedAge,
+                heightCm: resolvedHeightCm,
+                gender: resolvedGender,
+                weightKg: resolvedWeightKg,
+              }}
+              className="border-b-0 pb-0"
+            >
+              <PatientProfileHeader.Identity>
+                <PatientProfileHeader.Avatar variant="charcoal" size="lg" />
+                <PatientProfileHeader.Info>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <PatientProfileHeader.Name />
+                    <PatientProfileHeader.Gender />
+                    <PatientProfileHeader.Badge />
+                  </div>
+                  <PatientProfileHeader.Meta />
+                </PatientProfileHeader.Info>
+              </PatientProfileHeader.Identity>
 
-                <div className="col-span-7 flex min-w-0 flex-col items-end">
-                  <DietModeSwitcher {...activeDietModeProps} embedded />
-                </div>
-              </div>
-            </div>
+              <PatientProfileHeader.Actions>
+                <DietModeSwitcher {...activeDietModeProps} embedded />
+              </PatientProfileHeader.Actions>
+            </PatientProfileHeader.Root>
           </Surface>
         </section>
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
           <div className="flex items-center justify-end gap-2">
-            {macroTrackerData.onAdjustGoals && (
-              <Button onClick={macroTrackerData.onAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
+            {handleAdjustGoals && (
+              <Button onClick={handleAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
                 <Edit3 size={13} aria-hidden="true" />
                 <span>Ajustar Metas</span>
               </Button>
             )}
-            <Button onClick={onScaleDiet} variant="secondary" size="compact" className="flex items-center gap-1.5">
-              <Percent size={14} aria-hidden="true" />
-              <span>Escalar</span>
-            </Button>
+            {handleScale && (
+              <Button onClick={handleScale} variant="secondary" size="compact" className="flex items-center gap-1.5">
+                <Percent size={14} aria-hidden="true" />
+                <span>Escalar</span>
+              </Button>
+            )}
           </div>
-          <MacroTrackerHeader {...macroTrackerData} showPatientContext={false} />
+          <MacroTrackerHeader
+            patientInitials={resolvedInitials}
+            patientName={resolvedName}
+            patientWeightKg={resolvedWeightKg || 70}
+            patientGoalDescription={resolvedObjective}
+            metrics={metricsToRender}
+            showPatientContext={false}
+          />
         </section>
 
         <section aria-labelledby="meals-heading" className="flex flex-col gap-4">
@@ -185,7 +260,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           </div>
 
           {mealsData.length === 0 ? (
-            <div className="p-8 text-center bg-surface border-2 border-dashed border-border-subtle rounded-surface flex flex-col gap-4">
+            <Card className="p-8 text-center bg-surface-subtle/50 border-border-subtle flex flex-col items-center gap-4 shadow-none">
               <div className="h-12 w-12 rounded-surface bg-success/10 text-success flex items-center justify-center mx-auto">
                 <Utensils size={24} aria-hidden="true" />
               </div>
@@ -195,7 +270,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
                   Use “Nova Refeição” para começar a prescrição e adicionar alimentos diretamente da base TACO.
                 </p>
               </div>
-            </div>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
               {mealsData.map((meal, index) => (

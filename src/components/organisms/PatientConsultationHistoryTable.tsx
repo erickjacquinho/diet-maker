@@ -16,6 +16,15 @@ import {
 import { textStyle } from '@/design-system';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableCaption,
+} from '@/components/ui/table';
 import { EditIconButton, IconButton } from '@/components/atoms';
 import { MetricBox } from '@/components/molecules/MetricBox';
 import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
@@ -75,26 +84,26 @@ export function PatientConsultationHistoryTable({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto border border-border-subtle rounded-surface">
-          <table aria-label="Histórico de consultas por data" className="w-full text-left border-collapse">
-            <caption className="sr-only">Histórico de consultas por data</caption>
-            <thead>
-              <tr className="bg-surface-subtle border-b border-border-subtle">
-                <th className={`py-3 px-4 ${textStyle('table-header')}`}>Data / Consulta</th>
-                <th className={`py-3 px-4 ${textStyle('table-header')}`}>Tipo de Registro</th>
-                <th className={`py-3 px-4 ${textStyle('table-header')}`}>Dados Dietéticos</th>
-                <th className={`py-3 px-4 ${textStyle('table-header')}`}>Valores Corporais</th>
-                <th className={`py-3 px-4 text-right ${textStyle('table-header')}`}>Ação / Detalhes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle/70">
+        <div className="border border-border-subtle rounded-surface overflow-hidden">
+          <Table aria-label="Histórico de consultas por data">
+            <TableCaption className="sr-only">Histórico de consultas por data</TableCaption>
+            <TableHeader>
+              <TableRow className="bg-surface-subtle border-b border-border-subtle">
+                <TableHead className={`py-3 px-4 ${textStyle('table-header')}`}>Data / Consulta</TableHead>
+                <TableHead className={`py-3 px-4 ${textStyle('table-header')}`}>Tipo de Registro</TableHead>
+                <TableHead className={`py-3 px-4 ${textStyle('table-header')}`}>Dados Dietéticos</TableHead>
+                <TableHead className={`py-3 px-4 ${textStyle('table-header')}`}>Valores Corporais</TableHead>
+                <TableHead className={`py-3 px-4 text-right ${textStyle('table-header')}`}>Ação / Detalhes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border-subtle/70">
               {updates.map((update) => {
                 const isExpanded = expandedRowDate === update.date;
                 const isActiveDietRow = update.diet?.status === 'Ativa';
 
                 return (
                   <React.Fragment key={update.date}>
-                    <tr
+                    <TableRow
                       className={`transition-colors border-l-4 ${
                         isActiveDietRow
                           ? 'border-l-success bg-success/[0.04] hover:bg-success/[0.08]'
@@ -102,15 +111,15 @@ export function PatientConsultationHistoryTable({
                       }`}
                     >
                       {/* Col 1: Date */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <TableCell className="py-3.5 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
                           <Calendar size={13} className="text-text-muted shrink-0" />
                           <span className={textStyle('table-cell-strong')}>{update.date}</span>
                         </div>
-                      </td>
+                      </TableCell>
 
                       {/* Col 2: Badges */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <TableCell className="py-3.5 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
                           {update.diet && (
                             <Badge
@@ -129,10 +138,10 @@ export function PatientConsultationHistoryTable({
                             </Badge>
                           )}
                         </div>
-                      </td>
+                      </TableCell>
 
                       {/* Col 3: Dietary Data */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <TableCell className="py-3.5 px-4 whitespace-nowrap">
                         {update.diet ? (
                           <div className={`flex items-center gap-1.5 ${textStyle('table-number')}`}>
                             <span className="text-macro-protein font-bold">{update.diet.proteinG}g</span>
@@ -146,10 +155,10 @@ export function PatientConsultationHistoryTable({
                         ) : (
                           <span className={`italic ${textStyle('caption')}`}>Sem alteração dietética</span>
                         )}
-                      </td>
+                      </TableCell>
 
                       {/* Col 4: Body Values */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <TableCell className="py-3.5 px-4 whitespace-nowrap">
                         {update.assessment ? (
                           <div className={`flex items-center gap-1.5 ${textStyle('table-number')}`}>
                             <span>{update.assessment.weightKg} kg</span>
@@ -159,10 +168,10 @@ export function PatientConsultationHistoryTable({
                         ) : (
                           <span className={`italic ${textStyle('caption')}`}>Sem medição corporal</span>
                         )}
-                      </td>
+                      </TableCell>
 
                       {/* Col 5: Actions */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      <TableCell className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
                           <Button asChild variant="secondary" size="compact" onClick={(e) => e.stopPropagation()}>
                             <Link
@@ -183,13 +192,13 @@ export function PatientConsultationHistoryTable({
                             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </IconButton>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
 
                     {/* Accordion Expanded Detail View */}
                     {isExpanded && (
-                      <tr className="bg-surface-subtle/40">
-                        <td colSpan={5} className="p-4 border-t border-b border-border-subtle/50">
+                      <TableRow className="bg-surface-subtle/40">
+                        <TableCell colSpan={5} className="p-4 border-t border-b border-border-subtle/50">
                           <div className="grid grid-cols-1 gap-4">
                             {/* Diet Detail Card */}
                             {update.diet ? (
@@ -266,16 +275,17 @@ export function PatientConsultationHistoryTable({
                               </div>
                             )}
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
                   </React.Fragment>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </section>
   );
 }
+

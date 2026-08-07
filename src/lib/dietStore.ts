@@ -4,12 +4,18 @@ import { calculatePresetCalories } from './presetUtils';
 import { recordPatientActivity } from './patientsStore';
 
 export interface DietItem {
+  id?: string;
   foodId?: string;
   name: string;
   quantityGrams: number;
+  grams?: number;
   protein: number;
   carbs: number;
   fats: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+  fatsG?: number;
   kcal: number;
 }
 

@@ -17,10 +17,11 @@ export interface PageContextBreadcrumbItem {
 
 export interface PageContextHeaderProps {
   title: string;
-  backHref: string;
+  backHref?: string;
   backLabel: string;
   breadcrumbs: readonly PageContextBreadcrumbItem[];
   actions?: React.ReactNode;
+  onBackClick?: () => void;
 }
 
 export const PageContextHeader: React.FC<PageContextHeaderProps> = ({
@@ -29,21 +30,37 @@ export const PageContextHeader: React.FC<PageContextHeaderProps> = ({
   backLabel,
   breadcrumbs,
   actions,
+  onBackClick,
 }) => {
   const ancestorItems = breadcrumbs.slice(0, -1);
   const currentItem = breadcrumbs[breadcrumbs.length - 1];
 
+  const backButtonContent = <ArrowLeft size={16} aria-hidden="true" />;
+  const backButtonClasses = "flex h-control-standard w-control-standard shrink-0 items-center justify-center rounded-control border border-border-subtle bg-surface text-text-muted transition-colors hover:border-text-primary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
   return (
     <header className="flex min-w-0 flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 flex-1 items-start gap-3">
-        <Link
-          href={backHref}
-          aria-label={backLabel}
-          title={backLabel}
-          className="flex h-control-standard w-control-standard shrink-0 items-center justify-center rounded-control border border-border-subtle bg-surface text-text-muted transition-colors hover:border-text-primary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-        </Link>
+        {onBackClick ? (
+          <button
+            type="button"
+            onClick={onBackClick}
+            aria-label={backLabel}
+            title={backLabel}
+            className={backButtonClasses}
+          >
+            {backButtonContent}
+          </button>
+        ) : (
+          <Link
+            href={backHref || '#'}
+            aria-label={backLabel}
+            title={backLabel}
+            className={backButtonClasses}
+          >
+            {backButtonContent}
+          </Link>
+        )}
 
         <div className="flex min-w-0 flex-col gap-2">
           <Breadcrumb aria-label="Navegação contextual">

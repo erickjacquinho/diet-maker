@@ -11,9 +11,11 @@ export interface FoodItem {
   proteinG: number;
   carbsG: number;
   fatsG: number;
+  fatG?: number;
   fiberG: number;
   source: 'TACO' | 'CUSTOM';
   isFavorite: boolean;
+  isCustom?: boolean;
 }
 
 const CUSTOM_FOODS_KEY = 'nutridiet_custom_foods';

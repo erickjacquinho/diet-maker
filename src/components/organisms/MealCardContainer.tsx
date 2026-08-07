@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Badge } from '../atoms';
-import { Surface } from '@/components/atoms';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MealItemRow, MealItemRowProps } from '../molecules';
@@ -59,7 +59,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   return (
-    <Surface variant="default" density="highlight" className="p-0 flex flex-col justify-between">
+    <Card className="p-0 flex flex-col justify-between border-border-subtle bg-surface">
       <div className="p-5 p-6 gap-4 flex-1 flex flex-col justify-between">
         <div className="flex flex-col gap-4">
           {/* Meal Header */}
@@ -103,7 +103,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                     setTempTime(time);
                     setIsEditingTitle(true);
                   }}
-                  className="text-text-muted hover:text-text-primary p-1 rounded-md transition-colors"
+                  className="text-text-muted hover:text-text-primary p-1 rounded-md transition-colors h-auto w-auto"
                   title="Editar nome e horário"
                 >
                   <Pencil size={12} />
@@ -112,19 +112,19 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
             )}
 
             <div className="flex items-center gap-1.5 text-style-legal font-bold shrink-0">
-              <Badge variant="blue">P: {proteinG}g</Badge>
-              <Badge variant="amber">C: {carbsG}g</Badge>
-              <Badge variant="teal">G: {fatsG}g</Badge>
-              <Badge variant="amber">{displayKcal} kcal</Badge>
+              <Badge variant="outline" className="border-macro-protein-border bg-macro-protein-soft text-macro-protein">P: {proteinG}g</Badge>
+              <Badge variant="outline" className="border-macro-carbohydrate-border bg-macro-carbohydrate-soft text-macro-carbohydrate">C: {carbsG}g</Badge>
+              <Badge variant="outline" className="border-macro-fat-border bg-macro-fat-soft text-macro-fat">G: {fatsG}g</Badge>
+              <Badge variant="outline" className="border-warning-border bg-warning-soft text-warning">{displayKcal} kcal</Badge>
             </div>
           </div>
 
           {/* Items List */}
           <div className="flex flex-col gap-2 min-h-[50px]">
             {items.length === 0 ? (
-              <div className="p-4 text-center border border-dashed border-border-subtle rounded-control text-text-muted text-style-legal italic">
+              <Card className="p-4 text-center bg-surface-subtle/50 border-border-subtle text-text-muted text-style-legal italic shadow-none">
                 Nenhum alimento nesta refeição. Clique em "+ Adicionar Alimento" abaixo.
-              </div>
+              </Card>
             ) : (
               items.map((item, idx) => (
                 <MealItemRow
@@ -167,6 +167,6 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           </Button>
         </div>
       </div>
-    </Surface>
+    </Card>
   );
 };

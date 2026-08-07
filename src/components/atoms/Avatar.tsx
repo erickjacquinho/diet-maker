@@ -1,6 +1,7 @@
 import React from 'react';
 import { recipes } from '@/design-system';
 import { cn } from '@/lib/utils';
+import { Avatar as AvatarUI, AvatarFallback as AvatarFallbackUI } from '@/components/ui/avatar';
 
 export interface AvatarProps {
   initials: string;
@@ -19,11 +20,14 @@ export const Avatar: React.FC<AvatarProps> = ({
   const toneMap = { emerald: 'success', charcoal: 'primary', inner: 'neutral' } as const;
 
   return (
-    <div
+    <AvatarUI
       className={cn(recipes.avatar({ size: sizeMap[size], tone: toneMap[variant] }), className)}
       aria-label={initials}
     >
-      {initials}
-    </div>
+      <AvatarFallbackUI className="bg-transparent text-inherit font-medium">
+        {initials}
+      </AvatarFallbackUI>
+    </AvatarUI>
   );
 };
+

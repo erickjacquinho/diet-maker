@@ -1,6 +1,6 @@
 import type { HTMLAttributes, Key } from 'react';
 import { MetricBox, type MetricBoxProps } from '@/components/molecules/MetricBox';
-import { Surface } from '@/components/atoms';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export type MetricBoxGroupItem = MetricBoxProps & {
@@ -40,11 +40,9 @@ export function MetricBoxGroup({ items, className, ...props }: MetricBoxGroupPro
   }
 
   return (
-    <Surface
-      variant="default"
-      density="compact"
+    <Card
       className={cn(
-        'p-0 grid divide-x divide-border-divider overflow-hidden rounded-control border-border-divider',
+        'p-0 grid divide-x divide-border-divider overflow-hidden rounded-control border-border-divider bg-surface',
         gridColumns[itemCount],
         className,
       )}
@@ -64,6 +62,7 @@ export function MetricBoxGroup({ items, className, ...props }: MetricBoxGroupPro
           />
         );
       })}
-    </Surface>
+    </Card>
   );
 }
+
