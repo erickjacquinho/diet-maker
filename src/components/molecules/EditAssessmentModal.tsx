@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Activity, Scale } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -12,63 +11,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  BodyAssessment,
-  Patient,
-  normalizePairedBodyMeasurements,
-} from '@/lib/patientsStore';
-import {
-  calculateBodyComposition,
-  normalizeBodyFatSex,
-} from '@/lib/bodyFat';
+import { BodyAssessment, Patient } from '@/lib/patientsStore';
 import { Surface } from '@/components/atoms';
 import { MetricBox } from './MetricBox';
+import { useAssessmentForm } from '@/hooks/useAssessmentForm';
+import { AssessmentMeasurementField } from './assessment/AssessmentMeasurementField';
+import { LimbSectionCard } from './assessment/LimbSectionCard';
+import {
+  TRUNK_FIELDS,
+  UPPER_LIMB_FIELDS,
+  LOWER_LIMB_FIELDS,
+} from './assessment/assessmentFieldsConfig';
 
-type NumericAssessmentField =
-  | 'weightKg'
-  | 'neckCm'
-  | 'scapulaCm'
-  | 'bustCm'
-  | 'leftArmCm'
-  | 'rightArmCm'
-  | 'waistCm'
-  | 'abdomenCm'
-  | 'hipCm'
-  | 'leftProximalThighCm'
-  | 'rightProximalThighCm'
-  | 'leftDistalThighCm'
-  | 'rightDistalThighCm'
-  | 'leftCalfCm'
-  | 'rightCalfCm';
-
-interface AssessmentFieldConfig {
-  field: NumericAssessmentField;
-  label: string;
-  unit: 'kg' | 'cm';
-}
-
-const TRUNK_FIELDS: AssessmentFieldConfig[] = [
-  { field: 'neckCm', label: 'Pescoço', unit: 'cm' },
-  { field: 'waistCm', label: 'Cintura', unit: 'cm' },
-  { field: 'abdomenCm', label: 'Barriga', unit: 'cm' },
-  { field: 'hipCm', label: 'Quadril', unit: 'cm' },
-  { field: 'scapulaCm', label: 'Escápula', unit: 'cm' },
-  { field: 'bustCm', label: 'Busto', unit: 'cm' },
-];
-
-const UPPER_LIMB_FIELDS: AssessmentFieldConfig[] = [
-  { field: 'leftArmCm', label: 'Braço esquerdo', unit: 'cm' },
-  { field: 'rightArmCm', label: 'Braço direito', unit: 'cm' },
-];
-
-const LOWER_LIMB_FIELDS: AssessmentFieldConfig[] = [
-  { field: 'leftProximalThighCm', label: 'Coxa proximal esq.', unit: 'cm' },
-  { field: 'rightProximalThighCm', label: 'Coxa proximal dir.', unit: 'cm' },
-  { field: 'leftDistalThighCm', label: 'Coxa distal esq.', unit: 'cm' },
-  { field: 'rightDistalThighCm', label: 'Coxa distal dir.', unit: 'cm' },
-  { field: 'leftCalfCm', label: 'Panturrilha esq.', unit: 'cm' },
-  { field: 'rightCalfCm', label: 'Panturrilha dir.', unit: 'cm' },
-];
+export { useAssessmentForm };
 
 export interface EditAssessmentModalProps {
   open: boolean;
@@ -79,169 +34,6 @@ export interface EditAssessmentModalProps {
   onSave: (assessment: BodyAssessment) => void;
 }
 
-function formatInputValue(value: number | undefined): string | number {
-  return value !== undefined && Number.isFinite(value) ? value : '';
-}
-
-/**
- * Custom Hook for managing assessment form state & calculations.
- * Decouples state logic from visual components (vercel-composition-patterns / state-decouple-implementation).
- */
-export function useAssessmentForm({
-  assessment,
-  patient,
-  onSave,
-  onOpenChange,
-}: {
-  assessment: BodyAssessment | null;
-  patient: Pick<Patient, 'gender' | 'heightCm'> | null;
-  onSave: (assessment: BodyAssessment) => void;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [draft, setDraft] = useState<BodyAssessment | null>(assessment);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setDraft(assessment ? { ...assessment } : null);
-    setSubmitError(null);
-  }, [assessment]);
-
-  const bodyFatSex = useMemo(
-    () => (patient ? normalizeBodyFatSex(patient.gender) : null),
-    [patient],
-  );
-
-  const composition = useMemo(() => {
-    if (!draft || !patient || !bodyFatSex) {
-      return {
-        bodyFatPercent: null,
-        fatMassKg: null,
-        leanMassKg: null,
-        isValid: false,
-        error: bodyFatSex === null
-          ? 'O gênero do paciente deve ser Masculino ou Feminino.'
-          : 'As medidas informadas não permitem calcular o percentual de gordura.',
-      };
-    }
-
-    return calculateBodyComposition({
-      sex: bodyFatSex,
-      heightCm: patient.heightCm,
-      neckCm: draft.neckCm ?? Number.NaN,
-      waistCm: draft.waistCm,
-      abdomenCm: draft.abdomenCm ?? Number.NaN,
-      hipCm: draft.hipCm ?? Number.NaN,
-      weightKg: draft.weightKg,
-    });
-  }, [bodyFatSex, draft, patient]);
-
-  const updateNumericField = (field: NumericAssessmentField, value: string) => {
-    setDraft((current) =>
-      current
-        ? {
-            ...current,
-            [field]: value === '' ? Number.NaN : Number(value),
-          }
-        : current,
-    );
-    setSubmitError(null);
-  };
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!draft || !composition.isValid) {
-      setSubmitError(
-        composition.error ?? 'Preencha as medidas para calcular a composição corporal.',
-      );
-      return;
-    }
-
-    const normalizedDraft = normalizePairedBodyMeasurements(draft);
-
-    onSave({
-      ...normalizedDraft,
-      bodyFatPercent: composition.bodyFatPercent!,
-      fatMassKg: composition.fatMassKg!,
-      muscleMassKg: composition.leanMassKg!,
-    });
-    onOpenChange(false);
-  };
-
-  return {
-    draft,
-    composition,
-    submitError,
-    updateNumericField,
-    handleSubmit,
-  };
-}
-
-/**
- * Reusable measurement field component.
- * Encapsulates DS Form Field markup and eliminates repetitive HTML.
- */
-interface AssessmentMeasurementFieldProps {
-  id: string;
-  label: string;
-  unit: string;
-  value: number | undefined;
-  onChange: (value: string) => void;
-  className?: string;
-}
-
-function AssessmentMeasurementField({
-  id,
-  label,
-  unit,
-  value,
-  onChange,
-  className = 'min-w-0',
-}: AssessmentMeasurementFieldProps) {
-  return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className={textStyle('field-label')}>
-        {label} ({unit})
-      </label>
-      <Input
-        id={id}
-        type="number"
-        step="any"
-        min="0"
-        required
-        value={formatInputValue(value)}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </div>
-  );
-}
-
-/**
- * Card wrapper for limb measurement groups.
- * Replaces hardcoded `/30` opacity modifiers with DS Surface components.
- */
-interface LimbSectionCardProps {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}
-
-function LimbSectionCard({ title, subtitle, children }: LimbSectionCardProps) {
-  return (
-    <Surface variant="subtle" className="flex flex-col gap-2.5 p-3 rounded-surface border border-border-subtle">
-      <div className="flex items-center justify-between border-b border-border-subtle pb-1.5">
-        <span className={textStyle('caption-strong')}>{title}</span>
-        <span className={textStyle('helper')}>{subtitle}</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2.5">{children}</div>
-    </Surface>
-  );
-}
-
-/**
- * Main EditAssessmentModal Component.
- * Refactored using design system tokens and modular composition patterns.
- */
 export function EditAssessmentModal({
   open,
   patient,
@@ -318,7 +110,6 @@ export function EditAssessmentModal({
                 </TabsContent>
 
                 <TabsContent value="limbs" className="m-0 flex flex-col gap-3 p-1">
-                  {/* Membros Superiores */}
                   <LimbSectionCard title="Membros Superiores" subtitle="E / D (Auto-espelhado)">
                     {UPPER_LIMB_FIELDS.map(({ field, label, unit }) => (
                       <AssessmentMeasurementField
@@ -332,7 +123,6 @@ export function EditAssessmentModal({
                     ))}
                   </LimbSectionCard>
 
-                  {/* Membros Inferiores */}
                   <LimbSectionCard title="Membros Inferiores" subtitle="E / D (Auto-espelhado)">
                     {LOWER_LIMB_FIELDS.map(({ field, label, unit }) => (
                       <AssessmentMeasurementField
@@ -349,7 +139,6 @@ export function EditAssessmentModal({
               </div>
             </Tabs>
 
-            {/* Resumo de Composição Corporal Fixo no Rodapé */}
             <div className="shrink-0 pt-1" aria-label="Composição corporal calculada">
               <Surface variant="subtle" density="compact" className="grid grid-cols-3 gap-2">
                 <MetricBox

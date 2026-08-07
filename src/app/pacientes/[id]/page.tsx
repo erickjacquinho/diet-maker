@@ -6,19 +6,12 @@ import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle } from 'luc
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton } from '@/components/atoms';
 import {
-  EditAssessmentModal,
-  ReadOnlyDietModal,
-  EditPatientModal,
-  NextEventModal,
-  AddObjectiveModal,
-  DeletePatientModal,
-} from '@/components/molecules';
-import {
   PatientConsultationHistoryTable,
   PatientProfileHeader,
   ConsolidatedConsultationUpdate,
 } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
+import { PatientProfileModals } from './PatientProfileModals';
 
 export default function PatientDetailPage() {
   const {
@@ -91,7 +84,6 @@ export default function PatientDetailPage() {
 
   return (
     <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl">
-      {/* Header Contextual do Paciente */}
       <PatientProfileHeader patient={patient}>
         <PatientProfileHeader.Identity>
           <PatientProfileHeader.Avatar />
@@ -125,7 +117,6 @@ export default function PatientDetailPage() {
         </PatientProfileHeader.Actions>
       </PatientProfileHeader>
 
-      {/* Histórico e Consultas */}
       <Surface className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
@@ -153,55 +144,32 @@ export default function PatientDetailPage() {
         />
       </Surface>
 
-      {/* Modais de Ação */}
-      <EditPatientModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
+      <PatientProfileModals
         patient={patient}
-        objectives={availableObjectives}
-        onSave={handleSavePatient}
-        onRequestAddObjective={() => setIsAddObjectiveModalOpen(true)}
+        availableObjectives={availableObjectives}
         objectiveToApply={objectiveToApply}
+        isEditModalOpen={isEditModalOpen}
+        setIsEditModalOpen={setIsEditModalOpen}
+        isDeleteModalOpen={isDeleteModalOpen}
+        setIsDeleteModalOpen={setIsDeleteModalOpen}
+        isNextEventModalOpen={isNextEventModalOpen}
+        setIsNextEventModalOpen={setIsNextEventModalOpen}
+        isAddObjectiveModalOpen={isAddObjectiveModalOpen}
+        setIsAddObjectiveModalOpen={setIsAddObjectiveModalOpen}
+        isEditAssessmentOpen={isEditAssessmentOpen}
+        setIsEditAssessmentOpen={setIsEditAssessmentOpen}
+        editingAssessment={editingAssessment}
+        assessmentMode={assessmentMode}
+        selectedReadOnlyDiet={selectedReadOnlyDiet}
+        isReadOnlyDietModalOpen={isReadOnlyDietModalOpen}
+        setIsReadOnlyDietModalOpen={setIsReadOnlyDietModalOpen}
+        handleSavePatient={handleSavePatient}
+        handleDeletePatient={handleDeletePatient}
+        handleSaveNextEvent={handleSaveNextEvent}
+        handleClearNextEvent={handleClearNextEvent}
+        handleAddCustomObjective={handleAddCustomObjective}
+        handleSaveAssessment={handleSaveAssessment}
       />
-
-      <DeletePatientModal
-        open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        patientName={patient.name}
-        onConfirmDelete={handleDeletePatient}
-      />
-
-      <NextEventModal
-        open={isNextEventModalOpen}
-        onOpenChange={setIsNextEventModalOpen}
-        nextEvent={patient.nextEvent || null}
-        onSave={handleSaveNextEvent}
-        onClear={handleClearNextEvent}
-      />
-
-      <AddObjectiveModal
-        open={isAddObjectiveModalOpen}
-        onOpenChange={setIsAddObjectiveModalOpen}
-        onAddObjective={handleAddCustomObjective}
-      />
-
-      <EditAssessmentModal
-        open={isEditAssessmentOpen}
-        onOpenChange={setIsEditAssessmentOpen}
-        patient={patient}
-        assessment={editingAssessment}
-        mode={assessmentMode}
-        onSave={handleSaveAssessment}
-      />
-
-      {selectedReadOnlyDiet && (
-        <ReadOnlyDietModal
-          isOpen={isReadOnlyDietModalOpen}
-          onClose={() => setIsReadOnlyDietModalOpen(false)}
-          diet={selectedReadOnlyDiet}
-          patientName={patient.name}
-        />
-      )}
     </div>
   );
 }

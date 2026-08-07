@@ -1,30 +1,14 @@
 'use client';
 
 import React from 'react';
-import {
-  MacroTrackerHeader,
-  MealCardContainer,
-  PatientProfileHeader,
-  MacroTrackerHeaderProps,
-  MealCardContainerProps,
-} from '../organisms';
-import {
-  DietModeSwitcher,
-  DietModeSwitcherProps,
-  PatientBadgeHeader,
-  PageContextHeader,
-  MacroMetricCardProps,
-} from '../molecules';
-import { Surface } from '@/components/atoms';
+import { MacroTrackerHeader } from '../organisms';
+import { DietModeSwitcherProps, PageContextHeader } from '../molecules';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import {
-  Plus,
   Percent,
   MessageCircle,
   FileText,
   Save,
-  Utensils,
   MoreHorizontal,
   Edit3,
 } from 'lucide-react';
@@ -34,53 +18,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DietContextSection } from '../organisms/diet/DietContextSection';
+import { DietMealsSection } from '../organisms/diet/DietMealsSection';
+import type { DietBuilderTemplateProps } from './dietBuilderTemplateTypes';
 
-export interface DietBuilderTemplateProps {
-  patient?: {
-    id?: string;
-    name?: string;
-    initials?: string;
-    age?: number;
-    heightCm?: number;
-    weightKg?: number;
-    gender?: string;
-    objective?: string;
-  };
-  patientId?: string;
-  patientName?: string;
-  patientInitials?: string;
-  patientObjective?: string;
-  patientAge?: number;
-  patientHeightCm?: number;
-  patientGender?: string;
-  dietaId?: string;
-  mode?: 'simple' | 'carb_cycling';
-  onModeChange?: (mode: 'simple' | 'carb_cycling') => void;
-  dietModeProps?: DietModeSwitcherProps;
-  macroTrackerData?: MacroTrackerHeaderProps;
-  macroMetrics?: MacroMetricCardProps[];
-  mealsData?: MealCardContainerProps[];
-  meals?: any[];
-  onAddMeal?: () => void;
-  onRemoveMeal?: (index: number) => void;
-  onUpdateMealHeader?: (index: number, title: string, time: string) => void;
-  onAddFoodClick?: (index: number) => void;
-  onUpdateItemGram?: (mealIndex: number, itemIndex: number, newGrams: number) => void;
-  onRemoveItem?: (mealIndex: number, itemIndex: number) => void;
-  onScaleDiet?: () => void;
-  onOpenScaleModal?: () => void;
-  onOpenCopyModal?: () => void;
-  onOpenAdjustGoalsModal?: () => void;
-  onOpenWhatsAppModal?: () => void;
-  onWhatsAppShare?: () => void;
-  onExportPDF?: () => void;
-  onSaveDiet?: () => void;
-  onBackClick?: () => void;
-  carbCyclingVariations?: any[];
-  activeVariationId?: string;
-  onSelectVariation?: (id: string) => void;
-  onOpenFoodSearchForMeal?: (mealIndex: number) => void;
-}
+export type { DietBuilderTemplateProps };
 
 export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   patient,
@@ -184,41 +126,16 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           actions={headerActions}
         />
 
-        <section
-          aria-label="Contexto da dieta"
-          data-testid="diet-context-card"
-        >
-          <Surface variant="default" density="compact" className="p-6">
-            <PatientProfileHeader.Root
-              patient={{
-                name: resolvedName,
-                initials: resolvedInitials,
-                objective: resolvedObjective,
-                age: resolvedAge,
-                heightCm: resolvedHeightCm,
-                gender: resolvedGender,
-                weightKg: resolvedWeightKg,
-              }}
-              className="border-b-0 pb-0"
-            >
-              <PatientProfileHeader.Identity>
-                <PatientProfileHeader.Avatar variant="charcoal" size="lg" />
-                <PatientProfileHeader.Info>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <PatientProfileHeader.Name />
-                    <PatientProfileHeader.Gender />
-                    <PatientProfileHeader.Badge />
-                  </div>
-                  <PatientProfileHeader.Meta />
-                </PatientProfileHeader.Info>
-              </PatientProfileHeader.Identity>
-
-              <PatientProfileHeader.Actions>
-                <DietModeSwitcher {...activeDietModeProps} embedded />
-              </PatientProfileHeader.Actions>
-            </PatientProfileHeader.Root>
-          </Surface>
-        </section>
+        <DietContextSection
+          name={resolvedName}
+          initials={resolvedInitials}
+          objective={resolvedObjective}
+          age={resolvedAge}
+          heightCm={resolvedHeightCm}
+          gender={resolvedGender}
+          weightKg={resolvedWeightKg}
+          activeDietModeProps={activeDietModeProps}
+        />
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
           <div className="flex items-center justify-end gap-2">
@@ -245,40 +162,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           />
         </section>
 
-        <section aria-labelledby="meals-heading" className="flex flex-col gap-4">
-          <div className="flex flex-row items-center justify-between gap-3">
-            <div>
-              <h2 id="meals-heading" className="text-style-subsection-title font-bold tracking-tight text-text-primary">
-                Refeições
-              </h2>
-              <p className="text-style-legal text-text-muted">Organize as refeições e alimentos prescritos para o paciente.</p>
-            </div>
-            <Button onClick={onAddMeal} variant="secondary" size="compact" className="flex items-center gap-1.5 self-auto">
-              <Plus size={14} aria-hidden="true" />
-              <span>Nova Refeição</span>
-            </Button>
-          </div>
-
-          {mealsData.length === 0 ? (
-            <Card className="p-8 text-center bg-surface-subtle/50 border-border-subtle flex flex-col items-center gap-4 shadow-none">
-              <div className="h-12 w-12 rounded-surface bg-success/10 text-success flex items-center justify-center mx-auto">
-                <Utensils size={24} aria-hidden="true" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <h3 className="text-style-body font-bold text-text-primary">Nenhuma Refeição Cadastrada</h3>
-                <p className="text-style-legal text-text-muted max-w-md mx-auto">
-                  Use “Nova Refeição” para começar a prescrição e adicionar alimentos diretamente da base TACO.
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-              {mealsData.map((meal, index) => (
-                <MealCardContainer key={index} {...meal} />
-              ))}
-            </div>
-          )}
-        </section>
+        <DietMealsSection mealsData={mealsData} onAddMeal={onAddMeal} />
       </main>
     </div>
   );

@@ -1,33 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Plus, Search, Copy, Utensils, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Sparkles, Search } from 'lucide-react';
 import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePresetModal, type CreatePresetData } from '@/components/molecules/CreatePresetModal';
-import type { MacroMode } from '@/lib/presetUtils';
-
-interface DietPreset {
-  id: string;
-  title: string;
-  category: string;
-  targetKcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  proteinMode?: MacroMode;
-  proteinValue?: number;
-  carbsMode?: MacroMode;
-  carbsValue?: number;
-  fatsMode?: MacroMode;
-  fatsValue?: number;
-  referenceWeight?: number;
-  mealsCount: number;
-  description: string;
-}
+import { PresetCard, type DietPreset } from './PresetCard';
 
 const PRESETS_KEY = 'nutridiet_presets';
 
@@ -73,7 +52,6 @@ export default function PresetsPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
-      {/* Header Bar */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -89,7 +67,6 @@ export default function PresetsPage() {
         </CreateButton>
       </div>
 
-      {/* Search Input */}
       {presets.length > 0 && (
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
@@ -103,7 +80,6 @@ export default function PresetsPage() {
         </div>
       )}
 
-      {/* Empty State vs Presets Grid */}
       {filteredPresets.length === 0 ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
           <CardContent className="p-0 flex flex-col gap-4">
@@ -124,69 +100,12 @@ export default function PresetsPage() {
       ) : (
         <div className="grid grid-cols-3 gap-5">
           {filteredPresets.map((preset) => (
-            <Card
+            <PresetCard
               key={preset.id}
-              className="bg-surface border-border-subtle rounded-surface p-5 hover:border-border-hover transition-colors duration-standard flex flex-col justify-between gap-4"
-            >
-              <CardContent className="p-0 gap-4 flex flex-col justify-between h-full">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="default" className="text-style-legal font-bold bg-success/10 text-success">
-                      {preset.category}
-                    </Badge>
-                    <span className="text-style-legal font-semibold text-text-muted flex items-center gap-1">
-                      <Utensils size={12} />
-                      <span>{preset.mealsCount} refeições</span>
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-style-body-small text-text-primary leading-snug">{preset.title}</h3>
-                  <p className="text-style-legal text-text-muted leading-relaxed line-clamp-2">{preset.description}</p>
-                </div>
-
-                {/* Macro Summary */}
-                <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Kcal</span>
-                    <span className="font-bold text-style-legal text-text-primary">{preset.targetKcal}</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Prot</span>
-                    <span className="font-bold text-style-legal text-macro-protein">
-                      {preset.proteinMode === 'multiplicativo' ? `${preset.proteinValue ?? preset.proteinG}g/kg` : `${preset.proteinG}g`}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carb</span>
-                    <span className="font-bold text-style-legal text-macro-carbohydrate">
-                      {preset.carbsMode === 'multiplicativo' ? `${preset.carbsValue ?? preset.carbsG}g/kg` : `${preset.carbsG}g`}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gord</span>
-                    <span className="font-bold text-style-legal text-macro-fat">
-                      {preset.fatsMode === 'multiplicativo' ? `${preset.fatsValue ?? preset.fatsG}g/kg` : `${preset.fatsG}g`}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
-                  <span className="text-style-legal text-text-muted font-medium">Reutilizável em 1 clique</span>
-                  <Button
-                    size="compact"
-                    variant="primary"
-                    onClick={() => handleCopy(preset.id)}
-                    className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
-                      copiedId === preset.id
-                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating'
-                        : ''
-                    }`}
-                  >
-                    {copiedId === preset.id ? <Check size={14} /> : <Copy size={14} />}
-                    <span>{copiedId === preset.id ? 'Copiado!' : 'Aplicar Preset'}</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              preset={preset}
+              isCopied={copiedId === preset.id}
+              onCopy={handleCopy}
+            />
           ))}
         </div>
       )}

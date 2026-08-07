@@ -4,10 +4,10 @@ import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Utensils, Check } from 'lucide-react';
+import { Search, Plus, Utensils } from 'lucide-react';
 import { searchTacoFoods, getAllFoods, FoodItem } from '@/lib/tacoStore';
 import { calculatePresetCalories } from '@/lib/presetUtils';
+import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
 
 export interface FoodSearchModalProps {
   isOpen: boolean;
@@ -36,7 +36,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   const searchResults = useMemo(() => {
     if (!query.trim()) {
-      // Return top 15 popular foods from database when search is empty
       return getAllFoods().slice(0, 15);
     }
     return searchTacoFoods(query).slice(0, 30);
@@ -67,7 +66,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
       kcal: calculatedMacros.kcal,
     });
 
-    // Reset selection and close
     setSelectedFood(null);
     setQuantityGrams(100);
     setQuery('');
@@ -87,7 +85,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Search Input */}
         <div className="relative pt-3 shrink-0">
           <Input
             type="text"
@@ -100,56 +97,13 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
           <Search size={14} className="absolute left-3 top-6 text-text-muted" />
         </div>
 
-        {/* Results List */}
-        <div className="my-3 flex min-h-[220px] max-h-[300px] flex-1 flex-col gap-1.5 overflow-y-auto rounded-control border border-border-subtle bg-surface-subtle p-2">
-          {searchResults.length === 0 ? (
-            <div className="p-8 text-center text-style-legal text-text-muted">
-              Nenhum alimento encontrado para "{query}". Tente buscar por termos genéricos como "Frango", "Arroz" ou "Batata".
-            </div>
-          ) : (
-            searchResults.map((food) => {
-              const isSelected = selectedFood?.id === food.id;
-              return (
-                <Button
-                  key={food.id}
-                  type="button"
-                  onClick={() => setSelectedFood(food)}
-                  className={`w-full text-left p-3 rounded-control border transition-colors duration-standard flex items-center justify-between ${
-                    isSelected
-                      ? 'bg-surface border-success-border ring-2 ring-success shadow-floating'
-                      : 'bg-surface border-border-subtle hover:border-border-hover'
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="text-style-legal font-bold text-text-primary flex items-center gap-2">
-                      <span>{food.name}</span>
-                      <Badge variant="outline" className="text-style-chart-micro font-semibold border-border-subtle text-text-muted">
-                        {food.category}
-                      </Badge>
-                    </div>
-                    <div className="text-style-legal text-text-muted flex items-center gap-2">
-                      <span className="text-macro-protein font-semibold">P: {food.proteinG}g</span>
-                      <span>•</span>
-                      <span className="text-macro-carbohydrate font-semibold">C: {food.carbsG}g</span>
-                      <span>•</span>
-                      <span className="text-macro-fat font-semibold">G: {food.fatsG}g</span>
-                      <span>•</span>
-                      <span>{food.kcal} kcal (por 100g)</span>
-                    </div>
-                  </div>
+        <FoodSearchResultsList
+          searchResults={searchResults}
+          selectedFood={selectedFood}
+          query={query}
+          onSelectFood={setSelectedFood}
+        />
 
-                  {isSelected && (
-                    <div className="size-6 rounded-round bg-success text-on-primary flex items-center justify-center shrink-0">
-                      <Check size={14} />
-                    </div>
-                  )}
-                </Button>
-              );
-            })
-          )}
-        </div>
-
-        {/* Selected Food Grammage & Confirmation Section */}
         {selectedFood ? (
           <div className="p-4 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-3 shrink-0">
             <div className="flex flex-col flex-row items-center justify-between gap-3">
@@ -174,7 +128,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
               </div>
             </div>
 
-            {/* Calculated Macros Preview */}
             <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border-subtle text-center">
               <div className="bg-surface p-2 rounded-control border border-border-subtle">
                 <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Proteínas</span>
@@ -199,13 +152,13 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
               variant="primary"
               className="w-full text-style-legal font-bold py-2.5 rounded-control flex items-center justify-center gap-2"
             >
-              <Plus size={15} />
-              <span>Adicionar Alimento ({quantityGrams}g)</span>
+              <Plus size={14} />
+              <span>Adicionar Alimento ({calculatedMacros.kcal} kcal)</span>
             </Button>
           </div>
         ) : (
-          <div className="text-center py-2 text-style-legal text-text-muted italic shrink-0">
-            Selecione um alimento da lista acima para ajustar a gramatura.
+          <div className="p-4 border border-dashed border-border-subtle rounded-control text-center text-style-legal text-text-muted italic shrink-0">
+            Selecione um alimento da lista acima para configurar a quantidade em gramas.
           </div>
         )}
       </DialogContent>

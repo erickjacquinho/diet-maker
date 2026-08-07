@@ -9,7 +9,7 @@ import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { MealCardContainerProps } from '@/components/organisms';
-import { calculateMealTotals } from '@/lib/dietStore';
+import { calculateMealsTotal } from '@/lib/dietStore';
 
 export default function DietBuilderPage() {
   const {
@@ -60,27 +60,44 @@ export default function DietBuilderPage() {
   } = useDietBuilderPage();
 
   const mealsData: MealCardContainerProps[] = useMemo(() => {
-    return currentMeals.map((meal, index) => {
-      const totals = calculateMealTotals(meal.items);
+    return currentMeals.map((meal, mealIdx) => {
+      const totals = calculateMealsTotal([meal]);
       return {
+        id: meal.id,
         title: meal.name,
         time: meal.time,
         kcal: totals.kcal,
         proteinG: totals.proteinG,
         carbsG: totals.carbsG,
         fatsG: totals.fatsG,
-        items: meal.items.map((item) => ({
-          name: item.name,
-          quantityGrams: item.quantityGrams || item.grams || 100,
-          kcal: item.kcal,
-          protein: item.protein ?? item.proteinG ?? 0,
-          carbs: item.carbs ?? item.carbsG ?? 0,
-          fats: item.fats ?? item.fatsG ?? item.fatG ?? 0,
+        items: meal.items.map((it) => ({
+          name: it.name,
+          kcal: it.kcal,
+          protein: it.protein,
+          carbs: it.carbs,
+          fats: it.fats,
+          quantityGrams: it.quantityGrams,
         })),
-        onAddFood: () => setFoodSearchMealIndex(index),
+        onTitleChange: (newTitle: string) => handleUpdateMealHeader(meal.id, { name: newTitle }),
+        onTimeChange: (newTime: string) => handleUpdateMealHeader(meal.id, { time: newTime }),
+        onAddFoodClick: () => setFoodSearchMealIndex(mealIdx),
+        onDuplicate: () => {},
+        onScale: () => {
+          setFoodSearchMealIndex(mealIdx);
+          setIsScaleModalOpen(true);
+        },
+        onDeleteMeal: () => handleRemoveMeal(meal.id),
+        onRemoveItem: (itemIdx: number) => {
+          const item = meal.items[itemIdx];
+          if (item?.id) handleRemoveItem(meal.id, item.id);
+        },
+        onQuantityChange: (itemIdx: number, newGrams: number) => {
+          const item = meal.items[itemIdx];
+          if (item?.id) handleUpdateItemGram(meal.id, item.id, newGrams);
+        },
       };
     });
-  }, [currentMeals, setFoodSearchMealIndex]);
+  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleRemoveMeal, handleRemoveItem, handleUpdateItemGram]);
 
   if (!dietPlan || !patient) {
     return (
@@ -109,9 +126,9 @@ export default function DietBuilderPage() {
         dietModeProps={{
           mode: dietPlan.mode,
           onModeChange: handleModeChange,
-          variationsCount: dietPlan.carbCyclingVariationsCount || 2,
+          variationsCount: (dietPlan.carbCyclingVariationsCount as 2 | 3) || 2,
           onVariationsCountChange: () => {},
-          variations: dietPlan.carbCyclingVariations,
+          variations: dietPlan.carbCyclingVariations || [],
           activeVariationId: activeVariationId,
           onSelectVariation: setActiveVariationId,
         }}
@@ -119,7 +136,7 @@ export default function DietBuilderPage() {
           patientInitials: patient.initials,
           patientName: patient.name,
           patientWeightKg: patient.weightKg,
-          patientGoalDescription: patient.objective,
+          patientGoalDescription: patient.objective || 'Prescrição Alimentar',
           metrics: macroMetrics,
         }}
         mealsData={mealsData}
@@ -133,7 +150,8 @@ export default function DietBuilderPage() {
       <FoodSearchModal
         isOpen={foodSearchMealIndex !== null}
         onClose={() => setFoodSearchMealIndex(null)}
-        onAddFood={(item) => handleAddFoodToMeal(item)}
+        mealTitle={foodSearchMealIndex !== null && currentMeals[foodSearchMealIndex] ? currentMeals[foodSearchMealIndex].name : 'Refeição'}
+        onAddFood={handleAddFoodToMeal}
       />
 
       {/* Modal de Ajuste Proporcional / Escala */}

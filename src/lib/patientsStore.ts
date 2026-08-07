@@ -1,117 +1,42 @@
 'use client';
 
-import { calculatePresetCalories } from './presetUtils';
+import {
+  normalizeDateKey,
+  normalizePairedBodyMeasurements,
+  getConsultationRecordHelper,
+} from './consultationStorageUtils';
+import type {
+  Patient,
+  PatientNextEvent,
+  PatientNextEventType,
+  PatientLastActivity,
+  PatientLastActivityType,
+  HistoricalDiet,
+  BodyAssessment,
+  ConsultationRecord,
+  StoredDietRecord,
+  PatientRecordHistory,
+} from './patientsStoreTypes';
 
-export interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  heightCm: number;
-  weightKg: number;
-  targetKcal: number;
-  targetProtein: number;
-  targetCarbs: number;
-  targetFats: number;
-  objective: string;
-  phone?: string;
-  whatsapp?: string;
-  lastConsultation: string;
-  initials: string;
-  nextEvent?: PatientNextEvent | null;
-  lastActivity?: PatientLastActivity | null;
-  dietHistory?: HistoricalDiet[];
-  bodyAssessments?: BodyAssessment[];
-}
+import { DEFAULT_OBJECTIVES } from './patientsStoreTypes';
 
-export type PatientNextEventType = 'diet-update' | 'assessment-update';
-
-export interface PatientNextEvent {
-  date: string;
-  type: PatientNextEventType;
-}
-
-export type PatientLastActivityType = 'diet' | 'assessment';
-
-export interface PatientLastActivity {
-  at: string;
-  type: PatientLastActivityType;
-}
-
-export const DEFAULT_OBJECTIVES = [
-  'Cutting',
-  'Bulking',
-  'Recomposição Corporal',
-  'Manutenção',
-];
-
-
-export interface HistoricalDiet {
-  id: string;
-  name: string;
-  date: string;
-  targetKcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  status: 'Ativa' | 'Histórica';
-  meals?: Array<{
-    name: string;
-    time: string;
-    kcal: number;
-    proteinG: number;
-    carbsG: number;
-    fatsG: number;
-    itemsSummary?: string;
-  }>;
-}
-
-export interface BodyAssessment {
-  id: string;
-  date: string;
-  weightKg: number;
-  bodyFatPercent: number;
-  fatMassKg?: number;
-  muscleMassKg: number;
-  waistCm: number;
-  neckCm?: number;
-  scapulaCm?: number;
-  bustCm?: number;
-  leftArmCm?: number;
-  rightArmCm?: number;
-  abdomenCm?: number;
-  hipCm?: number;
-  leftProximalThighCm?: number;
-  rightProximalThighCm?: number;
-  leftDistalThighCm?: number;
-  rightDistalThighCm?: number;
-  leftCalfCm?: number;
-  rightCalfCm?: number;
-}
-
-export interface ConsultationRecord {
-  date: string;
-  diet?: HistoricalDiet;
-  assessment?: BodyAssessment;
-  notes?: string;
-  prescribedSupplements?: string[];
-}
+export type {
+  Patient,
+  PatientNextEvent,
+  PatientNextEventType,
+  PatientLastActivity,
+  PatientLastActivityType,
+  HistoricalDiet,
+  BodyAssessment,
+  ConsultationRecord,
+  StoredDietRecord,
+  PatientRecordHistory,
+};
+export { DEFAULT_OBJECTIVES, normalizeDateKey, normalizePairedBodyMeasurements };
 
 const PATIENTS_KEY = 'nutridiet_patients';
 const PATIENT_ASSESSMENTS_KEY_PREFIX = 'nutridiet_assessments_';
 const PATIENT_DIETS_KEY_PREFIX = 'nutridiet_diets_';
-
-export interface StoredDietRecord {
-  id?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: unknown;
-}
-
-export interface PatientRecordHistory {
-  assessments: BodyAssessment[];
-  hasDiet: boolean;
-}
 
 function normalizePatient(patient: Patient): Patient {
   return {
@@ -125,21 +50,6 @@ function writePatients(patients: Patient[]): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(PATIENTS_KEY, JSON.stringify(patients));
   }
-}
-
-function normalizeDateKey(value: string): string {
-  const decoded = decodeURIComponent(value).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(decoded)) return decoded;
-
-  const parts = decoded.split(/[/-]/).map((part) => part.trim());
-  if (parts.length !== 3) return decoded;
-
-  const [first, second, third] = parts;
-  if (third.length === 4) {
-    return `${third}-${second.padStart(2, '0')}-${first.padStart(2, '0')}`;
-  }
-
-  return decoded;
 }
 
 export function getPatientsFromStorage(): Patient[] {
@@ -194,7 +104,6 @@ export function updatePatientInStorage(updatedPatient: Patient): Patient {
   };
 
   const updatedList = current.map((p) => (p.id === updatedPatient.id ? patientToSave : p));
-  // If the patient was not found in storage (e.g. mock fallback patient), add it
   const exists = current.some((p) => p.id === updatedPatient.id);
   const finalList = exists ? updatedList : [patientToSave, ...current];
 
@@ -253,32 +162,6 @@ export function getPatientRecordHistory(patientId: string): PatientRecordHistory
   };
 }
 
-export function normalizePairedBodyMeasurements(assessment: BodyAssessment): BodyAssessment {
-  const normalized = { ...assessment };
-  const pairs: Array<[keyof BodyAssessment, keyof BodyAssessment]> = [
-    ['leftArmCm', 'rightArmCm'],
-    ['leftProximalThighCm', 'rightProximalThighCm'],
-    ['leftDistalThighCm', 'rightDistalThighCm'],
-    ['leftCalfCm', 'rightCalfCm'],
-  ];
-
-  for (const [leftKey, rightKey] of pairs) {
-    const leftVal = normalized[leftKey] as number | undefined;
-    const rightVal = normalized[rightKey] as number | undefined;
-
-    const hasLeft = leftVal !== undefined && !Number.isNaN(leftVal) && leftVal > 0;
-    const hasRight = rightVal !== undefined && !Number.isNaN(rightVal) && rightVal > 0;
-
-    if (hasLeft && !hasRight) {
-      (normalized[rightKey] as number) = leftVal;
-    } else if (!hasLeft && hasRight) {
-      (normalized[leftKey] as number) = rightVal;
-    }
-  }
-
-  return normalized;
-}
-
 export function savePatientAssessmentToStorage(
   patientId: string,
   assessment: BodyAssessment,
@@ -311,74 +194,5 @@ export function deletePatientFromStorage(id: string): void {
 }
 
 export function getConsultationRecord(patientId: string, rawDateParam: string): ConsultationRecord {
-  const normalizedDate = decodeURIComponent(rawDateParam).replace(/-/g, '/');
-  
-  let diet: HistoricalDiet | undefined = undefined;
-  let assessment: BodyAssessment | undefined = undefined;
-
-  // Retrieve saved patient diets if available
-  if (typeof window !== 'undefined') {
-    try {
-      const savedDietsRaw = localStorage.getItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`);
-      if (savedDietsRaw) {
-        const savedDiets = JSON.parse(savedDietsRaw);
-        const match = savedDiets.find((d: any) => d.createdAt === normalizedDate || d.updatedAt === normalizedDate);
-        if (match) {
-          const simpleMeals = match.simpleMeals || [];
-          const meals = simpleMeals.map((m: any) => {
-            const items = m.items || [];
-            const p = Math.round(items.reduce((a: number, i: any) => a + (Number(i.protein) || 0), 0) * 10) / 10;
-            const c = Math.round(items.reduce((a: number, i: any) => a + (Number(i.carbs) || 0), 0) * 10) / 10;
-            const f = Math.round(items.reduce((a: number, i: any) => a + (Number(i.fats) || 0), 0) * 10) / 10;
-            const kcal = calculatePresetCalories(p, c, f);
-            const itemsSummary = items.length > 0
-              ? items.map((i: any) => `${i.name} (${i.quantityGrams}g)`).join(', ')
-              : undefined;
-
-            return {
-              name: m.name || 'Refeição',
-              time: m.time || '00:00',
-              kcal,
-              proteinG: p,
-              carbsG: c,
-              fatsG: f,
-              itemsSummary,
-            };
-          });
-
-          const totalProteinG = Math.round(meals.reduce((acc: number, m: any) => acc + m.proteinG, 0) * 10) / 10;
-          const totalCarbsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.carbsG, 0) * 10) / 10;
-          const totalFatsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.fatsG, 0) * 10) / 10;
-          const totalKcal = calculatePresetCalories(totalProteinG, totalCarbsG, totalFatsG);
-
-          diet = {
-            id: match.id,
-            name: match.name || 'Prescrição Alimentar',
-            date: normalizedDate,
-            targetKcal: totalKcal || Number(match.simpleTargetKcal) || 0,
-            proteinG: totalProteinG || Number(match.simpleTargetProtein) || 0,
-            carbsG: totalCarbsG || Number(match.simpleTargetCarbs) || 0,
-            fatsG: totalFatsG || Number(match.simpleTargetFats) || 0,
-            status: 'Ativa',
-            meals,
-          };
-        }
-      }
-
-      const savedAssessments = getPatientAssessmentsFromStorage(patientId);
-      assessment = savedAssessments.find(
-        (item) => normalizeDateKey(item.date) === normalizeDateKey(rawDateParam),
-      );
-    } catch {
-      // Ignore JSON parse errors
-    }
-  }
-
-  return {
-    date: normalizedDate,
-    diet,
-    assessment,
-    notes: 'Sem observações registradas para esta consulta.',
-    prescribedSupplements: [],
-  };
+  return getConsultationRecordHelper(patientId, rawDateParam, getPatientAssessmentsFromStorage);
 }
