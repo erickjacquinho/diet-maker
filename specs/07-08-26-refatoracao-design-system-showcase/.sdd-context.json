@@ -1,0 +1,6 @@
+{
+  "task": "crie um sdd de refatoracao completo da pagina /design-system para que esta retrate apenas visualmente todos os tokens e componentes do projeto. como se fosse fazer um showcase da linha visual para um cliente",
+  "slug": "refatoracao-design-system-showcase",
+  "feature_dir": "specs/07-08-26-refatoracao-design-system-showcase",
+  "date": "2026-08-07"
+}
