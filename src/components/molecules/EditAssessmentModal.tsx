@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Activity, Ruler, Scale } from 'lucide-react';
+import { Activity, Scale } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,6 @@ import {
   normalizeBodyFatSex,
 } from '@/lib/bodyFat';
 import { Surface } from '@/components/atoms';
-import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { MetricBox } from './MetricBox';
 
 type NumericAssessmentField =
@@ -71,12 +70,6 @@ const LOWER_LIMB_FIELDS: AssessmentFieldConfig[] = [
   { field: 'rightCalfCm', label: 'Panturrilha dir.', unit: 'cm' },
 ];
 
-const DERIVED_FIELDS = [
-  { field: 'bodyFatPercent', label: 'Body fat', unit: '%' },
-  { field: 'fatMassKg', label: 'Massa gorda', unit: 'kg' },
-  { field: 'muscleMassKg', label: 'Massa magra', unit: 'kg' },
-] as const;
-
 export interface EditAssessmentModalProps {
   open: boolean;
   patient: Pick<Patient, 'gender' | 'heightCm'> | null;
@@ -90,21 +83,28 @@ function formatInputValue(value: number | undefined): string | number {
   return value !== undefined && Number.isFinite(value) ? value : '';
 }
 
-export function EditAssessmentModal({
-  open,
-  patient,
+/**
+ * Custom Hook for managing assessment form state & calculations.
+ * Decouples state logic from visual components (vercel-composition-patterns / state-decouple-implementation).
+ */
+export function useAssessmentForm({
   assessment,
-  mode = 'edit',
-  onOpenChange,
+  patient,
   onSave,
-}: EditAssessmentModalProps) {
+  onOpenChange,
+}: {
+  assessment: BodyAssessment | null;
+  patient: Pick<Patient, 'gender' | 'heightCm'> | null;
+  onSave: (assessment: BodyAssessment) => void;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [draft, setDraft] = useState<BodyAssessment | null>(assessment);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     setDraft(assessment ? { ...assessment } : null);
     setSubmitError(null);
-  }, [assessment, open]);
+  }, [assessment]);
 
   const bodyFatSex = useMemo(
     () => (patient ? normalizeBodyFatSex(patient.gender) : null),
@@ -136,12 +136,14 @@ export function EditAssessmentModal({
   }, [bodyFatSex, draft, patient]);
 
   const updateNumericField = (field: NumericAssessmentField, value: string) => {
-    setDraft((current) => current
-      ? {
-          ...current,
-          [field]: value === '' ? Number.NaN : Number(value),
-        }
-      : current);
+    setDraft((current) =>
+      current
+        ? {
+            ...current,
+            [field]: value === '' ? Number.NaN : Number(value),
+          }
+        : current,
+    );
     setSubmitError(null);
   };
 
@@ -149,7 +151,9 @@ export function EditAssessmentModal({
     event.preventDefault();
 
     if (!draft || !composition.isValid) {
-      setSubmitError(composition.error ?? 'Preencha as medidas para calcular a composição corporal.');
+      setSubmitError(
+        composition.error ?? 'Preencha as medidas para calcular a composição corporal.',
+      );
       return;
     }
 
@@ -164,13 +168,105 @@ export function EditAssessmentModal({
     onOpenChange(false);
   };
 
+  return {
+    draft,
+    composition,
+    submitError,
+    updateNumericField,
+    handleSubmit,
+  };
+}
+
+/**
+ * Reusable measurement field component.
+ * Encapsulates DS Form Field markup and eliminates repetitive HTML.
+ */
+interface AssessmentMeasurementFieldProps {
+  id: string;
+  label: string;
+  unit: string;
+  value: number | undefined;
+  onChange: (value: string) => void;
+  className?: string;
+}
+
+function AssessmentMeasurementField({
+  id,
+  label,
+  unit,
+  value,
+  onChange,
+  className = 'min-w-0',
+}: AssessmentMeasurementFieldProps) {
+  return (
+    <div className={`flex flex-col gap-1.5 ${className}`}>
+      <label htmlFor={id} className={textStyle('field-label')}>
+        {label} ({unit})
+      </label>
+      <Input
+        id={id}
+        type="number"
+        step="any"
+        min="0"
+        required
+        value={formatInputValue(value)}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
+
+/**
+ * Card wrapper for limb measurement groups.
+ * Replaces hardcoded `/30` opacity modifiers with DS Surface components.
+ */
+interface LimbSectionCardProps {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}
+
+function LimbSectionCard({ title, subtitle, children }: LimbSectionCardProps) {
+  return (
+    <Surface variant="subtle" className="flex flex-col gap-2.5 p-3 rounded-surface border border-border-subtle">
+      <div className="flex items-center justify-between border-b border-border-subtle pb-1.5">
+        <span className={textStyle('caption-strong')}>{title}</span>
+        <span className={textStyle('helper')}>{subtitle}</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">{children}</div>
+    </Surface>
+  );
+}
+
+/**
+ * Main EditAssessmentModal Component.
+ * Refactored using design system tokens and modular composition patterns.
+ */
+export function EditAssessmentModal({
+  open,
+  patient,
+  assessment,
+  mode = 'edit',
+  onOpenChange,
+  onSave,
+}: EditAssessmentModalProps) {
+  const { draft, composition, submitError, updateNumericField, handleSubmit } =
+    useAssessmentForm({
+      assessment,
+      patient,
+      onSave,
+      onOpenChange,
+    });
+
+  const modalTitle = mode === 'create' ? 'Nova Avaliação Física' : 'Editar Avaliação Física';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-5 overflow-hidden gap-0">
+      <DialogContent className="max-h-[85vh] flex flex-col p-5 overflow-hidden gap-0">
         <DialogHeader className="shrink-0 pb-3 border-b border-border-subtle">
           <DialogTitle className={textStyle('dialog-title')}>
-            <Scale size={18} className="text-success shrink-0 inline-block mr-2" aria-hidden="true" />
-            <span>{mode === 'create' ? 'Nova Avaliação Física' : 'Editar Avaliação Física'}</span>
+            <Scale className="size-4 text-success shrink-0 inline-block mr-2" aria-hidden="true" />
+            <span>{modalTitle}</span>
           </DialogTitle>
           <DialogDescription className={textStyle('body-secondary')}>
             Informe as medidas corporais. O BF e a composição corporal serão calculados automaticamente.
@@ -185,154 +281,109 @@ export function EditAssessmentModal({
             className="flex-1 min-h-0 flex flex-col overflow-hidden pt-3 gap-3"
           >
             <Tabs defaultValue="trunk" className="flex-1 min-h-0 flex flex-col overflow-hidden">
-              <TabsList className="grid grid-cols-2 w-full shrink-0 h-9 p-1">
+              <TabsList className="grid grid-cols-2 w-full shrink-0 p-1">
                 <TabsTrigger value="trunk" className={`flex items-center justify-center gap-1.5 py-1 ${textStyle('caption')}`}>
-                  <Scale size={14} />
+                  <Scale className="size-3.5" />
                   <span>Tronco & Composição</span>
                 </TabsTrigger>
                 <TabsTrigger value="limbs" className={`flex items-center justify-center gap-1.5 py-1 ${textStyle('caption')}`}>
-                  <Activity size={14} />
+                  <Activity className="size-3.5" />
                   <span>Membros (E / D)</span>
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 min-h-0 overflow-y-auto pt-2.5 pr-1 flex flex-col gap-3">
-                <TabsContent value="trunk" className="m-0 flex flex-col gap-3">
+              <div className="flex-1 min-h-0 overflow-y-auto p-1.5 flex flex-col gap-3">
+                <TabsContent value="trunk" className="m-0 flex flex-col gap-3 p-1">
                   <div className="grid grid-cols-2 gap-2.5">
-                    <div className="min-w-0 col-span-2">
-                      <label htmlFor="assessment-weight" className={textStyle('field-label')}>
-                        Peso atual (kg)
-                      </label>
-                      <Input
-                        id="assessment-weight"
-                        type="number"
-                        step="any"
-                        min="0"
-                        required
-                        value={formatInputValue(draft.weightKg)}
-                        onChange={(event) => updateNumericField('weightKg', event.target.value)}
-                        className="mt-1 h-9"
-                      />
-                    </div>
+                    <AssessmentMeasurementField
+                      id="assessment-weight"
+                      label="Peso atual"
+                      unit="kg"
+                      value={draft.weightKg}
+                      onChange={(val) => updateNumericField('weightKg', val)}
+                      className="col-span-2"
+                    />
 
                     {TRUNK_FIELDS.map(({ field, label, unit }) => (
-                      <div key={field} className="min-w-0">
-                        <label htmlFor={`assessment-${field}`} className={textStyle('field-label')}>
-                          {label} ({unit})
-                        </label>
-                        <Input
-                          id={`assessment-${field}`}
-                          type="number"
-                          step="any"
-                          min="0"
-                          required
-                          value={formatInputValue(draft[field])}
-                          onChange={(event) => updateNumericField(field, event.target.value)}
-                          className="mt-1 h-9"
-                        />
-                      </div>
+                      <AssessmentMeasurementField
+                        key={field}
+                        id={`assessment-${field}`}
+                        label={label}
+                        unit={unit}
+                        value={draft[field]}
+                        onChange={(val) => updateNumericField(field, val)}
+                      />
                     ))}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="limbs" className="m-0 flex flex-col gap-3">
+                <TabsContent value="limbs" className="m-0 flex flex-col gap-3 p-1">
                   {/* Membros Superiores */}
-                  <div className="flex flex-col gap-2 rounded-surface border border-border-subtle p-2.5 bg-surface-subtle/30">
-                    <div className="flex items-center justify-between border-b border-border-subtle pb-1.5">
-                      <span className={textStyle('caption-strong')}>Membros Superiores</span>
-                      <span className={`text-text-muted ${textStyle('caption')}`}>E / D (Auto-espelhado)</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {UPPER_LIMB_FIELDS.map(({ field, label, unit }) => (
-                        <div key={field} className="min-w-0">
-                          <label htmlFor={`assessment-${field}`} className={textStyle('field-label')}>
-                            {label} ({unit})
-                          </label>
-                          <Input
-                            id={`assessment-${field}`}
-                            type="number"
-                            step="any"
-                            min="0"
-                            required
-                            value={formatInputValue(draft[field])}
-                            onChange={(event) => updateNumericField(field, event.target.value)}
-                            className="mt-1 h-9"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <LimbSectionCard title="Membros Superiores" subtitle="E / D (Auto-espelhado)">
+                    {UPPER_LIMB_FIELDS.map(({ field, label, unit }) => (
+                      <AssessmentMeasurementField
+                        key={field}
+                        id={`assessment-${field}`}
+                        label={label}
+                        unit={unit}
+                        value={draft[field]}
+                        onChange={(val) => updateNumericField(field, val)}
+                      />
+                    ))}
+                  </LimbSectionCard>
 
                   {/* Membros Inferiores */}
-                  <div className="flex flex-col gap-2 rounded-surface border border-border-subtle p-2.5 bg-surface-subtle/30">
-                    <div className="flex items-center justify-between border-b border-border-subtle pb-1.5">
-                      <span className={textStyle('caption-strong')}>Membros Inferiores</span>
-                      <span className={`text-text-muted ${textStyle('caption')}`}>E / D (Auto-espelhado)</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {LOWER_LIMB_FIELDS.map(({ field, label, unit }) => (
-                        <div key={field} className="min-w-0">
-                          <label htmlFor={`assessment-${field}`} className={textStyle('field-label')}>
-                            {label} ({unit})
-                          </label>
-                          <Input
-                            id={`assessment-${field}`}
-                            type="number"
-                            step="any"
-                            min="0"
-                            required
-                            value={formatInputValue(draft[field])}
-                            onChange={(event) => updateNumericField(field, event.target.value)}
-                            className="mt-1 h-9"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <LimbSectionCard title="Membros Inferiores" subtitle="E / D (Auto-espelhado)">
+                    {LOWER_LIMB_FIELDS.map(({ field, label, unit }) => (
+                      <AssessmentMeasurementField
+                        key={field}
+                        id={`assessment-${field}`}
+                        label={label}
+                        unit={unit}
+                        value={draft[field]}
+                        onChange={(val) => updateNumericField(field, val)}
+                      />
+                    ))}
+                  </LimbSectionCard>
                 </TabsContent>
               </div>
             </Tabs>
 
-            {/* MetricBoxGroup Fixo no Rodapé */}
-            <div className="shrink-0 pt-1">
-              <MetricBoxGroup
-                aria-label="Composição corporal calculada"
-                items={[
-                  {
-                    key: 'bodyFatPercent',
-                    label: 'Body fat',
-                    value: composition.bodyFatPercent === null ? '—' : `${composition.bodyFatPercent}%`,
-                    size: 'compact',
-                    layout: 'split',
-                    surface: 'inline',
-                    tone: composition.bodyFatPercent === null ? 'default' : 'success',
-                  },
-                  {
-                    key: 'fatMassKg',
-                    label: 'Massa gorda',
-                    value: composition.fatMassKg === null ? '—' : `${composition.fatMassKg} kg`,
-                    size: 'compact',
-                    layout: 'split',
-                    surface: 'inline',
-                    tone: 'default',
-                  },
-                  {
-                    key: 'leanMassKg',
-                    label: 'Massa magra',
-                    value: composition.leanMassKg === null ? '—' : `${composition.leanMassKg} kg`,
-                    size: 'compact',
-                    layout: 'split',
-                    surface: 'inline',
-                    tone: 'default',
-                  },
-                ]}
-              />
+            {/* Resumo de Composição Corporal Fixo no Rodapé */}
+            <div className="shrink-0 pt-1" aria-label="Composição corporal calculada">
+              <Surface variant="subtle" density="compact" className="grid grid-cols-3 gap-2">
+                <MetricBox
+                  key="bodyFatPercent"
+                  label="Body fat"
+                  value={composition.bodyFatPercent === null ? '—' : `${composition.bodyFatPercent}%`}
+                  size="compact"
+                  layout="split"
+                  surface="inline"
+                  tone={composition.bodyFatPercent === null ? 'default' : 'success'}
+                />
+                <MetricBox
+                  key="fatMassKg"
+                  label="Massa gorda"
+                  value={composition.fatMassKg === null ? '—' : `${composition.fatMassKg} kg`}
+                  size="compact"
+                  layout="split"
+                  surface="inline"
+                  tone="default"
+                />
+                <MetricBox
+                  key="leanMassKg"
+                  label="Massa magra"
+                  value={composition.leanMassKg === null ? '—' : `${composition.leanMassKg} kg`}
+                  size="compact"
+                  layout="split"
+                  surface="inline"
+                  tone="default"
+                />
+              </Surface>
             </div>
 
             {submitError && (
-              <p role="alert" className={`shrink-0 bg-error-soft border border-error-border rounded-control p-2 ${textStyle('validation-error')}`}>
+              <p role="alert" className={`shrink-0 ${textStyle('validation-error')}`}>
                 {submitError}
               </p>
             )}

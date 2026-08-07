@@ -1,0 +1,6 @@
+{
+  "task": "adequacao da pagina design-system aos tokens e receitas canonicas do design system sem estilos hardcoded",
+  "slug": "adequacao-ds-page-tokens-canonicos",
+  "feature_dir": "specs/07-08-26-adequacao-ds-page-tokens-canonicos",
+  "date": "2026-08-07"
+}

@@ -53,25 +53,23 @@ describe('DietModeSwitcher', () => {
     render(<DietModeSwitcher {...makeProps()} />);
 
     expect(screen.getByRole('group', { name: 'Modelo de dieta' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'Dieta Simples' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('tab', { name: 'Dieta Simples' })).toHaveAttribute('data-state', 'active');
     expect(screen.queryByText('Número de variações')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Copiar Refeições/ })).not.toBeInTheDocument();
   });
 
-  it('moves the mode focus and callback with horizontal arrow keys', () => {
+  it('calls onModeChange when switching tabs', () => {
     const onModeChange = vi.fn();
     render(<DietModeSwitcher {...makeProps({ onModeChange })} />);
 
-    const simpleMode = screen.getByRole('radio', { name: 'Dieta Simples' });
-    const carbCyclingMode = screen.getByRole('radio', { name: 'Ciclo de Carboidratos' });
+    const simpleMode = screen.getByRole('tab', { name: 'Dieta Simples' });
+    const carbCyclingMode = screen.getByRole('tab', { name: 'Ciclo de Carboidratos' });
 
-    fireEvent.keyDown(simpleMode, { key: 'ArrowRight', code: 'ArrowRight' });
+    fireEvent.click(carbCyclingMode);
     expect(onModeChange).toHaveBeenCalledWith('carb_cycling');
-    expect(carbCyclingMode).toHaveFocus();
 
-    fireEvent.keyDown(carbCyclingMode, { key: 'ArrowLeft', code: 'ArrowLeft' });
+    fireEvent.click(simpleMode);
     expect(onModeChange).toHaveBeenCalledWith('simple');
-    expect(simpleMode).toHaveFocus();
   });
 
   it('reveals cycle controls in the same context and preserves the selected variation', () => {
@@ -91,7 +89,7 @@ describe('DietModeSwitcher', () => {
     );
 
     const group = screen.getByRole('group', { name: 'Modelo de dieta' });
-    expect(within(group).getByRole('radio', { name: 'Ciclo de Carboidratos' })).toHaveAttribute('aria-checked', 'true');
+    expect(within(group).getByRole('tab', { name: 'Ciclo de Carboidratos' })).toHaveAttribute('data-state', 'active');
     expect(within(group).getByText('Número de variações')).toBeInTheDocument();
     expect(within(group).getByRole('button', { name: /2 variações/i })).toBeInTheDocument();
     expect(within(group).getByRole('button', { name: /3 variações/i })).toBeInTheDocument();

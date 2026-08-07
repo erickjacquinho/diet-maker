@@ -46,8 +46,8 @@ describe('DietBuilderTemplate top composition', () => {
     const backLink = screen.getByRole('link', { name: 'Voltar para a ficha de Ana Lima' });
     const pageHeading = screen.getByRole('heading', { level: 1, name: 'Elaboração de Dieta' });
     const patientName = within(contextCard).getByRole('heading', { name: 'Ana Lima' });
-    const modeHeading = within(contextCard).getByRole('heading', { name: 'Modelo de Dieta Prescrita' });
-    const simpleMode = within(contextCard).getByRole('radio', { name: /Dieta Simples/i });
+    const modeHeading = within(contextCard).getByRole('heading', { name: 'Modelo de dieta' });
+    const simpleMode = within(contextCard).getByRole('tab', { name: /Dieta Simples/i });
     const mealsHeading = screen.getByRole('heading', { name: 'Refeições' });
 
     expect(backLink).toHaveAttribute('href', '/pacientes/patient-1');

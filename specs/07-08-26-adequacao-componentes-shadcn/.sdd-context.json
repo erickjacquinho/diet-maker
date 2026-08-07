@@ -1,0 +1,6 @@
+{
+  "task": "Adequação de 100% dos componentes de src/components aos padrões do Shadcn e Vercel Composition Patterns com base na auditoria",
+  "slug": "adequacao-componentes-shadcn",
+  "feature_dir": "specs/07-08-26-adequacao-componentes-shadcn",
+  "date": "2026-08-07"
+}

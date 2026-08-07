@@ -133,9 +133,9 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           data-testid="diet-context-card"
         >
           <Surface variant="default" density="highlight" className="p-0">
-            <div className="p-5 lg:p-6">
-              <div className="grid grid-cols-12 items-center gap-6">
-                <div className="col-span-5 flex min-w-0 items-center border-r border-border-subtle pr-6">
+            <div className="p-4 lg:p-6">
+              <div className="grid grid-cols-12 items-start gap-4">
+                <div className="col-span-5 flex min-w-0 items-start pr-4">
                   <PatientBadgeHeader
                     initials={macroTrackerData.patientInitials}
                     name={macroTrackerData.patientName}
@@ -146,7 +146,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
                   />
                 </div>
 
-                <div className="col-span-7 min-w-0">
+                <div className="col-span-7 flex min-w-0 flex-col items-end">
                   <DietModeSwitcher {...activeDietModeProps} embedded />
                 </div>
               </div>

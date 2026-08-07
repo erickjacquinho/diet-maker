@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Utensils, Repeat, Copy } from 'lucide-react';
 import { CarbCyclingVariation } from '@/lib/dietStore';
 import { cn } from '@/lib/utils';
@@ -36,79 +37,50 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   onCopyMealsBetweenVariations,
   embedded = false,
 }) => {
-  const simpleModeRef = React.useRef<HTMLButtonElement>(null);
-  const carbCyclingModeRef = React.useRef<HTMLButtonElement>(null);
-
-  const handleModeKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, currentMode: DietModeSwitcherProps['mode']) => {
-    const isForward = event.key === 'ArrowRight' || event.key === 'ArrowDown';
-    const isBackward = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
-
-    if (!isForward && !isBackward) return;
-
-    event.preventDefault();
-    const nextMode = currentMode === 'simple' ? 'carb_cycling' : 'simple';
-    onModeChange(nextMode);
-
-    const nextModeRef = nextMode === 'simple' ? simpleModeRef : carbCyclingModeRef;
-    nextModeRef.current?.focus();
-  };
-
   return (
     <div
       role="group"
       aria-label="Modelo de dieta"
       className={embedded
-        ? 'flex flex-col gap-3'
+        ? 'flex flex-col gap-3 items-end'
         : 'bg-surface border border-border-subtle rounded-surface p-4 flex flex-col gap-3 shadow-floating'}
     >
-      <div className={embedded
-        ? 'flex flex-col gap-3 border-b border-border-subtle pb-4'
-        : 'flex flex-row items-center justify-between gap-3 border-b border-border-subtle pb-3'}>
+      <div className={cn('flex flex-col gap-2', embedded ? 'items-end text-right' : 'items-start')}>
         <div>
           <h3 className="font-bold text-style-body-small text-text-primary tracking-overline flex items-center gap-2">
             <Repeat size={16} className="text-success" aria-hidden="true" />
-            <span>Modelo de Dieta Prescrita</span>
+            <span>{embedded ? 'Modelo de dieta' : 'Modelo de Dieta Prescrita'}</span>
           </h3>
-          <p className="text-style-legal text-text-muted mt-0.5">
-            Escolha entre um plano diário único ou um ciclo de carboidratos.
-          </p>
+          {!embedded && (
+            <p className="text-style-legal text-text-muted mt-0.5">
+              Escolha entre um plano diário único ou um ciclo de carboidratos.
+            </p>
+          )}
         </div>
 
-        <div className={embedded
-          ? 'flex items-center self-end p-1 bg-surface-subtle border border-border-subtle rounded-control'
-          : 'flex items-center self-auto p-1 bg-surface-subtle border border-border-subtle rounded-control'}>
-          <Button
-            type="button"
-            role="radio"
-            aria-checked={mode === 'simple'}
-            tabIndex={mode === 'simple' ? 0 : -1}
-            ref={simpleModeRef}
-            onKeyDown={(event) => handleModeKeyDown(event, 'simple')}
-            onClick={() => onModeChange('simple')}
-            variant={mode === 'simple' ? 'secondary' : 'quiet'}
-            size="compact"
-            className="flex items-center gap-1.5"
-          >
-            <Utensils size={14} aria-hidden="true" />
-            <span>Dieta Simples</span>
-          </Button>
-
-          <Button
-            type="button"
-            role="radio"
-            aria-checked={mode === 'carb_cycling'}
-            tabIndex={mode === 'carb_cycling' ? 0 : -1}
-            ref={carbCyclingModeRef}
-            onKeyDown={(event) => handleModeKeyDown(event, 'carb_cycling')}
-            onClick={() => onModeChange('carb_cycling')}
-            variant={mode === 'carb_cycling' ? 'secondary' : 'quiet'}
-            size="compact"
-            className={cn('flex items-center gap-1.5', mode === 'carb_cycling' && 'text-success')}
-          >
-            <Repeat size={14} aria-hidden="true" />
-            <span>Ciclo de Carboidratos</span>
-          </Button>
-        </div>
+        <Tabs
+          value={mode}
+          onValueChange={(value) => onModeChange(value as 'simple' | 'carb_cycling')}
+        >
+          <TabsList className="bg-surface-subtle border border-border-subtle p-1 rounded-control">
+            <TabsTrigger
+              value="simple"
+              onClick={() => onModeChange('simple')}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-style-legal font-medium"
+            >
+              <Utensils size={14} aria-hidden="true" />
+              <span>Dieta Simples</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="carb_cycling"
+              onClick={() => onModeChange('carb_cycling')}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-style-legal font-medium"
+            >
+              <Repeat size={14} aria-hidden="true" />
+              <span>Ciclo de Carboidratos</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {mode === 'carb_cycling' && (
@@ -151,7 +123,9 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className={variationsCount === 2
+            ? 'grid grid-cols-2 gap-2 pt-1'
+            : 'grid grid-cols-3 gap-2 pt-1'}>
             {variations.slice(0, variationsCount).map((variation) => {
               const isActive = variation.id === activeVariationId;
               const typeLabel = getVariationTypeLabel(variation.type);
@@ -168,23 +142,23 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
                   aria-pressed={isActive}
                   aria-label={`${variation.name} ${typeLabel} Meta: ${variation.targetKcal} kcal ${variation.targetCarbs}g C`}
                   onClick={() => onSelectVariation(variation.id)}
-                  className={`flex-1 min-w-[160px] p-3 rounded-control border text-left ${
+                  className={`flex w-full min-w-0 flex-col gap-2 p-3 rounded-control border text-left ${
                     isActive
                       ? 'bg-surface border-success ring-2 ring-success/20 shadow-floating'
-                      : 'bg-surface-subtle border-border-subtle hover:border-border-hover'
+                      : 'bg-surface-subtle border-border-subtle hover:bg-surface-hover hover:border-border-hover transition-colors'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-style-legal text-text-primary">{variation.name}</span>
+                    <span className="min-w-0 font-bold text-style-legal text-text-primary">{variation.name}</span>
                     <Badge variant={badgeVariant}>
                       {typeLabel}
                     </Badge>
                   </div>
 
-                  <div className="text-style-legal text-text-muted mt-1 font-medium flex items-center gap-2">
-                    <span>Meta: <strong>{variation.targetKcal} kcal</strong></span>
+                  <div className="flex flex-wrap items-center gap-2 text-style-legal font-medium text-text-muted">
+                    <span className="whitespace-nowrap">Meta: <strong>{variation.targetKcal} kcal</strong></span>
                     <span aria-hidden="true">•</span>
-                    <span className="text-warning font-bold">{variation.targetCarbs}g C</span>
+                    <span className="whitespace-nowrap text-warning font-bold">{variation.targetCarbs}g C</span>
                   </div>
                 </Button>
               );

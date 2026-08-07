@@ -585,7 +585,7 @@ export default function DietBuilderPage() {
           patientInitials: patient.initials,
           patientName: patient.name,
           patientWeightKg: patient.weightKg,
-          patientGoalDescription: `${patient.objective || 'Prescrição Alimentar'} • Peso: ${patient.weightKg}kg`,
+          patientGoalDescription: patient.objective || 'Prescrição Alimentar',
           onAdjustGoals: handleOpenAdjustGoals,
           metrics: macroMetrics,
         }}
