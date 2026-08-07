@@ -33,7 +33,7 @@ export function ShowcaseHeader({ viewMode, onViewModeChange }: ShowcaseHeaderPro
         </div>
 
         <div className="flex flex-col items-start gap-4 lg:items-end">
-          <ViewModeToggle mode={viewMode} onViewModeChange={onViewModeChange} />
+          <ViewModeToggle mode={viewMode} onModeChange={onViewModeChange} />
 
           <div className="flex items-center gap-4 text-xs text-stone-400">
             <span className="flex items-center gap-1.5">

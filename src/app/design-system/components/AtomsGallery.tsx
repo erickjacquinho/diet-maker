@@ -4,14 +4,14 @@ import { useState } from "react";
 import { ComponentSandbox } from "./ComponentSandbox";
 import { PlaygroundControls } from "./PlaygroundControls";
 import { ViewMode } from "./types";
-import { recipes, textStyle } from "@/design-system";
+import { textStyle } from "@/design-system";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/atoms/Avatar";
 import { Surface } from "@/components/atoms/Surface";
 import { ProgressBar } from "@/components/atoms/ProgressBar";
-import { User, Activity, AlertCircle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface AtomsGalleryProps {
   viewMode: ViewMode;
@@ -19,8 +19,8 @@ interface AtomsGalleryProps {
 
 export function AtomsGallery({ viewMode }: AtomsGalleryProps) {
   // Button State
-  const [btnVariant, setBtnVariant] = useState<"default" | "destructive" | "outline" | "secondary" | "ghost" | "link">("default");
-  const [btnSize, setBtnSize] = useState<"default" | "sm" | "lg" | "icon">("default");
+  const [btnVariant, setBtnVariant] = useState<"primary" | "secondary" | "quiet" | "destructive" | "destructive-outline">("primary");
+  const [btnSize, setBtnSize] = useState<"standard" | "compact">("standard");
   const [btnDisabled, setBtnDisabled] = useState(false);
 
   // Badge State
@@ -60,8 +60,8 @@ export function AtomsGallery({ viewMode }: AtomsGalleryProps) {
 
           <PlaygroundControls
             controls={[
-              { name: "variant", label: "Variante", type: "select", options: ["default", "destructive", "outline", "secondary", "ghost", "link"], defaultValue: "default" },
-              { name: "size", label: "Tamanho", type: "select", options: ["default", "sm", "lg", "icon"], defaultValue: "default" },
+              { name: "variant", label: "Variante", type: "select", options: ["primary", "secondary", "quiet", "destructive", "destructive-outline"], defaultValue: "primary" },
+              { name: "size", label: "Tamanho", type: "select", options: ["standard", "compact"], defaultValue: "standard" },
               { name: "disabled", label: "Desabilitado", type: "boolean", defaultValue: false },
             ]}
             values={{ variant: btnVariant, size: btnSize, disabled: btnDisabled }}
@@ -133,13 +133,13 @@ export function AtomsGallery({ viewMode }: AtomsGalleryProps) {
         <div className="space-y-3">
           <ComponentSandbox
             title="Avatar & Surface (Perfil e Container)"
-            description="Avatar com iniciais/imagem e Surface com bordas elevadas."
-            codeSnippet={`<Avatar name="Carlos Silva" />`}
+            description="Avatar com iniciais e Surface com bordas elevadas."
+            codeSnippet={`<Avatar initials="CS" size="lg" />`}
             showCode={viewMode === "dev-spec"}
           >
             <div className="flex items-center gap-4">
-              <Avatar name="Carlos Silva" size="lg" />
-              <Avatar name="Ana Maria" size="md" />
+              <Avatar initials="CS" size="lg" />
+              <Avatar initials="AM" size="md" />
               <Surface className="p-3">
                 <span className={textStyle("data-id")}>Surface Container</span>
               </Surface>
@@ -152,7 +152,7 @@ export function AtomsGallery({ viewMode }: AtomsGalleryProps) {
           <ComponentSandbox
             title="ProgressBar (Barra de Progresso de Metas)"
             description="Barra gráfica de preenchimento para metas de calorias e macronutrientes."
-            codeSnippet={`<ProgressBar value={${progressVal}} max={100} />`}
+            codeSnippet={`<ProgressBar value={${progressVal}} />`}
             showCode={viewMode === "dev-spec"}
           >
             <div className="w-full max-w-md space-y-2">
@@ -160,7 +160,7 @@ export function AtomsGallery({ viewMode }: AtomsGalleryProps) {
                 <span>Meta Diária de Calorias</span>
                 <span>{progressVal}%</span>
               </div>
-              <ProgressBar value={progressVal} max={100} />
+              <ProgressBar value={progressVal} />
             </div>
           </ComponentSandbox>
 

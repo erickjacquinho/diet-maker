@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/atoms/ProgressBar";
 import { ViewMode } from "./types";
-import { Sparkles, Calendar, UtensilsCheck, UserCheck, Flame, Scale, Activity } from "lucide-react";
+import { Sparkles, Utensils, Flame, Scale, Activity } from "lucide-react";
 
 interface CompositionGalleryProps {
   viewMode: ViewMode;
@@ -46,8 +46,8 @@ export function CompositionGallery({ viewMode }: CompositionGalleryProps) {
                 </div>
               </div>
 
-              <Button size="sm" variant="default">
-                <UtensilsCheck className="h-4 w-4 mr-1.5" />
+              <Button size="compact" variant="primary">
+                <Utensils className="h-4 w-4 mr-1.5" />
                 <span>Imprimir Dieta</span>
               </Button>
             </div>
@@ -93,7 +93,7 @@ export function CompositionGallery({ viewMode }: CompositionGalleryProps) {
                 <span className="text-stone-700 dark:text-stone-300">Adesão do Paciente (Últimos 7 dias)</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">92% de Conformidade</span>
               </div>
-              <ProgressBar value={92} max={100} />
+              <ProgressBar value={92} />
             </div>
           </div>
         </ComponentSandbox>

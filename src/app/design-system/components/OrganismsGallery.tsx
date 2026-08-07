@@ -5,7 +5,7 @@ import { ComponentSandbox } from "./ComponentSandbox";
 import { ViewMode } from "./types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, Utensils, Calendar, User, FileText } from "lucide-react";
+import { LayoutGrid, Utensils, Calendar, FileText } from "lucide-react";
 
 interface OrganismsGalleryProps {
   viewMode: ViewMode;
@@ -91,12 +91,12 @@ export function OrganismsGallery({ viewMode }: OrganismsGalleryProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="secondary" size="compact">
                 <FileText className="h-4 w-4 mr-1.5" />
                 <span>Exportar PDF</span>
               </Button>
 
-              <Button variant="default" size="sm">
+              <Button variant="primary" size="compact">
                 <Calendar className="h-4 w-4 mr-1.5" />
                 <span>Nova Avaliação</span>
               </Button>

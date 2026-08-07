@@ -121,14 +121,15 @@ export function MoleculesGallery({ viewMode }: MoleculesGalleryProps) {
           <ComponentSandbox
             title="DatePickerField (Seletor de Data de Consulta)"
             description="Seleção de data de avaliação física ou acompanhamento."
-            codeSnippet={`<DatePickerField label="Data da Avaliação" value="${selectedDate}" />`}
+            codeSnippet={`<DatePickerField id="demo-date" label="Data da Consulta" value="${selectedDate}" onValueChange={setSelectedDate} />`}
             showCode={viewMode === "dev-spec"}
           >
             <div className="w-full max-w-sm">
               <DatePickerField
+                id="demo-date"
                 label="Data da Consulta"
                 value={selectedDate}
-                onChange={(val) => setSelectedDate(val)}
+                onValueChange={(val: string) => setSelectedDate(val)}
               />
             </div>
           </ComponentSandbox>
