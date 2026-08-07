@@ -1,0 +1,6 @@
+{
+  "task": "Refatoração, componentização, limpeza de código e modularização dos arquivos principais (páginas, componentes, stores, testes e scripts) aplicando Vercel React Composition Patterns",
+  "slug": "refatoracao-composicao-codigo-limpo",
+  "feature_dir": "specs/07-08-26-refatoracao-composicao-codigo-limpo",
+  "date": "2026-08-07"
+}
