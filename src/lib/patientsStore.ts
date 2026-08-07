@@ -250,18 +250,45 @@ export function getPatientRecordHistory(patientId: string): PatientRecordHistory
   };
 }
 
+export function normalizePairedBodyMeasurements(assessment: BodyAssessment): BodyAssessment {
+  const normalized = { ...assessment };
+  const pairs: Array<[keyof BodyAssessment, keyof BodyAssessment]> = [
+    ['leftArmCm', 'rightArmCm'],
+    ['leftProximalThighCm', 'rightProximalThighCm'],
+    ['leftDistalThighCm', 'rightDistalThighCm'],
+    ['leftCalfCm', 'rightCalfCm'],
+  ];
+
+  for (const [leftKey, rightKey] of pairs) {
+    const leftVal = normalized[leftKey] as number | undefined;
+    const rightVal = normalized[rightKey] as number | undefined;
+
+    const hasLeft = leftVal !== undefined && !Number.isNaN(leftVal) && leftVal > 0;
+    const hasRight = rightVal !== undefined && !Number.isNaN(rightVal) && rightVal > 0;
+
+    if (hasLeft && !hasRight) {
+      (normalized[rightKey] as number) = leftVal;
+    } else if (!hasLeft && hasRight) {
+      (normalized[leftKey] as number) = rightVal;
+    }
+  }
+
+  return normalized;
+}
+
 export function savePatientAssessmentToStorage(
   patientId: string,
   assessment: BodyAssessment,
 ): BodyAssessment[] {
+  const normalizedAssessment = normalizePairedBodyMeasurements(assessment);
   const current = getPatientAssessmentsFromStorage(patientId);
-  const existingIndex = current.findIndex((item) => item.id === assessment.id);
+  const existingIndex = current.findIndex((item) => item.id === normalizedAssessment.id);
   const updated = [...current];
 
   if (existingIndex >= 0) {
-    updated[existingIndex] = assessment;
+    updated[existingIndex] = normalizedAssessment;
   } else {
-    updated.unshift(assessment);
+    updated.unshift(normalizedAssessment);
   }
 
   if (typeof window !== 'undefined') {

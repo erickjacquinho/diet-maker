@@ -61,4 +61,40 @@ describe('physical assessment persistence', () => {
 
     expect(getPatientAssessmentsFromStorage('legacy-patient')).toEqual([legacy]);
   });
+
+  it('mirrors paired left and right measurements when only one side is filled out', () => {
+    const patient = savePatientToStorage({
+      name: 'Paciente Paridade',
+      age: 30,
+      gender: 'Feminino',
+      heightCm: 165,
+      weightKg: 60,
+      targetKcal: 1800,
+      targetProtein: 120,
+      targetCarbs: 180,
+      targetFats: 50,
+      objective: 'Emagrecimento',
+    });
+
+    const assessment = {
+      id: 'assessment-paired',
+      date: '2026-08-07',
+      weightKg: 60,
+      bodyFatPercent: 20,
+      muscleMassKg: 48,
+      waistCm: 70,
+      leftArmCm: 32, // rightArmCm is blank
+      rightProximalThighCm: 54, // leftProximalThighCm is blank
+      leftDistalThighCm: 40, // rightDistalThighCm is blank
+      rightCalfCm: 36, // leftCalfCm is blank
+    };
+
+    savePatientAssessmentToStorage(patient.id, assessment);
+
+    const saved = getPatientAssessmentsFromStorage(patient.id)[0];
+    expect(saved.rightArmCm).toBe(32);
+    expect(saved.leftProximalThighCm).toBe(54);
+    expect(saved.rightDistalThighCm).toBe(40);
+    expect(saved.leftCalfCm).toBe(36);
+  });
 });

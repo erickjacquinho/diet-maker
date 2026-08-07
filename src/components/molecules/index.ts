@@ -15,4 +15,8 @@ export * from './DietModeSwitcher';
 export * from './FoodSearchModal';
 export * from './DatePickerField';
 export * from './EditAssessmentModal';
+export * from './EditPatientModal';
 export * from './PageContextHeader';
+export * from './NextEventModal';
+export * from './AddObjectiveModal';
+export * from './DeletePatientModal';

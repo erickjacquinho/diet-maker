@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 58,
+    "currentSourceCount": 62,
     "capturedAt": "2026-07-31",
     "legacyAudit": {
       "findings": 0,
@@ -507,7 +507,8 @@
         "atom-avatar",
         "molecule-patient-badge-header",
         "molecule-metric-box",
-        "organism-patient-list-table"
+        "organism-patient-list-table",
+        "organism-patient-consultation-history-table"
       ],
       "decisionRef": "CAT-2026-07-31-data-display"
     },
@@ -552,7 +553,10 @@
         "ui-sheet",
         "ui-tooltip",
         "organism-food-search-modal",
-        "organism-read-only-diet-modal"
+        "organism-read-only-diet-modal",
+        "molecule-add-objective-modal",
+        "molecule-delete-patient-modal",
+        "molecule-next-event-modal"
       ],
       "decisionRef": "CAT-2026-07-31-overlays"
     },
@@ -3611,6 +3615,163 @@
         "src/app/refeicoes-prontas/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-add-objective-modal",
+      "name": "AddObjectiveModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/AddObjectiveModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AddObjectiveModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "AddObjectiveModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/add-objective-modal.md",
+      "consumers": [
+        "src/app/pacientes/[id]/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-delete-patient-modal",
+      "name": "DeletePatientModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "destructive"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/DeletePatientModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "DeletePatientModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "DeletePatientModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/delete-patient-modal.md",
+      "consumers": [
+        "src/app/pacientes/[id]/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-next-event-modal",
+      "name": "NextEventModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/NextEventModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "NextEventModalProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "NextEventModal",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/next-event-modal.md",
+      "consumers": [
+        "src/app/pacientes/[id]/page.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-consultation-history-table",
+      "name": "PatientConsultationHistoryTable",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/PatientConsultationHistoryTable.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ConsolidatedConsultationUpdate",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "PatientConsultationHistoryTableProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "PatientConsultationHistoryTable",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-consultation-history-table.md",
+      "consumers": [
+        "src/app/pacientes/[id]/page.tsx"
+      ],
+      "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
     }
