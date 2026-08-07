@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Star, ArrowUpDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useMemo } from 'react';
+import { ArrowUpDown, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { EditIconButton } from '@/components/atoms';
-import { FoodItem } from '@/lib/tacoStore';
+import type { DataTableColumnDef } from '@/components/molecules/DataTable';
+import type { FoodItem } from '@/lib/tacoStore';
 
 export function useFoodTableColumns({
   onToggleFavorite,
@@ -12,38 +12,48 @@ export function useFoodTableColumns({
 }: {
   onToggleFavorite: (id: string) => void;
   onEditCustomFood: (food: FoodItem) => void;
-}) {
-  return useMemo<ColumnDef<FoodItem>[]>(
+}): DataTableColumnDef<FoodItem>[] {
+  return useMemo<DataTableColumnDef<FoodItem>[]>(
     () => [
       {
         id: 'favorite',
-        header: '',
-        cell: ({ row }) => (
+        header: <span className="sr-only">Favorito</span>,
+        cell: (food) => (
           <Button
             variant="quiet"
             size="compact"
             iconOnly
-            onClick={() => onToggleFavorite(row.original.id)}
+            type="button"
+            aria-label={food.isFavorite ? `Remover ${food.name} dos favoritos` : `Favoritar ${food.name}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleFavorite(food.id);
+            }}
             className="hover:bg-warning-soft text-warning"
           >
             <Star
-              className={`w-4 h-4 ${row.original.isFavorite ? 'fill-warning text-warning' : 'text-text-muted'}`}
+              size={16}
+              aria-hidden="true"
+              className={food.isFavorite ? 'fill-warning text-warning' : 'text-text-muted'}
             />
           </Button>
         ),
       },
       {
-        accessorKey: 'name',
-        header: ({ column }) => (
-          <Button variant="quiet" size="compact" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        id: 'name',
+        header: (
+          <span className="inline-flex items-center gap-2">
             Nome do Alimento
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowUpDown size={16} aria-hidden="true" />
+          </span>
         ),
-        cell: ({ row }) => (
-          <div className="font-medium text-text-primary flex items-center gap-2">
-            <span>{row.original.name}</span>
-            {(row.original.isCustom || row.original.source === 'CUSTOM') && (
+        sortLabel: 'nome do alimento',
+        sortable: true,
+        sortValue: (food) => food.name,
+        cell: (food) => (
+          <div className="flex items-center gap-2 font-medium text-text-primary">
+            <span>{food.name}</span>
+            {(food.isCustom || food.source === 'CUSTOM') && (
               <Badge variant="secondary" className="text-style-legal">
                 Custom
               </Badge>
@@ -52,64 +62,86 @@ export function useFoodTableColumns({
         ),
       },
       {
-        accessorKey: 'category',
+        id: 'category',
         header: 'Categoria',
-        cell: ({ row }) => <span className="text-text-secondary text-style-legal">{row.original.category || '-'}</span>,
+        cell: (food) => <span className="text-style-legal text-text-secondary">{food.category || '-'}</span>,
       },
       {
-        accessorKey: 'preparo',
+        id: 'preparo',
         header: 'Preparo',
-        cell: ({ row }) => <span className="text-text-muted text-style-legal">{row.original.preparo || 'Cru'}</span>,
+        cell: (food) => <span className="text-style-legal text-text-muted">{food.preparo || 'Cru'}</span>,
       },
       {
-        accessorKey: 'kcal',
-        header: ({ column }) => (
-          <Button variant="quiet" size="compact" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        id: 'kcal',
+        header: (
+          <span className="inline-flex items-center gap-2">
             Kcal
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowUpDown size={16} aria-hidden="true" />
+          </span>
         ),
-        cell: ({ row }) => <span className="font-semibold text-text-secondary">{row.original.kcal} kcal</span>,
+        sortLabel: 'kcal',
+        sortable: true,
+        sortValue: (food) => food.kcal,
+        align: 'right',
+        cell: (food) => <span className="font-semibold text-text-secondary">{food.kcal} kcal</span>,
       },
       {
-        accessorKey: 'proteinG',
-        header: ({ column }) => (
-          <Button variant="quiet" size="compact" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        id: 'proteinG',
+        header: (
+          <span className="inline-flex items-center gap-2">
             Proteína
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowUpDown size={16} aria-hidden="true" />
+          </span>
         ),
-        cell: ({ row }) => <span className="text-macro-protein font-medium">{row.original.proteinG}g</span>,
+        sortLabel: 'proteína',
+        sortable: true,
+        sortValue: (food) => food.proteinG,
+        align: 'right',
+        cell: (food) => <span className="font-medium text-macro-protein">{food.proteinG}g</span>,
       },
       {
-        accessorKey: 'carbsG',
-        header: ({ column }) => (
-          <Button variant="quiet" size="compact" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        id: 'carbsG',
+        header: (
+          <span className="inline-flex items-center gap-2">
             Carboidrato
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowUpDown size={16} aria-hidden="true" />
+          </span>
         ),
-        cell: ({ row }) => <span className="text-macro-carbohydrate font-medium">{row.original.carbsG}g</span>,
+        sortLabel: 'carboidrato',
+        sortable: true,
+        sortValue: (food) => food.carbsG,
+        align: 'right',
+        cell: (food) => <span className="font-medium text-macro-carbohydrate">{food.carbsG}g</span>,
       },
       {
-        accessorKey: 'fatG',
-        header: ({ column }) => (
-          <Button variant="quiet" size="compact" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        id: 'fatG',
+        header: (
+          <span className="inline-flex items-center gap-2">
             Gordura
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowUpDown size={16} aria-hidden="true" />
+          </span>
         ),
-        cell: ({ row }) => <span className="text-macro-fat font-medium">{row.original.fatG ?? row.original.fatsG}g</span>,
+        sortLabel: 'gordura',
+        sortable: true,
+        sortValue: (food) => food.fatG ?? food.fatsG,
+        align: 'right',
+        cell: (food) => <span className="font-medium text-macro-fat">{food.fatG ?? food.fatsG}g</span>,
       },
       {
         id: 'actions',
-        header: '',
-        cell: ({ row }) =>
-          row.original.isCustom || row.original.source === 'CUSTOM' ? (
-            <EditIconButton onClick={() => onEditCustomFood(row.original)} title="Editar alimento customizado" />
+        header: <span className="sr-only">Ações</span>,
+        cell: (food) =>
+          food.isCustom || food.source === 'CUSTOM' ? (
+            <EditIconButton
+              onClick={(event) => {
+                event.stopPropagation();
+                onEditCustomFood(food);
+              }}
+              title="Editar alimento customizado"
+            />
           ) : null,
       },
     ],
-    [onToggleFavorite, onEditCustomFood]
+    [onToggleFavorite, onEditCustomFood],
   );
 }

@@ -61,7 +61,10 @@ describe('PatientDetailPage history', () => {
 
     render(<PatientDetailPage />);
 
-    expect(await screen.findByRole('table')).toBeInTheDocument();
+    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader')).toHaveLength(5);
+    expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true);
     expect(screen.getByText('Dieta')).toBeInTheDocument();
     expect(screen.getByText('Avaliação Física')).toBeInTheDocument();
 
@@ -70,5 +73,8 @@ describe('PatientDetailPage history', () => {
     expect(screen.getAllByText('Plano cutting agosto')).toHaveLength(2);
     expect(screen.getByRole('button', { name: 'Ver Dieta' })).toBeInTheDocument();
     expect(screen.getByText('Avaliação Física & Valores')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Recolher consulta' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ver Dieta' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

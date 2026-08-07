@@ -50,7 +50,7 @@ Total de tarefas: 24 tarefas organizadas por fases independentes e atribuídas c
 ## Phase 4: Polish & Validação Global
 
 - [X] T023 [skill: general] Executar script de validação de contagem de linhas e confirmar que nenhum arquivo fonte em `src/` ultrapassa 200 linhas
-- [ ] T024 [skill: general] Executar a suíte de testes (`npm run test`) e build (`npm run build`) para garantir zero regressões
+- [X] T024 [skill: general] Executar a suíte de testes (`npm run test`) e build (`npm run build`) para garantir zero regressões
 
 ---
 

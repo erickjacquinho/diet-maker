@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { SortingState } from '@tanstack/react-table';
+import type { DataTableSortState } from '@/components/molecules/DataTable';
 import {
   getAllFoods,
   toggleFavoriteFood,
@@ -27,7 +27,8 @@ export function useFoodSearchPage() {
     'all' | 'high-protein' | 'high-carb' | 'high-fat' | 'high-fiber'
   >('all');
 
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<DataTableSortState | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
 
@@ -114,6 +115,14 @@ export function useFoodSearchPage() {
     });
   }, [foods, activeTab, categoryFilter, preparoFilter, macroPreset, searchTerm]);
 
+  useEffect(() => {
+    setPageIndex(0);
+  }, [activeTab, categoryFilter, preparoFilter, macroPreset, searchTerm, sorting]);
+
+  useEffect(() => {
+    setPageIndex((currentPage) => Math.min(currentPage, Math.max(0, Math.ceil(filteredFoods.length / 15) - 1)));
+  }, [filteredFoods.length]);
+
   const editingFood = useMemo(() => {
     return foods.find((f) => f.id === editingFoodId) || null;
   }, [foods, editingFoodId]);
@@ -135,6 +144,8 @@ export function useFoodSearchPage() {
     preparosList,
     sorting,
     setSorting,
+    pageIndex,
+    setPageIndex,
     isModalOpen,
     setIsModalOpen,
     editingFoodId,

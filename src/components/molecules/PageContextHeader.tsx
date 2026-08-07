@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,15 +43,18 @@ export const PageContextHeader: React.FC<PageContextHeaderProps> = ({
     <header className="flex min-w-0 flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 flex-1 items-start gap-3">
         {onBackClick ? (
-          <button
+          <Button
             type="button"
             onClick={onBackClick}
             aria-label={backLabel}
             title={backLabel}
+            variant="secondary"
+            size="standard"
+            iconOnly
             className={backButtonClasses}
           >
             {backButtonContent}
-          </button>
+          </Button>
         ) : (
           <Link
             href={backHref || '#'}

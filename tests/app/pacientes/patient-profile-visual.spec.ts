@@ -87,7 +87,10 @@ describe('PatientDetailPage desktop visual contracts', () => {
 
     render(React.createElement(PatientDetailPage));
 
-    expect(await screen.findByRole('table', { name: 'Histórico de consultas por data' })).toBeInTheDocument();
+    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader')).toHaveLength(5);
+    expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true);
     expect(screen.getAllByRole('button', { name: 'Expandir consulta' })).toHaveLength(2);
     expect(screen.getByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
   });

@@ -20,3 +20,4 @@ export * from './PageContextHeader';
 export * from './NextEventModal';
 export * from './AddObjectiveModal';
 export * from './DeletePatientModal';
+export * from './DataTable';

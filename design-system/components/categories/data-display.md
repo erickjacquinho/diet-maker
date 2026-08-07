@@ -4,7 +4,7 @@ Category ID: `data-display`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-data-display`  
 Allowed traits: `identity`, `nutrition-context`  
-Current consumers: `ui-table`, `atom-avatar`, `molecule-patient-badge-header`, `molecule-metric-box`
+Current consumers: `ui-table`, `molecule-data-table`, `atom-avatar`, `molecule-patient-badge-header`, `molecule-metric-box`, `organism-food-table-section`, `organism-patient-list-table`, `organism-patient-consultation-history-table`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 

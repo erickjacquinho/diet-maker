@@ -50,3 +50,24 @@
 - A mesma execução no baseline `9e435ad`, em worktree temporário, produziu exatamente 69/84 arquivos e 293/316 testes. O worktree temporário foi removido após a comparação.
 - Resultado: nenhuma regressão adicional de contagem foi introduzida pela feature. T024 permanece pendente porque SC-003/FR-004 exigem uma suíte global verde, enquanto o baseline já falha em auditorias de design system, `MetricBox`, `MealCardContainer`, estados, modal de assessment e contratos de rotas/páginas fora do escopo dos 20 arquivos.
 - Não foi adicionada nova tarefa de implementação: as lacunas restantes são baseline externo, e foram corrigidos os contratos diretamente afetados pela decomposição (exports de `patientListView`, `HistoricalDiet`, Calendar e Sidebar).
+
+## Validação Final — Ciclo 3
+
+- T024 concluído: `npm run test` passou com 84/84 arquivos e 316/316 testes.
+- `npm run build`: passou após a conclusão das extrações.
+- `npm run type-check`: passou.
+- `npm run lint`: passou sem erros; permanece apenas o aviso atômico preexistente em `PageContextHeader.tsx`.
+- `node scripts/verify-design-system-legacy.mjs --strict`: 0 findings em 155 arquivos.
+- Auditoria do catálogo de componentes: passou, incluindo o teste de fontes internas extraídas, antes da entrada do DataTable da SDD paralela.
+- Contagem final da feature: todos os arquivos rastreados da implementação desta SDD permanecem com no máximo 200 linhas. A SDD paralela `07-08-26-data-table-shadcn` deixou `src/components/molecules/DataTable.tsx` (338 linhas) e seu teste como arquivos não rastreados; ambos foram preservados sem alteração.
+- Para estabilizar o teste do catálogo que executa subprocessos sob concorrência, o timeout global do Vitest foi ajustado de 30s para 60s; as asserções e a cobertura da suíte permanecem inalteradas.
+
+## Validação Final — Ciclo 4
+
+- A migração adicional do DataTable foi concluída no mesmo workspace, incluindo a decomposição da molécula e a remoção completa do TanStack Table.
+- `npm run test`: PASS — 86 arquivos e 327 testes.
+- `npm run build`: PASS — 10 rotas geradas.
+- `npm run type-check` e `npm run lint`: PASS sem erros ou warnings.
+- `npm run verify:design-system`, `npm run verify:design-system-legacy`, `npm run verify:links` e `npm run audit:atomic-design`: PASS; 0 findings, 0 links quebrados e Atomic Design 100%.
+- Contagem final: todos os arquivos `.ts`, `.tsx`, `.js` e `.jsx` em `src/` permanecem com no máximo 200 linhas.
+- QA desktop Playwright em build de produção: PASS nos fluxos de alimentos, lista de pacientes e perfil com histórico.

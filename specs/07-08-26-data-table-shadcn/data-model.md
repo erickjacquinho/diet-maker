@@ -14,6 +14,7 @@ export interface DataTableColumnDef<TData> {
   cell: (row: TData, index: number) => React.ReactNode;
   sortValue?: (row: TData) => string | number | null | undefined;
   sortable?: boolean;
+  sortLabel?: string;
   align?: 'left' | 'center' | 'right';
   className?: string;
   headerClassName?: string;
@@ -61,6 +62,7 @@ export interface DataTableProps<TData> {
   emptyMessage: React.ReactNode;
   loading?: boolean;
   errorMessage?: React.ReactNode;
+  readOnly?: boolean;
   sort?: {
     state: DataTableSortState | null;
     onChange: (state: DataTableSortState | null) => void;

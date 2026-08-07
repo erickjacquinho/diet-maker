@@ -34,7 +34,7 @@ Linhas ativas recebem destaque de borda verde `border-l-success`. Linhas expans�
 
 ## Composition
 
-Compõe `atom-badge`, `atom-icon-button`, `molecule-metric-box` e `ui-button`.
+Compõe `molecule-data-table`, `atom-badge`, `atom-icon-button`, `molecule-metric-box` e `ui-button`.
 
 ## Content rules
 

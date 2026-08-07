@@ -30,11 +30,11 @@ Uma única sequência de prioridade: atrasados, hoje, próximos acompanhamentos 
 
 ## Particular states
 
-O estado corporal mostra o BF atual e, quando há duas avaliações válidas, a variação percentual assinada e o intervalo em dias. Sem comparação, usa texto explícito. Estados de foco, hover, vazio e erro são herdados da categoria e do primitivo `ui-table`.
+O estado corporal mostra o BF atual e, quando há duas avaliações válidas, a variação percentual assinada e o intervalo em dias. Sem comparação, usa texto explícito. Estados de foco, hover, vazio e erro são herdados da categoria e de `molecule-data-table`.
 
 ## Composition
 
-Compõe `ui-table`, `next/link` e ícones Lucide Mars, Venus e ChevronRight. A linha oferece navegação por teclado e o primeiro campo mantém um link real para o perfil; os indicadores têm descrição acessível e dois slots fixos, mesmo quando vazios.
+Compõe `molecule-data-table`, `next/link` e ícones Lucide Mars, Venus e ChevronRight. A linha oferece navegação por teclado e o primeiro campo mantém um link real para o perfil; os indicadores têm descrição acessível e dois slots fixos, mesmo quando vazios.
 
 ## Content rules
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 62,
+    "currentSourceCount": 65,
     "capturedAt": "2026-07-31",
     "legacyAudit": {
       "findings": 0,
@@ -246,7 +246,7 @@
         { "name": "TableCell", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "selected", "read-only"] },
         { "name": "TableCaption", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "empty"] }
       ],
-      "consumers": ["organism-patient-list-table", "src/app/pacientes/page.tsx", "src/app/design-system/page.tsx"]
+      "consumers": ["molecule-data-table", "src/app/design-system/page.tsx"]
     },
     {
       "id": "ui-tabs",
@@ -507,6 +507,8 @@
         "atom-avatar",
         "molecule-patient-badge-header",
         "molecule-metric-box",
+        "molecule-data-table",
+        "organism-food-table-section",
         "organism-patient-list-table",
         "organism-patient-consultation-history-table"
       ],
@@ -1830,7 +1832,7 @@
       ],
       "profile": "design-system/components/profiles/ui/table.md",
       "consumers": [
-        "src/app/alimentos/page.tsx",
+        "molecule-data-table",
         "src/app/design-system/page.tsx"
       ],
       "primitiveBase": null,
@@ -2472,6 +2474,89 @@
       "exceptions": ["inline-surface-mode"]
     },
     {
+      "id": "molecule-data-table",
+      "name": "DataTable",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/DataTable.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        { "name": "DataTableColumnDef", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableSortState", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTablePagination", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTable", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/data-table.md",
+      "consumers": [
+        "organism-food-table-section",
+        "organism-patient-list-table",
+        "organism-patient-consultation-history-table"
+      ],
+      "primitiveBase": "ui-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-data-table-pagination",
+      "name": "DataTablePagination",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/data-table/DataTablePagination.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        { "name": "DataTablePagination", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/data-table-pagination.md",
+      "consumers": ["molecule-data-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-data-table-state-row",
+      "name": "DataTableStateRow",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/data-table/DataTableStateRow.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        { "name": "DataTableStateRow", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/data-table-state-row.md",
+      "consumers": ["molecule-data-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "molecule-meal-item-row",
       "name": "MealItemRow",
       "nature": "domain",
@@ -2961,6 +3046,32 @@
       "exceptions": []
     },
     {
+      "id": "organism-food-table-section",
+      "name": "FoodTableSection",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/foods/FoodTableSection.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        { "name": "FoodTableSectionProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "FoodTableSection", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/food-table-section.md",
+      "consumers": ["src/app/alimentos/page.tsx"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "organism-patient-list-table",
       "name": "PatientListTable",
       "nature": "domain",
@@ -2992,7 +3103,7 @@
       "consumers": [
         "src/app/pacientes/page.tsx"
       ],
-      "primitiveBase": "ui-table",
+      "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
     },
@@ -3088,7 +3199,7 @@
       "consumers": [
         "src/app/layout.tsx"
       ],
-      "primitiveBase": null,
+      "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
     },
@@ -3771,7 +3882,7 @@
       "consumers": [
         "src/app/pacientes/[id]/page.tsx"
       ],
-      "primitiveBase": null,
+      "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
     }

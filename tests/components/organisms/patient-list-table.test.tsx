@@ -59,11 +59,14 @@ describe('PatientListTable', () => {
       />,
     );
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: 'Lista de pacientes' });
+    expect(table).toBeInTheDocument();
+    expect(screen.getByText('Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento.')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Paciente' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Objetivo' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Evolução de gordura' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Próximo acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Paciente' })).toHaveAttribute('scope', 'col');
     expect(screen.getByRole('link', { name: 'Ver perfil de Ana Lima' })).toHaveAttribute(
       'href',
       '/pacientes/patient-1',
@@ -102,5 +105,18 @@ describe('PatientListTable', () => {
     expect(onNavigate).toHaveBeenCalledWith('/pacientes/patient-1');
     fireEvent.keyDown(row, { key: ' ' });
     expect(onNavigate).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not duplicate row navigation when the real profile link is activated', () => {
+    const onNavigate = vi.fn();
+    render(
+      <PatientListTable
+        rows={buildPatientListRows([patient], '2026-08-03')}
+        onNavigate={onNavigate}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('link', { name: 'Ver perfil de Ana Lima' }));
+    expect(onNavigate).not.toHaveBeenCalled();
   });
 });

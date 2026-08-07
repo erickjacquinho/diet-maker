@@ -24,6 +24,8 @@ export default function FoodsPage() {
     preparosList,
     sorting,
     setSorting,
+    pageIndex,
+    setPageIndex,
     isModalOpen,
     setIsModalOpen,
     editingFood,
@@ -60,6 +62,8 @@ export default function FoodsPage() {
         data={filteredFoods}
         sorting={sorting}
         setSorting={setSorting}
+        pageIndex={pageIndex}
+        onPageChange={setPageIndex}
         onToggleFavorite={handleToggleFavorite}
         onEditCustomFood={handleOpenEditModal}
       />

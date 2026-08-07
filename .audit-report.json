@@ -1,21 +1,11 @@
 {
-  "timestamp": "2026-08-07T16:11:17.141Z",
+  "timestamp": "2026-08-07T21:47:19.130Z",
   "summary": {
-    "totalFilesScanned": 83,
-    "compliantFiles": 82,
-    "nonCompliantFiles": 1,
-    "totalViolations": 1,
-    "complianceScorePercentage": 98.8
+    "totalFilesScanned": 118,
+    "compliantFiles": 118,
+    "nonCompliantFiles": 0,
+    "totalViolations": 0,
+    "complianceScorePercentage": 100
   },
-  "violations": [
-    {
-      "file": "src/components/ui/progress.tsx",
-      "line": 22,
-      "column": 7,
-      "type": "INLINE_STYLE",
-      "element": "style",
-      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
-      "snippet": "style={{ transform: `translateX(-${100 - (value || 0)}%)` }}"
-    }
-  ]
+  "violations": []
 }
