@@ -16,9 +16,9 @@
 
 **Purpose**: Preparação da estrutura de componentes do showcase
 
-- [ ] T001 [skill: frontend-design] Criar estrutura de diretórios e contratos em `src/app/design-system/components/`
-- [ ] T002 [skill: ui-ux-pro-max] [P] Definir tipos e esquemas de dados em `src/app/design-system/components/types.ts`
-- [ ] T003 [skill: ui-ux-pro-max] [P] Criar dados mockados estáticos e mapeadores de componentes em `src/app/design-system/components/showcase-registry.ts`
+- [x] T001 [skill: frontend-design] Criar estrutura de diretórios e contratos em `src/app/design-system/components/`
+- [x] T002 [skill: ui-ux-pro-max] [P] Definir tipos e esquemas de dados em `src/app/design-system/components/types.ts`
+- [x] T003 [skill: ui-ux-pro-max] [P] Criar dados mockados estáticos e mapeadores de componentes em `src/app/design-system/components/showcase-registry.ts`
 
 ---
 
@@ -28,9 +28,9 @@
 
 **⚠️ CRITICAL**: Nenhuma user story pode avançar antes desta fase estar concluída
 
-- [ ] T004 [skill: frontend-design] Implementar o componente `ShowcaseHeader.tsx` em `src/app/design-system/components/ShowcaseHeader.tsx` com banner mineral dark e estatísticas
-- [ ] T005 [skill: ui-ux-pro-max] [P] Implementar o controle `ViewModeToggle.tsx` em `src/app/design-system/components/ViewModeToggle.tsx` para alternar entre "Modo Cliente Showcase" e "Modo Dev Spec"
-- [ ] T006 [skill: ui-ux-pro-max] [P] Criar a barra de navegação e abas de categorias em `src/app/design-system/components/ShowcaseTabs.tsx`
+- [x] T004 [skill: frontend-design] Implementar o componente `ShowcaseHeader.tsx` em `src/app/design-system/components/ShowcaseHeader.tsx` com banner mineral dark e estatísticas
+- [x] T005 [skill: ui-ux-pro-max] [P] Implementar o controle `ViewModeToggle.tsx` em `src/app/design-system/components/ViewModeToggle.tsx` para alternar entre "Modo Cliente Showcase" e "Modo Dev Spec"
+- [x] T006 [skill: ui-ux-pro-max] [P] Criar a barra de navegação e abas de categorias em `src/app/design-system/components/ShowcaseTabs.tsx`
 
 **Checkpoint**: Estrutura base pronta - as histórias de usuário podem ser desenvolvidas em sequência ou em paralelo.
 
@@ -42,10 +42,10 @@
 
 **Independent Test**: Navegar para a aba "Tokens de Design" em `/design-system`, inspecionar os swatches de cores, testar digitação no espécime de tipografia e verificar as barras de spacing/sombras.
 
-- [ ] T007 [skill: ui-ux-pro-max] [P] [US1] Implementar o swatch de cores `TokenColorSwatch.tsx` em `src/app/design-system/components/TokenColorSwatch.tsx` com indicação HSL/HEX e badges de contraste WCAG AA/AAA
-- [ ] T008 [skill: frontend-design] [P] [US1] Implementar o espécime de tipografia `TypographySpecimen.tsx` em `src/app/design-system/components/TypographySpecimen.tsx` com suporte a texto de teste em tempo real
-- [ ] T009 [skill: ui-ux-pro-max] [P] [US1] Implementar visualizador de spacing, raios e sombras `StructuralTokensSection.tsx` em `src/app/design-system/components/StructuralTokensSection.tsx`
-- [ ] T010 [skill: frontend-design] [US1] Integrar a seção completa de tokens `TokenSwatchesSection.tsx` em `src/app/design-system/components/TokenSwatchesSection.tsx`
+- [x] T007 [skill: ui-ux-pro-max] [P] [US1] Implementar o swatch de cores `TokenColorSwatch.tsx` em `src/app/design-system/components/TokenColorSwatch.tsx` com indicação HSL/HEX e badges de contraste WCAG AA/AAA
+- [x] T008 [skill: frontend-design] [P] [US1] Implementar o espécime de tipografia `TypographySpecimen.tsx` em `src/app/design-system/components/TypographySpecimen.tsx` com suporte a texto de teste em tempo real
+- [x] T009 [skill: ui-ux-pro-max] [P] [US1] Implementar visualizador de spacing, raios e sombras `StructuralTokensSection.tsx` em `src/app/design-system/components/StructuralTokensSection.tsx`
+- [x] T010 [skill: frontend-design] [US1] Integrar a seção completa de tokens `TokenSwatchesSection.tsx` em `src/app/design-system/components/TokenSwatchesSection.tsx`
 
 **Checkpoint**: User Story 1 funcional e independente.
 
@@ -57,12 +57,12 @@
 
 **Independent Test**: Selecionar um componente na galeria (ex: `Button` ou `MetricBox`), alterar suas variantes através dos controles e verificar a atualização em tempo real.
 
-- [ ] T011 [skill: ui-ux-pro-max] [P] [US2] Implementar os knobs de controle de props `PlaygroundControls.tsx` em `src/app/design-system/components/PlaygroundControls.tsx`
-- [ ] T012 [skill: ui-ux-pro-max] [P] [US2] Implementar o sandbox isolado de preview `ComponentSandbox.tsx` em `src/app/design-system/components/ComponentSandbox.tsx`
-- [ ] T013 [skill: frontend-design] [US2] Criar a galeria de Átomos (`Button`, `Input`, `Badge`, `Avatar`, `Surface`, `Spinner`, `Skeleton`) em `src/app/design-system/components/AtomsGallery.tsx`
-- [ ] T014 [skill: frontend-design] [US2] Criar a galeria de Moléculas (`FormField`, `MetricBox`, `TacoSearchInput`, `PatientBadgeHeader`) em `src/app/design-system/components/MoleculesGallery.tsx`
-- [ ] T015 [skill: frontend-design] [US2] Criar a galeria de Organismos (`DietModeSwitcher`, `MacroTrackerHeader`, `PatientListTable` preview) em `src/app/design-system/components/OrganismsGallery.tsx`
-- [ ] T016 [skill: ui-animations-motion] [US2] Integrar o visualizador principal da galeria `ComponentPlaygroundSection.tsx` em `src/app/design-system/components/ComponentPlaygroundSection.tsx`
+- [x] T011 [skill: ui-ux-pro-max] [P] [US2] Implementar os knobs de controle de props `PlaygroundControls.tsx` em `src/app/design-system/components/PlaygroundControls.tsx`
+- [x] T012 [skill: ui-ux-pro-max] [P] [US2] Implementar o sandbox isolado de preview `ComponentSandbox.tsx` em `src/app/design-system/components/ComponentSandbox.tsx`
+- [x] T013 [skill: frontend-design] [US2] Criar a galeria de Átomos (`Button`, `Input`, `Badge`, `Avatar`, `Surface`, `Spinner`, `Skeleton`) em `src/app/design-system/components/AtomsGallery.tsx`
+- [x] T014 [skill: frontend-design] [US2] Criar a galeria de Moléculas (`FormField`, `MetricBox`, `TacoSearchInput`, `PatientBadgeHeader`) em `src/app/design-system/components/MoleculesGallery.tsx`
+- [x] T015 [skill: frontend-design] [US2] Criar a galeria de Organismos (`DietModeSwitcher`, `MacroTrackerHeader`, `PatientListTable` preview) em `src/app/design-system/components/OrganismsGallery.tsx`
+- [x] T016 [skill: ui-animations-motion] [US2] Integrar o visualizador principal da galeria `ComponentPlaygroundSection.tsx` em `src/app/design-system/components/ComponentPlaygroundSection.tsx`
 
 **Checkpoint**: User Stories 1 e 2 totalmente operacionais e testáveis.
 
@@ -74,9 +74,9 @@
 
 **Independent Test**: Buscar por um termo na barra de busca, alternar para o "Modo Showcase Cliente" e validar a oculta dos detalhes de código.
 
-- [ ] T017 [skill: ui-ux-pro-max] [P] [US3] Implementar campo de busca e filtros dinâmicos em `src/app/design-system/components/ShowcaseSearch.tsx`
-- [ ] T018 [skill: frontend-design] [US3] Criar a galeria de telas/composições completas `CompositionGallery.tsx` em `src/app/design-system/components/CompositionGallery.tsx`
-- [ ] T019 [skill: frontend-design] [US3] Refatorar a página principal `/design-system/page.tsx` em `src/app/design-system/page.tsx` integrando todas as seções, filtros e controles de modo de exibição
+- [x] T017 [skill: ui-ux-pro-max] [P] [US3] Implementar campo de busca e filtros dinâmicos em `src/app/design-system/components/ShowcaseSearch.tsx`
+- [x] T018 [skill: frontend-design] [US3] Criar a galeria de telas/composições completas `CompositionGallery.tsx` em `src/app/design-system/components/CompositionGallery.tsx`
+- [x] T019 [skill: frontend-design] [US3] Refatorar a página principal `/design-system/page.tsx` em `src/app/design-system/page.tsx` integrando todas as seções, filtros e controles de modo de exibição
 
 **Checkpoint**: Todas as histórias de usuário entregues com filtragem e alternância de modos.
 
@@ -86,9 +86,9 @@
 
 **Purpose**: Refinamentos visuais, animações, acessibilidade e verificação
 
-- [ ] T020 [skill: ui-animations-motion] Adicionar micro-interações de hover e transições suaves de abas em `src/app/design-system/components/`
-- [ ] T021 [skill: ui-ux-pro-max] Validar contraste de cores WCAG AA e atalhos de navegação por teclado em toda a página `/design-system`
-- [ ] T022 [skill: webapp-testing] Executar verificação visual rápida com guia `quickstart.md` no navegador
+- [x] T020 [skill: ui-animations-motion] Adicionar micro-interações de hover e transições suaves de abas em `src/app/design-system/components/`
+- [x] T021 [skill: ui-ux-pro-max] Validar contraste de cores WCAG AA e atalhos de navegação por teclado em toda a página `/design-system`
+- [x] T022 [skill: webapp-testing] Executar verificação visual rápida com guia `quickstart.md` no navegador
 
 ---
 

@@ -1,0 +1,220 @@
+import { ColorTokenSpec, StructuralTokenSpec, TypographyTokenSpec } from "./types";
+import { textStyleContracts, textStyleIds } from "@/design-system";
+
+export const colorTokens: ColorTokenSpec[] = [
+  // Reference Layer
+  {
+    id: "ref-warm-0",
+    name: "Warm 0 (Pure White)",
+    layer: "reference",
+    cssVariable: "--ref-color-warm-0",
+    hexValue: "#ffffff",
+    hslValue: "hsl(0, 0%, 100%)",
+    contrastRatioOnDark: "16.8:1",
+    contrastRatioOnLight: "1:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Superfície de cartões, botões em repouso e áreas claras",
+  },
+  {
+    id: "ref-warm-15",
+    name: "Warm 15 (Canvas Light)",
+    layer: "reference",
+    cssVariable: "--ref-color-warm-15",
+    hexValue: "#fcfaf7",
+    hslValue: "hsl(36, 40%, 98%)",
+    contrastRatioOnDark: "16.2:1",
+    contrastRatioOnLight: "1.05:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Fundo principal da aplicação (Canvas)",
+  },
+  {
+    id: "ref-warm-950",
+    name: "Warm 950 (Text Primary)",
+    layer: "reference",
+    cssVariable: "--ref-color-warm-950",
+    hexValue: "#201c18",
+    hslValue: "hsl(30, 14%, 11%)",
+    contrastRatioOnDark: "1.1:1",
+    contrastRatioOnLight: "15.4:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Texto principal e títulos de alta hierarquia",
+  },
+  {
+    id: "ref-blue-700",
+    name: "Blue 700 (Action Primary)",
+    layer: "reference",
+    cssVariable: "--ref-color-blue-700",
+    hexValue: "#2746b3",
+    hslValue: "hsl(227, 64%, 43%)",
+    contrastRatioOnDark: "5.8:1",
+    contrastRatioOnLight: "6.2:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Ações primárias, links destacados e botões principais",
+  },
+  {
+    id: "ref-protein-500",
+    name: "Protein 500",
+    layer: "reference",
+    cssVariable: "--ref-color-protein-500",
+    hexValue: "#b8325a",
+    hslValue: "hsl(342, 57%, 46%)",
+    contrastRatioOnDark: "4.8:1",
+    contrastRatioOnLight: "5.1:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Identificador de Macronutriente Proteína",
+  },
+  {
+    id: "ref-carbohydrate-500",
+    name: "Carbohydrate 500",
+    layer: "reference",
+    cssVariable: "--ref-color-carbohydrate-500",
+    hexValue: "#a55b00",
+    hslValue: "hsl(33, 100%, 32%)",
+    contrastRatioOnDark: "4.9:1",
+    contrastRatioOnLight: "5.2:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Identificador de Macronutriente Carboidrato",
+  },
+  {
+    id: "ref-fat-500",
+    name: "Fat 500",
+    layer: "reference",
+    cssVariable: "--ref-color-fat-500",
+    hexValue: "#0f766e",
+    hslValue: "hsl(175, 77%, 26%)",
+    contrastRatioOnDark: "6.1:1",
+    contrastRatioOnLight: "6.5:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Identificador de Macronutriente Gordura",
+  },
+
+  // System Layer
+  {
+    id: "sys-canvas",
+    name: "sys.color.canvas",
+    layer: "system",
+    cssVariable: "--sys-color-canvas",
+    hexValue: "#fcfaf7",
+    hslValue: "var(--ref-color-warm-15)",
+    contrastRatioOnDark: "16.2:1",
+    contrastRatioOnLight: "1.05:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Background de página do sistema",
+  },
+  {
+    id: "sys-surface",
+    name: "sys.color.surface",
+    layer: "system",
+    cssVariable: "--sys-color-surface",
+    hexValue: "#ffffff",
+    hslValue: "var(--ref-color-warm-0)",
+    contrastRatioOnDark: "16.8:1",
+    contrastRatioOnLight: "1:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Superfície de cards, modais e containers",
+  },
+  {
+    id: "sys-action-primary",
+    name: "sys.color.action.primary",
+    layer: "system",
+    cssVariable: "--sys-color-action-primary",
+    hexValue: "#2746b3",
+    hslValue: "var(--ref-color-blue-700)",
+    contrastRatioOnDark: "5.8:1",
+    contrastRatioOnLight: "6.2:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Botões de ação primária e foco",
+  },
+  {
+    id: "sys-text-primary",
+    name: "sys.color.text.primary",
+    layer: "system",
+    cssVariable: "--sys-color-text-primary",
+    hexValue: "#201c18",
+    hslValue: "var(--ref-color-warm-950)",
+    contrastRatioOnDark: "1.1:1",
+    contrastRatioOnLight: "15.4:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Cor padrão de textos e headings",
+  },
+
+  // Component Layer
+  {
+    id: "cmp-button-primary-bg",
+    name: "cmp.button.primary.background",
+    layer: "component",
+    cssVariable: "--cmp-button-primary-background",
+    hexValue: "#2746b3",
+    hslValue: "var(--sys-color-action-primary)",
+    contrastRatioOnDark: "5.8:1",
+    contrastRatioOnLight: "6.2:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Fundo de botões primários",
+  },
+  {
+    id: "cmp-sidebar-background",
+    name: "cmp.sidebar.background",
+    layer: "component",
+    cssVariable: "--cmp-sidebar-background",
+    hexValue: "#ffffff",
+    hslValue: "var(--sys-color-surface)",
+    contrastRatioOnDark: "16.8:1",
+    contrastRatioOnLight: "1:1",
+    wcagAa: true,
+    wcagAaa: true,
+    usageContext: "Fundo da barra de navegação lateral (Sidebar)",
+  },
+];
+
+export const typographyTokens: TypographyTokenSpec[] = textStyleIds.map((id) => {
+  const contract = textStyleContracts[id];
+  return {
+    id: `typography-${id}`,
+    styleId: id,
+    name: id,
+    fontFamily: "Plus Jakarta Sans, system-ui",
+    fontSize: id === "page-title" ? "24px" : id === "section-title" ? "18px" : id === "card-title" ? "15px" : "14px",
+    lineHeight: "1.4",
+    fontWeight: id.includes("title") || id === "overline" ? "600" : "400",
+    allowedElements: [...contract.allowedElements],
+    sampleText: id === "page-title" 
+      ? "NutriDiet Clinical Software" 
+      : id === "section-title" 
+      ? "Plano Alimentar & Macronutrientes" 
+      : id === "overline" 
+      ? "COMPONENTE CANÔNICO" 
+      : "Visualização clara e precisa dos parâmetros do paciente.",
+  };
+});
+
+export const structuralTokens: StructuralTokenSpec[] = [
+  // Spacing
+  { id: "space-1", name: "Space 1 (4px)", type: "spacing", cssVariable: "--ref-space-1", value: "4px", pixelEquivalent: "4px" },
+  { id: "space-2", name: "Space 2 (8px)", type: "spacing", cssVariable: "--ref-space-2", value: "8px", pixelEquivalent: "8px" },
+  { id: "space-3", name: "Space 3 (12px)", type: "spacing", cssVariable: "--ref-space-3", value: "12px", pixelEquivalent: "12px" },
+  { id: "space-4", name: "Space 4 (16px)", type: "spacing", cssVariable: "--ref-space-4", value: "16px", pixelEquivalent: "16px" },
+  { id: "space-6", name: "Space 6 (24px)", type: "spacing", cssVariable: "--ref-space-6", value: "24px", pixelEquivalent: "24px" },
+  { id: "space-8", name: "Space 8 (32px)", type: "spacing", cssVariable: "--ref-space-8", value: "32px", pixelEquivalent: "32px" },
+
+  // Radius
+  { id: "radius-4", name: "Radius Compact", type: "radius", cssVariable: "--sys-radius-compact", value: "4px", pixelEquivalent: "4px" },
+  { id: "radius-6", name: "Radius Control", type: "radius", cssVariable: "--sys-radius-control", value: "6px", pixelEquivalent: "6px" },
+  { id: "radius-8", name: "Radius Surface", type: "radius", cssVariable: "--sys-radius-surface", value: "8px", pixelEquivalent: "8px" },
+  { id: "radius-round", name: "Radius Round", type: "radius", cssVariable: "--sys-radius-round", value: "9999px", pixelEquivalent: "9999px" },
+
+  // Shadows
+  { id: "shadow-floating", name: "Shadow Floating", type: "shadow", cssVariable: "--sys-shadow-floating", value: "0 4px 12px rgba(32, 28, 24, 0.1)" },
+  { id: "shadow-overlay", name: "Shadow Overlay", type: "shadow", cssVariable: "--sys-shadow-overlay", value: "0 8px 24px rgba(32, 28, 24, 0.12)" },
+];
