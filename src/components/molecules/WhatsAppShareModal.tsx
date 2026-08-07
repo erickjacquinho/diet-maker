@@ -27,10 +27,10 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-800">
-            <MessageCircle className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <MessageCircle className="w-5 h-5 text-success" />
             Enviar Dieta via WhatsApp
           </DialogTitle>
           <DialogDescription>
@@ -42,13 +42,13 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
           <textarea
             readOnly
             value={whatsAppText}
-            className="w-full h-64 p-3 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none"
+            className="w-full h-64 p-3 text-style-legal font-mono bg-surface-subtle border border-border-subtle rounded-control resize-none focus:outline-none"
           />
         </div>
 
-        <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
+        <DialogFooter className="flex items-center justify-between w-full">
           <Button variant="secondary" size="compact" onClick={handleCopy}>
-            {copied ? <Check className="w-4 h-4 mr-1 text-emerald-600" /> : <Copy className="w-4 h-4 mr-1" />}
+            {copied ? <Check className="w-4 h-4 mr-1 text-success" /> : <Copy className="w-4 h-4 mr-1" />}
             {copied ? 'Copiado' : 'Copiar Texto'}
           </Button>
           <div className="flex gap-2">

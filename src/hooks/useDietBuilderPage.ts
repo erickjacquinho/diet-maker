@@ -2,16 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getPatientById, Patient } from '@/lib/patientsStore';
 import {
-  FullDietPlan,
   DietMeal,
-  getDietFromStorage,
   saveDietToStorage,
-  createInitialDietPlan,
 } from '@/lib/dietStore';
 import { toast } from 'sonner';
 import { useDietCalculations } from './useDietCalculations';
 import { useDietBuilderModals } from './useDietBuilderModals';
 import { useDietMealActions } from './useDietMealActions';
+import { useDietPresets } from './useDietPresets';
 
 export function useDietBuilderPage() {
   const params = useParams();
@@ -21,7 +19,6 @@ export function useDietBuilderPage() {
   const dietaId = (params?.dietaId as string) || 'nova';
 
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [dietPlan, setDietPlan] = useState<FullDietPlan | null>(null);
   const [activeVariationId, setActiveVariationId] = useState<string>('var-high');
 
   // Load Patient & Diet Plan
@@ -46,26 +43,14 @@ export function useDietBuilderPage() {
     }
     setPatient(p);
 
-    if (dietaId !== 'nova') {
-      const saved = getDietFromStorage(patientId, dietaId);
-      if (saved) {
-        setDietPlan(saved);
-        if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
-          setActiveVariationId(saved.carbCyclingVariations[0].id);
-        }
-        return;
-      }
-    }
+  }, [patientId]);
 
-    const initial = createInitialDietPlan(patientId, {
-      weightKg: p.weightKg,
-      targetKcal: p.targetKcal,
-      targetProtein: p.targetProtein,
-      targetCarbs: p.targetCarbs,
-      targetFats: p.targetFats,
-    });
-    setDietPlan(initial);
-  }, [patientId, dietaId]);
+  const { dietPlan, setDietPlan } = useDietPresets({
+    patientId,
+    dietaId,
+    patient,
+    setActiveVariationId,
+  });
 
   // Calculations hook
   const {

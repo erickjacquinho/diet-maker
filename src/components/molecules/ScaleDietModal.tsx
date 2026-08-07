@@ -20,10 +20,10 @@ export function ScaleDietModal({
 }: ScaleDietModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-800">
-            <Percent className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <Percent className="w-5 h-5 text-success" />
             Escalar Quantidade dos Alimentos
           </DialogTitle>
           <DialogDescription>
@@ -31,7 +31,7 @@ export function ScaleDietModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
+        <div className="py-4 flex flex-col gap-4">
           <div className="flex items-center justify-center gap-2">
             {[-20, -10, -5, 5, 10, 20].map((pct) => (
               <Button

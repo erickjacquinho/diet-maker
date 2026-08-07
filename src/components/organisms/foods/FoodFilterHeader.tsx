@@ -43,15 +43,15 @@ export function FoodFilterHeader({
   onOpenCreateModal,
 }: FoodFilterHeaderProps) {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Title & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-emerald-600" />
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Base de Alimentos TACO</h1>
+            <BookOpen className="w-6 h-6 text-success" />
+            <h1 className="text-style-section-title font-bold text-text-primary tracking-tight">Base de Alimentos TACO</h1>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-style-body-secondary text-text-secondary mt-1">
             Exibindo {filteredCount} de {totalCount} alimentos cadastrados.
           </p>
         </div>
@@ -60,7 +60,7 @@ export function FoodFilterHeader({
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
         <Button
           variant={activeTab === 'all' ? 'primary' : 'quiet'}
           size="compact"
@@ -85,19 +85,19 @@ export function FoodFilterHeader({
       </div>
 
       {/* Filters Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
-        <div className="relative md:col-span-2">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="grid grid-cols-5 gap-3 bg-surface-subtle p-3 rounded-control border border-border-subtle">
+        <div className="relative col-span-2">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <Input
             placeholder="Buscar por nome ou categoria..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white"
+            className="pl-9 bg-surface"
           />
         </div>
 
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-surface">
             <SelectValue placeholder="Categoria" />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +111,7 @@ export function FoodFilterHeader({
         </Select>
 
         <Select value={preparoFilter} onValueChange={setPreparoFilter}>
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-surface">
             <SelectValue placeholder="Preparo" />
           </SelectTrigger>
           <SelectContent>
@@ -126,7 +126,7 @@ export function FoodFilterHeader({
 
         <div className="flex gap-2">
           <Select value={macroPreset} onValueChange={(val: any) => setMacroPreset(val)}>
-            <SelectTrigger className="bg-white flex-1">
+            <SelectTrigger className="bg-surface flex-1">
               <SelectValue placeholder="Filtro Macro" />
             </SelectTrigger>
             <SelectContent>
@@ -139,7 +139,7 @@ export function FoodFilterHeader({
           </Select>
 
           <Button variant="secondary" size="compact" iconOnly onClick={resetFilters} title="Limpar Filtros">
-            <RotateCcw className="w-4 h-4 text-slate-500" />
+            <RotateCcw className="w-4 h-4 text-text-muted" />
           </Button>
         </div>
       </div>

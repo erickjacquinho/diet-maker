@@ -68,10 +68,10 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         <div>
           <div className="text-style-legal font-bold text-text-primary">{name}</div>
           <div className="mt-1 flex items-center gap-1 flex-wrap">
-            <Badge variant="outline" className="border-macro-protein-border bg-macro-protein-soft text-macro-protein font-bold text-[10px] px-1.5 py-0">P: {protein}g</Badge>
-            <Badge variant="outline" className="border-macro-carbohydrate-border bg-macro-carbohydrate-soft text-macro-carbohydrate font-bold text-[10px] px-1.5 py-0">C: {carbs}g</Badge>
-            <Badge variant="outline" className="border-macro-fat-border bg-macro-fat-soft text-macro-fat font-bold text-[10px] px-1.5 py-0">G: {fats}g</Badge>
-            <Badge variant="outline" className="border-border-subtle bg-surface-subtle text-text-muted font-bold text-[10px] px-1.5 py-0">{kcal} kcal</Badge>
+              <Badge variant="outline" className="border-macro-protein-border bg-macro-protein-soft text-macro-protein font-bold text-style-legal px-1.5 py-0">P: {protein}g</Badge>
+              <Badge variant="outline" className="border-macro-carbohydrate-border bg-macro-carbohydrate-soft text-macro-carbohydrate font-bold text-style-legal px-1.5 py-0">C: {carbs}g</Badge>
+              <Badge variant="outline" className="border-macro-fat-border bg-macro-fat-soft text-macro-fat font-bold text-style-legal px-1.5 py-0">G: {fats}g</Badge>
+              <Badge variant="outline" className="border-border-subtle bg-surface-subtle text-text-muted font-bold text-style-legal px-1.5 py-0">{kcal} kcal</Badge>
           </div>
         </div>
       </div>

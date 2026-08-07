@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle } from 'lucide-react';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
@@ -8,10 +8,12 @@ import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIco
 import {
   PatientConsultationHistoryTable,
   PatientProfileHeader,
-  ConsolidatedConsultationUpdate,
 } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
+import { PageContextHeader } from '@/components/molecules';
 import { PatientProfileModals } from './PatientProfileModals';
+import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
+import { buildPatientProfileConsultations } from '@/lib/patientProfileConsultations';
 
 export default function PatientDetailPage() {
   const {
@@ -19,6 +21,9 @@ export default function PatientDetailPage() {
     patient,
     dietHistory,
     bodyAssessments,
+    activePlan,
+    latestAssessment,
+    nextEventSummary,
     whatsappUrl,
     availableObjectives,
     isDeleteModalOpen,
@@ -47,43 +52,32 @@ export default function PatientDetailPage() {
     handleDeletePatient,
   } = usePatientProfilePage();
 
-  const consultationUpdates: ConsolidatedConsultationUpdate[] = useMemo(() => {
-    const map = new Map<string, ConsolidatedConsultationUpdate>();
-
-    dietHistory.forEach((d) => {
-      if (!map.has(d.date)) {
-        map.set(d.date, { date: d.date, diet: d });
-      } else {
-        map.get(d.date)!.diet = d;
-      }
-    });
-
-    bodyAssessments.forEach((a) => {
-      if (!map.has(a.date)) {
-        map.set(a.date, { date: a.date, assessment: a });
-      } else {
-        map.get(a.date)!.assessment = a;
-      }
-    });
-
-    return Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
-  }, [dietHistory, bodyAssessments]);
+  const consultationUpdates = buildPatientProfileConsultations(dietHistory, bodyAssessments);
 
   if (!patient) {
     return (
       <div className="container mx-auto py-12 px-4 text-center">
-        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-slate-800 mb-2">Paciente Não Encontrado</h2>
-        <p className="text-slate-500 mb-6">O paciente solicitado não existe ou foi removido.</p>
+        <AlertTriangle className="size-12 text-warning mx-auto mb-4" />
+        <h2 className="text-style-section-title font-bold text-text-primary mb-2">Paciente Não Encontrado</h2>
+        <p className="text-text-secondary mb-6">O paciente solicitado não existe ou foi removido.</p>
         <Link href="/pacientes">
-          <SecondaryActionButton icon={<ArrowLeft size={14} />}>Voltar para Lista de Pacientes</SecondaryActionButton>
+          <SecondaryActionButton icon={<ArrowLeft size={14} />}>Voltar para Pacientes</SecondaryActionButton>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl">
+    <div className="container mx-auto py-6 px-4 flex flex-col gap-6 max-w-7xl">
+      <PageContextHeader
+        title="Perfil do paciente"
+        backHref="/pacientes"
+        backLabel="Voltar para Pacientes"
+        breadcrumbs={[
+          { label: 'Pacientes', href: '/pacientes' },
+          { label: patient.name },
+        ]}
+      />
       <PatientProfileHeader patient={patient}>
         <PatientProfileHeader.Identity>
           <PatientProfileHeader.Avatar />
@@ -98,33 +92,45 @@ export default function PatientDetailPage() {
         </PatientProfileHeader.Identity>
 
         <PatientProfileHeader.Actions>
-          {whatsappUrl && (
-            <Button
-              variant="secondary"
-              size="compact"
-              onClick={() => window.open(whatsappUrl, '_blank')}
-            >
-              <MessageCircle className="w-4 h-4 mr-1 text-emerald-600" />
+          <Button
+            variant="secondary"
+            size="compact"
+            aria-label="Abrir conversa no WhatsApp"
+            disabled={!whatsappUrl}
+            onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+          >
+              <MessageCircle className="w-4 h-4 mr-1 text-success" />
               WhatsApp
-            </Button>
-          )}
+          </Button>
           <Button variant="secondary" size="compact" onClick={() => setIsNextEventModalOpen(true)}>
-            <Calendar className="w-4 h-4 mr-1 text-indigo-600" />
+            <Calendar className="w-4 h-4 mr-1 text-primary" />
             Acompanhamento
           </Button>
-          <EditIconButton onClick={() => setIsEditModalOpen(true)} title="Editar dados do paciente" />
-          <DeleteIconButton onClick={() => setIsDeleteModalOpen(true)} title="Excluir paciente" />
+          <EditIconButton onClick={() => setIsEditModalOpen(true)} title="Editar Cadastro" />
+          <DeleteIconButton
+            onClick={() => setIsDeleteModalOpen(true)}
+            title="Excluir Paciente"
+            variant="destructive-outline"
+          />
         </PatientProfileHeader.Actions>
       </PatientProfileHeader>
 
-      <Surface className="p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+      <PatientProfileCurrentContext
+        patientId={patientId}
+        latestAssessment={latestAssessment}
+        activePlan={activePlan}
+        nextEventSummary={nextEventSummary}
+        onOpenNextEvent={() => setIsNextEventModalOpen(true)}
+      />
+
+      <Surface className="p-6 flex flex-col gap-6">
+        <div className="flex items-center justify-between gap-4 border-b border-border-divider pb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-emerald-600" />
+            <h2 className="text-style-section-title font-bold text-text-primary flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-success" />
               Histórico de Consultas & Acompanhamento
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-style-caption text-text-secondary mt-0.5">
               Consolidado de dietas e avaliações antropométricas do paciente.
             </p>
           </div>

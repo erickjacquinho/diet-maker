@@ -36,7 +36,7 @@ export default function FoodsPage() {
   } = useFoodSearchPage();
 
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-7xl">
+    <div className="container mx-auto py-6 flex flex-col gap-6 max-w-7xl">
       <FoodFilterHeader
         totalCount={foods.length}
         filteredCount={filteredFoods.length}

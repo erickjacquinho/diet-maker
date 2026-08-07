@@ -2,6 +2,7 @@ import type {
   BodyAssessment,
   HistoricalDiet,
   PatientNextEvent,
+  StoredDietRecord,
 } from './patientsStore';
 
 export interface ActivePlanSummary {
@@ -84,6 +85,29 @@ export function selectActivePlan(diets: HistoricalDiet[]): ActivePlanSummary | n
     carbsG: activePlan.carbsG,
     fatsG: activePlan.fatsG,
   };
+}
+
+function numericRecordValue(record: StoredDietRecord, key: string): number {
+  const value = record[key];
+  return typeof value === 'number' ? value : Number(value) || 0;
+}
+
+export function buildPatientDietHistory(records: StoredDietRecord[]): HistoricalDiet[] {
+  const mapped = records.map((record, index) => ({
+    id: String(record.id ?? `diet-${index}`),
+    name: String(record.name ?? 'Prescrição Alimentar'),
+    date: String(record.date ?? record.updatedAt ?? record.createdAt ?? ''),
+    targetKcal: numericRecordValue(record, 'simpleTargetKcal'),
+    proteinG: numericRecordValue(record, 'simpleTargetProtein'),
+    carbsG: numericRecordValue(record, 'simpleTargetCarbs'),
+    fatsG: numericRecordValue(record, 'simpleTargetFats'),
+    status: record.status === 'Histórica' ? 'Histórica' : 'Ativa',
+  } satisfies HistoricalDiet));
+
+  const sorted = [...mapped].sort((left, right) =>
+    (normalizePatientDateKey(right.date) ?? '').localeCompare(normalizePatientDateKey(left.date) ?? ''),
+  );
+  return sorted.map((diet, index) => ({ ...diet, status: index === 0 ? 'Ativa' : 'Histórica' }));
 }
 
 export function buildNextEventSummary(event: PatientNextEvent | null | undefined): NextEventSummary | null {

@@ -14,7 +14,7 @@ import type { Patient, BodyAssessment, HistoricalDiet, PatientNextEvent } from '
 export interface PatientProfileModalsProps {
   patient: Patient;
   availableObjectives: string[];
-  objectiveToApply: string;
+  objectiveToApply?: string;
   isEditModalOpen: boolean;
   setIsEditModalOpen: (open: boolean) => void;
   isDeleteModalOpen: boolean;

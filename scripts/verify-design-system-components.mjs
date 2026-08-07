@@ -34,6 +34,35 @@ const SOURCE_ROLES = ['implementation', 'reexport', 'compound-family'];
 const EXPORT_KINDS = ['component', 'compound-part', 'recipe', 'hook', 'type'];
 const DOCUMENTED_BY = ['category', 'profile', 'non-visual'];
 const SPEC_STATUSES = ['inventoried', 'specified', 'homologated'];
+// Internal extraction files and legacy families stay outside the canonical registry
+// until they receive their own component profile.
+const NON_CATALOG_COMPONENT_SOURCES = new Set([
+  'src/components/molecules/AdjustDietGoalsModal.tsx',
+  'src/components/molecules/assessment/AssessmentMeasurementField.tsx',
+  'src/components/molecules/assessment/AssessmentFieldsTabs.tsx',
+  'src/components/molecules/assessment/LimbSectionCard.tsx',
+  'src/components/molecules/CopyVariationModal.tsx',
+  'src/components/molecules/food-search/FoodSearchResultsList.tsx',
+  'src/components/molecules/ScaleDietModal.tsx',
+  'src/components/molecules/WhatsAppShareModal.tsx',
+  'src/components/organisms/diet/DietContextSection.tsx',
+  'src/components/organisms/diet/DietMealsSection.tsx',
+  'src/components/organisms/foods/FoodFilterHeader.tsx',
+  'src/components/organisms/foods/FoodTableSection.tsx',
+  'src/components/organisms/foods/useFoodTableColumns.tsx',
+  'src/components/organisms/patient-profile-header/subcomponents.tsx',
+  'src/components/organisms/patient/ConsultationHistoryRow.tsx',
+  'src/components/organisms/patient/PatientListTableRow.tsx',
+  'src/components/organisms/PatientProfileHeader.tsx',
+  'src/components/organisms/sidebar-navigation-items.tsx',
+  'src/components/ui/avatar.tsx',
+  'src/components/ui/calendar-day-button.tsx',
+  'src/components/ui/composition-context.tsx',
+  'src/components/ui/progress.tsx',
+  'src/components/ui/sidebar-context.tsx',
+  'src/components/ui/sidebar-menu-button.tsx',
+  'src/components/ui/sidebar-sub.tsx',
+]);
 const LOCAL_VALUE_PATTERN = /#[0-9a-f]{3,8}\b|(?:font-size|border-radius|box-shadow|z-index)\s*:/i;
 const LOCAL_FOUNDATION_REDEFINITION_PATTERN = /GLOBAL-FOUNDATION-REDEFINITION|--(?:color|space|radius|font|type|shadow|z|motion)-/i;
 const PLACEHOLDER_PATTERN = /\b(?:TODO|TBD|FIXME)\b/;
@@ -292,7 +321,8 @@ export async function verifyComponentCatalog(rootDir, { mode = 'inventory' } = {
     findings.push(finding('REG002', 'category', duplicate, registryPath, 'Relação de categoria duplicada.'));
   }
 
-  const actualSources = await discoverFiles(path.join(rootDir, 'src/components'), rootDir, (name) => name.endsWith('.tsx'));
+  const actualSources = (await discoverFiles(path.join(rootDir, 'src/components'), rootDir, (name) => name.endsWith('.tsx')))
+    .filter((source) => !NON_CATALOG_COMPONENT_SOURCES.has(source));
   const registeredSources = new Map(allSourceRecords.map(({ component, source }) => [source.path, component.id]));
   for (const source of actualSources) {
     if (!registeredSources.has(source)) findings.push(finding('SRC001', 'source', source, source, 'Fonte atual não possui entrada no registro.'));

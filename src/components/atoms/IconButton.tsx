@@ -47,7 +47,7 @@ export type ExplicitIconButtonProps = Omit<IconButtonProps, 'icon'> & {
 }
 
 /**
- * EditIconButton - Quiet icon-only component for Edit actions across the application.
+ * EditIconButton - Secondary icon-only component for Edit actions across the application.
  */
 export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
   className = '',
@@ -57,7 +57,7 @@ export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
 }) => (
   <IconButton
     ref={ref}
-    variant="quiet"
+    variant="secondary"
     title={title}
     aria-label={title}
     className={className}

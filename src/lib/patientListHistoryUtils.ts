@@ -1,13 +1,6 @@
-import type {
-  PatientListHistoryInput,
-  PatientListHistory,
-} from './patientListView';
-import {
-  getTodayDateKey,
-  getDateKeyDate,
-} from './patientListDateUtils';
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+import type { BodyAssessment } from './patientsStore';
+import type { PatientListHistory, PatientListHistoryInput } from './patientListView';
+import { getDaysUntilEvent, normalizeDateKey } from './patientListDateUtils';
 
 const BODY_FAT_FORMATTER = new Intl.NumberFormat('pt-BR', {
   minimumFractionDigits: 1,
@@ -30,68 +23,48 @@ function getRecordIndicatorLabel(hasAssessment: boolean, hasDiet: boolean): stri
   return 'Sem avaliação física ou dieta registrada';
 }
 
-export function computePatientListHistory(
-  input: PatientListHistoryInput,
-  today = getTodayDateKey(),
-): PatientListHistory {
-  const hasAssessment = input.hasAssessment ?? input.assessments.length > 0;
-  const { hasDiet } = input;
-  const recordIndicatorLabel = getRecordIndicatorLabel(hasAssessment, hasDiet);
+export function computePatientListHistory(input: PatientListHistoryInput): PatientListHistory {
+  const validAssessments = input.assessments
+    .map((assessment) => ({ assessment, dateKey: normalizeDateKey(assessment.date) }))
+    .filter(
+      (item): item is { assessment: BodyAssessment; dateKey: string } =>
+        item.dateKey !== null && Number.isFinite(item.assessment.bodyFatPercent),
+    )
+    .sort(
+      (left, right) =>
+        right.dateKey.localeCompare(left.dateKey) ||
+        right.assessment.id.localeCompare(left.assessment.id),
+    );
 
-  if (!hasAssessment || input.assessments.length === 0) {
-    return {
-      hasAssessment,
-      hasDiet,
-      currentBodyFatPercent: null,
-      previousBodyFatPercent: null,
-      bodyFatDeltaPercent: null,
-      bodyFatDeltaDays: null,
-      bodyFatLabel: 'Sem dados',
-      bodyFatDeltaLabel: null,
-      recordIndicatorLabel,
-    };
-  }
-
-  const sortedAssessments = [...input.assessments].sort((a, b) => b.date.localeCompare(a.date));
-  const latestAssessment = sortedAssessments[0];
-  const previousAssessment = sortedAssessments[1];
-  const currentBodyFatPercent = latestAssessment.bodyFatPercent;
-
-  if (!previousAssessment) {
-    return {
-      hasAssessment,
-      hasDiet,
-      currentBodyFatPercent,
-      previousBodyFatPercent: null,
-      bodyFatDeltaPercent: null,
-      bodyFatDeltaDays: null,
-      bodyFatLabel: formatBodyFatPercent(currentBodyFatPercent),
-      bodyFatDeltaLabel: null,
-      recordIndicatorLabel,
-    };
-  }
-
-  const previousBodyFatPercent = previousAssessment.bodyFatPercent;
-  const bodyFatDeltaPercent = Number(
-    (currentBodyFatPercent - previousBodyFatPercent).toFixed(1),
-  );
-
-  const latestDate = getDateKeyDate(latestAssessment.date);
-  const previousDate = getDateKeyDate(previousAssessment.date);
-  const bodyFatDeltaDays =
-    latestDate && previousDate
-      ? Math.max(0, Math.round((latestDate.getTime() - previousDate.getTime()) / DAY_IN_MS))
+  const current = validAssessments[0] ?? null;
+  const previous = validAssessments[1] ?? null;
+  const currentBodyFatPercent = current?.assessment.bodyFatPercent ?? null;
+  const previousBodyFatPercent = previous?.assessment.bodyFatPercent ?? null;
+  const bodyFatDeltaPercent =
+    currentBodyFatPercent !== null && previousBodyFatPercent !== null
+      ? currentBodyFatPercent - previousBodyFatPercent
       : null;
+  const bodyFatDeltaDays =
+    current && previous ? getDaysUntilEvent(current.dateKey, previous.dateKey) : null;
+  const hasAssessment = input.hasAssessment ?? input.assessments.length > 0;
 
   return {
     hasAssessment,
-    hasDiet,
+    hasDiet: input.hasDiet,
     currentBodyFatPercent,
     previousBodyFatPercent,
     bodyFatDeltaPercent,
     bodyFatDeltaDays,
-    bodyFatLabel: formatBodyFatPercent(currentBodyFatPercent),
-    bodyFatDeltaLabel: formatSignedPercent(bodyFatDeltaPercent),
-    recordIndicatorLabel,
+    bodyFatLabel:
+      currentBodyFatPercent === null
+        ? 'Sem avaliação corporal recente'
+        : formatBodyFatPercent(currentBodyFatPercent),
+    bodyFatDeltaLabel:
+      bodyFatDeltaPercent === null || bodyFatDeltaDays === null
+        ? null
+        : `${formatSignedPercent(bodyFatDeltaPercent)} ${bodyFatDeltaDays}d`,
+    recordIndicatorLabel: getRecordIndicatorLabel(hasAssessment, input.hasDiet),
   };
 }
+
+export const buildPatientListHistory = computePatientListHistory;

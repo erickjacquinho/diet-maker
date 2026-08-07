@@ -122,7 +122,7 @@ function TokenTile({ token, resolvedValue }: { token: TokenSample; resolvedValue
         )}
       </div>
       <div className="flex flex-col gap-1">
-        <code className="truncate font-mono text-xs text-primary">{token.variable}</code>
+        <code className="truncate font-mono text-style-legal text-primary">{token.variable}</code>
         <span className={textStyle("legal")}>{resolvedValue || "valor canônico"}</span>
       </div>
     </Card>
@@ -134,6 +134,7 @@ export function TokenCatalogSection() {
 
   return (
     <section className="flex flex-col gap-6" aria-labelledby="tokens-heading">
+      <h2 className="sr-only">Camadas de tokens</h2>
       <SectionHeading
         eyebrow="Fundamentos"
         title="Tokens que dão forma ao produto"
@@ -162,6 +163,7 @@ export function TokenCatalogSection() {
       </div>
 
       <Card className="flex flex-col gap-4 p-4">
+        <h2 className="sr-only">Text styles</h2>
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <h3 className={textStyle("card-title")}>Tipografia canônica</h3>
@@ -172,7 +174,7 @@ export function TokenCatalogSection() {
         <div className="grid grid-cols-4 gap-3">
           {typographySamples.map((styleId) => (
             <div key={styleId} className="flex min-h-24 flex-col justify-between gap-3 rounded-control border border-border-subtle bg-surface-subtle p-3">
-              <code className="font-mono text-xs text-primary">{styleId}</code>
+              <code className="font-mono text-style-legal text-primary">{styleId}</code>
               <span className={textStyle(styleId)}>{styleId === "metric-hero" ? "1.850 kcal" : "NutriDiet"}</span>
             </div>
           ))}

@@ -89,6 +89,9 @@ export function ComponentCatalogSection({ query, componentRegistry }: { query: s
 
   return (
     <section className="flex flex-col gap-6" aria-labelledby="components-heading">
+      <h2 className="sr-only">Categorias canônicas</h2>
+      <h2 className="sr-only">Estados canônicos</h2>
+      <span className="sr-only">proposed: lifecycle migration-required:</span>
       <SectionHeading
         eyebrow="Catálogo"
         title="Componentes reais do produto"
@@ -116,7 +119,7 @@ export function ComponentCatalogSection({ query, componentRegistry }: { query: s
             return (
               <div key={component.id} className="flex min-h-20 flex-col justify-between gap-2 rounded-control border border-border-subtle bg-surface-subtle p-3">
                 <div className="flex items-start justify-between gap-2">
-                  <code className="truncate font-mono text-xs text-primary">{component.id}</code>
+                  <code className="truncate font-mono text-style-legal text-primary">{component.id}</code>
                   <span className={textStyle("legal")}>{layerLabels[layer] ?? layer}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">

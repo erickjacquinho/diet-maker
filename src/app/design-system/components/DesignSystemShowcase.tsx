@@ -43,7 +43,7 @@ function DesignSystemShowcase({ componentRegistry, categoryCount }: { componentR
               <span className={textStyle("overline")}>NutriDiet / Design System</span>
             </div>
             <div className="flex flex-col gap-3">
-              <h1 className={textStyle("page-title")}>A linguagem visual do produto, retratada na própria interface.</h1>
+              <h1 className={textStyle("page-title")}>Design System canônico</h1>
               <p className={cn(textStyle("body-large"), "max-w-reading")}>Tokens canônicos, componentes reais e composições clínicas em uma página de referência objetiva para designers e desenvolvedores.</p>
             </div>
             <div className="flex items-center gap-2">

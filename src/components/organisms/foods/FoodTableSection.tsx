@@ -49,10 +49,10 @@ export function FoodTableSection({
   });
 
   return (
-    <div className="space-y-3">
-      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
+    <div className="flex flex-col gap-3">
+      <div className="border border-border-subtle rounded-control overflow-hidden bg-surface shadow-none">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-surface-subtle">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -66,7 +66,7 @@ export function FoodTableSection({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-slate-50/80 transition-colors">
+                <TableRow key={row.id} className="hover:bg-surface-hover transition-colors">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
@@ -74,7 +74,7 @@ export function FoodTableSection({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={columns.length} className="h-24 text-center text-text-muted">
                   Nenhum alimento encontrado com os filtros atuais.
                 </TableCell>
               </TableRow>
@@ -84,7 +84,7 @@ export function FoodTableSection({
       </div>
 
       <div className="flex items-center justify-between px-2">
-        <span className="text-xs text-slate-500">
+        <span className="text-style-legal text-text-muted">
           Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
         </span>
         <div className="flex items-center gap-1">

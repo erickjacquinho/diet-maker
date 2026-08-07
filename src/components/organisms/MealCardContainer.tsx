@@ -59,7 +59,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   return (
-    <Card className="p-0 flex flex-col justify-between border-border-subtle bg-surface">
+    <Card className="p-0 flex flex-col justify-between border-border-subtle bg-surface shadow-none">
       <div className="p-5 p-6 gap-4 flex-1 flex flex-col justify-between">
         <div className="flex flex-col gap-4">
           {/* Meal Header */}

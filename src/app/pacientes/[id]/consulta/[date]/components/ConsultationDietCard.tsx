@@ -7,14 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { MetricBox } from '@/components/molecules';
 import { EditIconButton } from '@/components/atoms';
-import { DietPlan } from '@/lib/patientsStore';
+import type { HistoricalDiet } from '@/lib/patientsStore';
 
 export function ConsultationDietCard({
   patientId,
   diet,
 }: {
   patientId: string;
-  diet: DietPlan;
+  diet: HistoricalDiet;
 }) {
   const [expandedMealIndexes, setExpandedMealIndexes] = useState<number[]>([]);
 

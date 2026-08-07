@@ -102,7 +102,7 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
       className={cn(
         layoutClasses,
         paddingBySize[size],
-        surface === 'raised' ? 'bg-surface border-border-subtle shadow-sm' : 'bg-surface-subtle border-border-subtle',
+        surface === 'raised' ? 'bg-surface border-border-subtle shadow-none' : 'bg-surface-subtle border-border-subtle',
         isTinted && tintedToneClasses[tone],
         className,
       )}
@@ -112,4 +112,3 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
     </Card>
   );
 };
-

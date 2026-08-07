@@ -12,6 +12,7 @@ import { Activity, Check } from "lucide-react";
 export function CompositionGallerySection() {
   return (
     <section className="flex flex-col gap-6" aria-labelledby="compositions-heading">
+      <h2 className="sr-only">Recipes e estados</h2>
       <div className="flex items-end justify-between gap-6 border-b border-border-divider pb-3">
         <div className="flex min-w-0 items-start gap-3">
           <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-control bg-primary-soft text-primary">

@@ -12,11 +12,13 @@ import {
   BodyAssessment,
   DEFAULT_OBJECTIVES,
   HistoricalDiet,
+  getPatientDietsFromStorage,
 } from '@/lib/patientsStore';
 import {
   buildNextEventSummary,
   selectActivePlan,
   selectLatestAssessment,
+  buildPatientDietHistory,
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
 
@@ -116,7 +118,8 @@ export function usePatientProfilePage() {
       const p = getPatientById(patientId);
       if (p) {
         setPatient(p);
-        setDietHistory(p.dietHistory || []);
+        const storedDiets = buildPatientDietHistory(getPatientDietsFromStorage(p.id));
+        setDietHistory(storedDiets.length > 0 ? storedDiets : p.dietHistory || []);
         const loadedAssessments = getPatientAssessmentsFromStorage(p.id);
         setBodyAssessments(loadedAssessments.length > 0 ? loadedAssessments : p.bodyAssessments || []);
       }
@@ -126,7 +129,8 @@ export function usePatientProfilePage() {
   const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
   const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
   const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
-  const whatsappUrl = useMemo(() => getWhatsappUrl(patient?.phone), [patient?.phone]);
+  const whatsappContact = patient?.whatsapp ?? patient?.phone;
+  const whatsappUrl = useMemo(() => getWhatsappUrl(whatsappContact), [whatsappContact]);
 
   const handleSavePatient = useCallback((updatedPatient: Patient) => {
     const saved = updatePatientInStorage(updatedPatient);

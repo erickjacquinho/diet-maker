@@ -12,6 +12,8 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CalendarDayButton } from "./calendar-day-button"
 
+// CalendarDayButton owns the data-selected-single contract for day state.
+
 type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }

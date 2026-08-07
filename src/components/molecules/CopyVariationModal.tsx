@@ -28,10 +28,10 @@ export function CopyVariationModal({
 }: CopyVariationModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-800">
-            <Copy className="w-5 h-5 text-indigo-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <Copy className="w-5 h-5 text-primary" />
             Copiar Refeições entre Variações
           </DialogTitle>
           <DialogDescription>
@@ -39,9 +39,9 @@ export function CopyVariationModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
+        <div className="py-4 flex flex-col gap-4">
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Copiar de:</label>
+            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Copiar de:</label>
             <Select value={copySourceId} onValueChange={setCopySourceId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione a origem" />
@@ -57,7 +57,7 @@ export function CopyVariationModal({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Para:</label>
+            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Para:</label>
             <Select value={copyTargetId} onValueChange={setCopyTargetId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o destino" />

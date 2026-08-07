@@ -31,10 +31,10 @@ export function AdjustDietGoalsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-800">
-            <Edit3 className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <Edit3 className="w-5 h-5 text-success" />
             Ajustar Metas de Macronutrientes
           </DialogTitle>
           <DialogDescription>
@@ -42,10 +42,10 @@ export function AdjustDietGoalsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
+        <div className="py-4 flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Proteína (g)</label>
+            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Proteína (g)</label>
               <Input
                 type="number"
                 value={tempTargetProt}
@@ -53,7 +53,7 @@ export function AdjustDietGoalsModal({
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Carboidratos (g)</label>
+            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Carboidratos (g)</label>
               <Input
                 type="number"
                 value={tempTargetCarb}
@@ -61,7 +61,7 @@ export function AdjustDietGoalsModal({
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Gorduras (g)</label>
+            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Gorduras (g)</label>
               <Input
                 type="number"
                 value={tempTargetFat}
@@ -70,9 +70,9 @@ export function AdjustDietGoalsModal({
             </div>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-lg text-center">
-            <span className="text-xs text-slate-500 block">Total Calculado</span>
-            <span className="text-lg font-bold text-slate-800">{calcKcal} kcal</span>
+          <div className="p-3 bg-surface-subtle rounded-control text-center">
+            <span className="text-style-legal text-text-muted block">Total Calculado</span>
+            <span className="text-style-body font-bold text-text-primary">{calcKcal} kcal</span>
           </div>
         </div>
 

@@ -8,11 +8,11 @@ export interface AssessmentFieldConfig {
 
 export const TRUNK_FIELDS: AssessmentFieldConfig[] = [
   { field: 'neckCm', label: 'Pescoço', unit: 'cm' },
+  { field: 'scapulaCm', label: 'Escápula', unit: 'cm' },
+  { field: 'bustCm', label: 'Busto', unit: 'cm' },
   { field: 'waistCm', label: 'Cintura', unit: 'cm' },
   { field: 'abdomenCm', label: 'Barriga', unit: 'cm' },
   { field: 'hipCm', label: 'Quadril', unit: 'cm' },
-  { field: 'scapulaCm', label: 'Escápula', unit: 'cm' },
-  { field: 'bustCm', label: 'Busto', unit: 'cm' },
 ];
 
 export const UPPER_LIMB_FIELDS: AssessmentFieldConfig[] = [
@@ -21,10 +21,10 @@ export const UPPER_LIMB_FIELDS: AssessmentFieldConfig[] = [
 ];
 
 export const LOWER_LIMB_FIELDS: AssessmentFieldConfig[] = [
-  { field: 'leftProximalThighCm', label: 'Coxa proximal esq.', unit: 'cm' },
-  { field: 'rightProximalThighCm', label: 'Coxa proximal dir.', unit: 'cm' },
-  { field: 'leftDistalThighCm', label: 'Coxa distal esq.', unit: 'cm' },
-  { field: 'rightDistalThighCm', label: 'Coxa distal dir.', unit: 'cm' },
-  { field: 'leftCalfCm', label: 'Panturrilha esq.', unit: 'cm' },
-  { field: 'rightCalfCm', label: 'Panturrilha dir.', unit: 'cm' },
+  { field: 'leftProximalThighCm', label: 'Coxa proximal esquerda', unit: 'cm' },
+  { field: 'rightProximalThighCm', label: 'Coxa proximal direita', unit: 'cm' },
+  { field: 'leftDistalThighCm', label: 'Coxa distal esquerda', unit: 'cm' },
+  { field: 'rightDistalThighCm', label: 'Coxa distal direita', unit: 'cm' },
+  { field: 'leftCalfCm', label: 'Panturrilha esquerda', unit: 'cm' },
+  { field: 'rightCalfCm', label: 'Panturrilha direita', unit: 'cm' },
 ];

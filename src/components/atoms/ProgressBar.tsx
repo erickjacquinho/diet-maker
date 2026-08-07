@@ -28,6 +28,9 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <Progress
       value={clampedValue}
+      aria-valuenow={clampedValue}
+      aria-valuemin={0}
+      aria-valuemax={100}
       className={cn(recipes.progress({ tone: tones[colorVariant], size: 'compact' }), className)}
       indicatorClassName={toneIndicatorMap[colorVariant]}
     />
