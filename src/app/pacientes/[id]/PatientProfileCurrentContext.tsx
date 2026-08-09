@@ -1,13 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, ExternalLink } from 'lucide-react';
-import { MetricBox } from '@/components/molecules/MetricBox';
+import { Calendar, ExternalLink, Scale, Percent, Activity, Ruler } from 'lucide-react';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { Button } from '@/components/ui/button';
 import { Surface } from '@/components/atoms';
 import { textStyle } from '@/design-system';
+import { formatDateOnly } from '@/lib/date-only';
 import type { ActivePlanSummary, NextEventSummary } from '@/lib/patientProfileSelectors';
 import type { BodyAssessment } from '@/lib/patientsStore';
+
+function formatAssessmentDate(dateStr?: string): string {
+  if (!dateStr) return '';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    return dateStr;
+  }
+  const formatted = formatDateOnly(dateStr);
+  if (formatted) return formatted;
+  const parts = dateStr.split(/[-/.]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+    } else if (parts[2].length === 4) {
+      return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+    }
+  }
+  return dateStr;
+}
 
 export function PatientProfileCurrentContext({
   patientId,
@@ -25,35 +44,65 @@ export function PatientProfileCurrentContext({
   const metricValue = (value: string | number | undefined, unit = '') =>
     value === undefined ? 'Sem avaliação' : `${value}${unit}`;
 
+  const assessmentDateLabel = latestAssessment?.date
+    ? formatAssessmentDate(latestAssessment.date)
+    : null;
+
   return (
-    <section className="grid grid-cols-2 gap-4" aria-label="Contexto atual do paciente">
-      <Surface className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-6 w-full" aria-label="Contexto atual do paciente">
+      <Surface className="flex flex-col gap-4 p-5 w-full">
         <div className="flex items-center justify-between gap-3">
           <h2 className={textStyle('section-title')}>Indicadores atuais</h2>
-          <span className={textStyle('caption')}>Última avaliação</span>
+          <span className={textStyle('caption')}>
+            {assessmentDateLabel ? `Última avaliação: ${assessmentDateLabel}` : 'Sem avaliações'}
+          </span>
         </div>
-        <div className="grid grid-cols-4 gap-3">
-          <MetricBox label="Peso" value={metricValue(latestAssessment?.weightKg, ' kg')} size="compact" />
-          <MetricBox label="Body fat" value={metricValue(latestAssessment?.bodyFatPercent, ' %')} size="compact" />
-          <MetricBox label="Massa magra" value={metricValue(latestAssessment?.muscleMassKg, ' kg')} size="compact" />
-          <MetricBox label="Cintura" value={metricValue(latestAssessment?.waistCm, ' cm')} size="compact" />
-        </div>
+        <MetricBoxGroup
+          items={[
+            {
+              label: 'Peso',
+              value: latestAssessment?.weightKg ?? 'Sem avaliação',
+              unit: latestAssessment?.weightKg !== undefined ? 'kg' : undefined,
+              icon: <Scale aria-hidden="true" />,
+            },
+            {
+              label: 'Body fat',
+              value: latestAssessment?.bodyFatPercent ?? 'Sem avaliação',
+              unit: latestAssessment?.bodyFatPercent !== undefined ? '%' : undefined,
+              icon: <Percent aria-hidden="true" />,
+            },
+            {
+              label: 'Massa magra',
+              value: latestAssessment?.muscleMassKg ?? 'Sem avaliação',
+              unit: latestAssessment?.muscleMassKg !== undefined ? 'kg' : undefined,
+              icon: <Activity aria-hidden="true" />,
+            },
+            {
+              label: 'Cintura',
+              value: latestAssessment?.waistCm ?? 'Sem avaliação',
+              unit: latestAssessment?.waistCm !== undefined ? 'cm' : undefined,
+              icon: <Ruler aria-hidden="true" />,
+            },
+          ]}
+        />
       </Surface>
 
-      <div className="flex flex-col gap-4">
-        <Surface className="flex flex-1 items-center justify-between gap-4 p-5" role="region" aria-label="Próximo acompanhamento">
-          <div className="flex items-start gap-3">
-            <Calendar className="mt-0.5 size-4 text-primary" aria-hidden="true" />
-            <div className="flex flex-col gap-1">
-              <h3 className={textStyle('card-title')}>Próximo acompanhamento</h3>
+      <div className="grid grid-cols-2 gap-4 w-full">
+        <Surface className="flex flex-col gap-3 p-5" role="region" aria-label="Próximo acompanhamento">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className={textStyle('section-title')}>Próximo acompanhamento</h2>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="size-4 text-primary shrink-0" aria-hidden="true" />
               <p className={textStyle('body-secondary')}>
                 {nextEventSummary ? `${nextEventSummary.date} · ${nextEventSummary.label}` : 'Sem próximo evento'}
               </p>
             </div>
+            <Button type="button" variant="secondary" size="compact" onClick={onOpenNextEvent}>
+              Definir acompanhamento
+            </Button>
           </div>
-          <Button type="button" variant="secondary" size="compact" onClick={onOpenNextEvent}>
-            Definir acompanhamento
-          </Button>
         </Surface>
 
         <Surface className="flex flex-col gap-3 p-5" aria-labelledby="current-diet-title">
@@ -81,6 +130,6 @@ export function PatientProfileCurrentContext({
           )}
         </Surface>
       </div>
-    </section>
+    </div>
   );
 }

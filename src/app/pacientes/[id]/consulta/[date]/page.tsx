@@ -83,7 +83,7 @@ export default function DedicatedConsultationPage() {
   const bmi = (currentWeight / (heightM * heightM)).toFixed(1);
 
   return (
-    <div className="min-h-screen bg-canvas text-text-primary p-4 p-8 flex flex-col gap-6 max-w-6xl mx-auto">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full text-text-primary">
       <PageContextHeader
         title={`Registro de Consulta — ${consultation.date}`}
         backHref={`/pacientes/${patient.id}`}

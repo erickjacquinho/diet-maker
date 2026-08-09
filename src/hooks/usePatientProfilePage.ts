@@ -56,6 +56,40 @@ export function usePatientProfilePage() {
     setIsEditAssessmentOpen(true);
   }, []);
 
+  const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
+  const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
+  const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
+  const whatsappContact = patient?.whatsapp ?? patient?.phone;
+  const whatsappUrl = useMemo(() => getWhatsappUrl(whatsappContact), [whatsappContact]);
+
+  const handleOpenCreateAssessment = useCallback(() => {
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+    setEditingAssessment({
+      id: `asm-${Date.now()}`,
+      date: todayStr,
+      weightKg: latestAssessment?.weightKg ?? 70,
+      bodyFatPercent: latestAssessment?.bodyFatPercent ?? 15,
+      muscleMassKg: latestAssessment?.muscleMassKg ?? 30,
+      fatMassKg: latestAssessment?.fatMassKg ?? 10,
+      waistCm: latestAssessment?.waistCm ?? 80,
+      neckCm: latestAssessment?.neckCm ?? 38,
+      scapulaCm: latestAssessment?.scapulaCm ?? 15,
+      bustCm: latestAssessment?.bustCm ?? 95,
+      leftArmCm: latestAssessment?.leftArmCm ?? 30,
+      rightArmCm: latestAssessment?.rightArmCm ?? 30,
+      abdomenCm: latestAssessment?.abdomenCm ?? 82,
+      hipCm: latestAssessment?.hipCm ?? 95,
+      leftProximalThighCm: latestAssessment?.leftProximalThighCm ?? 50,
+      rightProximalThighCm: latestAssessment?.rightProximalThighCm ?? 50,
+      leftDistalThighCm: latestAssessment?.leftDistalThighCm ?? 45,
+      rightDistalThighCm: latestAssessment?.rightDistalThighCm ?? 45,
+      leftCalfCm: latestAssessment?.leftCalfCm ?? 35,
+      rightCalfCm: latestAssessment?.rightCalfCm ?? 35,
+    });
+    setAssessmentMode('create');
+    setIsEditAssessmentOpen(true);
+  }, [latestAssessment]);
+
   const handleSaveAssessment = useCallback((assessment: BodyAssessment) => {
     if (editingAssessment && patient) {
       const updatedAssessments = savePatientAssessmentToStorage(patient.id, assessment);
@@ -126,12 +160,6 @@ export function usePatientProfilePage() {
     }
   }, [patientId]);
 
-  const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
-  const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
-  const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
-  const whatsappContact = patient?.whatsapp ?? patient?.phone;
-  const whatsappUrl = useMemo(() => getWhatsappUrl(whatsappContact), [whatsappContact]);
-
   const handleSavePatient = useCallback((updatedPatient: Patient) => {
     const saved = updatePatientInStorage(updatedPatient);
     setPatient(saved);
@@ -175,6 +203,7 @@ export function usePatientProfilePage() {
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
     handleOpenEditAssessment,
+    handleOpenCreateAssessment,
     handleSaveAssessment,
     handleSaveNextEvent,
     handleClearNextEvent,

@@ -68,24 +68,9 @@ export function PatientConsultationHistoryTable({
   return (
     <section
       role="region"
-      aria-labelledby="consultation-history-title"
-      className="flex flex-col gap-4 border-t border-border-divider pt-6"
+      aria-label="Histórico de consultas"
+      className="flex flex-col gap-4"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <FileSpreadsheet size={18} className="shrink-0 text-text-secondary" />
-          <div>
-            <h2 id="consultation-history-title" className={textStyle('subsection-title')}>
-              Histórico de consultas
-            </h2>
-            <p className={textStyle('caption')}>Dietas e avaliações físicas organizadas por data</p>
-          </div>
-        </div>
-        <span className={textStyle('caption')}>
-          {updates.length === 1 ? '1 consulta' : `${updates.length} consultas`}
-        </span>
-      </div>
-
       {updates.length === 0 ? (
         <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-6 text-center">
           <p className={textStyle('body-secondary')}>

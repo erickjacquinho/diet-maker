@@ -32,8 +32,8 @@ function DesignSystemShowcase({ componentRegistry, categoryCount }: { componentR
   const totalTokenCount = tokenNames.reference.length + tokenNames.system.length + tokenNames.component.length;
 
   return (
-    <main className="min-h-screen bg-canvas px-6 py-8 text-text-primary">
-      <div className="mx-auto flex w-full max-w-container-page flex-col gap-8">
+    <main className="min-h-screen bg-canvas px-8 py-6 text-text-primary">
+      <div className="mx-auto flex w-full max-w-container-workflow flex-col gap-8">
         <header className="grid grid-cols-2 items-end gap-8 border-b border-border-divider pb-8">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">

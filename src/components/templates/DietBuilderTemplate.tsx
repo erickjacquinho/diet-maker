@@ -111,7 +111,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
     <div className="flex min-w-0 flex-1 flex-col">
       <main
         aria-label="Elaboração de Dieta"
-        className="flex w-full max-w-6xl flex-1 flex-col gap-6 p-6 lg:mx-auto lg:p-8"
+        className="flex w-full max-w-container-workflow flex-1 flex-col gap-6 py-6 px-8 lg:mx-auto"
       >
         <PageContextHeader
           title="Elaboração de Dieta"

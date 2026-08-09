@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale } from 'lucide-react';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton } from '@/components/atoms';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
 import { PageContextHeader } from '@/components/molecules';
+import { textStyle } from '@/design-system';
 import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
 import { buildPatientProfileConsultations } from '@/lib/patientProfileConsultations';
@@ -44,6 +45,7 @@ export default function PatientDetailPage() {
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
     handleOpenEditAssessment,
+    handleOpenCreateAssessment,
     handleSaveAssessment,
     handleSaveNextEvent,
     handleClearNextEvent,
@@ -68,7 +70,7 @@ export default function PatientDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 flex flex-col gap-6 max-w-7xl">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
       <PageContextHeader
         title="Perfil do paciente"
         backHref="/pacientes"
@@ -78,42 +80,41 @@ export default function PatientDetailPage() {
           { label: patient.name },
         ]}
       />
-      <PatientProfileHeader patient={patient}>
-        <PatientProfileHeader.Identity>
-          <PatientProfileHeader.Avatar />
-          <PatientProfileHeader.Info>
-            <div className="flex items-center gap-2">
-              <PatientProfileHeader.Name />
-              <PatientProfileHeader.Gender />
-              <PatientProfileHeader.Badge />
-            </div>
-            <PatientProfileHeader.Meta />
-          </PatientProfileHeader.Info>
-        </PatientProfileHeader.Identity>
+      <Surface className="p-6">
+        <PatientProfileHeader patient={patient} className="border-b-0 pb-0">
+          <PatientProfileHeader.Identity>
+            <PatientProfileHeader.Avatar />
+            <PatientProfileHeader.Info>
+              <div className="flex items-center gap-2">
+                <PatientProfileHeader.Name />
+                <PatientProfileHeader.Gender />
+                <PatientProfileHeader.Badge />
+              </div>
+              <PatientProfileHeader.Meta />
+            </PatientProfileHeader.Info>
+          </PatientProfileHeader.Identity>
 
-        <PatientProfileHeader.Actions>
-          <Button
-            variant="secondary"
-            size="compact"
-            aria-label="Abrir conversa no WhatsApp"
-            disabled={!whatsappUrl}
-            onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
-          >
-              <MessageCircle className="w-4 h-4 mr-1 text-success" />
-              WhatsApp
-          </Button>
-          <Button variant="secondary" size="compact" onClick={() => setIsNextEventModalOpen(true)}>
-            <Calendar className="w-4 h-4 mr-1 text-primary" />
-            Acompanhamento
-          </Button>
-          <EditIconButton onClick={() => setIsEditModalOpen(true)} title="Editar Cadastro" />
-          <DeleteIconButton
-            onClick={() => setIsDeleteModalOpen(true)}
-            title="Excluir Paciente"
-            variant="destructive-outline"
-          />
-        </PatientProfileHeader.Actions>
-      </PatientProfileHeader>
+          <PatientProfileHeader.Actions>
+            <Button
+              variant="secondary"
+              size="compact"
+              aria-label="Abrir conversa no WhatsApp"
+              disabled={!whatsappUrl}
+              onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+            >
+              <MessageCircle className="size-4 text-success shrink-0" aria-hidden="true" />
+              <span>WhatsApp</span>
+            </Button>
+            <EditIconButton size="compact" onClick={() => setIsEditModalOpen(true)} title="Editar Cadastro" />
+            <DeleteIconButton
+              size="compact"
+              onClick={() => setIsDeleteModalOpen(true)}
+              title="Excluir Paciente"
+              variant="destructive-outline"
+            />
+          </PatientProfileHeader.Actions>
+        </PatientProfileHeader>
+      </Surface>
 
       <PatientProfileCurrentContext
         patientId={patientId}
@@ -128,14 +129,23 @@ export default function PatientDetailPage() {
           <div>
             <h2 className="text-style-section-title font-bold text-text-primary flex items-center gap-2">
               <Calendar className="w-5 h-5 text-success" />
-              Histórico de Consultas & Acompanhamento
+              <span>Histórico de consultas</span>
             </h2>
             <p className="text-style-caption text-text-secondary mt-0.5">
-              Consolidado de dietas e avaliações antropométricas do paciente.
+              Dietas e avaliações físicas do paciente.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <span className={textStyle('caption')}>
+              {consultationUpdates.length === 1 ? '1 consulta' : `${consultationUpdates.length} consultas`}
+            </span>
+            <SecondaryActionButton
+              icon={<Scale size={14} />}
+              onClick={handleOpenCreateAssessment}
+            >
+              Nova Avaliação
+            </SecondaryActionButton>
             <Link href={`/pacientes/${patientId}/dieta/nova`}>
               <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
             </Link>

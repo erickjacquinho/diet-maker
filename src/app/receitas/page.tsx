@@ -80,7 +80,7 @@ export default function RecipesPage() {
   }, [recipes, searchTerm, selectedCategory]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
       {/* Header */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>

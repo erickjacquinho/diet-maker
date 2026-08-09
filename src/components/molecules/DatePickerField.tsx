@@ -63,22 +63,26 @@ function DatePickerField({
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <FieldTrigger
-            id={id}
-            type="button"
-            state={error ? 'error' : 'default'}
-            disabled={disabled}
-            aria-haspopup="dialog"
-            aria-expanded={open}
-            aria-required={required || undefined}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={descriptionIds}
-          >
-            <CalendarDays aria-hidden="true" data-icon className="size-4 shrink-0" />
-            <span className={displayedValue ? textStyle('field-value') : textStyle('field-placeholder')}>
-              {displayedValue || placeholder}
-            </span>
-          </FieldTrigger>
+          <div className="relative flex items-center w-full cursor-pointer">
+            <CalendarDays
+              aria-hidden="true"
+              className="absolute left-3 size-4 text-text-muted pointer-events-none shrink-0"
+            />
+            <Input
+              id={id}
+              type="text"
+              readOnly
+              value={displayedValue}
+              placeholder={placeholder}
+              disabled={disabled}
+              required={required}
+              aria-haspopup="dialog"
+              aria-expanded={open}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={descriptionIds}
+              className="pl-9 pr-3 cursor-pointer select-none"
+            />
+          </div>
         </PopoverTrigger>
 
         <PopoverContent

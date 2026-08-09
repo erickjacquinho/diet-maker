@@ -83,7 +83,7 @@ export default function PatientsListPage() {
     : `${filteredPatients.length} de ${patients.length} pacientes`;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
       <div>
         <div>
           <h1 className="font-bold text-style-section-title text-text-primary tracking-tight">Pacientes</h1>

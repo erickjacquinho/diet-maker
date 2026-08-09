@@ -68,7 +68,7 @@ export function EditAssessmentModal({
             <AssessmentFieldsTabs draft={draft} updateNumericField={updateNumericField} />
 
             <div className="shrink-0 pt-1" aria-label="Composição corporal calculada">
-              <Surface variant="subtle" density="compact" className="grid grid-cols-3 gap-2">
+              <Surface variant="subtle" density="compact" className="grid grid-cols-3 gap-2 divide-x divide-border-divider overflow-hidden">
                 <MetricBox
                   key="bodyFatPercent"
                   label="Body fat"
@@ -77,6 +77,7 @@ export function EditAssessmentModal({
                   layout="split"
                   surface="inline"
                   tone={composition.bodyFatPercent === null ? 'default' : 'success'}
+                  className="px-2"
                 />
                 <MetricBox
                   key="fatMassKg"
@@ -86,6 +87,7 @@ export function EditAssessmentModal({
                   layout="split"
                   surface="inline"
                   tone="default"
+                  className="px-2"
                 />
                 <MetricBox
                   key="leanMassKg"
@@ -95,6 +97,7 @@ export function EditAssessmentModal({
                   layout="split"
                   surface="inline"
                   tone="default"
+                  className="px-2"
                 />
               </Surface>
             </div>

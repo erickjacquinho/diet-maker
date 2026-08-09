@@ -12,16 +12,18 @@ describe('Component UI Seam: MetricBox', () => {
     expect(screen.getByText('2.1 g/kg')).toBeInTheDocument();
   });
 
-  it('renders icon when provided', () => {
+  it('renders icon and unit when provided', () => {
     render(
       <MetricBox
         label="Meta Kcal"
-        value="2200 kcal"
+        value={2200}
+        unit="kcal"
         icon={<span aria-hidden="true">🔥</span>}
       />
     );
 
-    expect(screen.getByText('2200 kcal')).toBeInTheDocument();
+    expect(screen.getByText('2200')).toBeInTheDocument();
+    expect(screen.getByText('kcal')).toBeInTheDocument();
   });
 
   it('applies tone class to value', () => {

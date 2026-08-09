@@ -1,0 +1,6 @@
+{
+  "task": "Implementar identificador de paciente com NanoID nas URLs e número de prontuário P-XXXX na UI",
+  "slug": "implementacao-nanoid-pacientes",
+  "feature_dir": "specs/09-08-26-implementacao-nanoid-pacientes",
+  "date": "2026-08-09"
+}

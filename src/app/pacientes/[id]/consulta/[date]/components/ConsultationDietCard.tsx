@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Utensils, Sparkles, ChevronUp, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MetricBox } from '@/components/molecules';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { EditIconButton } from '@/components/atoms';
 import type { HistoricalDiet } from '@/lib/patientsStore';
 
@@ -47,12 +47,14 @@ export function ConsultationDietCard({
       </div>
 
       <CardContent className="p-5 flex flex-col gap-5">
-        <div className="grid grid-cols-4 gap-3 text-center">
-          <MetricBox size="standard" tone="muted" label="Meta Calórica" value={`${diet.targetKcal} kcal`} />
-          <MetricBox size="standard" tone="protein" label="Proteínas" value={`${diet.proteinG}g`} />
-          <MetricBox size="standard" tone="carbohydrate" label="Carboidratos" value={`${diet.carbsG}g`} />
-          <MetricBox size="standard" tone="success" label="Gorduras" value={`${diet.fatsG}g`} />
-        </div>
+        <MetricBoxGroup
+          items={[
+            { size: 'standard', tone: 'muted', label: 'Meta Calórica', value: `${diet.targetKcal} kcal` },
+            { size: 'standard', tone: 'protein', label: 'Proteínas', value: `${diet.proteinG}g` },
+            { size: 'standard', tone: 'carbohydrate', label: 'Carboidratos', value: `${diet.carbsG}g` },
+            { size: 'standard', tone: 'success', label: 'Gorduras', value: `${diet.fatsG}g` },
+          ]}
+        />
 
         {diet.meals && (
           <div className="flex flex-col gap-3 pt-2">

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Scale, TrendingDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { MetricBox } from '@/components/molecules';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { EditIconButton } from '@/components/atoms';
 import { BodyAssessment } from '@/lib/patientsStore';
 
@@ -36,12 +36,14 @@ export function ConsultationAssessmentCard({
       </div>
 
       <CardContent className="p-5">
-        <div className="grid grid-cols-4 gap-3 text-center">
-          <MetricBox size="standard" label="Peso Corporal" value={`${assessment.weightKg} kg`} />
-          <MetricBox size="standard" label="% Gordura (BF)" value={`${assessment.bodyFatPercent}%`} />
-          <MetricBox size="standard" label="Massa Magra" value={`${assessment.muscleMassKg} kg`} />
-          <MetricBox size="standard" label="Cintura" value={`${assessment.waistCm} cm`} />
-        </div>
+        <MetricBoxGroup
+          items={[
+            { size: 'standard', label: 'Peso Corporal', value: `${assessment.weightKg} kg` },
+            { size: 'standard', label: '% Gordura (BF)', value: `${assessment.bodyFatPercent}%` },
+            { size: 'standard', label: 'Massa Magra', value: `${assessment.muscleMassKg} kg` },
+            { size: 'standard', label: 'Cintura', value: `${assessment.waistCm} cm` },
+          ]}
+        />
       </CardContent>
     </Card>
   );
