@@ -1,11 +1,21 @@
 {
-  "timestamp": "2026-08-08T07:43:16.784Z",
+  "timestamp": "2026-08-09T06:13:31.339Z",
   "summary": {
-    "totalFilesScanned": 118,
+    "totalFilesScanned": 119,
     "compliantFiles": 118,
-    "nonCompliantFiles": 0,
-    "totalViolations": 0,
-    "complianceScorePercentage": 100
+    "nonCompliantFiles": 1,
+    "totalViolations": 1,
+    "complianceScorePercentage": 99.16
   },
-  "violations": []
+  "violations": [
+    {
+      "file": "src/components/molecules/DietModeSwitcher.tsx",
+      "line": 150,
+      "column": 17,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    }
+  ]
 }

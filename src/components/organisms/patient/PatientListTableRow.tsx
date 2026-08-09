@@ -116,10 +116,6 @@ export function PatientListTableRow({
               {row.patient.name}
             </span>
             <span className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted">
-              {row.patient.code && (
-                <span className="font-mono text-accent font-semibold">{row.patient.code}</span>
-              )}
-              {row.patient.code && <span aria-hidden="true">·</span>}
               <GenderIcon gender={row.patient.gender} />
               <span>{row.patient.age} anos</span>
             </span>

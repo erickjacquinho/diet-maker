@@ -85,10 +85,9 @@ export default function PatientDetailPage() {
           <PatientProfileHeader.Identity>
             <PatientProfileHeader.Avatar />
             <PatientProfileHeader.Info>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <PatientProfileHeader.Name />
                 <PatientProfileHeader.Gender />
-                <PatientProfileHeader.Code />
                 <PatientProfileHeader.Badge />
               </div>
               <PatientProfileHeader.Meta />
