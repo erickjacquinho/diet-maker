@@ -6,7 +6,7 @@ import { Search, Users } from 'lucide-react';
 import { PatientListTable } from '@/components/organisms';
 import { CreateButton } from '@/components/atoms/Button';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePatientModal, type CreatePatientFormData } from '@/components/molecules/CreatePatientModal';
 import {
@@ -96,17 +96,19 @@ export default function PatientsListPage() {
       {patients.length > 0 && (
         <div className="flex flex-col gap-3">
           <div className="flex flex-row items-center gap-3">
-            <div className="relative flex-1">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-              <Input
+            <InputGroup className="flex-1 h-11 bg-surface border-border-subtle rounded-control">
+              <InputGroupAddon align="inline-start">
+                <Search size={18} aria-hidden="true" />
+              </InputGroupAddon>
+              <InputGroupInput
                 type="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar por nome ou objetivo..."
                 aria-label="Buscar pacientes por nome ou objetivo"
-                className="pl-11 pr-4 h-11 bg-surface border-border-subtle rounded-control text-style-legal text-text-primary placeholder-text-muted"
+                className="text-style-legal text-text-primary placeholder:text-text-muted"
               />
-            </div>
+            </InputGroup>
             <span role="status" aria-live="polite" className="text-style-legal text-text-muted whitespace-nowrap">
               {countLabel}
             </span>
