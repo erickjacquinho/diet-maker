@@ -117,7 +117,15 @@ export function PatientListTableRow({
             </span>
             <span className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted">
               <GenderIcon gender={row.patient.gender} />
-              <span>{row.patient.age} anos</span>
+              <span>
+                {[
+                  row.patient.age ? `${row.patient.age} anos` : null,
+                  row.patient.heightCm ? `${row.patient.heightCm} cm` : null,
+                  row.patient.weightKg ? `${row.patient.weightKg} kg` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
             </span>
           </span>
         </Link>
