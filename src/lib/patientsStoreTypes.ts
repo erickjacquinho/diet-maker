@@ -1,5 +1,7 @@
 export interface Patient {
   id: string;
+  code?: string;
+  legacyId?: string;
   name: string;
   age: number;
   gender: string;

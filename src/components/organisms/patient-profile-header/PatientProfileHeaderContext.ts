@@ -2,6 +2,7 @@ import { createContext, use } from 'react';
 
 export interface PatientProfileHeaderContextValue {
   name?: string;
+  code?: string;
   gender?: string;
   objective?: string;
   age?: number;

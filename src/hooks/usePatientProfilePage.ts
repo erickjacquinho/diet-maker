@@ -151,6 +151,9 @@ export function usePatientProfilePage() {
     if (patientId) {
       const p = getPatientById(patientId);
       if (p) {
+        if (patientId !== p.id) {
+          router.replace(`/pacientes/${p.id}`);
+        }
         setPatient(p);
         const storedDiets = buildPatientDietHistory(getPatientDietsFromStorage(p.id));
         setDietHistory(storedDiets.length > 0 ? storedDiets : p.dietHistory || []);
@@ -158,7 +161,7 @@ export function usePatientProfilePage() {
         setBodyAssessments(loadedAssessments.length > 0 ? loadedAssessments : p.bodyAssessments || []);
       }
     }
-  }, [patientId]);
+  }, [patientId, router]);
 
   const handleSavePatient = useCallback((updatedPatient: Patient) => {
     const saved = updatePatientInStorage(updatedPatient);

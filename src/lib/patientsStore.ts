@@ -1,5 +1,6 @@
 'use client';
 
+import { nanoid } from 'nanoid';
 import {
   normalizeDateKey,
   normalizePairedBodyMeasurements,
@@ -38,9 +39,26 @@ const PATIENTS_KEY = 'nutridiet_patients';
 const PATIENT_ASSESSMENTS_KEY_PREFIX = 'nutridiet_assessments_';
 const PATIENT_DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
-function normalizePatient(patient: Patient): Patient {
+export function formatPatientCode(index: number): string {
+  return `P-${String(index).padStart(4, '0')}`;
+}
+
+function normalizePatient(patient: Patient, index: number): Patient {
+  let id = patient.id;
+  let legacyId = patient.legacyId;
+
+  if (id && id.startsWith('pat-')) {
+    legacyId = id;
+    id = nanoid(8);
+  }
+
+  const code = patient.code ?? formatPatientCode(index + 1);
+
   return {
     ...patient,
+    id,
+    code,
+    legacyId,
     nextEvent: patient.nextEvent ?? null,
     lastActivity: patient.lastActivity ?? null,
   };
@@ -56,7 +74,7 @@ export function getPatientsFromStorage(): Patient[] {
   if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(PATIENTS_KEY);
-    return saved ? (JSON.parse(saved) as Patient[]).map(normalizePatient) : [];
+    return saved ? (JSON.parse(saved) as Patient[]).map((p, idx) => normalizePatient(p, idx)) : [];
   } catch {
     return [];
   }
@@ -70,11 +88,13 @@ export function savePatientToStorage(newPatient: Omit<Patient, 'id' | 'initials'
     : nameParts[0].slice(0, 2).toUpperCase();
 
   const today = new Date().toLocaleDateString('pt-BR');
+  const patientId = nanoid(8);
+  const code = newPatient.code ?? formatPatientCode(current.length + 1);
 
-  const uniqueSuffix = Math.random().toString(36).substring(2, 7);
   const created: Patient = {
     ...newPatient,
-    id: `pat-${Date.now()}-${uniqueSuffix}`,
+    id: patientId,
+    code,
     initials,
     lastConsultation: today,
     nextEvent: newPatient.nextEvent ?? null,
@@ -88,7 +108,7 @@ export function savePatientToStorage(newPatient: Omit<Patient, 'id' | 'initials'
 
 export function getPatientById(id: string): Patient | null {
   const patients = getPatientsFromStorage();
-  return patients.find((p) => p.id === id) || null;
+  return patients.find((p) => p.id === id || p.legacyId === id) || null;
 }
 
 export function updatePatientInStorage(updatedPatient: Patient): Patient {

@@ -54,6 +54,19 @@ export function PatientProfileHeaderGender({
   );
 }
 
+export function PatientProfileHeaderCode({ code, className }: { code?: string; className?: string }) {
+  const ctx = usePatientProfileHeaderContext();
+  const displayCode = code ?? ctx.code;
+
+  if (!displayCode) return null;
+
+  return (
+    <span className={cn(`px-2 py-0.5 rounded-control bg-accent/10 text-accent border border-accent/20 ${textStyle('caption-strong')}`, className)}>
+      Prontuário {displayCode}
+    </span>
+  );
+}
+
 export function PatientProfileHeaderBadge({ children, className }: { children?: ReactNode; className?: string }) {
   const ctx = usePatientProfileHeaderContext();
   return (
