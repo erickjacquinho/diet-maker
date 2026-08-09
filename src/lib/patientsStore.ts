@@ -43,7 +43,7 @@ export function formatPatientCode(index: number): string {
   return `P-${String(index).padStart(4, '0')}`;
 }
 
-function normalizePatient(patient: Patient, index: number): Patient {
+function normalizePatient(patient: Patient, index: number = 0): Patient {
   let id = patient.id;
   let legacyId = patient.legacyId;
 
