@@ -23,26 +23,8 @@ export function useDietBuilderPage() {
 
   // Load Patient & Diet Plan
   useEffect(() => {
-    let p = getPatientById(patientId);
-    if (!p) {
-      p = {
-        id: patientId,
-        name: 'Paciente Sem Nome',
-        age: 30,
-        gender: 'Não Informado',
-        heightCm: 170,
-        weightKg: 70,
-        initials: 'P',
-        objective: 'Acompanhamento Nutricional',
-        targetKcal: 2000,
-        targetProtein: 140,
-        targetCarbs: 220,
-        targetFats: 60,
-        lastConsultation: new Date().toLocaleDateString('pt-BR'),
-      };
-    }
+    const p = getPatientById(patientId);
     setPatient(p);
-
   }, [patientId]);
 
   const { dietPlan, setDietPlan } = useDietPresets({

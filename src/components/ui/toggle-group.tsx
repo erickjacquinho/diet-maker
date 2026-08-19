@@ -18,7 +18,7 @@ const ToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupProps>(
       <ToggleGroupContext.Provider value={{ value, onValueChange }}>
         <div
           ref={ref}
-          role="group"
+          role="tablist"
           className={cn(
             "inline-flex items-center justify-center rounded-control bg-surface-subtle p-1 border border-border-subtle text-text-muted gap-1",
             className
@@ -51,7 +51,8 @@ const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupItemProps
       <button
         ref={ref}
         type="button"
-        role="radio"
+        role="tab"
+        aria-selected={isSelected}
         aria-checked={isSelected}
         aria-pressed={isSelected}
         data-state={isSelected ? "on" : "off"}

@@ -8,6 +8,7 @@ import { ScaleDietModal } from '@/components/molecules/ScaleDietModal';
 import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
+import { Spinner } from '@/components/ui/spinner';
 import { MealCardContainerProps } from '@/components/organisms';
 import { calculateMealsTotal } from '@/lib/dietStore';
 
@@ -102,7 +103,7 @@ export default function DietBuilderPage() {
   if (!dietPlan || !patient) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-control h-8 w-8 border-2 border-border-subtle border-b-success"></div>
+        <Spinner className="size-8 text-success" />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Patient } from '@/lib/patientsStore';
 import { FullDietPlan, calculateMealTotals } from '@/lib/dietStore';
 import { MacroMetricCardProps } from '@/components/molecules';
+import { BadgeVariant } from '@/components/ui/badge';
 
 export function useDietCalculations(
   dietPlan: FullDietPlan | null,
@@ -40,19 +41,19 @@ export function useDietCalculations(
 
     const kcalDiff = currentTotals.kcal - targetKcal;
     const kcalBadgeText = kcalDiff === 0 ? 'Na meta ✓' : kcalDiff > 0 ? `+${kcalDiff} kcal` : `${kcalDiff} kcal`;
-    const kcalBadgeVariant = Math.abs(kcalDiff) <= targetKcal * 0.05 ? 'emerald' : kcalDiff > 0 ? 'rose' : 'amber';
+    const kcalBadgeVariant: BadgeVariant = Math.abs(kcalDiff) <= targetKcal * 0.05 ? 'emerald' : kcalDiff > 0 ? 'rose' : 'amber';
     const kcalPct = targetKcal > 0 ? Math.min(100, Math.round((currentTotals.kcal / targetKcal) * 100)) : 0;
 
     const protDiff = Math.round((currentTotals.proteinG - targetProt) * 10) / 10;
     const protBadgeText = Math.abs(protDiff) <= 2 ? 'Na meta ✓' : protDiff > 0 ? `+${protDiff}g` : `${protDiff}g`;
-    const protBadgeVariant = Math.abs(protDiff) <= targetProt * 0.05 ? 'emerald' : protDiff > 0 ? 'rose' : 'amber';
+    const protBadgeVariant: BadgeVariant = Math.abs(protDiff) <= targetProt * 0.05 ? 'emerald' : protDiff > 0 ? 'rose' : 'amber';
     const protPct = targetProt > 0 ? Math.min(100, Math.round((currentTotals.proteinG / targetProt) * 100)) : 0;
     const protGPerKg = (currentTotals.proteinG / weight).toFixed(2);
     const protMetaGPerKg = (targetProt / weight).toFixed(1);
 
     const carbDiff = Math.round((currentTotals.carbsG - targetCarb) * 10) / 10;
     const carbBadgeText = Math.abs(carbDiff) <= 2 ? 'Na meta ✓' : carbDiff > 0 ? `+${carbDiff}g` : `${carbDiff}g`;
-    const carbBadgeVariant = Math.abs(carbDiff) <= targetCarb * 0.05 ? 'emerald' : carbDiff > 0 ? 'rose' : 'amber';
+    const carbBadgeVariant: BadgeVariant = Math.abs(carbDiff) <= targetCarb * 0.05 ? 'emerald' : carbDiff > 0 ? 'rose' : 'amber';
     const carbPct = targetCarb > 0 ? Math.min(100, Math.round((currentTotals.carbsG / targetCarb) * 100)) : 0;
     const carbGPerKg = (currentTotals.carbsG / weight).toFixed(2);
     const carbMetaGPerKg = (targetCarb / weight).toFixed(1);
@@ -60,7 +61,7 @@ export function useDietCalculations(
     const fatsVal = currentTotals.fatsG;
     const fatDiff = Math.round((fatsVal - targetFat) * 10) / 10;
     const fatBadgeText = Math.abs(fatDiff) <= 2 ? 'Na meta ✓' : fatDiff > 0 ? `+${fatDiff}g` : `${fatDiff}g`;
-    const fatBadgeVariant = Math.abs(fatDiff) <= targetFat * 0.05 ? 'emerald' : fatDiff > 0 ? 'rose' : 'amber';
+    const fatBadgeVariant: BadgeVariant = Math.abs(fatDiff) <= targetFat * 0.05 ? 'emerald' : fatDiff > 0 ? 'rose' : 'amber';
     const fatPct = targetFat > 0 ? Math.min(100, Math.round((fatsVal / targetFat) * 100)) : 0;
     const fatGPerKg = (fatsVal / weight).toFixed(2);
     const fatMetaGPerKg = (targetFat / weight).toFixed(1);
@@ -71,7 +72,7 @@ export function useDietCalculations(
         currentValue: `${currentTotals.kcal}`,
         targetValue: `${targetKcal} kcal`,
         statusBadgeText: kcalBadgeText,
-        statusBadgeVariant: kcalBadgeVariant as any,
+        statusBadgeVariant: kcalBadgeVariant,
         percentage: kcalPct,
         macroColor: 'blue',
       },
@@ -80,33 +81,33 @@ export function useDietCalculations(
         currentValue: `${Math.round(currentTotals.proteinG)}g`,
         targetValue: `${targetProt}g`,
         statusBadgeText: protBadgeText,
-        statusBadgeVariant: protBadgeVariant as any,
+        statusBadgeVariant: protBadgeVariant,
         percentage: protPct,
         gPerKgRatio: `${protGPerKg} g/kg`,
         gPerKgMeta: protMetaGPerKg,
-        macroColor: 'emerald',
+        macroColor: 'protein',
       },
       {
         label: 'Carboidratos',
         currentValue: `${Math.round(currentTotals.carbsG)}g`,
         targetValue: `${targetCarb}g`,
         statusBadgeText: carbBadgeText,
-        statusBadgeVariant: carbBadgeVariant as any,
+        statusBadgeVariant: carbBadgeVariant,
         percentage: carbPct,
         gPerKgRatio: `${carbGPerKg} g/kg`,
         gPerKgMeta: carbMetaGPerKg,
-        macroColor: 'amber',
+        macroColor: 'carbohydrate',
       },
       {
         label: 'Gorduras',
         currentValue: `${Math.round(fatsVal)}g`,
         targetValue: `${targetFat}g`,
         statusBadgeText: fatBadgeText,
-        statusBadgeVariant: fatBadgeVariant as any,
+        statusBadgeVariant: fatBadgeVariant,
         percentage: fatPct,
         gPerKgRatio: `${fatGPerKg} g/kg`,
         gPerKgMeta: fatMetaGPerKg,
-        macroColor: 'rose',
+        macroColor: 'fat',
       },
     ];
   }, [patient, currentTotals, targetKcal, targetProt, targetCarb, targetFat]);

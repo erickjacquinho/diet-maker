@@ -121,7 +121,6 @@ export function PatientListTableRow({
                 {[
                   row.patient.age ? `${row.patient.age} anos` : null,
                   row.patient.heightCm ? `${row.patient.heightCm} cm` : null,
-                  row.patient.weightKg ? `${row.patient.weightKg} kg` : null,
                 ]
                   .filter(Boolean)
                   .join(' · ')}

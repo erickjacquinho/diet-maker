@@ -76,7 +76,7 @@ export interface MealTotals {
   kcal: number;
 }
 
-const DIETS_KEY_PREFIX = 'nutridiet_diets_';
+export const DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
 export function getPatientDietsFromStorage(patientId: string): FullDietPlan[] {
   const saved = getStorageItem<FullDietPlan[]>(`${DIETS_KEY_PREFIX}${patientId}`, []);

@@ -6,11 +6,11 @@ const motion = "transition-colors duration-fast ease-standard motion-reduce:dura
 const button = cva(`inline-flex items-center justify-center gap-2 rounded-control border ${focus} ${motion} disabled:pointer-events-none disabled:opacity-disabled`, {
   variants: {
     variant: {
-      primary: "border-primary bg-primary text-on-primary text-white hover:bg-primary-hover active:bg-primary-pressed",
+      primary: "border-primary bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-pressed",
       secondary: "border-border-control bg-surface text-text-primary hover:border-button-secondary-border-hover hover:bg-button-secondary-hover",
       quiet: "border-transparent bg-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary",
-      destructive: "border-error bg-error text-on-error text-white hover:bg-error/90 active:bg-error",
-      "destructive-outline": "border-error bg-surface text-error hover:border-error hover:bg-error hover:text-on-error hover:text-white active:bg-error active:text-on-error disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
+      destructive: "border-error bg-error text-on-error hover:bg-error/90 active:bg-error",
+      "destructive-outline": "border-error bg-surface text-error hover:border-error hover:bg-error hover:text-on-error active:bg-error active:text-on-error disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
     },
     size: {
       compact: "h-control-compact px-3 text-style-button-label-compact font-semibold",

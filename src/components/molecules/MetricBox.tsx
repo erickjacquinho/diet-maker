@@ -116,8 +116,8 @@ export const MetricBox: React.FC<MetricBoxProps> = ({
           <span className={cn('text-text-muted', captionClasses[size])}>{caption}</span>
         )}
       </div>
-      <div className={cn('font-bold tabular-nums lining-nums shrink-0 flex items-baseline gap-1', valueClasses[size], toneClasses[tone])}>
-        <span>{value}</span>
+      <div className="shrink-0 flex items-baseline gap-1">
+        <span className={cn('font-bold tabular-nums lining-nums', valueClasses[size], toneClasses[tone])}>{value}</span>
         {unit && <span className={cn('font-normal text-text-muted', unitClasses[size])}>{unit}</span>}
       </div>
       {!isSplit && caption && (

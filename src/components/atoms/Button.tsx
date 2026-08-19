@@ -51,7 +51,7 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
     className={`gap-1.5 cursor-pointer ${className}`}
     {...props}
   >
-    {icon !== null && (icon || <Plus size={14} className="shrink-0 text-on-primary text-white" />)}
+    {icon !== null && (icon || <Plus size={14} className="shrink-0 text-on-primary" />)}
     <span>{children}</span>
   </ShadcnButton>
 );

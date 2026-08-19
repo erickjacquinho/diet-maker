@@ -26,7 +26,7 @@ export type { DietBuilderTemplateProps };
 
 export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   patient,
-  patientId = 'pat-1',
+  patientId,
   patientName,
   patientInitials,
   patientObjective,

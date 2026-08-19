@@ -6,26 +6,14 @@ import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { Button } from '@/components/ui/button';
 import { Surface } from '@/components/atoms';
 import { textStyle } from '@/design-system';
-import { formatDateOnly } from '@/lib/date-only';
+import { formatDateOnly, normalizeDateToISO } from '@/lib/date-only';
 import type { ActivePlanSummary, NextEventSummary } from '@/lib/patientProfileSelectors';
 import type { BodyAssessment } from '@/lib/patientsStore';
 
 function formatAssessmentDate(dateStr?: string): string {
   if (!dateStr) return '';
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    return dateStr;
-  }
-  const formatted = formatDateOnly(dateStr);
-  if (formatted) return formatted;
-  const parts = dateStr.split(/[-/.]/);
-  if (parts.length === 3) {
-    if (parts[0].length === 4) {
-      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-    } else if (parts[2].length === 4) {
-      return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
-    }
-  }
-  return dateStr;
+  const iso = normalizeDateToISO(dateStr);
+  return iso ? formatDateOnly(iso) : dateStr;
 }
 
 export function PatientProfileCurrentContext({

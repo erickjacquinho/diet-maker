@@ -189,6 +189,7 @@ export function deletePatientFromStorage(id: string): void {
   const updatedList = current.filter((p) => p.id !== id);
   writePatients(updatedList);
   removeStorageItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
+  removeStorageItem(`nutridiet_diets_${id}`);
 }
 
 export function getConsultationRecord(patientId: string, rawDateParam: string): ConsultationRecord {

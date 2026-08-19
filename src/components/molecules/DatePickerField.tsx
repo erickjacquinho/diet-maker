@@ -56,33 +56,35 @@ function DatePickerField({
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className={textStyle('field-label')}>
+      <label id={`${id}-label`} htmlFor={id} className={textStyle('field-label')}>
         {label}
         {required ? <span aria-hidden="true"> *</span> : null}
       </label>
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <div className="relative flex items-center w-full cursor-pointer">
+          <FieldTrigger
+            id={id}
+            size="standard"
+            state={error ? 'error' : 'default'}
+            disabled={disabled}
+            aria-label={label}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            aria-required={required ? 'true' : undefined}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={descriptionIds}
+            className={cn(
+              'w-full justify-start pl-9 pr-3 text-left font-normal select-none relative',
+              !displayedValue && 'text-text-muted',
+            )}
+          >
             <CalendarDays
               aria-hidden="true"
               className="absolute left-3 size-4 text-text-muted pointer-events-none shrink-0"
             />
-            <Input
-              id={id}
-              type="text"
-              readOnly
-              value={displayedValue}
-              placeholder={placeholder}
-              disabled={disabled}
-              required={required}
-              aria-haspopup="dialog"
-              aria-expanded={open}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={descriptionIds}
-              className="pl-9 pr-3 cursor-pointer select-none"
-            />
-          </div>
+            <span>{displayedValue || placeholder}</span>
+          </FieldTrigger>
         </PopoverTrigger>
 
         <PopoverContent

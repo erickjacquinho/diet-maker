@@ -1,10 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Utensils, Plus, Search, Clock, Users, Check, BookOpen, Trash2, PlusCircle } from 'lucide-react';
-import { CreateButton, Button, Badge } from '@/components/atoms';
+import { Utensils, Search, BookOpen } from 'lucide-react';
+import { CreateButton, Button } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { CreateRecipeModal } from '@/components/molecules/CreateRecipeModal';
 import { RecipeCard } from '@/components/molecules/RecipeCard';
 
@@ -32,6 +40,7 @@ export default function RecipesPage() {
   const [insertedId, setInsertedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
   useEffect(() => {
     setRecipes(getRecipesFromStorage());
@@ -54,12 +63,12 @@ export default function RecipesPage() {
     toast.success(data.id ? 'Receita atualizada com sucesso!' : 'Nova receita cadastrada!');
   };
 
-  const handleDeleteRecipe = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta receita?')) {
-      deleteRecipeFromStorage(id);
-      setRecipes(getRecipesFromStorage());
-      toast.success('Receita excluída do catálogo');
-    }
+  const handleConfirmDelete = () => {
+    if (!recipeToDelete) return;
+    deleteRecipeFromStorage(recipeToDelete.id);
+    setRecipes(getRecipesFromStorage());
+    setRecipeToDelete(null);
+    toast.success('Receita excluída do catálogo');
   };
 
   const handleInsertInDiet = (recipeId: string) => {
@@ -138,6 +147,43 @@ export default function RecipesPage() {
                 Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.
               </p>
             </div>
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar receita por nome ou ingrediente..."
+            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal w-full"
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto w-auto">
+          {CATEGORIES.map((cat) => (
+            <Button
+              key={cat}
+              variant={selectedCategory === cat ? 'primary' : 'secondary'}
+              size="compact"
+              onClick={() => setSelectedCategory(cat)}
+              className="whitespace-nowrap cursor-pointer"
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid or Empty State */}
+      {filteredRecipes.length === 0 ? (
+        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
+          <CardContent className="p-0 flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
+              <BookOpen size={24} />
+            </div>
+            <div>
+              <h3 className="font-bold text-style-body text-text-primary">Nenhuma receita encontrada</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
+                Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.
+              </p>
+            </div>
             <CreateButton onClick={handleOpenCreateModal}>
               Criar Primeira Receita
             </CreateButton>
@@ -152,7 +198,7 @@ export default function RecipesPage() {
               isInserted={insertedId === recipe.id}
               onInsert={() => handleInsertInDiet(recipe.id)}
               onEdit={() => handleOpenEditModal(recipe)}
-              onDelete={() => handleDeleteRecipe(recipe.id)}
+              onDelete={() => setRecipeToDelete(recipe)}
             />
           ))}
         </div>
@@ -164,6 +210,25 @@ export default function RecipesPage() {
         onOpenChange={setIsModalOpen}
         onSave={handleSaveRecipe}
       />
+
+      <Dialog open={!!recipeToDelete} onOpenChange={(open) => !open && setRecipeToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir Receita</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir a receita &quot;{recipeToDelete?.name}&quot;? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setRecipeToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

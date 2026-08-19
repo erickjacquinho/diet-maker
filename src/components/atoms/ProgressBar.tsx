@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 
 export interface ProgressBarProps {
   value: number; // 0 a 100
-  colorVariant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue';
+  colorVariant?: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue' | 'protein' | 'carbohydrate' | 'fat' | 'primary';
   className?: string;
 }
 
@@ -14,7 +14,17 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   colorVariant = 'emerald',
   className = '',
 }) => {
-  const tones = { emerald: 'success', rose: 'error', amber: 'warning', teal: 'info', blue: 'protein' } as const;
+  const tones = {
+    emerald: 'success',
+    rose: 'error',
+    amber: 'warning',
+    teal: 'info',
+    blue: 'primary',
+    primary: 'primary',
+    protein: 'protein',
+    carbohydrate: 'carbohydrate',
+    fat: 'fat',
+  } as const;
   const clampedValue = Math.min(100, Math.max(0, value));
 
   const toneIndicatorMap = {
@@ -22,7 +32,11 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     rose: 'bg-error',
     amber: 'bg-warning',
     teal: 'bg-info',
-    blue: 'bg-macro-protein',
+    blue: 'bg-primary',
+    primary: 'bg-primary',
+    protein: 'bg-macro-protein',
+    carbohydrate: 'bg-macro-carbohydrate',
+    fat: 'bg-macro-fat',
   } as const;
 
   return (
@@ -36,4 +50,3 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     />
   );
 };
-
