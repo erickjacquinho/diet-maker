@@ -4,6 +4,7 @@ import type {
   PatientNextEvent,
   StoredDietRecord,
 } from './patientsStore';
+import { normalizeDateToISO } from './date-only';
 
 export interface ActivePlanSummary {
   dietId: string;
@@ -22,22 +23,7 @@ export interface NextEventSummary {
 }
 
 export function normalizePatientDateKey(value: string | undefined): string | null {
-  const normalized = value?.trim() ?? '';
-  if (!normalized) return null;
-
-  if (/^\d{4}-\d{2}-\d{2}/.test(normalized)) {
-    return normalized.slice(0, 10);
-  }
-
-  const [day, month, year] = normalized.split(/[/-]/).map((part) => part.trim());
-  if (day && month && year?.length === 4 && /^\d{1,2}$/.test(day) && /^\d{1,2}$/.test(month)) {
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  }
-
-  const parsed = new Date(normalized);
-  if (Number.isNaN(parsed.getTime())) return null;
-
-  return parsed.toISOString().slice(0, 10);
+  return normalizeDateToISO(value);
 }
 
 export function selectLatestAssessment(assessments: BodyAssessment[]): BodyAssessment | null {

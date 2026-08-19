@@ -1,6 +1,7 @@
 'use client';
 
 import { calculatePresetCalories } from './presetUtils';
+import { getStorageItem, setStorageItem } from './storage';
 
 export interface RecipeIngredient {
   foodId: string;
@@ -22,7 +23,6 @@ export interface Recipe {
   ingredients: RecipeIngredient[];
   createdAt: string;
 }
-
 
 export interface RecipeNutrientsSummary {
   totalProteinG: number;
@@ -63,15 +63,7 @@ export function calculateRecipeNutrients(ingredients: RecipeIngredient[], servin
 }
 
 export function getRecipesFromStorage(): Recipe[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(RECIPES_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch {
-    // fallback
-  }
-
-  return [];
+  return getStorageItem<Recipe[]>(RECIPES_KEY, []);
 }
 
 export function saveRecipeToStorage(recipe: Omit<Recipe, 'id' | 'createdAt'> & { id?: string }): Recipe {
@@ -86,24 +78,16 @@ export function saveRecipeToStorage(recipe: Omit<Recipe, 'id' | 'createdAt'> & {
   };
 
   const existingIndex = current.findIndex((r) => r.id === id);
-  let updatedList: Recipe[];
-  if (existingIndex >= 0) {
-    updatedList = [...current];
-    updatedList[existingIndex] = recipeToSave;
-  } else {
-    updatedList = [recipeToSave, ...current];
-  }
+  const updatedList = existingIndex >= 0
+    ? current.map((r) => (r.id === id ? recipeToSave : r))
+    : [recipeToSave, ...current];
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(RECIPES_KEY, JSON.stringify(updatedList));
-  }
+  setStorageItem(RECIPES_KEY, updatedList);
   return recipeToSave;
 }
 
 export function deleteRecipeFromStorage(id: string): void {
   const current = getRecipesFromStorage();
   const updatedList = current.filter((r) => r.id !== id);
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(RECIPES_KEY, JSON.stringify(updatedList));
-  }
+  setStorageItem(RECIPES_KEY, updatedList);
 }

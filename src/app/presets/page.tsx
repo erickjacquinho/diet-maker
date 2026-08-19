@@ -6,9 +6,12 @@ import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePresetModal, type CreatePresetData } from '@/components/molecules/CreatePresetModal';
-import { PresetCard, type DietPreset } from './PresetCard';
-
-const PRESETS_KEY = 'nutridiet_presets';
+import { PresetCard } from './PresetCard';
+import {
+  type DietPreset,
+  getPresetsFromStorage,
+  savePresetToStorage,
+} from '@/lib/presetsStore';
 
 export default function PresetsPage() {
   const [presets, setPresets] = useState<DietPreset[]>([]);
@@ -17,25 +20,12 @@ export default function PresetsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(PRESETS_KEY);
-      if (saved) setPresets(JSON.parse(saved));
-    } catch {
-      setPresets([]);
-    }
+    setPresets(getPresetsFromStorage());
   }, []);
 
   const handleCreatePreset = (formData: CreatePresetData) => {
-    const newPreset: DietPreset = {
-      ...formData,
-      id: `preset-${Date.now()}`,
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-    };
-
-    const updated = [newPreset, ...presets];
-    setPresets(updated);
-    localStorage.setItem(PRESETS_KEY, JSON.stringify(updated));
+    savePresetToStorage(formData);
+    setPresets(getPresetsFromStorage());
     setIsModalOpen(false);
   };
 

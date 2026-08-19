@@ -1,4 +1,6 @@
 import { calculatePresetCalories } from './presetUtils';
+import { normalizeDateToISO } from './date-only';
+import { getStorageItem } from './storage';
 import type {
   BodyAssessment,
   ConsultationRecord,
@@ -8,18 +10,7 @@ import type {
 const PATIENT_DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
 export function normalizeDateKey(value: string): string {
-  const decoded = decodeURIComponent(value).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(decoded)) return decoded;
-
-  const parts = decoded.split(/[/-]/).map((part) => part.trim());
-  if (parts.length !== 3) return decoded;
-
-  const [first, second, third] = parts;
-  if (third.length === 4) {
-    return `${third}-${second.padStart(2, '0')}-${first.padStart(2, '0')}`;
-  }
-
-  return decoded;
+  return normalizeDateToISO(value) ?? value.trim();
 }
 
 export function normalizePairedBodyMeasurements(assessment: BodyAssessment): BodyAssessment {
@@ -58,62 +49,53 @@ export function getConsultationRecordHelper(
   let diet: HistoricalDiet | undefined = undefined;
   let assessment: BodyAssessment | undefined = undefined;
 
-  if (typeof window !== 'undefined') {
-    try {
-      const savedDietsRaw = localStorage.getItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`);
-      if (savedDietsRaw) {
-        const savedDiets = JSON.parse(savedDietsRaw);
-        const match = savedDiets.find((d: any) => d.createdAt === normalizedDate || d.updatedAt === normalizedDate);
-        if (match) {
-          const simpleMeals = match.simpleMeals || [];
-          const meals = simpleMeals.map((m: any) => {
-            const items = m.items || [];
-            const p = Math.round(items.reduce((a: number, i: any) => a + (Number(i.protein) || 0), 0) * 10) / 10;
-            const c = Math.round(items.reduce((a: number, i: any) => a + (Number(i.carbs) || 0), 0) * 10) / 10;
-            const f = Math.round(items.reduce((a: number, i: any) => a + (Number(i.fats) || 0), 0) * 10) / 10;
-            const kcal = calculatePresetCalories(p, c, f);
-            const itemsSummary = items.length > 0
-              ? items.map((i: any) => `${i.name} (${i.quantityGrams}g)`).join(', ')
-              : undefined;
+  const savedDiets = getStorageItem<any[]>(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`, []);
+  const match = savedDiets.find((d: any) => d.createdAt === normalizedDate || d.updatedAt === normalizedDate);
+  if (match) {
+    const simpleMeals = match.simpleMeals || [];
+    const meals = simpleMeals.map((m: any) => {
+      const items = m.items || [];
+      const p = Math.round(items.reduce((a: number, i: any) => a + (Number(i.protein) || 0), 0) * 10) / 10;
+      const c = Math.round(items.reduce((a: number, i: any) => a + (Number(i.carbs) || 0), 0) * 10) / 10;
+      const f = Math.round(items.reduce((a: number, i: any) => a + (Number(i.fats) || 0), 0) * 10) / 10;
+      const kcal = calculatePresetCalories(p, c, f);
+      const itemsSummary = items.length > 0
+        ? items.map((i: any) => `${i.name} (${i.quantityGrams}g)`).join(', ')
+        : undefined;
 
-            return {
-              name: m.name || 'Refeição',
-              time: m.time || '00:00',
-              kcal,
-              proteinG: p,
-              carbsG: c,
-              fatsG: f,
-              itemsSummary,
-            };
-          });
+      return {
+        name: m.name || 'Refeição',
+        time: m.time || '00:00',
+        kcal,
+        proteinG: p,
+        carbsG: c,
+        fatsG: f,
+        itemsSummary,
+      };
+    });
 
-          const totalProteinG = Math.round(meals.reduce((acc: number, m: any) => acc + m.proteinG, 0) * 10) / 10;
-          const totalCarbsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.carbsG, 0) * 10) / 10;
-          const totalFatsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.fatsG, 0) * 10) / 10;
-          const totalKcal = calculatePresetCalories(totalProteinG, totalCarbsG, totalFatsG);
+    const totalProteinG = Math.round(meals.reduce((acc: number, m: any) => acc + m.proteinG, 0) * 10) / 10;
+    const totalCarbsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.carbsG, 0) * 10) / 10;
+    const totalFatsG = Math.round(meals.reduce((acc: number, m: any) => acc + m.fatsG, 0) * 10) / 10;
+    const totalKcal = calculatePresetCalories(totalProteinG, totalCarbsG, totalFatsG);
 
-          diet = {
-            id: match.id,
-            name: match.name || 'Prescrição Alimentar',
-            date: normalizedDate,
-            targetKcal: totalKcal || Number(match.simpleTargetKcal) || 0,
-            proteinG: totalProteinG || Number(match.simpleTargetProtein) || 0,
-            carbsG: totalCarbsG || Number(match.simpleTargetCarbs) || 0,
-            fatsG: totalFatsG || Number(match.simpleTargetFats) || 0,
-            status: 'Ativa',
-            meals,
-          };
-        }
-      }
-
-      const savedAssessments = getPatientAssessmentsFromStorage(patientId);
-      assessment = savedAssessments.find(
-        (item) => normalizeDateKey(item.date) === normalizeDateKey(rawDateParam),
-      );
-    } catch {
-      // Ignore JSON parse errors
-    }
+    diet = {
+      id: match.id,
+      name: match.name || 'Prescrição Alimentar',
+      date: normalizedDate,
+      targetKcal: totalKcal || Number(match.simpleTargetKcal) || 0,
+      proteinG: totalProteinG || Number(match.simpleTargetProtein) || 0,
+      carbsG: totalCarbsG || Number(match.simpleTargetCarbs) || 0,
+      fatsG: totalFatsG || Number(match.simpleTargetFats) || 0,
+      status: 'Ativa',
+      meals,
+    };
   }
+
+  const savedAssessments = getPatientAssessmentsFromStorage(patientId);
+  assessment = savedAssessments.find(
+    (item) => normalizeDateKey(item.date) === normalizeDateKey(rawDateParam),
+  );
 
   return {
     date: normalizedDate,

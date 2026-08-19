@@ -5,26 +5,9 @@ import { Copy, Utensils, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import type { MacroMode } from '@/lib/presetUtils';
+import type { DietPreset } from '@/lib/presetsStore';
 
-export interface DietPreset {
-  id: string;
-  title: string;
-  category: string;
-  targetKcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  proteinMode?: MacroMode;
-  proteinValue?: number;
-  carbsMode?: MacroMode;
-  carbsValue?: number;
-  fatsMode?: MacroMode;
-  fatsValue?: number;
-  referenceWeight?: number;
-  mealsCount: number;
-  description: string;
-}
+export type { DietPreset };
 
 export function PresetCard({
   preset,

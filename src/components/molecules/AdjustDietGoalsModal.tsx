@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Edit3 } from 'lucide-react';
+import { calculatePresetCalories } from '@/lib/presetUtils';
 
 interface AdjustDietGoalsModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export function AdjustDietGoalsModal({
   setTempTargetFat,
   onSave,
 }: AdjustDietGoalsModalProps) {
-  const calcKcal = tempTargetProt * 4 + tempTargetCarb * 4 + tempTargetFat * 9;
+  const calcKcal = calculatePresetCalories(tempTargetProt, tempTargetCarb, tempTargetFat);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

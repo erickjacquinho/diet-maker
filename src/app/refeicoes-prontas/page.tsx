@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UtensilsCrossed, Plus, Search, Clock, PlusCircle, Check } from 'lucide-react';
+import { UtensilsCrossed, Search, Clock, PlusCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
@@ -9,21 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/molecules/CreateReadyMealModal';
 import { MetricBox } from '@/components/molecules';
-import { calculatePresetCalories } from '@/lib/presetUtils';
-
-interface ReadyMeal {
-  id: string;
-  name: string;
-  suggestedTime: string;
-  kcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  itemsCount: number;
-  itemsPreview: string;
-}
-
-const MEALS_KEY = 'nutridiet_ready_meals';
+import {
+  type ReadyMeal,
+  getReadyMealsFromStorage,
+  saveReadyMealToStorage,
+} from '@/lib/readyMealsStore';
 
 export default function ReadyMealsPage() {
   const [meals, setMeals] = useState<ReadyMeal[]>([]);
@@ -32,35 +22,14 @@ export default function ReadyMealsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(MEALS_KEY);
-      if (saved) setMeals(JSON.parse(saved));
-    } catch {
-      setMeals([]);
-    }
+    setMeals(getReadyMealsFromStorage());
   }, []);
 
   const handleCreateMeal = (formData: ReadyMealFormData) => {
-    const calculatedKcal = calculatePresetCalories(
-      Number(formData.proteinG),
-      Number(formData.carbsG),
-      Number(formData.fatsG)
-    );
-
-    const newMeal: ReadyMeal = {
-      ...formData,
-      kcal: calculatedKcal,
-      id: `meal-block-${Date.now()}`,
-      name: formData.name.trim(),
-      itemsPreview: formData.itemsPreview.trim() || 'Itens cadastrados no bloco',
-    };
-
-    const updated = [newMeal, ...meals];
-    setMeals(updated);
-    localStorage.setItem(MEALS_KEY, JSON.stringify(updated));
+    saveReadyMealToStorage(formData);
+    setMeals(getReadyMealsFromStorage());
     setIsModalOpen(false);
   };
-
 
   const filteredMeals = meals.filter((m) =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -182,4 +151,3 @@ export default function ReadyMealsPage() {
     </div>
   );
 }
-

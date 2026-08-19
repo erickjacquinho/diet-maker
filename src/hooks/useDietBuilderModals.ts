@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
 import { FullDietPlan, DietMeal } from '@/lib/dietStore';
+import { calculatePresetCalories } from '@/lib/presetUtils';
 import { toast } from 'sonner';
 
 export function useDietBuilderModals({
@@ -95,7 +96,7 @@ export function useDietBuilderModals({
     if (!dietPlan) return;
     setDietPlan((prev) => {
       if (!prev) return prev;
-      const targetKcal = tempTargetProt * 4 + tempTargetCarb * 4 + tempTargetFat * 9;
+      const targetKcal = calculatePresetCalories(tempTargetProt, tempTargetCarb, tempTargetFat);
       if (prev.mode === 'simple') {
         return {
           ...prev,

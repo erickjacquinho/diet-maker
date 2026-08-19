@@ -58,10 +58,13 @@ const NON_CATALOG_COMPONENT_SOURCES = new Set([
   'src/components/ui/avatar.tsx',
   'src/components/ui/calendar-day-button.tsx',
   'src/components/ui/composition-context.tsx',
+  'src/components/ui/input-group.tsx',
   'src/components/ui/progress.tsx',
   'src/components/ui/sidebar-context.tsx',
   'src/components/ui/sidebar-menu-button.tsx',
   'src/components/ui/sidebar-sub.tsx',
+  'src/components/ui/textarea.tsx',
+  'src/components/ui/toggle-group.tsx',
 ]);
 const LOCAL_VALUE_PATTERN = /#[0-9a-f]{3,8}\b|(?:font-size|border-radius|box-shadow|z-index)\s*:/i;
 const LOCAL_FOUNDATION_REDEFINITION_PATTERN = /GLOBAL-FOUNDATION-REDEFINITION|--(?:color|space|radius|font|type|shadow|z|motion)-/i;

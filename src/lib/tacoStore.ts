@@ -1,6 +1,7 @@
 'use client';
 
 import tacoData from '@/data/taco_database.json';
+import { getStorageItem, setStorageItem } from './storage';
 
 export interface FoodItem {
   id: string;
@@ -22,23 +23,11 @@ const CUSTOM_FOODS_KEY = 'nutridiet_custom_foods';
 const FAVORITES_KEY = 'nutridiet_favorite_foods';
 
 export function getFavoritesFromStorage(): string[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(FAVORITES_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
+  return getStorageItem<string[]>(FAVORITES_KEY, []);
 }
 
 export function getCustomFoodsFromStorage(): FoodItem[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(CUSTOM_FOODS_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
+  return getStorageItem<FoodItem[]>(CUSTOM_FOODS_KEY, []);
 }
 
 export function getAllFoods(): FoodItem[] {
@@ -63,7 +52,6 @@ export function getAllFoods(): FoodItem[] {
 }
 
 export function toggleFavoriteFood(foodId: string): string[] {
-  if (typeof window === 'undefined') return [];
   const favorites = new Set(getFavoritesFromStorage());
   if (favorites.has(foodId)) {
     favorites.delete(foodId);
@@ -71,7 +59,7 @@ export function toggleFavoriteFood(foodId: string): string[] {
     favorites.add(foodId);
   }
   const result = Array.from(favorites);
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(result));
+  setStorageItem(FAVORITES_KEY, result);
   return result;
 }
 
@@ -88,13 +76,11 @@ export function addCustomFood(newFood: Omit<FoodItem, 'id' | 'source'> & { isFav
     isFavorite: isFav,
   };
   const updated = [created, ...customFoods];
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(updated));
-    if (isFav) {
-      const favorites = new Set(getFavoritesFromStorage());
-      favorites.add(createdId);
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
-    }
+  setStorageItem(CUSTOM_FOODS_KEY, updated);
+  if (isFav) {
+    const favorites = new Set(getFavoritesFromStorage());
+    favorites.add(createdId);
+    setStorageItem(FAVORITES_KEY, Array.from(favorites));
   }
   return created;
 }
@@ -116,18 +102,16 @@ export function updateCustomFood(
   };
 
   customFoods[index] = updated;
+  setStorageItem(CUSTOM_FOODS_KEY, customFoods);
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(customFoods));
-    if (updatedData.isFavorite !== undefined) {
-      const favorites = new Set(getFavoritesFromStorage());
-      if (updatedData.isFavorite) {
-        favorites.add(foodId);
-      } else {
-        favorites.delete(foodId);
-      }
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
+  if (updatedData.isFavorite !== undefined) {
+    const favorites = new Set(getFavoritesFromStorage());
+    if (updatedData.isFavorite) {
+      favorites.add(foodId);
+    } else {
+      favorites.delete(foodId);
     }
+    setStorageItem(FAVORITES_KEY, Array.from(favorites));
   }
 
   return updated;
@@ -139,12 +123,10 @@ export function deleteCustomFood(foodId: string): boolean {
   if (index === -1) return false;
 
   const updated = customFoods.filter((f) => f.id !== foodId);
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(updated));
-    const favorites = new Set(getFavoritesFromStorage());
-    favorites.delete(foodId);
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
-  }
+  setStorageItem(CUSTOM_FOODS_KEY, updated);
+  const favorites = new Set(getFavoritesFromStorage());
+  favorites.delete(foodId);
+  setStorageItem(FAVORITES_KEY, Array.from(favorites));
 
   return true;
 }
@@ -159,5 +141,3 @@ export function searchTacoFoods(query: string): FoodItem[] {
       f.category.toLowerCase().includes(normalized)
   );
 }
-
-

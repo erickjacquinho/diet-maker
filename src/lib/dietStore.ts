@@ -3,6 +3,7 @@
 import { calculatePresetCalories } from './presetUtils';
 import { recordPatientActivity } from './patientsStore';
 import { calculateMealTotals, calculateMealsTotal } from './macroCalculations';
+import { getStorageItem, setStorageItem } from './storage';
 
 export { calculateMealTotals, calculateMealsTotal };
 
@@ -20,6 +21,18 @@ export interface DietItem {
   fatG?: number;
   fatsG?: number;
   kcal: number;
+}
+
+export function getItemGrams(item: DietItem): number {
+  return item.quantityGrams ?? item.grams ?? 100;
+}
+
+export function getItemMacros(item: DietItem): { protein: number; carbs: number; fats: number; kcal: number } {
+  const protein = item.protein ?? item.proteinG ?? 0;
+  const carbs = item.carbs ?? item.carbsG ?? 0;
+  const fats = item.fats ?? item.fatsG ?? item.fatG ?? 0;
+  const kcal = item.kcal ?? calculatePresetCalories(protein, carbs, fats);
+  return { protein, carbs, fats, kcal };
 }
 
 export interface DietMeal {
@@ -66,13 +79,8 @@ export interface MealTotals {
 const DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
 export function getPatientDietsFromStorage(patientId: string): FullDietPlan[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(`${DIETS_KEY_PREFIX}${patientId}`);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
+  const saved = getStorageItem<FullDietPlan[]>(`${DIETS_KEY_PREFIX}${patientId}`, []);
+  return Array.isArray(saved) ? saved : [];
 }
 
 export function getDietFromStorage(patientId: string, dietId: string): FullDietPlan | null {
@@ -89,18 +97,11 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
     updatedAt: new Date().toLocaleDateString('pt-BR'),
   };
 
-  let updatedList: FullDietPlan[];
-  if (existingIndex >= 0) {
-    updatedList = [...current];
-    updatedList[existingIndex] = updatedDiet;
-  } else {
-    updatedList = [updatedDiet, ...current];
-  }
+  const updatedList = existingIndex >= 0
+    ? current.map((d) => (d.id === diet.id ? updatedDiet : d))
+    : [updatedDiet, ...current];
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, JSON.stringify(updatedList));
-  }
-
+  setStorageItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, updatedList);
   recordPatientActivity(diet.patientId, 'diet');
 
   return updatedDiet;
