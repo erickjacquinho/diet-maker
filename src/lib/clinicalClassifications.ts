@@ -6,6 +6,9 @@ export interface ClinicalBadge {
   description?: string;
 }
 
+/**
+ * Classificação de Body Fat (BF%) voltada para praticantes de musculação e performance.
+ */
 export function classifyBodyFat(
   bfPercent: number | null | undefined,
   gender: string | null | undefined
@@ -18,35 +21,82 @@ export function classifyBodyFat(
   if (!sex) return null;
 
   if (sex === 'male') {
-    if (bfPercent < 6) {
-      return { label: 'Essencial', tone: 'amber', description: 'Gordura essencial mínima' };
+    if (bfPercent < 7.0) {
+      return { label: 'Competição', tone: 'emerald', description: 'Nível de palco / contest (< 7%)' };
     }
-    if (bfPercent <= 13.99) {
-      return { label: 'Atlético', tone: 'emerald', description: 'Nível atlético' };
+    if (bfPercent <= 10.99) {
+      return { label: 'Shredded', tone: 'emerald', description: 'Definição muscular máxima (7% - 10%)' };
     }
-    if (bfPercent <= 17.99) {
-      return { label: 'Bom / Fitness', tone: 'emerald', description: 'Boa aptidão física' };
+    if (bfPercent <= 14.99) {
+      return { label: 'Atlético', tone: 'blue', description: 'Físico atlético sustentável (11% - 14%)' };
     }
-    if (bfPercent <= 24.99) {
-      return { label: 'Normal', tone: 'blue', description: 'Faixa média aceitável' };
+    if (bfPercent <= 18.99) {
+      return { label: 'Bulking / Off', tone: 'amber', description: 'Fase de ganho de massa / off-season (15% - 18%)' };
     }
-    return { label: 'Elevado', tone: 'rose', description: 'Acima da faixa recomendada' };
+    return { label: 'Definição', tone: 'rose', description: 'Cutting / redução de gordura recomendado (≥ 19%)' };
   }
 
   // female
-  if (bfPercent < 14) {
-    return { label: 'Essencial', tone: 'amber', description: 'Gordura essencial mínima' };
+  if (bfPercent < 13.0) {
+    return { label: 'Competição', tone: 'emerald', description: 'Nível de palco / contest (< 13%)' };
   }
-  if (bfPercent <= 20.99) {
-    return { label: 'Atlético', tone: 'emerald', description: 'Nível atlético' };
+  if (bfPercent <= 17.99) {
+    return { label: 'Shredded', tone: 'emerald', description: 'Alta definição estética (13% - 17%)' };
   }
-  if (bfPercent <= 24.99) {
-    return { label: 'Bom / Fitness', tone: 'emerald', description: 'Boa aptidão física' };
+  if (bfPercent <= 21.99) {
+    return { label: 'Atlética', tone: 'blue', description: 'Físico atlético e saudável (18% - 21%)' };
   }
-  if (bfPercent <= 31.99) {
-    return { label: 'Normal', tone: 'blue', description: 'Faixa média aceitável' };
+  if (bfPercent <= 26.99) {
+    return { label: 'Manutenção / Off', tone: 'amber', description: 'Manutenção / ganho de massa (22% - 26%)' };
   }
-  return { label: 'Elevado', tone: 'rose', description: 'Acima da faixa recomendada' };
+  return { label: 'Definição', tone: 'rose', description: 'Cutting / redução de gordura recomendado (≥ 27%)' };
+}
+
+/**
+ * Classificação do Fat-Free Mass Index (FFMI) - Índice de Massa Livre de Gordura.
+ * Baseado no modelo científico de Kouri et al. para mensurar hipertrofia real.
+ */
+export function classifyFfmi(
+  ffmi: number | null | undefined,
+  gender: string | null | undefined
+): ClinicalBadge | null {
+  if (ffmi === null || ffmi === undefined || !Number.isFinite(ffmi) || ffmi <= 0) {
+    return null;
+  }
+
+  const sex = gender ? normalizeBodyFatSex(gender) : null;
+  if (!sex) return null;
+
+  if (sex === 'male') {
+    if (ffmi < 19.0) {
+      return { label: 'Iniciante', tone: 'amber', description: 'Desenvolvimento muscular inicial (< 19.0)' };
+    }
+    if (ffmi <= 21.49) {
+      return { label: 'Intermediário', tone: 'blue', description: 'Bom nível de massa muscular (19.0 - 21.4)' };
+    }
+    if (ffmi <= 23.49) {
+      return { label: 'Avançado', tone: 'emerald', description: 'Excelente volume muscular (21.5 - 23.4)' };
+    }
+    if (ffmi <= 24.99) {
+      return { label: 'Elite Natural', tone: 'emerald', description: 'Próximo ao limite genético natural (23.5 - 24.9)' };
+    }
+    return { label: 'Nível Pro', tone: 'emerald', description: 'Densidade muscular de nível competitivo (≥ 25.0)' };
+  }
+
+  // female
+  if (ffmi < 15.0) {
+    return { label: 'Iniciante', tone: 'amber', description: 'Desenvolvimento muscular inicial (< 15.0)' };
+  }
+  if (ffmi <= 17.49) {
+    return { label: 'Intermediária', tone: 'blue', description: 'Bom nível de massa muscular (15.0 - 17.4)' };
+  }
+  if (ffmi <= 19.49) {
+    return { label: 'Avançada', tone: 'emerald', description: 'Excelente volume muscular (17.5 - 19.4)' };
+  }
+  if (ffmi <= 21.99) {
+    return { label: 'Elite Natural', tone: 'emerald', description: 'Próximo ao limite genético natural (19.5 - 21.9)' };
+  }
+  return { label: 'Nível Pro', tone: 'emerald', description: 'Densidade muscular de nível competitivo (≥ 22.0)' };
 }
 
 export function classifyBmi(bmi: number | null | undefined): ClinicalBadge | null {

@@ -22,8 +22,7 @@ export default function AssessmentWorkspacePage() {
     draft,
     previousAssessment,
     composition,
-    bmi,
-    waistToHipRatio,
+    ffmi,
     deltas,
     isNew,
     isSaving,
@@ -126,8 +125,7 @@ export default function AssessmentWorkspacePage() {
         <div className="lg:col-span-1">
           <AssessmentSummaryPanel
             composition={composition}
-            bmi={bmi}
-            waistToHipRatio={waistToHipRatio}
+            ffmi={ffmi}
             deltas={deltas}
             patientGender={patient.gender}
             isSaving={isSaving}

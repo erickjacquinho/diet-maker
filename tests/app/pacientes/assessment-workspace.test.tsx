@@ -32,7 +32,7 @@ function makeAssessment(overrides: Partial<BodyAssessment> = {}): BodyAssessment
 }
 
 describe('AssessmentMeasurementField', () => {
-  it('auto-selects text on focus and displays inline previous value and delta', () => {
+  it('auto-selects text on focus and displays inline previous value and delta inside input', () => {
     const onChange = vi.fn();
     render(
       <AssessmentMeasurementField
@@ -80,7 +80,7 @@ describe('AssessmentContinuousFields', () => {
 });
 
 describe('AssessmentSummaryPanel', () => {
-  it('renders real-time metrics, clinical badges, stacked bar, deltas and handles copy summary', () => {
+  it('renders real-time performance metrics, FFMI, athletic badges, stacked bar, deltas and handles copy summary', () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     const onCopySummary = vi.fn();
@@ -88,19 +88,19 @@ describe('AssessmentSummaryPanel', () => {
     render(
       <AssessmentSummaryPanel
         composition={{
-          bodyFatPercent: 17.5,
-          fatMassKg: 14.0,
-          leanMassKg: 66.0,
+          bodyFatPercent: 9.5,
+          fatMassKg: 7.6,
+          leanMassKg: 72.4,
           isValid: true,
         }}
-        bmi={24.7}
-        waistToHipRatio={0.85}
+        ffmi={23.8}
         patientGender="Masculino"
         deltas={{
           weightDiff: -1.5,
-          bodyFatDiff: -0.96,
-          leanMassDiff: 0.77,
-          waistDiff: -2.0,
+          bodyFatDiff: -1.1,
+          leanMassDiff: 1.2,
+          fatMassDiff: -0.9,
+          waistDiff: -1.5,
           hasPrevious: true,
         }}
         onSave={onSave}
@@ -109,26 +109,25 @@ describe('AssessmentSummaryPanel', () => {
       />
     );
 
-    expect(screen.getByText('17.5 %')).toBeInTheDocument();
-    expect(screen.getByText('14 kg')).toBeInTheDocument();
-    expect(screen.getByText('66 kg')).toBeInTheDocument();
-    expect(screen.getByText('24.7 kg/m²')).toBeInTheDocument();
-    expect(screen.getByText('0.85')).toBeInTheDocument();
+    expect(screen.getByText('9.5 %')).toBeInTheDocument();
+    expect(screen.getByText('7.6 kg')).toBeInTheDocument();
+    expect(screen.getByText('72.4 kg')).toBeInTheDocument();
+    expect(screen.getByText('23.8 kg/m²')).toBeInTheDocument();
 
-    // Clinical Badges
-    expect(screen.getByText('Bom / Fitness')).toBeInTheDocument();
-    expect(screen.getByText('Eutrofia')).toBeInTheDocument();
-    expect(screen.getByText('Baixo Risco')).toBeInTheDocument();
+    // Athletic & High Performance Badges
+    expect(screen.getByText('Shredded')).toBeInTheDocument();
+    expect(screen.getByText('Elite Natural')).toBeInTheDocument();
 
     // Stacked Bar
-    expect(screen.getByText('82.5% Massa Magra')).toBeInTheDocument();
-    expect(screen.getByText('17.5% Gordura')).toBeInTheDocument();
+    expect(screen.getByText('90.5% Massa Magra')).toBeInTheDocument();
+    expect(screen.getByText('9.5% Gordura')).toBeInTheDocument();
 
-    // Deltas
+    // Recomposição Corporal Deltas
+    expect(screen.getByText('+1.2 kg')).toBeInTheDocument();
+    expect(screen.getByText('-0.9 kg')).toBeInTheDocument();
+    expect(screen.getByText('-1.1 %')).toBeInTheDocument();
+    expect(screen.getByText('-1.5 cm')).toBeInTheDocument();
     expect(screen.getByText('-1.5 kg')).toBeInTheDocument();
-    expect(screen.getByText('-0.96 %')).toBeInTheDocument();
-    expect(screen.getByText('+0.77 kg')).toBeInTheDocument();
-    expect(screen.getByText('-2 cm')).toBeInTheDocument();
 
     // Actions
     fireEvent.click(screen.getByRole('button', { name: /Salvar Avaliação/i }));

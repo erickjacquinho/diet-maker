@@ -16,6 +16,7 @@ export interface AssessmentDeltas {
   weightDiff: number | null;
   bodyFatDiff: number | null;
   leanMassDiff: number | null;
+  fatMassDiff: number | null;
   waistDiff: number | null;
   hasPrevious: boolean;
 }
@@ -113,6 +114,13 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     });
   }, [bodyFatSex, draft, patient]);
 
+  // Fat-Free Mass Index (FFMI) para ciência esportiva / hipertrofia real
+  const ffmi = useMemo(() => {
+    if (!composition.leanMassKg || !patient?.heightCm || patient.heightCm <= 0) return null;
+    const heightM = patient.heightCm / 100;
+    return Number((composition.leanMassKg / (heightM * heightM)).toFixed(1));
+  }, [composition.leanMassKg, patient?.heightCm]);
+
   const bmi = useMemo(() => {
     if (!draft?.weightKg || !patient?.heightCm || patient.heightCm <= 0) return null;
     const heightM = patient.heightCm / 100;
@@ -130,6 +138,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         weightDiff: null,
         bodyFatDiff: null,
         leanMassDiff: null,
+        fatMassDiff: null,
         waistDiff: null,
         hasPrevious: false,
       };
@@ -156,6 +165,13 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         ? Number((currentLean - prevLean).toFixed(1))
         : null;
 
+    const currentFat = composition.fatMassKg;
+    const prevFat = previousAssessment.fatMassKg;
+    const fatMassDiff =
+      currentFat !== null && prevFat !== undefined && Number.isFinite(prevFat)
+        ? Number((currentFat - prevFat).toFixed(1))
+        : null;
+
     const currentWaist = draft.waistCm;
     const prevWaist = previousAssessment.waistCm;
     const waistDiff =
@@ -167,6 +183,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       weightDiff,
       bodyFatDiff,
       leanMassDiff,
+      fatMassDiff,
       waistDiff,
       hasPrevious: true,
     };
@@ -235,18 +252,19 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   const handleCopySummary = useCallback(() => {
     if (!draft || !patient || !composition.isValid) return;
 
-    const wDiff = deltas.weightDiff ? ` (${deltas.weightDiff > 0 ? '+' : ''}${deltas.weightDiff} kg)` : '';
+    const lmDiff = deltas.leanMassDiff ? ` (${deltas.leanMassDiff > 0 ? '+' : ''}${deltas.leanMassDiff} kg)` : '';
+    const fmDiff = deltas.fatMassDiff ? ` (${deltas.fatMassDiff > 0 ? '+' : ''}${deltas.fatMassDiff} kg)` : '';
     const bfDiff = deltas.bodyFatDiff ? ` (${deltas.bodyFatDiff > 0 ? '+' : ''}${deltas.bodyFatDiff}%)` : '';
+    const wDiff = deltas.weightDiff ? ` (${deltas.weightDiff > 0 ? '+' : ''}${deltas.weightDiff} kg)` : '';
 
     const summaryText = [
-      `📊 *Avaliação Física — ${patient.name}* (${draft.date})`,
-      `• Peso: ${draft.weightKg} kg${wDiff}`,
-      `• Gordura Corporal (BF): ${composition.bodyFatPercent}%${bfDiff}`,
-      `• Massa Magra: ${composition.leanMassKg} kg`,
-      `• Massa Gorda: ${composition.fatMassKg} kg`,
+      `⚡ *Composição Corporal & Performance — ${patient.name}* (${draft.date})`,
+      `• Body Fat (BF): ${composition.bodyFatPercent}%${bfDiff}`,
+      `• Massa Magra (FFM): ${composition.leanMassKg} kg${lmDiff}`,
+      `• Massa Gorda (FM): ${composition.fatMassKg} kg${fmDiff}`,
+      ffmi ? `• FFMI (Índice Muscular): ${ffmi} kg/m²` : null,
       `• Cintura: ${draft.waistCm} cm`,
-      bmi ? `• IMC: ${bmi} kg/m²` : null,
-      waistToHipRatio ? `• RCQ: ${waistToHipRatio}` : null,
+      `• Peso Total: ${draft.weightKg} kg${wDiff}`,
     ]
       .filter(Boolean)
       .join('\n');
@@ -258,7 +276,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         setTimeout(() => setIsCopied(false), 2500);
       });
     }
-  }, [draft, patient, composition, deltas, bmi, waistToHipRatio]);
+  }, [draft, patient, composition, deltas, ffmi]);
 
   // Global Ctrl+S / Cmd+S shortcut
   useEffect(() => {
@@ -291,6 +309,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     draft,
     previousAssessment,
     composition,
+    ffmi,
     bmi,
     waistToHipRatio,
     deltas,
