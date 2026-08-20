@@ -91,7 +91,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
             placeholder="Digite o nome do alimento (ex: Frango, Arroz, Ovo, Aveia, Banana)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 text-style-legal font-semibold"
+            className="pl-9 text-style-field-value"
             autoFocus
           />
           <Search size={14} className="absolute left-3 top-6 text-text-muted" />
@@ -119,9 +119,10 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                     type="number"
                     min={1}
                     max={5000}
+                    size="compact"
                     value={quantityGrams}
                     onChange={(e) => setQuantityGrams(Number(e.target.value))}
-                    className="w-24 bg-surface border-border-subtle text-style-legal font-bold text-center"
+                    className="w-24 text-style-field-value font-bold text-center"
                   />
                   <span className="text-style-legal font-bold text-text-muted">g</span>
                 </div>

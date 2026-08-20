@@ -11,14 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import type { FoodItem } from '@/lib/tacoStore';
+import { textStyle } from '@/design-system';
 import {
   UNITS,
   CATEGORIES,
@@ -83,32 +78,38 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div className="grid grid-cols-12 gap-2">
             <div className="col-span-6">
-              <label htmlFor="custom-food-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome do Alimento / Suplemento</label>
+              <label htmlFor="custom-food-name" className={`${textStyle('field-label')} block mb-1`}>Nome do Alimento / Suplemento</label>
               <Input id="custom-food-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Whey Protein 80% Max" />
             </div>
             <div className="col-span-3">
-              <label htmlFor="custom-food-portion" className="text-style-legal font-bold text-text-primary block mb-1">Qtd. Porção</label>
+              <label htmlFor="custom-food-portion" className={`${textStyle('field-label')} block mb-1`}>Qtd. Porção</label>
               <Input id="custom-food-portion" value={formData.portion} onChange={(event) => update('portion', event.target.value)} placeholder="Ex: 100" />
             </div>
             <div className="col-span-3">
-              <label htmlFor="custom-food-unit" className="text-style-legal font-bold text-text-primary block mb-1">Unidade</label>
-              <Select value={formData.unit} onValueChange={(value) => update('unit', value)}>
-                <SelectTrigger id="custom-food-unit"><SelectValue /></SelectTrigger>
-                <SelectContent layer="modal">{UNITS.map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
-              </Select>
+              <SelectField
+                id="custom-food-unit"
+                label="Unidade"
+                value={formData.unit}
+                onValueChange={(value) => update('unit', value)}
+                layer="modal"
+                options={UNITS.map((unit) => ({ value: unit, label: unit }))}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-12 gap-2">
             <div className="col-span-6">
-              <label htmlFor="custom-food-category" className="text-style-legal font-bold text-text-primary block mb-1">Categoria</label>
-              <Select value={formData.category} onValueChange={(value) => update('category', value)}>
-                <SelectTrigger id="custom-food-category"><SelectValue /></SelectTrigger>
-                <SelectContent layer="modal">{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
-              </Select>
+              <SelectField
+                id="custom-food-category"
+                label="Categoria"
+                value={formData.category}
+                onValueChange={(value) => update('category', value)}
+                layer="modal"
+                options={CATEGORIES.map((category) => ({ value: category, label: category }))}
+              />
             </div>
             <div className="col-span-6">
-              <label htmlFor="custom-food-preparo" className="text-style-legal font-bold text-text-primary block mb-1">Forma de Preparo</label>
+              <label htmlFor="custom-food-preparo" className={`${textStyle('field-label')} block mb-1`}>Forma de Preparo</label>
               <Input id="custom-food-preparo" value={formData.preparo} onChange={(event) => update('preparo', event.target.value)} placeholder="Ex: Grelhado, Cozido, Cru" />
             </div>
           </div>
@@ -124,7 +125,7 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
           />
 
           <div>
-            <label htmlFor="custom-food-fiber" className="text-style-legal font-semibold text-text-muted block mb-1">Fibra Alimentar (opcional)</label>
+            <label htmlFor="custom-food-fiber" className={`${textStyle('field-label')} block mb-1`}>Fibra Alimentar (opcional)</label>
             <Input id="custom-food-fiber" type="number" min="0" step="any" value={formData.fiberG} onChange={(event) => update('fiberG', event.target.value)} placeholder="Ex: 2" />
           </div>
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Avatar, ProgressBar, Surface } from "@/components/atoms";
-import { DatePickerField, MetricBox, PatientBadgeHeader, TacoSearchInput } from "@/components/molecules";
+import { Avatar, ProgressBar, Surface, SelectField } from "@/components/atoms";
+import { ActionDropdown, DatePickerField, MetricBox, PatientBadgeHeader, TacoSearchInput } from "@/components/molecules";
 import { MacroTrackerHeader, MetricBoxGroup } from "@/components/organisms";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ export function ComponentSpecGrid() {
   const [inputValue, setInputValue] = useState("Paciente em acompanhamento");
   const [foodQuery, setFoodQuery] = useState("Frango grelhado");
   const [date, setDate] = useState("2026-08-07");
+  const [selectValue, setSelectValue] = useState("cutting");
 
   return (
     <div className="grid grid-cols-3 gap-4">
@@ -49,6 +50,33 @@ export function ComponentSpecGrid() {
           <label htmlFor="design-system-input" className={textStyle("field-label")}>Nome do paciente</label>
           <Input id="design-system-input" value={inputValue} onChange={(event) => setInputValue(event.target.value)} />
         </div>
+      </ComponentSpecCard>
+
+      <ComponentSpecCard id="atom-select-field" layer="Atoms" category="Campos + seleção" description="Componente pai padronizado de seleção para formulários e filtros.">
+        <div className="w-full max-w-form">
+          <SelectField
+            id="design-system-select"
+            label="Objetivo Clínico"
+            value={selectValue}
+            onValueChange={setSelectValue}
+            placeholder="Selecione o objetivo"
+            options={[
+              { value: "cutting", label: "Emagrecimento / Cutting" },
+              { value: "bulking", label: "Hipertrofia / Bulking" },
+              { value: "manutencao", label: "Manutenção / Saúde" },
+            ]}
+          />
+        </div>
+      </ComponentSpecCard>
+
+      <ComponentSpecCard id="molecule-action-dropdown" layer="Molecules" category="Ações compostas" description="Menu suspenso de ações contextuais sem estilos manuais.">
+        <ActionDropdown
+          triggerLabel="Mais ações"
+          items={[
+            { id: "whatsapp", label: "Compartilhar WhatsApp", onSelect: () => {} },
+            { id: "pdf", label: "Exportar PDF", onSelect: () => {} },
+          ]}
+        />
       </ComponentSpecCard>
 
       <ComponentSpecCard id="ui-badge" layer="UI" category="Feedback" description="Status compacto com tons semânticos.">

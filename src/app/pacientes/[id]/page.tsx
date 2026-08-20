@@ -140,12 +140,11 @@ export default function PatientDetailPage() {
             <span className={textStyle('caption')}>
               {consultationUpdates.length === 1 ? '1 consulta' : `${consultationUpdates.length} consultas`}
             </span>
-            <SecondaryActionButton
-              icon={<Scale size={14} />}
-              onClick={handleOpenCreateAssessment}
-            >
-              Nova Avaliação
-            </SecondaryActionButton>
+            <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
+              <SecondaryActionButton icon={<Scale size={14} />}>
+                Nova Avaliação
+              </SecondaryActionButton>
+            </Link>
             <Link href={`/pacientes/${patientId}/dieta/nova`}>
               <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
             </Link>

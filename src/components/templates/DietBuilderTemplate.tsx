@@ -2,22 +2,15 @@
 
 import React from 'react';
 import { MacroTrackerHeader } from '../organisms';
-import { DietModeSwitcherProps, PageContextHeader } from '../molecules';
+import { ActionDropdown, DietModeSwitcherProps, PageContextHeader } from '../molecules';
 import { Button } from '@/components/ui/button';
 import {
   Percent,
   MessageCircle,
   FileText,
   Save,
-  MoreHorizontal,
   Edit3,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
 import type { DietBuilderTemplateProps } from './dietBuilderTemplateTypes';
@@ -81,29 +74,23 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         </Button>
       )}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            size="compact"
-            aria-label="Mais ações"
-            className="flex items-center gap-1.5"
-          >
-            <MoreHorizontal size={15} aria-hidden="true" />
-            <span>Mais ações</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-44">
-          <DropdownMenuItem onSelect={() => handleWhatsApp?.()}>
-            <MessageCircle size={14} aria-hidden="true" />
-            <span>WhatsApp</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onExportPDF?.()}>
-            <FileText size={14} aria-hidden="true" />
-            <span>PDF</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ActionDropdown
+        triggerLabel="Mais ações"
+        items={[
+          {
+            id: 'whatsapp',
+            label: 'WhatsApp',
+            icon: <MessageCircle size={14} aria-hidden="true" />,
+            onSelect: () => handleWhatsApp?.(),
+          },
+          {
+            id: 'pdf',
+            label: 'PDF',
+            icon: <FileText size={14} aria-hidden="true" />,
+            onSelect: () => onExportPDF?.(),
+          },
+        ]}
+      />
     </>
   );
 

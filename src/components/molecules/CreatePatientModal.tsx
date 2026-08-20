@@ -9,15 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import { DEFAULT_OBJECTIVES } from '@/lib/patientsStore';
 import { formatWhatsappContact } from '@/lib/whatsapp';
+import { textStyle } from '@/design-system';
 
 export interface CreatePatientFormData {
   name: string;
@@ -76,40 +71,44 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div>
-            <label htmlFor="new-patient-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome Completo</label>
+            <label htmlFor="new-patient-name" className={`${textStyle('field-label')} block mb-1`}>Nome Completo</label>
             <Input id="new-patient-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Carlos Eduardo Silva" />
           </div>
 
           <div>
-            <label htmlFor="new-patient-whatsapp" className="text-style-legal font-bold text-text-primary block mb-1">WhatsApp</label>
+            <label htmlFor="new-patient-whatsapp" className={`${textStyle('field-label')} block mb-1`}>WhatsApp</label>
             <Input id="new-patient-whatsapp" type="tel" inputMode="numeric" autoComplete="tel" value={formData.whatsapp} onChange={(event) => update('whatsapp', formatWhatsappContact(event.target.value))} placeholder="(11) 99999-9999" />
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <div><label className="text-style-legal font-semibold text-text-muted block mb-1">Idade</label><Input type="number" value={formData.age} onChange={(event) => update('age', Number(event.target.value))} /></div>
-            <div><label className="text-style-legal font-semibold text-text-muted block mb-1">Altura (cm)</label><Input type="number" value={formData.heightCm} onChange={(event) => update('heightCm', Number(event.target.value))} /></div>
-            <div><label className="text-style-legal font-semibold text-text-muted block mb-1">Peso (kg)</label><Input type="number" step="any" value={formData.weightKg} onChange={(event) => update('weightKg', Number(event.target.value))} /></div>
+            <div><label className={`${textStyle('field-label')} block mb-1`}>Idade</label><Input type="number" value={formData.age} onChange={(event) => update('age', Number(event.target.value))} /></div>
+            <div><label className={`${textStyle('field-label')} block mb-1`}>Altura (cm)</label><Input type="number" value={formData.heightCm} onChange={(event) => update('heightCm', Number(event.target.value))} /></div>
+            <div><label className={`${textStyle('field-label')} block mb-1`}>Peso (kg)</label><Input type="number" step="any" value={formData.weightKg} onChange={(event) => update('weightKg', Number(event.target.value))} /></div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label htmlFor="new-patient-objective" className="text-style-legal font-bold text-text-primary block mb-1">Objetivo Clínico / Esportivo</label>
-              <Select value={formData.objective} onValueChange={(value) => update('objective', value)}>
-                <SelectTrigger id="new-patient-objective"><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger>
-                <SelectContent layer="modal">{DEFAULT_OBJECTIVES.map((objective) => <SelectItem key={objective} value={objective}>{objective}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <SelectField
+              id="new-patient-objective"
+              label="Objetivo Clínico / Esportivo"
+              value={formData.objective}
+              onValueChange={(value) => update('objective', value)}
+              placeholder="Selecione o objetivo"
+              layer="modal"
+              options={DEFAULT_OBJECTIVES.map((objective) => ({ value: objective, label: objective }))}
+            />
 
-            <div>
-              <label htmlFor="new-patient-gender" className="text-style-legal font-bold text-text-primary block mb-1">Gênero</label>
-              <Select value={formData.gender} onValueChange={(value) => update('gender', value)}>
-                <SelectTrigger id="new-patient-gender"><SelectValue placeholder="Selecione o gênero" /></SelectTrigger>
-                <SelectContent layer="modal">
-                  <SelectItem value="Masculino">Masculino</SelectItem>
-                  <SelectItem value="Feminino">Feminino</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectField
+              id="new-patient-gender"
+              label="Gênero"
+              value={formData.gender}
+              onValueChange={(value) => update('gender', value)}
+              placeholder="Selecione o gênero"
+              layer="modal"
+              options={[
+                { value: 'Masculino', label: 'Masculino' },
+                { value: 'Feminino', label: 'Feminino' },
+              ]}
+            />
           </div>
 
           <div className="flex gap-2 pt-2">

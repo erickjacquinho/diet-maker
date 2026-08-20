@@ -83,13 +83,14 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               type="number"
               min={1}
               max={5000}
+              size="compact"
               value={tempGrams}
               onChange={(e) => setTempGrams(Number(e.target.value))}
               onBlur={handleSaveGrams}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSaveGrams();
               }}
-              className="w-16 h-7 px-1 text-center bg-surface border border-success rounded-surface text-style-legal font-bold text-text-primary focus:outline-none"
+              className="w-16 px-1 text-center text-style-field-value font-bold"
               autoFocus
             />
             <span className="text-style-legal font-bold text-text-muted">g</span>
@@ -101,7 +102,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               setTempGrams(quantityGrams);
               setIsEditingGrams(true);
             }}
-            className="bg-surface border border-border-hover hover:border-success rounded-control px-2.5 py-1 text-style-legal font-bold text-text-primary transition-colors duration-standard"
+            className="bg-surface border border-border-control hover:border-primary rounded-control px-2.5 py-1 text-style-legal font-bold text-text-primary transition-colors duration-fast"
             title="Clique para editar gramatura"
           >
             {quantityGrams} <span className="text-text-muted font-normal">g</span>

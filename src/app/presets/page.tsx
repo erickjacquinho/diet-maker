@@ -65,7 +65,7 @@ export default function PresetsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar preset por nome ou categoria (ex: Low Carb, Bulking)..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal"
+            className="pl-11 pr-4"
           />
         </div>
       )}

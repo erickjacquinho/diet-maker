@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import { calculateMacroGrams, calculatePresetCalories, type MacroMode } from '@/lib/presetUtils';
+import { textStyle } from '@/design-system';
 
 export interface CreatePresetData {
   title: string;
@@ -92,10 +94,15 @@ export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetMo
     <div className="p-3 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-2">
       <div className="flex items-center justify-between"><span className={`text-style-legal font-bold ${color}`}>{label}</span><span className="text-style-legal font-semibold text-text-muted">Modo de cálculo</span></div>
       <div className="grid grid-cols-2 gap-2">
-        <Select value={formData[modeKey]} onValueChange={(value: MacroMode) => update(modeKey, value)}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent layer="modal"><SelectItem value="absoluto">Absoluto (g)</SelectItem><SelectItem value="multiplicativo">Multiplicativo (g/kg)</SelectItem></SelectContent>
-        </Select>
+        <SelectField
+          value={formData[modeKey]}
+          onValueChange={(value) => update(modeKey, value as MacroMode)}
+          layer="modal"
+          options={[
+            { value: 'absoluto', label: 'Absoluto (g)' },
+            { value: 'multiplicativo', label: 'Multiplicativo (g/kg)' },
+          ]}
+        />
         <Input type="number" min={0} step={formData[modeKey] === 'multiplicativo' ? 0.1 : 1} value={formData[valueKey]} onChange={(event) => update(valueKey, Number(event.target.value))} className="font-bold text-center" />
       </div>
     </div>
@@ -107,12 +114,26 @@ export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetMo
         <DialogContent className="max-w-md max-h-screen overflow-y-auto" onInteractOutside={(event) => { if (hasContent) { event.preventDefault(); setIsDiscardConfirmOpen(true); } }}>
           <DialogHeader className="border-b border-border-subtle pb-3"><DialogTitle className="font-bold text-style-body text-text-primary">Novo Preset de Dieta</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <div><label htmlFor="preset-title" className="text-style-legal font-bold text-text-primary block mb-1">Título do Protocolo</label><Input id="preset-title" required value={formData.title} onChange={(event) => update('title', event.target.value)} placeholder="Ex: Protocolo Cutting Low Carb 1800kcal" /></div>
-            <div><label htmlFor="preset-category" className="text-style-legal font-bold text-text-primary block mb-1">Categoria</label><Select value={formData.category} onValueChange={(value) => update('category', value)}><SelectTrigger id="preset-category"><SelectValue /></SelectTrigger><SelectContent layer="modal"><SelectItem value="Emagrecimento">Emagrecimento / Cutting</SelectItem><SelectItem value="Hipertrofia">Hipertrofia / Bulking</SelectItem><SelectItem value="Manutenção">Manutenção / Saúde</SelectItem><SelectItem value="Jejum Intermitente">Jejum Intermitente</SelectItem></SelectContent></Select></div>
-            <div className="flex flex-col gap-2"><span className="text-style-legal font-bold text-text-primary">Macronutrientes</span><MacroEditor label="Proteínas" modeKey="proteinMode" valueKey="proteinValue" color="text-macro-protein" /><MacroEditor label="Carboidratos" modeKey="carbsMode" valueKey="carbsValue" color="text-macro-carbohydrate" /><MacroEditor label="Gorduras" modeKey="fatsMode" valueKey="fatsValue" color="text-macro-fat" /></div>
-            {hasMultiplicative && <div className="p-3 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between gap-2"><div><label htmlFor="preset-reference-weight" className="text-style-legal font-bold text-text-primary block">Peso de Referência (kg)</label><span className="text-style-legal text-text-muted block">Estimativa para cálculo total (g/kg × kg)</span></div><Input id="preset-reference-weight" type="number" min={1} value={formData.referenceWeight} onChange={(event) => update('referenceWeight', Number(event.target.value))} className="font-bold text-center w-20 shrink-0" /></div>}
-            <div className="p-3 bg-macro-kcal-soft border border-macro-kcal-border rounded-control flex items-center justify-between"><div><span className="text-style-legal font-bold text-text-primary block">Calorias Totais (Calculadas)</span><span className="text-style-legal text-text-muted block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span></div><Badge variant="secondary" className="font-bold text-style-body-small text-macro-kcal bg-macro-kcal-soft border-none px-3 py-1">{calculatedKcal} kcal</Badge></div>
-            <div><label htmlFor="preset-description" className="text-style-legal font-bold text-text-primary block mb-1">Descrição Breve</label><textarea id="preset-description" rows={2} value={formData.description} onChange={(event) => update('description', event.target.value)} placeholder="Orientações e indicações deste preset..." className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none" /></div>
+            <div><label htmlFor="preset-title" className={`${textStyle('field-label')} block mb-1`}>Título do Protocolo</label><Input id="preset-title" required value={formData.title} onChange={(event) => update('title', event.target.value)} placeholder="Ex: Protocolo Cutting Low Carb 1800kcal" /></div>
+            <div>
+              <SelectField
+                id="preset-category"
+                label="Categoria"
+                value={formData.category}
+                onValueChange={(value) => update('category', value)}
+                layer="modal"
+                options={[
+                  { value: 'Emagrecimento', label: 'Emagrecimento / Cutting' },
+                  { value: 'Hipertrofia', label: 'Hipertrofia / Bulking' },
+                  { value: 'Manutenção', label: 'Manutenção / Saúde' },
+                  { value: 'Jejum Intermitente', label: 'Jejum Intermitente' },
+                ]}
+              />
+            </div>
+            <div className="flex flex-col gap-2"><span className={`${textStyle('field-label')} block`}>Macronutrientes</span><MacroEditor label="Proteínas" modeKey="proteinMode" valueKey="proteinValue" color="text-macro-protein" /><MacroEditor label="Carboidratos" modeKey="carbsMode" valueKey="carbsValue" color="text-macro-carbohydrate" /><MacroEditor label="Gorduras" modeKey="fatsMode" valueKey="fatsValue" color="text-macro-fat" /></div>
+            {hasMultiplicative && <div className="p-3 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between gap-2"><div><label htmlFor="preset-reference-weight" className={`${textStyle('field-label')} block`}>Peso de Referência (kg)</label><span className="text-style-legal text-text-muted block">Estimativa para cálculo total (g/kg × kg)</span></div><Input id="preset-reference-weight" type="number" min={1} value={formData.referenceWeight} onChange={(event) => update('referenceWeight', Number(event.target.value))} className="font-bold text-center w-20 shrink-0" /></div>}
+            <div className="p-3 bg-macro-kcal-soft border border-macro-kcal-border rounded-control flex items-center justify-between"><div><span className={`${textStyle('field-label')} block`}>Calorias Totais (Calculadas)</span><span className="text-style-legal text-text-muted block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span></div><Badge variant="secondary" className="font-bold text-style-body-small text-macro-kcal bg-macro-kcal-soft border-none px-3 py-1">{calculatedKcal} kcal</Badge></div>
+            <div><label htmlFor="preset-description" className={`${textStyle('field-label')} block mb-1`}>Descrição Breve</label><Textarea id="preset-description" rows={2} value={formData.description} onChange={(event) => update('description', event.target.value)} placeholder="Orientações e indicações deste preset..." className="resize-none" /></div>
             <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} className="flex-1">Cancelar</Button><Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Preset</Button></div>
           </form>
         </DialogContent>

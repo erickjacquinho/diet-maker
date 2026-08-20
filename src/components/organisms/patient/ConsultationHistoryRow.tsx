@@ -172,7 +172,9 @@ export function ConsultationHistoryExpandedRow({
               </div>
 
               <div className="flex justify-end pt-2">
-                <EditIconButton onClick={() => onOpenEditAssessment(update.assessment!)} title="Editar Avaliação Física" />
+                <Link href={`/pacientes/${patientId}/avaliacao/${update.assessment.id}`} title="Editar Avaliação Física">
+                  <EditIconButton title="Editar Avaliação Física" />
+                </Link>
               </div>
             </div>
           ) : (

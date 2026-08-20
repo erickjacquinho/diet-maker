@@ -2,8 +2,7 @@ import React from 'react';
 import { Search, RotateCcw, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CreateButton } from '@/components/atoms';
+import { SelectField, CreateButton } from '@/components/atoms';
 
 interface FoodFilterHeaderProps {
   totalCount: number;
@@ -85,7 +84,7 @@ export function FoodFilterHeader({
       </div>
 
       {/* Filters Bar */}
-      <div className="grid grid-cols-5 gap-3 bg-surface-subtle p-3 rounded-control border border-border-subtle">
+      <div className="grid grid-cols-5 gap-3 bg-surface-subtle p-3 rounded-control border border-border-subtle items-center">
         <div className="relative col-span-2">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <Input
@@ -96,47 +95,45 @@ export function FoodFilterHeader({
           />
         </div>
 
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="bg-surface">
-            <SelectValue placeholder="Categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas Categorias</SelectItem>
-            {categoriesList.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SelectField
+          value={categoryFilter}
+          onValueChange={setCategoryFilter}
+          placeholder="Categoria"
+          aria-label="Filtrar por categoria"
+          triggerClassName="bg-surface"
+          options={[
+            { value: 'all', label: 'Todas Categorias' },
+            ...categoriesList.map((cat) => ({ value: cat, label: cat })),
+          ]}
+        />
 
-        <Select value={preparoFilter} onValueChange={setPreparoFilter}>
-          <SelectTrigger className="bg-surface">
-            <SelectValue placeholder="Preparo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos Preparos</SelectItem>
-            {preparosList.map((prep) => (
-              <SelectItem key={prep} value={prep}>
-                {prep}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SelectField
+          value={preparoFilter}
+          onValueChange={setPreparoFilter}
+          placeholder="Preparo"
+          aria-label="Filtrar por preparo"
+          triggerClassName="bg-surface"
+          options={[
+            { value: 'all', label: 'Todos Preparos' },
+            ...preparosList.map((prep) => ({ value: prep, label: prep })),
+          ]}
+        />
 
-        <div className="flex gap-2">
-          <Select value={macroPreset} onValueChange={(val: any) => setMacroPreset(val)}>
-            <SelectTrigger className="bg-surface flex-1">
-              <SelectValue placeholder="Filtro Macro" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos Macros</SelectItem>
-              <SelectItem value="high-protein">Alta Proteína (&gt;15g)</SelectItem>
-              <SelectItem value="high-carb">Alto Carbo (&gt;30g)</SelectItem>
-              <SelectItem value="high-fat">Alta Gordura (&gt;15g)</SelectItem>
-              <SelectItem value="high-fiber">Rico em Fibras (&gt;3g)</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-2 items-center">
+          <SelectField
+            value={macroPreset}
+            onValueChange={(val) => setMacroPreset(val as any)}
+            placeholder="Filtro Macro"
+            aria-label="Filtrar por macronutrientes"
+            triggerClassName="bg-surface flex-1"
+            options={[
+              { value: 'all', label: 'Todos Macros' },
+              { value: 'high-protein', label: 'Alta Proteína (>15g)' },
+              { value: 'high-carb', label: 'Alto Carbo (>30g)' },
+              { value: 'high-fat', label: 'Alta Gordura (>15g)' },
+              { value: 'high-fiber', label: 'Rico em Fibras (>3g)' },
+            ]}
+          />
 
           <Button variant="secondary" size="compact" iconOnly onClick={resetFilters} title="Limpar Filtros">
             <RotateCcw className="w-4 h-4 text-text-muted" />

@@ -12,14 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import { DatePickerField } from './DatePickerField';
 import type { PatientNextEvent, PatientNextEventType } from '@/lib/patientsStore';
 
@@ -78,27 +71,19 @@ export function NextEventModal({
               onValueChange={(value) => setDraft((current) => ({ ...current, date: value }))}
             />
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="next-event-type" className={textStyle('field-label')}>
-                Tipo
-              </label>
-              <Select
-                value={draft.type}
-                onValueChange={(value: PatientNextEventType) =>
-                  setDraft((current) => ({ ...current, type: value }))
-                }
-              >
-                <SelectTrigger id="next-event-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent layer="modal">
-                  <SelectGroup>
-                    <SelectItem value="assessment-update">Atualização de avaliação</SelectItem>
-                    <SelectItem value="diet-update">Atualização de dieta</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectField
+              id="next-event-type"
+              label="Tipo"
+              value={draft.type}
+              onValueChange={(value) =>
+                setDraft((current) => ({ ...current, type: value as PatientNextEventType }))
+              }
+              layer="modal"
+              options={[
+                { value: 'assessment-update', label: 'Atualização de avaliação' },
+                { value: 'diet-update', label: 'Atualização de dieta' },
+              ]}
+            />
           </div>
 
           <DialogFooter className="items-center">

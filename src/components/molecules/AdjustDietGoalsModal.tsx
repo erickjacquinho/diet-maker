@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Edit3 } from 'lucide-react';
 import { calculatePresetCalories } from '@/lib/presetUtils';
+import { textStyle } from '@/design-system';
 
 interface AdjustDietGoalsModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export function AdjustDietGoalsModal({
         <div className="py-4 flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Proteína (g)</label>
+              <label className={`${textStyle('field-label')} mb-1 block`}>Proteína (g)</label>
               <Input
                 type="number"
                 value={tempTargetProt}
@@ -54,7 +55,7 @@ export function AdjustDietGoalsModal({
               />
             </div>
             <div>
-            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Carboidratos (g)</label>
+              <label className={`${textStyle('field-label')} mb-1 block`}>Carboidratos (g)</label>
               <Input
                 type="number"
                 value={tempTargetCarb}
@@ -62,7 +63,7 @@ export function AdjustDietGoalsModal({
               />
             </div>
             <div>
-            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Gorduras (g)</label>
+              <label className={`${textStyle('field-label')} mb-1 block`}>Gorduras (g)</label>
               <Input
                 type="number"
                 value={tempTargetFat}

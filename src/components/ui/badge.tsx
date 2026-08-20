@@ -4,7 +4,7 @@ import { recipes } from "@/design-system"
 
 const badgeVariants = recipes.badge
 
-export type BadgeVariant =
+type BadgeVariant =
   | "default"
   | "secondary"
   | "destructive"

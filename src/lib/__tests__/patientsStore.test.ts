@@ -4,6 +4,7 @@ import {
   getPatientById,
   getPatientsFromStorage,
   formatPatientCode,
+  deletePatientFromStorage,
 } from '../patientsStore';
 
 describe('patientsStore NanoID and Code formatting', () => {
@@ -72,5 +73,29 @@ describe('patientsStore NanoID and Code formatting', () => {
     const foundByLegacy = getPatientById('pat-17182938123-x9f2');
     expect(foundByLegacy).not.toBeNull();
     expect(foundByLegacy?.name).toBe('Maria Oliveira');
+  });
+
+  it('deletes patient along with assessments and diets in cascade', () => {
+    const created = savePatientToStorage({
+      name: 'Carlos Santos',
+      age: 28,
+      gender: 'Masculino',
+      heightCm: 175,
+      weightKg: 75,
+      targetKcal: 2200,
+      targetProtein: 160,
+      targetCarbs: 250,
+      targetFats: 70,
+      objective: 'Bulking',
+    });
+
+    localStorage.setItem(`nutridiet_assessments_${created.id}`, JSON.stringify([{ id: 'ass-1' }]));
+    localStorage.setItem(`nutridiet_diets_${created.id}`, JSON.stringify([{ id: 'diet-1' }]));
+
+    deletePatientFromStorage(created.id);
+
+    expect(getPatientById(created.id)).toBeNull();
+    expect(localStorage.getItem(`nutridiet_assessments_${created.id}`)).toBeNull();
+    expect(localStorage.getItem(`nutridiet_diets_${created.id}`)).toBeNull();
   });
 });

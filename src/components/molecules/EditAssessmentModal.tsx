@@ -14,7 +14,7 @@ import { BodyAssessment, Patient } from '@/lib/patientsStore';
 import { Surface } from '@/components/atoms';
 import { MetricBox } from './MetricBox';
 import { useAssessmentForm } from '@/hooks/useAssessmentForm';
-import { AssessmentFieldsTabs } from './assessment/AssessmentFieldsTabs';
+import { AssessmentContinuousFields } from './assessment/AssessmentContinuousFields';
 
 export { useAssessmentForm };
 
@@ -47,7 +47,7 @@ export function EditAssessmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] flex flex-col p-5 overflow-hidden gap-0">
+      <DialogContent className="max-h-[90vh] max-w-lg sm:max-w-xl md:max-w-2xl flex flex-col p-5 overflow-hidden gap-0">
         <DialogHeader className="shrink-0 pb-3 border-b border-border-subtle">
           <DialogTitle className={textStyle('dialog-title')}>
             <Scale className="size-4 text-success shrink-0 inline-block mr-2" aria-hidden="true" />
@@ -65,7 +65,9 @@ export function EditAssessmentModal({
             onSubmit={handleSubmit}
             className="flex-1 min-h-0 flex flex-col overflow-hidden pt-3 gap-3"
           >
-            <AssessmentFieldsTabs draft={draft} updateNumericField={updateNumericField} />
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+              <AssessmentContinuousFields draft={draft} updateNumericField={updateNumericField} />
+            </div>
 
             <div className="shrink-0 pt-1" aria-label="Composição corporal calculada">
               <Surface variant="subtle" density="compact" className="grid grid-cols-3 gap-2 divide-x divide-border-divider overflow-hidden">

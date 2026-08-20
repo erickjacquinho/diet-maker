@@ -15,6 +15,14 @@ describe("canonical component recipes", () => {
     expect(recipes.button({ size: "compact", iconOnly: true })).toContain("w-control-compact");
   });
 
+  it("creates the documented input and textarea recipes", () => {
+    expect(recipes.input({ size: "standard", state: "default" })).toContain("h-control-standard");
+    expect(recipes.input({ size: "compact", state: "default" })).toContain("h-control-compact");
+    expect(recipes.textarea({ state: "default" })).toContain("min-h-[80px]");
+    expect(recipes.textarea({ state: "error" })).toContain("border-error-border");
+    expect(recipes.textarea({ state: "read-only" })).toContain("bg-surface-subtle");
+  });
+
   it("uses semantic classes without local visual values", () => {
     const samples = [
       recipes.button(),

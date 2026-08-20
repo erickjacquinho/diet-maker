@@ -7,20 +7,27 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 import { recipes } from "@/design-system"
 import { cn } from "@/lib/utils"
 
+
 const Select = SelectPrimitive.Root
 
 const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  size?: 'compact' | 'standard';
+  state?: 'default' | 'error';
+}
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, size = 'standard', state = 'default', ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      recipes.input({ size: "standard", state: "default" }),
+      recipes.input({ size, state }),
       "flex cursor-pointer items-center justify-between gap-2 text-left data-[placeholder]:text-text-muted disabled:cursor-not-allowed [&>span]:line-clamp-1",
       className
     )}

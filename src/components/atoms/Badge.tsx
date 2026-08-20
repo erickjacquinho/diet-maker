@@ -1,9 +1,7 @@
 import React from 'react';
-import { Badge as ShadcnBadge, BadgeProps as ShadcnBadgeProps, BadgeVariant } from '@/components/ui/badge';
+import { Badge as ShadcnBadge, BadgeProps as ShadcnBadgeProps } from '@/components/ui/badge';
 
-export type BadgeProps = Omit<ShadcnBadgeProps, 'variant'> & {
-  variant?: BadgeVariant;
-}
+export type BadgeProps = ShadcnBadgeProps;
 
 export const Badge: React.FC<BadgeProps> = ({
   variant = 'neutral',

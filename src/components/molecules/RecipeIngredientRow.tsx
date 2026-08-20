@@ -33,9 +33,10 @@ export const RecipeIngredientRow: React.FC<RecipeIngredientRowProps> = ({
           <Input
             type="number"
             min={1}
+            size="compact"
             value={ingredient.amountGrams}
             onChange={(e) => onAmountChange(Number(e.target.value))}
-            className="w-16 h-8 text-center text-style-legal font-bold bg-surface border-border-subtle px-1"
+            className="w-16 text-center text-style-field-value font-bold px-1"
           />
           <span className="text-style-legal font-bold text-text-muted">g</span>
         </div>

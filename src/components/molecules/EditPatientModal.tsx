@@ -6,8 +6,7 @@ import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SecondaryActionButton } from '@/components/atoms';
+import { SecondaryActionButton, SelectField } from '@/components/atoms';
 import { DEFAULT_OBJECTIVES, type Patient } from '@/lib/patientsStore';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 
@@ -100,29 +99,36 @@ export function EditPatientModal({
                   <Input type="number" value={draft.heightCm} onChange={(event) => setDraft({ ...draft, heightCm: Number(event.target.value) })} className="mt-1" />
                 </div>
                 <div>
-                  <label className={textStyle('field-label')}>Gênero</label>
-                  <Select value={draft.gender || 'Masculino'} onValueChange={(value) => setDraft({ ...draft, gender: value })}>
-                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent layer="modal">
-                      <SelectItem value="Masculino">Masculino</SelectItem>
-                      <SelectItem value="Feminino">Feminino</SelectItem>
-                      {draft.gender && !['Masculino', 'Feminino'].includes(draft.gender) && <SelectItem value={draft.gender}>{draft.gender}</SelectItem>}
-                    </SelectContent>
-                  </Select>
+                  <SelectField
+                    label="Gênero"
+                    value={draft.gender || 'Masculino'}
+                    onValueChange={(value) => setDraft({ ...draft, gender: value })}
+                    layer="modal"
+                    options={[
+                      { value: 'Masculino', label: 'Masculino' },
+                      { value: 'Feminino', label: 'Feminino' },
+                      ...(draft.gender && !['Masculino', 'Feminino'].includes(draft.gender)
+                        ? [{ value: draft.gender, label: draft.gender }]
+                        : []),
+                    ]}
+                  />
                 </div>
               </div>
               <div>
-                <label htmlFor="edit-patient-objective" className={textStyle('field-label')}>Objetivo Clínico / Esportivo</label>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-end gap-2">
                   <div className="flex-1 min-w-0">
-                    <Select value={draft.objective || ''} onValueChange={(value) => setDraft({ ...draft, objective: value })}>
-                      <SelectTrigger id="edit-patient-objective"><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger>
-                      <SelectContent layer="modal">
-                        {Array.from(new Set([...DEFAULT_OBJECTIVES, ...objectives, draft.objective].filter(Boolean))).map((objective) => (
-                          <SelectItem key={objective} value={objective}>{objective}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SelectField
+                      id="edit-patient-objective"
+                      label="Objetivo Clínico / Esportivo"
+                      value={draft.objective || ''}
+                      onValueChange={(value) => setDraft({ ...draft, objective: value })}
+                      placeholder="Selecione o objetivo"
+                      layer="modal"
+                      options={Array.from(new Set([...DEFAULT_OBJECTIVES, ...objectives, draft.objective].filter(Boolean))).map((obj) => ({
+                        value: obj as string,
+                        label: obj as string,
+                      }))}
+                    />
                   </div>
                   <SecondaryActionButton type="button" onClick={onRequestAddObjective} icon={<Plus size={14} className="text-success" />} title="Adicionar Novo Objetivo">Novo</SecondaryActionButton>
                 </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import { Copy } from 'lucide-react';
 import { CarbCyclingVariation } from '@/lib/dietStore';
 
@@ -40,39 +40,33 @@ export function CopyVariationModal({
         </DialogHeader>
 
         <div className="py-4 flex flex-col gap-4">
-          <div>
-            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Copiar de:</label>
-            <Select value={copySourceId} onValueChange={setCopySourceId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a origem" />
-              </SelectTrigger>
-              <SelectContent>
-                {variations.map((v) => (
-                  <SelectItem key={v.id} value={v.id}>
-                    {v.name} ({v.targetKcal} kcal)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <SelectField
+            id="copy-variation-source"
+            label="Copiar de:"
+            value={copySourceId}
+            onValueChange={setCopySourceId}
+            placeholder="Selecione a origem"
+            layer="modal"
+            options={variations.map((v) => ({
+              value: v.id,
+              label: `${v.name} (${v.targetKcal} kcal)`,
+            }))}
+          />
 
-          <div>
-            <label className="text-style-legal font-semibold text-text-secondary mb-1 block">Para:</label>
-            <Select value={copyTargetId} onValueChange={setCopyTargetId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o destino" />
-              </SelectTrigger>
-              <SelectContent>
-                {variations
-                  .filter((v) => v.id !== copySourceId)
-                  .map((v) => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {v.name} ({v.targetKcal} kcal)
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <SelectField
+            id="copy-variation-target"
+            label="Para:"
+            value={copyTargetId}
+            onValueChange={setCopyTargetId}
+            placeholder="Selecione o destino"
+            layer="modal"
+            options={variations
+              .filter((v) => v.id !== copySourceId)
+              .map((v) => ({
+                value: v.id,
+                label: `${v.name} (${v.targetKcal} kcal)`,
+              }))}
+          />
         </div>
 
         <DialogFooter>

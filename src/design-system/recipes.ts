@@ -10,7 +10,7 @@ const button = cva(`inline-flex items-center justify-center gap-2 rounded-contro
       secondary: "border-border-control bg-surface text-text-primary hover:border-button-secondary-border-hover hover:bg-button-secondary-hover",
       quiet: "border-transparent bg-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary",
       destructive: "border-error bg-error text-on-error hover:bg-error/90 active:bg-error",
-      "destructive-outline": "border-error bg-surface text-error hover:border-error hover:bg-error hover:text-on-error active:bg-error active:text-on-error disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
+      "destructive-outline": "border-error bg-surface text-error hover:border-error hover:bg-error hover:text-white active:bg-error active:text-white disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
     },
     size: {
       compact: "h-control-compact px-3 text-style-button-label-compact font-semibold",
@@ -39,6 +39,13 @@ const input = cva(`w-full rounded-control border border-input bg-surface px-3 te
     state: { default: "", error: "border-error-border aria-invalid:border-error-border", "read-only": "bg-surface-subtle", disabled: "bg-disabled-soft" },
   },
   defaultVariants: { size: "standard", state: "default" },
+});
+
+const textarea = cva(`w-full min-h-[80px] rounded-control border border-input bg-surface px-3 py-2 text-style-field-value text-text-primary placeholder:text-text-muted ${focus} ${motion} disabled:opacity-disabled`, {
+  variants: {
+    state: { default: "", error: "border-error-border aria-invalid:border-error-border", "read-only": "bg-surface-subtle", disabled: "bg-disabled-soft" },
+  },
+  defaultVariants: { state: "default" },
 });
 
 const badge = cva("inline-flex min-h-6 items-center gap-1 rounded-compact border px-2 py-1 text-style-legal font-semibold", {
@@ -112,10 +119,11 @@ const progress = cva("w-full overflow-hidden rounded-round bg-border-subtle", {
   defaultVariants: { tone: "success", size: "compact" },
 });
 
-export const recipes = { button, iconButton: button, input, textarea: input, badge, card, surface, tableRow, avatar, progress } as const;
+export const recipes = { button, iconButton: button, input, textarea, badge, card, surface, tableRow, avatar, progress } as const;
 
 export type ButtonRecipeProps = Parameters<typeof button>[0];
 export type InputRecipeProps = Parameters<typeof input>[0];
+export type TextareaRecipeProps = Parameters<typeof textarea>[0];
 export type BadgeRecipeProps = Parameters<typeof badge>[0];
 export type CardRecipeProps = Parameters<typeof card>[0];
 export type SurfaceRecipeProps = Parameters<typeof surface>[0];

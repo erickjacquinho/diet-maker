@@ -2,7 +2,6 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 
-
 export interface AutoKcalSectionProps {
   title?: string;
   proteinG: number;
@@ -41,63 +40,67 @@ export const AutoKcalSection: React.FC<AutoKcalSectionProps> = ({
         <div>
           <span className="text-style-legal font-bold text-macro-protein block tracking-label mb-1 text-center">Prot (g)</span>
           {isReadOnly ? (
-            <div className="bg-surface border border-border-subtle rounded-control h-8 flex items-center justify-center font-bold text-style-legal text-macro-protein shadow-floating">
+            <div className="bg-surface border border-border-subtle rounded-control h-control-compact flex items-center justify-center font-bold text-style-field-value text-macro-protein shadow-none">
               {proteinG}g
             </div>
           ) : (
             <Input
               type="number"
               min={0}
+              size="compact"
               value={proteinG}
               onChange={(e) => onProteinChange?.(Number(e.target.value))}
-              className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
+              className="text-style-field-value font-bold text-center h-control-compact"
             />
           )}
         </div>
 
         <div>
-          <span className="text-style-legal font-bold text-warning block tracking-label mb-1 text-center">Carb (g)</span>
+          <span className="text-style-legal font-bold text-macro-carbohydrate block tracking-label mb-1 text-center">Carb (g)</span>
           {isReadOnly ? (
-            <div className="bg-surface border border-border-subtle rounded-surface h-8 flex items-center justify-center font-bold text-style-legal text-warning shadow-floating">
+            <div className="bg-surface border border-border-subtle rounded-control h-control-compact flex items-center justify-center font-bold text-style-field-value text-macro-carbohydrate shadow-none">
               {carbsG}g
             </div>
           ) : (
             <Input
               type="number"
               min={0}
+              size="compact"
               value={carbsG}
               onChange={(e) => onCarbsChange?.(Number(e.target.value))}
-              className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
+              className="text-style-field-value font-bold text-center h-control-compact"
             />
           )}
         </div>
 
         <div>
-          <span className="text-style-legal font-bold text-success block tracking-label mb-1 text-center">Gord (g)</span>
+          <span className="text-style-legal font-bold text-macro-fat block tracking-label mb-1 text-center">Gord (g)</span>
           {isReadOnly ? (
-            <div className="bg-surface border border-border-subtle rounded-surface h-8 flex items-center justify-center font-bold text-style-legal text-success shadow-floating">
+            <div className="bg-surface border border-border-subtle rounded-control h-control-compact flex items-center justify-center font-bold text-style-field-value text-macro-fat shadow-none">
               {fatsG}g
             </div>
           ) : (
             <Input
               type="number"
               min={0}
+              size="compact"
               value={fatsG}
               onChange={(e) => onFatsChange?.(Number(e.target.value))}
-              className="bg-surface border-border-subtle text-style-legal font-bold text-center h-8"
+              className="text-style-field-value font-bold text-center h-control-compact"
             />
           )}
         </div>
       </div>
 
-      <div className="p-2 bg-surface border border-border-subtle rounded-surface flex items-center justify-between text-style-legal">
+      <div className="p-2 bg-surface border border-border-subtle rounded-control flex items-center justify-between text-style-legal">
         <div>
           <span className="font-bold text-text-primary block">Calorias Totais (Calculadas)</span>
           <span className="text-style-chart-micro text-text-muted block font-medium">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span>
         </div>
-        <span className="font-bold text-style-legal text-success">{calculatedKcal} kcal</span>
+        <span className="font-bold text-style-legal text-macro-kcal">{calculatedKcal} kcal</span>
       </div>
     </div>
   );
 };
+
 

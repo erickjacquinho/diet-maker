@@ -68,7 +68,7 @@ export default function ReadyMealsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar refeição pronta por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal"
+            className="pl-11 pr-4"
           />
         </div>
       )}

@@ -115,44 +115,7 @@ export default function RecipesPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar receita por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal w-full"
-          />
-        </div>
-
-        <div className="flex items-center gap-1.5 overflow-x-auto w-auto">
-          {CATEGORIES.map((cat) => (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? 'primary' : 'secondary'}
-              size="compact"
-              onClick={() => setSelectedCategory(cat)}
-              className="whitespace-nowrap cursor-pointer"
-            >
-              {cat}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Grid or Empty State */}
-      {filteredRecipes.length === 0 ? (
-        <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
-          <CardContent className="p-0 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
-              <BookOpen size={24} />
-            </div>
-            <div>
-              <h3 className="font-bold text-style-body text-text-primary">Nenhuma receita encontrada</h3>
-              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
-                Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.
-              </p>
-            </div>
-          <Input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar receita por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal w-full"
+            className="pl-11 pr-4 w-full"
           />
         </div>
 

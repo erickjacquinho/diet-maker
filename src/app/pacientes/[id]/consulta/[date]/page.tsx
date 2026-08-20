@@ -2,19 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Utensils, Activity, Scale, Printer } from 'lucide-react';
-import { EditAssessmentModal, PageContextHeader } from '@/components/molecules';
+import { PageContextHeader } from '@/components/molecules';
 import { Card } from '@/components/ui/card';
 import { CreateButton, SecondaryActionButton } from '@/components/atoms';
 import { toast } from 'sonner';
 import {
   getPatientById,
   getConsultationRecord,
-  savePatientAssessmentToStorage,
   Patient,
   ConsultationRecord,
-  BodyAssessment
 } from '@/lib/patientsStore';
 import { ConsultationDietCard } from './components/ConsultationDietCard';
 import { ConsultationAssessmentCard } from './components/ConsultationAssessmentCard';
@@ -22,31 +20,16 @@ import { ConsultationNotesCard } from './components/ConsultationNotesCard';
 
 export default function DedicatedConsultationPage() {
   const params = useParams();
+  const router = useRouter();
   const patientId = params?.id as string;
   const rawDate = params?.date as string;
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [consultation, setConsultation] = useState<ConsultationRecord | null>(null);
-  const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
-  const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
 
   const handleOpenEditAssessment = () => {
-    if (consultation?.assessment) {
-      setEditingAssessment({ ...consultation.assessment });
-      setIsEditAssessmentOpen(true);
-    }
-  };
-
-  const handleSaveAssessment = (assessment: BodyAssessment) => {
-    if (consultation) {
-      const savedAssessments = savePatientAssessmentToStorage(patientId, assessment);
-      const savedAssessment = savedAssessments.find((item) => item.id === assessment.id) ?? assessment;
-      setConsultation({
-        ...consultation,
-        assessment: savedAssessment,
-      });
-      setIsEditAssessmentOpen(false);
-      toast.success('Avaliação física atualizada com sucesso!');
+    if (consultation?.assessment && patient) {
+      router.push(`/pacientes/${patient.id}/avaliacao/${consultation.assessment.id}`);
     }
   };
 
@@ -136,15 +119,6 @@ export default function DedicatedConsultationPage() {
 
         <ConsultationNotesCard consultation={consultation} bmi={bmi} />
       </div>
-
-      <EditAssessmentModal
-        open={isEditAssessmentOpen}
-        patient={patient}
-        assessment={editingAssessment}
-        mode="edit"
-        onOpenChange={setIsEditAssessmentOpen}
-        onSave={handleSaveAssessment}
-      />
     </div>
   );
 }

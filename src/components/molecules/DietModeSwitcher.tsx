@@ -60,6 +60,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
 
         <ToggleGroup
           type="single"
+          role="tablist"
           value={mode}
           onValueChange={(val) => {
             if (val) onModeChange(val as 'simple' | 'carb_cycling');
@@ -68,6 +69,9 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
         >
           <ToggleGroupItem
             value="simple"
+            role="tab"
+            data-state={mode === 'simple' ? 'active' : 'inactive'}
+            aria-selected={mode === 'simple'}
             onClick={() => onModeChange('simple')}
           >
             <Utensils size={14} aria-hidden="true" className="mr-1.5" />
@@ -75,6 +79,9 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           </ToggleGroupItem>
           <ToggleGroupItem
             value="carb_cycling"
+            role="tab"
+            data-state={mode === 'carb_cycling' ? 'active' : 'inactive'}
+            aria-selected={mode === 'carb_cycling'}
             onClick={() => onModeChange('carb_cycling')}
           >
             <Repeat size={14} aria-hidden="true" className="mr-1.5" />
@@ -144,6 +151,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
                 <ToggleGroupItem
                   key={v.id}
                   value={v.id}
+                  aria-pressed={activeVariationId === v.id}
                   onClick={() => onSelectVariation(v.id)}
                   aria-label={`${v.name} ${typeLabel} Meta: ${v.targetKcal} kcal ${v.targetCarbs}g C`}
                   className="flex-1 min-w-[140px] justify-between text-style-legal py-2 px-3"

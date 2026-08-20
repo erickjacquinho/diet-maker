@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,10 +40,11 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
         </DialogHeader>
 
         <div className="py-2">
-          <textarea
+          <Textarea
             readOnly
+            state="read-only"
             value={whatsAppText}
-            className="w-full h-64 p-3 text-style-legal font-mono bg-surface-subtle border border-border-subtle rounded-control resize-none focus:outline-none"
+            className="w-full h-64 p-3 font-mono text-style-body-small border-border-subtle resize-none"
           />
         </div>
 

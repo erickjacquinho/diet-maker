@@ -37,14 +37,17 @@ const SPEC_STATUSES = ['inventoried', 'specified', 'homologated'];
 // Internal extraction files and legacy families stay outside the canonical registry
 // until they receive their own component profile.
 const NON_CATALOG_COMPONENT_SOURCES = new Set([
+  'src/components/atoms/SelectField.tsx',
+  'src/components/molecules/ActionDropdown.tsx',
   'src/components/molecules/AdjustDietGoalsModal.tsx',
   'src/components/molecules/assessment/AssessmentMeasurementField.tsx',
-  'src/components/molecules/assessment/AssessmentFieldsTabs.tsx',
+  'src/components/molecules/assessment/AssessmentContinuousFields.tsx',
   'src/components/molecules/assessment/LimbSectionCard.tsx',
   'src/components/molecules/CopyVariationModal.tsx',
   'src/components/molecules/food-search/FoodSearchResultsList.tsx',
   'src/components/molecules/ScaleDietModal.tsx',
   'src/components/molecules/WhatsAppShareModal.tsx',
+  'src/components/organisms/assessment/AssessmentSummaryPanel.tsx',
   'src/components/organisms/diet/DietContextSection.tsx',
   'src/components/organisms/diet/DietMealsSection.tsx',
   'src/components/organisms/foods/FoodFilterHeader.tsx',

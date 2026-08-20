@@ -1,13 +1,12 @@
 import React from 'react';
-import { Badge, ProgressBar, Surface } from '../atoms';
-import { BadgeVariant } from '../atoms/Badge';
+import { Badge, BadgeProps, ProgressBar, Surface } from '../atoms';
 
 export interface MacroMetricCardProps {
   label: string;
   currentValue: string; // Ex: "168g" ou "2.450"
   targetValue: string;  // Ex: "165g" ou "2.400 kcal"
   statusBadgeText?: string;
-  statusBadgeVariant?: BadgeVariant;
+  statusBadgeVariant?: BadgeProps['variant'];
   percentage: number;   // 0 a 100+
   gPerKgRatio?: string; // Ex: "2.03 g/kg"
   gPerKgMeta?: string;  // Ex: "2.0"
@@ -40,6 +39,7 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
   return (
     <Surface variant="subtle" density="standard" className="p-0">
       <div className="p-4">
+        <div className="flex justify-between text-style-legal font-semibold text-text-muted mb-1">
           <span className={`${textColors[macroColor]} font-bold`}>{label}</span>
           {statusBadgeText && (
             <Badge variant={statusBadgeVariant}>{statusBadgeText}</Badge>

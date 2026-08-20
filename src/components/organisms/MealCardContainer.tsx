@@ -68,16 +68,18 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
               <div className="flex items-center gap-2 w-full w-auto">
                 <Input
                   type="text"
+                  size="compact"
                   value={tempTitle}
                   onChange={(e) => setTempTitle(e.target.value)}
-                  className="h-8 text-style-legal font-bold bg-surface-subtle border-border-subtle w-36"
+                  className="w-36 text-style-field-value font-bold"
                   placeholder="Nome da refeição"
                 />
                 <Input
                   type="text"
+                  size="compact"
                   value={tempTime}
                   onChange={(e) => setTempTime(e.target.value)}
-                  className="h-8 text-style-legal font-bold bg-surface-subtle border-border-subtle w-20 text-center"
+                  className="w-20 text-style-field-value font-bold text-center"
                   placeholder="08:00"
                 />
                 <Button

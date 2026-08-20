@@ -7,10 +7,12 @@ import { RecipeIngredientRow } from './RecipeIngredientRow';
 import { TacoSearchInput } from './TacoSearchInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectField } from '@/components/atoms';
 import { calculateRecipeNutrients, type Recipe, type RecipeIngredient } from '@/lib/recipesStore';
 import { searchTacoFoods, type FoodItem } from '@/lib/tacoStore';
+import { textStyle } from '@/design-system';
 
 export interface CreateRecipeModalProps {
   open: boolean;
@@ -73,12 +75,22 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
       <DialogContent className="max-w-lg max-h-screen overflow-y-auto">
         <DialogHeader className="border-b border-border-subtle pb-3"><DialogTitle className="font-bold text-style-body text-text-primary">{recipe ? 'Editar Receita Culinária' : 'Nova Receita Culinária'}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-          <div><label htmlFor="recipe-name" className="text-style-legal font-bold text-text-primary block mb-1">Nome da Receita</label><Input id="recipe-name" required value={formData.name} onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))} placeholder="Ex: Bolo de Banana com Aveia e Whey" /></div>
-          <div className="grid grid-cols-2 gap-2"><div><label htmlFor="recipe-category" className="text-style-legal font-semibold text-text-muted block mb-1">Categoria</label><Select value={formData.category} onValueChange={(value) => setFormData((current) => ({ ...current, category: value }))}><SelectTrigger id="recipe-category"><SelectValue /></SelectTrigger><SelectContent layer="modal">{CATEGORIES.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent></Select></div><div><label htmlFor="recipe-servings" className="text-style-legal font-semibold text-text-muted block mb-1">Rendimento (Porções)</label><Input id="recipe-servings" type="number" min={1} value={formData.servings} onChange={(event) => setFormData((current) => ({ ...current, servings: Number(event.target.value) }))} /></div></div>
-          <div className="flex flex-col gap-2"><label htmlFor="recipe-ingredient-search" className="text-style-legal font-bold text-text-primary block">Adicionar Ingredientes</label><div className="relative"><TacoSearchInput id="recipe-ingredient-search" value={foodQuery} onChange={(event) => handleSearch(event.target.value)} placeholder="Buscar ingrediente (ex: ovo, frango, aveia)..." />{searchResults.length > 0 && <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-control z-dropdown max-h-48 overflow-y-auto p-1 flex flex-col gap-1">{searchResults.map((food) => <Button key={food.id} type="button" variant="quiet" size="standard" onClick={() => addIngredient(food)} className="w-full text-left justify-between p-2"><span className="font-bold text-text-primary truncate">{food.name}</span><span className="text-style-legal text-macro-kcal font-bold shrink-0">{food.kcal} kcal/100g</span></Button>)}</div>}</div></div>
+          <div><label htmlFor="recipe-name" className={`${textStyle('field-label')} block mb-1`}>Nome da Receita</label><Input id="recipe-name" required value={formData.name} onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))} placeholder="Ex: Bolo de Banana com Aveia e Whey" /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <SelectField
+              id="recipe-category"
+              label="Categoria"
+              value={formData.category}
+              onValueChange={(value) => setFormData((current) => ({ ...current, category: value }))}
+              layer="modal"
+              options={CATEGORIES.map((category) => ({ value: category, label: category }))}
+            />
+            <div><label htmlFor="recipe-servings" className={`${textStyle('field-label')} block mb-1`}>Rendimento (Porções)</label><Input id="recipe-servings" type="number" min={1} value={formData.servings} onChange={(event) => setFormData((current) => ({ ...current, servings: Number(event.target.value) }))} /></div>
+          </div>
+          <div className="flex flex-col gap-2"><label htmlFor="recipe-ingredient-search" className={`${textStyle('field-label')} block`}>Adicionar Ingredientes</label><div className="relative"><TacoSearchInput id="recipe-ingredient-search" value={foodQuery} onChange={(event) => handleSearch(event.target.value)} placeholder="Buscar ingrediente (ex: ovo, frango, aveia)..." />{searchResults.length > 0 && <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-control z-dropdown max-h-48 overflow-y-auto p-1 flex flex-col gap-1">{searchResults.map((food) => <Button key={food.id} type="button" variant="quiet" size="standard" onClick={() => addIngredient(food)} className="w-full text-left justify-between p-2"><span className="font-bold text-text-primary truncate">{food.name}</span><span className="text-style-legal text-macro-kcal font-bold shrink-0">{food.kcal} kcal/100g</span></Button>)}</div>}</div></div>
           {formData.ingredients.length > 0 && <div className="flex flex-col gap-2"><span className="text-style-legal font-bold text-text-primary tracking-overline">Ingredientes Adicionados ({formData.ingredients.length})</span><div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">{formData.ingredients.map((ingredient, index) => <RecipeIngredientRow key={`${ingredient.foodId}-${index}`} ingredient={ingredient} onAmountChange={(amount) => updateIngredient(index, amount)} onRemove={() => setFormData((current) => ({ ...current, ingredients: current.ingredients.filter((_, ingredientIndex) => ingredientIndex !== index) }))} />)}</div></div>}
           <AutoKcalSection title={`Macros Calculados por Porção (1 de ${formData.servings})`} proteinG={summary.portionProteinG} carbsG={summary.portionCarbsG} fatsG={summary.portionFatsG} readOnly />
-          <div><label htmlFor="recipe-instructions" className="text-style-legal font-bold text-text-primary block mb-1">Modo de Preparo / Orientações</label><textarea id="recipe-instructions" rows={3} value={formData.instructions} onChange={(event) => setFormData((current) => ({ ...current, instructions: event.target.value }))} placeholder="Descreva o passo a passo do preparo da receita..." className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none" /></div>
+          <div><label htmlFor="recipe-instructions" className={`${textStyle('field-label')} block mb-1`}>Modo de Preparo / Orientações</label><Textarea id="recipe-instructions" rows={3} value={formData.instructions} onChange={(event) => setFormData((current) => ({ ...current, instructions: event.target.value }))} placeholder="Descreva o passo a passo do preparo da receita..." className="resize-none" /></div>
           <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button><Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Receita</Button></div>
         </form>
       </DialogContent>
