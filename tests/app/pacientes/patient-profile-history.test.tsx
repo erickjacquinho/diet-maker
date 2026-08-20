@@ -77,4 +77,36 @@ describe('PatientDetailPage history', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver Dieta' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('renders both assessment rows when multiple assessments exist on the same date', async () => {
+    localStorage.setItem(
+      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'asm-same-date-1',
+          date: '04/08/2026',
+          weightKg: 80,
+          bodyFatPercent: 15,
+          muscleMassKg: 35,
+          waistCm: 80,
+        },
+        {
+          id: 'asm-same-date-2',
+          date: '04/08/2026',
+          weightKg: 79,
+          bodyFatPercent: 14.5,
+          muscleMassKg: 35.5,
+          waistCm: 79,
+        },
+      ]),
+    );
+
+    render(<PatientDetailPage />);
+
+    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
+    expect(table).toBeInTheDocument();
+    expect(screen.getByText('2 consultas')).toBeInTheDocument();
+    expect(screen.getByText('80 kg')).toBeInTheDocument();
+    expect(screen.getByText('79 kg')).toBeInTheDocument();
+  });
 });

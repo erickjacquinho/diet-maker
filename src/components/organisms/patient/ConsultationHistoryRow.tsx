@@ -113,7 +113,7 @@ export function ConsultationHistoryExpandedRow({
   onOpenEditAssessment,
 }: Pick<ConsultationHistoryRowProps, 'patientId' | 'update' | 'onOpenReadOnlyDiet' | 'onOpenEditAssessment'>) {
   return (
-    <TableRow className="bg-surface-subtle/40" data-expanded-row-id={update.date}>
+    <TableRow className="bg-surface-subtle/40" data-expanded-row-id={update.id ?? update.date}>
       <TableCell colSpan={5} className="border-b border-t border-border-subtle/50 p-4">
         <div className="grid grid-cols-1 gap-4">
           {update.diet ? (

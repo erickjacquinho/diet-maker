@@ -155,12 +155,24 @@ export function getPatientDietsFromStorage(patientId: string): StoredDietRecord[
 }
 
 export function getPatientRecordHistory(patientId: string): PatientRecordHistory {
-  const assessments = getPatientAssessmentsFromStorage(patientId);
-  const diets = getPatientDietsFromStorage(patientId);
+  const storedAssessments = getPatientAssessmentsFromStorage(patientId);
+  const storedDiets = getPatientDietsFromStorage(patientId);
+  const patient = getPatientById(patientId);
+
+  const mergedAssessments = [...storedAssessments];
+  if (patient?.bodyAssessments) {
+    patient.bodyAssessments.forEach((item) => {
+      if (!mergedAssessments.some((existing) => existing.id === item.id)) {
+        mergedAssessments.push(item);
+      }
+    });
+  }
+
+  const hasDiet = storedDiets.length > 0 || Boolean(patient?.dietHistory?.length);
 
   return {
-    assessments,
-    hasDiet: diets.length > 0,
+    assessments: mergedAssessments,
+    hasDiet,
   };
 }
 

@@ -1,4 +1,5 @@
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { PatientListRow } from '@/lib/patientListView';
 import { PatientListTableRow } from './patient/PatientListTableRow';
 
@@ -42,16 +43,18 @@ const columns: DataTableColumnDef<PatientListRow>[] = [
 
 export function PatientListTable({ rows, onNavigate }: PatientListTableProps) {
   return (
-    <DataTable
-      data={rows}
-      columns={columns}
-      getRowId={(row) => row.patient.id}
-      caption="Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento."
-      ariaLabel="Lista de pacientes"
-      emptyMessage="Nenhum paciente encontrado."
-      renderRow={(row) => <PatientListTableRow row={row} onNavigate={onNavigate} />}
-      className="overflow-x-auto"
-      tableClassName="table-fixed"
-    />
+    <TooltipProvider delayDuration={150}>
+      <DataTable
+        data={rows}
+        columns={columns}
+        getRowId={(row) => row.patient.id}
+        caption="Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento."
+        ariaLabel="Lista de pacientes"
+        emptyMessage="Nenhum paciente encontrado."
+        renderRow={(row) => <PatientListTableRow row={row} onNavigate={onNavigate} />}
+        className="overflow-x-auto"
+        tableClassName="table-fixed"
+      />
+    </TooltipProvider>
   );
 }

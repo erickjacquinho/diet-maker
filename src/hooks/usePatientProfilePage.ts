@@ -156,9 +156,26 @@ export function usePatientProfilePage() {
         }
         setPatient(p);
         const storedDiets = buildPatientDietHistory(getPatientDietsFromStorage(p.id));
-        setDietHistory(storedDiets.length > 0 ? storedDiets : p.dietHistory || []);
+        const mergedDiets = [...storedDiets];
+        if (p.dietHistory) {
+          p.dietHistory.forEach((item) => {
+            if (!mergedDiets.some((existing) => existing.id === item.id)) {
+              mergedDiets.push(item);
+            }
+          });
+        }
+        setDietHistory(mergedDiets);
+
         const loadedAssessments = getPatientAssessmentsFromStorage(p.id);
-        setBodyAssessments(loadedAssessments.length > 0 ? loadedAssessments : p.bodyAssessments || []);
+        const mergedAssessments = [...loadedAssessments];
+        if (p.bodyAssessments) {
+          p.bodyAssessments.forEach((item) => {
+            if (!mergedAssessments.some((existing) => existing.id === item.id)) {
+              mergedAssessments.push(item);
+            }
+          });
+        }
+        setBodyAssessments(mergedAssessments);
       }
     }
   }, [patientId, router]);

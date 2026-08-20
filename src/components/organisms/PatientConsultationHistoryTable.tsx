@@ -8,6 +8,7 @@ import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
 import { ConsultationHistoryExpandedRow, ConsultationHistoryRow } from './patient/ConsultationHistoryRow';
 
 export interface ConsolidatedConsultationUpdate {
+  id?: string;
   date: string;
   diet?: HistoricalDiet;
   assessment?: BodyAssessment;
@@ -59,10 +60,10 @@ export function PatientConsultationHistoryTable({
   onOpenReadOnlyDiet,
   onOpenEditAssessment,
 }: PatientConsultationHistoryTableProps) {
-  const [expandedRowDate, setExpandedRowDate] = useState<string | null>(null);
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  const toggleRowExpansion = (date: string) => {
-    setExpandedRowDate((currentDate) => (currentDate === date ? null : date));
+  const toggleRowExpansion = (rowId: string) => {
+    setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
   };
 
   return (
@@ -81,21 +82,24 @@ export function PatientConsultationHistoryTable({
         <DataTable
           data={updates}
           columns={columns}
-          getRowId={(update) => update.date}
+          getRowId={(update) => update.id ?? update.date}
           caption="Histórico de consultas por data"
           ariaLabel="Histórico de consultas por data"
           emptyMessage="Nenhum histórico registrado para este paciente até o momento."
-          expandedRowId={expandedRowDate}
-          renderRow={(update) => (
-            <ConsultationHistoryRow
-              patientId={patientId}
-              update={update}
-              isExpanded={expandedRowDate === update.date}
-              onToggleExpand={() => toggleRowExpansion(update.date)}
-              onOpenReadOnlyDiet={onOpenReadOnlyDiet}
-              onOpenEditAssessment={onOpenEditAssessment}
-            />
-          )}
+          expandedRowId={expandedRowId}
+          renderRow={(update) => {
+            const rowId = update.id ?? update.date;
+            return (
+              <ConsultationHistoryRow
+                patientId={patientId}
+                update={update}
+                isExpanded={expandedRowId === rowId}
+                onToggleExpand={() => toggleRowExpansion(rowId)}
+                onOpenReadOnlyDiet={onOpenReadOnlyDiet}
+                onOpenEditAssessment={onOpenEditAssessment}
+              />
+            );
+          }}
           renderExpandedRow={(update) => (
             <ConsultationHistoryExpandedRow
               patientId={patientId}

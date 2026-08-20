@@ -9,6 +9,7 @@ import {
   Venus,
 } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PatientListGroupId, PatientListRow } from '@/lib/patientListView';
 
 const groupTone: Record<PatientListGroupId, string> = {
@@ -51,23 +52,50 @@ function GenderIcon({ gender }: { gender: string }) {
 
 function RecordIndicators({ row }: { row: PatientListRow }) {
   return (
-    <span
-      className="flex w-2 shrink-0 flex-col items-center gap-1"
-      role="img"
-      aria-label={row.history.recordIndicatorLabel}
-      data-testid="record-indicators"
-    >
-      <span
-        className={`h-1.5 w-1.5 rounded-round ${row.history.hasAssessment ? 'bg-text-muted' : 'bg-transparent'}`}
-        aria-hidden="true"
-        data-indicator="assessment"
-      />
-      <span
-        className={`h-1.5 w-1.5 rounded-round ${row.history.hasDiet ? 'bg-info' : 'bg-transparent'}`}
-        aria-hidden="true"
-        data-indicator="diet"
-      />
-    </span>
+    <Tooltip delayDuration={200}>
+      <TooltipTrigger asChild>
+        <span
+          className="flex w-2 shrink-0 flex-col items-center gap-1 cursor-help"
+          role="img"
+          aria-label={row.history.recordIndicatorLabel}
+          data-testid="record-indicators"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-round ${row.history.hasAssessment ? 'bg-text-muted' : 'bg-transparent'}`}
+            aria-hidden="true"
+            data-indicator="assessment"
+          />
+          <span
+            className={`h-1.5 w-1.5 rounded-round ${row.history.hasDiet ? 'bg-info' : 'bg-transparent'}`}
+            aria-hidden="true"
+            data-indicator="diet"
+          />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8} className="text-style-legal font-medium">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <span
+              className={`h-2 w-2 rounded-round ${
+                row.history.hasAssessment ? 'bg-text-muted' : 'border border-border-subtle bg-transparent'
+              }`}
+              aria-hidden="true"
+            />
+            <span>{row.history.hasAssessment ? 'Avaliação física registrada' : 'Sem avaliação física'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`h-2 w-2 rounded-round ${
+                row.history.hasDiet ? 'bg-info' : 'border border-border-subtle bg-transparent'
+              }`}
+              aria-hidden="true"
+            />
+            <span>{row.history.hasDiet ? 'Dieta registrada' : 'Sem dieta'}</span>
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
