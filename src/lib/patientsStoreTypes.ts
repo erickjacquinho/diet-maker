@@ -84,6 +84,7 @@ export interface BodyAssessment {
   rightDistalThighCm?: number;
   leftCalfCm?: number;
   rightCalfCm?: number;
+  autoFilledFields?: string[];
 }
 
 export interface ConsultationRecord {

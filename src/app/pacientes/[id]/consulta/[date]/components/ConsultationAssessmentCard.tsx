@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Scale, TrendingDown } from 'lucide-react';
+import { Scale, TrendingDown, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { EditIconButton } from '@/components/atoms';
@@ -14,6 +14,8 @@ export function ConsultationAssessmentCard({
   assessment: BodyAssessment;
   onEdit: () => void;
 }) {
+  const hasAutoFilled = Boolean(assessment.autoFilledFields && assessment.autoFilledFields.length > 0);
+
   return (
     <Card className="bg-surface border-border-subtle shadow-floating rounded-surface overflow-hidden">
       <div className="p-5 border-b border-border-subtle bg-surface-subtle/40 flex items-center justify-between">
@@ -35,7 +37,7 @@ export function ConsultationAssessmentCard({
         </div>
       </div>
 
-      <CardContent className="p-5">
+      <CardContent className="p-5 flex flex-col gap-3">
         <MetricBoxGroup
           items={[
             { size: 'standard', label: 'Peso Corporal', value: `${assessment.weightKg} kg` },
@@ -44,6 +46,15 @@ export function ConsultationAssessmentCard({
             { size: 'standard', label: 'Cintura', value: `${assessment.waistCm} cm` },
           ]}
         />
+
+        {hasAutoFilled && (
+          <div className="flex items-center gap-1.5 text-style-legal text-text-muted bg-surface-subtle/60 px-3 py-1.5 rounded-control border border-border-subtle/60">
+            <Sparkles size={12} className="text-primary shrink-0" aria-hidden="true" />
+            <span>
+              <strong className="text-text-secondary font-semibold">✦ {assessment.autoFilledFields!.length} medidas opcionais</strong> foram replicadas automaticamente da avaliação anterior.
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

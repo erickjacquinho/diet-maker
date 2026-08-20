@@ -99,20 +99,30 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         error:
           bodyFatSex === null
             ? 'O gênero do paciente deve ser Masculino ou Feminino.'
-            : 'As medidas informadas não permitem calcular o percentual de gordura.',
+            : 'Preencha as medidas para calcular a composição corporal.',
       };
     }
+
+    // Se neckCm não foi medido nesta consulta, herda da anterior ou usa padrão
+    const effectiveNeck =
+      draft.neckCm && !Number.isNaN(draft.neckCm) && draft.neckCm > 0
+        ? draft.neckCm
+        : previousAssessment?.neckCm && Number.isFinite(previousAssessment.neckCm) && previousAssessment.neckCm > 0
+        ? previousAssessment.neckCm
+        : bodyFatSex === 'female'
+        ? 34
+        : 38;
 
     return calculateBodyComposition({
       sex: bodyFatSex,
       heightCm: patient.heightCm,
-      neckCm: draft.neckCm ?? Number.NaN,
+      neckCm: effectiveNeck,
       waistCm: draft.waistCm,
       abdomenCm: draft.abdomenCm ?? Number.NaN,
       hipCm: draft.hipCm ?? Number.NaN,
       weightKg: draft.weightKg,
     });
-  }, [bodyFatSex, draft, patient]);
+  }, [bodyFatSex, draft, patient, previousAssessment]);
 
   // Fat-Free Mass Index (FFMI) para ciência esportiva / hipertrofia real
   const ffmi = useMemo(() => {
@@ -210,29 +220,113 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   const handleSave = useCallback(() => {
     if (!draft || !patient) return;
 
-    if (!composition.isValid) {
+    // 1. Validação dos 7 Campos Obrigatórios:
+    // peso, escapula, torax, cintura, barriga (abdomen), quadril, coxa proximal
+    const missingRequired: string[] = [];
+    if (!draft.weightKg || Number.isNaN(draft.weightKg) || draft.weightKg <= 0) missingRequired.push('Peso');
+    if (!draft.scapulaCm || Number.isNaN(draft.scapulaCm) || draft.scapulaCm <= 0) missingRequired.push('Escápula');
+    if (!draft.bustCm || Number.isNaN(draft.bustCm) || draft.bustCm <= 0) missingRequired.push('Tórax');
+    if (!draft.waistCm || Number.isNaN(draft.waistCm) || draft.waistCm <= 0) missingRequired.push('Cintura');
+    if (!draft.abdomenCm || Number.isNaN(draft.abdomenCm) || draft.abdomenCm <= 0) missingRequired.push('Barriga / Abdômen');
+    if (!draft.hipCm || Number.isNaN(draft.hipCm) || draft.hipCm <= 0) missingRequired.push('Quadril');
+
+    const hasThigh =
+      (draft.leftProximalThighCm !== undefined && !Number.isNaN(draft.leftProximalThighCm) && draft.leftProximalThighCm > 0) ||
+      (draft.rightProximalThighCm !== undefined && !Number.isNaN(draft.rightProximalThighCm) && draft.rightProximalThighCm > 0);
+
+    if (!hasThigh) missingRequired.push('Coxa Proximal');
+
+    if (missingRequired.length > 0) {
+      const errorMsg = `Preencha os campos obrigatórios: ${missingRequired.join(', ')}.`;
+      setSubmitError(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+
+    // 2. Preenchimento Automático dos Campos Opcionais com base na última avaliação
+    const autoFilledFields: string[] = [];
+    const completedDraft: BodyAssessment = { ...draft };
+
+    const optionalFields: Array<keyof BodyAssessment> = [
+      'neckCm',
+      'leftArmCm',
+      'rightArmCm',
+      'leftDistalThighCm',
+      'rightDistalThighCm',
+      'leftCalfCm',
+      'rightCalfCm',
+    ];
+
+    if (previousAssessment) {
+      for (const field of optionalFields) {
+        const curVal = completedDraft[field];
+        const isCurEmpty = curVal === undefined || Number.isNaN(curVal) || curVal === null || curVal === 0;
+        const prevVal = previousAssessment[field];
+        const hasPrev = prevVal !== undefined && Number.isFinite(prevVal) && Number(prevVal) > 0;
+
+        if (isCurEmpty && hasPrev) {
+          (completedDraft[field] as number) = Number(prevVal);
+          autoFilledFields.push(field as string);
+        }
+      }
+    }
+
+    if (autoFilledFields.length > 0) {
+      completedDraft.autoFilledFields = autoFilledFields;
+    }
+
+    // 3. Validação da Composição Corporal final
+    const sex = normalizeBodyFatSex(patient.gender);
+    const effectiveNeck =
+      completedDraft.neckCm && !Number.isNaN(completedDraft.neckCm) && completedDraft.neckCm > 0
+        ? completedDraft.neckCm
+        : previousAssessment?.neckCm && Number.isFinite(previousAssessment.neckCm) && previousAssessment.neckCm > 0
+        ? previousAssessment.neckCm
+        : sex === 'female'
+        ? 34
+        : 38;
+
+    const finalComposition = sex
+      ? calculateBodyComposition({
+          sex,
+          heightCm: patient.heightCm,
+          neckCm: effectiveNeck,
+          waistCm: completedDraft.waistCm,
+          abdomenCm: completedDraft.abdomenCm ?? Number.NaN,
+          hipCm: completedDraft.hipCm ?? Number.NaN,
+          weightKg: completedDraft.weightKg,
+        })
+      : composition;
+
+    if (!finalComposition.isValid) {
       const errorMsg =
-        composition.error ?? 'Preencha as medidas necessárias para calcular a composição corporal.';
+        finalComposition.error ?? 'As medidas informadas não permitem calcular a composição corporal.';
       setSubmitError(errorMsg);
       toast.error(errorMsg);
       return;
     }
 
     setIsSaving(true);
-    const normalizedDraft = normalizePairedBodyMeasurements(draft);
+    const normalizedDraft = normalizePairedBodyMeasurements(completedDraft);
 
     const savedRecord: BodyAssessment = {
       ...normalizedDraft,
-      bodyFatPercent: composition.bodyFatPercent!,
-      fatMassKg: composition.fatMassKg!,
-      muscleMassKg: composition.leanMassKg!,
+      bodyFatPercent: finalComposition.bodyFatPercent!,
+      fatMassKg: finalComposition.fatMassKg!,
+      muscleMassKg: finalComposition.leanMassKg!,
     };
 
     savePatientAssessmentToStorage(patient.id, savedRecord);
     setIsDirty(false);
-    toast.success(isNew ? 'Avaliação física criada com sucesso!' : 'Avaliação física salva com sucesso!');
+    toast.success(
+      isNew
+        ? autoFilledFields.length > 0
+          ? `Avaliação física criada! (${autoFilledFields.length} medidas opcionais replicadas da anterior)`
+          : 'Avaliação física criada com sucesso!'
+        : 'Avaliação física salva com sucesso!'
+    );
     router.push(`/pacientes/${patient.id}`);
-  }, [draft, patient, composition, isNew, router]);
+  }, [draft, patient, composition, previousAssessment, isNew, router]);
 
   const handleCancel = useCallback(() => {
     if (isDirty) {

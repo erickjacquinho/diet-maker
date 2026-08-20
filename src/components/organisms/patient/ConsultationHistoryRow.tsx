@@ -171,6 +171,13 @@ export function ConsultationHistoryExpandedRow({
                 <MetricBox size="compact" label="Cintura" value={`${update.assessment.waistCm} cm`} />
               </div>
 
+              {update.assessment.autoFilledFields && update.assessment.autoFilledFields.length > 0 && (
+                <div className="text-[11px] text-text-muted flex items-center gap-1.5 pt-1">
+                  <span className="text-primary font-bold">✦</span>
+                  <span>{update.assessment.autoFilledFields.length} medidas opcionais replicadas da avaliação anterior</span>
+                </div>
+              )}
+
               <div className="flex justify-end pt-2">
                 <Link href={`/pacientes/${patientId}/avaliacao/${update.assessment.id}`} title="Editar Avaliação Física">
                   <EditIconButton title="Editar Avaliação Física" />

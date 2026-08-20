@@ -8,6 +8,17 @@ import { AssessmentMeasurementField } from './AssessmentMeasurementField';
 import { LimbSectionCard } from './LimbSectionCard';
 import { TRUNK_FIELDS, UPPER_LIMB_FIELDS, LOWER_LIMB_FIELDS } from './assessmentFieldsConfig';
 
+export const REQUIRED_ASSESSMENT_FIELDS = new Set<string>([
+  'weightKg',
+  'scapulaCm',
+  'bustCm',
+  'waistCm',
+  'abdomenCm',
+  'hipCm',
+  'leftProximalThighCm',
+  'rightProximalThighCm',
+]);
+
 export interface AssessmentContinuousFieldsProps {
   draft: BodyAssessment;
   previousAssessment?: BodyAssessment | null;
@@ -21,6 +32,14 @@ export function AssessmentContinuousFields({
   updateNumericField,
   className = '',
 }: AssessmentContinuousFieldsProps) {
+  const isRequiredField = (name: NumericAssessmentField) => {
+    return REQUIRED_ASSESSMENT_FIELDS.has(name);
+  };
+
+  const isFieldAutoFilled = (name: NumericAssessmentField) => {
+    return Boolean(draft.autoFilledFields?.includes(name));
+  };
+
   const field = (name: NumericAssessmentField, label: string, unit: string, fieldClassName?: string) => (
     <AssessmentMeasurementField
       key={name}
@@ -29,6 +48,8 @@ export function AssessmentContinuousFields({
       unit={unit}
       value={draft[name]}
       previousValue={previousAssessment ? previousAssessment[name] : undefined}
+      isRequired={isRequiredField(name)}
+      isAutoFilled={isFieldAutoFilled(name)}
       onChange={(value) => updateNumericField(name, value)}
       className={fieldClassName}
     />

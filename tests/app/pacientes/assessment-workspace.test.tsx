@@ -41,14 +41,18 @@ describe('AssessmentMeasurementField', () => {
         unit="kg"
         value={82.5}
         previousValue={84.0}
+        isRequired
+        isAutoFilled
         onChange={onChange}
       />
     );
 
     expect(screen.getByText('Ant: 84 kg')).toBeInTheDocument();
     expect(screen.getByText('-1.5 kg')).toBeInTheDocument();
+    expect(screen.getByText('✦ Auto')).toBeInTheDocument();
+    expect(screen.getByText('*')).toBeInTheDocument();
 
-    const input = screen.getByLabelText('Peso corporal (kg)') as HTMLInputElement;
+    const input = screen.getByLabelText(/Peso corporal/i) as HTMLInputElement;
     const selectSpy = vi.spyOn(input, 'select');
     fireEvent.focus(input);
     expect(selectSpy).toHaveBeenCalled();
@@ -56,8 +60,11 @@ describe('AssessmentMeasurementField', () => {
 });
 
 describe('AssessmentContinuousFields', () => {
-  it('renders all measurement fields without tabs in anatomical order and shows previous data', () => {
-    const draft = makeAssessment({ weightKg: 82 });
+  it('renders all measurement fields without tabs in anatomical order and shows previous data and autoFilled tags', () => {
+    const draft = makeAssessment({
+      weightKg: 82,
+      autoFilledFields: ['leftArmCm', 'neckCm'],
+    });
     const prev = makeAssessment({ weightKg: 85, waistCm: 88 });
     const updateFn = vi.fn();
 
@@ -69,12 +76,12 @@ describe('AssessmentContinuousFields', () => {
       />
     );
 
-    expect(screen.getByLabelText('Peso atual (kg)')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Peso atual/i)).toBeInTheDocument();
     expect(screen.getByText('Ant: 85 kg')).toBeInTheDocument();
     expect(screen.getByText('Ant: 88 cm')).toBeInTheDocument();
     expect(screen.getByText('Equação US Navy')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Peso atual (kg)'), { target: { value: '82.5' } });
+    fireEvent.change(screen.getByLabelText(/Peso atual/i), { target: { value: '82.5' } });
     expect(updateFn).toHaveBeenCalledWith('weightKg', '82.5');
   });
 });
