@@ -1,0 +1,6 @@
+{
+  "task": "adequar totalmente a pagina ao projeto . no final a pagina deve usar apenas componentes do projeto, deve estar totalmente no padrão das outras paginas do projeto em questão de layout. não deve haver nenhum hardcode de componente, feature ou style. não exclua nenhuma feature e nem adicione componentes visuais. não mude o ui final.",
+  "slug": "adequar-pagina-dieta-nova",
+  "feature_dir": "specs/20-08-26-adequar-pagina-dieta-nova",
+  "date": "2026-08-20"
+}
