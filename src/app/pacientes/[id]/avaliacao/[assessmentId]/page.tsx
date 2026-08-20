@@ -100,7 +100,6 @@ export default function AssessmentWorkspacePage() {
             value={draft.date}
             onChange={(e) => updateDateField(e.target.value)}
             className="w-32 h-8 text-style-caption font-mono tabular-nums bg-surface-default"
-            placeholder="DD/MM/AAAA"
           />
         </div>
       </Surface>
