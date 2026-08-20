@@ -1,0 +1,6 @@
+{
+  "task": "Implementar pacote de melhorias UI/UX na tela de avaliacao fisica: deltas anteriores inline nos inputs, auto-select on focus, atalho Ctrl+S, badges de classificacao clinica (BF, IMC, RCQ), barra visual de distribuicao de massa, trava de alteracoes nao salvas (dirty guard) e copiar resumo para WhatsApp.",
+  "slug": "melhorias-ui-ux-avaliacao-fisica",
+  "feature_dir": "specs/20-08-26-melhorias-ui-ux-avaliacao-fisica",
+  "date": "2026-08-20"
+}
