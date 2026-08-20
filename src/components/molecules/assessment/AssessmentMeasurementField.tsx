@@ -47,7 +47,7 @@ export function AssessmentMeasurementField({
         )}
       </div>
 
-      {/* Input com Indicador de Diferença Integrado Alinhado à Direita */}
+      {/* Input com Indicador de Diferença Integrado Alinhado à Direita (Apenas Texto) */}
       <div className="relative flex items-center">
         <Input
           id={id}
@@ -64,12 +64,10 @@ export function AssessmentMeasurementField({
         />
 
         {showDelta && (
-          <div className="absolute right-2 pointer-events-none flex items-center">
+          <div className="absolute right-2.5 pointer-events-none flex items-center">
             <span
-              className={`text-[11px] font-bold font-mono tabular-nums px-1.5 py-0.5 rounded ${
-                delta < 0
-                  ? 'text-success bg-success/10'
-                  : 'text-text-secondary bg-canvas border border-border-subtle'
+              className={`text-[11px] font-semibold font-mono tabular-nums ${
+                delta < 0 ? 'text-success' : 'text-text-secondary'
               }`}
             >
               {delta > 0 ? `+${delta}` : delta} {unit}
