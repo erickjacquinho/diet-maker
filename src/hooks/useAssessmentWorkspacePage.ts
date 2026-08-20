@@ -27,6 +27,8 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   const [previousAssessment, setPreviousAssessment] = useState<BodyAssessment | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const isNew = assessmentId === 'nova';
 
@@ -66,9 +68,11 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         leftCalfCm: latest?.leftCalfCm ?? 35,
         rightCalfCm: latest?.rightCalfCm ?? 35,
       });
+      setIsDirty(false);
     } else {
       const existing = assessments.find((item) => item.id === assessmentId) ?? null;
       setDraft(existing ? { ...existing } : null);
+      setIsDirty(false);
 
       if (existing) {
         const olderAssessments = sorted.filter(
@@ -178,10 +182,12 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
         : current
     );
     setSubmitError(null);
+    setIsDirty(true);
   }, []);
 
   const updateDateField = useCallback((date: string) => {
     setDraft((current) => (current ? { ...current, date } : current));
+    setIsDirty(true);
   }, []);
 
   const handleSave = useCallback(() => {
@@ -206,17 +212,79 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     };
 
     savePatientAssessmentToStorage(patient.id, savedRecord);
+    setIsDirty(false);
     toast.success(isNew ? 'Avaliação física criada com sucesso!' : 'Avaliação física salva com sucesso!');
     router.push(`/pacientes/${patient.id}`);
   }, [draft, patient, composition, isNew, router]);
 
   const handleCancel = useCallback(() => {
+    if (isDirty) {
+      const confirmLeave = window.confirm(
+        'Você possui alterações não salvas na avaliação. Deseja sair mesmo assim?'
+      );
+      if (!confirmLeave) return;
+    }
+
     if (patient) {
       router.push(`/pacientes/${patient.id}`);
     } else {
       router.push('/pacientes');
     }
-  }, [patient, router]);
+  }, [isDirty, patient, router]);
+
+  const handleCopySummary = useCallback(() => {
+    if (!draft || !patient || !composition.isValid) return;
+
+    const wDiff = deltas.weightDiff ? ` (${deltas.weightDiff > 0 ? '+' : ''}${deltas.weightDiff} kg)` : '';
+    const bfDiff = deltas.bodyFatDiff ? ` (${deltas.bodyFatDiff > 0 ? '+' : ''}${deltas.bodyFatDiff}%)` : '';
+
+    const summaryText = [
+      `📊 *Avaliação Física — ${patient.name}* (${draft.date})`,
+      `• Peso: ${draft.weightKg} kg${wDiff}`,
+      `• Gordura Corporal (BF): ${composition.bodyFatPercent}%${bfDiff}`,
+      `• Massa Magra: ${composition.leanMassKg} kg`,
+      `• Massa Gorda: ${composition.fatMassKg} kg`,
+      `• Cintura: ${draft.waistCm} cm`,
+      bmi ? `• IMC: ${bmi} kg/m²` : null,
+      waistToHipRatio ? `• RCQ: ${waistToHipRatio}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(summaryText).then(() => {
+        setIsCopied(true);
+        toast.success('Resumo copiado para a área de transferência!');
+        setTimeout(() => setIsCopied(false), 2500);
+      });
+    }
+  }, [draft, patient, composition, deltas, bmi, waistToHipRatio]);
+
+  // Global Ctrl+S / Cmd+S shortcut
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
+
+  // BeforeUnload guard for browser tab close/refresh
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirty) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   return {
     patient,
@@ -228,10 +296,13 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     deltas,
     isNew,
     isSaving,
+    isDirty,
+    isCopied,
     submitError,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCopySummary,
   };
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Scale, Ruler } from 'lucide-react';
 import { textStyle } from '@/design-system';
-import { Surface } from '@/components/atoms';
+import { Surface, Badge } from '@/components/atoms';
 import type { BodyAssessment } from '@/lib/patientsStore';
 import type { NumericAssessmentField } from '@/hooks/useAssessmentForm';
 import { AssessmentMeasurementField } from './AssessmentMeasurementField';
@@ -10,12 +10,14 @@ import { TRUNK_FIELDS, UPPER_LIMB_FIELDS, LOWER_LIMB_FIELDS } from './assessment
 
 export interface AssessmentContinuousFieldsProps {
   draft: BodyAssessment;
+  previousAssessment?: BodyAssessment | null;
   updateNumericField: (field: NumericAssessmentField, value: string) => void;
   className?: string;
 }
 
 export function AssessmentContinuousFields({
   draft,
+  previousAssessment,
   updateNumericField,
   className = '',
 }: AssessmentContinuousFieldsProps) {
@@ -26,6 +28,7 @@ export function AssessmentContinuousFields({
       label={label}
       unit={unit}
       value={draft[name]}
+      previousValue={previousAssessment ? previousAssessment[name] : undefined}
       onChange={(value) => updateNumericField(name, value)}
       className={fieldClassName}
     />
@@ -52,9 +55,14 @@ export function AssessmentContinuousFields({
 
       {/* Seção 3: Circunferências Centrais / US Navy */}
       <Surface variant="subtle" className="flex flex-col gap-3 p-4 rounded-surface border border-border-subtle">
-        <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
-          <Ruler className="size-4 text-success" aria-hidden="true" />
-          <span className={textStyle('caption-strong')}>Circunferências Centrais (US Navy)</span>
+        <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+          <div className="flex items-center gap-2">
+            <Ruler className="size-4 text-success" aria-hidden="true" />
+            <span className={textStyle('caption-strong')}>Circunferências Centrais</span>
+          </div>
+          <Badge variant="blue" className="text-[10px]">
+            Equação US Navy
+          </Badge>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {TRUNK_FIELDS.slice(3).map(({ field: name, label, unit }) => field(name, label, unit))}

@@ -1,9 +1,14 @@
 import React from 'react';
-import { Activity, TrendingDown, TrendingUp, Minus, Save, X, Scale } from 'lucide-react';
+import { Activity, TrendingDown, TrendingUp, Minus, Save, X, Scale, Copy, Check } from 'lucide-react';
 import { textStyle } from '@/design-system';
-import { Surface } from '@/components/atoms';
+import { Surface, Badge, ProgressBar } from '@/components/atoms';
 import { MetricBox } from '@/components/molecules/MetricBox';
 import { Button } from '@/components/ui/button';
+import {
+  classifyBodyFat,
+  classifyBmi,
+  classifyWaistToHipRatio,
+} from '@/lib/clinicalClassifications';
 import type { AssessmentDeltas } from '@/hooks/useAssessmentWorkspacePage';
 import type { BodyCompositionResult } from '@/lib/bodyFat';
 
@@ -12,10 +17,13 @@ export interface AssessmentSummaryPanelProps {
   bmi: number | null;
   waistToHipRatio: number | null;
   deltas: AssessmentDeltas;
+  patientGender?: string | null;
   isSaving?: boolean;
   submitError?: string | null;
   onSave: () => void;
   onCancel: () => void;
+  onCopySummary?: () => void;
+  isCopied?: boolean;
   className?: string;
 }
 
@@ -78,12 +86,28 @@ export function AssessmentSummaryPanel({
   bmi,
   waistToHipRatio,
   deltas,
+  patientGender,
   isSaving = false,
   submitError,
   onSave,
   onCancel,
+  onCopySummary,
+  isCopied = false,
   className = '',
 }: AssessmentSummaryPanelProps) {
+  const bfBadge = classifyBodyFat(composition.bodyFatPercent, patientGender);
+  const bmiBadge = classifyBmi(bmi);
+  const whrBadge = classifyWaistToHipRatio(waistToHipRatio, patientGender);
+
+  const leanPct =
+    composition.bodyFatPercent !== null
+      ? Math.max(0, Math.min(100, Number((100 - composition.bodyFatPercent).toFixed(1))))
+      : null;
+  const fatPct =
+    composition.bodyFatPercent !== null
+      ? Math.max(0, Math.min(100, Number(composition.bodyFatPercent.toFixed(1))))
+      : null;
+
   return (
     <aside
       aria-label="Painel de resumo da composição corporal"
@@ -91,14 +115,21 @@ export function AssessmentSummaryPanel({
     >
       {/* Bloco 1: Composição Corporal Calculada */}
       <Surface variant="default" className="p-5 rounded-surface border border-border-subtle shadow-card flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
-          <div className="p-1.5 rounded-control bg-primary-soft text-primary">
-            <Activity className="size-4" aria-hidden="true" />
+        <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-control bg-primary-soft text-primary">
+              <Activity className="size-4" aria-hidden="true" />
+            </div>
+            <div>
+              <h3 className={textStyle('card-title')}>Composição Corporal</h3>
+              <span className={textStyle('helper')}>Cálculo automático US Navy</span>
+            </div>
           </div>
-          <div>
-            <h3 className={textStyle('card-title')}>Composição Corporal</h3>
-            <span className={textStyle('helper')}>Cálculo automático US Navy</span>
-          </div>
+          {bfBadge && (
+            <Badge variant={bfBadge.tone} className="text-[10px]" title={bfBadge.description}>
+              {bfBadge.label}
+            </Badge>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
@@ -123,20 +154,47 @@ export function AssessmentSummaryPanel({
             size="compact"
             surface="boxed"
           />
-          <MetricBox
-            label="IMC"
-            value={bmi === null ? '—' : `${bmi} kg/m²`}
-            tone="default"
-            size="compact"
-            surface="boxed"
-          />
+          <div className="flex flex-col justify-between">
+            <MetricBox
+              label="IMC"
+              value={bmi === null ? '—' : `${bmi} kg/m²`}
+              tone="default"
+              size="compact"
+              surface="boxed"
+            />
+            {bmiBadge && (
+              <div className="pt-1 flex justify-end">
+                <Badge variant={bmiBadge.tone} className="text-[10px]" title={bmiBadge.description}>
+                  {bmiBadge.label}
+                </Badge>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Barra Visual Empilhada de Proporção Magra vs Gorda */}
+        {leanPct !== null && fatPct !== null && (
+          <div className="flex flex-col gap-1.5 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-text-secondary">
+              <span className="font-medium text-success">{leanPct}% Massa Magra</span>
+              <span className="font-medium text-warning">{fatPct}% Gordura</span>
+            </div>
+            <ProgressBar value={leanPct} colorVariant="emerald" />
+          </div>
+        )}
 
         {waistToHipRatio !== null && (
           <div className="pt-1">
             <Surface variant="subtle" density="compact" className="flex items-center justify-between p-2.5 rounded-surface text-style-caption">
-              <span className="text-text-secondary">Relação Cintura / Quadril (RCQ)</span>
-              <span className="font-semibold text-text-primary">{waistToHipRatio}</span>
+              <div className="flex flex-col">
+                <span className="text-text-secondary text-[11px]">Relação Cintura / Quadril (RCQ)</span>
+                <span className="font-semibold text-text-primary">{waistToHipRatio}</span>
+              </div>
+              {whrBadge && (
+                <Badge variant={whrBadge.tone} className="text-[10px]" title={whrBadge.description}>
+                  {whrBadge.label}
+                </Badge>
+              )}
             </Surface>
           </div>
         )}
@@ -170,7 +228,7 @@ export function AssessmentSummaryPanel({
         </p>
       )}
 
-      <div className="flex flex-col sm:flex-row lg:flex-col gap-2 pt-1">
+      <div className="flex flex-col gap-2 pt-1">
         <Button
           type="button"
           variant="primary"
@@ -179,8 +237,21 @@ export function AssessmentSummaryPanel({
           className="w-full flex items-center justify-center gap-2"
         >
           <Save size={16} aria-hidden="true" />
-          <span>Salvar Avaliação</span>
+          <span>Salvar Avaliação (Ctrl+S)</span>
         </Button>
+
+        {onCopySummary && composition.isValid && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCopySummary}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            {isCopied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
+            <span>{isCopied ? 'Resumo Copiado!' : 'Copiar Resumo'}</span>
+          </Button>
+        )}
+
         <Button
           type="button"
           variant="secondary"

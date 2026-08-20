@@ -20,17 +20,20 @@ export default function AssessmentWorkspacePage() {
   const {
     patient,
     draft,
+    previousAssessment,
     composition,
     bmi,
     waistToHipRatio,
     deltas,
     isNew,
     isSaving,
+    isCopied,
     submitError,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCopySummary,
   } = useAssessmentWorkspacePage(patientId, assessmentId);
 
   if (!patient || !draft) {
@@ -113,6 +116,7 @@ export default function AssessmentWorkspacePage() {
           >
             <AssessmentContinuousFields
               draft={draft}
+              previousAssessment={previousAssessment}
               updateNumericField={updateNumericField}
             />
           </form>
@@ -124,10 +128,13 @@ export default function AssessmentWorkspacePage() {
             bmi={bmi}
             waistToHipRatio={waistToHipRatio}
             deltas={deltas}
+            patientGender={patient.gender}
             isSaving={isSaving}
+            isCopied={isCopied}
             submitError={submitError}
             onSave={handleSave}
             onCancel={handleCancel}
+            onCopySummary={handleCopySummary}
           />
         </div>
       </div>
