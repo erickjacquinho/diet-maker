@@ -37,40 +37,42 @@ export function AssessmentContinuousFields({
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
       {/* Seção 1: Balança e Tronco Superior */}
-      <Surface variant="subtle" className="flex flex-col gap-3 p-4 rounded-surface border border-border-subtle">
-        <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
+      <Surface variant="subtle" className="flex flex-col gap-3.5 p-4 sm:p-5 rounded-surface border border-border-subtle shadow-xs">
+        <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
           <Scale className="size-4 text-success" aria-hidden="true" />
           <span className={textStyle('caption-strong')}>Balança & Tronco Superior</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {field('weightKg', 'Peso atual', 'kg', 'sm:col-span-2')}
-          {TRUNK_FIELDS.slice(0, 3).map(({ field: name, label, unit }) => field(name, label, unit))}
+        <div className="flex flex-col gap-3">
+          {field('weightKg', 'Peso atual', 'kg')}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+            {TRUNK_FIELDS.slice(0, 3).map(({ field: name, label, unit }) => field(name, label, unit))}
+          </div>
         </div>
       </Surface>
 
       {/* Seção 2: Membros Superiores */}
-      <LimbSectionCard title="Membros Superiores" subtitle="E / D (Auto-espelhado)">
+      <LimbSectionCard title="Membros Superiores" subtitle="Esquerdo / Direito">
         {UPPER_LIMB_FIELDS.map(({ field: name, label, unit }) => field(name, label, unit))}
       </LimbSectionCard>
 
       {/* Seção 3: Circunferências Centrais / US Navy */}
-      <Surface variant="subtle" className="flex flex-col gap-3 p-4 rounded-surface border border-border-subtle">
-        <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+      <Surface variant="subtle" className="flex flex-col gap-3.5 p-4 sm:p-5 rounded-surface border border-border-subtle shadow-xs">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-2.5">
           <div className="flex items-center gap-2">
             <Ruler className="size-4 text-success" aria-hidden="true" />
             <span className={textStyle('caption-strong')}>Circunferências Centrais</span>
           </div>
-          <Badge variant="blue" className="text-[10px]">
+          <Badge variant="blue" className="text-[10px] font-medium">
             Equação US Navy
           </Badge>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
           {TRUNK_FIELDS.slice(3).map(({ field: name, label, unit }) => field(name, label, unit))}
         </div>
       </Surface>
 
       {/* Seção 4: Membros Inferiores */}
-      <LimbSectionCard title="Membros Inferiores" subtitle="E / D (Auto-espelhado)">
+      <LimbSectionCard title="Membros Inferiores" subtitle="Esquerdo / Direito">
         {LOWER_LIMB_FIELDS.map(({ field: name, label, unit }) => field(name, label, unit))}
       </LimbSectionCard>
     </div>

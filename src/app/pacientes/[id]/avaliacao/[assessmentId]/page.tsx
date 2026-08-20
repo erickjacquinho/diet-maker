@@ -58,7 +58,7 @@ export default function AssessmentWorkspacePage() {
   const pageTitle = isNew ? 'Nova Avaliação Antropométrica' : 'Editar Avaliação Antropométrica';
 
   return (
-    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full text-text-primary">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-5 w-full text-text-primary">
       <PageContextHeader
         title={pageTitle}
         backHref={`/pacientes/${patient.id}`}
@@ -71,8 +71,8 @@ export default function AssessmentWorkspacePage() {
       />
 
       {/* Barra de Contexto do Paciente & Data */}
-      <Surface variant="subtle" className="p-4 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
+      <Surface variant="subtle" density="compact" className="px-5 py-2.5 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" aria-hidden="true" />
             <span className={textStyle('caption-strong')}>{patient.name}</span>
@@ -81,9 +81,11 @@ export default function AssessmentWorkspacePage() {
             </span>
           </div>
 
+          <div className="h-4 w-px bg-border-subtle hidden sm:block" />
+
           <div className="flex items-center gap-1.5 text-style-caption text-text-secondary">
             <Ruler className="size-3.5 text-text-muted" aria-hidden="true" />
-            <span>Altura cadastral: <strong>{patient.heightCm} cm</strong></span>
+            <span>Altura cadastral: <strong className="font-semibold text-text-primary font-mono tabular-nums">{patient.heightCm} cm</strong></span>
           </div>
         </div>
 
@@ -97,7 +99,7 @@ export default function AssessmentWorkspacePage() {
             type="text"
             value={draft.date}
             onChange={(e) => updateDateField(e.target.value)}
-            className="w-32 h-8 text-style-caption"
+            className="w-32 h-8 text-style-caption font-mono tabular-nums bg-surface-default"
             placeholder="DD/MM/AAAA"
           />
         </div>

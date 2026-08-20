@@ -46,9 +46,9 @@ function DeltaItem({
 }) {
   if (value === null || !Number.isFinite(value)) {
     return (
-      <div className="flex items-center justify-between text-style-caption text-text-muted py-1 border-b border-border-subtle/50 last:border-0">
+      <div className="flex items-center justify-between text-style-caption text-text-muted py-1.5 border-b border-border-subtle/50 last:border-0">
         <span>{label}</span>
-        <span>—</span>
+        <span className="font-mono tabular-nums">—</span>
       </div>
     );
   }
@@ -67,7 +67,7 @@ function DeltaItem({
   return (
     <div className="flex items-center justify-between text-style-caption py-1.5 border-b border-border-subtle/50 last:border-0">
       <span className="text-text-secondary">{label}</span>
-      <span className={`font-semibold flex items-center gap-1 ${colorClass}`}>
+      <span className={`font-semibold font-mono tabular-nums flex items-center gap-1.5 ${colorClass}`}>
         {isZero ? (
           <Minus size={12} aria-hidden="true" />
         ) : isPositive ? (
@@ -116,17 +116,17 @@ export function AssessmentSummaryPanel({
       {/* Bloco 1: Composição Corporal Calculada */}
       <Surface variant="default" className="p-5 rounded-surface border border-border-subtle shadow-card flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-control bg-primary-soft text-primary">
               <Activity className="size-4" aria-hidden="true" />
             </div>
             <div>
               <h3 className={textStyle('card-title')}>Composição Corporal</h3>
-              <span className={textStyle('helper')}>Cálculo automático US Navy</span>
+              <span className={textStyle('helper')}>Equação US Navy</span>
             </div>
           </div>
           {bfBadge && (
-            <Badge variant={bfBadge.tone} className="text-[10px]" title={bfBadge.description}>
+            <Badge variant={bfBadge.tone} className="text-[10px] font-medium" title={bfBadge.description}>
               {bfBadge.label}
             </Badge>
           )}
@@ -164,7 +164,7 @@ export function AssessmentSummaryPanel({
             />
             {bmiBadge && (
               <div className="pt-1 flex justify-end">
-                <Badge variant={bmiBadge.tone} className="text-[10px]" title={bmiBadge.description}>
+                <Badge variant={bmiBadge.tone} className="text-[10px] font-medium" title={bmiBadge.description}>
                   {bmiBadge.label}
                 </Badge>
               </div>
@@ -172,26 +172,27 @@ export function AssessmentSummaryPanel({
           </div>
         </div>
 
-        {/* Barra Visual Empilhada de Proporção Magra vs Gorda */}
+        {/* Barra de Distribuição de Massa Corporal */}
         {leanPct !== null && fatPct !== null && (
-          <div className="flex flex-col gap-1.5 pt-1">
-            <div className="flex items-center justify-between text-[11px] text-text-secondary">
-              <span className="font-medium text-success">{leanPct}% Massa Magra</span>
+          <div className="flex flex-col gap-1.5 pt-1 border-t border-border-subtle/60">
+            <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-text-secondary">
+              <span className="font-semibold text-success">{leanPct}% Massa Magra</span>
               <span className="font-medium text-warning">{fatPct}% Gordura</span>
             </div>
             <ProgressBar value={leanPct} colorVariant="emerald" />
           </div>
         )}
 
+        {/* RCQ */}
         {waistToHipRatio !== null && (
-          <div className="pt-1">
+          <div className="pt-0.5">
             <Surface variant="subtle" density="compact" className="flex items-center justify-between p-2.5 rounded-surface text-style-caption">
               <div className="flex flex-col">
                 <span className="text-text-secondary text-[11px]">Relação Cintura / Quadril (RCQ)</span>
-                <span className="font-semibold text-text-primary">{waistToHipRatio}</span>
+                <span className="font-bold font-mono tabular-nums text-text-primary">{waistToHipRatio}</span>
               </div>
               {whrBadge && (
-                <Badge variant={whrBadge.tone} className="text-[10px]" title={whrBadge.description}>
+                <Badge variant={whrBadge.tone} className="text-[10px] font-medium" title={whrBadge.description}>
                   {whrBadge.label}
                 </Badge>
               )}
@@ -234,10 +235,10 @@ export function AssessmentSummaryPanel({
           variant="primary"
           onClick={onSave}
           disabled={isSaving}
-          className="w-full flex items-center justify-center gap-2"
+          className="w-full flex items-center justify-center gap-2 shadow-sm font-medium"
         >
           <Save size={16} aria-hidden="true" />
-          <span>Salvar Avaliação (Ctrl+S)</span>
+          <span>Salvar Avaliação <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span></span>
         </Button>
 
         {onCopySummary && composition.isValid && (
