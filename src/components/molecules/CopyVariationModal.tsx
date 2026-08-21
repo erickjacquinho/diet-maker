@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { SelectField } from '@/components/atoms';
+import { Button, SelectField } from '@/components/atoms';
 import { Copy } from 'lucide-react';
 import { CarbCyclingVariation } from '@/lib/dietStore';
 

@@ -6,6 +6,8 @@ import {
   ClipboardCheck,
   FilePenLine,
   Mars,
+  Scale,
+  Utensils,
   Venus,
 } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -55,43 +57,57 @@ function RecordIndicators({ row }: { row: PatientListRow }) {
     <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
         <span
-          className="flex w-2 shrink-0 flex-col items-center gap-1 cursor-help"
+          className="flex w-3.5 shrink-0 flex-col items-center gap-1 cursor-help"
           role="img"
           aria-label={row.history.recordIndicatorLabel}
           data-testid="record-indicators"
           onClick={(e) => e.stopPropagation()}
         >
-          <span
-            className={`h-1.5 w-1.5 rounded-round ${row.history.hasAssessment ? 'bg-text-muted' : 'bg-transparent'}`}
+          <Scale
+            size={12}
+            strokeWidth={1.8}
             aria-hidden="true"
             data-indicator="assessment"
+            className={`shrink-0 transition-opacity ${
+              row.history.hasAssessment
+                ? 'text-text-muted opacity-100'
+                : 'opacity-0 pointer-events-none'
+            }`}
           />
-          <span
-            className={`h-1.5 w-1.5 rounded-round ${row.history.hasDiet ? 'bg-info' : 'bg-transparent'}`}
+          <Utensils
+            size={12}
+            strokeWidth={1.8}
             aria-hidden="true"
             data-indicator="diet"
+            className={`shrink-0 transition-opacity ${
+              row.history.hasDiet
+                ? 'text-text-muted opacity-100'
+                : 'opacity-0 pointer-events-none'
+            }`}
           />
         </span>
       </TooltipTrigger>
       <TooltipContent side="right" sideOffset={8} className="text-style-legal font-medium">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-round ${
-                row.history.hasAssessment ? 'bg-text-muted' : 'border border-border-subtle bg-transparent'
-              }`}
+            <Scale
+              size={13}
+              className={row.history.hasAssessment ? 'text-text-muted' : 'text-text-muted/40'}
               aria-hidden="true"
             />
-            <span>{row.history.hasAssessment ? 'Avaliação física registrada' : 'Sem avaliação física'}</span>
+            <span className={row.history.hasAssessment ? 'text-text-primary' : 'text-text-muted'}>
+              {row.history.hasAssessment ? 'Avaliação física registrada' : 'Sem avaliação física'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-round ${
-                row.history.hasDiet ? 'bg-info' : 'border border-border-subtle bg-transparent'
-              }`}
+            <Utensils
+              size={13}
+              className={row.history.hasDiet ? 'text-text-muted' : 'text-text-muted/40'}
               aria-hidden="true"
             />
-            <span>{row.history.hasDiet ? 'Dieta registrada' : 'Sem dieta'}</span>
+            <span className={row.history.hasDiet ? 'text-text-primary' : 'text-text-muted'}>
+              {row.history.hasDiet ? 'Dieta registrada' : 'Sem dieta'}
+            </span>
           </div>
         </div>
       </TooltipContent>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/atoms';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';

@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { Trash2, GripVertical } from 'lucide-react';
-import { Button, IconButton, Surface } from '@/components/atoms';
-import { Badge } from '@/components/ui/badge';
+import { Badge, FieldTrigger, IconButton, Surface } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export interface MealItemRowProps {
   id?: string;
@@ -47,31 +47,32 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   return (
     <Surface variant="subtle" density="compact" className="group/row flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Button
-          type="button"
+        <IconButton
+          variant="quiet"
           onMouseDown={() => setIsActivated(true)}
           onMouseUp={() => setIsActivated(false)}
           onTouchStart={() => setIsActivated(true)}
           onTouchEnd={() => setIsActivated(false)}
           onClick={() => setIsActivated((prev) => !prev)}
           aria-label={`Reordenar ${name}`}
-          className={`p-1 rounded-control cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary ${
-            isActive
-              ? 'opacity-full text-success bg-success/10 ring-1 ring-success/30'
-              : 'invisible group-hover/row:visible'
-          }`}
           title="Reordenar alimento"
+          className={cn(
+            'h-7 w-7 p-0 cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary',
+            isActive
+              ? 'opacity-full text-success bg-success-soft ring-1 ring-success'
+              : 'invisible group-hover/row:visible'
+          )}
         >
           <GripVertical size={14} />
-        </Button>
+        </IconButton>
 
         <div>
           <div className="text-style-legal font-bold text-text-primary">{name}</div>
           <div className="mt-1 flex items-center gap-1 flex-wrap">
-              <Badge variant="outline" className="border-macro-protein-border bg-macro-protein-soft text-macro-protein font-bold text-style-legal px-1.5 py-0">P: {protein}g</Badge>
-              <Badge variant="outline" className="border-macro-carbohydrate-border bg-macro-carbohydrate-soft text-macro-carbohydrate font-bold text-style-legal px-1.5 py-0">C: {carbs}g</Badge>
-              <Badge variant="outline" className="border-macro-fat-border bg-macro-fat-soft text-macro-fat font-bold text-style-legal px-1.5 py-0">G: {fats}g</Badge>
-              <Badge variant="outline" className="border-border-subtle bg-surface-subtle text-text-muted font-bold text-style-legal px-1.5 py-0">{kcal} kcal</Badge>
+            <Badge variant="protein" className="px-1.5 py-0 font-bold text-style-legal">P: {protein}g</Badge>
+            <Badge variant="carbohydrate" className="px-1.5 py-0 font-bold text-style-legal">C: {carbs}g</Badge>
+            <Badge variant="fat" className="px-1.5 py-0 font-bold text-style-legal">G: {fats}g</Badge>
+            <Badge variant="default" className="px-1.5 py-0 font-bold text-style-legal text-text-muted">{kcal} kcal</Badge>
           </div>
         </div>
       </div>
@@ -96,17 +97,17 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
             <span className="text-style-legal font-bold text-text-muted">g</span>
           </div>
         ) : (
-          <Button
-            type="button"
+          <FieldTrigger
+            size="compact"
             onClick={() => {
               setTempGrams(quantityGrams);
               setIsEditingGrams(true);
             }}
-            className="bg-surface border border-border-control hover:border-primary rounded-control px-2.5 py-1 text-style-legal font-bold text-text-primary transition-colors duration-fast"
+            className="w-auto px-2.5 font-bold text-style-legal"
             title="Clique para editar gramatura"
           >
             {quantityGrams} <span className="text-text-muted font-normal">g</span>
-          </Button>
+          </FieldTrigger>
         )}
 
         <IconButton
@@ -121,3 +122,4 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
     </Surface>
   );
 };
+

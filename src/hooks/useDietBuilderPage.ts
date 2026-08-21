@@ -88,6 +88,13 @@ export function useDietBuilderPage() {
     setDietPlan((prev) => (prev ? { ...prev, mode: newMode } : prev));
   }, []);
 
+  const handleVariationsCountChange = useCallback((newCount: 2 | 3) => {
+    setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariationsCount: newCount } : prev));
+    if (newCount === 2 && activeVariationId === 'var-med') {
+      setActiveVariationId('var-high');
+    }
+  }, [activeVariationId]);
+
   const handleSaveDiet = useCallback(() => {
     if (!dietPlan) return;
     saveDietToStorage(dietPlan);
@@ -112,6 +119,7 @@ export function useDietBuilderPage() {
     currentTotals,
     macroMetrics,
     handleModeChange,
+    handleVariationsCountChange,
     handleSaveDiet,
     router,
   };

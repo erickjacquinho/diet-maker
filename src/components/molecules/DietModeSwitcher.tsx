@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Utensils, Repeat, Copy } from 'lucide-react';
+import { Utensils, Repeat } from 'lucide-react';
 import { CarbCyclingVariation } from '@/lib/dietStore';
+import { CarbCyclingVariationPanel } from './CarbCyclingVariationPanel';
 import { cn } from '@/lib/utils';
 
 export interface DietModeSwitcherProps {
@@ -17,13 +17,8 @@ export interface DietModeSwitcherProps {
   onSelectVariation: (id: string) => void;
   onCopyMealsBetweenVariations?: () => void;
   embedded?: boolean;
+  modeOnly?: boolean;
 }
-
-const getVariationTypeLabel = (type: CarbCyclingVariation['type']) => {
-  if (type === 'high') return 'Alto';
-  if (type === 'medium') return 'Médio';
-  return 'Baixo';
-};
 
 export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   mode,
@@ -35,16 +30,17 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   onSelectVariation,
   onCopyMealsBetweenVariations,
   embedded = false,
+  modeOnly = false,
 }) => {
   return (
     <div
       role="group"
       aria-label="Modelo de dieta"
       className={embedded
-        ? 'flex flex-col gap-3 items-end'
-        : 'bg-surface border border-border-subtle rounded-surface p-4 flex flex-col gap-3 shadow-floating'}
+        ? 'flex flex-col gap-2 items-end'
+        : 'bg-surface border border-border-subtle rounded-surface p-4 flex flex-col gap-3 shadow-none'}
     >
-      {/* 1️⃣ Seleção do Modelo de Dieta (Vanilla ToggleGroup) */}
+      {/* Seleção do Modelo de Dieta */}
       <div className={cn('flex flex-col gap-2', embedded ? 'items-end text-right' : 'items-start')}>
         <div>
           <h3 className="font-bold text-style-body-small text-text-primary tracking-overline flex items-center gap-2">
@@ -90,82 +86,18 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
         </ToggleGroup>
       </div>
 
-      {/* 2️⃣ Seleção de Variações (Vanilla ToggleGroups para Contagem e Variação Ativa) */}
-      {mode === 'carb_cycling' && (
-        <div className="flex flex-col gap-3 pt-1 w-full">
-          {/* Sub-header: Número de variações + Ação de Cópia */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-style-legal font-bold text-text-muted tracking-label">Número de variações</span>
-              <ToggleGroup
-                type="single"
-                value={String(variationsCount)}
-                onValueChange={(val) => {
-                  if (val) onVariationsCountChange(Number(val) as 2 | 3);
-                }}
-                aria-label="Número de variações"
-              >
-                <ToggleGroupItem
-                  value="2"
-                  onClick={() => onVariationsCountChange(2)}
-                  className="px-2.5 py-1"
-                >
-                  2 Variações (Alto / Baixo)
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="3"
-                  onClick={() => onVariationsCountChange(3)}
-                  className="px-2.5 py-1"
-                >
-                  3 Variações (Alto / Médio / Baixo)
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-
-            {onCopyMealsBetweenVariations && (
-              <Button
-                variant="secondary"
-                size="compact"
-                onClick={onCopyMealsBetweenVariations}
-                className="text-style-legal font-bold border-border-subtle hover:bg-surface-hover flex items-center gap-1.5"
-              >
-                <Copy size={13} aria-hidden="true" />
-                <span>Copiar Refeições entre Dias</span>
-              </Button>
-            )}
-          </div>
-
-          {/* 3️⃣ Seleção da Variação Ativa (Vanilla ToggleGroup Puro) */}
-          <ToggleGroup
-            type="single"
-            value={activeVariationId}
-            onValueChange={(val) => {
-              if (val) onSelectVariation(val);
-            }}
-            aria-label="Variação ativa do ciclo"
-            className="w-full flex-wrap justify-start"
-          >
-            {variations.slice(0, variationsCount).map((v) => {
-              const typeLabel = getVariationTypeLabel(v.type);
-              return (
-                <ToggleGroupItem
-                  key={v.id}
-                  value={v.id}
-                  aria-pressed={activeVariationId === v.id}
-                  onClick={() => onSelectVariation(v.id)}
-                  aria-label={`${v.name} ${typeLabel} Meta: ${v.targetKcal} kcal ${v.targetCarbs}g C`}
-                  className="flex-1 min-w-[140px] justify-between text-style-legal py-2 px-3"
-                >
-                  <span className="font-bold">{v.name} ({typeLabel})</span>
-                  <span className="text-text-muted font-medium ml-2">
-                    {v.targetKcal} kcal · <strong className="text-warning">{v.targetCarbs}g C</strong>
-                  </span>
-                </ToggleGroupItem>
-              );
-            })}
-          </ToggleGroup>
-        </div>
+      {/* Quando não for modeOnly e o modo for carb_cycling, renderiza a box adicional */}
+      {!modeOnly && mode === 'carb_cycling' && (
+        <CarbCyclingVariationPanel
+          variationsCount={variationsCount}
+          onVariationsCountChange={onVariationsCountChange}
+          variations={variations}
+          activeVariationId={activeVariationId}
+          onSelectVariation={onSelectVariation}
+          onCopyMealsBetweenVariations={onCopyMealsBetweenVariations}
+        />
       )}
     </div>
   );
 };
+

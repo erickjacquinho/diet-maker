@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, Button } from '@/components/atoms';
 import { Check } from 'lucide-react';
 import { FoodItem } from '@/lib/tacoStore';
+import { cn } from '@/lib/utils';
 
 export function FoodSearchResultsList({
   searchResults,
@@ -30,17 +30,19 @@ export function FoodSearchResultsList({
             <Button
               key={food.id}
               type="button"
+              variant="secondary"
               onClick={() => onSelectFood(food)}
-              className={`w-full text-left p-3 rounded-control border transition-colors duration-standard flex items-center justify-between ${
+              className={cn(
+                'w-full text-left p-3 rounded-control border transition-colors duration-fast flex items-center justify-between h-auto justify-start font-normal',
                 isSelected
-                  ? 'bg-surface border-success-border ring-2 ring-success shadow-floating'
+                  ? 'bg-surface border-success ring-2 ring-success'
                   : 'bg-surface border-border-subtle hover:border-border-hover'
-              }`}
+              )}
             >
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 flex-1">
                 <div className="text-style-legal font-bold text-text-primary flex items-center gap-2">
                   <span>{food.name}</span>
-                  <Badge variant="outline" className="text-style-chart-micro font-semibold border-border-subtle text-text-muted">
+                  <Badge variant="default" className="text-style-chart-micro font-semibold">
                     {food.category}
                   </Badge>
                 </div>
@@ -67,3 +69,4 @@ export function FoodSearchResultsList({
     </div>
   );
 }
+

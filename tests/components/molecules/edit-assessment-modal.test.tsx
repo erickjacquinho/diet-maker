@@ -90,7 +90,7 @@ describe('EditAssessmentModal', () => {
 
     const composition = screen.getByLabelText('Composição corporal calculada');
     expect(composition).toHaveTextContent('18.46 %');
-    fireEvent.change(screen.getByLabelText('Barriga (cm)'), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText(/Barriga/i), { target: { value: '100' } });
 
     expect(composition).toHaveTextContent('25.27 %');
     expect(composition).toHaveTextContent('20.22 kg');

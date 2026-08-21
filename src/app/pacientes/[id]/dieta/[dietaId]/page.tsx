@@ -46,8 +46,10 @@ export default function DietBuilderPage() {
     currentMeals,
     macroMetrics,
     handleModeChange,
+    handleVariationsCountChange,
     handleSaveDiet,
     handleAddMeal,
+    handleDuplicateMeal,
     handleRemoveMeal,
     handleUpdateMealHeader,
     handleAddFoodToMeal,
@@ -82,7 +84,7 @@ export default function DietBuilderPage() {
         onTitleChange: (newTitle: string) => handleUpdateMealHeader(meal.id, { name: newTitle }),
         onTimeChange: (newTime: string) => handleUpdateMealHeader(meal.id, { time: newTime }),
         onAddFoodClick: () => setFoodSearchMealIndex(mealIdx),
-        onDuplicate: () => {},
+        onDuplicate: () => handleDuplicateMeal(meal.id),
         onScale: () => {
           setFoodSearchMealIndex(mealIdx);
           setIsScaleModalOpen(true);
@@ -98,7 +100,7 @@ export default function DietBuilderPage() {
         },
       };
     });
-  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleRemoveMeal, handleRemoveItem, handleUpdateItemGram]);
+  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleRemoveMeal, handleRemoveItem, handleUpdateItemGram]);
 
   if (!dietPlan || !patient) {
     return (
@@ -128,10 +130,11 @@ export default function DietBuilderPage() {
           mode: dietPlan.mode,
           onModeChange: handleModeChange,
           variationsCount: (dietPlan.carbCyclingVariationsCount as 2 | 3) || 2,
-          onVariationsCountChange: () => {},
+          onVariationsCountChange: handleVariationsCountChange,
           variations: dietPlan.carbCyclingVariations || [],
           activeVariationId: activeVariationId,
           onSelectVariation: setActiveVariationId,
+          onCopyMealsBetweenVariations: () => setIsCopyModalOpen(true),
         }}
         macroTrackerData={{
           patientInitials: patient.initials,

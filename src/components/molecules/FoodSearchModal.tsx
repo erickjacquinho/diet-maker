@@ -106,7 +106,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
         {selectedFood ? (
           <div className="p-4 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-3 shrink-0">
-            <div className="flex flex-col flex-row items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div>
                 <span className="text-style-legal font-bold text-text-muted tracking-label block">Alimento Selecionado</span>
                 <span className="text-style-legal font-bold text-text-primary">{selectedFood.name}</span>

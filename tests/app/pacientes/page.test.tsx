@@ -51,7 +51,7 @@ describe('PatientsListPage', () => {
     expect(screen.getByRole('button', { name: 'Novo paciente' })).toBeInTheDocument();
     expect(screen.queryByText('Prioridade do acompanhamento')).not.toBeInTheDocument();
     expect(screen.queryByText('Lista de pacientes', { exact: true })).not.toBeInTheDocument();
-    expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('bg-text-muted');
+    expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
   });
 
   it('opens the existing registration dialog from the toolbar', async () => {
@@ -101,7 +101,7 @@ describe('PatientsListPage', () => {
     render(<PatientsListPage />);
 
     const indicators = await screen.findByTestId('record-indicators');
-    expect(indicators.querySelector('[data-indicator="assessment"]')).toHaveClass('bg-transparent');
-    expect(indicators.querySelector('[data-indicator="diet"]')).toHaveClass('bg-info');
+    expect(indicators.querySelector('[data-indicator="assessment"]')).toHaveClass('opacity-0');
+    expect(indicators.querySelector('[data-indicator="diet"]')).toHaveClass('text-text-muted');
   });
 });

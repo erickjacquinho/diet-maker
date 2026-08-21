@@ -3,7 +3,7 @@
 import React from 'react';
 import { Surface } from '@/components/atoms';
 import { PatientProfileHeader } from '../PatientProfileHeader';
-import { DietModeSwitcher, DietModeSwitcherProps } from '../../molecules';
+import { DietModeSwitcher, DietModeSwitcherProps, CarbCyclingVariationPanel } from '../../molecules';
 
 export interface DietContextSectionProps {
   name: string;
@@ -26,8 +26,11 @@ export function DietContextSection({
   weightKg,
   activeDietModeProps,
 }: DietContextSectionProps) {
+  const isCarbCycling = activeDietModeProps.mode === 'carb_cycling';
+
   return (
-    <section aria-label="Contexto da dieta" data-testid="diet-context-card">
+    <section aria-label="Contexto da dieta" data-testid="diet-context-card" className="flex flex-col gap-4">
+      {/* 1️⃣ Quadro Principal: Perfil do Paciente + Seletor de Modelo */}
       <Surface variant="default" density="compact" className="p-6">
         <PatientProfileHeader.Root
           patient={{
@@ -54,10 +57,23 @@ export function DietContextSection({
           </PatientProfileHeader.Identity>
 
           <PatientProfileHeader.Actions>
-            <DietModeSwitcher {...activeDietModeProps} embedded />
+            <DietModeSwitcher {...activeDietModeProps} embedded modeOnly />
           </PatientProfileHeader.Actions>
         </PatientProfileHeader.Root>
       </Surface>
+
+      {/* 2️⃣ Quadro Adicional / Box Abaixo: Opções do Ciclo de Carboidratos */}
+      {isCarbCycling && (
+        <CarbCyclingVariationPanel
+          variationsCount={activeDietModeProps.variationsCount}
+          onVariationsCountChange={activeDietModeProps.onVariationsCountChange}
+          variations={activeDietModeProps.variations}
+          activeVariationId={activeDietModeProps.activeVariationId}
+          onSelectVariation={activeDietModeProps.onSelectVariation}
+          onCopyMealsBetweenVariations={activeDietModeProps.onCopyMealsBetweenVariations}
+        />
+      )}
     </section>
   );
 }
+

@@ -78,12 +78,12 @@ describe('PatientListTable', () => {
     expect(screen.getByRole('img', { name: 'Avaliação física e dieta registradas' })).toBeInTheDocument();
     const patientName = screen.getByText('Ana Lima');
     const recordIndicators = screen.getByTestId('record-indicators');
-    expect(recordIndicators).toHaveClass('w-2');
+    expect(recordIndicators).toHaveClass('w-3.5');
     expect(recordIndicators.compareDocumentPosition(patientName) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
-    expect(recordIndicators.querySelector('[data-indicator="assessment"]')).toHaveClass('bg-text-muted');
-    expect(recordIndicators.querySelector('[data-indicator="diet"]')).toHaveClass('bg-info');
+    expect(recordIndicators.querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
+    expect(recordIndicators.querySelector('[data-indicator="diet"]')).toHaveClass('text-text-muted');
     expect(recordIndicators.querySelectorAll('[data-indicator]')).toHaveLength(2);
     expect(screen.getByTestId('patient-gender-icon')).toHaveAttribute('data-gender', 'venus');
     expect(screen.getByTestId('patient-row-chevron')).toBeInTheDocument();

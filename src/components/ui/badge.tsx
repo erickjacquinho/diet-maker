@@ -22,7 +22,8 @@ type BadgeVariant =
   | "error"
   | "protein"
   | "carbohydrate"
-  | "fat";
+  | "fat"
+  | "kcal";
 
 export type BadgeProps = React.HTMLAttributes<HTMLDivElement> & { variant?: BadgeVariant }
 
@@ -46,6 +47,7 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
     protein: "protein",
     carbohydrate: "carbohydrate",
     fat: "fat",
+    kcal: "warning",
   };
   const tone = toneMap[variant] || "default";
   return (

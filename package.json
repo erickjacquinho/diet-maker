@@ -13,7 +13,7 @@
     "verify:design-system-legacy": "node scripts/verify-design-system-legacy.mjs --strict",
     "verify:links": "node scripts/verify-links.js",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --pool=threads --maxWorkers=16",
+    "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

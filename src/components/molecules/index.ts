@@ -22,4 +22,5 @@ export * from './AddObjectiveModal';
 export * from './DeletePatientModal';
 export * from './DataTable';
 export * from './ActionDropdown';
+export * from './CarbCyclingVariationPanel';
 export * from '@/components/atoms/SelectField';

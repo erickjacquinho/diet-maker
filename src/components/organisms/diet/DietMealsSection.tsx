@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { Plus, Utensils } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button, Surface } from '@/components/atoms';
 import { MealCardContainer, MealCardContainerProps } from '../MealCardContainer';
 
 export interface DietMealsSectionProps {
@@ -28,8 +27,8 @@ export function DietMealsSection({ mealsData = [], onAddMeal }: DietMealsSection
       </div>
 
       {mealsData.length === 0 ? (
-        <Card className="p-8 text-center bg-surface-subtle/50 border-border-subtle flex flex-col items-center gap-4 shadow-none">
-          <div className="h-12 w-12 rounded-surface bg-success/10 text-success flex items-center justify-center mx-auto">
+        <Surface variant="subtle" className="p-8 text-center flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-surface bg-success-soft text-success flex items-center justify-center mx-auto">
             <Utensils size={24} aria-hidden="true" />
           </div>
           <div className="flex flex-col gap-1">
@@ -38,14 +37,15 @@ export function DietMealsSection({ mealsData = [], onAddMeal }: DietMealsSection
               Use “Nova Refeição” para começar a prescrição e adicionar alimentos diretamente da base TACO.
             </p>
           </div>
-        </Card>
+        </Surface>
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           {mealsData.map((meal, index) => (
-            <MealCardContainer key={index} {...meal} />
+            <MealCardContainer key={meal.id || index} {...meal} />
           ))}
         </div>
       )}
     </section>
   );
 }
+

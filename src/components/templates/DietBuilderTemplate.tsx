@@ -3,7 +3,7 @@
 import React from 'react';
 import { MacroTrackerHeader } from '../organisms';
 import { ActionDropdown, DietModeSwitcherProps, PageContextHeader } from '../molecules';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/atoms';
 import {
   Percent,
   MessageCircle,

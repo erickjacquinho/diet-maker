@@ -96,8 +96,34 @@ export function useDietMealActions({
     [updateActiveMeals]
   );
 
+  const handleDuplicateMeal = useCallback(
+    (mealId: string) => {
+      updateActiveMeals((prev) => {
+        const mealToDuplicate = prev.find((m) => m.id === mealId);
+        if (!mealToDuplicate) return prev;
+        const newMealId = `meal-${Date.now()}`;
+        const clonedMeal: DietMeal = {
+          ...mealToDuplicate,
+          id: newMealId,
+          name: `${mealToDuplicate.name} (Cópia)`,
+          items: mealToDuplicate.items.map((item, idx) => ({
+            ...item,
+            id: `item-${Date.now()}-${idx}`,
+          })),
+        };
+        const mealIndex = prev.findIndex((m) => m.id === mealId);
+        const nextMeals = [...prev];
+        nextMeals.splice(mealIndex + 1, 0, clonedMeal);
+        return nextMeals;
+      });
+      toast.success('Refeição duplicada com sucesso!');
+    },
+    [updateActiveMeals]
+  );
+
   return {
     handleAddMeal,
+    handleDuplicateMeal,
     handleRemoveMeal,
     handleUpdateMealHeader,
     handleAddFoodToMeal,
