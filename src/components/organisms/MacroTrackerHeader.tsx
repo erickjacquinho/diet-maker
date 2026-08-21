@@ -1,14 +1,18 @@
 import React from 'react';
 import { PatientBadgeHeader, MacroMetricCard, MacroMetricCardProps } from '../molecules';
-import { Card, CardContent } from '@/components/ui/card';
+import { Surface } from '@/components/atoms';
 
 export interface MacroTrackerHeaderProps {
   patientInitials: string;
   patientName: string;
   patientWeightKg: number;
   patientGoalDescription: string;
+  patientAge?: number;
+  patientHeightCm?: number;
+  patientGender?: string;
   onAdjustGoals?: () => void;
   metrics: MacroMetricCardProps[];
+  showPatientContext?: boolean;
 }
 
 export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
@@ -16,27 +20,33 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
   patientName,
   patientWeightKg,
   patientGoalDescription,
+  patientAge,
+  patientHeightCm,
+  patientGender,
   onAdjustGoals,
   metrics,
+  showPatientContext = true,
 }) => {
   return (
-    <Card className="bg-surface border-border-subtle rounded-surface p-0">
-      <CardContent className="p-6">
+    <Surface variant="default" className="p-6">
+      {showPatientContext && (
         <PatientBadgeHeader
           initials={patientInitials}
           name={patientName}
           weightKg={patientWeightKg}
           goalDescription={patientGoalDescription}
+          age={patientAge}
+          heightCm={patientHeightCm}
           onAdjustGoals={onAdjustGoals}
         />
+      )}
 
-        <div className="grid grid-cols-1 grid-cols-2 lg:grid-cols-4 gap-4">
-          {metrics.map((metric, index) => (
-            <MacroMetricCard key={index} {...metric} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+      <div className="grid grid-cols-4 gap-4">
+        {metrics.map((metric, index) => (
+          <MacroMetricCard key={index} {...metric} />
+        ))}
+      </div>
+    </Surface>
   );
 };
 

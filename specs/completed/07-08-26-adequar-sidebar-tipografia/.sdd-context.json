@@ -1,0 +1,6 @@
+{
+  "task": "Adequar a tipografia do sidebar ao Design System adicionando font-semibold ao menu button inativo conforme contrato nav-item em 05-typography-system.md",
+  "slug": "adequar-sidebar-tipografia",
+  "feature_dir": "specs/07-08-26-adequar-sidebar-tipografia",
+  "date": "2026-08-07"
+}

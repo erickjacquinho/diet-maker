@@ -6,11 +6,11 @@
 | --- | --- |
 | Component ID | `molecule-sidebar-user-profile` |
 | Nature | `product-generic` |
-| Lifecycle | `migration-required` |
+| Lifecycle | `implemented` |
 | Current layer | `molecule` |
 | Target layer | `molecule` |
 | Sources | `src/components/molecules/SidebarUserProfile.tsx` |
-| Public exports | `SidebarUserProfile` (component) |
+| Public exports | `SidebarUserProfileProps` (type), `SidebarUserProfile` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Root `SidebarUserProfile` e exports visuais registrados: `SidebarUserProfile`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `SidebarUserProfile` e exports visuais registrados: `SidebarUserProfile`. Não possui primitive base único; compõe `Avatar` e `Tooltip` por seus contratos públicos.
 
 ## Allowed variants
 
@@ -34,7 +34,11 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+The molecule owns identity fallback rendering and receives doctor metadata and collapse state by props. It does not depend on the `SidebarNav` organism; the organism supplies only product data and presentation state.
+
+`onOpenAccount` is optional. When present, expanded and collapsed identity render a keyboard-operable Button/IconButton with the account name; when absent, the profile is informational and has no button role, action cursor or action hover.
+
+Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -58,5 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `molecule`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `molecule`; perfil homologado. Expanded exibe nome e função; collapsed preserva identidade e tooltip.
 

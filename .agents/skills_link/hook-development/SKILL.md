@@ -1,712 +1,747 @@
 ---
 name: Hook Development
-description: This skill should be used when the user asks to "create a hook", "add a PreToolUse/PostToolUse/Stop hook", "validate tool use", "implement prompt-based hooks", "use ${CLAUDE_PLUGIN_ROOT}", "set up event-driven automation", "block dangerous commands", or mentions hook events (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, UserPromptSubmit, PreCompact, Notification). Provides comprehensive guidance for creating and implementing Claude Code plugin hooks with focus on advanced prompt-based hooks API.
-version: 0.1.0
+description: Use this skill when the user asks to create, configure, debug, validate, secure, or document Codex hooks; add a PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact, UserPromptSubmit, SubagentStart, SubagentStop, Stop, SessionStart, SessionEnd hook; work with hooks.json, config.toml, requirements.toml, or plugin-bundled lifecycle hooks; or enforce policies around Codex tools and turns.
+version: 0.2.0
 ---
 
-# Hook Development for Claude Code Plugins
+# Hook Development for Codex
 
-## Overview
+## Purpose
 
-Hooks are event-driven automation scripts that execute in response to Claude Code events. Use hooks to validate operations, enforce policies, add context, and integrate external tools into workflows.
+Codex Hooks are an extensibility framework for injecting user-owned command
+scripts into the agentic loop. Use them to log activity, validate or rewrite
+local tool calls, block unsafe prompts or commands, add project context, save
+session notes, enforce a completion check, or react to compaction and subagent
+lifecycle events.
 
-**Key capabilities:**
-- Validate tool calls before execution (PreToolUse)
-- React to tool results (PostToolUse)
-- Enforce completion standards (Stop, SubagentStop)
-- Load project context (SessionStart)
-- Automate workflows across the development lifecycle
+This skill is Codex-specific. Do not apply Claude Code hook semantics to a
+Codex hook. In particular:
 
-## Hook Types
+- Only type: "command" handlers run today. prompt and agent handlers may be
+  parsed, but are skipped.
+- Codex does not use Claude Code's permissionDecision: "ask" flow,
+  $CLAUDE_ENV_FILE, $CLAUDE_PROJECT_DIR, or Claude's plugin hook wrapper
+  semantics as the primary API.
+- A command hook receives one JSON object on stdin and communicates through
+  stdout, stderr, and its exit status.
+- Matching hooks from all active sources run. Hook execution is not a
+  replacement/override chain, and matching command hooks for one event are
+  launched concurrently.
 
-### Prompt-Based Hooks (Recommended)
+Official reference: https://learn.chatgpt.com/docs/hooks.md
 
-Use LLM-driven decision making for context-aware validation:
+## Mental model
 
-```json
-{
-  "type": "prompt",
-  "prompt": "Evaluate if this tool use is appropriate: $TOOL_INPUT",
-  "timeout": 30
-}
-```
+Every hook has three levels:
 
-**Supported events:** Stop, SubagentStop, UserPromptSubmit, PreToolUse
+1. An event, such as PreToolUse or Stop.
+2. An optional matcher group that decides when the event matches.
+3. One or more command handlers that run for a matching group.
 
-**Benefits:**
-- Context-aware decisions based on natural language reasoning
-- Flexible evaluation logic without bash scripting
-- Better edge case handling
-- Easier to maintain and extend
+The basic JSON shape is:
 
-### Command Hooks
-
-Execute bash commands for deterministic checks:
-
-```json
-{
-  "type": "command",
-  "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh",
-  "timeout": 60
-}
-```
-
-**Use for:**
-- Fast deterministic validations
-- File system operations
-- External tool integrations
-- Performance-critical checks
-
-## Hook Configuration Formats
-
-### Plugin hooks.json Format
-
-**For plugin hooks** in `hooks/hooks.json`, use wrapper format:
-
-```json
-{
-  "description": "Brief explanation of hooks (optional)",
-  "hooks": {
-    "PreToolUse": [...],
-    "Stop": [...],
-    "SessionStart": [...]
-  }
-}
-```
-
-**Key points:**
-- `description` field is optional
-- `hooks` field is required wrapper containing actual hook events
-- This is the **plugin-specific format**
-
-**Example:**
-```json
-{
-  "description": "Validation hooks for code quality",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
+    {
+      "description": "Optional lifecycle hooks for this workspace.",
+      "hooks": {
+        "PreToolUse": [
           {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate.sh"
+            "matcher": "^Bash$",
+            "hooks": [
+              {
+                "type": "command",
+                "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/pre_tool_use.py\"",
+                "timeout": 30,
+                "statusMessage": "Checking Bash command"
+              }
+            ]
           }
         ]
       }
-    ]
-  }
-}
-```
-
-### Settings Format (Direct)
-
-**For user settings** in `.claude/settings.json`, use direct format:
-
-```json
-{
-  "PreToolUse": [...],
-  "Stop": [...],
-  "SessionStart": [...]
-}
-```
-
-**Key points:**
-- No wrapper - events directly at top level
-- No description field
-- This is the **settings format**
-
-**Important:** The examples below show the hook event structure that goes inside either format. For plugin hooks.json, wrap these in `{"hooks": {...}}`.
-
-## Hook Events
-
-### PreToolUse
-
-Execute before any tool runs. Use to approve, deny, or modify tool calls.
-
-**Example (prompt-based):**
-```json
-{
-  "PreToolUse": [
-    {
-      "matcher": "Write|Edit",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Validate file write safety. Check: system paths, credentials, path traversal, sensitive content. Return 'approve' or 'deny'."
-        }
-      ]
     }
-  ]
-}
-```
 
-**Output for PreToolUse:**
-```json
-{
-  "hookSpecificOutput": {
-    "permissionDecision": "allow|deny|ask",
-    "updatedInput": {"field": "modified_value"}
-  },
-  "systemMessage": "Explanation for Claude"
-}
-```
+Handler fields:
 
-### PostToolUse
+- type: use command; prompt and agent are not executable hook types in the
+  current Codex release.
+- command: command line executed with the session's cwd as its working
+  directory.
+- timeout: seconds. The default is 600 for most events; SessionEnd defaults to
+  1 second and supports at most 3 seconds.
+- statusMessage: optional status text shown while the hook runs.
+- additionalContextLimit: optional approximate token threshold for
+  model-visible hookSpecificOutput.additionalContext from this handler.
+- commandWindows in JSON, or command_windows in TOML: optional Windows command
+  override.
+- async: parsed for compatibility but asynchronous command hooks are not
+  supported yet. Do not depend on it.
 
-Execute after tool completes. Use to react to results, provide feedback, or log.
+Keep hook commands short, deterministic, and independent. Multiple matching
+hooks cannot rely on an execution order or on seeing one another's output.
 
-**Example:**
-```json
-{
-  "PostToolUse": [
+## Where Codex discovers hooks
+
+Codex discovers hooks next to active configuration layers in either of these
+forms:
+
+- hooks.json
+- Inline [[hooks.<Event>]] tables in config.toml
+
+The most useful locations are:
+
+- ~/.codex/hooks.json
+- ~/.codex/config.toml
+- <repo>/.codex/hooks.json
+- <repo>/.codex/config.toml
+
+Codex also loads hooks from enabled plugins and managed configuration layers.
+If several sources exist, Codex loads all matching hooks. A higher-precedence
+layer does not replace lower-precedence hooks.
+
+Project-local hooks load only when the project's .codex layer is trusted. In an
+untrusted project, Codex still loads user and system hooks from their own
+active configuration layers.
+
+If one configuration layer contains both hooks.json and inline [hooks] in
+config.toml, Codex merges them and warns at startup. Prefer one
+representation per layer.
+
+For repository-local commands, resolve the script from the Git root instead of
+assuming the current directory is the repository root. Codex may start from a
+subdirectory:
+
     {
-      "matcher": "Edit",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Analyze edit result for potential issues: syntax errors, security vulnerabilities, breaking changes. Provide feedback."
-        }
-      ]
+      "type": "command",
+      "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/check.py\""
     }
-  ]
-}
-```
 
-**Output behavior:**
-- Exit 0: stdout shown in transcript
-- Exit 2: stderr fed back to Claude
-- systemMessage included in context
+Commands still run with the session cwd; the Git-root expression only makes
+the script path stable.
 
-### Stop
+### hooks.json
 
-Execute when main agent considers stopping. Use to validate completeness.
+Use the top-level wrapper in hooks.json:
 
-**Example:**
-```json
-{
-  "Stop": [
     {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Verify task completion: tests run, build succeeded, questions answered. Return 'approve' to stop or 'block' with reason to continue."
-        }
-      ]
+      "description": "Repository policy hooks",
+      "hooks": {
+        "SessionStart": [
+          {
+            "matcher": "startup|resume",
+            "hooks": [
+              {
+                "type": "command",
+                "command": "python3 ~/.codex/hooks/session_start.py",
+                "statusMessage": "Loading session notes",
+                "additionalContextLimit": 5000
+              }
+            ]
+          }
+        ]
+      }
     }
-  ]
-}
-```
 
-**Decision output:**
-```json
-{
-  "decision": "approve|block",
-  "reason": "Explanation",
-  "systemMessage": "Additional context"
-}
-```
+description is optional metadata and has no effect on execution. hooks is the
+required wrapper for this file format.
 
-### SubagentStop
+### Inline config.toml
 
-Execute when subagent considers stopping. Use to ensure subagent completed its task.
+The same hook can be declared inline:
 
-Similar to Stop hook, but for subagents.
+    [[hooks.SessionStart]]
+    matcher = "startup|resume"
 
-### UserPromptSubmit
+    [[hooks.SessionStart.hooks]]
+    type = "command"
+    command = 'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/session_start.py"'
+    additionalContextLimit = 5000
 
-Execute when user submits a prompt. Use to add context, validate, or block prompts.
+    [[hooks.PreToolUse]]
+    matcher = "^Bash$"
 
-**Example:**
-```json
-{
-  "UserPromptSubmit": [
+    [[hooks.PreToolUse.hooks]]
+    type = "command"
+    command = 'python3 "$(git rev-parse --show-toplevel)/.codex/hooks/pre_tool_use.py"'
+    timeout = 30
+    statusMessage = "Checking Bash command"
+
+In TOML, use command_windows for the Windows override. In JSON, use
+commandWindows.
+
+## Trust, review, and enabling
+
+Before a non-managed command hook runs, Codex requires review and trust of the
+exact hook definition. Trust is recorded against the hook's current hash, so a
+new or modified hook is reviewed again and skipped until trusted.
+
+In the Codex CLI, use /hooks to:
+
+- inspect hook sources;
+- review new or changed hooks;
+- trust hooks; and
+- disable individual non-managed hooks.
+
+Codex warns at startup when hooks need review. Managed hooks from system, MDM,
+cloud, or requirements.toml sources are trusted by policy and cannot be
+disabled from the user hook browser.
+
+Hooks are enabled by default. Disable them in config.toml with:
+
+    [features]
+    hooks = false
+
+codex_hooks is a deprecated alias; use hooks. Administrators can force hooks
+on in requirements.toml with [features].hooks = true.
+
+For one-off automation whose hook sources have already been vetted outside
+Codex, --dangerously-bypass-hook-trust bypasses persisted trust for that
+invocation. Use this only for explicitly trusted automation.
+
+## Managed enterprise hooks
+
+Administrators can define hooks in requirements.toml and distribute the actual
+scripts through MDM or another device-management system:
+
+    allow_managed_hooks_only = true
+
+    [features]
+    hooks = true
+
+    [hooks]
+    managed_dir = "/enterprise/hooks"
+    windows_managed_dir = 'C:\enterprise\hooks'
+
+    [[hooks.PreToolUse]]
+    matcher = "^Bash$"
+
+    [[hooks.PreToolUse.hooks]]
+    type = "command"
+    command = "python3 /enterprise/hooks/pre_tool_use_policy.py"
+    command_windows = 'py -3 C:\enterprise\hooks\pre_tool_use_policy.py'
+    timeout = 30
+    statusMessage = "Checking managed Bash command"
+
+Rules:
+
+- managed_dir is used on macOS and Linux; windows_managed_dir is used on
+  Windows.
+- Codex does not distribute the scripts. Enterprise tooling must install and
+  update them.
+- Managed hook commands should use absolute paths under the configured managed
+  directory.
+- allow_managed_hooks_only = true skips user, project, session, and plugin
+  hooks while still loading managed hooks.
+
+## Plugin-bundled hooks
+
+An enabled plugin can bundle lifecycle hooks. By default Codex looks for
+hooks/hooks.json inside the plugin root. A plugin manifest can override this
+with a hooks entry in .codex-plugin/plugin.json:
+
     {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Check if prompt requires security guidance. If discussing auth, permissions, or API security, return relevant warnings."
-        }
-      ]
+      "name": "repo-policy",
+      "hooks": "./hooks/hooks.json"
     }
-  ]
-}
-```
+
+The manifest value may be a ./-prefixed path, an array of such paths, an
+inline hooks object, or an array of inline hooks objects. Manifest paths are
+resolved relative to the plugin root and must remain inside that root. When a
+manifest defines hooks, Codex uses those entries instead of the default
+hooks/hooks.json.
+
+Plugin hook commands receive:
+
+- PLUGIN_ROOT: installed plugin root;
+- PLUGIN_DATA: writable plugin data directory;
+- CLAUDE_PLUGIN_ROOT and CLAUDE_PLUGIN_DATA: compatibility variables for
+  existing plugin hooks.
+
+Prefer PLUGIN_ROOT and PLUGIN_DATA for new Codex hooks. Plugin hooks use the
+same event schema and trust flow as other non-managed hooks; installing or
+enabling a plugin does not automatically trust its hooks.
+
+## Events and matchers
+
+### Event summary
+
+| Event | Runs | Matcher value | Primary use |
+|---|---|---|---|
+| SessionStart | Session starts or resumes | source: startup, resume, clear, compact | Load context or notes |
+| SessionEnd | Main session ends; not subagents | Currently reason: other | Save notes or cleanup |
+| SubagentStart | A subagent starts | agent_type | Add subagent context |
+| PreToolUse | Before a supported local tool runs | Tool name | Validate, deny, or rewrite |
+| PermissionRequest | Before Codex asks for approval | Tool name | Allow, deny, or defer approval |
+| PostToolUse | After a supported local tool runs | Tool name | Review output or provide feedback |
+| UserPromptSubmit | A user prompt is about to be sent | Not supported; ignored | Add context or block prompt |
+| PreCompact | Before manual or automatic compaction | manual or auto | Preserve critical context |
+| PostCompact | After manual or automatic compaction | manual or auto | Restore or record context |
+| SubagentStop | A subagent tries to stop | agent_type | Request another subagent pass |
+| Stop | The main turn tries to stop | Not supported; ignored | Continue until standards are met |
+
+Use matcher: "*", matcher: "", or omit matcher to match every occurrence of an
+event that supports matchers. The matcher is a regex string; write anchors
+when an exact match is intended:
+
+    "matcher": "^Bash$"
+
+Examples:
+
+    Bash
+    ^apply_patch$
+    Edit|Write
+    mcp__filesystem__read_file
+    mcp__filesystem__.*
+    startup|resume|clear|compact
+    manual|auto
+
+UserPromptSubmit and Stop currently ignore matcher, so configure them without
+relying on filtering.
+
+### Tool coverage
+
+PreToolUse and PostToolUse cover more than shell and MCP calls:
+
+| Tool path | PreToolUse | PostToolUse | Match/name notes |
+|---|---:|---:|---|
+| Shell commands | Yes | Yes | Match as Bash |
+| Unified exec_command | Yes | Yes | Match as Bash; a later write_stdin poll can deliver the original command's post event |
+| apply_patch | Yes | Yes | Canonical input name is apply_patch; matcher aliases include Edit and Write |
+| MCP tools | Yes | Yes | Match the MCP tool name, such as mcp__filesystem__read_file |
+| Other local function tools | Yes | Yes | Match the function tool name, such as update_plan; spawn_agent also matches Agent |
+| Hosted tools such as web search | No | No | They do not use the local function-tool hook path |
+
+PermissionRequest currently supports Bash, apply_patch/Edit/Write, and MCP
+tool names. Some specialized paths can opt out of the default hook path, so
+treat tool hooks as a guardrail rather than a complete enforcement boundary.
+
+write_stdin transports input or polls an existing unified-exec session; it does
+not run PreToolUse again for the already-approved command.
+
+## Command hook input
+
+Every command hook receives exactly one JSON object on stdin. Common fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| session_id | string | Current Codex session id; subagent hooks use the parent session id |
+| transcript_path | string or null | Session transcript path, if available; transcript format is not a stable API |
+| cwd | string | Session working directory |
+| hook_event_name | string | Current event name |
+| model | string | Active Codex model slug |
+| turn_id | string | Active Codex turn id on turn-scoped events |
+| permission_mode | string | On most turn events: default, acceptEdits, plan, dontAsk, or bypassPermissions |
+
+Event-specific fields:
+
+- SessionStart: source (startup, resume, clear, compact).
+- SessionEnd: reason (currently other).
+- SubagentStart: agent_id, agent_type, turn_id, permission_mode.
+- PreToolUse: tool_name, tool_use_id, tool_input, turn_id.
+- PermissionRequest: tool_name, tool_input, optional tool_input.description,
+  turn_id.
+- PostToolUse: tool_name, tool_use_id, tool_input, tool_response, turn_id.
+- PreCompact and PostCompact: trigger (manual or auto), turn_id.
+- UserPromptSubmit: prompt, turn_id.
+- SubagentStop: agent_id, agent_type, agent_transcript_path,
+  stop_hook_active, last_assistant_message, turn_id.
+- Stop: stop_hook_active, last_assistant_message, turn_id.
+
+Do not depend on transcript_path's internal format, and do not assume
+tool_input.description exists for every permission request.
+
+## Command hook output
+
+Print JSON to stdout when the event expects JSON. An empty stdout with exit code
+0 is success and lets Codex continue. Exit code 2 with a reason on stderr is
+the portable way to block or provide feedback for the events that support it.
+Timeouts and other command failures are reported as hook failures.
+
+Shared JSON fields supported by SessionStart, PreCompact, PostCompact,
+UserPromptSubmit, SubagentStop, and Stop:
+
+    {
+      "continue": true,
+      "stopReason": "optional",
+      "systemMessage": "optional",
+      "suppressOutput": false
+    }
+
+- continue: false marks the hook run as stopped. For SubagentStart, it is
+  parsed but does not prevent the subagent from starting.
+- stopReason records why processing was stopped.
+- systemMessage is surfaced as a warning in the UI or event stream.
+- suppressOutput is parsed but not implemented; do not rely on it.
+
+PreToolUse and PermissionRequest support systemMessage, but not continue,
+stopReason, or suppressOutput. Returning unsupported fields marks that hook
+run as failed and Codex continues the tool call. PostToolUse supports
+systemMessage, stopReason, and continue: false; its suppressOutput is also not
+implemented.
+
+Plain-text stdout behavior is event-specific:
+
+- SessionStart, SubagentStart, and UserPromptSubmit: added as extra
+  developer/model context.
+- PreToolUse, PermissionRequest, PostToolUse, PreCompact, and PostCompact:
+  ignored; use JSON or stderr as documented.
+- Stop and SubagentStop: plain text is invalid; return JSON.
+- SessionEnd: output is advisory and cannot steer Codex or keep the thread
+  open.
+
+### Large output and context limits
+
+Codex limits each model-visible hook-output message to roughly 2,500 tokens by
+default. Oversized output is spilled to:
+
+    <temp_dir>/hook_outputs/<session_id>/<uuid>.txt
+
+The model receives a head-and-tail preview and the saved-file path. If the file
+cannot be written, it receives a truncated preview.
+
+For a command that returns additionalContext, set additionalContextLimit on
+that handler. Omit it for the approximate 2,500 token default; use a positive
+integer for another threshold; use 0 only when the hook enforces a strict
+output cap and truly needs the full context passed through. The setting
+applies independently to each matching handler and only to additionalContext.
+
+Keep hook output concise. Context from several hooks can degrade model
+performance, and oversized output may write sensitive data to disk. Never
+return secrets, API keys, credentials, or unnecessary transcript content.
+
+## Event-specific contracts
 
 ### SessionStart
 
-Execute when Claude Code session begins. Use to load context and set environment.
+The matcher is applied to source. Plain text adds developer context. JSON can
+return additionalContext:
 
-**Example:**
-```json
-{
-  "SessionStart": [
     {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/load-context.sh"
-        }
-      ]
+      "hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": "Load the workspace conventions before editing."
+      }
     }
-  ]
-}
-```
 
-**Special capability:** Persist environment variables using `$CLAUDE_ENV_FILE`:
-```bash
-echo "export PROJECT_TYPE=nodejs" >> "$CLAUDE_ENV_FILE"
-```
-
-See `examples/load-context.sh` for complete example.
+After compaction, a matching source: "compact" hook runs before the next model
+request. If automatic compaction occurs mid-turn, its context is delivered to
+the immediate continuation. continue: false ends the turn without another
+model request.
 
 ### SessionEnd
 
-Execute when session ends. Use for cleanup, logging, and state preservation.
+Runs for the main thread when Codex closes normally, archives or deletes an open
+conversation, or ends an idle session. Switching away from a conversation or
+unsubscribing does not end it immediately. The hook can read the transcript
+while it runs, but its output cannot steer Codex or keep the thread open. Keep
+this hook within its short timeout.
 
-### PreCompact
+### SubagentStart
 
-Execute before context compaction. Use to add critical information to preserve.
+The matcher is applied to agent_type. Plain text and
+hookSpecificOutput.additionalContext are added to the subagent context:
 
-### Notification
-
-Execute when Claude sends notifications. Use to react to user notifications.
-
-## Hook Output Format
-
-### Standard Output (All Hooks)
-
-```json
-{
-  "continue": true,
-  "suppressOutput": false,
-  "systemMessage": "Message for Claude"
-}
-```
-
-- `continue`: If false, halt processing (default true)
-- `suppressOutput`: Hide output from transcript (default false)
-- `systemMessage`: Message shown to Claude
-
-### Exit Codes
-
-- `0` - Success (stdout shown in transcript)
-- `2` - Blocking error (stderr fed back to Claude)
-- Other - Non-blocking error
-
-## Hook Input Format
-
-All hooks receive JSON via stdin with common fields:
-
-```json
-{
-  "session_id": "abc123",
-  "transcript_path": "/path/to/transcript.txt",
-  "cwd": "/current/working/dir",
-  "permission_mode": "ask|allow",
-  "hook_event_name": "PreToolUse"
-}
-```
-
-**Event-specific fields:**
-
-- **PreToolUse/PostToolUse:** `tool_name`, `tool_input`, `tool_result`
-- **UserPromptSubmit:** `user_prompt`
-- **Stop/SubagentStop:** `reason`
-
-Access fields in prompts using `$TOOL_INPUT`, `$TOOL_RESULT`, `$USER_PROMPT`, etc.
-
-## Environment Variables
-
-Available in all command hooks:
-
-- `$CLAUDE_PROJECT_DIR` - Project root path
-- `$CLAUDE_PLUGIN_ROOT` - Plugin directory (use for portable paths)
-- `$CLAUDE_ENV_FILE` - SessionStart only: persist env vars here
-- `$CLAUDE_CODE_REMOTE` - Set if running in remote context
-
-**Always use ${CLAUDE_PLUGIN_ROOT} in hook commands for portability:**
-
-```json
-{
-  "type": "command",
-  "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh"
-}
-```
-
-## Plugin Hook Configuration
-
-In plugins, define hooks in `hooks/hooks.json`:
-
-```json
-{
-  "PreToolUse": [
     {
-      "matcher": "Write|Edit",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Validate file write safety"
+      "hookSpecificOutput": {
+        "hookEventName": "SubagentStart",
+        "additionalContext": "Review repository test conventions first."
+      }
+    }
+
+continue: false does not stop a subagent from starting.
+
+### PreToolUse
+
+Use this event for deterministic policy checks before supported local tools
+run. To deny a call:
+
+    {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": "Destructive command blocked by repository policy."
+      }
+    }
+
+Codex also accepts the older shape:
+
+    {
+      "decision": "block",
+      "reason": "Destructive command blocked by repository policy."
+    }
+
+To add context without blocking:
+
+    {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "additionalContext": "The pending command touches generated files."
+      }
+    }
+
+To rewrite a supported call, use permissionDecision: "allow" with
+updatedInput:
+
+    {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "updatedInput": {
+          "command": "echo rewritten"
         }
-      ]
+      }
     }
-  ],
-  "Stop": [
+
+For Bash and apply_patch, updatedInput must contain a string command. For MCP
+and other local function tools, it must be the replacement arguments object.
+Return updatedInput only with permissionDecision: "allow".
+
+permissionDecision: "ask", legacy decision: "approve", continue: false,
+stopReason, and suppressOutput are parsed but unsupported. Do not use them as a
+Codex decision API.
+
+### PermissionRequest
+
+Runs only when Codex is about to ask for approval, such as for shell
+escalation or managed-network approval. It does not run for commands that do
+not require approval. To allow:
+
     {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Verify task completion"
+      "hookSpecificOutput": {
+        "hookEventName": "PermissionRequest",
+        "decision": {
+          "behavior": "allow"
         }
-      ]
+      }
     }
-  ],
-  "SessionStart": [
+
+To deny:
+
     {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/load-context.sh",
-          "timeout": 10
+      "hookSpecificOutput": {
+        "hookEventName": "PermissionRequest",
+        "decision": {
+          "behavior": "deny",
+          "message": "Blocked by repository policy."
         }
-      ]
+      }
     }
-  ]
-}
-```
 
-Plugin hooks merge with user's hooks and run in parallel.
+If several hooks decide, any deny wins. If there is no deny, an allow avoids
+the approval prompt. If no hook decides, normal Codex approval flow continues.
+Do not return updatedInput, updatedPermissions, or interrupt; those fields are
+reserved and fail closed today.
 
-## Matchers
+### PostToolUse
 
-### Tool Name Matching
+Runs after supported tools produce output, including non-zero Bash exits. It
+cannot undo side effects that already occurred. Feedback can replace the
+model-visible tool result:
 
-**Exact match:**
-```json
-"matcher": "Write"
-```
-
-**Multiple tools:**
-```json
-"matcher": "Read|Write|Edit"
-```
-
-**Wildcard (all tools):**
-```json
-"matcher": "*"
-```
-
-**Regex patterns:**
-```json
-"matcher": "mcp__.*__delete.*"  // All MCP delete tools
-```
-
-**Note:** Matchers are case-sensitive.
-
-### Common Patterns
-
-```json
-// All MCP tools
-"matcher": "mcp__.*"
-
-// Specific plugin's MCP tools
-"matcher": "mcp__plugin_asana_.*"
-
-// All file operations
-"matcher": "Read|Write|Edit"
-
-// Bash commands only
-"matcher": "Bash"
-```
-
-## Security Best Practices
-
-### Input Validation
-
-Always validate inputs in command hooks:
-
-```bash
-#!/bin/bash
-set -euo pipefail
-
-input=$(cat)
-tool_name=$(echo "$input" | jq -r '.tool_name')
-
-# Validate tool name format
-if [[ ! "$tool_name" =~ ^[a-zA-Z0-9_]+$ ]]; then
-  echo '{"decision": "deny", "reason": "Invalid tool name"}' >&2
-  exit 2
-fi
-```
-
-### Path Safety
-
-Check for path traversal and sensitive files:
-
-```bash
-file_path=$(echo "$input" | jq -r '.tool_input.file_path')
-
-# Deny path traversal
-if [[ "$file_path" == *".."* ]]; then
-  echo '{"decision": "deny", "reason": "Path traversal detected"}' >&2
-  exit 2
-fi
-
-# Deny sensitive files
-if [[ "$file_path" == *".env"* ]]; then
-  echo '{"decision": "deny", "reason": "Sensitive file"}' >&2
-  exit 2
-fi
-```
-
-See `examples/validate-write.sh` and `examples/validate-bash.sh` for complete examples.
-
-### Quote All Variables
-
-```bash
-# GOOD: Quoted
-echo "$file_path"
-cd "$CLAUDE_PROJECT_DIR"
-
-# BAD: Unquoted (injection risk)
-echo $file_path
-cd $CLAUDE_PROJECT_DIR
-```
-
-### Set Appropriate Timeouts
-
-```json
-{
-  "type": "command",
-  "command": "bash script.sh",
-  "timeout": 10
-}
-```
-
-**Defaults:** Command hooks (60s), Prompt hooks (30s)
-
-## Performance Considerations
-
-### Parallel Execution
-
-All matching hooks run **in parallel**:
-
-```json
-{
-  "PreToolUse": [
     {
-      "matcher": "Write",
-      "hooks": [
-        {"type": "command", "command": "check1.sh"},  // Parallel
-        {"type": "command", "command": "check2.sh"},  // Parallel
-        {"type": "prompt", "prompt": "Validate..."}   // Parallel
-      ]
+      "decision": "block",
+      "reason": "The Bash output needs review before continuing.",
+      "hookSpecificOutput": {
+        "hookEventName": "PostToolUse",
+        "additionalContext": "The command updated generated files."
+      }
     }
-  ]
-}
-```
 
-**Design implications:**
-- Hooks don't see each other's output
-- Non-deterministic ordering
-- Design for independence
+Here decision: "block" means “replace the result with this feedback and
+continue the model”; it does not roll back the tool. continue: false also
+replaces the original result with hook feedback. updatedMCPToolOutput and
+suppressOutput are not supported.
 
-### Optimization
+For code-mode tool calls, the same decisions apply to the nested call:
 
-1. Use command hooks for quick deterministic checks
-2. Use prompt hooks for complex reasoning
-3. Cache validation results in temp files
-4. Minimize I/O in hot paths
+- Pre-tool block: the tool promise rejects before execution.
+- Pre-tool updatedInput: the tool runs with rewritten input.
+- Post-tool block or exit 2: the tool ran, then the promise rejects with the
+  hook reason.
+- Post-tool continue: false: Codex replaces the model-visible result, but the
+  nested promise is not rejected.
 
-## Temporarily Active Hooks
+### UserPromptSubmit
 
-Create hooks that activate conditionally by checking for a flag file or configuration:
+The matcher is ignored. Plain text or additionalContext is added before the
+prompt is sent:
 
-**Pattern: Flag file activation**
-```bash
-#!/bin/bash
-# Only active when flag file exists
-FLAG_FILE="$CLAUDE_PROJECT_DIR/.enable-strict-validation"
+    {
+      "hookSpecificOutput": {
+        "hookEventName": "UserPromptSubmit",
+        "additionalContext": "Ask for a clear reproduction before editing files."
+      }
+    }
 
-if [ ! -f "$FLAG_FILE" ]; then
-  # Flag not present, skip validation
-  exit 0
-fi
+To block the prompt:
 
-# Flag present, run validation
-input=$(cat)
-# ... validation logic ...
-```
+    {
+      "decision": "block",
+      "reason": "Ask for confirmation before doing that."
+    }
 
-**Pattern: Configuration-based activation**
-```bash
-#!/bin/bash
-# Check configuration for activation
-CONFIG_FILE="$CLAUDE_PROJECT_DIR/.claude/plugin-config.json"
+Exit code 2 with the reason on stderr is also supported.
 
-if [ -f "$CONFIG_FILE" ]; then
-  enabled=$(jq -r '.strictMode // false' "$CONFIG_FILE")
-  if [ "$enabled" != "true" ]; then
-    exit 0  # Not enabled, skip
-  fi
-fi
+### PreCompact and PostCompact
 
-# Enabled, run hook logic
-input=$(cat)
-# ... hook logic ...
-```
+The matcher is applied to trigger, either manual or auto. JSON may use the
+common output fields. A matching PreCompact hook with continue: false stops
+compaction; a matching PostCompact hook with continue: false stops normal
+processing after compaction.
 
-**Use cases:**
-- Enable strict validation only when needed
-- Temporary debugging hooks
-- Project-specific hook behavior
-- Feature flags for hooks
+### SubagentStop
 
-**Best practice:** Document activation mechanism in plugin README so users know how to enable/disable temporary hooks.
+The matcher is applied to agent_type. On exit 0, stdout must be JSON. To
+request another focused pass:
 
-## Hook Lifecycle and Limitations
+    {
+      "decision": "block",
+      "reason": "Run one more focused pass inside the subagent."
+    }
 
-### Hooks Load at Session Start
+Exit code 2 with a continuation reason is also supported. If any matching hook
+returns continue: false, that takes precedence over continuation decisions from
+other matching SubagentStop hooks.
 
-**Important:** Hooks are loaded when Claude Code session starts. Changes to hook configuration require restarting Claude Code.
+### Stop
 
-**Cannot hot-swap hooks:**
-- Editing `hooks/hooks.json` won't affect current session
-- Adding new hook scripts won't be recognized
-- Changing hook commands/prompts won't update
-- Must restart Claude Code: exit and run `claude` again
+The matcher is ignored. On exit 0, stdout must be JSON. To keep Codex going:
 
-**To test hook changes:**
-1. Edit hook configuration or scripts
-2. Exit Claude Code session
-3. Restart: `claude` or `cc`
-4. New hook configuration loads
-5. Test hooks with `claude --debug`
+    {
+      "decision": "block",
+      "reason": "Run one more pass over the failing tests."
+    }
 
-### Hook Validation at Startup
+For Stop, decision: "block" does not reject the finished turn. It creates a
+new continuation prompt that behaves like a new user prompt and uses reason
+as its text. stop_hook_active indicates that the current turn has already been
+continued by a Stop hook; use it to prevent infinite loops. If any matching
+Stop hook returns continue: false, that takes precedence over continuation
+decisions from other matching Stop hooks.
 
-Hooks are validated when Claude Code starts:
-- Invalid JSON in hooks.json causes loading failure
-- Missing scripts cause warnings
-- Syntax errors reported in debug mode
+## Minimal command hook example
 
-Use `/hooks` command to review loaded hooks in current session.
+This Python hook denies clearly destructive Bash commands before they execute.
+It is intentionally conservative; production policies should parse commands
+with the threat model of the repository and should fail safely:
 
-## Debugging Hooks
+    #!/usr/bin/env python3
+    import json
+    import re
+    import sys
 
-### Enable Debug Mode
+    payload = json.load(sys.stdin)
+    tool_name = payload.get("tool_name")
+    command = ""
+    if tool_name == "Bash":
+        command = (payload.get("tool_input") or {}).get("command", "")
 
-```bash
-claude --debug
-```
+    if re.search(r"\brm\s+-rf\s+(?:/|\\\\|\$HOME|~)", command):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": "Blocked by repository policy."
+            }
+        }))
+    else:
+        # Empty stdout with exit 0 means allow normal processing to continue.
+        sys.exit(0)
 
-Look for hook registration, execution logs, input/output JSON, and timing information.
+If a hook must block via stderr instead, write a concise reason and exit 2:
 
-### Test Hook Scripts
+    print("Blocked by repository policy.", file=sys.stderr)
+    sys.exit(2)
 
-Test command hooks directly:
+## Security and reliability checklist
 
-```bash
-echo '{"tool_name": "Write", "tool_input": {"file_path": "/test"}}' | \
-  bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh
+- Treat stdin, tool_input, prompts, paths, and transcript data as untrusted.
+- Parse JSON with a real JSON parser; do not extract fields with fragile text
+  matching.
+- Validate the event and tool name before reading tool-specific fields.
+- Never interpolate untrusted values into a shell command. Prefer invoking a
+  program with an argument array inside the hook implementation.
+- Quote paths and use stable Git-root or plugin-root resolution.
+- Use PLUGIN_ROOT for plugin resources and an absolute managed path for
+  enterprise hooks.
+- Do not log prompts, tool inputs, transcripts, tokens, credentials, or API
+  keys unless explicitly redacted.
+- Keep timeouts finite and output small.
+- Make hooks idempotent where possible; PostToolUse cannot roll back a tool.
+- Assume matching hooks run concurrently and can be skipped when untrusted.
+- Do not treat hooks as a complete security boundary: hosted tools and some
+  specialized paths may not pass through the local hook path.
+- Be especially careful with Stop and SubagentStop continuation logic; honor
+  stop_hook_active to avoid infinite loops.
 
-echo "Exit code: $?"
-```
+## Testing and debugging workflow
 
-### Validate JSON Output
+1. Choose the narrowest event and matcher that meets the requirement.
+2. Implement a command that reads one JSON object from stdin.
+3. Test the script directly with representative payloads for allow, deny,
+   malformed input, missing fields, timeouts, and non-zero tool results.
+4. Validate that stdout is the correct JSON shape for the selected event and
+   that stderr/exit 2 is used only where appropriate.
+5. Configure the hook in one source per config layer.
+6. Start Codex and use /hooks in the CLI to inspect, review, trust, or disable
+   the hook.
+7. Test both trusted and untrusted project behavior for repo-local hooks.
+8. Test from a repository subdirectory to verify Git-root resolution.
+9. On Windows, test the commandWindows/command_windows override explicitly.
+10. Test multiple matching hooks together; never assume ordering.
 
-Ensure hooks output valid JSON:
+## Common mistakes
 
-```bash
-output=$(./your-hook.sh < test-input.json)
-echo "$output" | jq .
-```
+- Copying Claude Code examples that use type: "prompt"; those handlers are
+  skipped by current Codex.
+- Using the old Claude permissionDecision: "ask" behavior; Codex does not
+  support it for PreToolUse.
+- Putting events directly at the top level of hooks.json; use the required
+  top-level hooks wrapper.
+- Assuming a project-local hook runs before it is reviewed and trusted.
+- Assuming a higher-precedence source disables lower-precedence hooks.
+- Returning plain text from Stop or SubagentStop.
+- Returning unsupported fields such as continue from PreToolUse or updatedInput
+  from PermissionRequest.
+- Expecting PostToolUse to undo a completed operation.
+- Using a relative repo path when Codex can start from a subdirectory.
+- Returning huge additionalContext or sensitive output that may spill to disk.
+- Relying on async, which is parsed but not supported yet.
+- Treating a tool hook as coverage for hosted tools such as web search.
 
-## Quick Reference
+## Quick reference
 
-### Hook Events Summary
+### Minimal PreToolUse JSON
 
-| Event | When | Use For |
-|-------|------|---------|
-| PreToolUse | Before tool | Validation, modification |
-| PostToolUse | After tool | Feedback, logging |
-| UserPromptSubmit | User input | Context, validation |
-| Stop | Agent stopping | Completeness check |
-| SubagentStop | Subagent done | Task validation |
-| SessionStart | Session begins | Context loading |
-| SessionEnd | Session ends | Cleanup, logging |
-| PreCompact | Before compact | Preserve context |
-| Notification | User notified | Logging, reactions |
+    {
+      "hooks": {
+        "PreToolUse": [
+          {
+            "matcher": "^Bash$",
+            "hooks": [
+              {
+                "type": "command",
+                "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/pre_tool_use.py\"",
+                "timeout": 30
+              }
+            ]
+          }
+        ]
+      }
+    }
 
-### Best Practices
+### Decision summary
 
-**DO:**
-- ✅ Use prompt-based hooks for complex logic
-- ✅ Use ${CLAUDE_PLUGIN_ROOT} for portability
-- ✅ Validate all inputs in command hooks
-- ✅ Quote all bash variables
-- ✅ Set appropriate timeouts
-- ✅ Return structured JSON output
-- ✅ Test hooks thoroughly
+| Event | Allow/continue | Block/stop/feedback |
+|---|---|---|
+| PreToolUse | Empty stdout or permissionDecision: "allow" | permissionDecision: "deny", legacy decision: "block", or exit 2 |
+| PermissionRequest | decision.behavior: "allow" | decision.behavior: "deny" |
+| PostToolUse | Empty stdout | decision: "block", continue: false, or exit 2; cannot undo side effects |
+| UserPromptSubmit | Empty stdout or additional context | decision: "block" or exit 2 |
+| Stop | Empty stdout | decision: "block" creates a continuation prompt; continue: false takes precedence |
+| SubagentStop | Empty stdout | decision: "block" requests continuation; continue: false takes precedence |
+| PreCompact | Empty stdout | continue: false stops compaction |
 
-**DON'T:**
-- ❌ Use hardcoded paths
-- ❌ Trust user input without validation
-- ❌ Create long-running hooks
-- ❌ Rely on hook execution order
-- ❌ Modify global state unpredictably
-- ❌ Log sensitive information
+### Official references
 
-## Additional Resources
-
-### Reference Files
-
-For detailed patterns and advanced techniques, consult:
-
-- **`references/patterns.md`** - Common hook patterns (8+ proven patterns)
-- **`references/migration.md`** - Migrating from basic to advanced hooks
-- **`references/advanced.md`** - Advanced use cases and techniques
-
-### Example Hook Scripts
-
-Working examples in `examples/`:
-
-- **`validate-write.sh`** - File write validation example
-- **`validate-bash.sh`** - Bash command validation example
-- **`load-context.sh`** - SessionStart context loading example
-
-### Utility Scripts
-
-Development tools in `scripts/`:
-
-- **`validate-hook-schema.sh`** - Validate hooks.json structure and syntax
-- **`test-hook.sh`** - Test hooks with sample input before deployment
-- **`hook-linter.sh`** - Check hook scripts for common issues and best practices
-
-### External Resources
-
-- **Official Docs**: https://docs.claude.com/en/docs/claude-code/hooks
-- **Examples**: See security-guidance plugin in marketplace
-- **Testing**: Use `claude --debug` for detailed logs
-- **Validation**: Use `jq` to validate hook JSON output
-
-## Implementation Workflow
-
-To implement hooks in a plugin:
-
-1. Identify events to hook into (PreToolUse, Stop, SessionStart, etc.)
-2. Decide between prompt-based (flexible) or command (deterministic) hooks
-3. Write hook configuration in `hooks/hooks.json`
-4. For command hooks, create hook scripts
-5. Use ${CLAUDE_PLUGIN_ROOT} for all file references
-6. Validate configuration with `scripts/validate-hook-schema.sh hooks/hooks.json`
-7. Test hooks with `scripts/test-hook.sh` before deployment
-8. Test in Claude Code with `claude --debug`
-9. Document hooks in plugin README
-
-Focus on prompt-based hooks for most use cases. Reserve command hooks for performance-critical or deterministic checks.
+- Codex Hooks reference: https://learn.chatgpt.com/docs/hooks.md
+- Codex hook schemas: https://github.com/openai/codex/tree/main/codex-rs/hooks/schema/generated
+- Codex plugin lifecycle hooks: https://developers.openai.com/plugins/build/plugins#bundled-mcp-servers-and-lifecycle-hooks

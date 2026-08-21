@@ -7,7 +7,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    maxWorkers: 1,
+    pool: 'forks',
+    maxWorkers: 4,
+    watch: false,
+    testTimeout: 15_000,
     setupFiles: ['./vitest.setup.ts'],
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',

@@ -52,7 +52,7 @@ Para componentes, a leitura normativa continua em [09-component-decision-model](
 ```text
 Plataforma: web desktop, mínimo 1024px
 Tema: claro e levemente quente
-Canvas: #F5F3EE
+Canvas: #FCFAF7
 Primary: #2746B3
 Fonte: Plus Jakarta Sans
 Spacing base: 4px

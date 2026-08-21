@@ -2,6 +2,8 @@
 
 Bem-vindo à documentação oficial do **NutriDiet Local Pro**, o aplicativo local de elaboração, adequação, cópia/cola e escala de dietas clínicas e esportivas para nutricionistas, construído em **Next.js (App Router)** com TypeScript e Tailwind CSS.
 
+**Escopo de plataforma:** o projeto será desenvolvido exclusivamente para visualização e uso em desktop, a partir de `1024px`. Mobile e tablet estão fora do escopo.
+
 ---
 
 ## ⚡ Comandos de Desenvolvimento

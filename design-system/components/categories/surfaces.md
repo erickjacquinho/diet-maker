@@ -4,7 +4,7 @@ Category ID: `surfaces`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-surfaces`  
 Allowed traits: `interactive-surface`  
-Current consumers: `ui-card`, `ui-scroll-area`, `ui-separator`
+Current consumers: `ui-card`, `atom-surface`, `ui-scroll-area`, `ui-separator`, `molecule-metric-box`, `molecule-macro-metric-card`, `molecule-recipe-card`, `molecule-meal-item-row`, `organism-metric-box-group`, `organism-macro-tracker-header`, `organism-meal-card-container`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 
@@ -90,7 +90,7 @@ Shadow em card/página; radius maior que `radius-surface`; border acima de 1px; 
 
 ## Current examples
 
-`ui-card` expõe partes compostas; `ui-scroll-area` contém overflow; `ui-separator` divide grupos sem aumentar contraste.
+`ui-card` expõe partes compostas; `atom-surface` centraliza o container visual de produto; `ui-scroll-area` contém overflow; `ui-separator` divide grupos sem aumentar contraste.
 
 ## Category acceptance
 

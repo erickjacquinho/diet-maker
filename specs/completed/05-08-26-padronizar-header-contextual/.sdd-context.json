@@ -1,0 +1,6 @@
+{
+  "task": "Padronizar o header contextual de navegacao para fluxos hierarquicos. Instalar o componente Shadcn Breadcrumb. Criar a molecula PageContextHeader com link de voltar, Breadcrumb, titulo e slot opcional de actions. Mapear e documentar todas as paginas que abrem sequencialmente a partir de outra pagina. Aplicar inicialmente em /pacientes/[id], /pacientes/[id]/dieta/[dietaId] e /pacientes/[id]/consulta/[date], mantendo o cadastro de alimento como modal fora do escopo enquanto nao houver rota propria. Documentar o intuito e as regras de inclusao em paginas futuras. Usar nomes dinamicos de paciente nos breadcrumbs, por exemplo Pacientes > Joao > Dieta. Produzir SDD completo para os passos de instalacao, mapeamento, documentacao e criacao do componente; encerrar antes da implementacao.",
+  "slug": "padronizar-header-contextual",
+  "feature_dir": "specs/05-08-26-padronizar-header-contextual",
+  "date": "2026-08-05"
+}

@@ -1,16 +1,17 @@
 :root {
   --ref-color-warm-0: #ffffff;
-  --ref-color-warm-25: #faf8f4;
-  --ref-color-warm-50: #f5f3ee;
-  --ref-color-warm-100: #f0ede6;
-  --ref-color-warm-150: #ece8e1;
-  --ref-color-warm-200: #e4e0d8;
-  --ref-color-warm-300: #cbc5ba;
-  --ref-color-warm-500: #9fa39f;
-  --ref-color-warm-600: #858a84;
-  --ref-color-warm-700: #686f69;
-  --ref-color-warm-800: #5e645f;
-  --ref-color-warm-950: #1c211f;
+  --ref-color-warm-15: #fcfaf7;
+  --ref-color-warm-25: #f8f6f2;
+  --ref-color-warm-50: #f3f0ea;
+  --ref-color-warm-100: #ece8e0;
+  --ref-color-warm-150: #e3ded5;
+  --ref-color-warm-200: #d6d0c5;
+  --ref-color-warm-300: #b8b1a5;
+  --ref-color-warm-500: #948d81;
+  --ref-color-warm-600: #7a7369;
+  --ref-color-warm-700: #615b53;
+  --ref-color-warm-800: #4b463f;
+  --ref-color-warm-950: #201c18;
   --ref-color-blue-50: #e9edff;
   --ref-color-blue-100: #c8d2ff;
   --ref-color-blue-500: #4a64d8;
@@ -59,10 +60,11 @@
   --ref-duration-160: 160ms;
   --ref-duration-240: 240ms;
 
-  --sys-color-canvas: var(--ref-color-warm-50);
+  --sys-color-canvas: var(--ref-color-warm-15);
   --sys-color-surface: var(--ref-color-warm-0);
   --sys-color-surface-subtle: var(--ref-color-warm-25);
-  --sys-color-surface-hover: var(--ref-color-warm-100);
+  --sys-color-surface-soft: var(--ref-color-warm-100);
+  --sys-color-surface-hover: var(--ref-color-warm-15);
   --sys-color-border-divider: var(--ref-color-warm-150);
   --sys-color-border-subtle: var(--ref-color-warm-200);
   --sys-color-border-hover: var(--ref-color-warm-300);
@@ -104,6 +106,9 @@
   --sys-color-macro-fat: var(--ref-color-fat-500);
   --sys-color-macro-fat-soft: var(--ref-color-fat-50);
   --sys-color-macro-fat-border: var(--ref-color-fat-200);
+  --sys-color-macro-kcal: var(--sys-color-action-primary);
+  --sys-color-macro-kcal-soft: var(--sys-color-action-primary-soft);
+  --sys-color-macro-kcal-border: var(--sys-color-action-primary-border);
   --sys-space-component: var(--ref-space-4);
   --sys-radius-compact: var(--ref-radius-4);
   --sys-radius-control: var(--ref-radius-6);
@@ -114,16 +119,31 @@
   --sys-motion-slow: var(--ref-duration-240);
   --sys-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --sys-ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --sys-shadow-floating: 0 4px 12px rgb(28 33 31 / 10%);
-  --sys-shadow-overlay: 0 8px 24px rgb(28 33 31 / 12%);
-  --sys-backdrop-overlay: rgb(28 33 31 / 32%);
+  --sys-shadow-floating: 0 4px 12px rgb(32 28 24 / 10%);
+  --sys-shadow-overlay: 0 8px 24px rgb(32 28 24 / 12%);
+  --sys-backdrop-overlay: rgb(32 28 24 / 32%);
   --sys-opacity-disabled: 0.48;
 
   --cmp-button-primary-background: var(--sys-color-action-primary);
   --cmp-button-primary-background-hover: var(--sys-color-action-primary-hover);
   --cmp-button-primary-background-pressed: var(--sys-color-action-primary-pressed);
+  --cmp-button-secondary-background-hover: var(--sys-color-surface-hover);
+  --cmp-button-secondary-border-hover: var(--sys-color-border-hover);
   --cmp-input-border-default: var(--sys-color-border-control-essential);
   --cmp-card-padding-default: var(--ref-space-4);
+  --cmp-card-background-hover: var(--sys-color-surface-hover);
+  --cmp-card-details-surface: var(--sys-color-surface-soft);
+  --cmp-sidebar-width-expanded: 224px;
+  --cmp-sidebar-width-collapsed: 64px;
+  --cmp-sidebar-background: var(--sys-color-surface);
+  --cmp-sidebar-foreground: var(--sys-color-text-secondary);
+  --cmp-sidebar-primary: var(--sys-color-action-primary);
+  --cmp-sidebar-primary-foreground: var(--sys-color-on-primary);
+  --cmp-sidebar-primary-soft: var(--sys-color-action-primary-soft);
+  --cmp-sidebar-accent: var(--sys-color-surface-hover);
+  --cmp-sidebar-accent-foreground: var(--sys-color-text-primary);
+  --cmp-sidebar-border: var(--sys-color-border-divider);
+  --cmp-sidebar-ring: var(--sys-color-action-primary-focus);
 
   --background: var(--sys-color-canvas);
   --foreground: var(--sys-color-text-primary);
@@ -135,7 +155,7 @@
   --primary-foreground: var(--sys-color-on-primary);
   --secondary: var(--sys-color-surface-subtle);
   --secondary-foreground: var(--sys-color-text-primary);
-  --muted: var(--sys-color-surface-hover);
+  --muted: var(--sys-color-surface-soft);
   --muted-foreground: var(--sys-color-text-muted);
   --accent: var(--sys-color-action-primary-soft);
   --accent-foreground: var(--sys-color-action-primary);

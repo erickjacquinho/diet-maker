@@ -22,7 +22,7 @@ Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). Tr
 
 ## Specific anatomy
 
-Root `RecipeCard` e exports visuais registrados: `RecipeCard`. Base declarada: `ui-card`.
+Root `RecipeCard` e exports visuais registrados: `RecipeCard`. Base declarada: `atom-surface`; o resumo de macros interno continua tratamento de data-display e não cria card aninhado.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Base declarada: `ui-card`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. O resumo de macros interno é uma exceção de tratamento de dados, não uma segunda superfície de card. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -42,7 +42,8 @@ Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui 
 
 ## Exceptions
 
-Nenhuma exceção aprovada.
+`inner-macro-summary-data-display`: o resumo de macros interno mantém anatomia compacta de data-display e não deve receber `Surface` aninhado; sua exceção é protegida por teste de consumidor.
+ExceptionRecord: inner-macro-summary-data-display reviewAt: 2026-09-30 owner: design-system-maintainers
 
 ## Consumers
 

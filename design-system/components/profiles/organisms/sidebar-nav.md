@@ -10,7 +10,7 @@
 | Current layer | `organism` |
 | Target layer | `organism` |
 | Sources | `src/components/organisms/SidebarNav.tsx` |
-| Public exports | `useSidebarContext` (hook), `SidebarNavProps` (type), `SidebarBrandProps` (type), `SidebarNavItemProps` (type), `SidebarUserProfileProps` (type), `SidebarQuickActionsProps` (type), `SidebarNavComponent` (compound-part), `SidebarNav` (component) |
+| Public exports | `SidebarContextValue` (type), `useSidebarContext` (hook), `SidebarNavProps` (type), `SidebarNavComponent` (compound-part), `SidebarNav` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed.
+Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed. O organismo recebe `pathname` e `navigationItems` explicitamente; a configuração flat das seis rotas de produção pertence ao adapter da aplicação. Grupos só aparecem quando fornecidos por `navigationItems`.
 
 ## Allowed variants
 
@@ -34,11 +34,15 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+The organism owns the collapse context through `ui-sidebar` and composes the four sidebar molecules through their public prop contracts; it no longer defines or reexports their implementations. Future grouped navigation uses `ui-collapsible` in expanded mode and the existing `ui-popover` in collapsed mode.
+
+Primitive base: `ui-sidebar`. Compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
 Labels nomeiam destinos; estado current é programático; collapsed conserva nome completo.
+
+`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSave`, `onOpen`, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
 
 ## Exceptions
 
@@ -58,5 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `organism`; perfil homologado documentalmente. Homologação não declara a estilização atual conforme.
+Implementado em `organism`; perfil homologado documentalmente. A migração estrutural está implementada; a conformidade visual final depende da aceitação manual desktop e não é declarada por este perfil.
 

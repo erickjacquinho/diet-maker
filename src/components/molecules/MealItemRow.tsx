@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { Trash2, GripVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Badge, FieldTrigger, IconButton, Surface } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export interface MealItemRowProps {
   id?: string;
@@ -44,36 +45,34 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   };
 
   return (
-    <div className="group/row flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-control p-3">
+    <Surface variant="subtle" density="compact" className="group/row flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Button
-          type="button"
+        <IconButton
+          variant="quiet"
           onMouseDown={() => setIsActivated(true)}
           onMouseUp={() => setIsActivated(false)}
           onTouchStart={() => setIsActivated(true)}
           onTouchEnd={() => setIsActivated(false)}
           onClick={() => setIsActivated((prev) => !prev)}
           aria-label={`Reordenar ${name}`}
-          className={`p-1 rounded-control cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary ${
-            isActive
-              ? 'opacity-full text-success bg-success/10 ring-1 ring-success/30'
-              : 'invisible group-hover/row:visible'
-          }`}
           title="Reordenar alimento"
+          className={cn(
+            'h-7 w-7 p-0 cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary',
+            isActive
+              ? 'opacity-full text-success bg-success-soft ring-1 ring-success'
+              : 'invisible group-hover/row:visible'
+          )}
         >
           <GripVertical size={14} />
-        </Button>
+        </IconButton>
 
         <div>
           <div className="text-style-legal font-bold text-text-primary">{name}</div>
-          <div className="text-style-legal text-text-secondary mt-0.5 flex items-center gap-1.5">
-            <span className="text-macro-protein font-bold">P: {protein}g</span>
-            <span className="text-text-muted font-normal">•</span>
-            <span className="text-warning font-bold">C: {carbs}g</span>
-            <span className="text-text-muted font-normal">•</span>
-            <span className="text-info font-bold">G: {fats}g</span>
-            <span className="text-text-muted font-normal">•</span>
-            <span>{kcal} kcal</span>
+          <div className="mt-1 flex items-center gap-1 flex-wrap">
+            <Badge variant="protein" className="px-1.5 py-0 font-bold text-style-legal">P: {protein}g</Badge>
+            <Badge variant="carbohydrate" className="px-1.5 py-0 font-bold text-style-legal">C: {carbs}g</Badge>
+            <Badge variant="fat" className="px-1.5 py-0 font-bold text-style-legal">G: {fats}g</Badge>
+            <Badge variant="default" className="px-1.5 py-0 font-bold text-style-legal text-text-muted">{kcal} kcal</Badge>
           </div>
         </div>
       </div>
@@ -85,41 +84,42 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               type="number"
               min={1}
               max={5000}
+              size="compact"
               value={tempGrams}
               onChange={(e) => setTempGrams(Number(e.target.value))}
               onBlur={handleSaveGrams}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSaveGrams();
               }}
-              className="w-16 h-7 px-1 text-center bg-surface border border-success rounded-surface text-style-legal font-bold text-text-primary focus:outline-none"
+              className="w-16 px-1 text-center text-style-field-value font-bold"
               autoFocus
             />
             <span className="text-style-legal font-bold text-text-muted">g</span>
           </div>
         ) : (
-          <Button
-            type="button"
+          <FieldTrigger
+            size="compact"
             onClick={() => {
               setTempGrams(quantityGrams);
               setIsEditingGrams(true);
             }}
-            className="bg-surface border border-border-hover hover:border-success rounded-control px-2.5 py-1 text-style-legal font-bold text-text-primary transition-colors duration-standard"
+            className="w-auto px-2.5 font-bold text-style-legal"
             title="Clique para editar gramatura"
           >
             {quantityGrams} <span className="text-text-muted font-normal">g</span>
-          </Button>
+          </FieldTrigger>
         )}
 
-        <Button
-          variant="ghost"
-          size="icon"
+        <IconButton
+          variant="quiet"
           onClick={onRemove}
           aria-label={`Remover ${name}`}
           className="text-text-muted hover:text-error h-7 w-7 p-0"
         >
           <Trash2 size={14} />
-        </Button>
+        </IconButton>
       </div>
-    </div>
+    </Surface>
   );
 };
+

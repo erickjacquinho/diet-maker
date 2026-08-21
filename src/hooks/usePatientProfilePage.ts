@@ -1,0 +1,235 @@
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import {
+  getPatientById,
+  updatePatientInStorage,
+  deletePatientFromStorage,
+  getPatientAssessmentsFromStorage,
+  savePatientAssessmentToStorage,
+  Patient,
+  PatientNextEvent,
+  BodyAssessment,
+  DEFAULT_OBJECTIVES,
+  HistoricalDiet,
+  getPatientDietsFromStorage,
+} from '@/lib/patientsStore';
+import {
+  buildNextEventSummary,
+  selectActivePlan,
+  selectLatestAssessment,
+  buildPatientDietHistory,
+} from '@/lib/patientProfileSelectors';
+import { getWhatsappUrl } from '@/lib/whatsapp';
+
+export function usePatientProfilePage() {
+  const params = useParams();
+  const router = useRouter();
+  const patientId = params?.id as string;
+  const [patient, setPatient] = useState<Patient | null>(null);
+
+  const [dietHistory, setDietHistory] = useState<HistoricalDiet[]>([]);
+  const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
+
+  // Modals state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
+  const [assessmentMode, setAssessmentMode] = useState<'create' | 'edit'>('edit');
+  const [isNextEventModalOpen, setIsNextEventModalOpen] = useState(false);
+  const [isAddObjectiveModalOpen, setIsAddObjectiveModalOpen] = useState(false);
+  const [objectiveToApply, setObjectiveToApply] = useState<string | undefined>();
+
+  // Read-Only Diet Modal state
+  const [selectedReadOnlyDiet, setSelectedReadOnlyDiet] = useState<HistoricalDiet | null>(null);
+  const [isReadOnlyDietModalOpen, setIsReadOnlyDietModalOpen] = useState(false);
+
+  const handleOpenReadOnlyDietModal = useCallback((diet: HistoricalDiet) => {
+    setSelectedReadOnlyDiet(diet);
+    setIsReadOnlyDietModalOpen(true);
+  }, []);
+
+  const handleOpenEditAssessment = useCallback((assessment: BodyAssessment) => {
+    setEditingAssessment({ ...assessment });
+    setAssessmentMode('edit');
+    setIsEditAssessmentOpen(true);
+  }, []);
+
+  const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
+  const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
+  const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
+  const whatsappContact = patient?.whatsapp ?? patient?.phone;
+  const whatsappUrl = useMemo(() => getWhatsappUrl(whatsappContact), [whatsappContact]);
+
+  const handleOpenCreateAssessment = useCallback(() => {
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+    setEditingAssessment({
+      id: `asm-${Date.now()}`,
+      date: todayStr,
+      weightKg: latestAssessment?.weightKg ?? 70,
+      bodyFatPercent: latestAssessment?.bodyFatPercent ?? 15,
+      muscleMassKg: latestAssessment?.muscleMassKg ?? 30,
+      fatMassKg: latestAssessment?.fatMassKg ?? 10,
+      waistCm: latestAssessment?.waistCm ?? 80,
+      neckCm: latestAssessment?.neckCm ?? 38,
+      scapulaCm: latestAssessment?.scapulaCm ?? 15,
+      bustCm: latestAssessment?.bustCm ?? 95,
+      leftArmCm: latestAssessment?.leftArmCm ?? 30,
+      rightArmCm: latestAssessment?.rightArmCm ?? 30,
+      abdomenCm: latestAssessment?.abdomenCm ?? 82,
+      hipCm: latestAssessment?.hipCm ?? 95,
+      leftProximalThighCm: latestAssessment?.leftProximalThighCm ?? 50,
+      rightProximalThighCm: latestAssessment?.rightProximalThighCm ?? 50,
+      leftDistalThighCm: latestAssessment?.leftDistalThighCm ?? 45,
+      rightDistalThighCm: latestAssessment?.rightDistalThighCm ?? 45,
+      leftCalfCm: latestAssessment?.leftCalfCm ?? 35,
+      rightCalfCm: latestAssessment?.rightCalfCm ?? 35,
+    });
+    setAssessmentMode('create');
+    setIsEditAssessmentOpen(true);
+  }, [latestAssessment]);
+
+  const handleSaveAssessment = useCallback((assessment: BodyAssessment) => {
+    if (editingAssessment && patient) {
+      const updatedAssessments = savePatientAssessmentToStorage(patient.id, assessment);
+      setBodyAssessments(updatedAssessments);
+      setIsEditAssessmentOpen(false);
+      toast.success('Avaliação física atualizada com sucesso!');
+    }
+  }, [editingAssessment, patient]);
+
+  const handleSaveNextEvent = useCallback((nextEvent: PatientNextEvent) => {
+    if (!patient) return;
+    const saved = updatePatientInStorage({
+      ...patient,
+      nextEvent,
+    });
+    setPatient(saved);
+    setIsNextEventModalOpen(false);
+    toast.success('Próximo acompanhamento salvo.');
+  }, [patient]);
+
+  const handleClearNextEvent = useCallback(() => {
+    if (!patient) return;
+    const saved = updatePatientInStorage({ ...patient, nextEvent: null });
+    setPatient(saved);
+    setIsNextEventModalOpen(false);
+    toast.success('Próximo acompanhamento removido.');
+  }, [patient]);
+
+  const [customObjectives, setCustomObjectives] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('diet_maker_custom_objectives');
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const availableObjectives = useMemo(() => {
+    const set = new Set([...DEFAULT_OBJECTIVES, ...customObjectives]);
+    return Array.from(set);
+  }, [customObjectives]);
+
+  const handleAddCustomObjective = useCallback((newObjective: string) => {
+    setCustomObjectives((prev) => {
+      if (prev.includes(newObjective)) return prev;
+      const updated = [...prev, newObjective];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('diet_maker_custom_objectives', JSON.stringify(updated));
+      }
+      return updated;
+    });
+    toast.success('Novo objetivo cadastrado!');
+  }, []);
+
+  useEffect(() => {
+    if (patientId) {
+      const p = getPatientById(patientId);
+      if (p) {
+        if (patientId !== p.id) {
+          router.replace(`/pacientes/${p.id}`);
+        }
+        setPatient(p);
+        const storedDiets = buildPatientDietHistory(getPatientDietsFromStorage(p.id));
+        const mergedDiets = [...storedDiets];
+        if (p.dietHistory) {
+          p.dietHistory.forEach((item) => {
+            if (!mergedDiets.some((existing) => existing.id === item.id)) {
+              mergedDiets.push(item);
+            }
+          });
+        }
+        setDietHistory(mergedDiets);
+
+        const loadedAssessments = getPatientAssessmentsFromStorage(p.id);
+        const mergedAssessments = [...loadedAssessments];
+        if (p.bodyAssessments) {
+          p.bodyAssessments.forEach((item) => {
+            if (!mergedAssessments.some((existing) => existing.id === item.id)) {
+              mergedAssessments.push(item);
+            }
+          });
+        }
+        setBodyAssessments(mergedAssessments);
+      }
+    }
+  }, [patientId, router]);
+
+  const handleSavePatient = useCallback((updatedPatient: Patient) => {
+    const saved = updatePatientInStorage(updatedPatient);
+    setPatient(saved);
+    setIsEditModalOpen(false);
+    toast.success('Dados do paciente atualizados!');
+  }, []);
+
+  const handleDeletePatient = useCallback(() => {
+    if (!patient) return;
+    deletePatientFromStorage(patient.id);
+    toast.success('Paciente excluído com sucesso!');
+    router.push('/pacientes');
+  }, [patient, router]);
+
+  return {
+    patientId,
+    patient,
+    dietHistory,
+    bodyAssessments,
+    activePlan,
+    latestAssessment,
+    nextEventSummary,
+    whatsappUrl,
+    availableObjectives,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isEditAssessmentOpen,
+    setIsEditAssessmentOpen,
+    editingAssessment,
+    assessmentMode,
+    isNextEventModalOpen,
+    setIsNextEventModalOpen,
+    isAddObjectiveModalOpen,
+    setIsAddObjectiveModalOpen,
+    objectiveToApply,
+    setObjectiveToApply,
+    selectedReadOnlyDiet,
+    isReadOnlyDietModalOpen,
+    setIsReadOnlyDietModalOpen,
+    handleOpenReadOnlyDietModal,
+    handleOpenEditAssessment,
+    handleOpenCreateAssessment,
+    handleSaveAssessment,
+    handleSaveNextEvent,
+    handleClearNextEvent,
+    handleAddCustomObjective,
+    handleSavePatient,
+    handleDeletePatient,
+    router,
+  };
+}

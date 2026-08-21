@@ -1,0 +1,6 @@
+{
+  "task": "Adequacao do dialog de criacao e edicao de avaliacao fisica (EditAssessmentModal) com padroes de composicao React vercel-composition-patterns e 100% de conformidade ao Design System",
+  "slug": "adequacao-ds-dialog-avaliacao-fisica",
+  "feature_dir": "specs/07-08-26-adequacao-ds-dialog-avaliacao-fisica",
+  "date": "2026-08-07"
+}

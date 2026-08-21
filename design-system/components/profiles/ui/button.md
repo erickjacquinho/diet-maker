@@ -26,6 +26,10 @@ Root `Button` e exports visuais registrados: `Button`, `buttonVariants`. Sem pri
 
 ## Allowed variants
 
+## Family contract
+
+`Button` is the visual root and `buttonVariants` is its recipe slot. The family owns action state, accessible naming and loading semantics; no child requires root context.
+
 Subconjunto: primary, secondary, quiet e destructive; compact/standard; `asChild` somente quando preserva semântica.
 
 ## Particular states

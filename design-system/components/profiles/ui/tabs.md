@@ -26,6 +26,10 @@ Parts públicas: root, list, trigger e content; cada trigger controla exatamente
 
 ## Allowed variants
 
+## Family contract
+
+`Tabs` provides selection context. `TabsList` is the structural group, `TabsTrigger` is the context-bound trigger and `TabsContent` is the context-bound panel.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

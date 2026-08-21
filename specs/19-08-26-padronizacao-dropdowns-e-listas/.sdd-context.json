@@ -1,0 +1,6 @@
+{
+  "task": "tarefa: padronizar e centralizar todos os dropdowns das telas para um único componente pai para garantir manutenção facilitada. este componente deve ser padronizado para que todos os componentes de lista chamem ele ao invés de criar seu propio dropdown. não deve haver nenhum tipo de lista espalhada nos componentes, nao deve haver hardcode de style em nenhum dos componentes de lista. depois de fazer o levantamento, crie um /sdd de correção",
+  "slug": "padronizacao-dropdowns-e-listas",
+  "feature_dir": "specs/19-08-26-padronizacao-dropdowns-e-listas",
+  "date": "2026-08-19"
+}

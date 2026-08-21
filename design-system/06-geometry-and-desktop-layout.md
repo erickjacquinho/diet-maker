@@ -147,10 +147,10 @@ Toda borda existente possui `1px`.
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `border-divider` | `#ECE8E1` | Separador interno |
-| `border-subtle` | `#E4E0D8` | Card e superfície |
-| `border-hover` | `#CBC5BA` | Hover neutro |
-| `border-control-essential` | `#858A84` | Fronteira que precisa ser reconhecida |
+| `border-divider` | `#E3DED5` | Separador interno |
+| `border-subtle` | `#D6D0C5` | Card e superfície |
+| `border-hover` | `#B8B1A5` | Hover neutro |
+| `border-control-essential` | `#7A7369` | Fronteira que precisa ser reconhecida |
 | `primary-border` | `#C8D2FF` | Contexto primário suave |
 | `error-border` | `#E6B8B2` | Campo em erro com mensagem |
 
@@ -179,12 +179,12 @@ A sidebar não vira drawer. O estado recolhido é uma preferência desktop, não
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `container-page` | máximo `1440px` | Página geral |
-| `container-workflow` | máximo `1200px` | Builder e fluxo operacional |
+| `container-workflow` | máximo `1200px` | **Padrão unificado de 100% das páginas da aplicação** (listas, cadastros, perfis e builders) |
+| `container-page` | máximo `1440px` | Token estendido para visualizações ultra-amplas |
 | `container-form` | máximo `960px` | Formulário concentrado |
 | `container-reading` | máximo `720px` | Texto e configuração simples |
 
-Containers são centralizados quando não ocupam toda a área útil. Tabelas e builders podem usar toda a largura disponível até `container-page`.
+ Containers são centralizados horizontalmente (`mx-auto`) e aplicam o padding padrão de página desktop (`24px 32px` / `py-6 px-8`).
 
 ## 12. Grid
 

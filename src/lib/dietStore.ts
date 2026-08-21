@@ -1,15 +1,38 @@
 'use client';
 
 import { calculatePresetCalories } from './presetUtils';
+import { recordPatientActivity } from './patientsStore';
+import { calculateMealTotals, calculateMealsTotal } from './macroCalculations';
+import { getStorageItem, setStorageItem } from './storage';
+
+export { calculateMealTotals, calculateMealsTotal };
 
 export interface DietItem {
+  id?: string;
   foodId?: string;
   name: string;
   quantityGrams: number;
+  grams?: number;
   protein: number;
   carbs: number;
   fats: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+  fatsG?: number;
   kcal: number;
+}
+
+export function getItemGrams(item: DietItem): number {
+  return item.quantityGrams ?? item.grams ?? 100;
+}
+
+export function getItemMacros(item: DietItem): { protein: number; carbs: number; fats: number; kcal: number } {
+  const protein = item.protein ?? item.proteinG ?? 0;
+  const carbs = item.carbs ?? item.carbsG ?? 0;
+  const fats = item.fats ?? item.fatsG ?? item.fatG ?? 0;
+  const kcal = item.kcal ?? calculatePresetCalories(protein, carbs, fats);
+  return { protein, carbs, fats, kcal };
 }
 
 export interface DietMeal {
@@ -21,7 +44,7 @@ export interface DietMeal {
 
 export interface CarbCyclingVariation {
   id: string;
-  name: string; // Ex: "Dia Alto Carbo", "Dia Médio Carbo", "Dia Baixo Carbo"
+  name: string;
   type: 'high' | 'medium' | 'low';
   targetKcal: number;
   targetProtein: number;
@@ -37,13 +60,11 @@ export interface FullDietPlan {
   createdAt: string;
   updatedAt: string;
   mode: 'simple' | 'carb_cycling';
-  // Simples
   simpleTargetKcal: number;
   simpleTargetProtein: number;
   simpleTargetCarbs: number;
   simpleTargetFats: number;
   simpleMeals: DietMeal[];
-  // Ciclo de Carboidratos
   carbCyclingVariationsCount: 2 | 3;
   carbCyclingVariations: CarbCyclingVariation[];
 }
@@ -55,45 +76,11 @@ export interface MealTotals {
   kcal: number;
 }
 
-export function calculateMealTotals(items: DietItem[]): MealTotals {
-  const proteinG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.protein) || 0), 0) * 10) / 10;
-  const carbsG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.carbs) || 0), 0) * 10) / 10;
-  const fatsG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.fats) || 0), 0) * 10) / 10;
-  const kcal = calculatePresetCalories(proteinG, carbsG, fatsG);
-
-  return { proteinG, carbsG, fatsG, kcal };
-}
-
-export function calculateMealsTotal(meals: DietMeal[]): MealTotals {
-  let proteinG = 0;
-  let carbsG = 0;
-  let fatsG = 0;
-
-  meals.forEach((meal) => {
-    const mealTotals = calculateMealTotals(meal.items);
-    proteinG += mealTotals.proteinG;
-    carbsG += mealTotals.carbsG;
-    fatsG += mealTotals.fatsG;
-  });
-
-  proteinG = Math.round(proteinG * 10) / 10;
-  carbsG = Math.round(carbsG * 10) / 10;
-  fatsG = Math.round(fatsG * 10) / 10;
-  const kcal = calculatePresetCalories(proteinG, carbsG, fatsG);
-
-  return { proteinG, carbsG, fatsG, kcal };
-}
-
-const DIETS_KEY_PREFIX = 'nutridiet_diets_';
+export const DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
 export function getPatientDietsFromStorage(patientId: string): FullDietPlan[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(`${DIETS_KEY_PREFIX}${patientId}`);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
+  const saved = getStorageItem<FullDietPlan[]>(`${DIETS_KEY_PREFIX}${patientId}`, []);
+  return Array.isArray(saved) ? saved : [];
 }
 
 export function getDietFromStorage(patientId: string, dietId: string): FullDietPlan | null {
@@ -110,17 +97,12 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
     updatedAt: new Date().toLocaleDateString('pt-BR'),
   };
 
-  let updatedList: FullDietPlan[];
-  if (existingIndex >= 0) {
-    updatedList = [...current];
-    updatedList[existingIndex] = updatedDiet;
-  } else {
-    updatedList = [updatedDiet, ...current];
-  }
+  const updatedList = existingIndex >= 0
+    ? current.map((d) => (d.id === diet.id ? updatedDiet : d))
+    : [updatedDiet, ...current];
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, JSON.stringify(updatedList));
-  }
+  setStorageItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, updatedList);
+  recordPatientActivity(diet.patientId, 'diet');
 
   return updatedDiet;
 }

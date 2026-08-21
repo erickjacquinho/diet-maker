@@ -1,0 +1,6 @@
+{
+  "task": "Revisar completamente e preparar novamente a especificação e o plano para trocar todas as tabelas consumidoras do app por um componente Shadcn DataTable reutilizável, construído sobre os primitivos de src/components/ui/table, removendo bibliotecas externas de tabela e preservando ordenação, filtros, paginação, ações, navegação, expansão, estados vazio/loading/error e acessibilidade. O escopo conhecido inclui FoodTableSection, PatientListTable e PatientConsultationHistoryTable; manter os primitivos ui limpos e atualizar os artefatos Spec Kit. Não implementar código agora.",
+  "slug": "data-table-shadcn",
+  "feature_dir": "specs/07-08-26-data-table-shadcn",
+  "date": "2026-08-07"
+}

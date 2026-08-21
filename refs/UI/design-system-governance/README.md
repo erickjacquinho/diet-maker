@@ -50,7 +50,7 @@ Leitura mínima para implementação: 02 a 08, 10 a 13. Para criar ou alterar AP
 ```text
 Plataforma: web desktop, mínimo 1024px
 Tema: claro e levemente quente
-Canvas: #F5F3EE
+Canvas: #FAF8F4
 Primary: #2746B3
 Fonte: Plus Jakarta Sans
 Spacing base: 4px

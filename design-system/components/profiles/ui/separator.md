@@ -26,6 +26,10 @@ Root `Separator` e exports visuais registrados: `Separator`. Sem primitive base;
 
 ## Allowed variants
 
+## Family contract
+
+`Separator` is a visual root for a structural divider and owns its orientation and decorative semantics; it has no child parts.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

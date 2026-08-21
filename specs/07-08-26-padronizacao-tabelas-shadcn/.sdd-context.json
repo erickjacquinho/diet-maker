@@ -1,0 +1,6 @@
+{
+  "task": "identifique todas as tabelas do app. quero converter todas em shadcn componente data table. se tiver library de tabela tambem vamos descartar. crie um /sdd dessa correcao",
+  "slug": "padronizacao-tabelas-shadcn",
+  "feature_dir": "specs/07-08-26-padronizacao-tabelas-shadcn",
+  "date": "2026-08-07"
+}

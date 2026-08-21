@@ -24,7 +24,19 @@ Herda integralmente [selection](../../categories/selection.md). Traits autorizad
 
 Parts públicas cobrem root/group/value/trigger/content, label, item, separator e scroll buttons; trigger + content + item formam o mínimo.
 
+## Visual contract
+
+- O `SelectTrigger` usa a receita canônica `recipes.input` em densidade `standard` por padrão, alinhando altura, radius, borda, superfície, foco e tipografia `field-value` aos demais controles de campo.
+- O layout interno reserva o lado direito para o chevron sem alterar a geometria do controle; overrides de consumidor devem respeitar a categoria `selection`.
+- O indicador do item selecionado fica à direita do label, com área reservada por `pr-8`, mantendo a leitura do texto à esquerda.
+- O `SelectContent` usa `surface`, `border-subtle`, `rounded-control`, `shadow-floating`, `p-1` e `z-dropdown` por padrão; `layer="modal"` usa `z-modal` quando o portal pertence conceitualmente a um `Dialog` ou `Sheet`. Não usa `bg-popover`/`text-popover-foreground` legados.
+- Os itens usam `nav-item`, `text-secondary`, `surface-hover` no foco e `primary-soft`/`primary`/`primary-border` quando selecionados; separadores usam `border-divider`.
+
 ## Allowed variants
+
+## Family contract
+
+`Select` provides selection context and keyboard navigation. Group, value, trigger, content, label, item, separator and scroll-button exports are context-bound parts of one selection family.
 
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 

@@ -1,0 +1,6 @@
+{
+  "task": "Refatoração, componentização e limpeza de código usando vercel-composition-patterns para todos os arquivos com mais de 200 linhas",
+  "slug": "refatoracao-arquivos-200-linhas",
+  "feature_dir": "specs/07-08-26-refatoracao-arquivos-200-linhas",
+  "date": "2026-08-07"
+}

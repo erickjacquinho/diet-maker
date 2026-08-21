@@ -4,7 +4,7 @@ import { Avatar } from "@/components/atoms/Avatar";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { IconButton } from "@/components/atoms/IconButton";
-import { Input } from "@/components/atoms/Input";
+import { Input } from "@/components/ui/input";
 import { ProgressBar } from "@/components/atoms/ProgressBar";
 
 describe("atom states", () => {

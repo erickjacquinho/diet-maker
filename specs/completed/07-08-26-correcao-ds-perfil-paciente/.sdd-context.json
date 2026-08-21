@@ -1,0 +1,6 @@
+{
+  "task": "Verificar 100% da pagina /pacientes/perfil, identificar nao conformidades com o Design System e corrigir todas as divergencias visuais, tipograficas, de tokens, componentes e limites arquiteturais",
+  "slug": "correcao-ds-perfil-paciente",
+  "feature_dir": "specs/07-08-26-correcao-ds-perfil-paciente",
+  "date": "2026-08-07"
+}

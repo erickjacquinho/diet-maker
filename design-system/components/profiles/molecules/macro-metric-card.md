@@ -22,7 +22,7 @@ Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). Tr
 
 ## Specific anatomy
 
-Root `MacroMetricCard` e exports visuais registrados: `MacroMetricCard`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `MacroMetricCard` e exports visuais registrados: `MacroMetricCard`. Base declarada: `atom-surface`; badge, progresso, valores e cores permanecem responsabilidade da molécula.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Nutrient protein/carbohydrate/fat e hierarquia compact/standard.
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 

@@ -97,7 +97,7 @@ popover             → surface
 primary             → primary
 primary-foreground  → on-primary
 secondary           → surface-subtle
-muted               → surface-hover
+muted               → surface-soft
 muted-foreground    → text-muted
 destructive         → error
 border              → border-subtle
@@ -389,3 +389,29 @@ npm run type-check                    → 0 erros
 ```
 
 Os números da seção 13 são o snapshot histórico de partida (31/07/2026) e não refletem o estado atual; a referência verificada é esta seção.
+
+### 18.4 Evidência da migração da sidebar (2026-08-06)
+
+A composição foi migrada para `ui-sidebar` e `ui-collapsible`, preservando `SidebarNav` como organism e as quatro partes product-generic como molecules independentes. `SidebarNav` mantém seis rotas flat por default; o contrato de dados aceita grupos futuros sem alterar a topologia de produção. A largura usa os aliases `--cmp-sidebar-width-expanded` (224px) e `--cmp-sidebar-width-collapsed` (64px).
+
+Validações estruturais e de comportamento registradas na implementação:
+
+- `npm run type-check` — aprovado;
+- testes focados de sidebar, submenus, shell e shortcut — aprovados;
+- `npm run verify:design-system` e `npm run audit:atomic-design` — executados após a sincronização do catálogo;
+- aceitação manual desktop — registra rota atual, toggle visível, labels collapsed, ausência de Ctrl/Cmd+B e scroll independente do shell.
+
+Esta seção registra evidência estrutural e de comportamento. Não declara conformidade visual final sem inspeção manual da renderização.
+
+### 18.5 Evidência da regra de superfície reutilizável (2026-08-06)
+
+A migração de superfícies introduziu `Surface` como wrapper atômico product-generic sobre o primitivo Shadcn `Card`. A regra reutilizável está registrada em `design-system/components/categories/surfaces.md`, no perfil `atom-surface` e no `registry.json`; consumidores de métricas, receitas, refeições, organisms e template declaram a composição ou a exceção correspondente.
+
+Validações executadas para a regra:
+
+- `npm run audit:atomic-design` — 72/72 arquivos conformes e 0 violações;
+- `npm run verify:design-system` — 40 fontes atuais cobertas e 0 findings bloqueantes;
+- `npm run verify:design-system-legacy` — 0 findings legados em 91 arquivos;
+- type-check, lint e testes focados de Surface/consumidores aprovados.
+
+A suíte completa permanece uma validação de entrega separada; uma tentativa em 2026-08-06 excedeu o timeout de 300 segundos antes de produzir um resultado terminal.

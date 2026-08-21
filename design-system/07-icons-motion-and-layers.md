@@ -172,6 +172,8 @@ Backdrop:
 | `z-toast` | `80` | Toast |
 | `z-tooltip` | `90` | Tooltip |
 
+Conteúdo renderizado por portal usa a camada semântica da própria família por padrão: dropdown e select usam `z-dropdown`, popover usa `z-popover`, backdrop usa `z-overlay` e dialog/sheet content usa `z-modal`. Quando um select ou popover precisa permanecer interativo dentro de um dialog ou sheet, o consumidor declara explicitamente o contexto `modal`; a proximidade no DOM não altera a camada automaticamente.
+
 Valores locais e `z-[N]` são proibidos.
 
 ## 7. Opacidade

@@ -26,6 +26,10 @@ Parts públicas: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardCont
 
 ## Allowed variants
 
+## Family contract
+
+`Card` owns the generic surface root. `CardHeader`, `CardFooter` and `CardContent` are structural slots; `CardTitle` and `CardDescription` are visual slots. All children remain composition-dependent parts of the same family.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

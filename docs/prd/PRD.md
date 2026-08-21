@@ -17,7 +17,19 @@ Nutricionistas clínicos e esportivos perdem tempo precioso durante e após as c
 ### 1.2 Proposed Solution
 O **NutriDiet Local Pro** é um aplicativo web local (offline-first), ultra-rápido e visualmente intuitivo, desenvolvido para centralizar a criação, adequação, cópia/cola e escala de dietas em ambiente visual. Ele une a base oficial brasileira de alimentos (TACO) a um construtor de refeições com recalculo instantâneo de macronutrientes, controle de metas manuais estritas (g/kg e Kcal), exportação limpa para PDF/WhatsApp e armazenamento local persistente em arquivos `.diet`.
 
-### 1.3 Success Criteria & KPIs
+### 1.3 Platform Scope
+O projeto será desenvolvido exclusivamente para visualização e uso em **desktop**, considerando a faixa oficial a partir de `1024px`.
+
+Não fazem parte do escopo do produto:
+
+- versão mobile;
+- versão tablet;
+- layouts ou componentes específicos para telas estreitas;
+- estratégia mobile-first.
+
+Variações de largura dentro da faixa desktop devem preservar a usabilidade, mas não representam suporte a dispositivos móveis ou tablets.
+
+### 1.4 Success Criteria & KPIs
 - **Velocidade de Prescrição**: Tempo médio de criação/adaptação completa de uma dieta < 5 minutos.
 - **Precisão Nutricional**: 100% de exatidão nos cálculos de calorias, macronutrientes e g/kg baseados na tabela TACO e peso do paciente.
 - **Desempenho da Aplicação**: Carregamento da aplicação e tempo de resposta de busca de alimentos < 100ms.

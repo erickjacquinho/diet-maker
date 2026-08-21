@@ -26,6 +26,10 @@ Root `ScrollArea` e exports visuais registrados: `ScrollArea`, `ScrollBar`. Sem 
 
 ## Allowed variants
 
+## Family contract
+
+`ScrollArea` owns the viewport and overflow behavior. `ScrollBar` is a context-bound visual slot; Radix measurement variables remain structural exceptions owned by this family.
+
 Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
 
 ## Particular states

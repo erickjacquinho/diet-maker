@@ -4,7 +4,7 @@ Category ID: `navigation`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-navigation`  
 Allowed traits: `collapsible`, `identity`, `icon-only`  
-Current consumers: `molecule-sidebar-brand`, `molecule-sidebar-nav-item`, `molecule-sidebar-user-profile`, `organism-sidebar-nav`
+Current consumers: `ui-breadcrumb`, `ui-sidebar`, `ui-collapsible`, `molecule-page-context-header`, `molecule-sidebar-brand`, `molecule-sidebar-nav-item`, `molecule-sidebar-user-profile`, `organism-sidebar-nav`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 
@@ -13,6 +13,8 @@ Normative foundations: [color](../../04-color-system.md), [typography](../../05-
 Orientar o usuário entre destinos e contextos persistentes, deixando localização atual e próximo destino explícitos.
 
 ## Includes
+
+O breadcrumb contextual e o header contextual de fluxos sequenciais pertencem a esta categoria.
 
 Sidebar, itens de rota, marca que retorna ao início, breadcrumbs futuros e perfil que abre navegação de conta.
 
@@ -31,6 +33,8 @@ Obrigatórios: landmark, lista de destinos, item com label e indicação da rota
 ## Geometry
 
 Sidebar expanded usa `sidebar-expanded` (224), collapsed `sidebar-collapsed` (64). Item tem altura 36, padding inline `control-inline`, gap `space-inline`, radius `radius-control`, sem borda por padrão. Grupos usam `space-related`; divisões usam `space-component` e `border-divider` de 1px. Overflow vertical é interno à lista.
+
+Rail usa `border-divider` de 1px; transições de largura, disclosure e surfaces devem respeitar `reduced-motion`. Subitens futuros mantêm a mesma altura de controle de 36px, icon-16 e offset de foco da navegação principal.
 
 ## Typography
 
@@ -75,6 +79,8 @@ Links ativam por Enter e preservam semântica de abrir em nova aba. Tab percorre
 
 Use `nav` com nome, links reais e `aria-current=page`. Ícone é decorativo quando há label. Collapsed conserva accessible name e tooltip. Ordem visual igual à DOM; foco 2px/offset 2; target mínimo 32 e contraste AA.
 
+Controles indisponíveis permanecem visíveis e usam `disabled` nativo com descrição acessível; identidade sem callback não recebe role de botão, cursor ou hover de ação.
+
 ## Composition
 
 Sidebar organiza brand, grupos, quick actions e user profile sem transferir regras visuais entre categorias. Badge não recebe foco. Navigation não define conteúdo principal nem margens de página.
@@ -87,9 +93,25 @@ Expanded trunca labels em uma linha com tooltip quando o nome completo é necess
 
 Usar button para rota; current apenas por cor; largura fora de 224/64; bottom navigation; comportamento mobile; pill radius; sombra no rail; borda acima de 1px; ícones de bibliotecas distintas.
 
+## Sequential route map
+
+| Transition | Contextual destination | Explicit return |
+| --- | --- | --- |
+| `/pacientes` -> `/pacientes/[id]` | `Pacientes > <nome>` | `/pacientes` |
+| `/pacientes/[id]` -> `/pacientes/[id]/dieta/[dietaId]` | `Pacientes > <nome> > Dieta` | `/pacientes/[id]` |
+| `/pacientes/[id]` -> `/pacientes/[id]/consulta/[date]` | `Pacientes > <nome> > Consulta` | `/pacientes/[id]` |
+| consulta -> dieta | `Pacientes > <nome> > Dieta` | `/pacientes/[id]` |
+| dieta -> perfil | `Pacientes > <nome>` | `/pacientes` |
+
+`PageContextHeader` compõe o retorno explícito, o breadcrumb, o `h1` e ações opcionais. `Breadcrumb` continua sendo o primitivo genérico de semântica e composição; ele não conhece pacientes, dietas ou rotas.
+
+## Adoption rule for future pages
+
+Uma nova página recebe o header contextual quando representa um nível sequencial de uma rota pai identificável, possui destino de retorno determinístico e consegue nomear a hierarquia sem expor identificadores técnicos. Modais, como a busca de alimentos dentro da dieta, permanecem fora do padrão porque não criam uma nova página ou transição de rota. Destinos globais independentes acessados pela sidebar também não ganham um botão de voltar contextual apenas por possuírem título ou breadcrumb.
+
 ## Current examples
 
-`organism-sidebar-nav` agrega `sidebar-brand`, `sidebar-nav-item` e `sidebar-user-profile`; quick actions continuam na categoria `actions`.
+`organism-sidebar-nav` agrega `ui-sidebar`, `ui-collapsible`, `sidebar-brand`, `sidebar-nav-item` e `sidebar-user-profile`; quick actions continuam na categoria `actions`. A topologia de produção permanece flat; grupos são contrato futuro fornecido por dados.
 
 ## Category acceptance
 

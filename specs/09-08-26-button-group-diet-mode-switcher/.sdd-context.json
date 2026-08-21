@@ -1,0 +1,6 @@
+{
+  "task": "Substituição dos seletores de modo de dieta e variações de ciclo por Button Groups / Toggle Groups utilizando shadcn com estado selected, preservando comportamento vanilla e design tokens de cores e hover",
+  "slug": "button-group-diet-mode-switcher",
+  "feature_dir": "specs/09-08-26-button-group-diet-mode-switcher",
+  "date": "2026-08-09"
+}

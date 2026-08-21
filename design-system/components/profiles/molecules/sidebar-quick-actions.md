@@ -6,11 +6,11 @@
 | --- | --- |
 | Component ID | `molecule-sidebar-quick-actions` |
 | Nature | `product-generic` |
-| Lifecycle | `migration-required` |
+| Lifecycle | `implemented` |
 | Current layer | `molecule` |
 | Target layer | `molecule` |
 | Sources | `src/components/molecules/SidebarQuickActions.tsx` |
-| Public exports | `SidebarQuickActions` (component) |
+| Public exports | `SidebarQuickActionsProps` (type), `SidebarQuickActions` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [actions](../../categories/actions.md). Traits autorizados: 
 
 ## Specific anatomy
 
-Root `SidebarQuickActions` e exports visuais registrados: `SidebarQuickActions`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `SidebarQuickActions` e exports visuais registrados: `SidebarQuickActions`. Não possui primitive base único; compõe `Button`, `IconButton` e `Tooltip` por seus contratos públicos.
 
 ## Allowed variants
 
@@ -34,7 +34,11 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+The molecule owns the save/open action composition and receives callbacks and collapse state by props. It does not depend on the `SidebarNav` organism; the organism only supplies callbacks and presentation state.
+
+Save and Open remain visible in both densities. A missing callback sets native `disabled` and exposes an `aria-describedby` reason: `A ação Salvar ainda não está disponível nesta tela.` or `A ação Abrir ainda não está disponível nesta tela.`
+
+Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -58,5 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `molecule`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `molecule`; perfil homologado. Os mesmos comandos permanecem disponíveis em expanded e collapsed, com accessible names equivalentes.
 

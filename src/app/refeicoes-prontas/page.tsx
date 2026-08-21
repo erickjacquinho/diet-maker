@@ -1,34 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UtensilsCrossed, Plus, Search, Clock, PlusCircle, Check } from 'lucide-react';
+import { UtensilsCrossed, Search, Clock, PlusCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/molecules/CreateReadyMealModal';
+import { MetricBox } from '@/components/molecules';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AutoKcalSection } from '@/components/molecules/AutoKcalSection';
-import { calculatePresetCalories } from '@/lib/presetUtils';
-
-interface ReadyMeal {
-  id: string;
-  name: string;
-  suggestedTime: string;
-  kcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  itemsCount: number;
-  itemsPreview: string;
-}
-
-const MEALS_KEY = 'nutridiet_ready_meals';
+  type ReadyMeal,
+  getReadyMealsFromStorage,
+  saveReadyMealToStorage,
+} from '@/lib/readyMealsStore';
 
 export default function ReadyMealsPage() {
   const [meals, setMeals] = useState<ReadyMeal[]>([]);
@@ -36,58 +21,15 @@ export default function ReadyMealsPage() {
   const [insertedId, setInsertedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    suggestedTime: '08:00',
-    proteinG: 30,
-    carbsG: 40,
-    fatsG: 12,
-    itemsCount: 3,
-    itemsPreview: '',
-  });
-
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(MEALS_KEY);
-      if (saved) setMeals(JSON.parse(saved));
-    } catch {
-      setMeals([]);
-    }
+    setMeals(getReadyMealsFromStorage());
   }, []);
 
-  const handleCreateMeal = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    const calculatedKcal = calculatePresetCalories(
-      Number(formData.proteinG),
-      Number(formData.carbsG),
-      Number(formData.fatsG)
-    );
-
-    const newMeal: ReadyMeal = {
-      ...formData,
-      kcal: calculatedKcal,
-      id: `meal-block-${Date.now()}`,
-      name: formData.name.trim(),
-      itemsPreview: formData.itemsPreview.trim() || 'Itens cadastrados no bloco',
-    };
-
-    const updated = [newMeal, ...meals];
-    setMeals(updated);
-    localStorage.setItem(MEALS_KEY, JSON.stringify(updated));
+  const handleCreateMeal = (formData: ReadyMealFormData) => {
+    saveReadyMealToStorage(formData);
+    setMeals(getReadyMealsFromStorage());
     setIsModalOpen(false);
-    setFormData({
-      name: '',
-      suggestedTime: '08:00',
-      proteinG: 30,
-      carbsG: 40,
-      fatsG: 12,
-      itemsCount: 3,
-      itemsPreview: '',
-    });
   };
-
 
   const filteredMeals = meals.filter((m) =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,7 +42,7 @@ export default function ReadyMealsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
+    <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
       {/* Header Bar */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
@@ -120,13 +62,13 @@ export default function ReadyMealsPage() {
       {/* Search Input */}
       {meals.length > 0 && (
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted z-10 pointer-events-none" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar refeição pronta por nome ou ingrediente..."
-            className="pl-11 pr-4 bg-surface border-border-subtle text-style-legal"
+            className="pl-11 pr-4"
           />
         </div>
       )}
@@ -173,33 +115,21 @@ export default function ReadyMealsPage() {
 
                 {/* Macro Summary */}
                 <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Kcal</span>
-                    <span className="font-bold text-style-legal text-text-primary">{meal.kcal}</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Prot</span>
-                    <span className="font-bold text-style-legal text-macro-protein">{meal.proteinG}g</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carb</span>
-                    <span className="font-bold text-style-legal text-warning">{meal.carbsG}g</span>
-                  </div>
-                  <div>
-                    <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gord</span>
-                    <span className="font-bold text-style-legal text-success">{meal.fatsG}g</span>
-                  </div>
+                  <MetricBox surface="inline" size="compact" label="Kcal" value={`${meal.kcal}`} />
+                  <MetricBox surface="inline" size="compact" tone="protein" label="Prot" value={`${meal.proteinG}g`} />
+                  <MetricBox surface="inline" size="compact" tone="warning" label="Carb" value={`${meal.carbsG}g`} />
+                  <MetricBox surface="inline" size="compact" tone="success" label="Gord" value={`${meal.fatsG}g`} />
                 </div>
 
                 <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
                   <span className="text-style-legal text-text-muted font-medium">Bloco de 1 clique</span>
                   <Button
-                    size="sm"
-                    variant={insertedId === meal.id ? 'default' : 'primary'}
+                    size="compact"
+                    variant="primary"
                     onClick={() => handleInsert(meal.id)}
                     className={`inline-flex items-center gap-1.5 text-style-legal font-bold transition-colors duration-standard ${
                       insertedId === meal.id
-                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating scale-[1.02]'
+                        ? 'bg-success text-on-success hover:bg-success border-transparent shadow-floating'
                         : ''
                     }`}
                   >
@@ -213,76 +143,11 @@ export default function ReadyMealsPage() {
         </div>
       )}
 
-      {/* Modal Criar Refeição Shadcn Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md bg-surface border-border-subtle p-6 rounded-surface">
-          <DialogHeader className="border-b border-border-subtle pb-3">
-            <DialogTitle className="font-bold text-style-body text-text-primary">Novo Bloco de Refeição</DialogTitle>
-          </DialogHeader>
-
-          <form onSubmit={handleCreateMeal} className="flex flex-col gap-3 pt-2">
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Nome do Bloco de Refeição</label>
-              <Input
-                type="text"
-                required
-                placeholder="Ex: Café da Manhã Proteico Padrão"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal"
-              />
-            </div>
-
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Horário Sugerido</label>
-              <Input
-                type="text"
-                placeholder="08:00"
-                value={formData.suggestedTime}
-                onChange={(e) => setFormData({ ...formData, suggestedTime: e.target.value })}
-                className="bg-surface-subtle border-border-subtle text-style-legal font-bold"
-              />
-            </div>
-
-            <AutoKcalSection
-              title="Macronutrientes & Calorias Calculadas"
-              proteinG={formData.proteinG}
-              carbsG={formData.carbsG}
-              fatsG={formData.fatsG}
-              onProteinChange={(val) => setFormData({ ...formData, proteinG: val })}
-              onCarbsChange={(val) => setFormData({ ...formData, carbsG: val })}
-              onFatsChange={(val) => setFormData({ ...formData, fatsG: val })}
-            />
-
-            <div>
-              <label className="text-style-legal font-bold text-text-primary block mb-1">Alimentos Incluídos (Resumo)</label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Ovo cozido (150g), Aveia em flocos (40g), Banana (100g)"
-                value={formData.itemsPreview}
-                onChange={(e) => setFormData({ ...formData, itemsPreview: e.target.value })}
-                className="w-full px-3 py-2 bg-surface-subtle border border-border-subtle rounded-control text-style-legal text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              />
-            </div>
-
-            <div className="pt-2 flex gap-2">
-              <Button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                variant="secondary"
-                size="sm"
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" size="sm" className="flex-1">
-                Salvar Refeição
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreateReadyMealModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSave={handleCreateMeal}
+      />
     </div>
   );
 }
-

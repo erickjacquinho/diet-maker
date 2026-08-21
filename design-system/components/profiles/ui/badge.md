@@ -26,6 +26,10 @@ Root `Badge` e exports visuais registrados: `Badge`, `badgeVariants`. Sem primit
 
 ## Allowed variants
 
+## Family contract
+
+`Badge` is the visual root. It owns its semantic status recipe; there are no context-dependent children.
+
 Neutral/info/success/warning/error e macro apenas quando o consumidor declara a semântica.
 
 ## Particular states

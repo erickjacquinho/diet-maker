@@ -34,7 +34,7 @@ Empty conserva header e action de adicionar; updating preserva itens anteriores.
 
 ## Composition
 
-Base declarada: `ui-card`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compõe `Surface` e `MealItemRow`; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -42,7 +42,7 @@ Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui 
 
 ## Exceptions
 
-Nenhuma exceção aprovada.
+O shadow flutuante anterior foi removido do card em fluxo conforme a categoria `surfaces`; overlays continuam com seus próprios primitives.
 
 ## Consumers
 

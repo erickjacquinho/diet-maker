@@ -1,0 +1,6 @@
+{
+  "task": "Adequar 100% das inconsistencias, tokens, acessibilidade, comps, telas, sem valores hardcoded e sem codigo morto",
+  "slug": "padronizacao-e-correcoes-gerais",
+  "feature_dir": "specs/19-08-26-padronizacao-e-correcoes-gerais",
+  "date": "2026-08-19"
+}

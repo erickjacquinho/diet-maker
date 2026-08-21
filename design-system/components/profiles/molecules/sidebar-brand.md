@@ -6,11 +6,11 @@
 | --- | --- |
 | Component ID | `molecule-sidebar-brand` |
 | Nature | `product-generic` |
-| Lifecycle | `migration-required` |
+| Lifecycle | `implemented` |
 | Current layer | `molecule` |
 | Target layer | `molecule` |
 | Sources | `src/components/molecules/SidebarBrand.tsx` |
-| Public exports | `SidebarBrand` (component) |
+| Public exports | `SidebarBrandProps` (type), `SidebarBrand` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Root `SidebarBrand` e exports visuais registrados: `SidebarBrand`. Sem primitive base; compõe somente dependências permitidas pela layer.
+Root `SidebarBrand` e exports visuais registrados: `SidebarBrand`. Não possui primitive base único; compõe `Avatar`, `IconButton`, `Tooltip` e `Link` por seus contratos públicos.
 
 ## Allowed variants
 
@@ -34,7 +34,11 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+The molecule owns its props contract and can be consumed without importing `SidebarNav`; the organism passes collapse state and the toggle callback downward. It remains responsible only for product identity and the visible collapse action.
+
+Expanded uses `subsection-title`/`caption`; collapsed keeps the full `NutriDiet Pro Local` accessible name on the home link. The collapse action uses the standard control size and icon-16 in both states.
+
+Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -58,5 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `molecule`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `molecule`; perfil homologado. A composição do organismo e o estado collapsed são recebidos por props, sem importar o organismo.
 

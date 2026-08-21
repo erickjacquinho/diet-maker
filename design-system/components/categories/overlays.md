@@ -85,7 +85,7 @@ Title é curto e único. Body rola quando excede viewport; header/footer permane
 
 ## Forbidden decisions
 
-Reimplementar foco/portal fora do primitivo; modal sem title; backdrop blur; fechar erro destrutivo por backdrop; tooltip interativo; nesting modal; shadow em conteúdo não flutuante; `transition-all`, scale ou bounce; z-index local.
+Reimplementar foco/portal fora do primitivo; modal sem title; backdrop blur; fechar erro destrutivo por backdrop; tooltip interativo; nesting modal; shadow em conteúdo não flutuante; `transition-all`, scale ou bounce; z-index numérico ou arbitrário local fora dos tokens canônicos.
 
 ## Current examples
 

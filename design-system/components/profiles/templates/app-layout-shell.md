@@ -24,6 +24,8 @@ Herda integralmente [structure](../../categories/structure.md). Traits autorizad
 
 Root grid com slot `sidebar` e landmark `main`; somente main controla o fluxo da página.
 
+The required props are `sidebar: ReactNode` and `children: ReactNode`. The shell exposes the pt-BR skip link `Pular para o conteúdo principal` targeting `main#main-content`; main is `tabIndex={-1}` and owns the independent desktop scroll.
+
 ## Allowed variants
 
 Expanded-nav e collapsed-nav.
