@@ -10,7 +10,7 @@ import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModa
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { Spinner } from '@/components/ui/spinner';
 import { MealCardContainerProps } from '@/components/organisms';
-import { calculateMealsTotal } from '@/lib/dietStore';
+import { calculateMealsTotal, saveDietToStorage } from '@/lib/dietStore';
 
 export default function DietBuilderPage() {
   const {
@@ -32,8 +32,13 @@ export default function DietBuilderPage() {
     setCopySourceId,
     copyTargetId,
     setCopyTargetId,
+    isCycleMatrixOpen,
+    setIsCycleMatrixOpen,
+    handleSaveCycleMatrix,
     isAdjustGoalsModalOpen,
     setIsAdjustGoalsModalOpen,
+    tempVariationName,
+    setTempVariationName,
     tempTargetProt,
     setTempTargetProt,
     tempTargetCarb,
@@ -47,6 +52,9 @@ export default function DietBuilderPage() {
     macroMetrics,
     handleModeChange,
     handleVariationsCountChange,
+    handleAddVariation,
+    handleRemoveVariation,
+    handleReorderVariations,
     handleSaveDiet,
     handleAddMeal,
     handleDuplicateMeal,
@@ -60,6 +68,7 @@ export default function DietBuilderPage() {
     handleSaveAdjustedGoals,
     openAdjustGoalsModal,
     openWhatsAppModal,
+    router,
   } = useDietBuilderPage();
 
   const mealsData: MealCardContainerProps[] = useMemo(() => {
@@ -104,7 +113,7 @@ export default function DietBuilderPage() {
 
   if (!dietPlan || !patient) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-96">
         <Spinner className="size-8 text-success" />
       </div>
     );
@@ -129,12 +138,24 @@ export default function DietBuilderPage() {
         dietModeProps={{
           mode: dietPlan.mode,
           onModeChange: handleModeChange,
-          variationsCount: (dietPlan.carbCyclingVariationsCount as 2 | 3) || 2,
+          variationsCount: (dietPlan.carbCyclingVariationsCount as 2 | 3) || dietPlan.carbCyclingVariations?.length || 3,
           onVariationsCountChange: handleVariationsCountChange,
           variations: dietPlan.carbCyclingVariations || [],
           activeVariationId: activeVariationId,
           onSelectVariation: setActiveVariationId,
           onCopyMealsBetweenVariations: () => setIsCopyModalOpen(true),
+          onOpenCycleMatrix: () => {
+            if (dietPlan) {
+              saveDietToStorage({
+                ...dietPlan,
+                id: dietaId,
+                patientId,
+              });
+            }
+            router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
+          },
+          onAddVariation: handleAddVariation,
+          onReorderVariations: handleReorderVariations,
         }}
         macroTrackerData={{
           patientInitials: patient.initials,
@@ -146,6 +167,7 @@ export default function DietBuilderPage() {
         mealsData={mealsData}
         onAddMeal={handleAddMeal}
         onScaleDiet={() => setIsScaleModalOpen(true)}
+        onOpenAdjustGoalsModal={openAdjustGoalsModal}
         onWhatsAppShare={openWhatsAppModal}
         onSaveDiet={handleSaveDiet}
       />
@@ -179,7 +201,7 @@ export default function DietBuilderPage() {
         onCopy={handleCopyVariation}
       />
 
-      {/* Modal de Edição de Metas */}
+      {/* Modal de Edição de Metas da Variação Ativa */}
       <AdjustDietGoalsModal
         isOpen={isAdjustGoalsModalOpen}
         onClose={() => setIsAdjustGoalsModalOpen(false)}
@@ -189,6 +211,9 @@ export default function DietBuilderPage() {
         setTempTargetCarb={setTempTargetCarb}
         tempTargetFat={tempTargetFat}
         setTempTargetFat={setTempTargetFat}
+        patientWeightKg={patient.weightKg || 70}
+        variationName={tempVariationName}
+        onVariationNameChange={setTempVariationName}
         onSave={handleSaveAdjustedGoals}
       />
 

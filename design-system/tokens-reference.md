@@ -12,9 +12,9 @@
 - `ref.color.warm.100`: `#ECE8E0` (Surface soft)
 - `ref.color.warm.150`: `#E3DED5` (Border divider)
 - `ref.color.warm.200`: `#D6D0C5` (Border subtle)
-- `ref.color.warm.300`: `#B8B1A5` (Border hover)
+- `ref.color.warm.300`: `#B8B1A5` (Border hover / Border control essential)
 - `ref.color.warm.500`: `#948D81` (Disabled)
-- `ref.color.warm.600`: `#7A7369` (Border control essential)
+- `ref.color.warm.600`: `#7A7369`
 - `ref.color.warm.700`: `#615B53` (Text muted)
 - `ref.color.warm.800`: `#4B463F` (Text secondary)
 - `ref.color.warm.950`: `#201C18` (Text primary)

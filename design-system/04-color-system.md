@@ -45,7 +45,7 @@ Todos os passos compartilham o mesmo hue quente (~40°): a rampa é um único of
 | `border-divider` | `#E3DED5` | Separadores internos |
 | `border-subtle` | `#D6D0C5` | Bordas padrão de superfícies |
 | `border-hover` | `#B8B1A5` | Hover neutro |
-| `border-control-essential` | `#7A7369` | Fronteira acessível de controles |
+| `border-control-essential` | `#B8B1A5` | Fronteira acessível de controles |
 | `text-primary` | `#201C18` | Títulos, valores e texto principal |
 | `text-secondary` | `#4B463F` | Texto de leitura secundário |
 | `text-muted` | `#615B53` | Metadados e legendas |

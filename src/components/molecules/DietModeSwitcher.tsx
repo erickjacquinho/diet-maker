@@ -10,12 +10,15 @@ import { cn } from '@/lib/utils';
 export interface DietModeSwitcherProps {
   mode: 'simple' | 'carb_cycling';
   onModeChange: (mode: 'simple' | 'carb_cycling') => void;
-  variationsCount: 2 | 3;
-  onVariationsCountChange: (count: 2 | 3) => void;
+  variationsCount?: 2 | 3 | number;
+  onVariationsCountChange?: (count: 2 | 3) => void;
   variations: CarbCyclingVariation[];
   activeVariationId: string;
   onSelectVariation: (id: string) => void;
   onCopyMealsBetweenVariations?: () => void;
+  onOpenCycleMatrix?: () => void;
+  onAddVariation?: () => void;
+  onReorderVariations?: (newVariations: CarbCyclingVariation[]) => void;
   embedded?: boolean;
   modeOnly?: boolean;
 }
@@ -29,6 +32,9 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   activeVariationId,
   onSelectVariation,
   onCopyMealsBetweenVariations,
+  onOpenCycleMatrix,
+  onAddVariation,
+  onReorderVariations,
   embedded = false,
   modeOnly = false,
 }) => {
@@ -44,7 +50,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
       <div className={cn('flex flex-col gap-2', embedded ? 'items-end text-right' : 'items-start')}>
         <div>
           <h3 className="font-bold text-style-body-small text-text-primary tracking-overline flex items-center gap-2">
-            <Repeat size={16} className="text-success" aria-hidden="true" />
+            <Repeat size={16} className="text-primary" aria-hidden="true" />
             <span>{embedded ? 'Modelo de dieta' : 'Modelo de Dieta Prescrita'}</span>
           </h3>
           {!embedded && (
@@ -95,6 +101,9 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           activeVariationId={activeVariationId}
           onSelectVariation={onSelectVariation}
           onCopyMealsBetweenVariations={onCopyMealsBetweenVariations}
+          onOpenCycleMatrix={onOpenCycleMatrix}
+          onAddVariation={onAddVariation}
+          onReorderVariations={onReorderVariations}
         />
       )}
     </div>

@@ -42,14 +42,31 @@ export interface DietMeal {
   items: DietItem[];
 }
 
+export type CarbCyclingDayType = 'high' | 'medium' | 'low' | 'zero' | 'custom';
+export type DayOfWeek = 'seg' | 'ter' | 'qua' | 'qui' | 'sex' | 'sab' | 'dom';
+
+export const DAYS_OF_WEEK: { id: DayOfWeek; label: string; shortLabel: string }[] = [
+  { id: 'seg', label: 'Segunda-feira', shortLabel: 'Seg' },
+  { id: 'ter', label: 'Terça-feira', shortLabel: 'Ter' },
+  { id: 'qua', label: 'Quarta-feira', shortLabel: 'Qua' },
+  { id: 'qui', label: 'Quinta-feira', shortLabel: 'Qui' },
+  { id: 'sex', label: 'Sexta-feira', shortLabel: 'Sex' },
+  { id: 'sab', label: 'Sábado', shortLabel: 'Sáb' },
+  { id: 'dom', label: 'Domingo', shortLabel: 'Dom' },
+];
+
 export interface CarbCyclingVariation {
   id: string;
   name: string;
-  type: 'high' | 'medium' | 'low';
+  type: CarbCyclingDayType;
+  customBadge?: string;
+  assignedDays?: DayOfWeek[];
   targetKcal: number;
   targetProtein: number;
   targetCarbs: number;
   targetFats: number;
+  inputMode?: 'grams' | 'g_per_kg' | 'percentage' | 'delta_base';
+  gPerKg?: { protein: number; carbs: number; fats: number };
   meals: DietMeal[];
 }
 
@@ -65,7 +82,7 @@ export interface FullDietPlan {
   simpleTargetCarbs: number;
   simpleTargetFats: number;
   simpleMeals: DietMeal[];
-  carbCyclingVariationsCount: 2 | 3;
+  carbCyclingVariationsCount?: 2 | 3 | number;
   carbCyclingVariations: CarbCyclingVariation[];
 }
 
@@ -74,6 +91,55 @@ export interface MealTotals {
   carbsG: number;
   fatsG: number;
   kcal: number;
+}
+
+export function calculateWeeklyCycleAverage(variations: CarbCyclingVariation[]): {
+  avgKcal: number;
+  avgProtein: number;
+  avgCarbs: number;
+  avgFats: number;
+  daysAssignedCount: number;
+} {
+  let totalKcal = 0;
+  let totalProt = 0;
+  let totalCarb = 0;
+  let totalFat = 0;
+  let daysCount = 0;
+
+  variations.forEach((v) => {
+    const days = v.assignedDays || [];
+    const count = days.length;
+    daysCount += count;
+    totalKcal += v.targetKcal * count;
+    totalProt += v.targetProtein * count;
+    totalCarb += v.targetCarbs * count;
+    totalFat += v.targetFats * count;
+  });
+
+  const divisor = daysCount > 0 ? daysCount : variations.length || 1;
+
+  if (daysCount === 0) {
+    // If no days are assigned, calculate simple average across variations
+    const sumKcal = variations.reduce((acc, v) => acc + v.targetKcal, 0);
+    const sumProt = variations.reduce((acc, v) => acc + v.targetProtein, 0);
+    const sumCarb = variations.reduce((acc, v) => acc + v.targetCarbs, 0);
+    const sumFat = variations.reduce((acc, v) => acc + v.targetFats, 0);
+    return {
+      avgKcal: Math.round(sumKcal / divisor),
+      avgProtein: Math.round(sumProt / divisor),
+      avgCarbs: Math.round(sumCarb / divisor),
+      avgFats: Math.round(sumFat / divisor),
+      daysAssignedCount: 0,
+    };
+  }
+
+  return {
+    avgKcal: Math.round(totalKcal / divisor),
+    avgProtein: Math.round(totalProt / divisor),
+    avgCarbs: Math.round(totalCarb / divisor),
+    avgFats: Math.round(totalFat / divisor),
+    daysAssignedCount: daysCount,
+  };
 }
 
 export const DIETS_KEY_PREFIX = 'nutridiet_diets_';
@@ -103,6 +169,10 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
 
   setStorageItem(`${DIETS_KEY_PREFIX}${diet.patientId}`, updatedList);
   recordPatientActivity(diet.patientId, 'diet');
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('nutridiet-diet-sync', { detail: { patientId: diet.patientId, dietId: diet.id } }));
+  }
 
   return updatedDiet;
 }
@@ -146,30 +216,51 @@ export function createInitialDietPlan(patientId: string, patientTargets?: {
         id: 'var-high',
         name: 'Dia Alto Carbo',
         type: 'high',
+        assignedDays: ['seg', 'qua', 'sex'],
         targetKcal: highKcal,
         targetProtein: baseProt,
         targetCarbs: defaultHighCarb,
         targetFats: baseFat,
+        inputMode: 'grams',
+        gPerKg: {
+          protein: Number((baseProt / weight).toFixed(1)),
+          carbs: Number((defaultHighCarb / weight).toFixed(1)),
+          fats: Number((baseFat / weight).toFixed(1)),
+        },
         meals: [],
       },
       {
         id: 'var-med',
         name: 'Dia Médio Carbo',
         type: 'medium',
+        assignedDays: ['ter', 'qui'],
         targetKcal: medKcal,
         targetProtein: baseProt,
         targetCarbs: defaultMedCarb,
         targetFats: baseFat,
+        inputMode: 'grams',
+        gPerKg: {
+          protein: Number((baseProt / weight).toFixed(1)),
+          carbs: Number((defaultMedCarb / weight).toFixed(1)),
+          fats: Number((baseFat / weight).toFixed(1)),
+        },
         meals: [],
       },
       {
         id: 'var-low',
         name: 'Dia Baixo Carbo',
         type: 'low',
+        assignedDays: ['sab', 'dom'],
         targetKcal: lowKcal,
         targetProtein: baseProt,
         targetCarbs: defaultLowCarb,
         targetFats: baseFat,
+        inputMode: 'grams',
+        gPerKg: {
+          protein: Number((baseProt / weight).toFixed(1)),
+          carbs: Number((defaultLowCarb / weight).toFixed(1)),
+          fats: Number((baseFat / weight).toFixed(1)),
+        },
         meals: [],
       },
     ],

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
-import { FullDietPlan, DietMeal } from '@/lib/dietStore';
+import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/dietStore';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { toast } from 'sonner';
 
@@ -35,7 +35,10 @@ export function useDietBuilderModals({
   const [copySourceId, setCopySourceId] = useState<string>('var-high');
   const [copyTargetId, setCopyTargetId] = useState<string>('var-low');
 
+  const [isCycleMatrixOpen, setIsCycleMatrixOpen] = useState(false);
+
   const [isAdjustGoalsModalOpen, setIsAdjustGoalsModalOpen] = useState(false);
+  const [tempVariationName, setTempVariationName] = useState<string>('');
   const [tempTargetProt, setTempTargetProt] = useState<number>(160);
   const [tempTargetCarb, setTempTargetCarb] = useState<number>(240);
   const [tempTargetFat, setTempTargetFat] = useState<number>(65);
@@ -112,6 +115,7 @@ export function useDietBuilderModals({
             v.id === activeVariationId
               ? {
                   ...v,
+                  name: tempVariationName.trim() || v.name,
                   targetKcal,
                   targetProtein: tempTargetProt,
                   targetCarbs: tempTargetCarb,
@@ -124,14 +128,29 @@ export function useDietBuilderModals({
     });
     toast.success('Metas de macronutrientes atualizadas!');
     setIsAdjustGoalsModalOpen(false);
-  }, [dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, activeVariationId, setDietPlan]);
+  }, [dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, tempVariationName, activeVariationId, setDietPlan]);
 
   const openAdjustGoalsModal = useCallback(() => {
     setTempTargetProt(targetProt);
     setTempTargetCarb(targetCarb);
     setTempTargetFat(targetFat);
+    if (dietPlan?.mode === 'carb_cycling') {
+      const activeVar = dietPlan.carbCyclingVariations.find((v) => v.id === activeVariationId);
+      setTempVariationName(activeVar?.name || '');
+    }
     setIsAdjustGoalsModalOpen(true);
-  }, [targetProt, targetCarb, targetFat]);
+  }, [targetProt, targetCarb, targetFat, dietPlan, activeVariationId]);
+
+  const handleSaveCycleMatrix = useCallback((updatedVariations: CarbCyclingVariation[]) => {
+    setDietPlan((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        carbCyclingVariationsCount: updatedVariations.length,
+        carbCyclingVariations: updatedVariations,
+      };
+    });
+  }, [setDietPlan]);
 
   const openWhatsAppModal = useCallback(() => {
     if (!patient || !dietPlan) return;
@@ -162,8 +181,13 @@ export function useDietBuilderModals({
     setCopySourceId,
     copyTargetId,
     setCopyTargetId,
+    isCycleMatrixOpen,
+    setIsCycleMatrixOpen,
+    handleSaveCycleMatrix,
     isAdjustGoalsModalOpen,
     setIsAdjustGoalsModalOpen,
+    tempVariationName,
+    setTempVariationName,
     tempTargetProt,
     setTempTargetProt,
     tempTargetCarb,

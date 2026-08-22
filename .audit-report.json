@@ -1,11 +1,30 @@
 {
-  "timestamp": "2026-08-21T05:58:03.405Z",
+  "timestamp": "2026-08-21T06:43:28.095Z",
   "summary": {
-    "totalFilesScanned": 127,
-    "compliantFiles": 127,
-    "nonCompliantFiles": 0,
-    "totalViolations": 0,
-    "complianceScorePercentage": 100
+    "totalFilesScanned": 128,
+    "compliantFiles": 126,
+    "nonCompliantFiles": 2,
+    "totalViolations": 2,
+    "complianceScorePercentage": 98.44
   },
-  "violations": []
+  "violations": [
+    {
+      "file": "src/components/molecules/CarbCyclingVariationPanel.tsx",
+      "line": 182,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 488,
+      "column": 27,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    }
+  ]
 }

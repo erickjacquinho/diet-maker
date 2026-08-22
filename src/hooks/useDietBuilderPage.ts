@@ -4,7 +4,9 @@ import { getPatientById, Patient } from '@/lib/patientsStore';
 import {
   DietMeal,
   saveDietToStorage,
+  CarbCyclingVariation,
 } from '@/lib/dietStore';
+import { calculatePresetCalories } from '@/lib/presetUtils';
 import { toast } from 'sonner';
 import { useDietCalculations } from './useDietCalculations';
 import { useDietBuilderModals } from './useDietBuilderModals';
@@ -61,7 +63,7 @@ export function useDietBuilderPage() {
         }
       });
     },
-    [activeVariationId]
+    [activeVariationId, setDietPlan]
   );
 
   // Modals hook
@@ -86,14 +88,75 @@ export function useDietBuilderPage() {
 
   const handleModeChange = useCallback((newMode: 'simple' | 'carb_cycling') => {
     setDietPlan((prev) => (prev ? { ...prev, mode: newMode } : prev));
-  }, []);
+  }, [setDietPlan]);
 
   const handleVariationsCountChange = useCallback((newCount: 2 | 3) => {
     setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariationsCount: newCount } : prev));
     if (newCount === 2 && activeVariationId === 'var-med') {
       setActiveVariationId('var-high');
     }
-  }, [activeVariationId]);
+  }, [activeVariationId, setDietPlan]);
+
+  const handleAddVariation = useCallback(() => {
+    setDietPlan((prev) => {
+      if (!prev) return prev;
+      const weight = patient?.weightKg || 70;
+      const nextIdx = prev.carbCyclingVariations.length + 1;
+      const defaultProt = Math.round(weight * 2.0);
+      const defaultCarb = Math.round(weight * 2.5);
+      const defaultFat = Math.round(weight * 0.8);
+      const kcal = calculatePresetCalories(defaultProt, defaultCarb, defaultFat);
+
+      const newVar: CarbCyclingVariation = {
+        id: `var-custom-${Date.now()}`,
+        name: `Variação ${nextIdx}`,
+        type: 'custom',
+        assignedDays: [],
+        targetKcal: kcal,
+        targetProtein: defaultProt,
+        targetCarbs: defaultCarb,
+        targetFats: defaultFat,
+        inputMode: 'grams',
+        gPerKg: {
+          protein: Number((defaultProt / weight).toFixed(1)),
+          carbs: Number((defaultCarb / weight).toFixed(1)),
+          fats: Number((defaultFat / weight).toFixed(1)),
+        },
+        meals: [],
+      };
+
+      return {
+        ...prev,
+        carbCyclingVariationsCount: prev.carbCyclingVariations.length + 1,
+        carbCyclingVariations: [...prev.carbCyclingVariations, newVar],
+      };
+    });
+    toast.success('Nova variação adicionada ao ciclo!');
+  }, [patient, setDietPlan]);
+
+  const handleRemoveVariation = useCallback((varId: string) => {
+    setDietPlan((prev) => {
+      if (!prev) return prev;
+      if (prev.carbCyclingVariations.length <= 1) {
+        toast.error('O plano precisa ter pelo menos 1 variação.');
+        return prev;
+      }
+      const filtered = prev.carbCyclingVariations.filter((v) => v.id !== varId);
+      if (activeVariationId === varId && filtered[0]) {
+        setActiveVariationId(filtered[0].id);
+      }
+      return {
+        ...prev,
+        carbCyclingVariationsCount: filtered.length,
+        carbCyclingVariations: filtered,
+      };
+    });
+    toast.success('Variação removida.');
+  }, [activeVariationId, setDietPlan]);
+
+  const handleReorderVariations = useCallback((newVariations: CarbCyclingVariation[]) => {
+    setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariations: newVariations } : prev));
+  }, [setDietPlan]);
 
   const handleSaveDiet = useCallback(() => {
     if (!dietPlan) return;
@@ -120,6 +183,9 @@ export function useDietBuilderPage() {
     macroMetrics,
     handleModeChange,
     handleVariationsCountChange,
+    handleAddVariation,
+    handleRemoveVariation,
+    handleReorderVariations,
     handleSaveDiet,
     router,
   };

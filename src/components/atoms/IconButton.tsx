@@ -6,6 +6,7 @@ export type IconButtonProps = Omit<ButtonProps, 'iconOnly'> & {
   'aria-label'?: string;
   title?: string;
   icon?: React.ReactNode;
+  size?: 'compact' | 'standard';
   ref?: React.Ref<HTMLButtonElement>;
 }
 
@@ -19,6 +20,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   'aria-label': ariaLabel,
   title,
   variant = 'quiet',
+  size = 'standard',
   ref,
   ...props
 }) => {
@@ -30,7 +32,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     <Button
       ref={ref}
       variant={variant}
-      size="standard"
+      size={size}
       iconOnly
       aria-label={label}
       title={title || ariaLabel}

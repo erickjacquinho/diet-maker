@@ -68,7 +68,7 @@
   --sys-color-border-divider: var(--ref-color-warm-150);
   --sys-color-border-subtle: var(--ref-color-warm-200);
   --sys-color-border-hover: var(--ref-color-warm-300);
-  --sys-color-border-control-essential: var(--ref-color-warm-600);
+  --sys-color-border-control-essential: var(--ref-color-warm-300);
   --sys-color-text-primary: var(--ref-color-warm-950);
   --sys-color-text-secondary: var(--ref-color-warm-800);
   --sys-color-text-muted: var(--ref-color-warm-700);
