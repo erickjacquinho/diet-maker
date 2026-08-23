@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { Layers, Scale, Utensils } from 'lucide-react';
 import { textStyle } from '@/design-system';
+import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
 import {
   buildConsolidatedConsultations,
   type ConsolidatedConsultation,
+  type TimelineFilter,
 } from '@/lib/patientProfileConsultations';
 import {
   ConsultationHistoryExpandedRow,
@@ -33,31 +36,31 @@ const columns: DataTableColumnDef<ConsolidatedConsultation>[] = [
   {
     id: 'date',
     header: 'Data / Consulta',
-    headerClassName: 'px-4 py-3',
+    headerClassName: 'px-4 py-3 min-w-[140px]',
     cell: () => null,
   },
   {
     id: 'record-type',
-    header: 'Tipo de Registro',
-    headerClassName: 'px-4 py-3',
+    header: 'Tipo de Atendimento',
+    headerClassName: 'px-4 py-3 min-w-[150px]',
     cell: () => null,
   },
   {
     id: 'diet',
-    header: 'Dados Dietéticos',
-    headerClassName: 'px-4 py-3',
+    header: 'Prescrição Dietética',
+    headerClassName: 'px-4 py-3 min-w-[260px]',
     cell: () => null,
   },
   {
     id: 'assessment',
-    header: 'Valores Corporais',
-    headerClassName: 'px-4 py-3',
+    header: 'Avaliação Antropométrica',
+    headerClassName: 'px-4 py-3 min-w-[200px]',
     cell: () => null,
   },
   {
     id: 'actions',
-    header: 'Ação / Detalhes',
-    headerClassName: 'px-4 py-3 text-right',
+    header: 'Ações & Detalhes',
+    headerClassName: 'px-4 py-3 text-right min-w-[170px]',
     cell: () => null,
   },
 ];
@@ -70,6 +73,7 @@ export function PatientConsultationHistoryTable({
   onOpenReadOnlyDiet,
   onOpenEditAssessment,
 }: PatientConsultationHistoryTableProps) {
+  const [filter, setFilter] = useState<TimelineFilter>('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
   // Fallback to extract from updates if direct diets/assessments arrays are not passed
@@ -95,9 +99,22 @@ export function PatientConsultationHistoryTable({
     return extracted;
   }, [assessments, updates]);
 
-  const consultations = useMemo(() => {
+  const allConsultations = useMemo(() => {
     return buildConsolidatedConsultations(resolvedDiets, resolvedAssessments);
   }, [resolvedDiets, resolvedAssessments]);
+
+  const totalDiets = resolvedDiets.length;
+  const totalAssessments = resolvedAssessments.length;
+  const totalAll = allConsultations.length;
+
+  const filteredConsultations = useMemo(() => {
+    return allConsultations.filter((c) => {
+      if (filter === 'all') return true;
+      if (filter === 'assessments') return c.hasAssessment;
+      if (filter === 'diets') return c.hasDiet;
+      return true;
+    });
+  }, [allConsultations, filter]);
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
@@ -107,17 +124,98 @@ export function PatientConsultationHistoryTable({
     <section
       role="region"
       aria-label="Histórico de consultas"
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-4 w-full"
     >
-      {consultations.length === 0 ? (
-        <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-6 text-center">
+      {/* Barra de Filtros Rápidos (Abas) no topo da Tabela */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-divider pb-3">
+        <div
+          role="tablist"
+          aria-label="Filtrar histórico por tipo de atendimento"
+          className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-subtle/60 p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === 'all'}
+            onClick={() => setFilter('all')}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+              filter === 'all'
+                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Layers size={13} aria-hidden="true" />
+            <span>Todas as Consultas</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+            >
+              {totalAll}
+            </Badge>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === 'assessments'}
+            onClick={() => setFilter('assessments')}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+              filter === 'assessments'
+                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Scale size={13} aria-hidden="true" />
+            <span>Avaliações Físicas</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+            >
+              {totalAssessments}
+            </Badge>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === 'diets'}
+            onClick={() => setFilter('diets')}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+              filter === 'diets'
+                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Utensils size={13} aria-hidden="true" />
+            <span>Prescrições Dietéticas</span>
+            <Badge
+              variant="secondary"
+              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+            >
+              {totalDiets}
+            </Badge>
+          </button>
+        </div>
+
+        <span className={textStyle('caption')}>
+          {filteredConsultations.length === 1 ? '1 registro exibido' : `${filteredConsultations.length} registros exibidos`}
+        </span>
+      </div>
+
+      {/* Visualização em Tabela */}
+      {filteredConsultations.length === 0 ? (
+        <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
           <p className={textStyle('body-secondary')}>
-            Nenhum histórico registrado para este paciente até o momento.
+            {totalAll === 0
+              ? 'Nenhum histórico registrado para este paciente até o momento.'
+              : filter === 'assessments'
+              ? 'Nenhuma avaliação física registrada para este paciente.'
+              : 'Nenhuma prescrição dietética registrada para este paciente.'}
           </p>
         </div>
       ) : (
         <DataTable
-          data={consultations}
+          data={filteredConsultations}
           columns={columns}
           getRowId={(consultation) => consultation.id}
           caption="Histórico de consultas por data"
@@ -144,12 +242,13 @@ export function PatientConsultationHistoryTable({
               onOpenReadOnlyDiet={onOpenReadOnlyDiet}
             />
           )}
-          className="border border-border-subtle rounded-surface overflow-hidden"
+          className="border border-border-subtle rounded-surface overflow-hidden shadow-xs"
           tableClassName="table-fixed"
         />
       )}
     </section>
   );
 }
+
 
 

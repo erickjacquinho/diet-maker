@@ -118,6 +118,58 @@ describe('PatientDetailPage history', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expandir consulta' }));
     expect(screen.getByText('79 kg')).toBeInTheDocument();
   });
+
+  it('filters table rows when switching tabs (Todas as Consultas, Avaliações Físicas, Prescrições Dietéticas)', async () => {
+    localStorage.setItem(
+      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'asm-1',
+          date: '04/08/2026',
+          weightKg: 80,
+          bodyFatPercent: 15,
+          muscleMassKg: 35,
+          waistCm: 80,
+        },
+      ]),
+    );
+    localStorage.setItem(
+      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'diet-1',
+          name: 'Plano cutting agosto',
+          updatedAt: '2026-08-01',
+          date: '01/08/2026',
+          simpleTargetKcal: 2020,
+          simpleTargetProtein: 150,
+          simpleTargetCarbs: 220,
+          simpleTargetFats: 60,
+        },
+      ]),
+    );
+
+    render(<PatientDetailPage />);
+
+    const allTab = await screen.findByRole('tab', { name: /Todas as Consultas/ });
+    const asmTab = screen.getByRole('tab', { name: /Avaliações Físicas/ });
+    const dietTab = screen.getByRole('tab', { name: /Prescrições Dietéticas/ });
+
+    expect(allTab).toBeInTheDocument();
+    expect(screen.getByText('04/08/2026')).toBeInTheDocument();
+    expect(screen.getByText('01/08/2026')).toBeInTheDocument();
+
+    // Filtrar apenas avaliações físicas
+    fireEvent.click(asmTab);
+    expect(screen.getByText('04/08/2026')).toBeInTheDocument();
+    expect(screen.queryByText('01/08/2026')).not.toBeInTheDocument();
+
+    // Filtrar apenas prescrições dietéticas
+    fireEvent.click(dietTab);
+    expect(screen.getByText('01/08/2026')).toBeInTheDocument();
+    expect(screen.queryByText('04/08/2026')).not.toBeInTheDocument();
+  });
 });
+
 
 
