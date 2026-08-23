@@ -1,11 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { FileSpreadsheet } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 import { textStyle } from '@/design-system';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
-import { ConsultationHistoryExpandedRow, ConsultationHistoryRow } from './patient/ConsultationHistoryRow';
+import {
+  buildConsolidatedConsultations,
+  type ConsolidatedConsultation,
+} from '@/lib/patientProfileConsultations';
+import {
+  ConsultationHistoryExpandedRow,
+  ConsultationHistoryRow,
+} from './patient/ConsultationHistoryRow';
 
 export interface ConsolidatedConsultationUpdate {
   id?: string;
@@ -16,12 +22,14 @@ export interface ConsolidatedConsultationUpdate {
 
 export interface PatientConsultationHistoryTableProps {
   patientId: string;
-  updates: ConsolidatedConsultationUpdate[];
+  diets?: HistoricalDiet[];
+  assessments?: BodyAssessment[];
+  updates?: ConsolidatedConsultationUpdate[];
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
-  onOpenEditAssessment: (assessment: BodyAssessment) => void;
+  onOpenEditAssessment?: (assessment: BodyAssessment) => void;
 }
 
-const columns: DataTableColumnDef<ConsolidatedConsultationUpdate>[] = [
+const columns: DataTableColumnDef<ConsolidatedConsultation>[] = [
   {
     id: 'date',
     header: 'Data / Consulta',
@@ -56,11 +64,40 @@ const columns: DataTableColumnDef<ConsolidatedConsultationUpdate>[] = [
 
 export function PatientConsultationHistoryTable({
   patientId,
-  updates,
+  diets = [],
+  assessments = [],
+  updates = [],
   onOpenReadOnlyDiet,
   onOpenEditAssessment,
 }: PatientConsultationHistoryTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  // Fallback to extract from updates if direct diets/assessments arrays are not passed
+  const resolvedDiets = useMemo(() => {
+    if (diets.length > 0) return diets;
+    const extracted: HistoricalDiet[] = [];
+    updates.forEach((u) => {
+      if (u.diet && !extracted.some((d) => d.id === u.diet!.id)) {
+        extracted.push(u.diet);
+      }
+    });
+    return extracted;
+  }, [diets, updates]);
+
+  const resolvedAssessments = useMemo(() => {
+    if (assessments.length > 0) return assessments;
+    const extracted: BodyAssessment[] = [];
+    updates.forEach((u) => {
+      if (u.assessment && !extracted.some((a) => a.id === u.assessment!.id)) {
+        extracted.push(u.assessment);
+      }
+    });
+    return extracted;
+  }, [assessments, updates]);
+
+  const consultations = useMemo(() => {
+    return buildConsolidatedConsultations(resolvedDiets, resolvedAssessments);
+  }, [resolvedDiets, resolvedAssessments]);
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
@@ -72,7 +109,7 @@ export function PatientConsultationHistoryTable({
       aria-label="Histórico de consultas"
       className="flex flex-col gap-4"
     >
-      {updates.length === 0 ? (
+      {consultations.length === 0 ? (
         <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-6 text-center">
           <p className={textStyle('body-secondary')}>
             Nenhum histórico registrado para este paciente até o momento.
@@ -80,19 +117,19 @@ export function PatientConsultationHistoryTable({
         </div>
       ) : (
         <DataTable
-          data={updates}
+          data={consultations}
           columns={columns}
-          getRowId={(update) => update.id ?? update.date}
+          getRowId={(consultation) => consultation.id}
           caption="Histórico de consultas por data"
           ariaLabel="Histórico de consultas por data"
           emptyMessage="Nenhum histórico registrado para este paciente até o momento."
           expandedRowId={expandedRowId}
-          renderRow={(update) => {
-            const rowId = update.id ?? update.date;
+          renderRow={(consultation) => {
+            const rowId = consultation.id;
             return (
               <ConsultationHistoryRow
                 patientId={patientId}
-                update={update}
+                consultation={consultation}
                 isExpanded={expandedRowId === rowId}
                 onToggleExpand={() => toggleRowExpansion(rowId)}
                 onOpenReadOnlyDiet={onOpenReadOnlyDiet}
@@ -100,12 +137,11 @@ export function PatientConsultationHistoryTable({
               />
             );
           }}
-          renderExpandedRow={(update) => (
+          renderExpandedRow={(consultation) => (
             <ConsultationHistoryExpandedRow
               patientId={patientId}
-              update={update}
+              consultation={consultation}
               onOpenReadOnlyDiet={onOpenReadOnlyDiet}
-              onOpenEditAssessment={onOpenEditAssessment}
             />
           )}
           className="border border-border-subtle rounded-surface overflow-hidden"
@@ -115,3 +151,5 @@ export function PatientConsultationHistoryTable({
     </section>
   );
 }
+
+

@@ -41,7 +41,7 @@ describe('PatientDetailPage history', () => {
     );
   });
 
-  it('preserves dated diet and assessment details in the expandable history', async () => {
+  it('preserves dated diet and assessment details in the expandable table with chevron', async () => {
     localStorage.setItem(
       `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
       JSON.stringify([PATIENT_PROFILE_ASSESSMENTS[1]]),
@@ -68,17 +68,22 @@ describe('PatientDetailPage history', () => {
     expect(screen.getByText('Dieta')).toBeInTheDocument();
     expect(screen.getByText('Avaliação Física')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expandir consulta' }));
+    const expandBtn = screen.getByRole('button', { name: 'Expandir consulta' });
+    expect(expandBtn).toBeInTheDocument();
+    fireEvent.click(expandBtn);
 
     expect(screen.getAllByText('Plano cutting agosto')).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Ver Dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver Consulta' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ver Cardápio' })).toBeInTheDocument();
     expect(screen.getByText('Avaliação Física & Valores')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Recolher consulta' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Ver Dieta' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver Cardápio' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
-  it('renders both assessment rows when multiple assessments exist on the same date', async () => {
+
+  it('consolidates multiple assessments on the same date into a single row and shows both in expanded panel', async () => {
     localStorage.setItem(
       `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
       JSON.stringify([
@@ -105,8 +110,14 @@ describe('PatientDetailPage history', () => {
 
     const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
     expect(table).toBeInTheDocument();
-    expect(screen.getByText('2 consultas')).toBeInTheDocument();
+    expect(screen.getByText('1 consulta')).toBeInTheDocument();
+    expect(screen.getByText('2 Avaliações')).toBeInTheDocument();
+    expect(screen.getByText('+1 medição')).toBeInTheDocument();
     expect(screen.getByText('80 kg')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expandir consulta' }));
     expect(screen.getByText('79 kg')).toBeInTheDocument();
   });
 });
+
+

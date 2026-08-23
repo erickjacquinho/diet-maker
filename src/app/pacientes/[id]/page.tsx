@@ -14,7 +14,7 @@ import { PageContextHeader } from '@/components/molecules';
 import { textStyle } from '@/design-system';
 import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
-import { buildPatientProfileConsultations } from '@/lib/patientProfileConsultations';
+import { buildConsolidatedConsultations } from '@/lib/patientProfileConsultations';
 
 export default function PatientDetailPage() {
   const {
@@ -54,7 +54,7 @@ export default function PatientDetailPage() {
     handleDeletePatient,
   } = usePatientProfilePage();
 
-  const consultationUpdates = buildPatientProfileConsultations(dietHistory, bodyAssessments);
+  const consultations = buildConsolidatedConsultations(dietHistory, bodyAssessments);
 
   if (!patient) {
     return (
@@ -138,7 +138,7 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {consultationUpdates.length === 1 ? '1 consulta' : `${consultationUpdates.length} consultas`}
+              {consultations.length === 1 ? '1 consulta' : `${consultations.length} consultas`}
             </span>
             <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
               <SecondaryActionButton icon={<Scale size={14} />}>
@@ -153,7 +153,8 @@ export default function PatientDetailPage() {
 
         <PatientConsultationHistoryTable
           patientId={patientId}
-          updates={consultationUpdates}
+          diets={dietHistory}
+          assessments={bodyAssessments}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
           onOpenEditAssessment={handleOpenEditAssessment}
         />

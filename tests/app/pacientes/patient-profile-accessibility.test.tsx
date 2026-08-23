@@ -52,6 +52,8 @@ describe('PatientDetailPage accessibility', () => {
     expect(screen.getByRole('region', { name: 'Histórico de consultas' })).toBeInTheDocument();
   });
 
+
+
   it('keeps the follow-up dialog fields labelled and keyboard-addressable', async () => {
     render(<PatientDetailPage />);
 
