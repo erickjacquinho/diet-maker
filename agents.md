@@ -23,6 +23,7 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **PRD & Requirements** | [docs/prd/PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md) | Requisitos de produto, estórias de usuário e critérios de aceite |
 | **Domain Context** | [docs/context/CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md) | Termos nutricionais, tabela TACO, VET e fórmulas de macros |
 | **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-007 |
+| **Pesquisa Mercadológica** | [refs/pesquisa-mercadologica/index.md](file:///c:/Programmer/diet-maker/refs/pesquisa-mercadologica/index.md) | Panorama do mercado brasileiro, concorrentes, personas e proposta de valor |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
 ### Design System component catalog
