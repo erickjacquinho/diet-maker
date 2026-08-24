@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/atoms/SelectField';
-import { Edit3, RotateCcw } from 'lucide-react';
+import { Edit3, RotateCcw, Flame } from 'lucide-react';
 import { calculateMacroDistributionPct } from '@/lib/nutrition/macroCalculations';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
@@ -235,16 +235,20 @@ export function AdjustDietGoalsModal({
               </span>
             </div>
 
-            {/* 4. Calorias (ao lado dos macros no mesmo formato) */}
-            <div className="flex flex-col gap-1.5">
-              <label className={cn(textStyle('field-label'), 'text-text-primary font-bold text-center block')}>
-                Calorias (kcal)
+            {/* 4. Total Calórico (Métrica Calculada - Sem aspecto de input) */}
+            <div className="flex flex-col gap-1.5 items-center justify-between">
+              <label className={cn(textStyle('field-label'), 'text-text-secondary font-bold text-center block')}>
+                Total Calórico
               </label>
               <div
-                className="h-10 rounded-control border border-border-subtle bg-surface-subtle/80 flex items-center justify-center font-bold text-style-body text-text-primary tabular-nums select-none"
+                className="h-10 flex items-center justify-center gap-1.5 px-2 select-none"
                 aria-label="Calorias totais calculadas"
               >
-                {distribution.totalKcal}
+                <Flame className="w-4 h-4 text-warning shrink-0" aria-hidden="true" />
+                <span className="text-style-body font-bold text-text-primary tabular-nums text-lg">
+                  {distribution.totalKcal}
+                </span>
+                <span className="text-style-legal text-text-muted font-medium">kcal</span>
               </div>
               <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
                 {kcalPerKg} kcal/kg

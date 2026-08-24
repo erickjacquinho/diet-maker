@@ -35,7 +35,7 @@ describe('Component UI Seam: AdjustDietGoalsModal', () => {
     expect(screen.getAllByText(/Proteínas/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Carboidratos/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Gorduras/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/Calorias \(kcal\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Total Calórico/i)).toBeInTheDocument();
 
     // Verify calculated calories are rendered (150*4 + 250*4 + 50*9 = 2050 kcal)
     expect(screen.getByText('2050')).toBeInTheDocument();
