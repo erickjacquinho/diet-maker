@@ -35,4 +35,24 @@ describe('DietBuilderTemplate header action dropdown', () => {
     fireEvent.click(whatsappItem);
     expect(handleWhatsApp).toHaveBeenCalled();
   });
+
+  it('renders Puxar Metas Anteriores button and triggers onPullPreviousGoals callback', () => {
+    const handlePull = vi.fn();
+
+    render(
+      <DietBuilderTemplate
+        patientId="pat-1"
+        patientName="Carlos Silva"
+        patientObjective="Emagrecimento"
+        onPullPreviousGoals={handlePull}
+        onOpenAdjustGoalsModal={vi.fn()}
+      />,
+    );
+
+    const pullButton = screen.getByRole('button', { name: /puxar metas anteriores/i });
+    expect(pullButton).toBeInTheDocument();
+
+    fireEvent.click(pullButton);
+    expect(handlePull).toHaveBeenCalled();
+  });
 });

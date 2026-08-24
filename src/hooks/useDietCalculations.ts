@@ -73,13 +73,6 @@ export function useDietCalculations(
 
     return [
       buildMacroMetricCardProps({
-        label: 'Calorias',
-        current: currentTotals.kcal,
-        target: targetKcal,
-        unit: 'kcal',
-        macroColor: 'blue',
-      }),
-      buildMacroMetricCardProps({
         label: 'Proteínas',
         current: currentTotals.proteinG,
         target: targetProt,
@@ -103,6 +96,13 @@ export function useDietCalculations(
         macroColor: 'fat',
         weightKg,
         isFat: true,
+      }),
+      buildMacroMetricCardProps({
+        label: 'Calorias',
+        current: currentTotals.kcal,
+        target: targetKcal,
+        unit: 'kcal',
+        macroColor: 'blue',
       }),
     ];
   }, [patient?.weightKg, currentTotals, targetKcal, targetProt, targetCarb, targetFat]);

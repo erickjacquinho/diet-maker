@@ -25,9 +25,18 @@ export function useDietPresets({
   useEffect(() => {
     if (!patient) return;
 
+    const fromCycleConfig = typeof window !== 'undefined' && window.sessionStorage?.getItem('nutridiet_cycle_configured') === 'true';
+    if (fromCycleConfig && typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('nutridiet_cycle_configured');
+    }
+
     const saved = getDietFromStorage(patientId, dietaId);
-    if (saved) {
-      setDietPlan(saved);
+    if (saved && (dietaId !== 'nova' || fromCycleConfig)) {
+      const normalizedSaved = {
+        ...saved,
+        mode: saved.mode || 'simple',
+      };
+      setDietPlan(normalizedSaved);
       if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
         setActiveVariationId((prev) => {
           const exists = saved.carbCyclingVariations.some((v) => v.id === prev);
@@ -37,17 +46,17 @@ export function useDietPresets({
       return;
     }
 
+    // Para criação de nova dieta (/dieta/nova), cria SEMPRE plano novo limpo com alvos ZERADOS e modo 'simple'
     const initialPlan = createInitialDietPlan(patientId, {
       weightKg: patient.weightKg,
-      targetKcal: patient.targetKcal,
-      targetProtein: patient.targetProtein,
-      targetCarbs: patient.targetCarbs,
-      targetFats: patient.targetFats,
+      targetKcal: 0,
+      targetProtein: 0,
+      targetCarbs: 0,
+      targetFats: 0,
     });
 
-    if (dietaId === 'nova') {
-      initialPlan.id = 'nova';
-    }
+    initialPlan.id = 'nova';
+    initialPlan.mode = 'simple';
 
     setDietPlan(initialPlan);
   }, [dietaId, patient, patientId, setActiveVariationId]);

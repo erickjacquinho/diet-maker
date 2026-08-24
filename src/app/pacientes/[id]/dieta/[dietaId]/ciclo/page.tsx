@@ -547,6 +547,9 @@ export default function DedicatedCarbCyclingPage() {
     };
 
     setInitialStateHash('');
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('nutridiet_cycle_configured', 'true');
+    }
     saveDietToStorage(updatedPlan);
     toast.success('Ciclo de carboidratos configurado com sucesso!');
     router.push(`/pacientes/${patientId}/dieta/${dietaId}`);

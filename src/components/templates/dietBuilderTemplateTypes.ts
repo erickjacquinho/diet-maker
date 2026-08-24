@@ -43,6 +43,7 @@ export interface DietBuilderTemplateProps {
   onOpenScaleModal?: () => void;
   onOpenCopyModal?: () => void;
   onOpenAdjustGoalsModal?: () => void;
+  onPullPreviousGoals?: () => void;
   onOpenWhatsAppModal?: () => void;
   onWhatsAppShare?: () => void;
   onExportPDF?: () => void;

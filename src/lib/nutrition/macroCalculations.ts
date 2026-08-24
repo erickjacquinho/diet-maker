@@ -10,7 +10,7 @@ export const ATWATER_FACTORS = {
 export const DEFAULT_MACRO_TOLERANCE_PCT = 0.05; // 5% de tolerância para considerar "Na meta"
 export const FAT_ABSOLUTE_TOLERANCE_GRAMS = 2; // tolerância de ±2g para gorduras
 
-export type MacroProgressStatus = 'empty' | 'deficit' | 'on_target' | 'surplus';
+export type MacroProgressStatus = 'no_target' | 'empty' | 'deficit' | 'on_target' | 'surplus';
 
 export interface MacroProgressResult {
   percentage: number;
@@ -18,6 +18,7 @@ export interface MacroProgressResult {
   status: MacroProgressStatus;
   badgeText: string;
   badgeTone: NonNullable<BadgeProps['variant']>;
+  hasTarget: boolean;
 }
 
 /**
@@ -68,9 +69,10 @@ export function calculateMacroProgress(
     return {
       percentage: 0,
       diff: 0,
-      status: 'empty',
+      status: 'no_target',
       badgeText: 'Sem meta',
       badgeTone: 'default',
+      hasTarget: false,
     };
   }
 
@@ -89,6 +91,7 @@ export function calculateMacroProgress(
       status: 'on_target',
       badgeText: 'Na meta ✓',
       badgeTone: 'emerald',
+      hasTarget: true,
     };
   }
 
@@ -100,6 +103,7 @@ export function calculateMacroProgress(
       status: 'empty',
       badgeText: `Faltam ${formattedTarget}`,
       badgeTone: 'warning',
+      hasTarget: true,
     };
   }
 
@@ -112,6 +116,7 @@ export function calculateMacroProgress(
       status: 'deficit',
       badgeText: `Faltam ${formattedRemaining}`,
       badgeTone: 'warning',
+      hasTarget: true,
     };
   }
 
@@ -123,6 +128,7 @@ export function calculateMacroProgress(
     status: 'surplus',
     badgeText: formattedSurplus,
     badgeTone: 'rose',
+    hasTarget: true,
   };
 }
 
@@ -158,9 +164,9 @@ export function buildMacroMetricCardProps({
     ? `${Math.round(safeCurrent)}`
     : `${Math.round(safeCurrent * 10) / 10}g`;
 
-  const targetValueStr = unit === 'kcal'
-    ? `${Math.round(safeTarget)} kcal`
-    : `${Math.round(safeTarget * 10) / 10}g`;
+  const targetValueStr = safeTarget > 0
+    ? (unit === 'kcal' ? `${Math.round(safeTarget)} kcal` : `${Math.round(safeTarget * 10) / 10}g`)
+    : '';
 
   let gPerKgRatioStr: string | undefined;
   let gPerKgMetaStr: string | undefined;
@@ -187,5 +193,47 @@ export function buildMacroMetricCardProps({
     gPerKgRatio: gPerKgRatioStr,
     gPerKgMeta: gPerKgMetaStr,
     macroColor,
+    hasTarget: progress.hasTarget,
   };
 }
+
+/**
+ * Calcula a distribuição percentual calórica (% VET) de cada macronutriente.
+ */
+export function calculateMacroDistributionPct(proteinG: number, carbsG: number, fatsG: number): {
+  proteinPct: number;
+  carbsPct: number;
+  fatsPct: number;
+  proteinKcal: number;
+  carbsKcal: number;
+  fatsKcal: number;
+  totalKcal: number;
+} {
+  const pKcal = Math.max(0, Number(proteinG) || 0) * ATWATER_FACTORS.protein;
+  const cKcal = Math.max(0, Number(carbsG) || 0) * ATWATER_FACTORS.carbs;
+  const fKcal = Math.max(0, Number(fatsG) || 0) * ATWATER_FACTORS.fats;
+  const totalKcal = Math.round(pKcal + cKcal + fKcal);
+
+  if (totalKcal <= 0) {
+    return {
+      proteinPct: 0,
+      carbsPct: 0,
+      fatsPct: 0,
+      proteinKcal: 0,
+      carbsKcal: 0,
+      fatsKcal: 0,
+      totalKcal: 0,
+    };
+  }
+
+  return {
+    proteinPct: Math.round((pKcal / totalKcal) * 100),
+    carbsPct: Math.round((cKcal / totalKcal) * 100),
+    fatsPct: Math.round((fKcal / totalKcal) * 100),
+    proteinKcal: Math.round(pKcal),
+    carbsKcal: Math.round(cKcal),
+    fatsKcal: Math.round(fKcal),
+    totalKcal,
+  };
+}
+

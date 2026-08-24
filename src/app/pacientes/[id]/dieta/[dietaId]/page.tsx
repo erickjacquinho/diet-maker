@@ -66,6 +66,7 @@ export default function DietBuilderPage() {
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,
+    handlePullPreviousGoals,
     openAdjustGoalsModal,
     openWhatsAppModal,
     router,
@@ -136,7 +137,7 @@ export default function DietBuilderPage() {
           objective: patient.objective,
         }}
         dietModeProps={{
-          mode: dietPlan.mode,
+          mode: dietPlan.mode || 'simple',
           onModeChange: handleModeChange,
           variationsCount: (dietPlan.carbCyclingVariationsCount as 2 | 3) || dietPlan.carbCyclingVariations?.length || 3,
           onVariationsCountChange: handleVariationsCountChange,
@@ -168,6 +169,7 @@ export default function DietBuilderPage() {
         onAddMeal={handleAddMeal}
         onScaleDiet={() => setIsScaleModalOpen(true)}
         onOpenAdjustGoalsModal={openAdjustGoalsModal}
+        onPullPreviousGoals={handlePullPreviousGoals}
         onWhatsAppShare={openWhatsAppModal}
         onSaveDiet={handleSaveDiet}
       />

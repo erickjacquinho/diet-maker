@@ -10,6 +10,7 @@ import {
   FileText,
   Save,
   Edit3,
+  History,
 } from 'lucide-react';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
@@ -34,6 +35,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onScaleDiet,
   onOpenScaleModal,
   onOpenAdjustGoalsModal,
+  onPullPreviousGoals,
   onOpenWhatsAppModal,
   onWhatsAppShare,
   onExportPDF,
@@ -50,7 +52,11 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
     onSelectVariation: () => {},
   };
 
-  const activeDietModeProps = dietModeProps || defaultDietModeProps;
+  const activeDietModeProps: DietModeSwitcherProps = {
+    ...defaultDietModeProps,
+    ...dietModeProps,
+    mode: dietModeProps?.mode || 'simple',
+  };
 
   const resolvedName = patient?.name || patientName || macroTrackerData?.patientName || 'Paciente';
   const resolvedInitials = patient?.initials || patientInitials || macroTrackerData?.patientInitials || 'P';
@@ -125,7 +131,19 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         />
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-2 flex-wrap">
+            {onPullPreviousGoals && (
+              <Button
+                onClick={onPullPreviousGoals}
+                variant="secondary"
+                size="compact"
+                className="flex items-center gap-1.5"
+                title="Puxar metas da última dieta cadastrada"
+              >
+                <History size={13} aria-hidden="true" />
+                <span>Puxar Metas Anteriores</span>
+              </Button>
+            )}
             {handleAdjustGoals && (
               <Button onClick={handleAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
                 <Edit3 size={13} aria-hidden="true" />

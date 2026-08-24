@@ -117,4 +117,17 @@ describe('Diet Domain: dietStore', () => {
     expect(getPatientById(patient.id)?.lastActivity?.type).toBe('diet');
     expect(getPatientById(patient.id)?.lastActivity?.at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
+
+  it('creates an initial diet plan with zeroed targets when patient has no targets configured', () => {
+    const plan = createInitialDietPlan('pat-no-targets', {});
+
+    expect(plan.simpleTargetProtein).toBe(0);
+    expect(plan.simpleTargetCarbs).toBe(0);
+    expect(plan.simpleTargetFats).toBe(0);
+    expect(plan.simpleTargetKcal).toBe(0);
+    expect(plan.carbCyclingVariations[0].targetProtein).toBe(0);
+    expect(plan.carbCyclingVariations[0].targetCarbs).toBe(0);
+    expect(plan.carbCyclingVariations[0].targetFats).toBe(0);
+    expect(plan.carbCyclingVariations[0].targetKcal).toBe(0);
+  });
 });

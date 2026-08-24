@@ -13,6 +13,7 @@ export interface MacroMetricCardProps {
   gPerKgMeta?: string;  // Ex: "2.0"
   macroColor: 'emerald' | 'rose' | 'amber' | 'teal' | 'blue' | 'protein' | 'carbohydrate' | 'fat' | 'primary';
   subtitle?: string;    // Texto auxiliar alternativo quando não há proporção g/kg
+  hasTarget?: boolean;  // Indica se existe meta cadastrada
   className?: string;
 }
 
@@ -39,38 +40,60 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
   gPerKgMeta,
   macroColor,
   subtitle,
+  hasTarget = true,
   className,
 }) => {
+  const isTargetActive = hasTarget && Boolean(targetValue);
   const colorClass = TEXT_COLORS[macroColor] || 'text-primary';
 
   return (
     <Surface
       variant="subtle"
       density="standard"
-      className={cn('flex flex-col justify-between p-4', className)}
+      className={cn(
+        'flex flex-col justify-between p-4 transition-all duration-fast',
+        !isTargetActive && 'opacity-75 border border-dashed border-border-control-essential/50 bg-surface-subtle/40 shadow-none select-none',
+        className
+      )}
     >
       <div>
         <div className="flex items-center justify-between text-style-legal font-semibold text-text-muted mb-1.5 min-h-6">
-          <span className={cn(colorClass, 'font-bold text-style-field-label')}>{label}</span>
+          <span className={cn(colorClass, 'font-bold text-style-field-label', !isTargetActive && 'opacity-90')}>
+            {label}
+          </span>
           {statusBadgeText && (
-            <Badge variant={statusBadgeVariant} className="shrink-0 text-style-legal">
+            <Badge
+              variant={isTargetActive ? statusBadgeVariant : 'default'}
+              className="shrink-0 text-style-legal"
+            >
               {statusBadgeText}
             </Badge>
           )}
         </div>
 
         <div className="text-style-page-title font-bold text-text-primary my-1 tabular-nums">
-          {currentValue} <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
+          {currentValue}{' '}
+          {isTargetActive ? (
+            <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
+          ) : (
+            <span className="text-style-legal font-normal text-text-muted ml-1">(sem meta)</span>
+          )}
         </div>
 
         <div className="min-h-5 mb-3 flex items-center text-style-legal">
-          {gPerKgRatio ? (
+          {isTargetActive && gPerKgRatio ? (
             <div className={cn(colorClass, 'font-bold tabular-nums')}>
               {gPerKgRatio}{' '}
               {gPerKgMeta !== undefined && (
                 <span className="font-normal text-text-muted">(meta: {gPerKgMeta})</span>
               )}
             </div>
+          ) : !isTargetActive && gPerKgRatio ? (
+            <div className="text-text-muted font-normal tabular-nums">
+              {gPerKgRatio} <span className="text-style-chart-micro opacity-75">(sem meta g/kg)</span>
+            </div>
+          ) : !isTargetActive ? (
+            <span className="text-text-muted font-normal italic text-style-legal">Definir em Ajustar Metas</span>
           ) : subtitle ? (
             <span className="text-text-muted font-normal">{subtitle}</span>
           ) : (
@@ -81,8 +104,9 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
 
       <div className="w-full">
         <ProgressBar
-          value={percentage}
-          colorVariant={macroColor}
+          value={isTargetActive ? percentage : 0}
+          colorVariant={isTargetActive ? macroColor : 'primary'}
+          className={!isTargetActive ? 'opacity-30' : ''}
           aria-label={`Progresso de ${label}`}
         />
       </div>

@@ -24,7 +24,7 @@ export interface DietModeSwitcherProps {
 }
 
 export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
-  mode,
+  mode = 'simple',
   onModeChange,
   variationsCount,
   onVariationsCountChange,
@@ -38,6 +38,8 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
   embedded = false,
   modeOnly = false,
 }) => {
+  const currentMode = mode || 'simple';
+
   return (
     <div
       role="group"
@@ -63,7 +65,7 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
         <ToggleGroup
           type="single"
           role="tablist"
-          value={mode}
+          value={currentMode}
           onValueChange={(val) => {
             if (val) onModeChange(val as 'simple' | 'carb_cycling');
           }}
@@ -72,9 +74,8 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           <ToggleGroupItem
             value="simple"
             role="tab"
-            data-state={mode === 'simple' ? 'active' : 'inactive'}
-            aria-selected={mode === 'simple'}
-            onClick={() => onModeChange('simple')}
+            data-state={currentMode === 'simple' ? 'active' : 'inactive'}
+            aria-selected={currentMode === 'simple'}
           >
             <Utensils size={14} aria-hidden="true" className="mr-1.5" />
             <span>Dieta Simples</span>
@@ -82,9 +83,8 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
           <ToggleGroupItem
             value="carb_cycling"
             role="tab"
-            data-state={mode === 'carb_cycling' ? 'active' : 'inactive'}
-            aria-selected={mode === 'carb_cycling'}
-            onClick={() => onModeChange('carb_cycling')}
+            data-state={currentMode === 'carb_cycling' ? 'active' : 'inactive'}
+            aria-selected={currentMode === 'carb_cycling'}
           >
             <Repeat size={14} aria-hidden="true" className="mr-1.5" />
             <span>Ciclo de Carboidratos</span>

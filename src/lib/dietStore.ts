@@ -184,19 +184,32 @@ export function createInitialDietPlan(patientId: string, patientTargets?: {
   targetCarbs?: number;
   targetFats?: number;
 }): FullDietPlan {
-  const weight = patientTargets?.weightKg || 70;
-  const baseKcal = patientTargets?.targetKcal || 2000;
-  const baseProt = patientTargets?.targetProtein || Math.round(weight * 2.0);
-  const baseCarb = patientTargets?.targetCarbs || Math.round(weight * 3.0);
-  const baseFat = patientTargets?.targetFats || Math.round(weight * 0.8);
+  const weight = patientTargets?.weightKg;
+  const hasExplicitTargets =
+    (patientTargets?.targetProtein !== undefined && patientTargets.targetProtein > 0) ||
+    (patientTargets?.targetCarbs !== undefined && patientTargets.targetCarbs > 0) ||
+    (patientTargets?.targetFats !== undefined && patientTargets.targetFats > 0) ||
+    (patientTargets?.targetKcal !== undefined && patientTargets.targetKcal > 0);
 
-  const defaultHighCarb = Math.round(baseCarb * 1.3);
+  const baseProt = hasExplicitTargets ? (patientTargets?.targetProtein || 0) : 0;
+  const baseCarb = hasExplicitTargets ? (patientTargets?.targetCarbs || 0) : 0;
+  const baseFat = hasExplicitTargets ? (patientTargets?.targetFats || 0) : 0;
+  const baseKcal = hasExplicitTargets
+    ? (patientTargets?.targetKcal || calculatePresetCalories(baseProt, baseCarb, baseFat))
+    : 0;
+
+  const defaultHighCarb = hasExplicitTargets ? Math.round(baseCarb * 1.3) : 0;
   const defaultMedCarb = baseCarb;
-  const defaultLowCarb = Math.round(baseCarb * 0.5);
+  const defaultLowCarb = hasExplicitTargets ? Math.round(baseCarb * 0.5) : 0;
 
-  const highKcal = calculatePresetCalories(baseProt, defaultHighCarb, baseFat);
-  const medKcal = calculatePresetCalories(baseProt, defaultMedCarb, baseFat);
-  const lowKcal = calculatePresetCalories(baseProt, defaultLowCarb, baseFat);
+  const highKcal = hasExplicitTargets ? calculatePresetCalories(baseProt, defaultHighCarb, baseFat) : 0;
+  const medKcal = hasExplicitTargets ? calculatePresetCalories(baseProt, defaultMedCarb, baseFat) : 0;
+  const lowKcal = hasExplicitTargets ? calculatePresetCalories(baseProt, defaultLowCarb, baseFat) : 0;
+
+  const calculateGPerKgSafe = (grams: number) => {
+    if (!weight || weight <= 0 || grams <= 0) return 0;
+    return Number((grams / weight).toFixed(1));
+  };
 
   return {
     id: `diet-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -223,9 +236,9 @@ export function createInitialDietPlan(patientId: string, patientTargets?: {
         targetFats: baseFat,
         inputMode: 'grams',
         gPerKg: {
-          protein: Number((baseProt / weight).toFixed(1)),
-          carbs: Number((defaultHighCarb / weight).toFixed(1)),
-          fats: Number((baseFat / weight).toFixed(1)),
+          protein: calculateGPerKgSafe(baseProt),
+          carbs: calculateGPerKgSafe(defaultHighCarb),
+          fats: calculateGPerKgSafe(baseFat),
         },
         meals: [],
       },
@@ -240,9 +253,9 @@ export function createInitialDietPlan(patientId: string, patientTargets?: {
         targetFats: baseFat,
         inputMode: 'grams',
         gPerKg: {
-          protein: Number((baseProt / weight).toFixed(1)),
-          carbs: Number((defaultMedCarb / weight).toFixed(1)),
-          fats: Number((baseFat / weight).toFixed(1)),
+          protein: calculateGPerKgSafe(baseProt),
+          carbs: calculateGPerKgSafe(defaultMedCarb),
+          fats: calculateGPerKgSafe(baseFat),
         },
         meals: [],
       },
@@ -257,9 +270,9 @@ export function createInitialDietPlan(patientId: string, patientTargets?: {
         targetFats: baseFat,
         inputMode: 'grams',
         gPerKg: {
-          protein: Number((baseProt / weight).toFixed(1)),
-          carbs: Number((defaultLowCarb / weight).toFixed(1)),
-          fats: Number((baseFat / weight).toFixed(1)),
+          protein: calculateGPerKgSafe(baseProt),
+          carbs: calculateGPerKgSafe(defaultLowCarb),
+          fats: calculateGPerKgSafe(baseFat),
         },
         meals: [],
       },
