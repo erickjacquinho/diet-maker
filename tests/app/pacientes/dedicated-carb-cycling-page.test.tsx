@@ -235,4 +235,15 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     const carbInputs = screen.getAllByDisplayValue('260');
     expect(carbInputs.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('limits macro inputs to at most 4 characters', () => {
+    render(<DedicatedCarbCyclingPage />);
+
+    const protInput = screen.getAllByDisplayValue('130')[0]; // Dia Alto Carbo protein input
+    fireEvent.change(protInput, { target: { value: '12345' } });
+
+    // Should be truncated to 4 characters (1234)
+    expect(screen.getByDisplayValue('1234')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('12345')).not.toBeInTheDocument();
+  });
 });

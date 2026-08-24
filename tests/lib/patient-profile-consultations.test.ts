@@ -209,8 +209,11 @@ describe('buildPatientTimelineEvents', () => {
 
     expect(groups).toHaveLength(1);
     expect(groups[0].items).toHaveLength(1);
-    expect(groups[0].items[0].type).toBe('assessment');
-    expect(groups[0].items[0].assessment.id).toBe('asm-1');
+    const item = groups[0].items[0];
+    expect(item.type).toBe('assessment');
+    if (item.type === 'assessment') {
+      expect(item.assessment.id).toBe('asm-1');
+    }
   });
 
   it('renders date group with only diets when no assessment is registered on that date', () => {
@@ -231,8 +234,11 @@ describe('buildPatientTimelineEvents', () => {
 
     expect(groups).toHaveLength(1);
     expect(groups[0].items).toHaveLength(1);
-    expect(groups[0].items[0].type).toBe('diet');
-    expect(groups[0].items[0].diet.id).toBe('diet-1');
+    const dietItem = groups[0].items[0];
+    expect(dietItem.type).toBe('diet');
+    if (dietItem.type === 'diet') {
+      expect(dietItem.diet.id).toBe('diet-1');
+    }
   });
 
   it('sorts date groups in descending chronological order across multiple dates', () => {

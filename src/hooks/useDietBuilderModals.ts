@@ -39,9 +39,9 @@ export function useDietBuilderModals({
 
   const [isAdjustGoalsModalOpen, setIsAdjustGoalsModalOpen] = useState(false);
   const [tempVariationName, setTempVariationName] = useState<string>('');
-  const [tempTargetProt, setTempTargetProt] = useState<number>(160);
-  const [tempTargetCarb, setTempTargetCarb] = useState<number>(240);
-  const [tempTargetFat, setTempTargetFat] = useState<number>(65);
+  const [tempTargetProt, setTempTargetProt] = useState<number>(targetProt || 0);
+  const [tempTargetCarb, setTempTargetCarb] = useState<number>(targetCarb || 0);
+  const [tempTargetFat, setTempTargetFat] = useState<number>(targetFat || 0);
 
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [whatsAppText, setWhatsAppText] = useState('');

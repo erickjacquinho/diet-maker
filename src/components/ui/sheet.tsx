@@ -66,9 +66,12 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-control text-text-muted opacity-subdued ring-offset-surface transition-opacity duration-fast hover:bg-surface-hover hover:text-text-primary hover:opacity-full focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-surface-subtle motion-reduce:transition-none">
-        <X className="size-4" />
-        <span className="sr-only">Close</span>
+      <SheetPrimitive.Close
+        aria-label="Fechar"
+        className="absolute right-4 top-4 z-20 flex size-8 items-center justify-center rounded-control text-text-muted opacity-subdued ring-offset-surface transition-opacity duration-fast hover:bg-surface-hover hover:text-text-primary hover:opacity-full focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-surface-subtle motion-reduce:transition-none"
+      >
+        <X className="size-4" aria-hidden="true" />
+        <span className="sr-only">Fechar</span>
       </SheetPrimitive.Close>
     </SheetPrimitive.Content>
   </SheetPortal>
@@ -81,7 +84,7 @@ const SheetHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col gap-2 text-left",
+      "flex flex-col gap-2 text-left pr-10",
       className
     )}
     {...props}

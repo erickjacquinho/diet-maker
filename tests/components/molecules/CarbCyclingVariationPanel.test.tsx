@@ -62,7 +62,7 @@ describe('CarbCyclingVariationPanel molecule', () => {
     expect(screen.getByText('Dia Alto')).toBeInTheDocument();
     expect(screen.getByText('Dia Médio')).toBeInTheDocument();
     expect(screen.getByText('Dia Baixo')).toBeInTheDocument();
-    expect(screen.getByText(/Segunda-feira/i)).toBeInTheDocument();
+    expect(screen.getByText(/Seg, Qua, Sex/i)).toBeInTheDocument();
 
     // Click Dia Médio
     fireEvent.click(screen.getByText('Dia Médio'));

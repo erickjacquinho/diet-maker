@@ -138,6 +138,20 @@ export function PatientListTableRow({
     onNavigate?.(href);
   };
 
+  const patientMeta = [
+    row.patient.age ? `${row.patient.age} anos` : null,
+    row.patient.heightCm ? `${row.patient.heightCm} cm` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const hasBodyFat = row.history.currentBodyFatPercent !== null;
+  const bodyFatSubtitle = row.history.bodyFatDeltaLabel ?? (hasBodyFat ? 'Sem comparação' : 'Sem histórico');
+
+  const nextEventSubtitle = row.eventTypeLabel
+    ? `${row.eventTypeLabel}${row.eventDateLabel ? ` · ${row.eventDateLabel}` : ''}`
+    : 'Definir no perfil';
+
   return (
     <TableRow
       tabIndex={0}
@@ -147,7 +161,7 @@ export function PatientListTableRow({
       onClick={(event) => handleRowClick(event, row.href)}
       onKeyDown={(event) => handleRowKeyDown(event, row.href)}
     >
-      <TableCell className="relative px-4 py-3">
+      <TableCell className="relative px-4 py-3 align-middle">
         <Link
           href={row.href}
           tabIndex={-1}
@@ -156,18 +170,19 @@ export function PatientListTableRow({
         >
           <RecordIndicators row={row} />
           <span className="flex min-w-0 flex-col gap-1">
-            <span className="text-style-body-small font-semibold truncate group-hover:text-primary">
+            <span
+              className="text-style-body-small font-semibold truncate whitespace-nowrap group-hover:text-primary"
+              title={row.patient.name}
+            >
               {row.patient.name}
             </span>
-            <span className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted">
+            <span
+              className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted min-h-[1rem] truncate whitespace-nowrap"
+              title={patientMeta || undefined}
+            >
               <GenderIcon gender={row.patient.gender} />
-              <span>
-                {[
-                  row.patient.age ? `${row.patient.age} anos` : null,
-                  row.patient.heightCm ? `${row.patient.heightCm} cm` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
+              <span className="truncate whitespace-nowrap">
+                {patientMeta || '—'}
               </span>
             </span>
           </span>
@@ -175,7 +190,7 @@ export function PatientListTableRow({
       </TableCell>
       <TableCell className="px-4 py-3 align-middle">
         <span
-          className="inline-flex max-w-full truncate rounded-control border border-border-subtle bg-surface-subtle px-2 py-1 text-style-legal font-medium text-text-secondary"
+          className="inline-flex max-w-full truncate whitespace-nowrap rounded-control border border-border-subtle bg-surface-subtle px-2 py-1 text-style-legal font-medium text-text-secondary"
           title={row.patient.objective}
         >
           {getObjectiveLabel(row.patient.objective)}
@@ -183,24 +198,37 @@ export function PatientListTableRow({
       </TableCell>
       <TableCell className="px-4 py-3 align-middle">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-style-body-small font-semibold text-text-primary">
+          <span
+            className="text-style-body-small font-semibold text-text-primary truncate whitespace-nowrap"
+            title={row.history.bodyFatLabel}
+          >
             {row.history.bodyFatLabel}
           </span>
-          <span className="text-style-legal font-medium text-text-muted">
-            {row.history.bodyFatDeltaLabel ?? 'Sem comparação anterior'}
+          <span
+            className="text-style-legal font-medium text-text-muted truncate whitespace-nowrap"
+            title={bodyFatSubtitle}
+          >
+            {bodyFatSubtitle}
           </span>
         </div>
       </TableCell>
       <TableCell className="px-4 py-3 align-middle">
-        <div className={`flex items-start gap-2 ${groupTone[row.group]}`}>
+        <div className={`flex min-w-0 items-start gap-2 ${groupTone[row.group]}`}>
           <span className="mt-0.5 shrink-0">
             <EventIcon row={row} />
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-style-body-small font-semibold">{row.eventStatusLabel}</span>
-            <span className="text-style-legal text-text-secondary">
-              {row.eventTypeLabel ?? 'Defina o tipo e a data no perfil'}
-              {row.eventDateLabel ? ` · ${row.eventDateLabel}` : ''}
+            <span
+              className="text-style-body-small font-semibold truncate whitespace-nowrap"
+              title={row.eventStatusLabel}
+            >
+              {row.eventStatusLabel}
+            </span>
+            <span
+              className="text-style-legal text-text-secondary truncate whitespace-nowrap"
+              title={nextEventSubtitle}
+            >
+              {nextEventSubtitle}
             </span>
           </span>
         </div>

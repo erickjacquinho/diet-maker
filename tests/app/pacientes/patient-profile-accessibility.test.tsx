@@ -49,7 +49,8 @@ describe('PatientDetailPage accessibility', () => {
       'hover:bg-error',
       'hover:text-white',
     );
-    expect(screen.getByRole('region', { name: 'Histórico de consultas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Histórico de avaliações físicas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Histórico de prescrições dietéticas' })).toBeInTheDocument();
   });
 
 

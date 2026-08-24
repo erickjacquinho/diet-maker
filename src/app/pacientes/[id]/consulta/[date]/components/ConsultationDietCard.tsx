@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Utensils, Sparkles, ChevronUp, ChevronDown } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Utensils, Sparkles, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
-import { EditIconButton } from '@/components/atoms';
+import { EditIconButton, Badge } from '@/components/atoms';
+import { MacroSummary } from '@/components/molecules';
 import type { HistoricalDiet } from '@/lib/patientsStore';
 
 export function ConsultationDietCard({
@@ -25,10 +26,10 @@ export function ConsultationDietCard({
   };
 
   return (
-    <Card className="bg-surface border-border-subtle shadow-floating rounded-surface overflow-hidden">
-      <div className="p-5 border-b border-border-subtle bg-surface-subtle/40 flex items-center justify-between">
+    <Card className="bg-surface border-border-subtle rounded-surface overflow-hidden">
+      <div className="p-5 border-b border-border-divider bg-surface-subtle/40 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-control bg-success/10 text-success">
+          <div className="p-2 rounded-control bg-primary-soft text-primary">
             <Utensils size={18} />
           </div>
           <div>
@@ -37,9 +38,7 @@ export function ConsultationDietCard({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-surface text-text-primary border-border-subtle font-semibold text-style-legal px-2.5 py-0.5">
-            Dieta
-          </Badge>
+          <Badge variant="neutral">Dieta</Badge>
           <Link href={`/pacientes/${patientId}/dieta/${diet.id}`} title="Editar Dieta">
             <EditIconButton title="Editar Dieta" />
           </Link>
@@ -52,14 +51,14 @@ export function ConsultationDietCard({
             { size: 'standard', tone: 'muted', label: 'Meta Calórica', value: `${diet.targetKcal} kcal` },
             { size: 'standard', tone: 'protein', label: 'Proteínas', value: `${diet.proteinG}g` },
             { size: 'standard', tone: 'carbohydrate', label: 'Carboidratos', value: `${diet.carbsG}g` },
-            { size: 'standard', tone: 'success', label: 'Gorduras', value: `${diet.fatsG}g` },
+            { size: 'standard', tone: 'fat', label: 'Gorduras', value: `${diet.fatsG}g` },
           ]}
         />
 
         {diet.meals && (
           <div className="flex flex-col gap-3 pt-2">
             <h3 className="text-style-legal font-bold text-text-primary tracking-overline flex items-center gap-1.5">
-              <Sparkles size={13} className="text-success" />
+              <Sparkles size={13} className="text-primary" />
               <span>Refeições Programadas da Consulta</span>
             </h3>
 
@@ -80,26 +79,25 @@ export function ConsultationDietCard({
                       </div>
 
                       <div className="flex items-center gap-3 text-style-legal">
-                        <div className="text-text-muted font-medium text-style-legal flex items-center gap-1.5">
-                          <span className="text-macro-protein font-bold">{meal.proteinG}g</span>
-                          <span>•</span>
-                          <span className="text-macro-carbohydrate font-bold">{meal.carbsG}g</span>
-                          <span>•</span>
-                          <span className="text-macro-fat font-bold">{meal.fatsG}g</span>
-                        </div>
+                        <MacroSummary
+                          protein={meal.proteinG}
+                          carbs={meal.carbsG}
+                          fats={meal.fatsG}
+                          className="text-text-muted font-medium text-style-legal"
+                        />
                         <span className="font-semibold text-style-legal text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-1 rounded-surface">
                           {meal.kcal} kcal
                         </span>
                         <div className="text-text-muted hover:text-text-primary transition-colors">
-                          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          <ChevronDown size={16} className={cn('transition-transform duration-standard', isExpanded && 'rotate-180')} />
                         </div>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="px-3.5 pb-3.5 pt-2 border-t border-border-subtle/60 bg-surface/60 flex flex-col gap-2">
+                      <div className="px-3.5 pb-3.5 pt-2 border-t border-border-subtle/60 bg-surface/60 flex flex-col gap-2 animate-in fade-in-50 slide-in-from-top-2 duration-fast">
                         <div className="flex items-center gap-1.5 text-style-legal font-bold text-text-muted tracking-overline">
-                          <Utensils size={12} className="text-success" />
+                          <Utensils size={12} className="text-primary" />
                           <span>Composição e Alimentos da Refeição</span>
                         </div>
                         <p className="text-style-legal text-text-primary leading-relaxed bg-surface-subtle p-2.5 rounded-control border border-border-subtle/70">

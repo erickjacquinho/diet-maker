@@ -1,17 +1,26 @@
 {
-  "timestamp": "2026-08-21T06:43:28.095Z",
+  "timestamp": "2026-08-24T02:59:57.995Z",
   "summary": {
-    "totalFilesScanned": 128,
-    "compliantFiles": 126,
-    "nonCompliantFiles": 2,
-    "totalViolations": 2,
-    "complianceScorePercentage": 98.44
+    "totalFilesScanned": 132,
+    "compliantFiles": 128,
+    "nonCompliantFiles": 4,
+    "totalViolations": 12,
+    "complianceScorePercentage": 96.97
   },
   "violations": [
     {
-      "file": "src/components/molecules/CarbCyclingVariationPanel.tsx",
-      "line": 182,
-      "column": 11,
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/ciclo/page.tsx",
+      "line": 906,
+      "column": 25,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/app/pacientes/[id]/dieta/[dietaId]/ciclo/page.tsx",
+      "line": 927,
+      "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
@@ -19,8 +28,89 @@
     },
     {
       "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 488,
-      "column": 27,
+      "line": 616,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 625,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 635,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 659,
+      "column": 25,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 680,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/SidebarBrand.tsx",
+      "line": 31,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/SidebarBrand.tsx",
+      "line": 71,
+      "column": 15,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/organisms/PatientConsultationHistoryTable.tsx",
+      "line": 136,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/organisms/PatientConsultationHistoryTable.tsx",
+      "line": 157,
+      "column": 11,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/organisms/PatientConsultationHistoryTable.tsx",
+      "line": 178,
+      "column": 11,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",

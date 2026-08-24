@@ -58,8 +58,11 @@ describe('PatientDetailPage desktop visual contracts', () => {
 
     render(React.createElement(PatientDetailPage));
 
-    expect(await screen.findByText('Plano vigente')).toBeInTheDocument();
-    expect(screen.getByText('2020 kcal · 150g P · 220g C · 60g G')).toBeInTheDocument();
+    expect(await screen.findByText('Plano ativo')).toBeInTheDocument();
+    expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
+    expect(screen.getByText(/C\s*220g/)).toBeInTheDocument();
+    expect(screen.getByText(/G\s*60g/)).toBeInTheDocument();
+    expect(screen.getByText(/2020/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',
@@ -87,11 +90,10 @@ describe('PatientDetailPage desktop visual contracts', () => {
 
     render(React.createElement(PatientDetailPage));
 
-    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
-    expect(table).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader')).toHaveLength(5);
-    expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true);
-    expect(screen.getAllByRole('button', { name: 'Expandir consulta' })).toHaveLength(2);
+    const assessmentsTable = await screen.findByRole('table', { name: /Histórico de avaliações físicas/ });
+    expect(assessmentsTable).toBeInTheDocument();
+    const dietsTable = screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ });
+    expect(dietsTable).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
   });
 });

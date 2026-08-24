@@ -1,0 +1,6 @@
+{
+  "task": "Auditoria das implementacoes e adequacao do componente MacroSummary: sem quebra de linha e controle de exibicao de kcal",
+  "slug": "auditoria-adequacao-macro-summary",
+  "feature_dir": "specs/24-08-26-auditoria-adequacao-macro-summary",
+  "date": "2026-08-24"
+}

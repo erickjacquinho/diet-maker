@@ -214,7 +214,9 @@ export default function DedicatedCarbCyclingPage() {
           return { ...item, name: String(value) };
         }
 
-        const numVal = Math.max(0, Number(value) || 0);
+        const rawStr = String(value);
+        const truncatedStr = rawStr.length > 4 ? rawStr.slice(0, 4) : rawStr;
+        const numVal = Math.max(0, Number(truncatedStr) || 0);
 
         if (unitMode === 'grams') {
           const newP = field === 'protein' ? numVal : item.proteinG;
@@ -765,8 +767,16 @@ export default function DedicatedCarbCyclingPage() {
                           size="compact"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.proteinG : item.proteinGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'protein', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'protein', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           className="bg-surface pr-6 text-right font-medium tabular-nums"
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-style-legal text-text-muted pointer-events-none">
@@ -786,8 +796,16 @@ export default function DedicatedCarbCyclingPage() {
                           size="compact"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.carbsG : item.carbsGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'carbs', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'carbs', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           className="bg-surface pr-6 text-right font-medium tabular-nums"
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-style-legal text-text-muted pointer-events-none">
@@ -807,8 +825,16 @@ export default function DedicatedCarbCyclingPage() {
                           size="compact"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.fatsG : item.fatsGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'fats', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'fats', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           className="bg-surface pr-6 text-right font-medium tabular-nums"
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-style-legal text-text-muted pointer-events-none">

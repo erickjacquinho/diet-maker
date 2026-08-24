@@ -6,7 +6,6 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  ChevronUp,
   Eye,
   Scale,
   TrendingDown,
@@ -15,11 +14,12 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { textStyle } from '@/design-system';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { EditIconButton, IconButton } from '@/components/atoms';
+import { EditIconButton, IconButton, Badge } from '@/components/atoms';
 import { MetricBox } from '@/components/molecules/MetricBox';
+import { MacroSummary } from '@/components/molecules/MacroSummary';
 import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
 import type { ConsolidatedConsultation } from '@/lib/patientProfileConsultations';
 
@@ -48,7 +48,7 @@ export function ConsultationHistoryRow({
     <TableRow
       className={`border-l-4 transition-colors ${
         isActive
-          ? 'border-l-success bg-success/[0.04] hover:bg-success/[0.08]'
+          ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/50'
           : 'border-l-transparent hover:bg-surface-hover'
       }`}
     >
@@ -64,18 +64,12 @@ export function ConsultationHistoryRow({
       <TableCell className="whitespace-nowrap px-4 py-3.5">
         <div className="flex items-center gap-1.5 flex-wrap">
           {dietsCount > 0 && (
-            <Badge
-              variant="outline"
-              className="pointer-events-none border-border-subtle bg-surface px-2 py-0.5 text-style-caption font-semibold text-text-primary shadow-none"
-            >
+            <Badge variant="neutral">
               {dietsCount === 1 ? 'Dieta' : `${dietsCount} Dietas`}
             </Badge>
           )}
           {assessmentsCount > 0 && (
-            <Badge
-              variant="outline"
-              className="pointer-events-none border-border-subtle bg-surface px-2 py-0.5 text-style-caption font-semibold text-text-primary shadow-none"
-            >
+            <Badge variant="neutral">
               {assessmentsCount === 1 ? 'Avaliação Física' : `${assessmentsCount} Avaliações`}
             </Badge>
           )}
@@ -86,17 +80,15 @@ export function ConsultationHistoryRow({
       <TableCell className="whitespace-nowrap px-4 py-3.5">
         {primaryDiet ? (
           <div className="flex items-center gap-2">
-            <div className={`flex items-center gap-1.5 ${textStyle('table-number')}`}>
-              <span className="font-bold text-macro-protein">{primaryDiet.proteinG}g</span>
-              <span className="font-normal text-text-muted">•</span>
-              <span className="font-bold text-macro-carbohydrate">{primaryDiet.carbsG}g</span>
-              <span className="font-normal text-text-muted">•</span>
-              <span className="font-bold text-macro-fat">{primaryDiet.fatsG}g</span>
-              <span className="font-normal text-text-muted">•</span>
-              <span className="font-bold text-text-muted">{primaryDiet.targetKcal} kcal</span>
-            </div>
+            <MacroSummary
+              protein={primaryDiet.proteinG}
+              carbs={primaryDiet.carbsG}
+              fats={primaryDiet.fatsG}
+              kcal={primaryDiet.targetKcal}
+              className={textStyle('table-number')}
+            />
             {dietsCount > 1 && (
-              <span className="text-[11px] text-text-muted font-medium bg-surface-subtle px-1.5 py-0.5 rounded">
+              <span className={`text-text-muted font-medium bg-surface-subtle px-1.5 py-0.5 rounded-control ${textStyle('legal')}`}>
                 +{dietsCount - 1} variação
               </span>
             )}
@@ -116,7 +108,7 @@ export function ConsultationHistoryRow({
               <span>{primaryAssessment.bodyFatPercent}% BF</span>
             </div>
             {assessmentsCount > 1 && (
-              <span className="text-[11px] text-text-muted font-medium bg-surface-subtle px-1.5 py-0.5 rounded">
+              <span className={`text-text-muted font-medium bg-surface-subtle px-1.5 py-0.5 rounded-control ${textStyle('legal')}`}>
                 +{assessmentsCount - 1} medição
               </span>
             )}
@@ -144,7 +136,11 @@ export function ConsultationHistoryRow({
               onToggleExpand();
             }}
           >
-            {isExpanded ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className={cn('transition-transform duration-standard', isExpanded && 'rotate-180')}
+            />
           </IconButton>
         </div>
       </TableCell>
@@ -160,27 +156,22 @@ export function ConsultationHistoryExpandedRow({
   return (
     <TableRow className="bg-surface-subtle/40" data-expanded-row-id={consultation.id}>
       <TableCell colSpan={5} className="border-b border-t border-border-subtle/50 p-4">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 animate-in fade-in-50 slide-in-from-top-2 duration-fast">
           {/* Seção de Dietas */}
           {consultation.diets.length > 0 ? (
             <div className="flex flex-col gap-3">
               {consultation.diets.map((diet, idx) => (
                 <div
                   key={diet.id ?? `diet-${idx}`}
-                  className="flex flex-col gap-3 rounded-surface border border-border-subtle bg-surface p-4 shadow-xs"
+                  className="flex flex-col gap-3 rounded-surface border border-border-subtle bg-surface p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Utensils size={15} className="shrink-0 text-success" />
+                      <Utensils size={15} className="shrink-0 text-primary" />
                       <span className={textStyle('card-title')}>{diet.name}</span>
                     </div>
-                    <Badge
-                      variant={diet.status === 'Ativa' ? 'default' : 'secondary'}
-                      className={`text-style-caption font-semibold ${
-                        diet.status === 'Ativa' ? 'bg-success text-white' : 'bg-surface-subtle text-text-secondary'
-                      }`}
-                    >
-                      {diet.status === 'Ativa' ? 'Plano Vigente' : 'Histórica'}
+                    <Badge variant={diet.status === 'Ativa' ? 'primary' : 'neutral'}>
+                      {diet.status === 'Ativa' ? 'Plano Ativo' : 'Histórica'}
                     </Badge>
                   </div>
 
@@ -224,11 +215,11 @@ export function ConsultationHistoryExpandedRow({
               {consultation.assessments.map((assessment, idx) => (
                 <div
                   key={assessment.id ?? `asm-${idx}`}
-                  className="flex flex-col gap-3 rounded-surface border border-border-subtle bg-surface p-4 shadow-xs"
+                  className="flex flex-col gap-3 rounded-surface border border-border-subtle bg-surface p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Scale size={15} className="shrink-0 text-success" />
+                      <Scale size={15} className="shrink-0 text-primary" />
                       <span className={textStyle('card-title')}>Avaliação Física & Valores</span>
                     </div>
                     <span className={`flex items-center gap-1 text-success ${textStyle('caption')}`}>
@@ -246,12 +237,12 @@ export function ConsultationHistoryExpandedRow({
 
                   {/* Circunferências / Perímetros adicionais */}
                   {(assessment.abdomenCm || assessment.hipCm || assessment.bustCm || assessment.leftArmCm) && (
-                    <div className="flex flex-col gap-2 rounded bg-surface-subtle/50 p-2.5 border border-border-subtle/60 text-style-caption">
+                    <div className="flex flex-col gap-2 rounded-control bg-surface-subtle p-2.5 border border-border-subtle text-style-caption">
                       <span className={`flex items-center gap-1 text-text-secondary ${textStyle('caption-strong')}`}>
                         <Ruler size={12} className="text-text-muted" />
                         <span>Perímetros Corporais Complementares:</span>
                       </span>
-                      <div className="flex flex-wrap gap-3 text-[12px] text-text-secondary">
+                      <div className={`flex flex-wrap gap-3 text-text-secondary ${textStyle('caption')}`}>
                         {assessment.abdomenCm && <span>Abdômen: <strong className="text-text-primary">{assessment.abdomenCm} cm</strong></span>}
                         {assessment.hipCm && <span>Quadril: <strong className="text-text-primary">{assessment.hipCm} cm</strong></span>}
                         {assessment.bustCm && <span>Tórax/Busto: <strong className="text-text-primary">{assessment.bustCm} cm</strong></span>}
@@ -263,7 +254,7 @@ export function ConsultationHistoryExpandedRow({
                   )}
 
                   {assessment.autoFilledFields && assessment.autoFilledFields.length > 0 && (
-                    <div className="text-[11px] text-text-muted flex items-center gap-1.5 pt-0.5">
+                    <div className={`text-text-muted flex items-center gap-1.5 pt-0.5 ${textStyle('legal')}`}>
                       <CheckCircle2 size={11} className="text-primary" />
                       <span>{assessment.autoFilledFields.length} medidas opcionais replicadas da avaliação anterior</span>
                     </div>
@@ -290,6 +281,3 @@ export function ConsultationHistoryExpandedRow({
     </TableRow>
   );
 }
-
-
-

@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
-import { Avatar, IconButton } from '@/components/atoms';
+import { Avatar } from '@/components/atoms';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface SidebarBrandProps {
@@ -28,6 +28,22 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
         <div className="flex w-full flex-col items-center gap-3">
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                className="flex items-center justify-center rounded-control p-1 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Expandir Menu"
+              >
+                <PanelLeftOpen className="size-5 shrink-0" aria-hidden="true" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-style-legal font-semibold">
+              Expandir Menu
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
               <Link
                 href="/pacientes"
                 aria-label={`${title} ${subtitle}`}
@@ -38,21 +54,6 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
             </TooltipTrigger>
             <TooltipContent side="right" className="text-style-legal font-semibold bg-primary text-on-primary border-primary">
               {title} {subtitle}
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <IconButton
-                variant="quiet"
-                onClick={toggleCollapse}
-                className="h-control-compact w-control-compact rounded-control border border-border-subtle p-0 text-text-muted hover:bg-surface-hover hover:text-text-primary"
-                aria-label="Expandir Menu"
-                icon={<ChevronRight className="size-4" />}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="text-style-legal font-semibold">
-              Expandir Menu
             </TooltipContent>
           </Tooltip>
         </div>
@@ -67,13 +68,14 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
           </Link>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <IconButton
-                variant="quiet"
+              <button
+                type="button"
                 onClick={toggleCollapse}
-                className="h-control-standard w-control-standard shrink-0 rounded-control border border-border-subtle p-0 text-text-muted hover:bg-surface-hover hover:text-text-primary"
+                className="flex shrink-0 items-center justify-center rounded-control p-1 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Recolher Menu"
-                icon={<ChevronLeft className="size-4" />}
-              />
+              >
+                <PanelLeftClose className="size-5 shrink-0" aria-hidden="true" />
+              </button>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-style-legal font-semibold">
               Recolher Menu

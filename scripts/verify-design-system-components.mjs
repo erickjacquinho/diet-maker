@@ -45,6 +45,7 @@ const NON_CATALOG_COMPONENT_SOURCES = new Set([
   'src/components/molecules/assessment/LimbSectionCard.tsx',
   'src/components/molecules/CopyVariationModal.tsx',
   'src/components/molecules/food-search/FoodSearchResultsList.tsx',
+  'src/components/molecules/MacroSummary.tsx',
   'src/components/molecules/ScaleDietModal.tsx',
   'src/components/molecules/WhatsAppShareModal.tsx',
   'src/components/organisms/assessment/AssessmentSummaryPanel.tsx',

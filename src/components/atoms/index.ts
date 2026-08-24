@@ -8,3 +8,4 @@ export * from './Avatar';
 export * from './Surface';
 export * from './SelectField';
 export * from './VariationCard';
+export * from '@/components/molecules/MacroSummary';

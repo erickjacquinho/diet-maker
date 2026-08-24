@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Patient } from '@/lib/patientsStore';
 import {
   createInitialDietPlan,
@@ -10,7 +10,7 @@ interface UseDietPresetsOptions {
   patientId: string;
   dietaId: string;
   patient: Patient | null;
-  setActiveVariationId: (id: string) => void;
+  setActiveVariationId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export function useDietPresets({
@@ -21,14 +21,18 @@ export function useDietPresets({
 }: UseDietPresetsOptions) {
   const [dietPlan, setDietPlan] = useState<FullDietPlan | null>(null);
 
-  const syncFromStorage = useCallback(() => {
+  // Initial load
+  useEffect(() => {
     if (!patient) return;
 
     const saved = getDietFromStorage(patientId, dietaId);
     if (saved) {
       setDietPlan(saved);
       if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
-        setActiveVariationId(saved.carbCyclingVariations[0]?.id ?? 'var-high');
+        setActiveVariationId((prev) => {
+          const exists = saved.carbCyclingVariations.some((v) => v.id === prev);
+          return exists ? prev : (saved.carbCyclingVariations[0]?.id ?? 'var-high');
+        });
       }
       return;
     }
@@ -48,25 +52,36 @@ export function useDietPresets({
     setDietPlan(initialPlan);
   }, [dietaId, patient, patientId, setActiveVariationId]);
 
+  // Sync only on explicit storage/sync events from other sources/modals when data exists
   useEffect(() => {
-    syncFromStorage();
-  }, [syncFromStorage]);
+    const handleSync = (event?: Event) => {
+      if (event && 'detail' in event) {
+        const detail = (event as CustomEvent).detail;
+        if (detail && (detail.patientId !== patientId || detail.dietId !== dietaId)) {
+          return;
+        }
+      }
 
-  useEffect(() => {
-    const handleSync = () => {
-      syncFromStorage();
+      const saved = getDietFromStorage(patientId, dietaId);
+      if (saved) {
+        setDietPlan(saved);
+        if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
+          setActiveVariationId((prev) => {
+            const exists = saved.carbCyclingVariations.some((v) => v.id === prev);
+            return exists ? prev : (saved.carbCyclingVariations[0]?.id ?? 'var-high');
+          });
+        }
+      }
     };
 
-    window.addEventListener('focus', handleSync);
     window.addEventListener('storage', handleSync);
     window.addEventListener('nutridiet-diet-sync', handleSync);
 
     return () => {
-      window.removeEventListener('focus', handleSync);
       window.removeEventListener('storage', handleSync);
       window.removeEventListener('nutridiet-diet-sync', handleSync);
     };
-  }, [syncFromStorage]);
+  }, [dietaId, patientId, setActiveVariationId]);
 
   return { dietPlan, setDietPlan };
 }

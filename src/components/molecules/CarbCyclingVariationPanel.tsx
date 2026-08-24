@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button, Surface } from '@/components/atoms';
+import { MacroSummary } from './MacroSummary';
 import {
   Repeat,
   Copy,
@@ -176,11 +177,11 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
         </div>
       </div>
 
-      {/* Lista Vertical de Variações */}
+      {/* Grid de Variações em Colunas */}
       <div
         role="tablist"
         aria-label="Variações do ciclo"
-        className="flex flex-col gap-2.5"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
         onDragOver={(e) => e.preventDefault()}
       >
         {variations.map((v, index) => {
@@ -188,7 +189,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
           const isDraggingThis = draggedIndex === index;
           const isDragOverThis = dragOverIndex === index && draggedIndex !== index;
           const assignedDaysLabels = (v.assignedDays || []).map(
-            (dayId) => DAYS_OF_WEEK.find((d) => d.id === dayId)?.label || dayId
+            (dayId) => DAYS_OF_WEEK.find((d) => d.id === dayId)?.shortLabel || dayId
           );
 
           return (
@@ -204,7 +205,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
               onDragLeave={(e) => handleDragLeave(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               className={cn(
-                'group relative flex flex-col gap-1.5 p-3 rounded-control border text-left transition-all duration-fast cursor-pointer select-none',
+                'group relative flex flex-col justify-between gap-2 p-3 rounded-control border text-left transition-all duration-fast cursor-pointer select-none',
                 isActive
                   ? 'bg-surface border-primary shadow-xs ring-1 ring-primary'
                   : 'bg-surface-subtle border-border-subtle hover:border-border-hover hover:bg-surface',
@@ -212,68 +213,60 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
                 isDragOverThis && 'border-t-2 border-t-primary ring-2 ring-primary/20 bg-surface'
               )}
             >
-              {/* Linha 1: Handle, Indicador, Nome, Prot, Carbo, Gordura, Kcal */}
-              <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-                {/* Lado Esquerdo: Grip, Seleção e Nome */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    draggable
-                    onDragStart={(e) => {
-                      e.stopPropagation();
-                      handleDragStart(e, index);
-                    }}
-                    onDragEnd={handleDragEnd}
-                    className="text-text-muted group-hover:text-text-primary cursor-grab active:cursor-grabbing shrink-0 p-1 -m-1 rounded-control hover:bg-surface-subtle"
-                    title="Arrastar para reordenar (ou use Alt + Setas no teclado)"
-                  >
-                    <GripVertical size={15} aria-hidden="true" />
+              {/* Linha 1: Grip, Indicador e Nome */}
+              <div className="flex items-center gap-2 min-w-0 w-full text-left">
+                <div
+                  draggable
+                  onDragStart={(e) => {
+                    e.stopPropagation();
+                    handleDragStart(e, index);
+                  }}
+                  onDragEnd={handleDragEnd}
+                  className="text-text-muted group-hover:text-text-primary cursor-grab active:cursor-grabbing shrink-0 p-0.5 -m-0.5 rounded-control hover:bg-surface-subtle"
+                  title="Arrastar para reordenar (ou use Alt + Setas no teclado)"
+                >
+                  <GripVertical size={15} aria-hidden="true" />
+                </div>
+
+                {isActive ? (
+                  <div className="size-4 rounded-round bg-primary text-on-primary flex items-center justify-center shrink-0">
+                    <Check size={10} strokeWidth={3} aria-hidden="true" />
                   </div>
+                ) : (
+                  <div className="size-2 rounded-round bg-border-hover shrink-0" />
+                )}
 
-                  {isActive ? (
-                    <div className="size-4 rounded-round bg-primary text-on-primary flex items-center justify-center shrink-0">
-                      <Check size={10} strokeWidth={3} aria-hidden="true" />
-                    </div>
-                  ) : (
-                    <div className="size-2 rounded-round bg-border-hover shrink-0" />
+                <span
+                  className={cn(
+                    'text-style-body-small font-bold truncate text-left',
+                    isActive ? 'text-text-primary' : 'text-text-muted group-hover:text-text-primary'
                   )}
+                >
+                  {v.name}
+                </span>
 
-                  <span
-                    className={cn(
-                      'text-style-body-small font-bold truncate',
-                      isActive ? 'text-text-primary' : 'text-text-muted group-hover:text-text-primary'
-                    )}
-                  >
-                    {v.name}
+                {v.customBadge && (
+                  <span className="text-style-chart-micro px-1.5 py-0.5 rounded-control bg-primary-soft text-primary font-semibold shrink-0 ml-auto">
+                    {v.customBadge}
                   </span>
-                </div>
-
-                {/* Lado Direito: Macros Coloridos e Kcal Final (Texto limpo) */}
-                <div className="flex items-center gap-3 text-style-body-small font-medium shrink-0">
-                  <span className="font-bold text-macro-protein" title="Proteína">
-                    {v.targetProtein}g P
-                  </span>
-                  <span className="text-text-muted text-style-chart-micro">•</span>
-                  <span className="font-bold text-macro-carbohydrate" title="Carboidratos">
-                    {v.targetCarbs}g C
-                  </span>
-                  <span className="text-text-muted text-style-chart-micro">•</span>
-                  <span className="font-bold text-macro-fat" title="Gorduras">
-                    {v.targetFats}g G
-                  </span>
-                  <span className="text-text-muted text-style-chart-micro">•</span>
-                  <span className="font-bold text-text-primary">
-                    {v.targetKcal} <span className="text-style-legal font-normal text-text-muted">kcal</span>
-                  </span>
-                </div>
+                )}
               </div>
 
-              {/* Linha 2: Dias da Semana Selecionados */}
-              <div className="flex items-center gap-2 pl-6 pt-1 border-t border-border-subtle/70 text-style-legal text-text-muted">
+              {/* Linha 2: Macros e Kcal logo abaixo */}
+              <MacroSummary
+                protein={v.targetProtein}
+                carbs={v.targetCarbs}
+                fats={v.targetFats}
+                kcal={v.targetKcal}
+              />
+
+              {/* Linha 3: Dias da semana abreviados */}
+              <div className="flex items-center gap-1.5 pt-1.5 border-t border-border-subtle/70 text-style-legal text-text-muted text-left">
                 <Calendar size={12} className="shrink-0 text-text-muted" aria-hidden="true" />
-                <span className="font-medium text-style-chart-micro">
+                <span className="font-medium text-style-chart-micro truncate" title={assignedDaysLabels.join(', ')}>
                   {assignedDaysLabels.length > 0
                     ? assignedDaysLabels.join(', ')
-                    : 'Nenhum dia da semana vinculado'}
+                    : 'Nenhum dia vinculado'}
                 </span>
               </div>
             </div>

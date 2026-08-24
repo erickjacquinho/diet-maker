@@ -48,7 +48,7 @@ const textarea = cva(`w-full min-h-[80px] rounded-control border border-input bg
   defaultVariants: { state: "default" },
 });
 
-const badge = cva("inline-flex min-h-6 items-center gap-1 rounded-compact border px-2 py-1 text-style-legal font-semibold", {
+const badge = cva("inline-flex min-h-6 items-center gap-1 whitespace-nowrap shrink-0 rounded-compact border px-2 py-1 text-style-legal font-semibold", {
   variants: {
     tone: {
       default: "border-border-subtle bg-surface-subtle text-text-secondary",

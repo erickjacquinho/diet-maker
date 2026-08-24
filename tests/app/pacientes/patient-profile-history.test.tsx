@@ -20,7 +20,7 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-describe('PatientDetailPage history', () => {
+describe('PatientDetailPage history with two stacked tables', () => {
   beforeEach(() => {
     localStorage.clear();
     push.mockClear();
@@ -30,96 +30,29 @@ describe('PatientDetailPage history', () => {
     );
   });
 
-  it('keeps the empty history state informational', async () => {
+  it('renders both empty states cleanly with contextual creation links', async () => {
     render(<PatientDetailPage />);
 
-    await waitFor(() => expect(screen.getByText('Nenhum histórico registrado para este paciente até o momento.')).toBeInTheDocument());
-    expect(screen.queryByRole('link', { name: 'Criar Dieta' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText('Nenhuma avaliação física registrada para este paciente até o momento.'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Nenhuma prescrição dietética registrada para este paciente até o momento.'),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('link', { name: 'Nova Avaliação' })).toHaveAttribute(
+      'href',
+      '/pacientes/patient-profile-1/avaliacao/nova',
+    );
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/nova',
     );
   });
 
-  it('preserves dated diet and assessment details in the expandable table with chevron', async () => {
-    localStorage.setItem(
-      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([PATIENT_PROFILE_ASSESSMENTS[1]]),
-    );
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([{
-        id: 'diet-current',
-        name: 'Plano cutting agosto',
-        updatedAt: '2026-08-04',
-        simpleTargetKcal: 2020,
-        simpleTargetProtein: 150,
-        simpleTargetCarbs: 220,
-        simpleTargetFats: 60,
-      }]),
-    );
-
-    render(<PatientDetailPage />);
-
-    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
-    expect(table).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader')).toHaveLength(5);
-    expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true);
-    expect(screen.getByText('Dieta')).toBeInTheDocument();
-    expect(screen.getByText('Avaliação Física')).toBeInTheDocument();
-
-    const expandBtn = screen.getByRole('button', { name: 'Expandir consulta' });
-    expect(expandBtn).toBeInTheDocument();
-    fireEvent.click(expandBtn);
-
-    expect(screen.getAllByText('Plano cutting agosto')).toHaveLength(2);
-    expect(screen.getByRole('link', { name: 'Ver Consulta' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ver Cardápio' })).toBeInTheDocument();
-    expect(screen.getByText('Avaliação Física & Valores')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Recolher consulta' })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ver Cardápio' }));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-  });
-
-
-  it('consolidates multiple assessments on the same date into a single row and shows both in expanded panel', async () => {
-    localStorage.setItem(
-      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'asm-same-date-1',
-          date: '04/08/2026',
-          weightKg: 80,
-          bodyFatPercent: 15,
-          muscleMassKg: 35,
-          waistCm: 80,
-        },
-        {
-          id: 'asm-same-date-2',
-          date: '04/08/2026',
-          weightKg: 79,
-          bodyFatPercent: 14.5,
-          muscleMassKg: 35.5,
-          waistCm: 79,
-        },
-      ]),
-    );
-
-    render(<PatientDetailPage />);
-
-    const table = await screen.findByRole('table', { name: 'Histórico de consultas por data' });
-    expect(table).toBeInTheDocument();
-    expect(screen.getByText('1 consulta')).toBeInTheDocument();
-    expect(screen.getByText('2 Avaliações')).toBeInTheDocument();
-    expect(screen.getByText('+1 medição')).toBeInTheDocument();
-    expect(screen.getByText('80 kg')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Expandir consulta' }));
-    expect(screen.getByText('79 kg')).toBeInTheDocument();
-  });
-
-  it('filters table rows when switching tabs (Todas as Consultas, Avaliações Físicas, Prescrições Dietéticas)', async () => {
+  it('renders two specialized tables when assessments and diets exist', async () => {
     localStorage.setItem(
       `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
       JSON.stringify([
@@ -130,6 +63,7 @@ describe('PatientDetailPage history', () => {
           bodyFatPercent: 15,
           muscleMassKg: 35,
           waistCm: 80,
+          abdomenCm: 82,
         },
       ]),
     );
@@ -139,37 +73,48 @@ describe('PatientDetailPage history', () => {
         {
           id: 'diet-1',
           name: 'Plano cutting agosto',
-          updatedAt: '2026-08-01',
-          date: '01/08/2026',
-          simpleTargetKcal: 2020,
-          simpleTargetProtein: 150,
-          simpleTargetCarbs: 220,
-          simpleTargetFats: 60,
+          date: '04/08/2026',
+          status: 'Ativa',
+          targetKcal: 2020,
+          proteinG: 150,
+          carbsG: 220,
+          fatsG: 60,
         },
       ]),
     );
 
     render(<PatientDetailPage />);
 
-    const allTab = await screen.findByRole('tab', { name: /Todas as Consultas/ });
-    const asmTab = screen.getByRole('tab', { name: /Avaliações Físicas/ });
-    const dietTab = screen.getByRole('tab', { name: /Prescrições Dietéticas/ });
+    // 1. Tabela de Avaliações Físicas
+    const assessmentsTable = await screen.findByRole('table', {
+      name: /Histórico de avaliações físicas/,
+    });
+    expect(assessmentsTable).toBeInTheDocument();
+    expect(screen.getByText('80 kg')).toBeInTheDocument();
+    expect(screen.getByText('15%')).toBeInTheDocument();
+    expect(screen.getByText('35 kg')).toBeInTheDocument();
 
-    expect(allTab).toBeInTheDocument();
-    expect(screen.getByText('04/08/2026')).toBeInTheDocument();
-    expect(screen.getByText('01/08/2026')).toBeInTheDocument();
+    // Expansão de detalhes na tabela de avaliações
+    const detailsBtn = screen.getByRole('button', { name: 'Detalhes' });
+    fireEvent.click(detailsBtn);
+    expect(screen.getByText(/Circunferências & Perímetros Corporais/)).toBeInTheDocument();
+    expect(screen.getByText('82 cm')).toBeInTheDocument();
 
-    // Filtrar apenas avaliações físicas
-    fireEvent.click(asmTab);
-    expect(screen.getByText('04/08/2026')).toBeInTheDocument();
-    expect(screen.queryByText('01/08/2026')).not.toBeInTheDocument();
+    // 2. Tabela de Prescrições Dietéticas
+    const dietsTable = screen.getByRole('table', {
+      name: /Histórico de prescrições dietéticas/,
+    });
+    expect(dietsTable).toBeInTheDocument();
+    expect(screen.getByText('Plano cutting agosto')).toBeInTheDocument();
+    expect(screen.getByText('Plano Ativo')).toBeInTheDocument();
+    expect(screen.getByText('2020 kcal')).toBeInTheDocument();
+    expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
 
-    // Filtrar apenas prescrições dietéticas
-    fireEvent.click(dietTab);
-    expect(screen.getByText('01/08/2026')).toBeInTheDocument();
-    expect(screen.queryByText('04/08/2026')).not.toBeInTheDocument();
+    // Abertura do modal de cardápio
+    const verCardapioBtn = screen.getByRole('button', {
+      name: /Ver cardápio completo da dieta Plano cutting agosto/,
+    });
+    fireEvent.click(verCardapioBtn);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
-
-
-

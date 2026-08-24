@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/atoms';
+import { MacroSummary } from './MacroSummary';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/atoms/SelectField';
 import {
@@ -126,7 +127,9 @@ export function CycleMatrixModal({
           return { ...item, name: String(value) };
         }
 
-        const numVal = Math.max(0, Number(value) || 0);
+        const rawStr = String(value);
+        const truncatedStr = rawStr.length > 4 ? rawStr.slice(0, 4) : rawStr;
+        const numVal = Math.max(0, Number(truncatedStr) || 0);
 
         if (unitMode === 'grams') {
           const newP = field === 'protein' ? numVal : item.proteinG;
@@ -410,7 +413,7 @@ export function CycleMatrixModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden bg-surface border-border-subtle shadow-xl">
         {/* Header Superior Dedicado */}
-        <DialogHeader className="p-6 pb-4 border-b border-border-subtle bg-surface">
+        <DialogHeader className="p-6 pr-16 pb-4 border-b border-border-subtle bg-surface">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-control bg-success-soft text-success flex items-center justify-center shrink-0">
@@ -522,8 +525,16 @@ export function CycleMatrixModal({
                           type="number"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.proteinG : item.proteinGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'protein', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'protein', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           draggable={false}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="h-8 bg-surface-subtle border-border-subtle focus:border-macro-protein font-bold text-text-primary pr-8 text-style-chart-micro"
@@ -544,8 +555,16 @@ export function CycleMatrixModal({
                           type="number"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.carbsG : item.carbsGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'carbs', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'carbs', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           draggable={false}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="h-8 bg-surface-subtle border-border-subtle focus:border-macro-carbohydrate font-bold text-text-primary pr-8 text-style-chart-micro"
@@ -566,8 +585,16 @@ export function CycleMatrixModal({
                           type="number"
                           step={unitMode === 'grams' ? '1' : '0.1'}
                           min="0"
+                          max="9999"
+                          maxLength={4}
                           value={unitMode === 'grams' ? item.fatsG : item.fatsGPerKg}
-                          onChange={(e) => handleUpdateField(item.id, 'fats', e.target.value)}
+                          onChange={(e) => handleUpdateField(item.id, 'fats', e.target.value.slice(0, 4))}
+                          onInput={(e) => {
+                            const target = e.currentTarget;
+                            if (target.value.length > 4) {
+                              target.value = target.value.slice(0, 4);
+                            }
+                          }}
                           draggable={false}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="h-8 bg-surface-subtle border-border-subtle focus:border-macro-fat font-bold text-text-primary pr-8 text-style-chart-micro"
@@ -693,13 +720,12 @@ export function CycleMatrixModal({
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-style-chart-micro font-bold">
-              <span className="text-macro-protein">{weeklyAverage.avgProtein}g P</span>
-              <span className="text-text-muted">•</span>
-              <span className="text-macro-carbohydrate">{weeklyAverage.avgCarbs}g C</span>
-              <span className="text-text-muted">•</span>
-              <span className="text-macro-fat">{weeklyAverage.avgFats}g G</span>
-            </div>
+            <MacroSummary
+              protein={weeklyAverage.avgProtein}
+              carbs={weeklyAverage.avgCarbs}
+              fats={weeklyAverage.avgFats}
+              className="text-style-chart-micro font-bold"
+            />
 
             <div className="text-style-chart-micro font-bold">
               {all7DaysAssigned ? (

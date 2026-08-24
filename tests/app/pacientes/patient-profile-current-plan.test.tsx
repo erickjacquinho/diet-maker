@@ -44,8 +44,11 @@ describe('PatientDetailPage current plan', () => {
     render(<PatientDetailPage />);
 
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(screen.getByText('Plano vigente')).toBeInTheDocument();
-    expect(screen.getByText('2020 kcal · 150g P · 220g C · 60g G')).toBeInTheDocument();
+    expect(screen.getByText('Plano ativo')).toBeInTheDocument();
+    expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
+    expect(screen.getByText(/C\s*220g/)).toBeInTheDocument();
+    expect(screen.getByText(/G\s*60g/)).toBeInTheDocument();
+    expect(screen.getByText(/2020/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',

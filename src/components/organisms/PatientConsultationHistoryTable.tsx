@@ -131,16 +131,16 @@ export function PatientConsultationHistoryTable({
         <div
           role="tablist"
           aria-label="Filtrar histórico por tipo de atendimento"
-          className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-subtle/60 p-1"
+          className="flex items-center gap-1.5 rounded-surface border border-border-subtle bg-surface-subtle/60 p-1"
         >
           <button
             type="button"
             role="tab"
             aria-selected={filter === 'all'}
             onClick={() => setFilter('all')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-control px-3 py-1.5 text-style-caption transition-colors duration-fast ease-standard ${
               filter === 'all'
-                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                ? 'bg-surface font-semibold text-text-primary'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -148,7 +148,7 @@ export function PatientConsultationHistoryTable({
             <span>Todas as Consultas</span>
             <Badge
               variant="secondary"
-              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+              className="ml-0.5 px-1.5 py-0 text-style-legal font-bold text-text-secondary"
             >
               {totalAll}
             </Badge>
@@ -159,9 +159,9 @@ export function PatientConsultationHistoryTable({
             role="tab"
             aria-selected={filter === 'assessments'}
             onClick={() => setFilter('assessments')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-control px-3 py-1.5 text-style-caption transition-colors duration-fast ease-standard ${
               filter === 'assessments'
-                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                ? 'bg-surface font-semibold text-text-primary'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -169,7 +169,7 @@ export function PatientConsultationHistoryTable({
             <span>Avaliações Físicas</span>
             <Badge
               variant="secondary"
-              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+              className="ml-0.5 px-1.5 py-0 text-style-legal font-bold text-text-secondary"
             >
               {totalAssessments}
             </Badge>
@@ -180,9 +180,9 @@ export function PatientConsultationHistoryTable({
             role="tab"
             aria-selected={filter === 'diets'}
             onClick={() => setFilter('diets')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-style-caption font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-control px-3 py-1.5 text-style-caption transition-colors duration-fast ease-standard ${
               filter === 'diets'
-                ? 'bg-surface font-semibold text-text-primary shadow-xs'
+                ? 'bg-surface font-semibold text-text-primary'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -190,7 +190,7 @@ export function PatientConsultationHistoryTable({
             <span>Prescrições Dietéticas</span>
             <Badge
               variant="secondary"
-              className="ml-0.5 px-1.5 py-0 text-[10px] font-bold text-text-secondary"
+              className="ml-0.5 px-1.5 py-0 text-style-legal font-bold text-text-secondary"
             >
               {totalDiets}
             </Badge>
@@ -242,7 +242,7 @@ export function PatientConsultationHistoryTable({
               onOpenReadOnlyDiet={onOpenReadOnlyDiet}
             />
           )}
-          className="border border-border-subtle rounded-surface overflow-hidden shadow-xs"
+          className="border border-border-subtle rounded-surface overflow-hidden"
           tableClassName="table-fixed"
         />
       )}

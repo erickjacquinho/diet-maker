@@ -24,4 +24,5 @@ export * from './DataTable';
 export * from './ActionDropdown';
 export * from './CarbCyclingVariationPanel';
 export * from './CycleMatrixModal';
+export * from './MacroSummary';
 export * from '@/components/atoms/SelectField';

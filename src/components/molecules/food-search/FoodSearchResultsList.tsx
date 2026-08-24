@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Badge, Button } from '@/components/atoms';
+import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { Check } from 'lucide-react';
 import { FoodItem } from '@/lib/tacoStore';
 import { cn } from '@/lib/utils';
@@ -46,15 +47,14 @@ export function FoodSearchResultsList({
                     {food.category}
                   </Badge>
                 </div>
-                <div className="text-style-legal text-text-muted flex items-center gap-2">
-                  <span className="text-macro-protein font-semibold">P: {food.proteinG}g</span>
-                  <span>•</span>
-                  <span className="text-macro-carbohydrate font-semibold">C: {food.carbsG}g</span>
-                  <span>•</span>
-                  <span className="text-macro-fat font-semibold">G: {food.fatsG}g</span>
-                  <span>•</span>
-                  <span>{food.kcal} kcal (por 100g)</span>
-                </div>
+                <MacroSummary
+                  protein={food.proteinG}
+                  carbs={food.carbsG}
+                  fats={food.fatsG}
+                  kcal={food.kcal}
+                  kcalSuffix="kcal (por 100g)"
+                  className="text-style-legal text-text-muted"
+                />
               </div>
 
               {isSelected && (

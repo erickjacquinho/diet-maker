@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { Patient } from '@/lib/patientsStore';
 import { FullDietPlan, calculateMealTotals } from '@/lib/dietStore';
 import { MacroMetricCardProps } from '@/components/molecules';
-import { BadgeProps } from '@/components/atoms';
-
-type BadgeTone = NonNullable<BadgeProps['variant']>;
+import {
+  calculateKcalFromMacros,
+  buildMacroMetricCardProps,
+} from '@/lib/nutrition/macroCalculations';
 
 export function useDietCalculations(
   dietPlan: FullDietPlan | null,
@@ -13,110 +14,98 @@ export function useDietCalculations(
 ) {
   const { currentMeals, targetKcal, targetProt, targetCarb, targetFat } = useMemo(() => {
     if (!dietPlan) {
-      return { currentMeals: [], targetKcal: 2000, targetProt: 140, targetCarb: 220, targetFat: 60 };
+      const pProt = patient?.targetProtein ?? 0;
+      const pCarb = patient?.targetCarbs ?? 0;
+      const pFat = patient?.targetFats ?? 0;
+      const pKcal = patient?.targetKcal ?? calculateKcalFromMacros(pProt, pCarb, pFat);
+
+      return {
+        currentMeals: [],
+        targetKcal: pKcal,
+        targetProt: pProt,
+        targetCarb: pCarb,
+        targetFat: pFat,
+      };
     }
 
     if (dietPlan.mode === 'simple') {
+      const prot = Number(dietPlan.simpleTargetProtein) || 0;
+      const carb = Number(dietPlan.simpleTargetCarbs) || 0;
+      const fat = Number(dietPlan.simpleTargetFats) || 0;
+      const kcal = Number(dietPlan.simpleTargetKcal) || calculateKcalFromMacros(prot, carb, fat);
+
       return {
         currentMeals: dietPlan.simpleMeals || [],
-        targetKcal: dietPlan.simpleTargetKcal,
-        targetProt: dietPlan.simpleTargetProtein,
-        targetCarb: dietPlan.simpleTargetCarbs,
-        targetFat: dietPlan.simpleTargetFats,
+        targetKcal: kcal,
+        targetProt: prot,
+        targetCarb: carb,
+        targetFat: fat,
       };
     } else {
-      const activeVar = dietPlan.carbCyclingVariations.find((v) => v.id === activeVariationId) || dietPlan.carbCyclingVariations[0];
+      const activeVar =
+        dietPlan.carbCyclingVariations.find((v) => v.id === activeVariationId) ||
+        dietPlan.carbCyclingVariations[0];
+
+      const prot = activeVar ? Number(activeVar.targetProtein) || 0 : (patient?.targetProtein ?? 0);
+      const carb = activeVar ? Number(activeVar.targetCarbs) || 0 : (patient?.targetCarbs ?? 0);
+      const fat = activeVar ? Number(activeVar.targetFats) || 0 : (patient?.targetFats ?? 0);
+      const kcal = activeVar
+        ? (Number(activeVar.targetKcal) || calculateKcalFromMacros(prot, carb, fat))
+        : (patient?.targetKcal ?? calculateKcalFromMacros(prot, carb, fat));
+
       return {
         currentMeals: activeVar ? activeVar.meals : [],
-        targetKcal: activeVar ? activeVar.targetKcal : 2000,
-        targetProt: activeVar ? activeVar.targetProtein : 140,
-        targetCarb: activeVar ? activeVar.targetCarbs : 220,
-        targetFat: activeVar ? activeVar.targetFats : 60,
+        targetKcal: kcal,
+        targetProt: prot,
+        targetCarb: carb,
+        targetFat: fat,
       };
     }
-  }, [dietPlan, activeVariationId]);
+  }, [dietPlan, activeVariationId, patient]);
 
-  const currentTotals = useMemo(() => calculateMealTotals(currentMeals.flatMap(m => m.items)), [currentMeals]);
+  const currentTotals = useMemo(
+    () => calculateMealTotals(currentMeals.flatMap((m) => m.items)),
+    [currentMeals]
+  );
 
   const macroMetrics: MacroMetricCardProps[] = useMemo(() => {
-    const weight = patient?.weightKg || 70;
-
-    const kcalDiff = currentTotals.kcal - targetKcal;
-    const kcalBadgeText = kcalDiff === 0 ? 'Na meta ✓' : kcalDiff > 0 ? `+${kcalDiff} kcal` : `${kcalDiff} kcal`;
-    const kcalBadgeVariant: BadgeTone = Math.abs(kcalDiff) <= targetKcal * 0.05 ? 'emerald' : kcalDiff > 0 ? 'rose' : 'amber';
-    const kcalPct = targetKcal > 0 ? Math.min(100, Math.round((currentTotals.kcal / targetKcal) * 100)) : 0;
-
-    const protDiff = currentTotals.proteinG - targetProt;
-    const protMet = Math.abs(protDiff) <= targetProt * 0.05;
-    const protStatus = protMet ? 'Meta' : protDiff > 0 ? 'Excesso' : 'Déficit';
-    const protBadgeVariant: BadgeTone = Math.abs(protDiff) <= targetProt * 0.05 ? 'emerald' : protDiff > 0 ? 'rose' : 'amber';
-    const protBadgeText = protMet ? 'Na meta ✓' : protDiff > 0 ? `+${Math.round(protDiff)}g` : `${Math.round(protDiff)}g`;
-    const protPct = targetProt > 0 ? Math.min(100, Math.round((currentTotals.proteinG / targetProt) * 100)) : 0;
-    const protGPerKg = (currentTotals.proteinG / weight).toFixed(2);
-    const protMetaGPerKg = (targetProt / weight).toFixed(1);
-
-    const carbDiff = currentTotals.carbsG - targetCarb;
-    const carbMet = Math.abs(carbDiff) <= targetCarb * 0.05;
-    const carbStatus = carbMet ? 'Meta' : carbDiff > 0 ? 'Excesso' : 'Déficit';
-    const carbBadgeVariant: BadgeTone = Math.abs(carbDiff) <= targetCarb * 0.05 ? 'emerald' : carbDiff > 0 ? 'rose' : 'amber';
-    const carbBadgeText = carbMet ? 'Na meta ✓' : carbDiff > 0 ? `+${Math.round(carbDiff)}g` : `${Math.round(carbDiff)}g`;
-    const carbPct = targetCarb > 0 ? Math.min(100, Math.round((currentTotals.carbsG / targetCarb) * 100)) : 0;
-    const carbGPerKg = (currentTotals.carbsG / weight).toFixed(2);
-    const carbMetaGPerKg = (targetCarb / weight).toFixed(1);
-
-    const fatsVal = currentTotals.fatsG;
-    const fatDiff = Math.round((fatsVal - targetFat) * 10) / 10;
-    const fatBadgeText = Math.abs(fatDiff) <= 2 ? 'Na meta ✓' : fatDiff > 0 ? `+${fatDiff}g` : `${fatDiff}g`;
-    const fatBadgeVariant: BadgeTone = Math.abs(fatDiff) <= targetFat * 0.05 ? 'emerald' : fatDiff > 0 ? 'rose' : 'amber';
-    const fatPct = targetFat > 0 ? Math.min(100, Math.round((fatsVal / targetFat) * 100)) : 0;
-    const fatGPerKg = (fatsVal / weight).toFixed(2);
-    const fatMetaGPerKg = (targetFat / weight).toFixed(1);
+    const weightKg = patient?.weightKg;
 
     return [
-      {
+      buildMacroMetricCardProps({
         label: 'Calorias',
-        currentValue: `${currentTotals.kcal}`,
-        targetValue: `${targetKcal} kcal`,
-        statusBadgeText: kcalBadgeText,
-        statusBadgeVariant: kcalBadgeVariant,
-        percentage: kcalPct,
+        current: currentTotals.kcal,
+        target: targetKcal,
+        unit: 'kcal',
         macroColor: 'blue',
-      },
-      {
+      }),
+      buildMacroMetricCardProps({
         label: 'Proteínas',
-        currentValue: `${Math.round(currentTotals.proteinG)}g`,
-        targetValue: `${targetProt}g`,
-        statusBadgeText: protBadgeText,
-        statusBadgeVariant: protBadgeVariant,
-        percentage: protPct,
-        gPerKgRatio: `${protGPerKg} g/kg`,
-        gPerKgMeta: protMetaGPerKg,
+        current: currentTotals.proteinG,
+        target: targetProt,
+        unit: 'g',
         macroColor: 'protein',
-      },
-      {
+        weightKg,
+      }),
+      buildMacroMetricCardProps({
         label: 'Carboidratos',
-        currentValue: `${Math.round(currentTotals.carbsG)}g`,
-        targetValue: `${targetCarb}g`,
-        statusBadgeText: carbBadgeText,
-        statusBadgeVariant: carbBadgeVariant,
-        percentage: carbPct,
-        gPerKgRatio: `${carbGPerKg} g/kg`,
-        gPerKgMeta: carbMetaGPerKg,
+        current: currentTotals.carbsG,
+        target: targetCarb,
+        unit: 'g',
         macroColor: 'carbohydrate',
-      },
-      {
+        weightKg,
+      }),
+      buildMacroMetricCardProps({
         label: 'Gorduras',
-        currentValue: `${Math.round(fatsVal)}g`,
-        targetValue: `${targetFat}g`,
-        statusBadgeText: fatBadgeText,
-        statusBadgeVariant: fatBadgeVariant,
-        percentage: fatPct,
-        gPerKgRatio: `${fatGPerKg} g/kg`,
-        gPerKgMeta: fatMetaGPerKg,
+        current: currentTotals.fatsG,
+        target: targetFat,
+        unit: 'g',
         macroColor: 'fat',
-      },
+        weightKg,
+        isFat: true,
+      }),
     ];
-  }, [patient, currentTotals, targetKcal, targetProt, targetCarb, targetFat]);
+  }, [patient?.weightKg, currentTotals, targetKcal, targetProt, targetCarb, targetFat]);
 
   return {
     currentMeals,

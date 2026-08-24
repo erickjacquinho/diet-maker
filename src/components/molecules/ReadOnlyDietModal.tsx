@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { textStyle } from '@/design-system';
+import { cn } from '@/lib/utils';
 import { HistoricalDiet } from '@/lib/patientsStore';
 import {
   Dialog,
@@ -9,9 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { SecondaryActionButton } from '@/components/atoms';
+import { Badge, SecondaryActionButton } from '@/components/atoms';
+import { MacroSummary } from './MacroSummary';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { Utensils, Clock, Printer, Eye, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculatePresetCalories } from '@/lib/presetUtils';
@@ -33,70 +35,98 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
   const displayKcal = calculatePresetCalories(diet.proteinG, diet.carbsG, diet.fatsG) || diet.targetKcal || 0;
   const displayMeals = diet.meals || [];
+  const isActive = diet.status === 'Ativa';
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-col gap-3 border-b border-border-subtle pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-control bg-success-soft text-success shrink-0">
-                <Utensils size={20} />
-              </div>
-              <div>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-5">
+        <DialogHeader className="pr-0 flex flex-col gap-4 border-b border-border-divider pb-4">
+          <div className="flex items-start gap-3 min-w-0 pr-10">
+            <div className="p-2.5 rounded-control bg-primary-soft text-primary shrink-0 mt-0.5">
+              <Utensils size={20} aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <DialogTitle className={textStyle('dialog-title')}>
                   {diet.name}
                 </DialogTitle>
-                <div className={`flex items-center gap-2 mt-0.5 ${textStyle('caption')}`}>
-                  {patientName && <span>Paciente: <strong className={textStyle('body-small-strong')}>{patientName}</strong> •</span>}
-                  <span>Prescrito em {diet.date}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="neutral" className="flex items-center gap-1 whitespace-nowrap">
+                    <Lock size={10} className="mr-0.5" aria-hidden="true" />
+                    <span>Somente Leitura</span>
+                  </Badge>
+                  <Badge variant={isActive ? 'primary' : 'neutral'} className="whitespace-nowrap">
+                    {isActive ? 'Plano Ativo' : diet.status}
+                  </Badge>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-surface-subtle text-text-muted border-border-subtle font-semibold text-style-caption flex items-center gap-1 px-2.5 py-1">
-                <Lock size={10} className="mr-1" />
-                Modo Somente Leitura
-              </Badge>
-              <Badge variant="secondary" className="text-style-caption font-semibold">
-                {diet.status}
-              </Badge>
+              <div className={cn('flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-text-secondary', textStyle('caption'))}>
+                {patientName && (
+                  <span className="whitespace-nowrap">
+                    Paciente: <strong className={textStyle('caption-strong')}>{patientName}</strong>
+                  </span>
+                )}
+                {patientName && diet.date && (
+                  <span className="text-text-muted select-none" aria-hidden="true">
+                    •
+                  </span>
+                )}
+                {diet.date && <span className="whitespace-nowrap">{diet.date}</span>}
+              </div>
             </div>
           </div>
 
-          {/* Macro Summary Header */}
-          <div className="grid grid-cols-4 gap-2 pt-2 text-center">
-            <div className="p-2.5 bg-surface-subtle border border-border-subtle rounded-control">
-              <span className={`block ${textStyle('chart-micro')}`}>Calorias</span>
-              <span className={`font-bold ${textStyle('body-small')}`}>{displayKcal} kcal</span>
-            </div>
-            <div className="p-2.5 bg-primary-soft border border-primary-border rounded-control">
-              <span className={`block text-macro-protein ${textStyle('chart-micro')}`}>Proteínas</span>
-              <span className={`font-bold text-macro-protein ${textStyle('body-small')}`}>{diet.proteinG}g</span>
-            </div>
-            <div className="p-2.5 bg-warning-soft border border-warning-border rounded-control">
-              <span className={`block text-warning ${textStyle('chart-micro')}`}>Carboidratos</span>
-              <span className={`font-bold text-warning ${textStyle('body-small')}`}>{diet.carbsG}g</span>
-            </div>
-            <div className="p-2.5 bg-success-soft border border-success-border rounded-control">
-              <span className={`block text-success ${textStyle('chart-micro')}`}>Gorduras</span>
-              <span className={`font-bold text-success ${textStyle('body-small')}`}>{diet.fatsG}g</span>
-            </div>
-          </div>
+          {/* Macro Summary Header with divider */}
+          <MetricBoxGroup
+            items={[
+              {
+                size: 'standard',
+                tone: 'muted',
+                label: 'Calorias',
+                value: `${displayKcal} kcal`,
+                layout: 'stack',
+                surface: 'inline',
+              },
+              {
+                size: 'standard',
+                tone: 'protein',
+                label: 'Proteínas',
+                value: `${diet.proteinG}g`,
+                layout: 'stack',
+                surface: 'inline',
+              },
+              {
+                size: 'standard',
+                tone: 'carbohydrate',
+                label: 'Carboidratos',
+                value: `${diet.carbsG}g`,
+                layout: 'stack',
+                surface: 'inline',
+              },
+              {
+                size: 'standard',
+                tone: 'fat',
+                label: 'Gorduras',
+                value: `${diet.fatsG}g`,
+                layout: 'stack',
+                surface: 'inline',
+              },
+            ]}
+          />
         </DialogHeader>
 
         {/* Refeições Lista */}
-        <div className="py-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h3 className={`flex items-center gap-1.5 ${textStyle('subsection-title')}`}>
-              <Eye size={14} className="text-success shrink-0" />
+            <h3 className={cn('flex items-center gap-2 text-text-primary', textStyle('subsection-title'))}>
+              <Eye size={15} className="text-primary shrink-0" aria-hidden="true" />
               <span>Plano Alimentar Prescrito ({displayMeals.length} Refeições)</span>
             </h3>
           </div>
 
           {displayMeals.length === 0 ? (
             <div className="p-8 text-center bg-surface-subtle border border-dashed border-border-subtle rounded-control flex flex-col gap-2">
-              <Utensils size={24} className="mx-auto text-text-muted opacity-subdued" />
+              <Utensils size={24} className="mx-auto text-text-muted opacity-subdued" aria-hidden="true" />
               <p className={textStyle('body-secondary')}>Nenhuma refeição cadastrada neste plano alimentar.</p>
             </div>
           ) : (
@@ -106,31 +136,34 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
                 return (
                   <div
                     key={idx}
-                    className="p-4 bg-surface border border-border-subtle rounded-control flex flex-col gap-2 shadow-floating transition-colors hover:border-success/40"
+                    className="p-4 bg-surface border border-border-subtle rounded-control flex flex-col gap-3 transition-colors hover:border-border-hover"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-surface-subtle rounded-surface text-text-primary shrink-0">
-                          <Clock size={13} />
+                        <div className="p-1.5 bg-surface-subtle rounded-control text-text-muted shrink-0">
+                          <Clock size={13} aria-hidden="true" />
                         </div>
-                        <span className={textStyle('body-small-strong')}>{meal.time}</span>
-                        <span className={textStyle('body-small-strong')}>• {meal.name}</span>
+                        <span className={textStyle('body-strong')}>{meal.time}</span>
+                        <span className={textStyle('body-strong')}>• {meal.name}</span>
                       </div>
-                      <span className={`text-success bg-success-soft px-2 py-0.5 rounded-control ${textStyle('caption-strong')}`}>
+                      <span className={cn('font-semibold text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-1 rounded-control', textStyle('caption'))}>
                         {mealKcal} kcal
                       </span>
                     </div>
 
                     {meal.itemsSummary && (
-                      <p className={`bg-surface-subtle p-2.5 rounded-surface border border-border-subtle ${textStyle('body-small')}`}>
+                      <p className={cn('bg-surface-subtle p-3 rounded-control border border-border-subtle leading-relaxed text-text-primary', textStyle('body-small'))}>
                         {meal.itemsSummary}
                       </p>
                     )}
 
-                    <div className={`flex items-center justify-end gap-3 pt-1 ${textStyle('caption')}`}>
-                      <span>P: <strong className="text-macro-protein font-bold">{meal.proteinG}g</strong></span>
-                      <span>C: <strong className="text-warning font-bold">{meal.carbsG}g</strong></span>
-                      <span>G: <strong className="text-success font-bold">{meal.fatsG}g</strong></span>
+                    <div className="pt-2 border-t border-border-divider/60 flex items-center justify-end">
+                      <MacroSummary
+                        protein={meal.proteinG}
+                        carbs={meal.carbsG}
+                        fats={meal.fatsG}
+                        className={cn('justify-end', textStyle('caption'))}
+                      />
                     </div>
                   </div>
                 );
@@ -140,10 +173,10 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="border-t border-border-subtle pt-4 flex items-center justify-between">
+        <div className="border-t border-border-divider pt-4 flex items-center justify-between gap-3">
           <SecondaryActionButton
             onClick={() => toast.info('Impressão/Exportação da dieta acionada')}
-            icon={<Printer size={14} />}
+            icon={<Printer size={14} aria-hidden="true" />}
           >
             Imprimir Plano Alimentar
           </SecondaryActionButton>

@@ -142,7 +142,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           <MacroTrackerHeader
             patientInitials={resolvedInitials}
             patientName={resolvedName}
-            patientWeightKg={resolvedWeightKg || 70}
+            patientWeightKg={resolvedWeightKg}
             patientGoalDescription={resolvedObjective}
             metrics={metricsToRender}
             showPatientContext={false}

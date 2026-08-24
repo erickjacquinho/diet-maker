@@ -75,7 +75,7 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
     // Mode is carb_cycling and variations are visible
     expect(screen.getByTestId('carb-cycling-variation-panel')).toBeInTheDocument();
     expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
-    expect(screen.getByText('Segunda-feira, Terça-feira, Quarta-feira, Quinta-feira, Sexta-feira, Sábado, Domingo')).toBeInTheDocument();
+    expect(screen.getByText('Seg, Ter, Qua, Qui, Sex, Sáb, Dom')).toBeInTheDocument();
   });
 
   it('preserves draft from /dieta/nova when clicking Configurar Ciclo and opens /dieta/nova/ciclo', () => {
@@ -115,5 +115,50 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
     render(<DedicatedCarbCyclingPage />);
     expect(screen.getByText('Configuração do Ciclo de Carboidratos')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Dia Alto Carbo')).toBeInTheDocument();
+  });
+
+  it('preserves added variations and edits when switching browser tabs (focus event) or variation tabs in /dieta/nova', () => {
+    let storedDiets: dietStore.FullDietPlan[] = [];
+    vi.spyOn(dietStore, 'getPatientDietsFromStorage').mockImplementation(() => storedDiets);
+    vi.spyOn(dietStore, 'getDietFromStorage').mockImplementation((pid, did) => {
+      return storedDiets.find((d) => d.patientId === pid && d.id === did) || null;
+    });
+
+    render(<DietBuilderPage />);
+
+    // Switch to carb cycling mode
+    const cyclingTab = screen.getByRole('tab', { name: /Ciclo de Carboidratos/i });
+    fireEvent.click(cyclingTab);
+
+    // Initial 3 variations are rendered
+    expect(screen.getByTestId('carb-cycling-variation-panel')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Médio Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Baixo Carbo')).toBeInTheDocument();
+
+    // Click "Adicionar Dia"
+    const addVariationBtn = screen.getByRole('button', { name: /Adicionar Dia/i });
+    fireEvent.click(addVariationBtn);
+
+    // Variação 4 should now be visible
+    expect(screen.getByText('Variação 4')).toBeInTheDocument();
+
+    // Simulate switching browser tab and returning (fires 'focus' event on window)
+    window.dispatchEvent(new Event('focus'));
+
+    // Variação 4 and all variations must still be present!
+    expect(screen.getByText('Variação 4')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Médio Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Baixo Carbo')).toBeInTheDocument();
+
+    // Select another variation tab (e.g. Dia Médio Carbo)
+    fireEvent.click(screen.getByText('Dia Médio Carbo'));
+
+    // Again simulate tab switch / focus event
+    window.dispatchEvent(new Event('focus'));
+
+    // Variação 4 must still be preserved
+    expect(screen.getByText('Variação 4')).toBeInTheDocument();
   });
 });

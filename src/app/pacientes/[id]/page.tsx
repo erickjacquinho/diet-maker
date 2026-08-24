@@ -6,15 +6,16 @@ import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale } fr
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton } from '@/components/atoms';
 import {
-  PatientConsultationHistoryTable,
+  PatientAssessmentsTable,
+  PatientDietsTable,
   PatientProfileHeader,
 } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
 import { PageContextHeader } from '@/components/molecules';
 import { textStyle } from '@/design-system';
+import { cn } from '@/lib/utils';
 import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
-import { buildConsolidatedConsultations } from '@/lib/patientProfileConsultations';
 
 export default function PatientDetailPage() {
   const {
@@ -53,8 +54,6 @@ export default function PatientDetailPage() {
     handleSavePatient,
     handleDeletePatient,
   } = usePatientProfilePage();
-
-  const consultations = buildConsolidatedConsultations(dietHistory, bodyAssessments);
 
   if (!patient) {
     return (
@@ -124,41 +123,68 @@ export default function PatientDetailPage() {
         onOpenNextEvent={() => setIsNextEventModalOpen(true)}
       />
 
+      {/* 1. Histórico de Prescrições & Planos Alimentares */}
       <Surface className="p-6 flex flex-col gap-6">
         <div className="flex items-center justify-between gap-4 border-b border-border-divider pb-4">
           <div>
-            <h2 className="text-style-section-title font-bold text-text-primary flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-success" />
-              <span>Histórico de consultas</span>
+            <h2 className={cn(textStyle('section-title'), 'flex items-center gap-2 text-text-primary')}>
+              <Utensils className="w-5 h-5 text-primary" />
+              <span>Histórico de prescrições dietéticas</span>
             </h2>
-            <p className="text-style-caption text-text-secondary mt-0.5">
-              Dietas e avaliações físicas do paciente.
+            <p className={cn(textStyle('caption'), 'text-text-secondary mt-0.5')}>
+              Planos alimentares, metas calóricas, distribuição de macronutrientes e cardápios.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {consultations.length === 1 ? '1 consulta' : `${consultations.length} consultas`}
+              {dietHistory.length === 1 ? '1 plano' : `${dietHistory.length} planos`}
             </span>
-            <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
-              <SecondaryActionButton icon={<Scale size={14} />}>
-                Nova Avaliação
-              </SecondaryActionButton>
-            </Link>
             <Link href={`/pacientes/${patientId}/dieta/nova`}>
               <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
             </Link>
           </div>
         </div>
 
-        <PatientConsultationHistoryTable
+        <PatientDietsTable
           patientId={patientId}
           diets={dietHistory}
-          assessments={bodyAssessments}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
+        />
+      </Surface>
+
+      {/* 2. Histórico de Avaliações Físicas & Antropometria */}
+      <Surface className="p-6 flex flex-col gap-6">
+        <div className="flex items-center justify-between gap-4 border-b border-border-divider pb-4">
+          <div>
+            <h2 className={cn(textStyle('section-title'), 'flex items-center gap-2 text-text-primary')}>
+              <Scale className="w-5 h-5 text-primary" />
+              <span>Histórico de avaliações físicas</span>
+            </h2>
+            <p className={cn(textStyle('caption'), 'text-text-secondary mt-0.5')}>
+              Evolução da composição corporal, peso, % de gordura e perímetros.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className={textStyle('caption')}>
+              {bodyAssessments.length === 1 ? '1 avaliação' : `${bodyAssessments.length} avaliações`}
+            </span>
+            <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
+              <CreateButton icon={<Scale size={14} />}>
+                Nova Avaliação
+              </CreateButton>
+            </Link>
+          </div>
+        </div>
+
+        <PatientAssessmentsTable
+          patientId={patientId}
+          assessments={bodyAssessments}
           onOpenEditAssessment={handleOpenEditAssessment}
         />
       </Surface>
+
 
       <PatientProfileModals
         patient={patient}
