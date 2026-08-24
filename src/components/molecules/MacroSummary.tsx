@@ -6,6 +6,7 @@ export interface MacroSummaryProps {
   carbs: number | string;
   fats: number | string;
   kcal?: number | string;
+  showKcal?: boolean;
   unit?: string;
   kcalSuffix?: string;
   showLabels?: boolean;
@@ -18,17 +19,21 @@ export const MacroSummary: React.FC<MacroSummaryProps> = ({
   carbs,
   fats,
   kcal,
+  showKcal = true,
   unit = 'g',
   kcalSuffix = 'kcal',
   showLabels = true,
   className,
   'data-testid': testId = 'macro-summary',
 }) => {
+  const isKcalVisible =
+    showKcal !== false && kcal !== undefined && kcal !== null && kcal !== '';
+
   return (
     <div
       data-testid={testId}
       className={cn(
-        'flex flex-wrap items-center gap-1.5 text-style-caption font-medium text-left',
+        'inline-flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-style-caption font-medium text-left shrink-0',
         className
       )}
     >
@@ -63,8 +68,8 @@ export const MacroSummary: React.FC<MacroSummaryProps> = ({
         {unit}
       </span>
 
-      {/* Calorias (opcional) */}
-      {kcal !== undefined && kcal !== null && (
+      {/* Calorias (opcional e controlável) */}
+      {isKcalVisible && (
         <>
           <span className="text-text-muted text-style-chart-micro" aria-hidden="true">
             •

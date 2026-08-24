@@ -67,6 +67,38 @@ describe('MacroSummary component', () => {
     expect(screen.getByText('60g')).toBeInTheDocument();
   });
 
+  it('applies flex-nowrap and whitespace-nowrap preventing line breaks', () => {
+    render(
+      <MacroSummary
+        protein={150}
+        carbs={286}
+        fats={60}
+        kcal={2284}
+        data-testid="nowrap-summary"
+      />
+    );
+
+    const container = screen.getByTestId('nowrap-summary');
+    expect(container).toHaveClass('flex-nowrap');
+    expect(container).toHaveClass('whitespace-nowrap');
+  });
+
+  it('hides calories when showKcal is false even if kcal is provided', () => {
+    render(
+      <MacroSummary
+        protein={150}
+        carbs={286}
+        fats={60}
+        kcal={2284}
+        showKcal={false}
+        data-testid="hide-kcal-summary"
+      />
+    );
+
+    expect(screen.queryByText(/2284/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/kcal/)).not.toBeInTheDocument();
+  });
+
   it('applies custom className and data-testid', () => {
     render(
       <MacroSummary

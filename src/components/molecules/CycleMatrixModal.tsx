@@ -724,6 +724,7 @@ export function CycleMatrixModal({
               protein={weeklyAverage.avgProtein}
               carbs={weeklyAverage.avgCarbs}
               fats={weeklyAverage.avgFats}
+              showKcal={false}
               className="text-style-chart-micro font-bold"
             />
 

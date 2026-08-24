@@ -162,6 +162,7 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
                         protein={meal.proteinG}
                         carbs={meal.carbsG}
                         fats={meal.fatsG}
+                        showKcal={false}
                         className={cn('justify-end', textStyle('caption'))}
                       />
                     </div>

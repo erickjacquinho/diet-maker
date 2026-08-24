@@ -110,6 +110,7 @@ export function DietTableRow({
           protein={diet.proteinG}
           carbs={diet.carbsG}
           fats={diet.fatsG}
+          showKcal={false}
           className={textStyle('table-number')}
         />
       </TableCell>

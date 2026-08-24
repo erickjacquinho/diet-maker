@@ -83,6 +83,7 @@ export function ConsultationDietCard({
                           protein={meal.proteinG}
                           carbs={meal.carbsG}
                           fats={meal.fatsG}
+                          showKcal={false}
                           className="text-text-muted font-medium text-style-legal"
                         />
                         <span className="font-semibold text-style-legal text-text-muted bg-surface-subtle border border-border-subtle px-2.5 py-1 rounded-surface">
