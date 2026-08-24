@@ -9,10 +9,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button, Badge, Surface } from '@/components/atoms';
+import { Button } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/atoms/SelectField';
-import { Edit3, RotateCcw, Flame } from 'lucide-react';
+import { Edit3, RotateCcw } from 'lucide-react';
 import { calculateMacroDistributionPct } from '@/lib/nutrition/macroCalculations';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ export interface AdjustDietGoalsModalProps {
   tempTargetFat: number;
   setTempTargetFat: (val: number) => void;
   patientWeightKg?: number;
+  mode?: 'simple' | 'carb_cycling';
   variationName?: string;
   onVariationNameChange?: (name: string) => void;
   onSave: () => void;
@@ -42,6 +43,7 @@ export function AdjustDietGoalsModal({
   tempTargetFat,
   setTempTargetFat,
   patientWeightKg = 70,
+  mode = 'simple',
   variationName,
   onVariationNameChange,
   onSave,
@@ -52,6 +54,8 @@ export function AdjustDietGoalsModal({
   const [protGKg, setProtGKg] = useState<number>(Number((tempTargetProt / weight).toFixed(1)));
   const [carbGKg, setCarbGKg] = useState<number>(Number((tempTargetCarb / weight).toFixed(1)));
   const [fatGKg, setFatGKg] = useState<number>(Number((tempTargetFat / weight).toFixed(1)));
+
+  const isSimpleMode = mode === 'simple' || (!variationName && mode !== 'carb_cycling');
 
   useEffect(() => {
     if (isOpen) {
@@ -109,14 +113,14 @@ export function AdjustDietGoalsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg bg-surface">
+      <DialogContent className="max-w-2xl bg-surface sm:max-w-2xl p-6">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-4">
             <DialogTitle className="flex items-center gap-2 text-text-primary text-style-body font-bold">
               <Edit3 className="w-4 h-4 text-primary" aria-hidden="true" />
               <span>Ajustar Metas Nutricionais</span>
             </DialogTitle>
-            <div className="w-36 shrink-0">
+            <div className="w-40 shrink-0">
               <SelectField
                 id="adjust-unit-mode"
                 value={unitMode}
@@ -131,39 +135,41 @@ export function AdjustDietGoalsModal({
             </div>
           </div>
           <DialogDescription className="text-style-legal text-text-muted mt-1">
-            Defina os alvos em {unitMode === 'grams' ? 'gramas (g)' : `gramas por quilo (g/kg para ${weight}kg)`}. Calorias e proporções são atualizadas em tempo real.
+            Defina os alvos em {unitMode === 'grams' ? 'gramas (g)' : `gramas por quilo (g/kg para ${weight}kg)`}. As calorias e proporções são calculadas em tempo real.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-2 flex flex-col gap-4">
-          {/* Campo opcional de variação (apenas se fornecido explicitamente) */}
-          {variationName !== undefined && onVariationNameChange && (
-            <div>
-              <label className={cn(textStyle('field-label'), 'mb-1 block')}>Nome da Variação / Dia</label>
-              <Input
-                type="text"
-                value={variationName}
-                onChange={(e) => onVariationNameChange(e.target.value)}
-                placeholder="Ex: Dia de Treino Pesado"
-                className="bg-surface font-medium"
-              />
+          {/* Cabeçalho da Seção / Modo */}
+          {isSimpleMode ? (
+            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-style-body font-bold text-text-primary">Dieta Simples</span>
+                <span className="text-style-legal text-text-muted">· Metas diárias unificadas</span>
+              </div>
             </div>
+          ) : (
+            onVariationNameChange && (
+              <div>
+                <label className={cn(textStyle('field-label'), 'mb-1 block')}>Nome da Variação / Dia</label>
+                <Input
+                  type="text"
+                  value={variationName || ''}
+                  onChange={(e) => onVariationNameChange(e.target.value)}
+                  placeholder="Ex: Dia Alto Carbo"
+                  className="bg-surface font-medium"
+                />
+              </div>
+            )
           )}
 
-          {/* Grid de 3 Colunas: Proteínas -> Carboidratos -> Gorduras */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Grid de 4 Colunas no mesmo formato: Proteínas -> Carboidratos -> Gorduras -> Calorias */}
+          <div className="grid grid-cols-4 gap-3.5">
             {/* 1. Proteínas */}
-            <div className="p-3 bg-surface-subtle/50 border border-border-subtle rounded-surface flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className={cn(textStyle('field-label'), 'text-macro-protein font-bold')}>
-                  Proteínas
-                </label>
-                {distribution.totalKcal > 0 && (
-                  <Badge variant="primary" className="text-[10px] px-1.5 py-0 h-4">
-                    {distribution.proteinPct}%
-                  </Badge>
-                )}
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label className={cn(textStyle('field-label'), 'text-macro-protein font-bold text-center block')}>
+                Proteínas {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              </label>
               <Input
                 type="number"
                 step={unitMode === 'grams' ? '1' : '0.1'}
@@ -175,7 +181,7 @@ export function AdjustDietGoalsModal({
                     ? handleGramsChange('prot', Number(e.target.value))
                     : handleGPerKgChange('prot', Number(e.target.value))
                 }
-                className="bg-surface font-bold text-center text-style-body tabular-nums"
+                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
               />
               <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
                 {unitMode === 'grams' ? `${protGKg} g/kg` : `${tempTargetProt}g`}
@@ -183,17 +189,10 @@ export function AdjustDietGoalsModal({
             </div>
 
             {/* 2. Carboidratos */}
-            <div className="p-3 bg-surface-subtle/50 border border-border-subtle rounded-surface flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className={cn(textStyle('field-label'), 'text-macro-carbohydrate font-bold')}>
-                  Carboidratos
-                </label>
-                {distribution.totalKcal > 0 && (
-                  <Badge variant="warning" className="text-[10px] px-1.5 py-0 h-4">
-                    {distribution.carbsPct}%
-                  </Badge>
-                )}
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label className={cn(textStyle('field-label'), 'text-macro-carbohydrate font-bold text-center block')}>
+                Carboidratos {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              </label>
               <Input
                 type="number"
                 step={unitMode === 'grams' ? '1' : '0.1'}
@@ -205,7 +204,7 @@ export function AdjustDietGoalsModal({
                     ? handleGramsChange('carb', Number(e.target.value))
                     : handleGPerKgChange('carb', Number(e.target.value))
                 }
-                className="bg-surface font-bold text-center text-style-body tabular-nums"
+                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
               />
               <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
                 {unitMode === 'grams' ? `${carbGKg} g/kg` : `${tempTargetCarb}g`}
@@ -213,17 +212,10 @@ export function AdjustDietGoalsModal({
             </div>
 
             {/* 3. Gorduras */}
-            <div className="p-3 bg-surface-subtle/50 border border-border-subtle rounded-surface flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className={cn(textStyle('field-label'), 'text-macro-fat font-bold')}>
-                  Gorduras
-                </label>
-                {distribution.totalKcal > 0 && (
-                  <Badge variant="error" className="text-[10px] px-1.5 py-0 h-4">
-                    {distribution.fatsPct}%
-                  </Badge>
-                )}
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label className={cn(textStyle('field-label'), 'text-macro-fat font-bold text-center block')}>
+                Gorduras {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              </label>
               <Input
                 type="number"
                 step={unitMode === 'grams' ? '1' : '0.1'}
@@ -235,20 +227,36 @@ export function AdjustDietGoalsModal({
                     ? handleGramsChange('fat', Number(e.target.value))
                     : handleGPerKgChange('fat', Number(e.target.value))
                 }
-                className="bg-surface font-bold text-center text-style-body tabular-nums"
+                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
               />
               <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
                 {unitMode === 'grams' ? `${fatGKg} g/kg` : `${tempTargetFat}g`}
+              </span>
+            </div>
+
+            {/* 4. Calorias (ao lado dos macros no mesmo formato) */}
+            <div className="flex flex-col gap-1.5">
+              <label className={cn(textStyle('field-label'), 'text-text-primary font-bold text-center block')}>
+                Calorias (kcal)
+              </label>
+              <div
+                className="h-10 rounded-control border border-border-subtle bg-surface-subtle/80 flex items-center justify-center font-bold text-style-body text-text-primary tabular-nums select-none"
+                aria-label="Calorias totais calculadas"
+              >
+                {distribution.totalKcal}
+              </div>
+              <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
+                {kcalPerKg} kcal/kg
               </span>
             </div>
           </div>
 
           {/* Barra de Distribuição Percentual (% VET) */}
           {distribution.totalKcal > 0 ? (
-            <div className="flex flex-col gap-1.5 bg-surface border border-border-subtle rounded-surface p-3">
+            <div className="flex flex-col gap-2 bg-surface-subtle/40 border border-border-subtle rounded-surface p-3.5">
               <div className="flex items-center justify-between text-style-chart-micro text-text-muted font-semibold">
                 <span>Distribuição Calórica (% VET)</span>
-                <span>100%</span>
+                <span className="font-bold text-text-primary">100%</span>
               </div>
               {/* Barra multi-segmentada */}
               <div className="w-full h-2.5 bg-surface-subtle rounded-full overflow-hidden flex" role="progressbar" aria-label="Distribuição calórica">
@@ -268,50 +276,30 @@ export function AdjustDietGoalsModal({
                   title={`Gorduras: ${distribution.fatsPct}% (${distribution.fatsKcal} kcal)`}
                 />
               </div>
-              {/* Legenda com kcal por macro */}
+              {/* Legenda com percentual e kcal por macro */}
               <div className="flex items-center justify-between text-style-chart-micro text-text-muted pt-0.5 tabular-nums">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-macro-protein inline-block" aria-hidden="true" />
-                  <span className="text-text-primary font-medium">{distribution.proteinPct}%</span> ({distribution.proteinKcal} kcal)
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-macro-protein inline-block shrink-0" aria-hidden="true" />
+                  <span>Proteínas: <strong className="text-text-primary">{distribution.proteinPct}%</strong> ({distribution.proteinKcal} kcal)</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-macro-carbohydrate inline-block" aria-hidden="true" />
-                  <span className="text-text-primary font-medium">{distribution.carbsPct}%</span> ({distribution.carbsKcal} kcal)
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-macro-carbohydrate inline-block shrink-0" aria-hidden="true" />
+                  <span>Carboidratos: <strong className="text-text-primary">{distribution.carbsPct}%</strong> ({distribution.carbsKcal} kcal)</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-macro-fat inline-block" aria-hidden="true" />
-                  <span className="text-text-primary font-medium">{distribution.fatsPct}%</span> ({distribution.fatsKcal} kcal)
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-macro-fat inline-block shrink-0" aria-hidden="true" />
+                  <span>Gorduras: <strong className="text-text-primary">{distribution.fatsPct}%</strong> ({distribution.fatsKcal} kcal)</span>
                 </span>
               </div>
             </div>
           ) : (
-            <div className="text-center py-2 text-style-chart-micro text-text-muted italic bg-surface-subtle/30 rounded-surface border border-dashed border-border-subtle">
-              Nenhuma meta inserida. Digite os valores para visualizar a distribuição calórica.
+            <div className="text-center py-3 text-style-chart-micro text-text-muted italic bg-surface-subtle/30 rounded-surface border border-dashed border-border-subtle">
+              Nenhuma meta inserida. Digite os valores para visualizar a distribuição calórica (% VET).
             </div>
           )}
-
-          {/* Card de Calorias Totais Calculadas */}
-          <Surface variant="subtle" density="compact" className="p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-warning shrink-0" aria-hidden="true" />
-              <div>
-                <span className="text-style-chart-micro text-text-muted uppercase font-bold block">
-                  Total Calórico Calculado
-                </span>
-                <span className="text-style-legal text-text-muted">
-                  {kcalPerKg} kcal/kg para {weight} kg
-                </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <span className="text-style-h3 font-bold text-text-primary tabular-nums">
-                {distribution.totalKcal} <span className="text-style-legal font-normal text-text-muted">kcal</span>
-              </span>
-            </div>
-          </Surface>
         </div>
 
-        <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2">
+        <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2 pt-2">
           <Button
             variant="ghost"
             size="compact"

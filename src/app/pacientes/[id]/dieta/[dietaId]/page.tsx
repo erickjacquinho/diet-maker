@@ -214,6 +214,7 @@ export default function DietBuilderPage() {
         tempTargetFat={tempTargetFat}
         setTempTargetFat={setTempTargetFat}
         patientWeightKg={patient.weightKg || 70}
+        mode={dietPlan.mode}
         variationName={tempVariationName}
         onVariationNameChange={setTempVariationName}
         onSave={handleSaveAdjustedGoals}
