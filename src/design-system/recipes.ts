@@ -33,7 +33,7 @@ const button = cva(`inline-flex items-center justify-center gap-2 rounded-contro
   defaultVariants: { variant: "primary", size: "standard", iconOnly: false, state: "default" },
 });
 
-const input = cva(`w-full rounded-control border border-input bg-surface px-3 text-style-field-value text-text-primary placeholder:text-text-muted ${focus} ${motion} disabled:opacity-disabled`, {
+const input = cva(`w-full rounded-control border border-input bg-surface px-3 text-style-field-value text-text-primary placeholder:text-text-muted focus:placeholder:text-transparent ${focus} ${motion} disabled:opacity-disabled`, {
   variants: {
     size: { compact: "h-control-compact", standard: "h-control-standard" },
     state: { default: "", error: "border-error-border aria-invalid:border-error-border", "read-only": "bg-surface-subtle", disabled: "bg-disabled-soft" },
@@ -41,7 +41,7 @@ const input = cva(`w-full rounded-control border border-input bg-surface px-3 te
   defaultVariants: { size: "standard", state: "default" },
 });
 
-const textarea = cva(`w-full min-h-[80px] rounded-control border border-input bg-surface px-3 py-2 text-style-field-value text-text-primary placeholder:text-text-muted ${focus} ${motion} disabled:opacity-disabled`, {
+const textarea = cva(`w-full min-h-[80px] rounded-control border border-input bg-surface px-3 py-2 text-style-field-value text-text-primary placeholder:text-text-muted focus:placeholder:text-transparent ${focus} ${motion} disabled:opacity-disabled`, {
   variants: {
     state: { default: "", error: "border-error-border aria-invalid:border-error-border", "read-only": "bg-surface-subtle", disabled: "bg-disabled-soft" },
   },

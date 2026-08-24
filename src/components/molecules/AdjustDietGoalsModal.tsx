@@ -130,6 +130,7 @@ export function AdjustDietGoalsModal({
                   { value: 'g_per_kg', label: 'g/kg corporal' },
                 ]}
                 size="compact"
+                layer="modal"
                 aria-label="Modo de entrada"
               />
             </div>
@@ -301,7 +302,7 @@ export function AdjustDietGoalsModal({
 
         <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2 pt-2">
           <Button
-            variant="ghost"
+            variant="quiet"
             size="compact"
             onClick={handleResetToZero}
             className="text-text-muted hover:text-error flex items-center gap-1.5"

@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge, SecondaryActionButton } from '@/components/atoms';
+import { Card } from '@/components/ui/card';
 import { MacroSummary } from './MacroSummary';
-import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
+import { MetricBox } from './MetricBox';
 import { Utensils, Clock, Printer, Eye, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculatePresetCalories } from '@/lib/presetUtils';
@@ -77,42 +78,44 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
           </div>
 
           {/* Macro Summary Header with divider */}
-          <MetricBoxGroup
-            items={[
-              {
-                size: 'standard',
-                tone: 'muted',
-                label: 'Calorias',
-                value: `${displayKcal} kcal`,
-                layout: 'stack',
-                surface: 'inline',
-              },
-              {
-                size: 'standard',
-                tone: 'protein',
-                label: 'Proteínas',
-                value: `${diet.proteinG}g`,
-                layout: 'stack',
-                surface: 'inline',
-              },
-              {
-                size: 'standard',
-                tone: 'carbohydrate',
-                label: 'Carboidratos',
-                value: `${diet.carbsG}g`,
-                layout: 'stack',
-                surface: 'inline',
-              },
-              {
-                size: 'standard',
-                tone: 'fat',
-                label: 'Gorduras',
-                value: `${diet.fatsG}g`,
-                layout: 'stack',
-                surface: 'inline',
-              },
-            ]}
-          />
+          <Card className="p-0 grid grid-cols-4 divide-x divide-border-divider overflow-hidden rounded-control border-border-divider bg-surface">
+            <MetricBox
+              size="standard"
+              tone="muted"
+              label="Calorias"
+              value={`${displayKcal} kcal`}
+              layout="stack"
+              surface="inline"
+              className="min-w-0 px-3 py-3"
+            />
+            <MetricBox
+              size="standard"
+              tone="protein"
+              label="Proteínas"
+              value={`${diet.proteinG}g`}
+              layout="stack"
+              surface="inline"
+              className="min-w-0 px-3 py-3"
+            />
+            <MetricBox
+              size="standard"
+              tone="carbohydrate"
+              label="Carboidratos"
+              value={`${diet.carbsG}g`}
+              layout="stack"
+              surface="inline"
+              className="min-w-0 px-3 py-3"
+            />
+            <MetricBox
+              size="standard"
+              tone="fat"
+              label="Gorduras"
+              value={`${diet.fatsG}g`}
+              layout="stack"
+              surface="inline"
+              className="min-w-0 px-3 py-3"
+            />
+          </Card>
         </DialogHeader>
 
         {/* Refeições Lista */}
