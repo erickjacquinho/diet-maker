@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
-import { SelectField } from '@/components/atoms/SelectField';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Edit3, RotateCcw, Flame } from 'lucide-react';
 import { calculateMacroDistributionPct } from '@/lib/nutrition/macroCalculations';
 import { textStyle } from '@/design-system';
@@ -115,53 +115,86 @@ export function AdjustDietGoalsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-surface sm:max-w-2xl p-6">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="flex items-center gap-2 text-text-primary text-style-body font-bold">
-              <Edit3 className="w-4 h-4 text-primary" aria-hidden="true" />
-              <span>Ajustar Metas Nutricionais</span>
-            </DialogTitle>
-            <div className="w-40 shrink-0">
-              <SelectField
-                id="adjust-unit-mode"
-                value={unitMode}
-                onValueChange={(val) => setUnitMode(val as 'grams' | 'g_per_kg')}
-                options={[
-                  { value: 'grams', label: 'Gramas (g)' },
-                  { value: 'g_per_kg', label: 'g/kg corporal' },
-                ]}
-                size="compact"
-                layer="modal"
-                aria-label="Modo de entrada"
-              />
-            </div>
-          </div>
+          <DialogTitle className="flex items-center gap-2 text-text-primary text-style-body font-bold">
+            <Edit3 className="w-4 h-4 text-primary" aria-hidden="true" />
+            <span>Ajustar Metas Nutricionais</span>
+          </DialogTitle>
           <DialogDescription className="text-style-legal text-text-muted mt-1">
             Defina os alvos em {unitMode === 'grams' ? 'gramas (g)' : `gramas por quilo (g/kg para ${weight}kg)`}. As calorias e proporções são calculadas em tempo real.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-2 flex flex-col gap-4">
-          {/* Cabeçalho da Seção / Modo */}
+          {/* Cabeçalho da Seção / Modo com Button Group alinhado à direita na mesma linha */}
           {isSimpleMode ? (
-            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-style-body font-bold text-text-primary">Dieta Simples</span>
                 <span className="text-style-legal text-text-muted">· Metas diárias unificadas</span>
               </div>
+              <ToggleGroup
+                type="single"
+                value={unitMode}
+                onValueChange={(val) => {
+                  if (val) setUnitMode(val as 'grams' | 'g_per_kg');
+                }}
+                className="bg-surface-subtle border border-border-subtle p-0.5 rounded-control"
+              >
+                <ToggleGroupItem
+                  value="grams"
+                  className="w-24 h-7 text-xs font-semibold"
+                  aria-label="Definir em Gramas"
+                >
+                  Gramas (g)
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="g_per_kg"
+                  className="w-24 h-7 text-xs font-semibold"
+                  aria-label="Definir em g/kg corporal"
+                >
+                  g/kg
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           ) : (
-            onVariationNameChange && (
-              <div>
+            <div className="flex items-center justify-between gap-4 border-b border-border-subtle pb-3">
+              <div className="flex-1">
                 <label className={cn(textStyle('field-label'), 'mb-1 block')}>Nome da Variação / Dia</label>
                 <Input
                   type="text"
                   value={variationName || ''}
-                  onChange={(e) => onVariationNameChange(e.target.value)}
+                  onChange={(e) => onVariationNameChange?.(e.target.value)}
                   placeholder="Ex: Dia Alto Carbo"
                   className="bg-surface font-medium"
                 />
               </div>
-            )
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <label className={cn(textStyle('field-label'), 'mb-1 block')}>Unidade</label>
+                <ToggleGroup
+                  type="single"
+                  value={unitMode}
+                  onValueChange={(val) => {
+                    if (val) setUnitMode(val as 'grams' | 'g_per_kg');
+                  }}
+                  className="bg-surface-subtle border border-border-subtle p-0.5 rounded-control"
+                >
+                  <ToggleGroupItem
+                    value="grams"
+                    className="w-24 h-7 text-xs font-semibold"
+                    aria-label="Definir em Gramas"
+                  >
+                    Gramas (g)
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    value="g_per_kg"
+                    className="w-24 h-7 text-xs font-semibold"
+                    aria-label="Definir em g/kg corporal"
+                  >
+                    g/kg
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </div>
           )}
 
           {/* Grid de 4 Colunas no mesmo formato: Proteínas -> Carboidratos -> Gorduras -> Calorias */}

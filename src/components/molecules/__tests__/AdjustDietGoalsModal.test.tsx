@@ -81,4 +81,31 @@ describe('Component UI Seam: AdjustDietGoalsModal', () => {
     fireEvent.change(input, { target: { value: 'Dia Médio Carbo' } });
     expect(handleNameChange).toHaveBeenCalledWith('Dia Médio Carbo');
   });
+
+  it('switches between Gramas and g/kg via ToggleGroup buttons', () => {
+    render(
+      <AdjustDietGoalsModal
+        isOpen={true}
+        onClose={vi.fn()}
+        tempTargetProt={150}
+        setTempTargetProt={vi.fn()}
+        tempTargetCarb={250}
+        setTempTargetCarb={vi.fn()}
+        tempTargetFat={50}
+        setTempTargetFat={vi.fn()}
+        patientWeightKg={70}
+        mode="simple"
+        onSave={vi.fn()}
+      />
+    );
+
+    const gKgButton = screen.getByRole('button', { name: /definir em g\/kg corporal/i });
+    const gramsButton = screen.getByRole('button', { name: /definir em gramas/i });
+
+    expect(gKgButton).toBeInTheDocument();
+    expect(gramsButton).toBeInTheDocument();
+
+    fireEvent.click(gKgButton);
+    expect(gKgButton).toHaveAttribute('data-state', 'on');
+  });
 });
