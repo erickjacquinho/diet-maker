@@ -274,18 +274,18 @@ export function AdjustDietGoalsModal({
               </div>
             </div>
 
-            {/* 4. Total Calórico (Igual no alinhamento: texto left, kcal/kg right) */}
+            {/* 4. Total Calórico (Sem box/borda, texto left e kcal/kg right) */}
             <div className="flex flex-col gap-1.5">
-              <label className={cn(textStyle('field-label'), 'text-text-primary font-bold text-left block')}>
+              <label className={cn(textStyle('field-label'), 'text-text-secondary font-bold text-left block')}>
                 Total Calórico
               </label>
               <div
-                className="h-10 rounded-control border border-border-subtle bg-surface-subtle/50 px-3 flex items-center justify-between select-none"
+                className="h-10 px-1 flex items-center justify-between select-none"
                 aria-label="Calorias totais calculadas"
               >
                 <div className="flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-warning shrink-0" aria-hidden="true" />
-                  <span className="text-style-body font-bold text-text-primary tabular-nums">
+                  <Flame className="w-4 h-4 text-warning shrink-0" aria-hidden="true" />
+                  <span className="text-style-body font-bold text-text-primary tabular-nums text-base">
                     {distribution.totalKcal}
                   </span>
                   <span className="text-style-legal text-text-muted font-medium">kcal</span>
