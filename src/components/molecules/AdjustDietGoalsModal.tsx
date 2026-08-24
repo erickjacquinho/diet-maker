@@ -168,91 +168,99 @@ export function AdjustDietGoalsModal({
           <div className="grid grid-cols-4 gap-3.5">
             {/* 1. Proteínas */}
             <div className="flex flex-col gap-1.5">
-              <label className={cn(textStyle('field-label'), 'text-macro-protein font-bold text-center block')}>
-                Proteínas {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              <label className={cn(textStyle('field-label'), 'text-macro-protein font-bold text-left block')}>
+                Proteínas
               </label>
-              <Input
-                type="number"
-                step={unitMode === 'grams' ? '1' : '0.1'}
-                min="0"
-                value={unitMode === 'grams' ? (tempTargetProt || '') : (protGKg || '')}
-                placeholder="0"
-                onChange={(e) =>
-                  unitMode === 'grams'
-                    ? handleGramsChange('prot', Number(e.target.value))
-                    : handleGPerKgChange('prot', Number(e.target.value))
-                }
-                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
-              />
-              <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
-                {unitMode === 'grams' ? `${protGKg} g/kg` : `${tempTargetProt}g`}
-              </span>
+              <div className="relative flex items-center">
+                <Input
+                  type="number"
+                  step={unitMode === 'grams' ? '1' : '0.1'}
+                  min="0"
+                  value={unitMode === 'grams' ? (tempTargetProt || '') : (protGKg || '')}
+                  placeholder="0"
+                  onChange={(e) =>
+                    unitMode === 'grams'
+                      ? handleGramsChange('prot', Number(e.target.value))
+                      : handleGPerKgChange('prot', Number(e.target.value))
+                  }
+                  className="h-10 pl-3 pr-16 text-left font-bold text-style-body tabular-nums bg-surface border-border-subtle focus:ring-1 focus:ring-primary w-full"
+                />
+                <span className="pointer-events-none absolute right-3 text-style-legal font-medium text-text-muted select-none tabular-nums">
+                  {unitMode === 'grams' ? `${protGKg} g/kg` : `${tempTargetProt}g`}
+                </span>
+              </div>
             </div>
 
             {/* 2. Carboidratos */}
             <div className="flex flex-col gap-1.5">
-              <label className={cn(textStyle('field-label'), 'text-macro-carbohydrate font-bold text-center block')}>
-                Carboidratos {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              <label className={cn(textStyle('field-label'), 'text-macro-carbohydrate font-bold text-left block')}>
+                Carboidratos
               </label>
-              <Input
-                type="number"
-                step={unitMode === 'grams' ? '1' : '0.1'}
-                min="0"
-                value={unitMode === 'grams' ? (tempTargetCarb || '') : (carbGKg || '')}
-                placeholder="0"
-                onChange={(e) =>
-                  unitMode === 'grams'
-                    ? handleGramsChange('carb', Number(e.target.value))
-                    : handleGPerKgChange('carb', Number(e.target.value))
-                }
-                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
-              />
-              <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
-                {unitMode === 'grams' ? `${carbGKg} g/kg` : `${tempTargetCarb}g`}
-              </span>
+              <div className="relative flex items-center">
+                <Input
+                  type="number"
+                  step={unitMode === 'grams' ? '1' : '0.1'}
+                  min="0"
+                  value={unitMode === 'grams' ? (tempTargetCarb || '') : (carbGKg || '')}
+                  placeholder="0"
+                  onChange={(e) =>
+                    unitMode === 'grams'
+                      ? handleGramsChange('carb', Number(e.target.value))
+                      : handleGPerKgChange('carb', Number(e.target.value))
+                  }
+                  className="h-10 pl-3 pr-16 text-left font-bold text-style-body tabular-nums bg-surface border-border-subtle focus:ring-1 focus:ring-primary w-full"
+                />
+                <span className="pointer-events-none absolute right-3 text-style-legal font-medium text-text-muted select-none tabular-nums">
+                  {unitMode === 'grams' ? `${carbGKg} g/kg` : `${tempTargetCarb}g`}
+                </span>
+              </div>
             </div>
 
             {/* 3. Gorduras */}
             <div className="flex flex-col gap-1.5">
-              <label className={cn(textStyle('field-label'), 'text-macro-fat font-bold text-center block')}>
-                Gorduras {unitMode === 'grams' ? '(g)' : '(g/kg)'}
+              <label className={cn(textStyle('field-label'), 'text-macro-fat font-bold text-left block')}>
+                Gorduras
               </label>
-              <Input
-                type="number"
-                step={unitMode === 'grams' ? '1' : '0.1'}
-                min="0"
-                value={unitMode === 'grams' ? (tempTargetFat || '') : (fatGKg || '')}
-                placeholder="0"
-                onChange={(e) =>
-                  unitMode === 'grams'
-                    ? handleGramsChange('fat', Number(e.target.value))
-                    : handleGPerKgChange('fat', Number(e.target.value))
-                }
-                className="h-10 text-center font-bold text-style-body tabular-nums bg-surface border-border-subtle"
-              />
-              <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
-                {unitMode === 'grams' ? `${fatGKg} g/kg` : `${tempTargetFat}g`}
-              </span>
+              <div className="relative flex items-center">
+                <Input
+                  type="number"
+                  step={unitMode === 'grams' ? '1' : '0.1'}
+                  min="0"
+                  value={unitMode === 'grams' ? (tempTargetFat || '') : (fatGKg || '')}
+                  placeholder="0"
+                  onChange={(e) =>
+                    unitMode === 'grams'
+                      ? handleGramsChange('fat', Number(e.target.value))
+                      : handleGPerKgChange('fat', Number(e.target.value))
+                  }
+                  className="h-10 pl-3 pr-16 text-left font-bold text-style-body tabular-nums bg-surface border-border-subtle focus:ring-1 focus:ring-primary w-full"
+                />
+                <span className="pointer-events-none absolute right-3 text-style-legal font-medium text-text-muted select-none tabular-nums">
+                  {unitMode === 'grams' ? `${fatGKg} g/kg` : `${tempTargetFat}g`}
+                </span>
+              </div>
             </div>
 
-            {/* 4. Total Calórico (Métrica Calculada - Sem aspecto de input) */}
-            <div className="flex flex-col gap-1.5 items-center justify-between">
-              <label className={cn(textStyle('field-label'), 'text-text-secondary font-bold text-center block')}>
+            {/* 4. Total Calórico (Igual no alinhamento: texto left, kcal/kg right) */}
+            <div className="flex flex-col gap-1.5">
+              <label className={cn(textStyle('field-label'), 'text-text-primary font-bold text-left block')}>
                 Total Calórico
               </label>
               <div
-                className="h-10 flex items-center justify-center gap-1.5 px-2 select-none"
+                className="h-10 rounded-control border border-border-subtle bg-surface-subtle/50 px-3 flex items-center justify-between select-none"
                 aria-label="Calorias totais calculadas"
               >
-                <Flame className="w-4 h-4 text-warning shrink-0" aria-hidden="true" />
-                <span className="text-style-body font-bold text-text-primary tabular-nums text-lg">
-                  {distribution.totalKcal}
+                <div className="flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5 text-warning shrink-0" aria-hidden="true" />
+                  <span className="text-style-body font-bold text-text-primary tabular-nums">
+                    {distribution.totalKcal}
+                  </span>
+                  <span className="text-style-legal text-text-muted font-medium">kcal</span>
+                </div>
+                <span className="text-style-legal font-medium text-text-muted select-none tabular-nums">
+                  {kcalPerKg} kcal/kg
                 </span>
-                <span className="text-style-legal text-text-muted font-medium">kcal</span>
               </div>
-              <span className="text-style-chart-micro text-text-muted text-center block tabular-nums">
-                {kcalPerKg} kcal/kg
-              </span>
             </div>
           </div>
 
