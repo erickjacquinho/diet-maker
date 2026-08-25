@@ -177,6 +177,16 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
   return updatedDiet;
 }
 
+export function deleteDietFromStorage(patientId: string, dietId: string): void {
+  const current = getPatientDietsFromStorage(patientId);
+  const updatedList = current.filter((d) => d.id !== dietId);
+  setStorageItem(`${DIETS_KEY_PREFIX}${patientId}`, updatedList);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('nutridiet-diet-sync', { detail: { patientId, dietId } }));
+  }
+}
+
 export function createInitialDietPlan(patientId: string, patientTargets?: {
   weightKg?: number;
   targetKcal?: number;

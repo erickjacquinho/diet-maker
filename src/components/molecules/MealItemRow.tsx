@@ -1,13 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Trash2, GripVertical } from 'lucide-react';
-import { Badge, FieldTrigger, IconButton, Surface } from '@/components/atoms';
+import React, { useState, useEffect } from 'react';
+import { GripVertical } from 'lucide-react';
+import { DeleteIconButton } from '@/components/atoms';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export interface MealItemRowProps {
   id?: string;
+  index?: number;
   name: string;
   kcal: number;
   protein: number;
@@ -16,10 +24,17 @@ export interface MealItemRowProps {
   quantityGrams: number;
   onQuantityChange?: (newGrams: number) => void;
   onRemove?: () => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+  onDragStart?: (index: number) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (e: React.DragEvent, index: number) => void;
+  onDrop?: (e: React.DragEvent, index: number) => void;
   isReorderingActive?: boolean;
 }
 
 export const MealItemRow: React.FC<MealItemRowProps> = ({
+  index = 0,
   name,
   kcal,
   protein,
@@ -28,98 +43,129 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   quantityGrams,
   onQuantityChange,
   onRemove,
-  isReorderingActive: propIsActive = false,
+  isDragging = false,
+  isDragOver = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }) => {
-  const [isActivated, setIsActivated] = useState(false);
-  const [isEditingGrams, setIsEditingGrams] = useState(false);
-  const [tempGrams, setTempGrams] = useState<number>(quantityGrams);
+  const [tempGrams, setTempGrams] = useState<number | string>(quantityGrams);
 
-  const isActive = isActivated || propIsActive;
+  useEffect(() => {
+    setTempGrams(quantityGrams);
+  }, [quantityGrams]);
 
   const handleSaveGrams = () => {
     const val = Math.max(1, Number(tempGrams) || 100);
-    if (onQuantityChange) {
+    setTempGrams(val);
+    if (onQuantityChange && val !== quantityGrams) {
       onQuantityChange(val);
     }
-    setIsEditingGrams(false);
   };
 
   return (
-    <Surface variant="subtle" density="compact" className="group/row flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <IconButton
-          variant="quiet"
-          onMouseDown={() => setIsActivated(true)}
-          onMouseUp={() => setIsActivated(false)}
-          onTouchStart={() => setIsActivated(true)}
-          onTouchEnd={() => setIsActivated(false)}
-          onClick={() => setIsActivated((prev) => !prev)}
+    <TableRow
+      onDragOver={(e) => onDragOver?.(e, index)}
+      onDrop={(e) => onDrop?.(e, index)}
+      className={cn(
+        'group/row border-b border-border-divider transition-all duration-fast select-none hover:bg-surface-hover',
+        isDragging && 'opacity-40 border-dashed border-primary bg-primary-soft/20',
+        isDragOver && 'border-t-2 border-t-primary ring-1 ring-primary/20 bg-surface'
+      )}
+    >
+      {/* 1. Drag handle */}
+      <TableCell className="w-10 px-2 text-center py-2">
+        <div
+          draggable
+          onDragStart={(e) => {
+            e.stopPropagation();
+            onDragStart?.(index);
+          }}
+          onDragEnd={onDragEnd}
+          className="text-text-muted hover:text-text-primary cursor-grab active:cursor-grabbing p-1 -m-1 rounded-control hover:bg-surface-hover transition-colors inline-flex items-center justify-center"
+          title="Arrastar para reordenar"
           aria-label={`Reordenar ${name}`}
-          title="Reordenar alimento"
-          className={cn(
-            'h-7 w-7 p-0 cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary',
-            isActive
-              ? 'opacity-full text-success bg-success-soft ring-1 ring-success'
-              : 'invisible group-hover/row:visible'
-          )}
         >
-          <GripVertical size={14} />
-        </IconButton>
-
-        <div>
-          <div className="text-style-legal font-bold text-text-primary">{name}</div>
-          <div className="mt-1 flex items-center gap-1 flex-wrap">
-            <Badge variant="protein" className="px-1.5 py-0 font-bold text-style-legal">P: {protein}g</Badge>
-            <Badge variant="carbohydrate" className="px-1.5 py-0 font-bold text-style-legal">C: {carbs}g</Badge>
-            <Badge variant="fat" className="px-1.5 py-0 font-bold text-style-legal">G: {fats}g</Badge>
-            <Badge variant="default" className="px-1.5 py-0 font-bold text-style-legal text-text-muted">{kcal} kcal</Badge>
-          </div>
+          <GripVertical size={14} className="shrink-0" />
         </div>
-      </div>
+      </TableCell>
 
-      <div className="flex items-center gap-2">
-        {isEditingGrams ? (
-          <div className="flex items-center gap-1">
-            <Input
-              type="number"
-              min={1}
-              max={5000}
-              size="compact"
-              value={tempGrams}
-              onChange={(e) => setTempGrams(Number(e.target.value))}
-              onBlur={handleSaveGrams}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSaveGrams();
-              }}
-              className="w-16 px-1 text-center text-style-field-value font-bold"
-              autoFocus
-            />
-            <span className="text-style-legal font-bold text-text-muted">g</span>
-          </div>
-        ) : (
-          <FieldTrigger
+      {/* 2. Nome do Alimento */}
+      <TableCell className="text-left font-bold text-style-legal text-text-primary py-2 min-w-0">
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                tabIndex={0}
+                className="truncate block cursor-default outline-none"
+              >
+                {name}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="start" className="text-style-legal font-medium max-w-xs shadow-floating">
+              {name}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
+
+      {/* 3. Quantidade (Input permanente e idêntico) */}
+      <TableCell className="w-24 text-center py-2 px-1">
+        <div className="relative flex items-center justify-center mx-auto max-w-[84px]">
+          <Input
+            type="number"
+            min={1}
+            max={5000}
             size="compact"
-            onClick={() => {
-              setTempGrams(quantityGrams);
-              setIsEditingGrams(true);
+            value={tempGrams}
+            onChange={(e) => {
+              const val = e.target.value === '' ? ('' as unknown as number) : Number(e.target.value);
+              setTempGrams(val);
             }}
-            className="w-auto px-2.5 font-bold text-style-legal"
-            title="Clique para editar gramatura"
-          >
-            {quantityGrams} <span className="text-text-muted font-normal">g</span>
-          </FieldTrigger>
-        )}
+            onBlur={handleSaveGrams}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveGrams();
+              if (e.key === 'Escape') setTempGrams(quantityGrams);
+            }}
+            className="w-full h-7 pl-2 pr-5 text-center text-style-field-value font-bold bg-surface border-border-subtle hover:border-border-hover focus:border-primary"
+            aria-label={`Quantidade em gramas para ${name}`}
+          />
+          <span className="absolute right-2 text-style-chart-micro font-bold text-text-muted pointer-events-none select-none">
+            g
+          </span>
+        </div>
+      </TableCell>
 
-        <IconButton
-          variant="quiet"
+      {/* 4. Proteína */}
+      <TableCell className="w-20 text-right font-bold text-macro-protein tabular-nums py-2 text-style-legal">
+        {protein}g
+      </TableCell>
+
+      {/* 5. Carboidrato */}
+      <TableCell className="w-24 text-right font-bold text-macro-carbohydrate tabular-nums py-2 text-style-legal">
+        {carbs}g
+      </TableCell>
+
+      {/* 6. Gorduras */}
+      <TableCell className="w-20 text-right font-bold text-macro-fat tabular-nums py-2 text-style-legal">
+        {fats}g
+      </TableCell>
+
+      {/* 7. Calorias */}
+      <TableCell className="w-24 text-right font-bold text-text-primary tabular-nums py-2 text-style-legal">
+        {kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
+      </TableCell>
+
+      {/* 8. Excluir */}
+      <TableCell className="w-12 px-2 text-center py-2">
+        <DeleteIconButton
+          size="compact"
           onClick={onRemove}
-          aria-label={`Remover ${name}`}
-          className="text-text-muted hover:text-error h-7 w-7 p-0"
-        >
-          <Trash2 size={14} />
-        </IconButton>
-      </div>
-    </Surface>
+          title={`Remover ${name}`}
+        />
+      </TableCell>
+    </TableRow>
   );
 };
 

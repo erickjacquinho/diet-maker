@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/atoms';
 import { Percent } from 'lucide-react';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 interface ScaleDietModalProps {
   isOpen: boolean;
@@ -18,6 +19,11 @@ export function ScaleDietModal({
   setScalePercentage,
   onApplyScale,
 }: ScaleDietModalProps) {
+  useSaveShortcut({
+    onSave: () => onApplyScale(scalePercentage),
+    enabled: isOpen,
+    priority: 10,
+  });
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -51,8 +57,13 @@ export function ScaleDietModal({
           <Button variant="quiet" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={() => onApplyScale(scalePercentage)}>
-            Aplicar Ajuste
+          <Button
+            variant="primary"
+            onClick={() => onApplyScale(scalePercentage)}
+            aria-keyshortcuts="Control+s Meta+s"
+            title="Aplicar Ajuste (Ctrl+S)"
+          >
+            Aplicar Ajuste <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
           </Button>
         </DialogFooter>
       </DialogContent>

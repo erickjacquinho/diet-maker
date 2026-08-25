@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-08-24T13:23:32.802Z",
+  "timestamp": "2026-08-24T22:26:47.193Z",
   "summary": {
-    "totalFilesScanned": 132,
-    "compliantFiles": 128,
-    "nonCompliantFiles": 4,
-    "totalViolations": 12,
-    "complianceScorePercentage": 96.97
+    "totalFilesScanned": 136,
+    "compliantFiles": 130,
+    "nonCompliantFiles": 6,
+    "totalViolations": 16,
+    "complianceScorePercentage": 95.59
   },
   "violations": [
     {
       "file": "src/app/pacientes/[id]/dieta/[dietaId]/ciclo/page.tsx",
-      "line": 906,
+      "line": 918,
       "column": 25,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -19,7 +19,52 @@
     },
     {
       "file": "src/app/pacientes/[id]/dieta/[dietaId]/ciclo/page.tsx",
-      "line": 927,
+      "line": 939,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/atoms/HoldToDeleteButton.tsx",
+      "line": 173,
+      "column": 9,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={{"
+    },
+    {
+      "file": "src/components/molecules/AdjustDietGoalsModal.tsx",
+      "line": 316,
+      "column": 19,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={{ width: `${distribution.proteinPct}%` }}"
+    },
+    {
+      "file": "src/components/molecules/AdjustDietGoalsModal.tsx",
+      "line": 321,
+      "column": 19,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={{ width: `${distribution.carbsPct}%` }}"
+    },
+    {
+      "file": "src/components/molecules/AdjustDietGoalsModal.tsx",
+      "line": 326,
+      "column": 19,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={{ width: `${distribution.fatsPct}%` }}"
+    },
+    {
+      "file": "src/components/molecules/CycleMatrixModal.tsx",
+      "line": 623,
       "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -28,7 +73,7 @@
     },
     {
       "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 616,
+      "line": 632,
       "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -37,7 +82,7 @@
     },
     {
       "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 625,
+      "line": 642,
       "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -46,16 +91,7 @@
     },
     {
       "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 635,
-      "column": 21,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<button"
-    },
-    {
-      "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 659,
+      "line": 666,
       "column": 25,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -64,7 +100,7 @@
     },
     {
       "file": "src/components/molecules/CycleMatrixModal.tsx",
-      "line": 680,
+      "line": 687,
       "column": 21,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",

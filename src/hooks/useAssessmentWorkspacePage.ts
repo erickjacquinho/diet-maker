@@ -10,6 +10,7 @@ import {
   BodyAssessment,
 } from '@/lib/patientsStore';
 import { calculateBodyComposition, normalizeBodyFatSex } from '@/lib/bodyFat';
+import { useSaveShortcut } from './useSaveShortcut';
 import type { NumericAssessmentField } from './useAssessmentForm';
 
 export interface AssessmentDeltas {
@@ -373,17 +374,10 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   }, [draft, patient, composition, deltas, ffmi]);
 
   // Global Ctrl+S / Cmd+S shortcut
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
-        event.preventDefault();
-        handleSave();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave]);
+  useSaveShortcut({
+    onSave: handleSave,
+    priority: 0,
+  });
 
   // BeforeUnload guard for browser tab close/refresh
   useEffect(() => {

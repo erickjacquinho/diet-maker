@@ -54,12 +54,13 @@ export type ExplicitIconButtonProps = Omit<IconButtonProps, 'icon'> & {
 export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
   className = '',
   title = 'Editar',
+  variant = 'secondary',
   ref,
   ...props
 }) => (
   <IconButton
     ref={ref}
-    variant="secondary"
+    variant={variant}
     title={title}
     aria-label={title}
     className={className}
@@ -70,17 +71,19 @@ export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
 );
 
 /**
- * DeleteIconButton - Destructive icon-only component for Delete actions across the application.
+ * DeleteIconButton - Destructive outline icon-only component for Delete actions across the application.
+ * Normal: red border and red icon. Hover: red background, red border, and white icon.
  */
 export const DeleteIconButton: React.FC<ExplicitIconButtonProps> = ({
   className = '',
   title = 'Excluir',
+  variant = 'destructive-outline',
   ref,
   ...props
 }) => (
   <IconButton
     ref={ref}
-    variant="destructive"
+    variant={variant}
     title={title}
     aria-label={title}
     className={className}

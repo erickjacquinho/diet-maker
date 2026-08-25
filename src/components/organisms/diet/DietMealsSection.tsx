@@ -39,7 +39,7 @@ export function DietMealsSection({ mealsData = [], onAddMeal }: DietMealsSection
           </div>
         </Surface>
       ) : (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="flex flex-col gap-6">
           {mealsData.map((meal, index) => (
             <MealCardContainer key={meal.id || index} {...meal} />
           ))}

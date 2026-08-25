@@ -14,6 +14,7 @@ import { useDietCalculations } from './useDietCalculations';
 import { useDietBuilderModals } from './useDietBuilderModals';
 import { useDietMealActions } from './useDietMealActions';
 import { useDietPresets } from './useDietPresets';
+import { useSaveShortcut } from './useSaveShortcut';
 
 export function useDietBuilderPage() {
   const params = useParams();
@@ -269,6 +270,11 @@ export function useDietBuilderPage() {
     toast.success('Plano alimentar salvo com sucesso!');
     router.push(`/pacientes/${patientId}`);
   }, [dietPlan, patientId, dietaId, router]);
+
+  useSaveShortcut({
+    onSave: handleSaveDiet,
+    priority: 0,
+  });
 
   return {
     patientId,

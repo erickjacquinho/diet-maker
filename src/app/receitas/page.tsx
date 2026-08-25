@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Utensils, Search, BookOpen } from 'lucide-react';
-import { CreateButton, Button } from '@/components/atoms';
+import { CreateButton, Button, HoldToDeleteButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -186,9 +186,9 @@ export default function RecipesPage() {
             <Button variant="secondary" onClick={() => setRecipeToDelete(null)}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Excluir
-            </Button>
+            <HoldToDeleteButton onConfirm={handleConfirmDelete} size="compact">
+              Excluir Receita
+            </HoldToDeleteButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

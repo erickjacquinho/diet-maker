@@ -30,6 +30,9 @@ export default function PatientDetailPage() {
     availableObjectives,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
+    isDeleteDietModalOpen,
+    setIsDeleteDietModalOpen,
+    dietToDelete,
     isEditModalOpen,
     setIsEditModalOpen,
     isEditAssessmentOpen,
@@ -45,6 +48,7 @@ export default function PatientDetailPage() {
     isReadOnlyDietModalOpen,
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
+    handleOpenDeleteDietModal,
     handleOpenEditAssessment,
     handleOpenCreateAssessment,
     handleSaveAssessment,
@@ -53,6 +57,7 @@ export default function PatientDetailPage() {
     handleAddCustomObjective,
     handleSavePatient,
     handleDeletePatient,
+    handleDeleteDiet,
   } = usePatientProfilePage();
 
   if (!patient) {
@@ -109,7 +114,6 @@ export default function PatientDetailPage() {
               size="compact"
               onClick={() => setIsDeleteModalOpen(true)}
               title="Excluir Paciente"
-              variant="destructive-outline"
             />
           </PatientProfileHeader.Actions>
         </PatientProfileHeader>
@@ -150,6 +154,7 @@ export default function PatientDetailPage() {
           patientId={patientId}
           diets={dietHistory}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
+          onDeleteDiet={handleOpenDeleteDietModal}
         />
       </Surface>
 
@@ -194,6 +199,10 @@ export default function PatientDetailPage() {
         setIsEditModalOpen={setIsEditModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         setIsDeleteModalOpen={setIsDeleteModalOpen}
+        isDeleteDietModalOpen={isDeleteDietModalOpen}
+        setIsDeleteDietModalOpen={setIsDeleteDietModalOpen}
+        dietToDelete={dietToDelete}
+        handleDeleteDiet={handleDeleteDiet}
         isNextEventModalOpen={isNextEventModalOpen}
         setIsNextEventModalOpen={setIsNextEventModalOpen}
         isAddObjectiveModalOpen={isAddObjectiveModalOpen}

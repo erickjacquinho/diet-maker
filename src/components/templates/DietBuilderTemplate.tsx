@@ -74,9 +74,19 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   const headerActions = (
     <>
       {onSaveDiet && (
-        <Button onClick={onSaveDiet} variant="primary" size="compact" className="flex items-center gap-1.5">
+        <Button
+          onClick={onSaveDiet}
+          variant="primary"
+          size="compact"
+          className="flex items-center gap-1.5"
+          aria-keyshortcuts="Control+s Meta+s"
+          aria-label="Salvar Prescrição"
+          title="Salvar Prescrição e fechar (Ctrl+S)"
+        >
           <Save size={14} aria-hidden="true" />
-          <span>Salvar Prescrição</span>
+          <span>
+            Salvar Prescrição <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+          </span>
         </Button>
       )}
 

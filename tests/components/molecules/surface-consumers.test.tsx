@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MealItemRow } from "@/components/molecules/MealItemRow";
 import { RecipeCard } from "@/components/molecules/RecipeCard";
+import { Table, TableBody } from "@/components/ui/table";
 
 const recipe = {
   id: "recipe-1",
@@ -32,21 +33,29 @@ describe("Surface molecule consumers", () => {
     expect(screen.getByText(/Valores por 1 porção/)).toBeInTheDocument();
   });
 
-  it("composes MealItemRow with the compact subtle surface and keeps controls", () => {
+  it("composes MealItemRow with the table row structure and keeps controls", () => {
     const { container } = render(
-      <MealItemRow
-        name="Arroz"
-        kcal={130}
-        protein={3}
-        carbs={28}
-        fats={1}
-        quantityGrams={100}
-        onRemove={() => undefined}
-      />,
+      <Table>
+        <TableBody>
+          <MealItemRow
+            name="Arroz"
+            kcal={130}
+            protein={3}
+            carbs={28}
+            fats={1}
+            quantityGrams={100}
+            onRemove={() => undefined}
+          />
+        </TableBody>
+      </Table>,
     );
 
-    expect(container.firstElementChild).toHaveClass("bg-surface-subtle", "rounded-surface", "shadow-none", "p-3");
+    const row = container.querySelector("tr");
+    expect(row).toHaveClass("border-b", "border-border-divider", "group/row");
     expect(screen.getByText("Arroz")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("100")).toBeInTheDocument();
+    expect(screen.getByText(/130/)).toBeInTheDocument();
+    expect(screen.getByTitle("Arrastar para reordenar")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remover Arroz" })).toBeInTheDocument();
   });
 });

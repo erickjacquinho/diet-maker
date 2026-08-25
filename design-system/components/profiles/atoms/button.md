@@ -10,7 +10,7 @@
 | Current layer | `atom` |
 | Target layer | `atom` |
 | Sources | `src/components/atoms/Button.tsx` |
-| Public exports | `ButtonProps` (type), `Button` (component), `CreateButtonProps` (type), `CreateButton` (compound-part), `SecondaryActionButtonProps` (type), `SecondaryActionButton` (compound-part) |
+| Public exports | `ButtonProps` (type), `Button` (component), `CreateButtonProps` (type), `CreateButton` (compound-part), `SecondaryActionButtonProps` (type), `SecondaryActionButton` (compound-part), `HoldToDeleteButtonProps` (type), `HoldToDeleteButton` (compound-part) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [actions](../../categories/actions.md). Traits autorizados: 
 
 ## Specific anatomy
 
-Root `Button` e exports visuais registrados: `Button`, `CreateButton`, `SecondaryActionButton`. Base declarada: `ui-button`.
+Root `Button` e exports visuais registrados: `Button`, `CreateButton`, `SecondaryActionButton`, `HoldToDeleteButton`. Base declarada: `ui-button`.
 
 ## Allowed variants
 

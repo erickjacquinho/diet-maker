@@ -108,4 +108,34 @@ describe('Component UI Seam: AdjustDietGoalsModal', () => {
     fireEvent.click(gKgButton);
     expect(gKgButton).toHaveAttribute('data-state', 'on');
   });
+
+  it('triggers onSave when Ctrl+S is pressed', () => {
+    const handleSave = vi.fn();
+    render(
+      <AdjustDietGoalsModal
+        isOpen={true}
+        onClose={vi.fn()}
+        tempTargetProt={150}
+        setTempTargetProt={vi.fn()}
+        tempTargetCarb={250}
+        setTempTargetCarb={vi.fn()}
+        tempTargetFat={50}
+        setTempTargetFat={vi.fn()}
+        patientWeightKg={70}
+        mode="simple"
+        onSave={handleSave}
+      />
+    );
+
+    const event = new KeyboardEvent('keydown', {
+      key: 's',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    window.dispatchEvent(event);
+
+    expect(handleSave).toHaveBeenCalledTimes(1);
+  });
 });

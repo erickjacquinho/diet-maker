@@ -121,6 +121,23 @@ export function useDietMealActions({
     [updateActiveMeals]
   );
 
+  const handleReorderItems = useCallback(
+    (mealId: string, sourceIndex: number, targetIndex: number) => {
+      if (sourceIndex === targetIndex) return;
+      updateActiveMeals((prev) =>
+        prev.map((meal) => {
+          if (meal.id !== mealId) return meal;
+          const nextItems = [...meal.items];
+          const [moved] = nextItems.splice(sourceIndex, 1);
+          if (!moved) return meal;
+          nextItems.splice(targetIndex, 0, moved);
+          return { ...meal, items: nextItems };
+        })
+      );
+    },
+    [updateActiveMeals]
+  );
+
   return {
     handleAddMeal,
     handleDuplicateMeal,
@@ -129,5 +146,6 @@ export function useDietMealActions({
     handleAddFoodToMeal,
     handleUpdateItemGram,
     handleRemoveItem,
+    handleReorderItems,
   };
 }

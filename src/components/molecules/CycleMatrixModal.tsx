@@ -9,14 +9,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/atoms';
+import { Button, DeleteIconButton } from '@/components/atoms';
 import { MacroSummary } from './MacroSummary';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/atoms/SelectField';
 import {
   SlidersHorizontal,
   Plus,
-  Trash2,
   Copy,
   ClipboardPaste,
   Calendar,
@@ -36,6 +35,7 @@ import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface CycleMatrixModalProps {
   isOpen: boolean;
@@ -409,6 +409,12 @@ export function CycleMatrixModal({
     onClose();
   };
 
+  useSaveShortcut({
+    onSave: handleSave,
+    enabled: isOpen,
+    priority: 10,
+  });
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden bg-surface border-border-subtle shadow-xl">
@@ -632,16 +638,13 @@ export function CycleMatrixModal({
                     >
                       <ClipboardPaste size={13} aria-hidden="true" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveItem(item.id)}
+                    <DeleteIconButton
+                      size="compact"
                       disabled={items.length <= 1}
+                      onClick={() => handleRemoveItem(item.id)}
                       title="Excluir variação"
                       aria-label="Excluir variação"
-                      className="size-7 rounded-control text-error hover:bg-error-soft flex items-center justify-center transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 size={13} aria-hidden="true" />
-                    </button>
+                    />
                   </div>
                 </div>
 
@@ -745,8 +748,16 @@ export function CycleMatrixModal({
             <Button variant="secondary" onClick={onClose}>
               Cancelar
             </Button>
-            <Button variant="primary" onClick={handleSave} className="flex items-center gap-1.5">
-              <span>Salvar Configurações</span>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              className="flex items-center gap-1.5"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Configurações (Ctrl+S)"
+            >
+              <span>
+                Salvar Configurações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              </span>
             </Button>
           </div>
         </DialogFooter>

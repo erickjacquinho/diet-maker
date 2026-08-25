@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AlertTriangle, Pencil, Plus } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SecondaryActionButton, SelectField } from '@/components/atoms';
-import { DEFAULT_OBJECTIVES, type Patient } from '@/lib/patientsStore';
+import { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES, type Patient } from '@/lib/patientsStore';
 import { formatWhatsappContact } from '@/lib/whatsapp';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface EditPatientModalProps {
   open: boolean;
@@ -31,9 +32,22 @@ export function EditPatientModal({
 }: EditPatientModalProps) {
   const [draft, setDraft] = useState<Patient | null>(patient);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open && !isDiscardConfirmOpen,
+    priority: 10,
+  });
 
   useEffect(() => {
-    if (open && patient) setDraft({ ...patient, whatsapp: formatWhatsappContact(patient.whatsapp) || undefined });
+    if (open && patient) {
+      setDraft({
+        ...patient,
+        maritalStatus: patient.maritalStatus || 'Solteiro(a)',
+        whatsapp: formatWhatsappContact(patient.whatsapp) || undefined,
+      });
+    }
   }, [open, patient]);
 
   useEffect(() => {
@@ -42,7 +56,9 @@ export function EditPatientModal({
 
   const hasUnsavedChanges = Boolean(draft && patient && (
     draft.name !== patient.name || draft.age !== patient.age || draft.heightCm !== patient.heightCm || draft.weightKg !== patient.weightKg ||
-    (draft.gender || 'Masculino') !== (patient.gender || 'Masculino') || (draft.objective || '') !== (patient.objective || '') ||
+    (draft.gender || 'Masculino') !== (patient.gender || 'Masculino') ||
+    (draft.maritalStatus || 'Solteiro(a)') !== (patient.maritalStatus || 'Solteiro(a)') ||
+    (draft.objective || '') !== (patient.objective || '') ||
     formatWhatsappContact(draft.whatsapp) !== formatWhatsappContact(patient.whatsapp) || draft.targetKcal !== patient.targetKcal ||
     draft.targetProtein !== patient.targetProtein || draft.targetCarbs !== patient.targetCarbs || draft.targetFats !== patient.targetFats
   ));
@@ -55,7 +71,12 @@ export function EditPatientModal({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!draft || !draft.name.trim()) return;
-    onSave({ ...draft, name: draft.name.trim(), whatsapp: formatWhatsappContact(draft.whatsapp) || undefined });
+    onSave({
+      ...draft,
+      name: draft.name.trim(),
+      maritalStatus: draft.maritalStatus || 'Solteiro(a)',
+      whatsapp: formatWhatsappContact(draft.whatsapp) || undefined,
+    });
     onOpenChange(false);
   };
 
@@ -69,7 +90,7 @@ export function EditPatientModal({
     <>
       <Dialog open={open} onOpenChange={requestClose}>
         <DialogContent className="max-h-screen overflow-y-auto" onPointerDownOutside={(event) => { if (hasUnsavedChanges) { event.preventDefault(); setIsDiscardConfirmOpen(true); } }} onEscapeKeyDown={(event) => { if (hasUnsavedChanges) { event.preventDefault(); setIsDiscardConfirmOpen(true); } }}>
-          <DialogHeader className="border-b border-border-subtle pb-3">
+          <DialogHeader>
             <DialogTitle className={textStyle('dialog-title')}>
               <Pencil size={18} className="text-success shrink-0 inline-block mr-2" />
               <span>Editar Dados do Paciente</span>
@@ -80,26 +101,22 @@ export function EditPatientModal({
           </DialogHeader>
 
           {draft && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-              <div>
-                <label htmlFor="edit-patient-name" className={textStyle('field-label')}>Nome Completo do Paciente</label>
-                <Input id="edit-patient-name" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <label htmlFor="edit-patient-whatsapp" className={textStyle('field-label')}>WhatsApp</label>
-                <Input id="edit-patient-whatsapp" type="tel" inputMode="numeric" autoComplete="tel" value={draft.whatsapp ?? ''} onChange={(event) => setDraft({ ...draft, whatsapp: formatWhatsappContact(event.target.value) })} placeholder="(11) 99999-9999" className="mt-1" />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={textStyle('field-label')}>Idade</label>
-                  <Input type="number" value={draft.age} onChange={(event) => setDraft({ ...draft, age: Number(event.target.value) })} className="mt-1" />
+                  <label htmlFor="edit-patient-name" className={textStyle('field-label')}>Nome Completo do Paciente</label>
+                  <Input id="edit-patient-name" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className="mt-1" />
                 </div>
                 <div>
-                  <label className={textStyle('field-label')}>Altura (cm)</label>
-                  <Input type="number" value={draft.heightCm} onChange={(event) => setDraft({ ...draft, heightCm: Number(event.target.value) })} className="mt-1" />
+                  <label htmlFor="edit-patient-whatsapp" className={textStyle('field-label')}>WhatsApp</label>
+                  <Input id="edit-patient-whatsapp" type="tel" inputMode="numeric" autoComplete="tel" value={draft.whatsapp ?? ''} onChange={(event) => setDraft({ ...draft, whatsapp: formatWhatsappContact(event.target.value) })} placeholder="(11) 99999-9999" className="mt-1" />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <SelectField
+                    id="edit-patient-gender"
                     label="Gênero"
                     value={draft.gender || 'Masculino'}
                     onValueChange={(value) => setDraft({ ...draft, gender: value })}
@@ -112,6 +129,34 @@ export function EditPatientModal({
                         : []),
                     ]}
                   />
+                </div>
+                <div>
+                  <SelectField
+                    id="edit-patient-marital-status"
+                    label="Estado Civil"
+                    value={draft.maritalStatus || 'Solteiro(a)'}
+                    onValueChange={(value) => setDraft({ ...draft, maritalStatus: value })}
+                    layer="modal"
+                    options={Array.from(new Set([...DEFAULT_MARITAL_STATUSES, draft.maritalStatus].filter(Boolean))).map((status) => ({
+                      value: status as string,
+                      label: status as string,
+                    }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className={textStyle('field-label')}>Idade</label>
+                  <Input type="number" value={draft.age} onChange={(event) => setDraft({ ...draft, age: Number(event.target.value) })} className="mt-1" />
+                </div>
+                <div>
+                  <label className={textStyle('field-label')}>Altura (cm)</label>
+                  <Input type="number" value={draft.heightCm} onChange={(event) => setDraft({ ...draft, heightCm: Number(event.target.value) })} className="mt-1" />
+                </div>
+                <div>
+                  <label className={textStyle('field-label')}>Peso (kg)</label>
+                  <Input type="number" value={draft.weightKg} onChange={(event) => setDraft({ ...draft, weightKg: Number(event.target.value) })} className="mt-1" />
                 </div>
               </div>
               <div>
@@ -133,10 +178,19 @@ export function EditPatientModal({
                   <SecondaryActionButton type="button" onClick={onRequestAddObjective} icon={<Plus size={14} className="text-success" />} title="Adicionar Novo Objetivo">Novo</SecondaryActionButton>
                 </div>
               </div>
-              <div className="flex gap-2 pt-2 border-t border-border-subtle">
+              <DialogFooter className="flex gap-2 pt-2">
                 <Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} className="flex-1">Cancelar</Button>
-                <Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Alterações</Button>
-              </div>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="compact"
+                  className="flex-1"
+                  aria-keyshortcuts="Control+s Meta+s"
+                  title="Salvar Alterações (Ctrl+S)"
+                >
+                  Salvar Alterações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                </Button>
+              </DialogFooter>
             </form>
           )}
         </DialogContent>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Scale } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Surface } from '@/components/atoms';
 import { MetricBox } from './MetricBox';
 import { useAssessmentForm } from '@/hooks/useAssessmentForm';
 import { AssessmentContinuousFields } from './assessment/AssessmentContinuousFields';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export { useAssessmentForm };
 
@@ -35,6 +36,14 @@ export function EditAssessmentModal({
   onOpenChange,
   onSave,
 }: EditAssessmentModalProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
+
   const { draft, composition, submitError, updateNumericField, handleSubmit } =
     useAssessmentForm({
       assessment,
@@ -60,6 +69,7 @@ export function EditAssessmentModal({
 
         {draft && (
           <form
+            ref={formRef}
             aria-label="Avaliação física"
             noValidate
             onSubmit={handleSubmit}
@@ -119,8 +129,14 @@ export function EditAssessmentModal({
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="compact">
-                Salvar avaliação
+              <Button
+                type="submit"
+                variant="primary"
+                size="compact"
+                aria-keyshortcuts="Control+s Meta+s"
+                title="Salvar avaliação (Ctrl+S)"
+              >
+                Salvar avaliação <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
               </Button>
             </DialogFooter>
           </form>

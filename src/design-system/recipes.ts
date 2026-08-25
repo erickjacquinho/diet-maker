@@ -10,7 +10,7 @@ const button = cva(`inline-flex items-center justify-center gap-2 rounded-contro
       secondary: "border-border-control bg-surface text-text-primary hover:border-button-secondary-border-hover hover:bg-button-secondary-hover",
       quiet: "border-transparent bg-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary",
       destructive: "border-error bg-error text-on-error hover:bg-error/90 active:bg-error",
-      "destructive-outline": "border-error bg-surface text-error hover:border-error hover:bg-error hover:text-white active:bg-error active:text-white disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
+      "destructive-outline": "border-error-border bg-surface text-error hover:border-error hover:bg-error hover:text-white active:bg-error active:text-white disabled:border-border-subtle disabled:bg-disabled-soft disabled:text-disabled",
     },
     size: {
       compact: "h-control-compact px-3 text-style-button-label-compact font-semibold",

@@ -69,4 +69,23 @@ describe('PatientDietsTable', () => {
     expect(handleOpen).toHaveBeenCalledTimes(1);
     expect(handleOpen).toHaveBeenCalledWith(mockDiets[0]);
   });
+
+  it('triggers onDeleteDiet when delete button is clicked', () => {
+    const handleDelete = vi.fn();
+    render(
+      <PatientDietsTable
+        patientId="p1"
+        diets={mockDiets}
+        onOpenReadOnlyDiet={vi.fn()}
+        onDeleteDiet={handleDelete}
+      />,
+    );
+
+    const deleteButtons = screen.getAllByRole('button', { name: /Excluir prescrição/ });
+    expect(deleteButtons).toHaveLength(2);
+
+    fireEvent.click(deleteButtons[0]);
+    expect(handleDelete).toHaveBeenCalledTimes(1);
+    expect(handleDelete).toHaveBeenCalledWith(mockDiets[0]);
+  });
 });

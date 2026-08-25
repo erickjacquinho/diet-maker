@@ -117,4 +117,52 @@ describe('PatientDetailPage history with two stacked tables', () => {
     fireEvent.click(verCardapioBtn);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('opens confirmation modal and deletes a prescription diet from history', async () => {
+    localStorage.setItem(
+      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'diet-1',
+          name: 'Plano cutting agosto',
+          date: '04/08/2026',
+          status: 'Ativa',
+          targetKcal: 2020,
+          proteinG: 150,
+          carbsG: 220,
+          fatsG: 60,
+        },
+      ]),
+    );
+
+    render(<PatientDetailPage />);
+
+    const dietsTable = await screen.findByRole('table', {
+      name: /Histórico de prescrições dietéticas/,
+    });
+    expect(dietsTable).toBeInTheDocument();
+    expect(screen.getByText('Plano cutting agosto')).toBeInTheDocument();
+
+    // Clica no botão de excluir ao lado de editar
+    const deleteBtn = screen.getByRole('button', {
+      name: /Excluir prescrição Plano cutting agosto/,
+    });
+    fireEvent.click(deleteBtn);
+
+    // Modal de confirmação
+    expect(
+      screen.getByRole('dialog', { name: /Confirmar Exclusão de Prescrição/ }),
+    ).toBeInTheDocument();
+
+    // Clica em confirmar exclusão
+    const confirmBtn = screen.getByRole('button', { name: 'Sim, Excluir Prescrição' });
+    fireEvent.click(confirmBtn);
+
+    // Dieta removida da tabela e estado vazio renderizado
+    await waitFor(() => {
+      expect(
+        screen.getByText('Nenhuma prescrição dietética registrada para este paciente até o momento.'),
+      ).toBeInTheDocument();
+    });
+  });
 });

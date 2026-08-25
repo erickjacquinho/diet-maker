@@ -20,7 +20,7 @@ import type {
   PatientRecordHistory,
 } from './patientsStoreTypes';
 
-import { DEFAULT_OBJECTIVES } from './patientsStoreTypes';
+import { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES } from './patientsStoreTypes';
 
 export type {
   Patient,
@@ -34,7 +34,7 @@ export type {
   StoredDietRecord,
   PatientRecordHistory,
 };
-export { DEFAULT_OBJECTIVES, normalizeDateKey, normalizePairedBodyMeasurements };
+export { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES, normalizeDateKey, normalizePairedBodyMeasurements };
 
 const PATIENTS_KEY = 'nutridiet_patients';
 const PATIENT_ASSESSMENTS_KEY_PREFIX = 'nutridiet_assessments_';
@@ -202,6 +202,27 @@ export function deletePatientFromStorage(id: string): void {
   writePatients(updatedList);
   removeStorageItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
   removeStorageItem(`nutridiet_diets_${id}`);
+}
+
+export function deletePatientDietFromStorage(patientId: string, dietId: string): void {
+  const currentDiets = getPatientDietsFromStorage(patientId);
+  const updatedDiets = currentDiets.filter((d) => d.id !== dietId);
+  setStorageItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`, updatedDiets);
+
+  const patient = getPatientById(patientId);
+  if (patient && patient.dietHistory) {
+    const updatedDietHistory = patient.dietHistory.filter((d) => d.id !== dietId);
+    updatePatientInStorage({
+      ...patient,
+      dietHistory: updatedDietHistory,
+    });
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('nutridiet-diet-sync', { detail: { patientId, dietId } }),
+    );
+  }
 }
 
 export function getConsultationRecord(patientId: string, rawDateParam: string): ConsultationRecord {

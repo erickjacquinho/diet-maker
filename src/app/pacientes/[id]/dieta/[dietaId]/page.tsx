@@ -8,6 +8,7 @@ import { ScaleDietModal } from '@/components/molecules/ScaleDietModal';
 import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
+import { DeleteMealFoodModal } from '@/components/molecules/DeleteMealFoodModal';
 import { Spinner } from '@/components/ui/spinner';
 import { MealCardContainerProps } from '@/components/organisms';
 import { calculateMealsTotal, saveDietToStorage } from '@/lib/dietStore';
@@ -48,6 +49,9 @@ export default function DietBuilderPage() {
     isWhatsAppModalOpen,
     setIsWhatsAppModalOpen,
     whatsAppText,
+    foodToDelete,
+    setFoodToDelete,
+    handleConfirmDeleteFood,
     currentMeals,
     macroMetrics,
     handleModeChange,
@@ -63,6 +67,7 @@ export default function DietBuilderPage() {
     handleAddFoodToMeal,
     handleUpdateItemGram,
     handleRemoveItem,
+    handleReorderItems,
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,
@@ -84,6 +89,7 @@ export default function DietBuilderPage() {
         carbsG: totals.carbsG,
         fatsG: totals.fatsG,
         items: meal.items.map((it) => ({
+          id: it.id,
           name: it.name,
           kcal: it.kcal,
           protein: it.protein,
@@ -102,15 +108,26 @@ export default function DietBuilderPage() {
         onDeleteMeal: () => handleRemoveMeal(meal.id),
         onRemoveItem: (itemIdx: number) => {
           const item = meal.items[itemIdx];
-          if (item?.id) handleRemoveItem(meal.id, item.id);
+          if (item?.id) {
+            setFoodToDelete({
+              mealId: meal.id,
+              mealName: meal.name,
+              itemId: item.id,
+              foodName: item.name,
+              quantityGrams: item.quantityGrams,
+            });
+          }
         },
         onQuantityChange: (itemIdx: number, newGrams: number) => {
           const item = meal.items[itemIdx];
           if (item?.id) handleUpdateItemGram(meal.id, item.id, newGrams);
         },
+        onReorderItems: (sourceIndex: number, targetIndex: number) => {
+          handleReorderItems(meal.id, sourceIndex, targetIndex);
+        },
       };
     });
-  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleRemoveMeal, handleRemoveItem, handleUpdateItemGram]);
+  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleRemoveMeal, setFoodToDelete, handleUpdateItemGram, handleReorderItems]);
 
   if (!dietPlan || !patient) {
     return (
@@ -225,6 +242,18 @@ export default function DietBuilderPage() {
         isOpen={isWhatsAppModalOpen}
         onClose={() => setIsWhatsAppModalOpen(false)}
         whatsAppText={whatsAppText}
+      />
+
+      {/* Modal de Confirmação de Exclusão de Alimento da Refeição */}
+      <DeleteMealFoodModal
+        open={foodToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setFoodToDelete(null);
+        }}
+        foodName={foodToDelete?.foodName || ''}
+        mealName={foodToDelete?.mealName}
+        quantityGrams={foodToDelete?.quantityGrams}
+        onConfirmDelete={handleConfirmDeleteFood}
       />
     </>
   );

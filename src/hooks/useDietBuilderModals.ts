@@ -4,6 +4,14 @@ import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/dietStore';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { toast } from 'sonner';
 
+export interface MealFoodToDelete {
+  mealId: string;
+  mealName: string;
+  itemId: string;
+  foodName: string;
+  quantityGrams?: number;
+}
+
 export function useDietBuilderModals({
   patient,
   dietPlan,
@@ -45,6 +53,21 @@ export function useDietBuilderModals({
 
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [whatsAppText, setWhatsAppText] = useState('');
+
+  const [foodToDelete, setFoodToDelete] = useState<MealFoodToDelete | null>(null);
+
+  const handleConfirmDeleteFood = useCallback(() => {
+    if (!foodToDelete) return;
+    updateActiveMeals((prev) =>
+      prev.map((meal) =>
+        meal.id === foodToDelete.mealId
+          ? { ...meal, items: meal.items.filter((item) => item.id !== foodToDelete.itemId) }
+          : meal
+      )
+    );
+    toast.success(`${foodToDelete.foodName} removido da refeição.`);
+    setFoodToDelete(null);
+  }, [foodToDelete, updateActiveMeals]);
 
   const handleApplyScale = useCallback(
     (percent: number) => {
@@ -198,6 +221,9 @@ export function useDietBuilderModals({
     setIsWhatsAppModalOpen,
     whatsAppText,
     setWhatsAppText,
+    foodToDelete,
+    setFoodToDelete,
+    handleConfirmDeleteFood,
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,

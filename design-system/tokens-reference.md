@@ -28,9 +28,11 @@
 - `ref.color.blue.900`: `#192F7A` (`primary-pressed`)
 
 ### 1.3 Macronutrientes (Domínio Nutricional)
+- **Ordem Canônica Obrigatória:** **1º Proteína (`P`) → 2º Carboidrato (`C`) → 3º Gordura (`G`) → 4º Calorias (`kcal`)**
 - **Proteínas:** `macro-protein` `#B8325A` | Soft `#FBEAF0` | Border `#E8BDC9`
 - **Carboidratos:** `macro-carbohydrate` `#A55B00` | Soft `#FFF1D6` | Border `#E7C997`
 - **Gorduras:** `macro-fat` `#0F766E` | Soft `#E6F4F1` | Border `#B6DAD5`
+- **Calorias:** `text-primary` (`#201C18`) / `primary` (`#2746B3`) | Unidade `kcal`
 
 ### 1.4 Feedback Semântico
 - **Informação:** `info` `#3157A4` | Soft `#EAF0FB` | Border `#C7D5ED`

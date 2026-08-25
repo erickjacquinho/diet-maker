@@ -9,7 +9,6 @@ import {
   Sparkles,
   CheckCheck,
   GripVertical,
-  Trash2,
   Save,
   AlertTriangle,
   ClipboardPaste,
@@ -17,6 +16,7 @@ import {
 import {
   Button,
   Surface,
+  DeleteIconButton,
 } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/atoms/SelectField';
@@ -47,6 +47,7 @@ import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 interface EditableVariationItem {
   id: string;
@@ -555,6 +556,11 @@ export default function DedicatedCarbCyclingPage() {
     router.push(`/pacientes/${patientId}/dieta/${dietaId}`);
   };
 
+  useSaveShortcut({
+    onSave: handleSave,
+    priority: 0,
+  });
+
   if (isLoading || !patient || !dietPlan) {
     return (
       <div className="min-h-screen bg-canvas flex items-center justify-center">
@@ -577,15 +583,18 @@ export default function DedicatedCarbCyclingPage() {
         size="compact"
         onClick={handleSave}
         disabled={!all7DaysAssigned}
+        aria-keyshortcuts="Control+s Meta+s"
         title={
           !all7DaysAssigned
             ? 'Distribua todos os 7 dias da semana antes de salvar'
-            : 'Salvar configurações do ciclo'
+            : 'Salvar configurações do ciclo e voltar (Ctrl+S)'
         }
         className="flex items-center gap-1.5"
       >
         <Save size={14} aria-hidden="true" />
-        <span>Salvar Configurações</span>
+        <span>
+          Salvar Configurações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+        </span>
       </Button>
     </div>
   );
@@ -879,19 +888,13 @@ export default function DedicatedCarbCyclingPage() {
                     >
                       <ClipboardPaste size={13} aria-hidden="true" />
                     </Button>
-                    <Button
-                      type="button"
-                      variant="destructive-outline"
+                    <DeleteIconButton
                       size="compact"
-                      iconOnly
                       disabled={items.length <= 1}
                       onClick={() => handleRemoveItem(item.id)}
-                      className="size-8 p-0 flex items-center justify-center"
                       title="Excluir variação"
                       aria-label="Excluir variação"
-                    >
-                      <Trash2 size={13} aria-hidden="true" />
-                    </Button>
+                    />
                   </div>
                 </div>
 

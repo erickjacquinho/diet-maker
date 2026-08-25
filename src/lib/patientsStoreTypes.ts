@@ -12,6 +12,7 @@ export interface Patient {
   targetCarbs: number;
   targetFats: number;
   objective: string;
+  maritalStatus?: string;
   phone?: string;
   whatsapp?: string;
   lastConsultation: string;
@@ -41,6 +42,11 @@ export const DEFAULT_OBJECTIVES = [
   'Bulking',
   'Recomposição Corporal',
   'Manutenção',
+];
+
+export const DEFAULT_MARITAL_STATUSES = [
+  'Solteiro(a)',
+  'Comprometido(a)',
 ];
 
 export interface HistoricalDiet {

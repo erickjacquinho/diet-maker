@@ -100,6 +100,7 @@ As cores de macro não são cores da marca. Elas possuem significado fixo:
 
 Regras:
 
+- **Ordem Canônica Obrigatória:** A criação e exibição de macronutrientes e calorias deve **SEMPRE** seguir estritamente a sequência: **1º Proteína (`P`), 2º Carboidrato (`C`), 3º Gordura (`G`), 4º Calorias (`kcal`)** em todas as interfaces, tabelas, formulários, modais e resumos da aplicação;
 - o rótulo textual deve acompanhar a cor;
 - não comunicar macro apenas pela cor;
 - usar fundos suaves para áreas maiores;

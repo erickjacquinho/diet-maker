@@ -7,6 +7,8 @@ import { IconButton } from "@/components/atoms/IconButton";
 import { Input } from "@/components/ui/input";
 import { ProgressBar } from "@/components/atoms/ProgressBar";
 
+import { Textarea } from "@/components/ui/textarea";
+
 describe("atom states", () => {
   it("renders identity, feedback, actions, fields and progress semantically", () => {
     render(<>
@@ -23,5 +25,22 @@ describe("atom states", () => {
     expect(screen.getByRole("button", { name: "Editar" })).toBeEnabled();
     expect(screen.getByRole("textbox", { name: "Nome" })).toBeEnabled();
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
+  });
+
+  it("configures placeholder and hides placeholder on focus for input and textarea", () => {
+    render(<>
+      <Input aria-label="Busca" placeholder="Digite aqui..." />
+      <Textarea aria-label="Observações" placeholder="Escreva observações..." />
+    </>);
+    const input = screen.getByRole("textbox", { name: "Busca" });
+    const textarea = screen.getByRole("textbox", { name: "Observações" });
+
+    expect(input).toHaveAttribute("placeholder", "Digite aqui...");
+    expect(input.className).toContain("placeholder:text-text-muted");
+    expect(input.className).toContain("focus:placeholder:text-transparent");
+
+    expect(textarea).toHaveAttribute("placeholder", "Escreva observações...");
+    expect(textarea.className).toContain("placeholder:text-text-muted");
+    expect(textarea.className).toContain("focus:placeholder:text-transparent");
   });
 });

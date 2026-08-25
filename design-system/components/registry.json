@@ -2052,6 +2052,16 @@
           "name": "SecondaryActionButton",
           "kind": "compound-part",
           "documentedBy": "profile"
+        },
+        {
+          "name": "HoldToDeleteButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "HoldToDeleteButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
         }
       ],
       "profile": "design-system/components/profiles/atoms/button.md",

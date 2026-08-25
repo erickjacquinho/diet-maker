@@ -16,6 +16,7 @@ import { Edit3, RotateCcw, Flame } from 'lucide-react';
 import { calculateMacroDistributionPct } from '@/lib/nutrition/macroCalculations';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface AdjustDietGoalsModalProps {
   isOpen: boolean;
@@ -48,6 +49,11 @@ export function AdjustDietGoalsModal({
   onVariationNameChange,
   onSave,
 }: AdjustDietGoalsModalProps) {
+  useSaveShortcut({
+    onSave,
+    enabled: isOpen,
+    priority: 10,
+  });
   const weight = patientWeightKg > 0 ? patientWeightKg : 70;
   const [unitMode, setUnitMode] = useState<'grams' | 'g_per_kg'>('grams');
 
@@ -361,8 +367,14 @@ export function AdjustDietGoalsModal({
             <Button variant="secondary" size="compact" onClick={onClose}>
               Cancelar
             </Button>
-            <Button variant="primary" size="compact" onClick={onSave}>
-              Salvar Metas
+            <Button
+              variant="primary"
+              size="compact"
+              onClick={onSave}
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Metas (Ctrl+S)"
+            >
+              Salvar Metas <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </DialogFooter>

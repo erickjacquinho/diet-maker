@@ -10,7 +10,7 @@ import {
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { EditIconButton, Badge } from '@/components/atoms';
+import { EditIconButton, DeleteIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import type { HistoricalDiet } from '@/lib/patientsStore';
@@ -19,6 +19,7 @@ export interface PatientDietsTableProps {
   patientId: string;
   diets: HistoricalDiet[];
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
+  onDeleteDiet?: (diet: HistoricalDiet) => void;
 }
 
 const columns: DataTableColumnDef<HistoricalDiet>[] = [
@@ -55,7 +56,7 @@ const columns: DataTableColumnDef<HistoricalDiet>[] = [
   {
     id: 'actions',
     header: 'Ações',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-[160px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-[190px]',
     cell: () => null,
   },
 ];
@@ -64,10 +65,12 @@ export function DietTableRow({
   patientId,
   diet,
   onOpenReadOnlyDiet,
+  onDeleteDiet,
 }: {
   patientId: string;
   diet: HistoricalDiet;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
+  onDeleteDiet?: (diet: HistoricalDiet) => void;
 }) {
   const isActive = diet.status === 'Ativa';
 
@@ -143,6 +146,14 @@ export function DietTableRow({
           >
             <EditIconButton title="Editar no Construtor de Dietas" size="compact" />
           </Link>
+          {onDeleteDiet && (
+            <DeleteIconButton
+              title={`Excluir prescrição ${diet.name}`}
+              aria-label={`Excluir prescrição ${diet.name}`}
+              size="compact"
+              onClick={() => onDeleteDiet(diet)}
+            />
+          )}
         </div>
       </TableCell>
     </TableRow>
@@ -153,6 +164,7 @@ export function PatientDietsTable({
   patientId,
   diets = [],
   onOpenReadOnlyDiet,
+  onDeleteDiet,
 }: PatientDietsTableProps) {
   if (diets.length === 0) {
     return (
@@ -177,6 +189,7 @@ export function PatientDietsTable({
           patientId={patientId}
           diet={diet}
           onOpenReadOnlyDiet={onOpenReadOnlyDiet}
+          onDeleteDiet={onDeleteDiet}
         />
       )}
       className="border border-border-subtle rounded-surface overflow-hidden"

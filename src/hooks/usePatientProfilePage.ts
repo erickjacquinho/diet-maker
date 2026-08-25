@@ -5,6 +5,7 @@ import {
   getPatientById,
   updatePatientInStorage,
   deletePatientFromStorage,
+  deletePatientDietFromStorage,
   getPatientAssessmentsFromStorage,
   savePatientAssessmentToStorage,
   Patient,
@@ -33,6 +34,8 @@ export function usePatientProfilePage() {
 
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteDietModalOpen, setIsDeleteDietModalOpen] = useState(false);
+  const [dietToDelete, setDietToDelete] = useState<HistoricalDiet | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
@@ -48,6 +51,11 @@ export function usePatientProfilePage() {
   const handleOpenReadOnlyDietModal = useCallback((diet: HistoricalDiet) => {
     setSelectedReadOnlyDiet(diet);
     setIsReadOnlyDietModalOpen(true);
+  }, []);
+
+  const handleOpenDeleteDietModal = useCallback((diet: HistoricalDiet) => {
+    setDietToDelete(diet);
+    setIsDeleteDietModalOpen(true);
   }, []);
 
   const handleOpenEditAssessment = useCallback((assessment: BodyAssessment) => {
@@ -194,6 +202,23 @@ export function usePatientProfilePage() {
     router.push('/pacientes');
   }, [patient, router]);
 
+  const handleDeleteDiet = useCallback(() => {
+    if (!dietToDelete || !patientId) return;
+    deletePatientDietFromStorage(patientId, dietToDelete.id);
+
+    setDietHistory((prev) => {
+      const filtered = prev.filter((d) => d.id !== dietToDelete.id);
+      return filtered.map((d, index) => ({
+        ...d,
+        status: index === 0 ? 'Ativa' : 'Histórica',
+      }));
+    });
+
+    setIsDeleteDietModalOpen(false);
+    setDietToDelete(null);
+    toast.success('Prescrição dietética excluída com sucesso!');
+  }, [dietToDelete, patientId]);
+
   return {
     patientId,
     patient,
@@ -206,6 +231,9 @@ export function usePatientProfilePage() {
     availableObjectives,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
+    isDeleteDietModalOpen,
+    setIsDeleteDietModalOpen,
+    dietToDelete,
     isEditModalOpen,
     setIsEditModalOpen,
     isEditAssessmentOpen,
@@ -222,6 +250,7 @@ export function usePatientProfilePage() {
     isReadOnlyDietModalOpen,
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
+    handleOpenDeleteDietModal,
     handleOpenEditAssessment,
     handleOpenCreateAssessment,
     handleSaveAssessment,
@@ -230,6 +259,7 @@ export function usePatientProfilePage() {
     handleAddCustomObjective,
     handleSavePatient,
     handleDeletePatient,
+    handleDeleteDiet,
     router,
   };
 }

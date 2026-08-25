@@ -4,6 +4,7 @@ import { Button } from '@/components/atoms';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 interface WhatsAppShareModalProps {
   isOpen: boolean;
@@ -25,6 +26,12 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
     const encoded = encodeURIComponent(whatsAppText);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   };
+
+  useSaveShortcut({
+    onSave: handleSendWhatsApp,
+    enabled: isOpen,
+    priority: 10,
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -57,8 +64,13 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
             <Button variant="quiet" onClick={onClose}>
               Fechar
             </Button>
-            <Button variant="primary" onClick={handleSendWhatsApp}>
-              Abrir WhatsApp
+            <Button
+              variant="primary"
+              onClick={handleSendWhatsApp}
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Abrir WhatsApp (Ctrl+S)"
+            >
+              Abrir WhatsApp <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </DialogFooter>
