@@ -39,6 +39,41 @@ describe('MacroProportionBar', () => {
     expect(screen.getAllByText('0g')).toHaveLength(3);
   });
 
+  it('renders custom empty message when provided and macros are zero', () => {
+    render(
+      <MacroProportionBar
+        proteinG={0}
+        carbsG={0}
+        fatsG={0}
+        emptyMessage="Nenhuma meta inserida. Digite os valores para visualizar a distribuição."
+      />
+    );
+
+    expect(screen.getByText(/Nenhuma meta inserida/i)).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('renders title, 100% total pct, and individual kcal per macro when configured', () => {
+    render(
+      <MacroProportionBar
+        proteinG={160}
+        carbsG={200}
+        fatsG={50}
+        title="Distribuição Calórica (% VET)"
+        showTotalPct
+        showKcalPerMacro
+        showGrams={false}
+        showCalories={false}
+      />
+    );
+
+    expect(screen.getByText('Distribuição Calórica (% VET)')).toBeInTheDocument();
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText(/640 kcal/)).toBeInTheDocument();
+    expect(screen.getByText(/800 kcal/)).toBeInTheDocument();
+    expect(screen.getByText(/450 kcal/)).toBeInTheDocument();
+  });
+
   it('respects showLegend and showCalories flags', () => {
     render(
       <MacroProportionBar

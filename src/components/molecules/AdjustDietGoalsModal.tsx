@@ -17,6 +17,7 @@ import { calculateMacroDistributionPct } from '@/lib/nutrition/macroCalculations
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
+import { MacroProportionBar } from './MacroProportionBar';
 
 export interface AdjustDietGoalsModalProps {
   isOpen: boolean;
@@ -303,52 +304,20 @@ export function AdjustDietGoalsModal({
             </div>
           </div>
 
-          {/* Barra de Distribuição Percentual (% VET) */}
-          {distribution.totalKcal > 0 ? (
-            <div className="flex flex-col gap-2 bg-surface-subtle/40 border border-border-subtle rounded-surface p-3.5">
-              <div className="flex items-center justify-between text-style-chart-micro text-text-muted font-semibold">
-                <span>Distribuição Calórica (% VET)</span>
-                <span className="font-bold text-text-primary">100%</span>
-              </div>
-              {/* Barra multi-segmentada */}
-              <div className="w-full h-2.5 bg-surface-subtle rounded-full overflow-hidden flex" role="progressbar" aria-label="Distribuição calórica">
-                <div
-                  style={{ width: `${distribution.proteinPct}%` }}
-                  className="h-full bg-macro-protein transition-all duration-300"
-                  title={`Proteínas: ${distribution.proteinPct}% (${distribution.proteinKcal} kcal)`}
-                />
-                <div
-                  style={{ width: `${distribution.carbsPct}%` }}
-                  className="h-full bg-macro-carbohydrate transition-all duration-300"
-                  title={`Carboidratos: ${distribution.carbsPct}% (${distribution.carbsKcal} kcal)`}
-                />
-                <div
-                  style={{ width: `${distribution.fatsPct}%` }}
-                  className="h-full bg-macro-fat transition-all duration-300"
-                  title={`Gorduras: ${distribution.fatsPct}% (${distribution.fatsKcal} kcal)`}
-                />
-              </div>
-              {/* Legenda com percentual e kcal por macro */}
-              <div className="flex items-center justify-between text-style-chart-micro text-text-muted pt-0.5 tabular-nums">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-macro-protein inline-block shrink-0" aria-hidden="true" />
-                  <span>Proteínas: <strong className="text-text-primary">{distribution.proteinPct}%</strong> ({distribution.proteinKcal} kcal)</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-macro-carbohydrate inline-block shrink-0" aria-hidden="true" />
-                  <span>Carboidratos: <strong className="text-text-primary">{distribution.carbsPct}%</strong> ({distribution.carbsKcal} kcal)</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-macro-fat inline-block shrink-0" aria-hidden="true" />
-                  <span>Gorduras: <strong className="text-text-primary">{distribution.fatsPct}%</strong> ({distribution.fatsKcal} kcal)</span>
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-3 text-style-chart-micro text-text-muted italic bg-surface-subtle/30 rounded-surface border border-dashed border-border-subtle">
-              Nenhuma meta inserida. Digite os valores para visualizar a distribuição calórica (% VET).
-            </div>
-          )}
+          {/* Barra de Distribuição Percentual (% VET) — Componente Modularizado */}
+          <MacroProportionBar
+            proteinG={tempTargetProt}
+            carbsG={tempTargetCarb}
+            fatsG={tempTargetFat}
+            title="Distribuição Calórica (% VET)"
+            showTotalPct
+            showKcalPerMacro
+            showGrams={false}
+            showCalories={false}
+            size="standard"
+            emptyMessage="Nenhuma meta inserida. Digite os valores para visualizar a distribuição calórica (% VET)."
+            className="bg-surface-subtle/40 border-border-subtle"
+          />
         </div>
 
         <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2 pt-2">

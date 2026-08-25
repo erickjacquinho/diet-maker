@@ -7,13 +7,33 @@ import { cn } from '@/lib/utils';
 import { Flame } from 'lucide-react';
 
 export interface MacroProportionBarProps {
+  /** Gramas de proteína (P) */
   proteinG: number;
+  /** Gramas de carboidrato (C) */
   carbsG: number;
+  /** Gramas de gorduras (G) */
   fatsG: number;
+  /** Calorias totais (kcal). Opcional; se omitido, calcula automaticamente via fatores de Atwater. */
   kcal?: number;
+  /** Título opcional exibido no topo da barra (ex: "Distribuição Calórica (% VET)") */
+  title?: React.ReactNode;
+  /** Exibir percentual total (ex: "100%") à direita do título. Padrão: false */
+  showTotalPct?: boolean;
+  /** Exibir a legenda com macros. Padrão: true */
   showLegend?: boolean;
+  /** Exibir o total de calorias na legenda/barra. Padrão: true */
   showCalories?: boolean;
+  /** Exibir calorias individuais calculadas por macro (ex: "(320 kcal)"). Padrão: false */
+  showKcalPerMacro?: boolean;
+  /** Exibir gramaturas na legenda (ex: "80g"). Padrão: true */
+  showGrams?: boolean;
+  /** Exibir percentuais individuais na legenda (ex: "40%"). Padrão: true */
+  showPct?: boolean;
+  /** Densidade visual / tamanho da barra e fontes. Padrão: 'compact' */
   size?: 'compact' | 'standard';
+  /** Mensagem customizada para estado vazio (quando macros = 0). Opcional */
+  emptyMessage?: string;
+  /** Classes CSS adicionais do container */
   className?: string;
 }
 
@@ -26,9 +46,15 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   carbsG,
   fatsG,
   kcal,
+  title,
+  showTotalPct = false,
   showLegend = true,
   showCalories = true,
+  showKcalPerMacro = false,
+  showGrams = true,
+  showPct = true,
   size = 'compact',
+  emptyMessage,
   className = '',
 }) => {
   const safeP = Math.max(0, Math.round(proteinG * 10) / 10);
@@ -43,6 +69,21 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   const displayKcal = kcal !== undefined && kcal > 0 ? Math.round(kcal) : computedKcal;
   const hasMacros = distribution.totalKcal > 0;
 
+  // Se houver emptyMessage definida e não houver macros, renderiza o estado vazio amigável
+  if (!hasMacros && emptyMessage) {
+    return (
+      <div
+        data-testid="macro-proportion-bar"
+        className={cn(
+          'text-center py-3 px-4 text-style-chart-micro text-text-muted italic bg-surface-subtle/30 rounded-control border border-dashed border-border-divider transition-colors',
+          className
+        )}
+      >
+        {emptyMessage}
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="macro-proportion-bar"
@@ -52,6 +93,18 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
         className
       )}
     >
+      {/* Header Opcional de Título e Percentual Total */}
+      {(title || showTotalPct) && (
+        <div className="flex items-center justify-between text-style-chart-micro text-text-muted font-semibold">
+          <div>{title}</div>
+          {showTotalPct && (
+            <span className="font-bold text-text-primary">
+              {hasMacros ? '100%' : '0%'}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Barra Multi-Segmentada */}
       {hasMacros ? (
         <div
@@ -60,7 +113,10 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
           aria-valuenow={100}
           aria-valuemin={0}
           aria-valuemax={100}
-          className="h-2 w-full overflow-hidden rounded-full bg-surface-subtle border border-border-divider flex"
+          className={cn(
+            'w-full overflow-hidden rounded-full bg-surface-subtle border border-border-divider flex',
+            size === 'compact' ? 'h-2' : 'h-2.5'
+          )}
         >
           {distribution.proteinPct > 0 && (
             <div
@@ -85,7 +141,12 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
           )}
         </div>
       ) : (
-        <div className="h-2 w-full overflow-hidden rounded-full bg-surface-subtle border border-dashed border-border-divider" />
+        <div
+          className={cn(
+            'w-full overflow-hidden rounded-full bg-surface-subtle border border-dashed border-border-divider',
+            size === 'compact' ? 'h-2' : 'h-2.5'
+          )}
+        />
       )}
 
       {/* Legenda Canônica: 1º Proteínas -> 2º Carboidratos -> 3º Gorduras -> 4º Total Calorias */}
@@ -96,8 +157,19 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             <div className="flex items-center gap-1.5" title="Proteínas">
               <span className="size-2 rounded-full bg-macro-protein shrink-0" aria-hidden="true" />
               <span className="text-text-muted">
-                P: <strong className="font-bold text-macro-protein">{safeP}g</strong>{' '}
-                {hasMacros && <span className="text-text-muted font-normal">({distribution.proteinPct}%)</span>}
+                {showGrams ? (
+                  <>
+                    P: <strong className="font-bold text-macro-protein">{safeP}g</strong>{' '}
+                    {hasMacros && showPct && <span className="text-text-muted font-normal">({distribution.proteinPct}%)</span>}
+                  </>
+                ) : (
+                  <>
+                    Proteínas: <strong className="font-bold text-text-primary">{distribution.proteinPct}%</strong>
+                  </>
+                )}
+                {showKcalPerMacro && hasMacros && (
+                  <span className="text-text-muted font-normal ml-1">({distribution.proteinKcal} kcal)</span>
+                )}
               </span>
             </div>
 
@@ -105,8 +177,19 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             <div className="flex items-center gap-1.5" title="Carboidratos">
               <span className="size-2 rounded-full bg-macro-carbohydrate shrink-0" aria-hidden="true" />
               <span className="text-text-muted">
-                C: <strong className="font-bold text-macro-carbohydrate">{safeC}g</strong>{' '}
-                {hasMacros && <span className="text-text-muted font-normal">({distribution.carbsPct}%)</span>}
+                {showGrams ? (
+                  <>
+                    C: <strong className="font-bold text-macro-carbohydrate">{safeC}g</strong>{' '}
+                    {hasMacros && showPct && <span className="text-text-muted font-normal">({distribution.carbsPct}%)</span>}
+                  </>
+                ) : (
+                  <>
+                    Carboidratos: <strong className="font-bold text-text-primary">{distribution.carbsPct}%</strong>
+                  </>
+                )}
+                {showKcalPerMacro && hasMacros && (
+                  <span className="text-text-muted font-normal ml-1">({distribution.carbsKcal} kcal)</span>
+                )}
               </span>
             </div>
 
@@ -114,15 +197,26 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             <div className="flex items-center gap-1.5" title="Gorduras">
               <span className="size-2 rounded-full bg-macro-fat shrink-0" aria-hidden="true" />
               <span className="text-text-muted">
-                G: <strong className="font-bold text-macro-fat">{safeF}g</strong>{' '}
-                {hasMacros && <span className="text-text-muted font-normal">({distribution.fatsPct}%)</span>}
+                {showGrams ? (
+                  <>
+                    G: <strong className="font-bold text-macro-fat">{safeF}g</strong>{' '}
+                    {hasMacros && showPct && <span className="text-text-muted font-normal">({distribution.fatsPct}%)</span>}
+                  </>
+                ) : (
+                  <>
+                    Gorduras: <strong className="font-bold text-text-primary">{distribution.fatsPct}%</strong>
+                  </>
+                )}
+                {showKcalPerMacro && hasMacros && (
+                  <span className="text-text-muted font-normal ml-1">({distribution.fatsKcal} kcal)</span>
+                )}
               </span>
             </div>
           </div>
 
           {/* 4. Total Calorias */}
           {showCalories && (
-            <div className="flex items-center gap-1 font-bold text-text-primary ml-auto" title="Calorias Totais da Refeição">
+            <div className="flex items-center gap-1 font-bold text-text-primary ml-auto" title="Calorias Totais">
               <Flame size={12} className="text-text-muted shrink-0" aria-hidden="true" />
               <span>
                 {displayKcal}{' '}

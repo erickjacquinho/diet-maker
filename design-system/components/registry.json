@@ -2422,6 +2422,45 @@
       "exceptions": []
     },
     {
+      "id": "molecule-macro-proportion-bar",
+      "name": "MacroProportionBar",
+      "nature": "domain-nutrition",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/MacroProportionBar.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MacroProportionBarProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MacroProportionBar",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/macro-proportion-bar.md",
+      "consumers": [
+        "molecule-adjust-diet-goals-modal",
+        "organism-meal-card-container"
+      ],
+      "primitiveBase": "atom-surface",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "molecule-metric-box",
       "name": "MetricBox",
       "nature": "product-generic",
