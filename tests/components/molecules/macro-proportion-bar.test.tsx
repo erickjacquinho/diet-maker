@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { MacroProportionBar } from '@/components/molecules/MacroProportionBar';
 
 describe('MacroProportionBar', () => {
-  it('renders multi-segmented proportion bar and canonical macro values', () => {
+  it('renders multi-segmented proportion bar and divided vertical columns for all macros and kcal', () => {
     render(
       <MacroProportionBar
         proteinG={30}
@@ -18,9 +18,13 @@ describe('MacroProportionBar', () => {
     expect(screen.getByRole('progressbar', { name: /Proporção calórica/i })).toBeInTheDocument();
 
     // Ordem canônica: Proteínas -> Carboidratos -> Gorduras -> Calorias
-    expect(screen.getByText('30g')).toBeInTheDocument();
-    expect(screen.getByText('40g')).toBeInTheDocument();
-    expect(screen.getByText('10g')).toBeInTheDocument();
+    expect(screen.getByText('Proteínas')).toBeInTheDocument();
+    expect(screen.getByText('30')).toBeInTheDocument();
+    expect(screen.getByText('Carboidratos')).toBeInTheDocument();
+    expect(screen.getByText('40')).toBeInTheDocument();
+    expect(screen.getByText('Gorduras')).toBeInTheDocument();
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('Calorias')).toBeInTheDocument();
     expect(screen.getByText('370')).toBeInTheDocument();
   });
 
@@ -36,7 +40,7 @@ describe('MacroProportionBar', () => {
 
     expect(screen.getByTestId('macro-proportion-bar')).toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-    expect(screen.getAllByText('0g')).toHaveLength(3);
+    expect(screen.getAllByText('0')).toHaveLength(4);
   });
 
   it('renders custom empty message when provided and macros are zero', () => {
@@ -53,7 +57,7 @@ describe('MacroProportionBar', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
-  it('renders title, 100% total pct, and individual kcal per macro when configured', () => {
+  it('renders title, 100% total pct, and individual kcal per macro', () => {
     render(
       <MacroProportionBar
         proteinG={160}
@@ -61,9 +65,6 @@ describe('MacroProportionBar', () => {
         fatsG={50}
         title="Distribuição Calórica (% VET)"
         showTotalPct
-        showKcalPerMacro
-        showGrams={false}
-        showCalories={false}
       />
     );
 
@@ -74,13 +75,13 @@ describe('MacroProportionBar', () => {
     expect(screen.getByText(/450 kcal/)).toBeInTheDocument();
   });
 
-  it('respects showLegend and showCalories flags', () => {
+  it('respects showDividers and showCalories flags', () => {
     render(
       <MacroProportionBar
         proteinG={25}
         carbsG={30}
         fatsG={8}
-        showLegend={false}
+        showDividers={false}
         showCalories={false}
         title={false}
         showTotalPct={false}
@@ -88,7 +89,7 @@ describe('MacroProportionBar', () => {
     );
 
     expect(screen.getByTestId('macro-proportion-bar')).toBeInTheDocument();
-    expect(screen.queryByText(/Proteínas:/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/kcal/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Proteínas')).not.toBeInTheDocument();
+    expect(screen.queryByText('Calorias')).not.toBeInTheDocument();
   });
 });

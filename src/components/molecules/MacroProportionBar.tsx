@@ -19,19 +19,11 @@ export interface MacroProportionBarProps {
   title?: React.ReactNode | false;
   /** Exibir percentual total (ex: "100%") à direita do título. Padrão: true */
   showTotalPct?: boolean;
-  /** Exibir a legenda com macros. Padrão: true */
-  showLegend?: boolean;
-  /** Exibir o total de calorias na legenda/barra. Padrão: true */
+  /** Exibir a grade inferior de macros com dividers verticais. Padrão: true */
+  showDividers?: boolean;
+  /** Exibir o total de calorias. Padrão: true */
   showCalories?: boolean;
-  /** Exibir calorias individuais calculadas por macro (ex: "(320 kcal)"). Padrão: true */
-  showKcalPerMacro?: boolean;
-  /** Exibir gramaturas na legenda (ex: "80g"). Padrão: true */
-  showGrams?: boolean;
-  /** Exibir percentuais individuais na legenda (ex: "40%"). Padrão: true */
-  showPct?: boolean;
-  /** Formato dos rótulos dos macros: 'full' ("Proteínas") ou 'short' ("P:"). Padrão: 'full' */
-  labelFormat?: 'full' | 'short';
-  /** Densidade visual / tamanho da barra e fontes. Padrão: 'standard' */
+  /** Densidade visual / tamanho da barra. Padrão: 'standard' */
   size?: 'compact' | 'standard';
   /** Mensagem customizada para estado vazio (quando macros = 0). Opcional */
   emptyMessage?: string;
@@ -41,7 +33,8 @@ export interface MacroProportionBarProps {
 
 /**
  * MacroProportionBar — Barra multi-segmentada de proporção e distribuição calórica (% VET)
- * dos macronutrientes (Proteínas, Carboidratos e Gorduras) seguindo a ordem canônica normativa.
+ * com bloco inferior de macronutrientes separado por divisores verticais.
+ * Segue estritamente a ordem canônica normativa: Proteínas -> Carboidratos -> Gorduras -> Calorias.
  */
 export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   proteinG,
@@ -50,12 +43,8 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   kcal,
   title = 'Distribuição Calórica (% VET)',
   showTotalPct = true,
-  showLegend = true,
+  showDividers = true,
   showCalories = true,
-  showKcalPerMacro = true,
-  showGrams = true,
-  showPct = true,
-  labelFormat = 'full',
   size = 'standard',
   emptyMessage,
   className = '',
@@ -93,30 +82,20 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
     <div
       data-testid="macro-proportion-bar"
       className={cn(
-        'flex flex-col gap-2 rounded-control border border-border-divider bg-surface-subtle/40 p-3.5 transition-colors',
-        size === 'compact' ? 'py-2.5 px-3' : 'p-3.5',
+        'flex flex-col gap-2.5 rounded-control border border-border-divider bg-surface p-3.5 transition-colors',
+        size === 'compact' ? 'py-2.5 px-3 gap-2' : 'p-3.5 gap-2.5',
         className
       )}
     >
-      {/* Header de Título e Percentual Total / Calorias */}
-      {(hasTitle || showTotalPct || showCalories) && (
+      {/* Header de Título e Percentual Total */}
+      {(hasTitle || showTotalPct) && (
         <div className="flex items-center justify-between text-style-chart-micro text-text-muted font-semibold">
           {hasTitle && <div>{title}</div>}
-          <div className="flex items-center gap-2 ml-auto">
-            {showTotalPct && (
-              <span className="font-bold text-text-primary">
-                {hasMacros ? '100%' : '0%'}
-              </span>
-            )}
-            {showCalories && (
-              <span className="flex items-center gap-1 font-bold text-text-primary pl-1.5 border-l border-border-divider" title="Calorias Totais">
-                <Flame size={12} className="text-warning shrink-0" aria-hidden="true" />
-                <span>
-                  {displayKcal} <span className="font-normal text-text-muted">kcal</span>
-                </span>
-              </span>
-            )}
-          </div>
+          {showTotalPct && (
+            <span className="font-bold text-text-primary ml-auto">
+              {hasMacros ? '100%' : '0%'}
+            </span>
+          )}
         </div>
       )}
 
@@ -164,62 +143,72 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
         />
       )}
 
-      {/* Legenda Canônica Completa: 1º Proteínas -> 2º Carboidratos -> 3º Gorduras */}
-      {showLegend && (
-        <div className="flex flex-wrap items-center justify-between gap-2 text-style-chart-micro pt-0.5 tabular-nums text-text-muted">
+      {/* Grade Inferior com Dividers Verticais: Proteínas | Carboidratos | Gorduras | Calorias */}
+      {showDividers && (
+        <div
+          className={cn(
+            'grid divide-x divide-border-divider border-t border-border-divider/70 text-center',
+            showCalories ? 'grid-cols-4' : 'grid-cols-3',
+            size === 'compact' ? 'pt-2 mt-0.5' : 'pt-2.5 mt-0.5'
+          )}
+        >
           {/* 1. Proteínas */}
-          <span className="flex items-center gap-1.5" title="Proteínas">
-            <span className="size-2 rounded-full bg-macro-protein inline-block shrink-0" aria-hidden="true" />
-            <span>
-              {labelFormat === 'full' ? 'Proteínas: ' : 'P: '}
-              {showGrams && <strong className="text-text-primary font-bold">{safeP}g</strong>}
-              {showGrams && showPct && hasMacros && <span className="mx-0.5">·</span>}
-              {showPct && (
-                <strong className="text-macro-protein font-bold">
-                  {hasMacros ? `${distribution.proteinPct}%` : '0%'}
-                </strong>
-              )}
-              {showKcalPerMacro && hasMacros && (
-                <span className="text-text-muted font-normal ml-1">({distribution.proteinKcal} kcal)</span>
-              )}
-            </span>
-          </span>
+          <div className="flex flex-col items-center justify-center px-2 py-0.5" title="Proteínas">
+            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+              <span className="size-2 rounded-full bg-macro-protein shrink-0" aria-hidden="true" />
+              <span>Proteínas</span>
+            </div>
+            <div className="text-style-body font-bold text-macro-protein tabular-nums">
+              {safeP}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span>
+            </div>
+            <div className="text-style-chart-micro text-text-muted tabular-nums">
+              {hasMacros ? `${distribution.proteinPct}% (${distribution.proteinKcal} kcal)` : '0%'}
+            </div>
+          </div>
 
           {/* 2. Carboidratos */}
-          <span className="flex items-center gap-1.5" title="Carboidratos">
-            <span className="size-2 rounded-full bg-macro-carbohydrate inline-block shrink-0" aria-hidden="true" />
-            <span>
-              {labelFormat === 'full' ? 'Carboidratos: ' : 'C: '}
-              {showGrams && <strong className="text-text-primary font-bold">{safeC}g</strong>}
-              {showGrams && showPct && hasMacros && <span className="mx-0.5">·</span>}
-              {showPct && (
-                <strong className="text-macro-carbohydrate font-bold">
-                  {hasMacros ? `${distribution.carbsPct}%` : '0%'}
-                </strong>
-              )}
-              {showKcalPerMacro && hasMacros && (
-                <span className="text-text-muted font-normal ml-1">({distribution.carbsKcal} kcal)</span>
-              )}
-            </span>
-          </span>
+          <div className="flex flex-col items-center justify-center px-2 py-0.5" title="Carboidratos">
+            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+              <span className="size-2 rounded-full bg-macro-carbohydrate shrink-0" aria-hidden="true" />
+              <span>Carboidratos</span>
+            </div>
+            <div className="text-style-body font-bold text-macro-carbohydrate tabular-nums">
+              {safeC}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span>
+            </div>
+            <div className="text-style-chart-micro text-text-muted tabular-nums">
+              {hasMacros ? `${distribution.carbsPct}% (${distribution.carbsKcal} kcal)` : '0%'}
+            </div>
+          </div>
 
           {/* 3. Gorduras */}
-          <span className="flex items-center gap-1.5" title="Gorduras">
-            <span className="size-2 rounded-full bg-macro-fat inline-block shrink-0" aria-hidden="true" />
-            <span>
-              {labelFormat === 'full' ? 'Gorduras: ' : 'G: '}
-              {showGrams && <strong className="text-text-primary font-bold">{safeF}g</strong>}
-              {showGrams && showPct && hasMacros && <span className="mx-0.5">·</span>}
-              {showPct && (
-                <strong className="text-macro-fat font-bold">
-                  {hasMacros ? `${distribution.fatsPct}%` : '0%'}
-                </strong>
-              )}
-              {showKcalPerMacro && hasMacros && (
-                <span className="text-text-muted font-normal ml-1">({distribution.fatsKcal} kcal)</span>
-              )}
-            </span>
-          </span>
+          <div className="flex flex-col items-center justify-center px-2 py-0.5" title="Gorduras">
+            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+              <span className="size-2 rounded-full bg-macro-fat shrink-0" aria-hidden="true" />
+              <span>Gorduras</span>
+            </div>
+            <div className="text-style-body font-bold text-macro-fat tabular-nums">
+              {safeF}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span>
+            </div>
+            <div className="text-style-chart-micro text-text-muted tabular-nums">
+              {hasMacros ? `${distribution.fatsPct}% (${distribution.fatsKcal} kcal)` : '0%'}
+            </div>
+          </div>
+
+          {/* 4. Calorias */}
+          {showCalories && (
+            <div className="flex flex-col items-center justify-center px-2 py-0.5" title="Calorias Totais">
+              <div className="flex items-center gap-1 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+                <Flame size={12} className="text-warning shrink-0" aria-hidden="true" />
+                <span>Calorias</span>
+              </div>
+              <div className="text-style-body font-bold text-text-primary tabular-nums">
+                {displayKcal}<span className="text-style-legal text-text-muted font-medium ml-0.5">kcal</span>
+              </div>
+              <div className="text-style-chart-micro text-text-muted">
+                Total
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
