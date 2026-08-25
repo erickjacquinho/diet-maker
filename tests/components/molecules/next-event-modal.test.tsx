@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { NextEventModal } from '@/components/molecules/NextEventModal';
 
@@ -69,10 +69,15 @@ describe('NextEventModal', () => {
     expect(alertDialog).toBeInTheDocument();
 
     const confirmBtn = screen.getByRole('button', { name: 'Sim, remover' });
-    fireEvent.click(confirmBtn);
+    vi.useFakeTimers();
+    fireEvent.pointerDown(confirmBtn, { button: 0 });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
 
     expect(onClear).toHaveBeenCalledTimes(1);
     expect(onOpenChange).toHaveBeenCalledWith(false);
+    vi.useRealTimers();
   });
 
   it('opens discard alert when closing with unsaved changes', async () => {

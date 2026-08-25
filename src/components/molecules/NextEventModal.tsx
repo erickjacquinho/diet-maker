@@ -192,6 +192,7 @@ export function NextEventModal({
             <HoldToDeleteButton
               onConfirm={confirmRemove}
               size="compact"
+              ariaLabel="Sim, remover"
             >
               Sim, remover
             </HoldToDeleteButton>
