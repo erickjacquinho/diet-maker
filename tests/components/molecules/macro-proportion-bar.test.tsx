@@ -81,11 +81,14 @@ describe('MacroProportionBar', () => {
         carbsG={30}
         fatsG={8}
         showLegend={false}
+        showCalories={false}
+        title={false}
+        showTotalPct={false}
       />
     );
 
     expect(screen.getByTestId('macro-proportion-bar')).toBeInTheDocument();
-    expect(screen.queryByText(/P:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Proteínas:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/kcal/)).not.toBeInTheDocument();
   });
 });
