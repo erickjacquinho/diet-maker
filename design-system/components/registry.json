@@ -2454,7 +2454,9 @@
       "profile": "design-system/components/profiles/molecules/macro-proportion-bar.md",
       "consumers": [
         "molecule-adjust-diet-goals-modal",
-        "organism-meal-card-container"
+        "organism-meal-card-container",
+        "molecule-read-only-diet-modal",
+        "page-refeicoes-prontas"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
