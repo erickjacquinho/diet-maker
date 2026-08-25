@@ -15,6 +15,7 @@ import { Badge, SecondaryActionButton } from '@/components/atoms';
 import { Card } from '@/components/ui/card';
 import { MacroSummary } from './MacroSummary';
 import { MetricBox } from './MetricBox';
+import { MacroProportionBar } from './MacroProportionBar';
 import { Utensils, Clock, Printer, Eye, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculatePresetCalories } from '@/lib/presetUtils';
@@ -160,15 +161,13 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
                       </p>
                     )}
 
-                    <div className="pt-2 border-t border-border-divider/60 flex items-center justify-end">
-                      <MacroSummary
-                        protein={meal.proteinG}
-                        carbs={meal.carbsG}
-                        fats={meal.fatsG}
-                        showKcal={false}
-                        className={cn('justify-end', textStyle('caption'))}
-                      />
-                    </div>
+                    <MacroProportionBar
+                      proteinG={meal.proteinG}
+                      carbsG={meal.carbsG}
+                      fatsG={meal.fatsG}
+                      kcal={mealKcal}
+                      size="compact"
+                    />
                   </div>
                 );
               })}

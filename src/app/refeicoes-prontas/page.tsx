@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/molecules/CreateReadyMealModal';
-import { MetricBox } from '@/components/molecules';
+import { MacroProportionBar } from '@/components/molecules';
 import {
   type ReadyMeal,
   getReadyMealsFromStorage,
@@ -113,13 +113,13 @@ export default function ReadyMealsPage() {
                   <p className="text-style-legal text-text-muted leading-relaxed line-clamp-2">{meal.itemsPreview}</p>
                 </div>
 
-                {/* Macro Summary */}
-                <div className="grid grid-cols-4 gap-1.5 p-3 bg-surface-subtle border border-border-subtle rounded-control text-center">
-                  <MetricBox surface="inline" size="compact" label="Kcal" value={`${meal.kcal}`} />
-                  <MetricBox surface="inline" size="compact" tone="protein" label="Prot" value={`${meal.proteinG}g`} />
-                  <MetricBox surface="inline" size="compact" tone="warning" label="Carb" value={`${meal.carbsG}g`} />
-                  <MetricBox surface="inline" size="compact" tone="success" label="Gord" value={`${meal.fatsG}g`} />
-                </div>
+                {/* Barra de Proporção de Macronutrientes da Refeição Pronta */}
+                <MacroProportionBar
+                  proteinG={meal.proteinG}
+                  carbsG={meal.carbsG}
+                  fatsG={meal.fatsG}
+                  kcal={meal.kcal}
+                />
 
                 <div className="pt-2 flex items-center justify-between border-t border-border-subtle">
                   <span className="text-style-legal text-text-muted font-medium">Bloco de 1 clique</span>
