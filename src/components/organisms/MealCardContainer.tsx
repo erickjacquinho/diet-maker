@@ -213,7 +213,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           className="w-full border-dashed border-border-control hover:border-primary/60 hover:bg-surface-hover text-text-primary font-semibold text-style-button-label-compact flex items-center justify-center gap-1.5"
         >
           <Plus size={14} className="text-success" />
-          <span>Adicionar Alimento da Base TACO</span>
+          <span>Adicionar Alimento</span>
         </Button>
 
         {/* Barra de Proporção de Macronutrientes e Calorias da Refeição */}
