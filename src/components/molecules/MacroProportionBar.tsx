@@ -147,23 +147,25 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
       {showDividers && (
         <div
           className={cn(
-            'grid divide-x divide-border-divider border-t border-border-divider/70 text-center',
+            'grid divide-x divide-border-divider border-t border-border-divider/70 text-center items-center',
             showCalories ? 'grid-cols-4' : 'grid-cols-3',
             size === 'compact' ? 'pt-2 mt-0.5' : 'pt-2.5 mt-0.5'
           )}
         >
           {/* 1. Proteínas */}
-          <div className="flex flex-col items-center justify-center px-1.5 py-0.5 min-w-0" title="Proteínas">
-            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+          <div className="flex flex-col items-center justify-center h-full px-1.5 py-0.5 min-w-0" title="Proteínas">
+            <div className="flex items-center justify-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-1">
               <span className="size-2 rounded-full bg-macro-protein shrink-0" aria-hidden="true" />
               <span>Proteínas</span>
             </div>
-            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-protein tabular-nums">
-              <span>{safeP}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span></span>
+            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-protein tabular-nums leading-none">
+              <span className="inline-flex items-center leading-none">
+                {safeP}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+              </span>
               {hasMacros && (
                 <>
-                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70">·</span>
-                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap">
+                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70 leading-none">·</span>
+                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap leading-none">
                     {distribution.proteinPct}% ({distribution.proteinKcal} kcal)
                   </span>
                 </>
@@ -172,17 +174,19 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
           </div>
 
           {/* 2. Carboidratos */}
-          <div className="flex flex-col items-center justify-center px-1.5 py-0.5 min-w-0" title="Carboidratos">
-            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+          <div className="flex flex-col items-center justify-center h-full px-1.5 py-0.5 min-w-0" title="Carboidratos">
+            <div className="flex items-center justify-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-1">
               <span className="size-2 rounded-full bg-macro-carbohydrate shrink-0" aria-hidden="true" />
               <span>Carboidratos</span>
             </div>
-            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-carbohydrate tabular-nums">
-              <span>{safeC}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span></span>
+            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-carbohydrate tabular-nums leading-none">
+              <span className="inline-flex items-center leading-none">
+                {safeC}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+              </span>
               {hasMacros && (
                 <>
-                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70">·</span>
-                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap">
+                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70 leading-none">·</span>
+                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap leading-none">
                     {distribution.carbsPct}% ({distribution.carbsKcal} kcal)
                   </span>
                 </>
@@ -191,17 +195,19 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
           </div>
 
           {/* 3. Gorduras */}
-          <div className="flex flex-col items-center justify-center px-1.5 py-0.5 min-w-0" title="Gorduras">
-            <div className="flex items-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+          <div className="flex flex-col items-center justify-center h-full px-1.5 py-0.5 min-w-0" title="Gorduras">
+            <div className="flex items-center justify-center gap-1.5 text-style-chart-micro font-semibold text-text-muted mb-1">
               <span className="size-2 rounded-full bg-macro-fat shrink-0" aria-hidden="true" />
               <span>Gorduras</span>
             </div>
-            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-fat tabular-nums">
-              <span>{safeF}<span className="text-style-legal text-text-muted font-medium ml-0.5">g</span></span>
+            <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-fat tabular-nums leading-none">
+              <span className="inline-flex items-center leading-none">
+                {safeF}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+              </span>
               {hasMacros && (
                 <>
-                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70">·</span>
-                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap">
+                  <span className="text-text-muted font-normal text-style-chart-micro opacity-70 leading-none">·</span>
+                  <span className="text-style-chart-micro font-normal text-text-muted whitespace-nowrap leading-none">
                     {distribution.fatsPct}% ({distribution.fatsKcal} kcal)
                   </span>
                 </>
@@ -211,15 +217,17 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
 
           {/* 4. Calorias */}
           {showCalories && (
-            <div className="flex flex-col items-center justify-center px-1.5 py-0.5 min-w-0" title="Calorias Totais">
-              <div className="flex items-center gap-1 text-style-chart-micro font-semibold text-text-muted mb-0.5">
+            <div className="flex flex-col items-center justify-center h-full px-1.5 py-0.5 min-w-0" title="Calorias Totais">
+              <div className="flex items-center justify-center gap-1 text-style-chart-micro font-semibold text-text-muted mb-1">
                 <Flame size={12} className="text-warning shrink-0" aria-hidden="true" />
                 <span>Calorias</span>
               </div>
-              <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-text-primary tabular-nums">
-                <span>{displayKcal}<span className="text-style-legal text-text-muted font-medium ml-0.5">kcal</span></span>
-                <span className="text-text-muted font-normal text-style-chart-micro opacity-70">·</span>
-                <span className="text-style-chart-micro font-normal text-text-muted">
+              <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-text-primary tabular-nums leading-none">
+                <span className="inline-flex items-center leading-none">
+                  {displayKcal}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">kcal</span>
+                </span>
+                <span className="text-text-muted font-normal text-style-chart-micro opacity-70 leading-none">·</span>
+                <span className="text-style-chart-micro font-normal text-text-muted leading-none">
                   Total
                 </span>
               </div>
