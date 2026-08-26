@@ -36,7 +36,7 @@ describe('macroCalculations Unit Tests', () => {
     expect(result.percentage).toBe(0);
     expect(result.diff).toBe(-2020);
     expect(result.badgeText).toBe('Faltam 2020 kcal');
-    expect(result.badgeTone).toBe('warning');
+    expect(result.badgeTone).toBe('default');
     expect(result.hasTarget).toBe(true);
   });
 
@@ -105,7 +105,7 @@ describe('macroCalculations Unit Tests', () => {
     expect(protCard.currentValue).toBe('0g');
     expect(protCard.targetValue).toBe('150g');
     expect(protCard.statusBadgeText).toBe('Faltam 150g');
-    expect(protCard.statusBadgeVariant).toBe('warning');
+    expect(protCard.statusBadgeVariant).toBe('default');
     expect(protCard.gPerKgRatio).toBe('0.00 g/kg');
     expect(protCard.gPerKgMeta).toBe('1.9');
     expect(protCard.macroColor).toBe('protein');

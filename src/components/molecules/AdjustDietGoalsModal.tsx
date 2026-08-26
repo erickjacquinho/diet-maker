@@ -311,14 +311,13 @@ export function AdjustDietGoalsModal({
             fatsG={tempTargetFat}
             title="Distribuição Calórica (% VET)"
             showTotalPct
-            showKcalPerMacro
-            showGrams={false}
             showCalories={false}
             size="standard"
             emptyMessage="Nenhuma meta inserida. Digite os valores para visualizar a distribuição calórica (% VET)."
             className="bg-surface-subtle/40 border-border-subtle"
           />
         </div>
+
 
         <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2 pt-2">
           <Button

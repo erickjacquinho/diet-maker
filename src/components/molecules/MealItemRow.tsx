@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GripVertical } from 'lucide-react';
-import { DeleteIconButton } from '@/components/atoms';
+import { DeleteIconButton, DuplicateIconButton, SubstituteIconButton } from '@/components/atoms';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,6 +23,8 @@ export interface MealItemRowProps {
   fats: number;
   quantityGrams: number;
   onQuantityChange?: (newGrams: number) => void;
+  onSubstitute?: () => void;
+  onDuplicate?: () => void;
   onRemove?: () => void;
   isDragging?: boolean;
   isDragOver?: boolean;
@@ -42,6 +44,8 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   fats,
   quantityGrams,
   onQuantityChange,
+  onSubstitute,
+  onDuplicate,
   onRemove,
   isDragging = false,
   isDragOver = false,
@@ -50,6 +54,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   onDragOver,
   onDrop,
 }) => {
+
   const [tempGrams, setTempGrams] = useState<number | string>(quantityGrams);
 
   useEffect(() => {
@@ -62,6 +67,24 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
     if (onQuantityChange && val !== quantityGrams) {
       onQuantityChange(val);
     }
+  };
+
+  const handleQuantityKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Tab') return;
+
+    const quantityInputs = Array.from(
+      event.currentTarget.closest('tbody')?.querySelectorAll<HTMLInputElement>(
+        'input[data-meal-quantity-input]'
+      ) ?? []
+    );
+    const currentIndex = quantityInputs.indexOf(event.currentTarget);
+    const nextIndex = event.shiftKey ? currentIndex - 1 : currentIndex + 1;
+    const nextInput = quantityInputs[nextIndex];
+
+    if (!nextInput) return;
+
+    event.preventDefault();
+    nextInput.focus();
   };
 
   return (
@@ -92,25 +115,36 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
       </TableCell>
 
       {/* 2. Nome do Alimento */}
-      <TableCell className="text-left font-bold text-style-legal text-text-primary py-2 min-w-0">
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                tabIndex={0}
-                className="truncate block cursor-default outline-none"
-              >
-                {name}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" align="start" className="text-style-legal font-medium max-w-xs shadow-floating">
-              {name}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <TableCell className="text-left font-bold text-style-legal text-text-primary py-2 min-w-[140px]">
+        <div className="flex items-center min-w-[140px] max-w-sm">
+          <span
+            className="truncate block font-bold text-text-primary"
+            title={name}
+          >
+            {name}
+          </span>
+        </div>
       </TableCell>
 
-      {/* 3. Quantidade (Input permanente e idêntico) */}
+      {/* 3. Ações do alimento */}
+      <TableCell className="w-20 px-2 text-center py-2">
+        <div className="flex items-center justify-center gap-1 opacity-0 pointer-events-none transition-opacity duration-fast group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
+          <SubstituteIconButton
+            size="compact"
+            onClick={onSubstitute}
+            title={`Substituir ${name}`}
+            aria-label={`Substituir ${name}`}
+          />
+          <DuplicateIconButton
+            size="compact"
+            onClick={onDuplicate}
+            title={`Duplicar ${name}`}
+            aria-label={`Duplicar ${name}`}
+          />
+        </div>
+      </TableCell>
+
+      {/* 4. Quantidade (Input permanente e idêntico) */}
       <TableCell className="w-24 text-center py-2 px-1">
         <div className="relative flex items-center justify-center mx-auto max-w-[84px]">
           <Input
@@ -118,6 +152,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
             min={1}
             max={5000}
             size="compact"
+            data-meal-quantity-input="true"
             value={tempGrams}
             onChange={(e) => {
               const val = e.target.value === '' ? ('' as unknown as number) : Number(e.target.value);
@@ -125,6 +160,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
             }}
             onBlur={handleSaveGrams}
             onKeyDown={(e) => {
+              handleQuantityKeyDown(e);
               if (e.key === 'Enter') handleSaveGrams();
               if (e.key === 'Escape') setTempGrams(quantityGrams);
             }}
@@ -137,35 +173,37 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         </div>
       </TableCell>
 
-      {/* 4. Proteína */}
+      {/* 5. Proteína */}
       <TableCell className="w-20 text-right font-bold text-macro-protein tabular-nums py-2 text-style-legal">
         {protein}g
       </TableCell>
 
-      {/* 5. Carboidrato */}
+      {/* 6. Carboidrato */}
       <TableCell className="w-24 text-right font-bold text-macro-carbohydrate tabular-nums py-2 text-style-legal">
         {carbs}g
       </TableCell>
 
-      {/* 6. Gorduras */}
+      {/* 7. Gorduras */}
       <TableCell className="w-20 text-right font-bold text-macro-fat tabular-nums py-2 text-style-legal">
         {fats}g
       </TableCell>
 
-      {/* 7. Calorias */}
+      {/* 8. Calorias */}
       <TableCell className="w-24 text-right font-bold text-text-primary tabular-nums py-2 text-style-legal">
         {kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
       </TableCell>
 
-      {/* 8. Excluir */}
+      {/* 9. Remover alimento */}
       <TableCell className="w-12 px-2 text-center py-2">
-        <DeleteIconButton
-          size="compact"
-          onClick={onRemove}
-          title={`Remover ${name}`}
-        />
+        <div className="flex items-center justify-center">
+          <DeleteIconButton
+            size="compact"
+            onClick={onRemove}
+            title={`Remover ${name}`}
+            aria-label={`Remover ${name}`}
+          />
+        </div>
       </TableCell>
     </TableRow>
   );
 };
-

@@ -12,14 +12,13 @@ export type ButtonProps = Omit<ShadcnButtonProps, 'variant' | 'size' | 'iconOnly
   ref?: React.Ref<HTMLButtonElement>;
 };
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   variant = 'secondary',
   size = 'standard',
   iconOnly = false,
   className = '',
-  ref,
   ...props
-}) => (
+}, ref) => (
   <ShadcnButton
     ref={ref}
     variant={variant}
@@ -28,7 +27,8 @@ export const Button: React.FC<ButtonProps> = ({
     className={className}
     {...props}
   />
-);
+));
+Button.displayName = 'Button';
 
 export interface CreateButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;

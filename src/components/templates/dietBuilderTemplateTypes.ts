@@ -41,6 +41,7 @@ export interface DietBuilderTemplateProps {
   onRemoveItem?: (mealIndex: number, itemIndex: number) => void;
   onScaleDiet?: () => void;
   onOpenScaleModal?: () => void;
+  scaleDisabled?: boolean;
   onOpenCopyModal?: () => void;
   onOpenAdjustGoalsModal?: () => void;
   onPullPreviousGoals?: () => void;

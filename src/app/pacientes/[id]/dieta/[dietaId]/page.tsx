@@ -8,8 +8,9 @@ import { ScaleDietModal } from '@/components/molecules/ScaleDietModal';
 import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
-import { DeleteMealFoodModal } from '@/components/molecules/DeleteMealFoodModal';
+import { SubstituteFoodModal } from '@/components/molecules/SubstituteFoodModal';
 import { Spinner } from '@/components/ui/spinner';
+
 import { MealCardContainerProps } from '@/components/organisms';
 import { calculateMealsTotal, saveDietToStorage } from '@/lib/dietStore';
 
@@ -49,9 +50,9 @@ export default function DietBuilderPage() {
     isWhatsAppModalOpen,
     setIsWhatsAppModalOpen,
     whatsAppText,
-    foodToDelete,
-    setFoodToDelete,
-    handleConfirmDeleteFood,
+    foodToSubstitute,
+    setFoodToSubstitute,
+    handleSubstituteFood,
     currentMeals,
     macroMetrics,
     handleModeChange,
@@ -62,6 +63,10 @@ export default function DietBuilderPage() {
     handleSaveDiet,
     handleAddMeal,
     handleDuplicateMeal,
+    handleCopyMeal,
+    handlePasteMeal,
+    hasCopiedMeal,
+    handleDuplicateItem,
     handleRemoveMeal,
     handleUpdateMealHeader,
     handleAddFoodToMeal,
@@ -76,6 +81,8 @@ export default function DietBuilderPage() {
     openWhatsAppModal,
     router,
   } = useDietBuilderPage();
+
+  const isNewDiet = dietaId === 'nova' || dietPlan?.id === 'nova';
 
   const mealsData: MealCardContainerProps[] = useMemo(() => {
     return currentMeals.map((meal, mealIdx) => {
@@ -101,21 +108,41 @@ export default function DietBuilderPage() {
         onTimeChange: (newTime: string) => handleUpdateMealHeader(meal.id, { time: newTime }),
         onAddFoodClick: () => setFoodSearchMealIndex(mealIdx),
         onDuplicate: () => handleDuplicateMeal(meal.id),
+        onCopyMeal: () => handleCopyMeal(meal.id),
+        onPasteMeal: () => handlePasteMeal(meal.id),
+        canPasteMeal: hasCopiedMeal,
         onScale: () => {
           setFoodSearchMealIndex(mealIdx);
           setIsScaleModalOpen(true);
         },
+        scaleDisabled: isNewDiet,
         onDeleteMeal: () => handleRemoveMeal(meal.id),
-        onRemoveItem: (itemIdx: number) => {
+        onSubstituteItem: (itemIdx: number) => {
           const item = meal.items[itemIdx];
           if (item?.id) {
-            setFoodToDelete({
+            setFoodToSubstitute({
               mealId: meal.id,
               mealName: meal.name,
               itemId: item.id,
               foodName: item.name,
-              quantityGrams: item.quantityGrams,
+              quantityGrams: item.quantityGrams || item.grams || 100,
+              protein: item.protein ?? item.proteinG ?? 0,
+              carbs: item.carbs ?? item.carbsG ?? 0,
+              fats: item.fats ?? item.fatsG ?? item.fatG ?? 0,
+              kcal: item.kcal,
             });
+          }
+        },
+        onDuplicateItem: (itemIdx: number) => {
+          const item = meal.items[itemIdx];
+          if (item?.id) {
+            handleDuplicateItem(meal.id, item.id);
+          }
+        },
+        onRemoveItem: (itemIdx: number) => {
+          const item = meal.items[itemIdx];
+          if (item?.id) {
+            handleRemoveItem(meal.id, item.id);
           }
         },
         onQuantityChange: (itemIdx: number, newGrams: number) => {
@@ -127,7 +154,8 @@ export default function DietBuilderPage() {
         },
       };
     });
-  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleRemoveMeal, setFoodToDelete, handleUpdateItemGram, handleReorderItems]);
+  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems, isNewDiet]);
+
 
   if (!dietPlan || !patient) {
     return (
@@ -185,6 +213,7 @@ export default function DietBuilderPage() {
         mealsData={mealsData}
         onAddMeal={handleAddMeal}
         onScaleDiet={() => setIsScaleModalOpen(true)}
+        scaleDisabled={isNewDiet}
         onOpenAdjustGoalsModal={openAdjustGoalsModal}
         onPullPreviousGoals={handlePullPreviousGoals}
         onWhatsAppShare={openWhatsAppModal}
@@ -244,16 +273,12 @@ export default function DietBuilderPage() {
         whatsAppText={whatsAppText}
       />
 
-      {/* Modal de Confirmação de Exclusão de Alimento da Refeição */}
-      <DeleteMealFoodModal
-        open={foodToDelete !== null}
-        onOpenChange={(open) => {
-          if (!open) setFoodToDelete(null);
-        }}
-        foodName={foodToDelete?.foodName || ''}
-        mealName={foodToDelete?.mealName}
-        quantityGrams={foodToDelete?.quantityGrams}
-        onConfirmDelete={handleConfirmDeleteFood}
+      {/* Modal de Substituição de Alimento na Refeição */}
+      <SubstituteFoodModal
+        isOpen={foodToSubstitute !== null}
+        onClose={() => setFoodToSubstitute(null)}
+        foodToSubstitute={foodToSubstitute}
+        onSubstituteFood={handleSubstituteFood}
       />
     </>
   );

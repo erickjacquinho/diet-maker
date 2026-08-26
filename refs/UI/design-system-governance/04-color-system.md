@@ -91,7 +91,7 @@ As cores de macro não são cores da marca. Elas possuem significado fixo:
 | Macro | Principal | Fundo suave | Borda |
 | --- | --- | --- | --- |
 | Proteínas | `macro-protein` `#B8325A` | `macro-protein-soft` `#FBEAF0` | `macro-protein-border` `#E8BDC9` |
-| Carboidratos | `macro-carbohydrate` `#A55B00` | `macro-carbohydrate-soft` `#FFF1D6` | `macro-carbohydrate-border` `#E7C997` |
+| Carboidratos | `macro-carbohydrate` `#C87A00` | `macro-carbohydrate-soft` `#FFF6E5` | `macro-carbohydrate-border` `#FCDAA4` |
 | Gorduras | `macro-fat` `#0F766E` | `macro-fat-soft` `#E6F4F1` | `macro-fat-border` `#B6DAD5` |
 
 Regras:
@@ -106,7 +106,7 @@ Regras:
 Contrastes das cores principais sobre seus fundos suaves:
 
 - proteínas: **4.98:1**;
-- carboidratos: **4.59:1**;
+- carboidratos: **3.14:1**;
 - gorduras: **4.84:1**.
 
 ## 5. Feedback semântico
@@ -117,7 +117,7 @@ Feedback descreve o estado do sistema, não o tipo de nutriente.
 | --- | --- | --- | --- | --- | --- |
 | Informação | `info` `#3157A4` | `info-soft` `#EAF0FB` | `info-border` `#C7D5ED` | `on-info` `#FFFFFF` | Contexto e orientação |
 | Sucesso | `success` `#237A4B` | `success-soft` `#E8F5ED` | `success-border` `#B9DCC8` | `on-success` `#FFFFFF` | Operação concluída |
-| Alerta | `warning` `#8A5D00` | `warning-soft` `#FFF3D6` | `warning-border` `#E6D19B` | `on-warning` `#FFFFFF` | Atenção ou risco reversível |
+| Alerta | `warning` `#EAB308` | `warning-soft` `#FEFCE8` | `warning-border` `#FEF08A` | `on-warning` `#FFFFFF` | Atenção, risco reversível e favoritos |
 | Erro | `error` `#B42318` | `error-soft` `#FDECEA` | `error-border` `#E6B8B2` | `on-error` `#FFFFFF` | Falha, bloqueio ou ação destrutiva |
 
 Mesmo quando feedback e macro possuem cores próximas, seus tokens permanecem separados. O contexto deve incluir texto e, quando útil, ícone.
@@ -128,7 +128,7 @@ Contrastes sobre os fundos suaves:
 
 - informação: **6.06:1**;
 - sucesso: **4.73:1**;
-- alerta: **5.22:1**;
+- alerta / favorito: **1.92:1** (amarelo vivo);
 - erro: **5.75:1**.
 
 ## 6. Hierarquia de contraste

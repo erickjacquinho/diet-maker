@@ -102,7 +102,7 @@ export function calculateMacroProgress(
       diff: -safeTarget,
       status: 'empty',
       badgeText: `Faltam ${formattedTarget}`,
-      badgeTone: 'warning',
+      badgeTone: 'default',
       hasTarget: true,
     };
   }
@@ -115,7 +115,7 @@ export function calculateMacroProgress(
       diff,
       status: 'deficit',
       badgeText: `Faltam ${formattedRemaining}`,
-      badgeTone: 'warning',
+      badgeTone: 'default',
       hasTarget: true,
     };
   }

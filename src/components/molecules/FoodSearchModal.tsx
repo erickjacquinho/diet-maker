@@ -99,9 +99,12 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
         <FoodSearchResultsList
           searchResults={searchResults}
-          selectedFood={selectedFood}
+          selectedFoodIds={useMemo(() => new Set(selectedFood ? [selectedFood.id] : []), [selectedFood])}
           query={query}
-          onSelectFood={setSelectedFood}
+          onToggleFood={(food) => setSelectedFood((prev) => prev?.id === food.id ? null : food)}
+          onToggleAll={() => {}}
+          isAllSelected={false}
+          isSomeSelected={Boolean(selectedFood)}
         />
 
         {selectedFood ? (

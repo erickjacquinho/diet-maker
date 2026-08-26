@@ -1,0 +1,6 @@
+{
+  "task": "Revisar o modal atual de seleção de alimentos para refeição e criar uma especificação SDD para adequá-lo ao contexto do produto. O fluxo deve permanecer simples e rápido. O modal deve ter um grupo separado para refeições prontas; ao inserir uma refeição pronta, ela deve carregar a refeição completa e as substituições ou opções configuradas. A partir do card da refeição no construtor, deve ser possível salvar o conteúdo atual como nova refeição ou receita para reutilização. O criador deve suportar substituições equivalentes com quantidades proporcionais em gramas usando um macro de referência selecionado pelo nutricionista. A unidade desta etapa é somente gramas; medidas caseiras estão fora do escopo. Autosave e exportação ficam para etapas futuras. A escala será refatorada futuramente para uma experiência mais visual e flexível. O contexto também discutiu a escolha entre substituição individual e opções completas de refeição; registrar e esclarecer essa decisão na especificação, sem implementar nada. Revisar o código atual do FoodSearchModal e superfícies relacionadas, mantendo o escopo da especificação focado no fluxo de seleção e reutilização de refeições.",
+  "slug": "refatorar-selecao-refeicoes-modal",
+  "feature_dir": "specs/26-08-26-refatorar-selecao-refeicoes-modal",
+  "date": "2026-08-26"
+}

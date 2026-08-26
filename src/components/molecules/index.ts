@@ -28,4 +28,6 @@ export * from './CarbCyclingVariationPanel';
 export * from './CycleMatrixModal';
 export * from './MacroSummary';
 export * from './MacroProportionBar';
+export * from './SubstituteFoodModal';
 export * from '@/components/atoms/SelectField';
+

@@ -67,7 +67,11 @@ module.exports = {
       borderRadius: { compact: 'var(--sys-radius-compact)', control: 'var(--sys-radius-control)', surface: 'var(--sys-radius-surface)', round: 'var(--sys-radius-round)' },
       boxShadow: { floating: 'var(--sys-shadow-floating)', overlay: 'var(--sys-shadow-overlay)' },
       height: { 'control-compact': '32px', 'control-standard': '36px', 'table-row': '44px' },
-      width: { 'control-compact': '32px', 'control-standard': '36px' },
+      width: {
+        'control-compact': '32px',
+        'control-standard': '36px',
+        'meal-title': 'var(--cmp-meal-title-input-width)',
+      },
       transitionDuration: { fast: 'var(--sys-motion-fast)', standard: 'var(--sys-motion-standard)', slow: 'var(--sys-motion-slow)' },
       transitionTimingFunction: { standard: 'var(--sys-ease-standard)', exit: 'var(--sys-ease-exit)' },
       opacity: { disabled: 'var(--sys-opacity-disabled)', subdued: '0.72', full: '1' },

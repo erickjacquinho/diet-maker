@@ -86,6 +86,7 @@ export function useDietBuilderPage() {
   // Meal Actions hook
   const mealActions = useDietMealActions({
     foodSearchMealIndex: modals.foodSearchMealIndex,
+    currentMeals,
     updateActiveMeals,
   });
 

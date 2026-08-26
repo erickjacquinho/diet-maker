@@ -1,12 +1,64 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Badge, Button, Surface, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
+import React, { useEffect, useState } from 'react';
+import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
-import { Copy, Percent, Plus, Clock, Check, X } from 'lucide-react';
+import { ClipboardCopy, ClipboardPaste, Clock, Copy, Percent, Plus } from 'lucide-react';
 import { calculatePresetCalories } from '@/lib/presetUtils';
+import { textStyle } from '@/design-system';
+import { cn } from '@/lib/utils';
+
+export const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+export const MINUTES_OPTIONS = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
+
+export const enforceValidTimeFormat = (value: string, fallback = '08:00'): string => {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+
+  const normalized = trimmed.replace(/h/i, ':');
+
+  let hours = 8;
+  let minutes = 0;
+
+  if (normalized.includes(':')) {
+    const parts = normalized.split(':');
+    const hPart = parts[0].replace(/\D/g, '');
+    const mPart = parts[1] ? parts[1].replace(/\D/g, '') : '';
+    hours = hPart ? parseInt(hPart, 10) : 0;
+    minutes = mPart ? parseInt(mPart.slice(0, 2), 10) : 0;
+  } else {
+    const digits = normalized.replace(/\D/g, '');
+    if (digits.length === 0) return fallback;
+    if (digits.length === 1 || digits.length === 2) {
+      hours = parseInt(digits, 10);
+      minutes = 0;
+    } else if (digits.length === 3) {
+      hours = parseInt(digits.slice(0, 1), 10);
+      minutes = parseInt(digits.slice(1), 10);
+    } else {
+      hours = parseInt(digits.slice(0, 2), 10);
+      minutes = parseInt(digits.slice(2, 4), 10);
+    }
+  }
+
+  if (isNaN(hours) || hours < 0) hours = 0;
+  if (hours > 23) hours = 23;
+  if (isNaN(minutes) || minutes < 0) minutes = 0;
+  if (minutes > 59) minutes = 59;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
+export const formatMealTimeInput = enforceValidTimeFormat;
+
+export const parseHourAndMinute = (value: string): { hour: string; minute: string } => {
+  const formatted = enforceValidTimeFormat(value);
+  const [h, m] = formatted.split(':');
+  return { hour: h, minute: m };
+};
 
 export interface MealCardContainerProps {
   id?: string;
@@ -21,9 +73,15 @@ export interface MealCardContainerProps {
   onTimeChange?: (newTime: string) => void;
   onAddFoodClick?: () => void;
   onDuplicate?: () => void;
+  onCopyMeal?: () => void;
+  onPasteMeal?: () => void;
+  canPasteMeal?: boolean;
   onScale?: () => void;
+  scaleDisabled?: boolean;
   onDeleteMeal?: () => void;
   onRemoveItem?: (index: number) => void;
+  onSubstituteItem?: (index: number) => void;
+  onDuplicateItem?: (index: number) => void;
   onQuantityChange?: (index: number, newGrams: number) => void;
   onReorderItems?: (sourceIndex: number, targetIndex: number) => void;
 }
@@ -40,31 +98,77 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   onTimeChange,
   onAddFoodClick,
   onDuplicate,
+  onCopyMeal,
+  onPasteMeal,
+  canPasteMeal = false,
   onScale,
+  scaleDisabled = false,
   onDeleteMeal,
   onRemoveItem,
+  onSubstituteItem,
+  onDuplicateItem,
   onQuantityChange,
   onReorderItems,
 }) => {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [tempTitle, setTempTitle] = useState(title);
-  const [tempTime, setTempTime] = useState(time);
+
+  const [draftTitle, setDraftTitle] = useState(title);
+  const [draftTime, setDraftTime] = useState(time);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  useEffect(() => setDraftTitle(title), [title]);
+  useEffect(() => setDraftTime(time), [time]);
 
   const computedKcal = calculatePresetCalories(proteinG, carbsG, fatsG);
   const displayKcal = computedKcal > 0 ? computedKcal : kcal;
 
-  const handleSaveTitleTime = () => {
-    if (onTitleChange && tempTitle.trim()) onTitleChange(tempTitle.trim());
-    if (onTimeChange && tempTime.trim()) onTimeChange(tempTime.trim());
-    setIsEditingTitle(false);
+  const handleCommitTitle = () => {
+    const nextTitle = draftTitle.trim();
+
+    if (!nextTitle) {
+      setDraftTitle(title);
+      return;
+    }
+
+    setDraftTitle(nextTitle);
+    if (nextTitle !== title) onTitleChange?.(nextTitle);
   };
 
-  const handleCancelEditing = () => {
-    setTempTitle(title);
-    setTempTime(time);
-    setIsEditingTitle(false);
+  const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const clean = raw.replace(/[^\d:]/g, '').slice(0, 5);
+
+    if (!clean.includes(':') && clean.length > 2) {
+      if (clean.length === 3) {
+        setDraftTime(`0${clean.slice(0, 1)}:${clean.slice(1)}`);
+      } else {
+        setDraftTime(`${clean.slice(0, 2)}:${clean.slice(2, 4)}`);
+      }
+    } else {
+      setDraftTime(clean);
+    }
+  };
+
+  const handleCommitTime = () => {
+    const nextTime = enforceValidTimeFormat(draftTime, time);
+
+    setDraftTime(nextTime);
+    if (nextTime !== time) onTimeChange?.(nextTime);
+  };
+
+  const { hour: currentHour, minute: currentMinute } = parseHourAndMinute(draftTime);
+
+  const handleSelectHour = (newHour: string) => {
+    const nextTime = `${newHour}:${currentMinute}`;
+    setDraftTime(nextTime);
+    if (nextTime !== time) onTimeChange?.(nextTime);
+  };
+
+  const handleSelectMinute = (newMinute: string) => {
+    const nextTime = `${currentHour}:${newMinute}`;
+    setDraftTime(nextTime);
+    if (nextTime !== time) onTimeChange?.(nextTime);
   };
 
   return (
@@ -72,61 +176,195 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
       <div className="flex flex-col gap-4 flex-1">
         {/* Meal Header */}
         <div className="flex items-center justify-between pb-3 border-b border-border-subtle gap-2 flex-wrap">
-          {isEditingTitle ? (
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
+            <Input
+              type="text"
+              size="compact"
+              value={draftTitle}
+              onChange={(e) => setDraftTitle(e.target.value)}
+              onBlur={handleCommitTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleCommitTitle();
+                  e.currentTarget.blur();
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setDraftTitle(title);
+                }
+              }}
+              className="w-meal-title text-style-field-value font-bold"
+              placeholder="Nome da refeição"
+              aria-label="Nome da refeição"
+            />
+            <div className="relative shrink-0 flex items-center">
               <Input
                 type="text"
                 size="compact"
-                value={tempTitle}
-                onChange={(e) => setTempTitle(e.target.value)}
+                maxLength={5}
+                value={draftTime}
+                onChange={handleTimeInputChange}
+                onBlur={handleCommitTime}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSaveTitleTime();
-                  if (e.key === 'Escape') handleCancelEditing();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCommitTime();
+                    e.currentTarget.blur();
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setDraftTime(time);
+                  }
                 }}
-                className="w-36 text-style-field-value font-bold"
-                placeholder="Nome da refeição"
-                autoFocus
-              />
-              <Input
-                type="text"
-                size="compact"
-                value={tempTime}
-                onChange={(e) => setTempTime(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSaveTitleTime();
-                  if (e.key === 'Escape') handleCancelEditing();
-                }}
-                className="w-20 text-style-field-value font-bold text-center"
+                className="w-24 justify-center pr-7 text-center font-bold text-style-field-value"
                 placeholder="08:00"
+                aria-label="Horário da refeição"
               />
-              <IconButton
-                size="compact"
-                variant="primary"
-                onClick={handleSaveTitleTime}
-                title="Salvar alterações"
-                aria-label="Salvar alterações"
-              >
-                <Check size={14} />
-              </IconButton>
-              <IconButton
-                size="compact"
-                variant="quiet"
-                onClick={handleCancelEditing}
-                title="Cancelar edição"
-                aria-label="Cancelar edição"
-              >
-                <X size={14} />
-              </IconButton>
+              <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="quiet"
+                    size="compact"
+                    iconOnly
+                    aria-label="Selecionar horário"
+                    title="Selecionar horário"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-auto w-auto min-w-0 border-transparent bg-transparent text-text-muted hover:bg-transparent hover:border-transparent hover:text-text-muted active:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer shadow-none p-0"
+                  >
+                    <Clock size={13} aria-hidden="true" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  side="bottom"
+                  className="w-auto p-3 shadow-floating bg-surface border-border-subtle"
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-1.5 px-1 gap-4">
+                      <span className={cn(textStyle('field-label'), 'font-semibold text-text-secondary')}>
+                        Selecionar horário
+                      </span>
+                      <span className={cn(textStyle('legal'), 'font-bold text-text-primary bg-surface-subtle px-1.5 py-0.5 rounded')}>
+                        {draftTime || '00:00'}
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      {/* Coluna de Horas */}
+                      <div className="flex flex-col gap-1 items-center">
+                        <span className={cn(textStyle('legal'), 'text-text-muted uppercase font-medium')}>
+                          Hora
+                        </span>
+                        <div
+                          role="listbox"
+                          aria-label="Horas"
+                          className="flex flex-col gap-0.5 max-h-44 overflow-y-auto w-14 pr-1"
+                        >
+                          {HOURS_OPTIONS.map((h) => {
+                            const isSelected = currentHour === h;
+                            return (
+                              <Button
+                                key={h}
+                                type="button"
+                                variant={isSelected ? 'primary' : 'quiet'}
+                                size="compact"
+                                aria-label={`Hora ${h}`}
+                                onClick={() => handleSelectHour(h)}
+                                className={cn(
+                                  'h-7 w-full text-center justify-center text-style-legal font-medium px-1',
+                                  isSelected && 'font-bold'
+                                )}
+                              >
+                                {h}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="w-px h-44 bg-border-subtle self-center" />
+
+                      {/* Coluna de Minutos */}
+                      <div className="flex flex-col gap-1 items-center">
+                        <span className={cn(textStyle('legal'), 'text-text-muted uppercase font-medium')}>
+                          Min
+                        </span>
+                        <div
+                          role="listbox"
+                          aria-label="Minutos"
+                          className="flex flex-col gap-0.5 max-h-44 overflow-y-auto w-14 pr-1"
+                        >
+                          {MINUTES_OPTIONS.map((m) => {
+                            const isSelected = currentMinute === m;
+                            return (
+                              <Button
+                                key={m}
+                                type="button"
+                                variant={isSelected ? 'primary' : 'quiet'}
+                                size="compact"
+                                aria-label={`Minuto ${m}`}
+                                onClick={() => handleSelectMinute(m)}
+                                className={cn(
+                                  'h-7 w-full text-center justify-center text-style-legal font-medium px-1',
+                                  isSelected && 'font-bold'
+                                )}
+                              >
+                                {m}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-          ) : (
-            <div className="flex items-center gap-2.5 min-w-0">
-              <h3 className="text-style-card-title font-bold text-text-primary truncate">{title}</h3>
-              <Badge variant="neutral" className="gap-1 font-mono shrink-0">
-                <Clock size={11} className="text-text-muted" />
-                <span>{time}</span>
-              </Badge>
+          </div>
+          <div
+            role="group"
+            aria-label="Ações da refeição"
+            className="flex items-center gap-2 shrink-0"
+          >
+            <div role="group" aria-label="Transferir alimentos da refeição" className="flex items-center gap-1.5">
+              <Button
+                onClick={onCopyMeal}
+                disabled={items.length === 0}
+                variant="secondary"
+                size="compact"
+                className="flex items-center gap-1 text-style-legal"
+              >
+                <ClipboardCopy size={12} />
+                <span>Copiar</span>
+              </Button>
+              <Button
+                onClick={onPasteMeal}
+                disabled={!canPasteMeal}
+                variant="secondary"
+                size="compact"
+                className="flex items-center gap-1 text-style-legal"
+              >
+                <ClipboardPaste size={12} />
+                <span>Colar</span>
+              </Button>
             </div>
-          )}
+            <div role="separator" aria-orientation="vertical" className="h-5 w-px bg-border-divider" />
+            <div className="flex items-center gap-1.5">
+              <Button onClick={onDuplicate} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
+                <Copy size={12} />
+                <span>Duplicar</span>
+              </Button>
+              <Button onClick={onScale} disabled={scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
+                <Percent size={12} />
+                <span>Escalar</span>
+              </Button>
+              <DeleteIconButton
+                size="compact"
+                onClick={onDeleteMeal}
+                title="Excluir refeição"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Items List - Table View */}
@@ -149,6 +387,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                     <TableHead className="text-left font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary h-8">
                       Nome
                     </TableHead>
+                    <TableHead className="w-20 px-2 text-center h-8" aria-label="Ações do alimento" />
                     <TableHead className="w-24 text-center font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary h-8">
                       Quantidade
                     </TableHead>
@@ -164,7 +403,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                     <TableHead className="w-24 text-right font-bold text-style-chart-micro uppercase tracking-wider text-text-primary h-8">
                       Calorias
                     </TableHead>
-                    <TableHead className="w-12 px-2 text-center h-8" aria-label="Ações" />
+                    <TableHead className="w-12 px-2 text-center h-8" aria-label="Remover alimento" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -195,10 +434,13 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                         setDragOverIndex(null);
                       }}
                       onQuantityChange={(newGrams) => onQuantityChange && onQuantityChange(idx, newGrams)}
+                      onSubstitute={() => onSubstituteItem && onSubstituteItem(idx)}
+                      onDuplicate={() => onDuplicateItem && onDuplicateItem(idx)}
                       onRemove={() => onRemoveItem && onRemoveItem(idx)}
                     />
                   ))}
                 </TableBody>
+
               </Table>
             </div>
           )}
@@ -225,35 +467,6 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
         />
       </div>
 
-      {/* Meal Footer Actions */}
-      <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-style-legal">
-        <div className="flex gap-2">
-          <Button onClick={onDuplicate} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
-            <Copy size={12} />
-            <span>Duplicar</span>
-          </Button>
-          <Button onClick={onScale} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
-            <Percent size={12} />
-            <span>Escalar</span>
-          </Button>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <EditIconButton
-            size="compact"
-            onClick={() => {
-              setTempTitle(title);
-              setTempTime(time);
-              setIsEditingTitle(true);
-            }}
-            title="Editar nome e horário"
-          />
-          <DeleteIconButton
-            size="compact"
-            onClick={onDeleteMeal}
-            title="Excluir refeição"
-          />
-        </div>
-      </div>
     </Surface>
   );
 };

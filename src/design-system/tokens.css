@@ -21,9 +21,9 @@
   --ref-color-protein-500: #b8325a;
   --ref-color-protein-50: #fbeaf0;
   --ref-color-protein-200: #e8bdc9;
-  --ref-color-carbohydrate-500: #a55b00;
-  --ref-color-carbohydrate-50: #fff1d6;
-  --ref-color-carbohydrate-200: #e7c997;
+  --ref-color-carbohydrate-500: #c87a00;
+  --ref-color-carbohydrate-50: #fff6e5;
+  --ref-color-carbohydrate-200: #fcdaa4;
   --ref-color-fat-500: #0f766e;
   --ref-color-fat-50: #e6f4f1;
   --ref-color-fat-200: #b6dad5;
@@ -33,9 +33,9 @@
   --ref-color-success-500: #237a4b;
   --ref-color-success-50: #e8f5ed;
   --ref-color-success-200: #b9dcc8;
-  --ref-color-warning-500: #8a5d00;
-  --ref-color-warning-50: #fff3d6;
-  --ref-color-warning-200: #e6d19b;
+  --ref-color-warning-500: #eab308;
+  --ref-color-warning-50: #fefce8;
+  --ref-color-warning-200: #fef08a;
   --ref-color-error-500: #b42318;
   --ref-color-error-50: #fdecea;
   --ref-color-error-200: #e6b8b2;
@@ -130,6 +130,7 @@
   --cmp-button-secondary-background-hover: var(--sys-color-surface-hover);
   --cmp-button-secondary-border-hover: var(--sys-color-border-hover);
   --cmp-input-border-default: var(--sys-color-border-control-essential);
+  --cmp-meal-title-input-width: 350px;
   --cmp-card-padding-default: var(--ref-space-4);
   --cmp-card-background-hover: var(--sys-color-surface-hover);
   --cmp-card-details-surface: var(--sys-color-surface-soft);

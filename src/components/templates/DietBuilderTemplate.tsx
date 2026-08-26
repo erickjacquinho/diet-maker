@@ -34,6 +34,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onAddMeal,
   onScaleDiet,
   onOpenScaleModal,
+  scaleDisabled = false,
   onOpenAdjustGoalsModal,
   onPullPreviousGoals,
   onOpenWhatsAppModal,
@@ -161,7 +162,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
               </Button>
             )}
             {handleScale && (
-              <Button onClick={handleScale} variant="secondary" size="compact" className="flex items-center gap-1.5">
+              <Button onClick={handleScale} disabled={scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1.5">
                 <Percent size={14} aria-hidden="true" />
                 <span>Escalar</span>
               </Button>

@@ -64,40 +64,37 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
           {statusBadgeText && (
             <Badge
               variant={isTargetActive ? statusBadgeVariant : 'default'}
-              className="shrink-0 text-style-legal"
+              className={cn(
+                'shrink-0 text-style-legal font-medium',
+                (statusBadgeVariant === 'default' || !isTargetActive || statusBadgeText.startsWith('Faltam')) &&
+                  'bg-surface border-border-subtle text-text-muted shadow-none'
+              )}
             >
               {statusBadgeText}
             </Badge>
           )}
         </div>
 
-        <div className="text-style-page-title font-bold text-text-primary my-1 tabular-nums">
-          {currentValue}{' '}
-          {isTargetActive ? (
-            <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
-          ) : (
-            <span className="text-style-legal font-normal text-text-muted ml-1">(sem meta)</span>
-          )}
-        </div>
-
-        <div className="min-h-5 mb-3 flex items-center text-style-legal">
-          {isTargetActive && gPerKgRatio ? (
-            <div className={cn(colorClass, 'font-bold tabular-nums')}>
-              {gPerKgRatio}{' '}
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-style-page-title font-bold text-text-primary my-1 tabular-nums">
+          <span>{currentValue}</span>
+          {isTargetActive && gPerKgRatio && (
+            <span className={cn(colorClass, 'text-style-legal font-bold inline-flex items-baseline gap-1.5')}>
+              <span>{gPerKgRatio}</span>
               {gPerKgMeta !== undefined && (
                 <span className="font-normal text-text-muted">(meta: {gPerKgMeta})</span>
               )}
-            </div>
-          ) : !isTargetActive && gPerKgRatio ? (
-            <div className="text-text-muted font-normal tabular-nums">
+            </span>
+          )}
+          {isTargetActive ? (
+            <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
+          ) : gPerKgRatio ? (
+            <span className="text-style-legal font-normal text-text-muted">
               {gPerKgRatio} <span className="text-style-chart-micro opacity-75">(sem meta g/kg)</span>
-            </div>
-          ) : !isTargetActive ? (
-            <span className="text-text-muted font-normal italic text-style-legal">Definir em Ajustar Metas</span>
+            </span>
           ) : subtitle ? (
-            <span className="text-text-muted font-normal">{subtitle}</span>
+            <span className="text-style-legal font-normal text-text-muted">{subtitle}</span>
           ) : (
-            <span className="text-text-muted font-normal">Meta calórica diária</span>
+            <span className="text-style-legal font-normal italic text-text-muted">Definir em Ajustar Metas</span>
           )}
         </div>
       </div>
