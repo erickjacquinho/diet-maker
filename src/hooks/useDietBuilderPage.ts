@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getPatientById, Patient } from '@/lib/patientsStore';
 import {
@@ -6,7 +6,14 @@ import {
   saveDietToStorage,
   getPatientDietsFromStorage,
   CarbCyclingVariation,
+  FullDietPlan,
 } from '@/lib/dietStore';
+import {
+  PreviousDietSummary,
+  buildPreviousDietSummaries,
+  cloneDietForNewDraft,
+  extractMacrosFromPreviousDiet,
+} from '@/lib/dietDuplication';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { calculateKcalFromMacros } from '@/lib/nutrition/macroCalculations';
 import { toast } from 'sonner';
@@ -162,89 +169,92 @@ export function useDietBuilderPage() {
     setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariations: newVariations } : prev));
   }, [setDietPlan]);
 
-  const handlePullPreviousGoals = useCallback(() => {
-    if (!patient) return;
+  const previousDiets = useMemo(() => {
+    const stored = getPatientDietsFromStorage(patientId);
+    return buildPreviousDietSummaries(stored, patient?.dietHistory || [], dietaId);
+  }, [patientId, patient?.dietHistory, dietaId]);
 
-    // 1. Check patient's stored diets or dietHistory
-    const storedDiets = getPatientDietsFromStorage(patientId);
-    const previousDiets = storedDiets.filter((d) => d.id !== dietaId && d.id !== 'nova');
+  const hasPreviousDiets = previousDiets.length > 0;
 
-    let previousProt = 0;
-    let previousCarb = 0;
-    let previousFat = 0;
-    let previousKcal = 0;
+  const handlePullMacrosOnly = useCallback(
+    (selectedDiet: PreviousDietSummary) => {
+      if (!selectedDiet) return;
+      const { targetProtein, targetCarbs, targetFats, targetKcal } = extractMacrosFromPreviousDiet(selectedDiet);
 
-    if (previousDiets.length > 0) {
-      const mostRecent = previousDiets[0];
-      if (mostRecent.mode === 'simple') {
-        previousProt = mostRecent.simpleTargetProtein || 0;
-        previousCarb = mostRecent.simpleTargetCarbs || 0;
-        previousFat = mostRecent.simpleTargetFats || 0;
-        previousKcal = mostRecent.simpleTargetKcal || calculateKcalFromMacros(previousProt, previousCarb, previousFat);
-      } else if (mostRecent.carbCyclingVariations && mostRecent.carbCyclingVariations.length > 0) {
-        const firstVar = mostRecent.carbCyclingVariations[0];
-        previousProt = firstVar.targetProtein || 0;
-        previousCarb = firstVar.targetCarbs || 0;
-        previousFat = firstVar.targetFats || 0;
-        previousKcal = firstVar.targetKcal || calculateKcalFromMacros(previousProt, previousCarb, previousFat);
+      setDietPlan((prev) => {
+        if (!prev) return prev;
+        if (prev.mode === 'simple') {
+          return {
+            ...prev,
+            simpleTargetProtein: targetProtein,
+            simpleTargetCarbs: targetCarbs,
+            simpleTargetFats: targetFats,
+            simpleTargetKcal: targetKcal,
+          };
+        } else {
+          return {
+            ...prev,
+            carbCyclingVariations: prev.carbCyclingVariations.map((v) =>
+              v.id === activeVariationId
+                ? {
+                    ...v,
+                    targetProtein,
+                    targetCarbs,
+                    targetFats,
+                    targetKcal,
+                    gPerKg:
+                      patient?.weightKg && patient.weightKg > 0
+                        ? {
+                            protein: Number((targetProtein / patient.weightKg).toFixed(1)),
+                            carbs: Number((targetCarbs / patient.weightKg).toFixed(1)),
+                            fats: Number((targetFats / patient.weightKg).toFixed(1)),
+                          }
+                        : v.gPerKg,
+                  }
+                : v
+            ),
+          };
+        }
+      });
+
+      toast.success(
+        `Metas importadas da dieta "${selectedDiet.name}" (${targetProtein}g P, ${targetCarbs}g C, ${targetFats}g G)!`
+      );
+    },
+    [activeVariationId, patient?.weightKg, setDietPlan]
+  );
+
+  const handlePullAllMeals = useCallback(
+    (selectedDiet: PreviousDietSummary) => {
+      if (!selectedDiet) return;
+      const cloned = cloneDietForNewDraft(selectedDiet, patientId, dietaId);
+
+      setDietPlan(cloned);
+      if (cloned.carbCyclingVariations && cloned.carbCyclingVariations.length > 0) {
+        setActiveVariationId(cloned.carbCyclingVariations[0].id);
       }
-    }
 
-    if ((!previousProt && !previousCarb && !previousFat) && patient.dietHistory && patient.dietHistory.length > 0) {
-      const mostRecentHistorical = patient.dietHistory[0];
-      previousProt = mostRecentHistorical.proteinG || 0;
-      previousCarb = mostRecentHistorical.carbsG || 0;
-      previousFat = mostRecentHistorical.fatsG || 0;
-      previousKcal = mostRecentHistorical.targetKcal || calculateKcalFromMacros(previousProt, previousCarb, previousFat);
-    }
+      const totalMeals =
+        cloned.mode === 'simple'
+          ? (cloned.simpleMeals || []).length
+          : (cloned.carbCyclingVariations?.[0]?.meals || []).length;
 
-    if (!previousProt && !previousCarb && !previousFat && (patient.targetProtein || patient.targetCarbs || patient.targetFats)) {
-      previousProt = patient.targetProtein || 0;
-      previousCarb = patient.targetCarbs || 0;
-      previousFat = patient.targetFats || 0;
-      previousKcal = patient.targetKcal || calculateKcalFromMacros(previousProt, previousCarb, previousFat);
-    }
+      toast.success(
+        `Dieta "${selectedDiet.name}" duplicada com sucesso (${totalMeals} ${
+          totalMeals === 1 ? 'refeição' : 'refeições'
+        })!`
+      );
+    },
+    [patientId, dietaId, setDietPlan, setActiveVariationId]
+  );
 
-    if (!previousProt && !previousCarb && !previousFat) {
-      toast.info('Nenhuma meta de dieta anterior encontrada para este paciente.');
+  const handlePullPreviousGoals = useCallback(() => {
+    if (!hasPreviousDiets) {
+      toast.info('Nenhuma dieta anterior encontrada para este paciente.');
       return;
     }
-
-    setDietPlan((prev) => {
-      if (!prev) return prev;
-      if (prev.mode === 'simple') {
-        return {
-          ...prev,
-          simpleTargetProtein: previousProt,
-          simpleTargetCarbs: previousCarb,
-          simpleTargetFats: previousFat,
-          simpleTargetKcal: previousKcal,
-        };
-      } else {
-        return {
-          ...prev,
-          carbCyclingVariations: prev.carbCyclingVariations.map((v) =>
-            v.id === activeVariationId
-              ? {
-                  ...v,
-                  targetProtein: previousProt,
-                  targetCarbs: previousCarb,
-                  targetFats: previousFat,
-                  targetKcal: previousKcal,
-                  gPerKg: patient.weightKg && patient.weightKg > 0 ? {
-                    protein: Number((previousProt / patient.weightKg).toFixed(1)),
-                    carbs: Number((previousCarb / patient.weightKg).toFixed(1)),
-                    fats: Number((previousFat / patient.weightKg).toFixed(1)),
-                  } : v.gPerKg,
-                }
-              : v
-          ),
-        };
-      }
-    });
-
-    toast.success(`Metas importadas da dieta anterior (${previousProt}g P, ${previousCarb}g C, ${previousFat}g G)!`);
-  }, [patient, patientId, dietaId, activeVariationId, setDietPlan]);
+    modals.openImportPreviousDietModal();
+  }, [hasPreviousDiets, modals]);
 
   const handleSaveDiet = useCallback(() => {
     if (!dietPlan) return;
@@ -293,13 +303,18 @@ export function useDietBuilderPage() {
     targetFat,
     currentTotals,
     macroMetrics,
+    previousDiets,
+    hasPreviousDiets,
     handleModeChange,
     handleVariationsCountChange,
     handleAddVariation,
     handleRemoveVariation,
     handleReorderVariations,
     handlePullPreviousGoals,
+    handlePullMacrosOnly,
+    handlePullAllMeals,
     handleSaveDiet,
     router,
   };
 }
+

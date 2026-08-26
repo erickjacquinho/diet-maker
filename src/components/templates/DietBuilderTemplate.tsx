@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { MacroTrackerHeader } from '../organisms';
@@ -37,6 +37,8 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   scaleDisabled = false,
   onOpenAdjustGoalsModal,
   onPullPreviousGoals,
+  onOpenImportPreviousDietModal,
+  hasPreviousDiets = true,
   onOpenWhatsAppModal,
   onWhatsAppShare,
   onExportPDF,
@@ -71,6 +73,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   const handleAdjustGoals = onOpenAdjustGoalsModal || macroTrackerData?.onAdjustGoals;
   const handleScale = onOpenScaleModal || onScaleDiet;
   const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
+  const handlePullPrevious = onOpenImportPreviousDietModal || onPullPreviousGoals;
 
   const headerActions = (
     <>
@@ -143,13 +146,18 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
           <div className="flex items-center justify-end gap-2 flex-wrap">
-            {onPullPreviousGoals && (
+            {handlePullPrevious && (
               <Button
-                onClick={onPullPreviousGoals}
+                onClick={handlePullPrevious}
+                disabled={hasPreviousDiets === false}
                 variant="secondary"
                 size="compact"
                 className="flex items-center gap-1.5"
-                title="Puxar metas da última dieta cadastrada"
+                title={
+                  hasPreviousDiets === false
+                    ? 'Nenhuma dieta anterior cadastrada para este paciente'
+                    : 'Puxar metas ou refeições de dietas anteriores'
+                }
               >
                 <History size={13} aria-hidden="true" />
                 <span>Puxar Metas Anteriores</span>

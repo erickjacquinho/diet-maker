@@ -9,6 +9,7 @@ import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { SubstituteFoodModal } from '@/components/molecules/SubstituteFoodModal';
+import { ImportPreviousDietModal } from '@/components/molecules/ImportPreviousDietModal';
 import { Spinner } from '@/components/ui/spinner';
 
 import { MealCardContainerProps } from '@/components/organisms';
@@ -77,6 +78,13 @@ export default function DietBuilderPage() {
     handleCopyVariation,
     handleSaveAdjustedGoals,
     handlePullPreviousGoals,
+    handlePullMacrosOnly,
+    handlePullAllMeals,
+    previousDiets,
+    hasPreviousDiets,
+    isImportPreviousDietModalOpen,
+    setIsImportPreviousDietModalOpen,
+    openImportPreviousDietModal,
     openAdjustGoalsModal,
     openWhatsAppModal,
     router,
@@ -216,6 +224,8 @@ export default function DietBuilderPage() {
         scaleDisabled={isNewDiet}
         onOpenAdjustGoalsModal={openAdjustGoalsModal}
         onPullPreviousGoals={handlePullPreviousGoals}
+        onOpenImportPreviousDietModal={openImportPreviousDietModal}
+        hasPreviousDiets={hasPreviousDiets}
         onWhatsAppShare={openWhatsAppModal}
         onSaveDiet={handleSaveDiet}
       />
@@ -279,6 +289,16 @@ export default function DietBuilderPage() {
         onClose={() => setFoodToSubstitute(null)}
         foodToSubstitute={foodToSubstitute}
         onSubstituteFood={handleSubstituteFood}
+      />
+
+      {/* Modal de Importação / Duplicação de Dietas Anteriores */}
+      <ImportPreviousDietModal
+        isOpen={isImportPreviousDietModalOpen}
+        onClose={() => setIsImportPreviousDietModalOpen(false)}
+        patientName={patient.name}
+        diets={previousDiets}
+        onPullMacrosOnly={handlePullMacrosOnly}
+        onPullAllMeals={handlePullAllMeals}
       />
     </>
   );

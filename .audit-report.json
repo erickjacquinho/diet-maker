@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-26T06:02:44.913Z",
+  "timestamp": "2026-08-26T16:14:28.565Z",
   "summary": {
-    "totalFilesScanned": 138,
+    "totalFilesScanned": 139,
     "compliantFiles": 131,
-    "nonCompliantFiles": 7,
-    "totalViolations": 17,
-    "complianceScorePercentage": 94.93
+    "nonCompliantFiles": 8,
+    "totalViolations": 21,
+    "complianceScorePercentage": 94.24
   },
   "violations": [
     {
@@ -66,6 +66,42 @@
       "file": "src/components/molecules/CycleMatrixModal.tsx",
       "line": 683,
       "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
+      "line": 68,
+      "column": 9,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
+      "line": 95,
+      "column": 13,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
+      "line": 170,
+      "column": 5,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
+      "line": 240,
+      "column": 17,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",

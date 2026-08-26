@@ -48,6 +48,7 @@ export function useDietBuilderModals({
   const [whatsAppText, setWhatsAppText] = useState('');
 
   const [foodToSubstitute, setFoodToSubstitute] = useState<MealFoodToSubstitute | null>(null);
+  const [isImportPreviousDietModalOpen, setIsImportPreviousDietModalOpen] = useState(false);
 
   const handleApplyScale = useCallback(
     (percent: number) => {
@@ -203,6 +204,9 @@ export function useDietBuilderModals({
     setWhatsAppText,
     foodToSubstitute,
     setFoodToSubstitute,
+    isImportPreviousDietModalOpen,
+    setIsImportPreviousDietModalOpen,
+    openImportPreviousDietModal: () => setIsImportPreviousDietModalOpen(true),
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,

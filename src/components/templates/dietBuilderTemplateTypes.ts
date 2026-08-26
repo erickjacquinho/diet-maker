@@ -1,4 +1,4 @@
-import {
+﻿import {
   MacroTrackerHeaderProps,
   MealCardContainerProps,
 } from '../organisms';
@@ -45,6 +45,8 @@ export interface DietBuilderTemplateProps {
   onOpenCopyModal?: () => void;
   onOpenAdjustGoalsModal?: () => void;
   onPullPreviousGoals?: () => void;
+  onOpenImportPreviousDietModal?: () => void;
+  hasPreviousDiets?: boolean;
   onOpenWhatsAppModal?: () => void;
   onWhatsAppShare?: () => void;
   onExportPDF?: () => void;

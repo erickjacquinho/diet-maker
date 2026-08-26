@@ -10,14 +10,14 @@
 
 **Purpose**: Preparar utilitários e contratos de dados para dietas anteriores e duplicação.
 
-- [ ] T001 [skill: $nextjs-fullstack-master] Mapear tipos `PreviousDietSummary`, `ImportActionType` e contratos de props em `src/lib/dietDuplication.ts` conforme `specs/26-08-26-refatorar-puxar-dietas-anteriores/data-model.md`.
+- [x] T001 [skill: $nextjs-fullstack-master] Mapear tipos `PreviousDietSummary`, `ImportActionType` e contratos de props em `src/lib/dietDuplication.ts` conforme `specs/26-08-26-refatorar-puxar-dietas-anteriores/data-model.md`.
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: Criar as funções puras de formatação de resumo, clonagem profunda de refeições e isolamento de estado.
 
-- [ ] T002 [skill: $tdd] [P] Criar testes unitários determinísticos em `tests/lib/dietDuplication.test.ts` para as funções `buildPreviousDietSummaries`, `cloneMealsWithFreshIds` e `cloneDietForNewDraft`.
-- [ ] T003 [skill: $tdd] Implementar funções utilitárias puras `buildPreviousDietSummaries`, `cloneMealsWithFreshIds` e `cloneDietForNewDraft` em `src/lib/dietDuplication.ts`, fazendo os testes T002 passarem com 100% de integridade e novos IDs únicos para refeições e itens.
+- [x] T002 [skill: $tdd] [P] Criar testes unitários determinísticos em `tests/lib/dietDuplication.test.ts` para as funções `buildPreviousDietSummaries`, `cloneMealsWithFreshIds` e `cloneDietForNewDraft`.
+- [x] T003 [skill: $tdd] Implementar funções utilitárias puras `buildPreviousDietSummaries`, `cloneMealsWithFreshIds` e `cloneDietForNewDraft` em `src/lib/dietDuplication.ts`, fazendo os testes T002 passarem com 100% de integridade e novos IDs únicos para refeições e itens.
 
 **Checkpoint**: Utilitários de duplicação prontos e testados com cobertura unitária; implementação do modal e da UI pode prosseguir.
 
@@ -29,14 +29,14 @@
 
 ### Tests for User Story 1 & 2
 
-- [ ] T004 [skill: $tdd] [P] [US1] Criar testes de componente em `tests/components/molecules/ImportPreviousDietModal.test.tsx` cobrindo renderização da tabela, ordenação de datas, seleção de linha, botões desabilitados na ausência de seleção e disparo de callbacks com a dieta selecionada.
+- [x] T004 [skill: $tdd] [P] [US1] Criar testes de componente em `tests/components/molecules/ImportPreviousDietModal.test.tsx` cobrindo renderização da tabela, ordenação de datas, seleção de linha, botões desabilitados na ausência de seleção e disparo de callbacks com a dieta selecionada.
 
 ### Implementation for User Story 1 & 2
 
-- [ ] T005 [skill: $frontend-design] [US1] Criar o componente `src/components/molecules/ImportPreviousDietModal.tsx` com `Dialog`, tabela estruturada (Data, Nome, Modo, Calorias, Macros, Qtd. Refeições), estado de seleção exclusiva de linha e dois botões de ação ("Puxar apenas os macros" e "Puxar todas as refeições"), exportando em `src/components/molecules/index.ts`.
-- [ ] T006 [skill: $frontend-architecture-mindset] [US1] Atualizar `src/hooks/useDietBuilderModals.ts` para incluir estado do modal `isImportPreviousDietModalOpen`, `setIsImportPreviousDietModalOpen` e sincronização de dados.
-- [ ] T007 [skill: $nextjs-fullstack-master] [US1] Atualizar `src/hooks/useDietBuilderPage.ts` para carregar dietas anteriores formatadas (filtrando `'nova'` e a dieta atual), implementar `handlePullMacrosOnly` e `handlePullAllMeals` com emissão de toasts de sucesso e isolamento de estado.
-- [ ] T008 [skill: $nextjs-fullstack-master] [US1] Integrar `ImportPreviousDietModal` na página `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx`, conectando propriedades, estados e callbacks.
+- [x] T005 [skill: $frontend-design] [US1] Criar o componente `src/components/molecules/ImportPreviousDietModal.tsx` com `Dialog`, tabela estruturada (Data, Nome, Modo, Calorias, Macros, Qtd. Refeições), estado de seleção exclusiva de linha e dois botões de ação ("Puxar apenas os macros" e "Puxar todas as refeições"), exportando em `src/components/molecules/index.ts`.
+- [x] T006 [skill: $frontend-architecture-mindset] [US1] Atualizar `src/hooks/useDietBuilderModals.ts` para incluir estado do modal `isImportPreviousDietModalOpen`, `setIsImportPreviousDietModalOpen` e sincronização de dados.
+- [x] T007 [skill: $nextjs-fullstack-master] [US1] Atualizar `src/hooks/useDietBuilderPage.ts` para carregar dietas anteriores formatadas (filtrando `'nova'` e a dieta atual), implementar `handlePullMacrosOnly` e `handlePullAllMeals` com emissão de toasts de sucesso e isolamento de estado.
+- [x] T008 [skill: $nextjs-fullstack-master] [US1] Integrar `ImportPreviousDietModal` na página `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx`, conectando propriedades, estados e callbacks.
 
 **Checkpoint**: US1 e US2 funcionais - nutricionista consegue selecionar qualquer dieta anterior e escolher se puxa macros ou a estrutura de refeições completa.
 
@@ -48,11 +48,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T009 [skill: $tdd] [P] [US3] Criar testes de renderização e estado `disabled` para o botão de puxar dietas anteriores em `tests/components/templates/DietBuilderTemplate.test.tsx`.
+- [x] T009 [skill: $tdd] [P] [US3] Criar testes de renderização e estado `disabled` para o botão de puxar dietas anteriores em `tests/components/templates/DietBuilderTemplate.test.tsx`.
 
 ### Implementation for User Story 3
 
-- [ ] T010 [skill: $frontend-design] [US3] Atualizar `src/components/templates/dietBuilderTemplateTypes.ts` e `src/components/templates/DietBuilderTemplate.tsx` para aceitar `hasPreviousDiets` e `onOpenImportPreviousDietModal`, renderizando o botão com `disabled={!hasPreviousDiets}` e tooltip explicativo.
+- [x] T010 [skill: $frontend-design] [US3] Atualizar `src/components/templates/dietBuilderTemplateTypes.ts` e `src/components/templates/DietBuilderTemplate.tsx` para aceitar `hasPreviousDiets` e `onOpenImportPreviousDietModal`, renderizando o botão com `disabled={!hasPreviousDiets}` e tooltip explicativo.
 
 **Checkpoint**: US3 funcional - botão inativo e protegido contra cliques em pacientes novos sem histórico.
 
@@ -60,8 +60,8 @@
 
 **Purpose**: Assegurar acessibilidade, conformidade visual do design system e ausência de regressões.
 
-- [ ] T011 [skill: $code-reviewer-expert] [P] Auditar conformidade de acessibilidade desktop WCAG 2.2 AA (foco visível, navegação por teclado com Tab/Escape/Enter e aria-labels) em `ImportPreviousDietModal.tsx` e `DietBuilderTemplate.tsx`.
-- [ ] T012 [skill: $nextjs-fullstack-master] Executar checagem de tipos (`npx tsc --noEmit`) e suíte completa de testes (`npm run test`), validando que todos os cenários passam sem quebras.
+- [x] T011 [skill: $code-reviewer-expert] [P] Auditar conformidade de acessibilidade desktop WCAG 2.2 AA (foco visível, navegação por teclado com Tab/Escape/Enter e aria-labels) em `ImportPreviousDietModal.tsx` e `DietBuilderTemplate.tsx`.
+- [x] T012 [skill: $nextjs-fullstack-master] Executar checagem de tipos (`npx tsc --noEmit`) e suíte completa de testes (`npm run test`), validando que todos os cenários passam sem quebras.
 
 ## Dependencies & Execution Order
 
