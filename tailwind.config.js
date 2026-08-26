@@ -38,7 +38,7 @@ module.exports = {
         destructive: { DEFAULT: 'var(--destructive)', foreground: 'var(--destructive-foreground)' },
         error: 'var(--sys-color-error)', 'error-soft': 'var(--sys-color-error-soft)', 'error-border': 'var(--sys-color-error-border)',
         success: 'var(--sys-color-success)', 'success-soft': 'var(--sys-color-success-soft)', 'success-border': 'var(--sys-color-success-border)',
-        warning: 'var(--sys-color-warning)', 'warning-soft': 'var(--sys-color-warning-soft)', 'warning-border': 'var(--sys-color-warning-border)',
+        warning: { DEFAULT: 'var(--sys-color-warning)', pressed: 'var(--sys-color-warning-pressed)', soft: 'var(--sys-color-warning-soft)', border: 'var(--sys-color-warning-border)' },
         info: 'var(--sys-color-info)', 'info-soft': 'var(--sys-color-info-soft)', 'info-border': 'var(--sys-color-info-border)',
         'on-primary': 'var(--sys-color-on-primary)',
         'on-error': 'var(--sys-color-on-error)',

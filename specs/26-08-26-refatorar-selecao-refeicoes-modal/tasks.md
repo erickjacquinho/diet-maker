@@ -6,6 +6,8 @@
 
 **Organization**: Tasks are grouped by user story so each increment can be implemented and validated independently.
 
+**Escopo desta execução**: somente restaurar e adequar o modal de seleção de alimentos para adição na refeição. Salvamento de refeições, receitas, opções e alterações de stores/card permanecem fora desta entrega.
+
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Preparar os pontos de extensão sem alterar o comportamento existente.
@@ -41,7 +43,7 @@
 ### Implementation for User Story 1
 
 - [ ] T012 [US1] [skill: $backend-patterns] Evoluir `src/lib/readyMealsStore.ts` para persistir `items` e `options`, derivar os totais e manter leitura segura dos registros legados.
-- [ ] T013 [US1] [skill: $ui-styling] Refatorar `src/components/molecules/FoodSearchModal.tsx` para separar alimentos de refeições prontas/receitas, pesquisar a biblioteca, exibir prévia e manter todas as quantidades em gramas.
+- [X] T013 [US1] [skill: $ui-styling] Refatorar `src/components/molecules/FoodSearchModal.tsx` para manter a tabela de alimentos, favoritos, busca/ordenação, seleção múltipla e footer de adição em gramas.
 - [ ] T014 [US1] [skill: $frontend-architecture-mindset] Adicionar ao `src/hooks/useDietMealActions.ts` a aplicação de snapshot completo na refeição ativa, incluindo opções e cópia de identificadores sem sobrescrever itens.
 - [ ] T015 [US1] [skill: $nextjs-fullstack-master] Integrar o novo callback e os estados da biblioteca em `src/app/pacientes/[id]/dieta/[dietaId]/page.tsx`, preservando a substituição individual existente.
 - [ ] T016 [US1] [skill: $ui-styling] Ajustar os estados vazios, incompletos, erro de dados e foco visível do modal conforme os contratos canônicos em `src/components/molecules/FoodSearchModal.tsx`.

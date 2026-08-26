@@ -94,8 +94,8 @@ describe('FoodSearchModal component', () => {
     fireEvent.change(searchInput, { target: { value: 'alimento-sem-resultado' } });
 
     const emptyState = screen.getByText(/Nenhum resultado para/i).parentElement;
-    expect(emptyState).toHaveClass('min-h-[220px]');
-    expect(emptyState).toHaveClass('max-h-[380px]');
+    expect(emptyState).toHaveClass('min-h-[450px]');
+    expect(emptyState).toHaveClass('max-h-[450px]');
   });
 
   it('supports toggle all and clear selection', () => {
@@ -197,16 +197,45 @@ describe('FoodSearchModal component', () => {
     const toggleSwitch = screen.getByRole('switch', { name: /favoritos/i });
     expect(toggleSwitch).toBeInTheDocument();
     expect(toggleSwitch).toHaveAttribute('aria-checked', 'false');
+    expect(toggleSwitch).not.toHaveTextContent('Favoritos');
+    expect(toggleSwitch).toHaveAttribute('title', 'Filtrar favoritos');
+    expect(toggleSwitch).toHaveClass('hover:bg-warning');
+    expect(toggleSwitch).toHaveClass('hover:border-transparent');
+    expect(toggleSwitch.querySelector('svg')).toHaveClass('group-hover:fill-current', 'group-hover:text-on-warning');
 
     // Click toggle to filter favorites only
     fireEvent.click(toggleSwitch);
     expect(toggleSwitch).toHaveAttribute('aria-checked', 'true');
-    expect(toggleSwitch).toHaveClass('bg-warning');
-    expect(toggleSwitch).toHaveClass('text-white');
+    expect(toggleSwitch).toHaveClass('bg-warning-pressed');
+    expect(toggleSwitch).toHaveClass('border-transparent');
+    expect(toggleSwitch).toHaveClass('text-on-warning');
+    expect(toggleSwitch.querySelector('svg')).toHaveClass('fill-current', 'text-on-warning');
 
     // Click again to turn off
     fireEvent.click(toggleSwitch);
     expect(toggleSwitch).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('shows the Ctrl+F badge and focuses the search field with the shortcut', () => {
+    const onAddFood = vi.fn();
+    const onClose = vi.fn();
+
+    render(
+      <FoodSearchModal
+        isOpen={true}
+        onClose={onClose}
+        mealTitle="Refeição 1"
+        onAddFood={onAddFood}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(/Buscar por nome do alimento/i);
+    expect(screen.getByText('Ctrl+F')).toHaveAttribute('title', 'Atalho Ctrl+F');
+
+    searchInput.blur();
+    fireEvent.keyDown(window, { key: 'f', ctrlKey: true });
+
+    expect(searchInput).toHaveFocus();
   });
 
   it('sorts foods by macro columns (protein, carbs, fats, kcal) and name when clicking table headers', () => {

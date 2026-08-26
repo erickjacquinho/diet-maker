@@ -211,7 +211,7 @@ export function FoodSearchResultsList({
 }: FoodSearchResultsListProps) {
   if (searchResults.length === 0) {
     return (
-      <div className="flex-1 min-h-[220px] max-h-[380px] flex flex-col items-center justify-center p-8 text-center text-text-muted gap-2 border border-dashed border-border-divider rounded-control my-2 bg-surface-subtle">
+      <div className="flex-1 min-h-[450px] max-h-[450px] flex flex-col items-center justify-center p-8 text-center text-text-muted gap-2 border border-dashed border-border-divider rounded-control my-2 bg-surface-subtle">
         <span className="font-semibold text-text-secondary">
           {onlyFavorites ? 'Nenhum alimento favorito encontrado' : 'Nenhum alimento encontrado'}
         </span>
@@ -229,7 +229,7 @@ export function FoodSearchResultsList({
   }
 
   return (
-    <div className="my-2 flex-1 min-h-[220px] max-h-[380px] flex flex-col rounded-control border border-border-divider bg-surface overflow-hidden">
+    <div className="my-2 flex-1 min-h-[450px] max-h-[450px] flex flex-col rounded-control border border-border-divider bg-surface overflow-hidden">
       {/* 1. Header Fixo (fora da área de rolagem) */}
       <div className="bg-surface-subtle border-b border-border-divider shrink-0">
         <Table className="table-fixed w-full">
@@ -343,4 +343,3 @@ export function FoodSearchResultsList({
     </div>
   );
 }
-

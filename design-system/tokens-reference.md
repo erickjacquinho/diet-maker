@@ -37,7 +37,7 @@
 ### 1.4 Feedback Semântico & Favoritos
 - **Informação:** `info` `#3157A4` | Soft `#EAF0FB` | Border `#C7D5ED`
 - **Sucesso:** `success` `#237A4B` | Soft `#E8F5ED` | Border `#B9DCC8`
-- **Alerta / Favorito:** `warning` `#EAB308` | Soft `#FEFCE8` | Border `#FEF08A`
+- **Alerta / Favorito:** `warning` `#EAB308` | Pressed `#CA8A04` | Soft `#FEFCE8` | Border `#FEF08A`
 - **Erro:** `error` `#B42318` | Soft `#FDECEA` | Border `#E6B8B2`
 
 ---

@@ -1,27 +1,57 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, Plus, Utensils, X, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Utensils } from 'lucide-react';
-import { searchTacoFoods, getAllFoods, FoodItem } from '@/lib/tacoStore';
-import { calculatePresetCalories } from '@/lib/presetUtils';
-import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
+import { Badge } from '@/components/ui/badge';
+import { searchTacoFoods, getAllFoods, toggleFavoriteFood, type FoodItem } from '@/lib/tacoStore';
+import { FoodSearchResultsList, type FoodSortConfig, type FoodSortField } from './food-search/FoodSearchResultsList';
+
+type FoodAddPayload = {
+  foodId?: string;
+  name: string;
+  quantityGrams: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  kcal: number;
+};
 
 export interface FoodSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   mealTitle?: string;
-  onAddFood: (foodItem: {
-    foodId?: string;
-    name: string;
-    quantityGrams: number;
-    protein: number;
-    carbs: number;
-    fats: number;
-    kcal: number;
-  }) => void;
+  onAddFood: (foodItem: FoodAddPayload | FoodAddPayload[]) => void;
+}
+
+function sortFoods(foods: FoodItem[], config: FoodSortConfig | null) {
+  if (!config) return foods;
+  return [...foods].sort((left, right) => {
+    const leftValue = config.field === 'name'
+      ? left.name
+      : config.field === 'protein'
+        ? left.proteinG
+        : config.field === 'carbs'
+          ? left.carbsG
+          : config.field === 'fats'
+            ? (left.fatG ?? left.fatsG)
+            : left.kcal;
+    const rightValue = config.field === 'name'
+      ? right.name
+      : config.field === 'protein'
+        ? right.proteinG
+        : config.field === 'carbs'
+          ? right.carbsG
+          : config.field === 'fats'
+            ? (right.fatG ?? right.fatsG)
+            : right.kcal;
+    const comparison = typeof leftValue === 'string'
+      ? leftValue.localeCompare(String(rightValue), 'pt-BR')
+      : Number(leftValue) - Number(rightValue);
+    return config.direction === 'asc' ? comparison : -comparison;
+  });
 }
 
 export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
@@ -31,140 +61,177 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   onAddFood,
 }) => {
   const [query, setQuery] = useState('');
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  const [quantityGrams, setQuantityGrams] = useState<number>(100);
+  const [selectedFoodIds, setSelectedFoodIds] = useState<Set<string>>(new Set());
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [favoriteVersion, setFavoriteVersion] = useState(0);
+  const [sortConfig, setSortConfig] = useState<FoodSortConfig | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const searchResults = useMemo(() => {
-    if (!query.trim()) {
-      return getAllFoods().slice(0, 15);
+  useEffect(() => {
+    if (!isOpen) {
+      setQuery('');
+      setSelectedFoodIds(new Set());
+      setOnlyFavorites(false);
+      setSortConfig(null);
     }
-    return searchTacoFoods(query).slice(0, 30);
-  }, [query]);
+  }, [isOpen]);
 
-  const calculatedMacros = useMemo(() => {
-    if (!selectedFood) return { protein: 0, carbs: 0, fats: 0, kcal: 0 };
+  useEffect(() => {
+    if (!isOpen) return;
 
-    const ratio = Math.max(0, quantityGrams) / 100;
-    const protein = Math.round((selectedFood.proteinG * ratio) * 10) / 10;
-    const carbs = Math.round((selectedFood.carbsG * ratio) * 10) / 10;
-    const fats = Math.round((selectedFood.fatsG * ratio) * 10) / 10;
-    const kcal = calculatePresetCalories(protein, carbs, fats);
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+    };
 
-    return { protein, carbs, fats, kcal };
-  }, [selectedFood, quantityGrams]);
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, [isOpen]);
 
-  const handleConfirmAdd = () => {
-    if (!selectedFood) return;
+  // A TACO inteira é lida uma vez por abertura. Digitar no campo só filtra o pool já carregado.
+  const allFoods = useMemo(() => getAllFoods(), [isOpen, favoriteVersion]);
+  const searchResults = useMemo(() => {
+    const searched = query.trim() ? searchTacoFoods(query, allFoods) : allFoods.slice(0, 15);
+    const filtered = onlyFavorites ? searched.filter((food) => food.isFavorite) : searched;
+    return sortFoods(filtered.slice(0, 30), sortConfig);
+  }, [allFoods, onlyFavorites, query, sortConfig]);
 
-    onAddFood({
-      foodId: selectedFood.id,
-      name: `${selectedFood.name} (${selectedFood.preparo || 'Cozido/In Natura'})`,
-      quantityGrams: Math.max(1, Number(quantityGrams) || 100),
-      protein: calculatedMacros.protein,
-      carbs: calculatedMacros.carbs,
-      fats: calculatedMacros.fats,
-      kcal: calculatedMacros.kcal,
+  const selectedFoods = useMemo(
+    () => allFoods.filter((food) => selectedFoodIds.has(food.id)),
+    [allFoods, selectedFoodIds]
+  );
+
+  const handleToggleFood = (food: FoodItem) => {
+    setSelectedFoodIds((current) => {
+      const next = new Set(current);
+      if (next.has(food.id)) next.delete(food.id);
+      else next.add(food.id);
+      return next;
     });
+  };
 
-    setSelectedFood(null);
-    setQuantityGrams(100);
-    setQuery('');
+  const handleToggleAll = () => {
+    setSelectedFoodIds((current) => {
+      const next = new Set(current);
+      const allSelected = searchResults.length > 0 && searchResults.every((food) => next.has(food.id));
+      searchResults.forEach((food) => (allSelected ? next.delete(food.id) : next.add(food.id)));
+      return next;
+    });
+  };
+
+  const handleSort = (field: FoodSortField) => {
+    setSortConfig((current) => current?.field === field
+      ? { field, direction: current.direction === 'desc' ? 'asc' : 'desc' }
+      : { field, direction: 'desc' });
+  };
+
+  const handleToggleFavorite = (foodId: string) => {
+    toggleFavoriteFood(foodId);
+    setFavoriteVersion((version) => version + 1);
+  };
+
+  const handleAddSelectedFoods = () => {
+    if (!selectedFoods.length) return;
+    const payload = selectedFoods.map((food) => ({
+      foodId: food.id,
+      name: `${food.name}${food.preparo && food.preparo !== 'inNatura' ? ` (${food.preparo})` : ''}`,
+      quantityGrams: 100,
+      protein: food.proteinG,
+      carbs: food.carbsG,
+      fats: food.fatG ?? food.fatsG,
+      kcal: food.kcal,
+    }));
+    onAddFood(payload);
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <Utensils size={18} className="text-success" />
-            <span>Adicionar Alimento em "{mealTitle}"</span>
+            <span>Adicionar Alimentos em &quot;{mealTitle}&quot;</span>
           </DialogTitle>
           <DialogDescription className="text-style-legal text-text-muted">
-            Busque na base TACO de alimentos e insira a gramatura desejada.
+            Selecione um ou mais alimentos da base TACO e adicione-os à refeição em uma única confirmação.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative pt-3 shrink-0">
-          <Input
-            type="text"
-            placeholder="Digite o nome do alimento (ex: Frango, Arroz, Ovo, Aveia, Banana)..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 text-style-field-value"
-            autoFocus
-          />
-          <Search size={14} className="absolute left-3 top-6 text-text-muted" />
+        <div className="flex items-center gap-2 pt-3 shrink-0">
+          <label htmlFor="food-search-input" className="sr-only">Buscar por nome do alimento</label>
+          <div className="relative flex-1">
+            <Input
+              ref={searchInputRef}
+              id="food-search-input"
+              type="search"
+              placeholder="Buscar por nome do alimento..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="pl-9 pr-20 text-style-field-value"
+              autoFocus
+            />
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" aria-hidden="true" />
+            <Badge
+              variant="neutral"
+              title="Atalho Ctrl+F"
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 border-border-divider bg-surface-subtle px-2 py-0.5 text-style-chart-micro text-text-muted"
+            >
+              Ctrl+F
+            </Badge>
+          </div>
+          <Button
+            type="button"
+            variant="quiet"
+            size="standard"
+            iconOnly
+            role="switch"
+            aria-checked={onlyFavorites}
+            aria-label="Filtrar favoritos"
+            title="Filtrar favoritos"
+            onClick={() => setOnlyFavorites((current) => !current)}
+            className={onlyFavorites
+              ? 'group border-transparent bg-warning-pressed text-on-warning hover:border-transparent hover:bg-warning-pressed hover:text-on-warning'
+              : 'group border border-border-control bg-surface text-text-secondary hover:border-transparent hover:bg-warning hover:text-on-warning'}
+          >
+            <Star size={16} aria-hidden="true" className={onlyFavorites ? 'fill-current text-on-warning' : 'text-text-muted group-hover:fill-current group-hover:text-on-warning'} />
+          </Button>
         </div>
 
         <FoodSearchResultsList
           searchResults={searchResults}
-          selectedFoodIds={useMemo(() => new Set(selectedFood ? [selectedFood.id] : []), [selectedFood])}
+          selectedFoodIds={selectedFoodIds}
           query={query}
-          onToggleFood={(food) => setSelectedFood((prev) => prev?.id === food.id ? null : food)}
-          onToggleAll={() => {}}
-          isAllSelected={false}
-          isSomeSelected={Boolean(selectedFood)}
+          onlyFavorites={onlyFavorites}
+          onToggleFood={handleToggleFood}
+          onToggleAll={handleToggleAll}
+          onToggleFavorite={handleToggleFavorite}
+          isAllSelected={searchResults.length > 0 && searchResults.every((food) => selectedFoodIds.has(food.id))}
+          isSomeSelected={selectedFoodIds.size > 0}
+          sortConfig={sortConfig}
+          onSort={handleSort}
         />
 
-        {selectedFood ? (
-          <div className="p-4 bg-surface-subtle border border-border-subtle rounded-control flex flex-col gap-3 shrink-0">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <span className="text-style-legal font-bold text-text-muted tracking-label block">Alimento Selecionado</span>
-                <span className="text-style-legal font-bold text-text-primary">{selectedFood.name}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <label className="text-style-legal font-bold text-text-primary whitespace-nowrap">Gramatura:</label>
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={5000}
-                    size="compact"
-                    value={quantityGrams}
-                    onChange={(e) => setQuantityGrams(Number(e.target.value))}
-                    className="w-24 text-style-field-value font-bold text-center"
-                  />
-                  <span className="text-style-legal font-bold text-text-muted">g</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border-subtle text-center">
-              <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Proteínas</span>
-                <span className="font-bold text-style-legal text-macro-protein">{calculatedMacros.protein}g</span>
-              </div>
-              <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Carboidratos</span>
-                <span className="font-bold text-style-legal text-macro-carbohydrate">{calculatedMacros.carbs}g</span>
-              </div>
-              <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Gorduras</span>
-                <span className="font-bold text-style-legal text-macro-fat">{calculatedMacros.fats}g</span>
-              </div>
-              <div className="bg-surface p-2 rounded-control border border-border-subtle">
-                <span className="text-style-chart-micro font-bold text-text-muted block tracking-label">Calorias</span>
-                <span className="font-bold text-style-legal text-text-primary">{calculatedMacros.kcal} kcal</span>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleConfirmAdd}
-              variant="primary"
-              className="w-full text-style-legal font-bold py-2.5 rounded-control flex items-center justify-center gap-2"
-            >
-              <Plus size={14} />
-              <span>Adicionar Alimento ({calculatedMacros.kcal} kcal)</span>
-            </Button>
+        <div className="flex items-center justify-between gap-3 border-t border-border-divider pt-3 shrink-0">
+          <div className="flex items-center gap-2 text-style-legal text-text-secondary" aria-live="polite">
+            {selectedFoods.length > 0
+              ? `${selectedFoods.length} ${selectedFoods.length === 1 ? 'alimento selecionado' : 'alimentos selecionados'}`
+              : 'Nenhum alimento selecionado'}
+            {selectedFoods.length > 0 && (
+              <Button type="button" variant="quiet" size="compact" onClick={() => setSelectedFoodIds(new Set())} className="inline-flex items-center gap-1 text-primary hover:underline" aria-label="Limpar seleção">
+                <X size={13} aria-hidden="true" /> Limpar seleção
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="p-4 border border-dashed border-border-subtle rounded-control text-center text-style-legal text-text-muted italic shrink-0">
-            Selecione um alimento da lista acima para configurar a quantidade em gramas.
-          </div>
-        )}
+          <Button type="button" variant="primary" disabled={!selectedFoods.length} onClick={handleAddSelectedFoods}>
+            <Plus size={14} aria-hidden="true" />
+            <span className="sr-only">Adicionar à Refeição</span>
+            <span>Adicionar ({selectedFoods.length})</span>
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -34,6 +34,7 @@
   --ref-color-success-50: #e8f5ed;
   --ref-color-success-200: #b9dcc8;
   --ref-color-warning-500: #eab308;
+  --ref-color-warning-600: #ca8a04;
   --ref-color-warning-50: #fefce8;
   --ref-color-warning-200: #fef08a;
   --ref-color-error-500: #b42318;
@@ -90,6 +91,7 @@
   --sys-color-success-border: var(--ref-color-success-200);
   --sys-color-on-success: var(--ref-color-warm-0);
   --sys-color-warning: var(--ref-color-warning-500);
+  --sys-color-warning-pressed: var(--ref-color-warning-600);
   --sys-color-warning-soft: var(--ref-color-warning-50);
   --sys-color-warning-border: var(--ref-color-warning-200);
   --sys-color-on-warning: var(--ref-color-warm-0);
