@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ImportPreviousDietModal } from '@/components/molecules/ImportPreviousDietModal';
@@ -32,7 +32,7 @@ const mockDiets: PreviousDietSummary[] = [
 ];
 
 describe('ImportPreviousDietModal', () => {
-  it('should render dialog with title, search input, table of diets, and disabled action buttons initially', () => {
+  it('should render dialog with title, table of diets, and disabled action buttons initially', () => {
     render(
       <ImportPreviousDietModal
         isOpen={true}
@@ -45,7 +45,6 @@ describe('ImportPreviousDietModal', () => {
     );
 
     expect(screen.getByText('Importar Dieta Anterior')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Buscar por nome da dieta/i)).toBeInTheDocument();
     expect(screen.getByText('Dieta Hipertrofia')).toBeInTheDocument();
     expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
     expect(screen.getByText('2600 kcal')).toBeInTheDocument();
@@ -58,26 +57,7 @@ describe('ImportPreviousDietModal', () => {
     expect(mealsBtn).toBeDisabled();
   });
 
-  it('should filter diets when typing in the search input', () => {
-    render(
-      <ImportPreviousDietModal
-        isOpen={true}
-        onClose={vi.fn()}
-        diets={mockDiets}
-        patientName="João Silva"
-        onPullMacrosOnly={vi.fn()}
-        onPullAllMeals={vi.fn()}
-      />
-    );
-
-    const searchInput = screen.getByPlaceholderText(/Buscar por nome da dieta/i);
-    fireEvent.change(searchInput, { target: { value: 'Hipertrofia' } });
-
-    expect(screen.getByText('Dieta Hipertrofia')).toBeInTheDocument();
-    expect(screen.queryByText('Ciclo de Carbos Cut')).not.toBeInTheDocument();
-  });
-
-  it('should enable action buttons when a diet row is clicked and selected, and allow clearing selection', () => {
+  it('should enable action buttons when a diet row is clicked and selected', () => {
     render(
       <ImportPreviousDietModal
         isOpen={true}
@@ -98,15 +78,6 @@ describe('ImportPreviousDietModal', () => {
 
     expect(macrosBtn).toBeEnabled();
     expect(mealsBtn).toBeEnabled();
-    expect(screen.getByText(/1 dieta selecionada/i)).toBeInTheDocument();
-
-    // Clear selection
-    const clearBtn = screen.getByRole('button', { name: /Limpar seleção/i });
-    fireEvent.click(clearBtn);
-
-    expect(macrosBtn).toBeDisabled();
-    expect(mealsBtn).toBeDisabled();
-    expect(screen.getByText('Nenhuma dieta selecionada')).toBeInTheDocument();
   });
 
   it('should call onPullMacrosOnly with the selected diet when clicking Puxar apenas os macros', () => {
@@ -175,4 +146,32 @@ describe('ImportPreviousDietModal', () => {
 
     expect(screen.getByText(/Nenhuma dieta anterior encontrada/i)).toBeInTheDocument();
   });
+
+  it('renders Checkbox components instead of text header Sel. and toggles on click', () => {
+    render(
+      <ImportPreviousDietModal
+        isOpen={true}
+        onClose={vi.fn()}
+        diets={mockDiets}
+        patientName="João Silva"
+        onPullMacrosOnly={vi.fn()}
+        onPullAllMeals={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByText('Sel.')).not.toBeInTheDocument();
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(2);
+    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'false');
+
+    // Click checkbox directly
+    fireEvent.click(checkboxes[0]);
+    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'true');
+
+    // Click again to unselect
+    fireEvent.click(checkboxes[0]);
+    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'false');
+  });
 });
+

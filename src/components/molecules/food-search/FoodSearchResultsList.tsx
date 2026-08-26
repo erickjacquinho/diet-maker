@@ -1,15 +1,8 @@
 'use client';
 
-import React from 'react';
-import { Check, Star, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
+import React, { useMemo } from 'react';
+import { Star, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import { FoodItem } from '@/lib/tacoStore';
 import { cn } from '@/lib/utils';
 
@@ -27,126 +20,14 @@ export interface FoodSearchResultsListProps {
   query: string;
   onlyFavorites?: boolean;
   onToggleFood: (food: FoodItem) => void;
-  onToggleAll: () => void;
+  onToggleAll?: () => void;
   onToggleFavorite?: (foodId: string) => void;
-  isAllSelected: boolean;
-  isSomeSelected: boolean;
+  isAllSelected?: boolean;
+  isSomeSelected?: boolean;
   sortConfig?: FoodSortConfig | null;
   onSort?: (field: FoodSortField) => void;
+  mode?: 'single' | 'multi';
 }
-
-interface FoodSearchResultRowProps {
-  food: FoodItem;
-  isSelected: boolean;
-  onToggleFood: (food: FoodItem) => void;
-  onToggleFavorite?: (foodId: string) => void;
-}
-
-const FoodSearchResultRow = React.memo(function FoodSearchResultRow({
-  food,
-  isSelected,
-  onToggleFood,
-  onToggleFavorite,
-}: FoodSearchResultRowProps) {
-  return (
-    <TableRow
-      data-state={isSelected ? 'selected' : undefined}
-      onClick={() => onToggleFood(food)}
-      className={cn(
-        'cursor-pointer select-none transition-colors border-b border-border-divider hover:bg-surface-hover',
-        isSelected && 'bg-primary-soft/30 hover:bg-primary-soft/40'
-      )}
-    >
-      {/* 1. Checkbox da Linha */}
-      <TableCell
-        className="w-10 px-3 py-2 text-center"
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleFood(food);
-        }}
-      >
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={isSelected}
-          aria-label={`Selecionar ${food.name}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFood(food);
-          }}
-          className={cn(
-            'size-4 rounded-compact border flex items-center justify-center transition-colors duration-fast mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus',
-            isSelected
-              ? 'bg-primary border-primary text-on-primary'
-              : 'border-border-subtle bg-surface hover:border-border-hover'
-          )}
-        >
-          {isSelected && <Check size={12} strokeWidth={3} />}
-        </button>
-      </TableCell>
-
-      {/* 2. Nome + Categoria/Preparo */}
-      <TableCell className="text-left py-2 px-3 font-bold text-style-legal text-text-primary min-w-[160px]">
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="truncate block font-bold text-text-primary" title={food.name}>
-              {food.name}
-            </span>
-            <button
-              type="button"
-              aria-label={
-                food.isFavorite
-                  ? `Remover ${food.name} dos favoritos`
-                  : `Favoritar ${food.name}`
-              }
-              title={food.isFavorite ? 'Remover dos favoritos' : 'Favoritar alimento'}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite?.(food.id);
-              }}
-              className="shrink-0 p-0.5 rounded-compact text-text-muted hover:text-warning hover:bg-warning-soft/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus inline-flex items-center justify-center"
-            >
-              <Star
-                size={14}
-                aria-hidden="true"
-                className={cn(
-                  'transition-colors',
-                  food.isFavorite
-                    ? 'fill-warning text-warning'
-                    : 'text-text-muted hover:text-warning'
-                )}
-              />
-            </button>
-          </div>
-          <span className="text-style-chart-micro text-text-muted font-normal truncate">
-            {food.preparo && food.preparo !== 'inNatura' ? `${food.preparo} · ` : ''}
-            {food.category || 'Geral'}
-          </span>
-        </div>
-      </TableCell>
-
-      {/* 3. Proteína */}
-      <TableCell className="w-24 sm:w-28 text-right font-bold text-macro-protein tabular-nums py-2.5 px-3 text-style-legal">
-        {food.proteinG}g
-      </TableCell>
-
-      {/* 4. Carboidrato */}
-      <TableCell className="w-28 sm:w-32 text-right font-bold text-macro-carbohydrate tabular-nums py-2.5 px-3 text-style-legal">
-        {food.carbsG}g
-      </TableCell>
-
-      {/* 5. Gorduras */}
-      <TableCell className="w-24 sm:w-28 text-right font-bold text-macro-fat tabular-nums py-2.5 px-3 text-style-legal">
-        {food.fatG ?? food.fatsG}g
-      </TableCell>
-
-      {/* 6. Calorias */}
-      <TableCell className="w-28 sm:w-32 text-right font-bold text-text-primary tabular-nums py-2.5 px-4 text-style-legal">
-        {food.kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
-      </TableCell>
-    </TableRow>
-  );
-});
 
 function SortHeaderButton({
   field,
@@ -188,7 +69,7 @@ function SortHeaderButton({
       ) : (
         <ArrowUpDown
           size={12}
-          className="opacity-30 group-hover:opacity-100 transition-opacity shrink-0"
+          className="opacity-subdued group-hover:opacity-full transition-opacity shrink-0"
           aria-hidden="true"
         />
       )}
@@ -205,10 +86,139 @@ export function FoodSearchResultsList({
   onToggleAll,
   onToggleFavorite,
   isAllSelected,
-  isSomeSelected,
   sortConfig,
   onSort,
+  mode = 'multi',
 }: FoodSearchResultsListProps) {
+  const columns: DataTableColumnDef<FoodItem>[] = useMemo(
+    () => [
+      {
+        id: 'name',
+        header: (
+          <SortHeaderButton
+            field="name"
+            label="Nome (100g base)"
+            currentSort={sortConfig}
+            onSort={onSort}
+            align="left"
+          />
+        ),
+        headerClassName: 'text-left min-w-[160px] px-3',
+        className: 'text-left py-2 px-3 font-bold text-style-legal text-text-primary min-w-[160px]',
+        cell: (food) => (
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="truncate block font-bold text-text-primary" title={food.name}>
+                {food.name}
+              </span>
+              <button
+                type="button"
+                aria-label={
+                  food.isFavorite
+                    ? `Remover ${food.name} dos favoritos`
+                    : `Favoritar ${food.name}`
+                }
+                title={food.isFavorite ? 'Remover dos favoritos' : 'Favoritar alimento'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite?.(food.id);
+                }}
+                className="shrink-0 p-0.5 rounded-compact text-text-muted hover:text-warning hover:bg-warning-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus inline-flex items-center justify-center"
+              >
+                <Star
+                  size={14}
+                  aria-hidden="true"
+                  className={cn(
+                    'transition-colors',
+                    food.isFavorite
+                      ? 'fill-warning text-warning'
+                      : 'text-text-muted hover:text-warning'
+                  )}
+                />
+              </button>
+            </div>
+            <span className="text-style-chart-micro text-text-muted font-normal truncate">
+              {food.preparo && food.preparo !== 'inNatura' ? `${food.preparo} · ` : ''}
+              {food.category || 'Geral'}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: 'protein',
+        align: 'right',
+        header: (
+          <SortHeaderButton
+            field="protein"
+            label="Proteína"
+            currentSort={sortConfig}
+            onSort={onSort}
+            align="right"
+            className="text-macro-protein hover:text-macro-protein"
+          />
+        ),
+        headerClassName: 'w-24 sm:w-28 text-right px-3 text-macro-protein',
+        className: 'w-24 sm:w-28 text-right font-bold text-macro-protein tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (food) => `${food.proteinG}g`,
+      },
+      {
+        id: 'carbs',
+        align: 'right',
+        header: (
+          <SortHeaderButton
+            field="carbs"
+            label="Carboidrato"
+            currentSort={sortConfig}
+            onSort={onSort}
+            align="right"
+            className="text-macro-carbohydrate hover:text-macro-carbohydrate"
+          />
+        ),
+        headerClassName: 'w-28 sm:w-32 text-right px-3 text-macro-carbohydrate',
+        className: 'w-28 sm:w-32 text-right font-bold text-macro-carbohydrate tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (food) => `${food.carbsG}g`,
+      },
+      {
+        id: 'fats',
+        align: 'right',
+        header: (
+          <SortHeaderButton
+            field="fats"
+            label="Gorduras"
+            currentSort={sortConfig}
+            onSort={onSort}
+            align="right"
+            className="text-macro-fat hover:text-macro-fat"
+          />
+        ),
+        headerClassName: 'w-24 sm:w-28 text-right px-3 text-macro-fat',
+        className: 'w-24 sm:w-28 text-right font-bold text-macro-fat tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (food) => `${food.fatG ?? food.fatsG}g`,
+      },
+      {
+        id: 'kcal',
+        align: 'right',
+        header: (
+          <SortHeaderButton
+            field="kcal"
+            label="Calorias"
+            currentSort={sortConfig}
+            onSort={onSort}
+            align="right"
+          />
+        ),
+        headerClassName: 'w-28 sm:w-32 text-right px-4',
+        className: 'w-28 sm:w-32 text-right font-bold text-text-primary tabular-nums py-2.5 px-4 text-style-legal',
+        cell: (food) => (
+          <>
+            {food.kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
+          </>
+        ),
+      },
+    ],
+    [sortConfig, onSort, onToggleFavorite]
+  );
+
   if (searchResults.length === 0) {
     return (
       <div className="flex-1 min-h-[450px] max-h-[450px] flex flex-col items-center justify-center p-8 text-center text-text-muted gap-2 border border-dashed border-border-divider rounded-control my-2 bg-surface-subtle">
@@ -230,116 +240,51 @@ export function FoodSearchResultsList({
 
   return (
     <div className="my-2 flex-1 min-h-[450px] max-h-[450px] flex flex-col rounded-control border border-border-divider bg-surface overflow-hidden">
-      {/* 1. Header Fixo (fora da área de rolagem) */}
-      <div className="bg-surface-subtle border-b border-border-divider shrink-0">
-        <Table className="table-fixed w-full">
-          <TableHeader className="bg-surface-subtle">
-            <TableRow className="hover:bg-surface-subtle border-0">
-              {/* 1. Header Checkbox (Selecionar Todos) */}
-              <TableHead className="w-10 px-3 text-center h-9 bg-surface-subtle">
-                <button
-                  type="button"
-                  role="checkbox"
-                  aria-checked={isAllSelected ? true : isSomeSelected ? 'mixed' : false}
-                  aria-label="Selecionar todos os alimentos visíveis"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleAll();
-                  }}
-                  className={cn(
-                    'size-4 rounded-compact border flex items-center justify-center transition-colors duration-fast mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus',
-                    isAllSelected
-                      ? 'bg-primary border-primary text-on-primary'
-                      : isSomeSelected
-                      ? 'bg-primary-soft border-primary text-primary'
-                      : 'border-border-subtle bg-surface hover:border-border-hover'
-                  )}
-                >
-                  {isAllSelected && <Check size={12} strokeWidth={3} />}
-                  {isSomeSelected && !isAllSelected && (
-                    <span className="w-2 h-0.5 bg-primary rounded-round" />
-                  )}
-                </button>
-              </TableHead>
-
-              {/* 2. Nome do Alimento */}
-              <TableHead className="text-left font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary h-9 bg-surface-subtle px-3">
-                <SortHeaderButton
-                  field="name"
-                  label="Nome (100g base)"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                  align="left"
-                />
-              </TableHead>
-
-              {/* 3. Proteína (P) */}
-              <TableHead className="w-24 sm:w-28 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-protein h-9 bg-surface-subtle px-3">
-                <SortHeaderButton
-                  field="protein"
-                  label="Proteína"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                  align="right"
-                  className="text-macro-protein hover:text-macro-protein"
-                />
-              </TableHead>
-
-              {/* 4. Carboidrato (C) */}
-              <TableHead className="w-28 sm:w-32 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-carbohydrate h-9 bg-surface-subtle px-3">
-                <SortHeaderButton
-                  field="carbs"
-                  label="Carboidrato"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                  align="right"
-                  className="text-macro-carbohydrate hover:text-macro-carbohydrate"
-                />
-              </TableHead>
-
-              {/* 5. Gorduras (G) */}
-              <TableHead className="w-24 sm:w-28 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-fat h-9 bg-surface-subtle px-3">
-                <SortHeaderButton
-                  field="fats"
-                  label="Gorduras"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                  align="right"
-                  className="text-macro-fat hover:text-macro-fat"
-                />
-              </TableHead>
-
-              {/* 6. Calorias (kcal) */}
-              <TableHead className="w-28 sm:w-32 text-right font-bold text-style-chart-micro uppercase tracking-wider text-text-primary h-9 bg-surface-subtle px-4">
-                <SortHeaderButton
-                  field="kcal"
-                  label="Calorias"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                  align="right"
-                />
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-        </Table>
-      </div>
-
-      {/* 2. Corpo Rolável (apenas as linhas rolam) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
-        <Table className="table-fixed w-full">
-          <TableBody>
-            {searchResults.map((food) => (
-              <FoodSearchResultRow
-                key={food.id}
-                food={food}
-                isSelected={selectedFoodIds.has(food.id)}
-                onToggleFood={onToggleFood}
-                onToggleFavorite={onToggleFavorite}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        data={searchResults}
+        columns={columns}
+        getRowId={(food) => food.id}
+        caption="Lista de resultados de alimentos da base TACO"
+        emptyMessage="Nenhum alimento encontrado."
+        selection={{
+          mode,
+          selectedRowIds: selectedFoodIds,
+          onSelectionChange: (nextSet) => {
+            if (mode === 'single') {
+              const selectedId = Array.from(nextSet)[0];
+              const found = searchResults.find((f) => f.id === selectedId) || null;
+              if (found) {
+                onToggleFood(found);
+              } else {
+                const previous = searchResults.find((f) => selectedFoodIds.has(f.id));
+                if (previous) onToggleFood(previous);
+              }
+            } else {
+              if (onToggleAll && nextSet.size === 0 && (isAllSelected || selectedFoodIds.size === searchResults.length)) {
+                onToggleAll();
+              } else if (onToggleAll && nextSet.size === searchResults.length && selectedFoodIds.size === 0) {
+                onToggleAll();
+              } else {
+                for (const food of searchResults) {
+                  const wasSelected = selectedFoodIds.has(food.id);
+                  const isSelected = nextSet.has(food.id);
+                  if (wasSelected !== isSelected) {
+                    onToggleFood(food);
+                    break;
+                  }
+                }
+              }
+            }
+          },
+          selectOnRowClick: true,
+          selectAllAriaLabel: 'Selecionar todos os alimentos visíveis',
+          selectRowAriaLabel: (food) => `Selecionar ${food.name}`,
+        }}
+        stickyHeader
+        maxHeight="450px"
+        tableClassName="table-fixed w-full"
+        className="flex-1 min-h-0"
+      />
     </div>
   );
 }

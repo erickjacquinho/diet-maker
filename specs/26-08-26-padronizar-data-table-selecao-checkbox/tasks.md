@@ -1,4 +1,4 @@
-﻿# Tasks: Padronização do Componente DataTable com Seleção e Checkbox Canônico
+# Tasks: Padronização do Componente DataTable com Seleção e Checkbox Canônico
 
 **Input**: Design documents from specs/26-08-26-padronizar-data-table-selecao-checkbox/
 **Prerequisites**: plan.md, spec.md, esearch.md, data-model.md, contracts/data-table-selection-contract.md
@@ -9,9 +9,9 @@
 
 **Purpose**: Criação do átomo Checkbox e infraestrutura de tipos para a seleção
 
-- [ ] T001 [skill: shadcn] [P] Criar o componente átomo Checkbox em src/components/atoms/Checkbox.tsx e exportar em src/components/atoms/index.ts
-- [ ] T002 [skill: tdd] [P] Criar testes unitários para o átomo Checkbox em tests/components/atoms/Checkbox.test.tsx
-- [ ] T003 [skill: frontend-architecture-mindset] Estender tipos de seleção DataTableSelectionConfig e DataTableProps em src/components/molecules/data-table/types.ts e utilitários de seleção em src/components/molecules/data-table/utils.ts
+- [X] T001 [skill: shadcn] [P] Criar o componente átomo Checkbox em src/components/atoms/Checkbox.tsx e exportar em src/components/atoms/index.ts
+- [X] T002 [skill: tdd] [P] Criar testes unitários para o átomo Checkbox em tests/components/atoms/Checkbox.test.tsx
+- [X] T003 [skill: frontend-architecture-mindset] Estender tipos de seleção DataTableSelectionConfig e DataTableProps em src/components/molecules/data-table/types.ts e utilitários de seleção em src/components/molecules/data-table/utils.ts
 
 ---
 
@@ -21,9 +21,9 @@
 
 **Independent Test**: Renderizar DataTable com selection={{ mode: 'multi' }} e selection={{ mode: 'single' }} e verificar marcação, desmarcação, estado indeterminado e eventos.
 
-- [ ] T004 [skill: shadcn] [US1] Implementar a renderização da coluna de seleção (cabeçalho com Checkbox mestre para multi e células de linha com Checkbox) em src/components/molecules/DataTable.tsx
-- [ ] T005 [skill: shadcn] [US1] Adicionar suporte à propriedade selectOnRowClick e estilização de linha selecionada data-[state=selected] em src/components/molecules/DataTable.tsx
-- [ ] T006 [skill: tdd] [P] [US1] Adicionar testes unitários para os modos multi-select, single-select, select-all e indeterminate em tests/components/molecules/data-table.test.tsx
+- [X] T004 [skill: shadcn] [US1] Implementar a renderização da coluna de seleção (cabeçalho com Checkbox mestre para multi e células de linha com Checkbox) em src/components/molecules/DataTable.tsx
+- [X] T005 [skill: shadcn] [US1] Adicionar suporte à propriedade selectOnRowClick e estilização de linha selecionada data-[state=selected] em src/components/molecules/DataTable.tsx
+- [X] T006 [skill: tdd] [P] [US1] Adicionar testes unitários para os modos multi-select, single-select, select-all e indeterminate em tests/components/molecules/data-table.test.tsx
 
 ---
 
@@ -33,10 +33,10 @@
 
 **Independent Test**: Abrir FoodSearchModal e SubstituteFoodModal, verificar visual idêntico com ordenação, busca, seleção e persistência.
 
-- [ ] T007 [skill: anti-ai-slop-design] [US2] Padronizar tipografia de cabeçalhos (text-style-chart-micro) e alinhamento de números tabulares (text-right tabular-nums) em src/components/molecules/DataTable.tsx e src/components/molecules/data-table/utils.ts
-- [ ] T008 [skill: frontend-architecture-mindset] [US2] Refatorar FoodSearchResultsList em src/components/molecules/food-search/FoodSearchResultsList.tsx para compor as colunas de alimentos e delegar a tabela ao DataTable com seleção
-- [ ] T009 [skill: frontend-architecture-mindset] [P] [US2] Ajustar FoodSearchModal em src/components/molecules/FoodSearchModal.tsx e SubstituteFoodModal em src/components/molecules/SubstituteFoodModal.tsx para integração limpa com a seleção
-- [ ] T010 [skill: tdd] [P] [US2] Executar e validar testes de componentes de busca e substituição em tests/components/molecules/food-search-modal.test.tsx e tests/components/molecules/substitute-food-modal.test.tsx
+- [X] T007 [skill: anti-ai-slop-design] [US2] Padronizar tipografia de cabeçalhos (text-style-chart-micro) e alinhamento de números tabulares (text-right tabular-nums) em src/components/molecules/DataTable.tsx e src/components/molecules/data-table/utils.ts
+- [X] T008 [skill: frontend-architecture-mindset] [US2] Refatorar FoodSearchResultsList em src/components/molecules/food-search/FoodSearchResultsList.tsx para compor as colunas de alimentos e delegar a tabela ao DataTable com seleção
+- [X] T009 [skill: frontend-architecture-mindset] [P] [US2] Ajustar FoodSearchModal em src/components/molecules/FoodSearchModal.tsx e SubstituteFoodModal em src/components/molecules/SubstituteFoodModal.tsx para integração limpa com a seleção
+- [X] T010 [skill: tdd] [P] [US2] Executar e validar testes de componentes de busca e substituição em tests/components/molecules/food-search-modal.test.tsx e tests/components/molecules/substitute-food-modal.test.tsx
 
 ---
 
@@ -46,8 +46,8 @@
 
 **Independent Test**: Configurar stickyHeader e maxHeight no DataTable e verificar que o cabeçalho se mantém fixo sem desalinhamento das colunas.
 
-- [ ] T011 [skill: shadcn] [US3] Implementar propriedades stickyHeader e maxHeight com contêiner integrado no DataTable em src/components/molecules/DataTable.tsx
-- [ ] T012 [skill: tdd] [P] [US3] Adicionar testes unitários para a rolagem com cabeçalho fixo em tests/components/molecules/data-table.test.tsx
+- [X] T011 [skill: shadcn] [US3] Implementar propriedades stickyHeader e maxHeight com contêiner integrado no DataTable em src/components/molecules/DataTable.tsx
+- [X] T012 [skill: tdd] [P] [US3] Adicionar testes unitários para a rolagem com cabeçalho fixo em tests/components/molecules/data-table.test.tsx
 
 ---
 
@@ -55,8 +55,9 @@
 
 **Purpose**: Verificação de qualidade, governança do Design System e não-regressão geral
 
-- [ ] T013 [skill: code-reviewer-expert] [P] Executar auditorias automatizadas do Design System e verificar conformidade de Atomic Design
-- [ ] T014 [skill: tdd] [P] Executar a suíte de testes completa do projeto (npm test) para confirmar zero regressões em todas as tabelas
+- [X] T013 [skill: code-reviewer-expert] [P] Executar auditorias automatizadas do Design System e verificar conformidade de Atomic Design
+- [X] T014 [skill: tdd] [P] Executar a suíte de testes completa do projeto (npm test) para confirmar zero regressões em todas as tabelas
+
 
 ---
 

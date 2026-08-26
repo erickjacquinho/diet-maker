@@ -210,10 +210,10 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
             title={onlyFavorites ? 'Exibindo apenas favoritos (clique para mostrar todos)' : 'Filtrar apenas favoritos'}
             onClick={() => setOnlyFavorites((prev) => !prev)}
             className={cn(
-              'group size-9 rounded-control border flex items-center justify-center transition-all duration-fast shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus cursor-pointer',
+              'group size-9 rounded-control border flex items-center justify-center transition-colors duration-fast shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus cursor-pointer',
               onlyFavorites
-                ? 'bg-warning border-warning text-white shadow-sm hover:brightness-95'
-                : 'border-input bg-surface text-warning hover:bg-warning hover:border-warning hover:text-white'
+                ? 'bg-warning border-warning text-on-warning hover:brightness-95'
+                : 'border-input bg-surface text-warning hover:bg-warning hover:border-warning hover:text-on-warning'
             )}
           >
             <Star
@@ -222,8 +222,8 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
               className={cn(
                 'transition-colors duration-fast',
                 onlyFavorites
-                  ? 'fill-white text-white'
-                  : 'text-warning fill-warning group-hover:text-white group-hover:fill-white'
+                  ? 'fill-on-warning text-on-warning'
+                  : 'text-warning fill-warning group-hover:text-on-warning group-hover:fill-on-warning'
               )}
             />
           </button>
@@ -243,6 +243,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
             isSomeSelected={selectedFood !== null}
             sortConfig={sortConfig}
             onSort={handleSort}
+            mode="single"
           />
         </div>
 

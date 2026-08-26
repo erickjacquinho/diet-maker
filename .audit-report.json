@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-26T16:14:28.565Z",
+  "timestamp": "2026-08-26T16:29:17.624Z",
   "summary": {
-    "totalFilesScanned": 139,
+    "totalFilesScanned": 140,
     "compliantFiles": 131,
-    "nonCompliantFiles": 8,
-    "totalViolations": 21,
-    "complianceScorePercentage": 94.24
+    "nonCompliantFiles": 9,
+    "totalViolations": 20,
+    "complianceScorePercentage": 93.57
   },
   "violations": [
     {
@@ -72,26 +72,17 @@
       "snippet": "<button"
     },
     {
-      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
-      "line": 68,
-      "column": 9,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<button"
+      "file": "src/components/molecules/DataTable.tsx",
+      "line": 292,
+      "column": 11,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={maxHeight ? { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight } : undefined}"
     },
     {
       "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
-      "line": 95,
-      "column": 13,
-      "type": "RESTRICTED_HTML_TAG",
-      "element": "button",
-      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
-      "snippet": "<button"
-    },
-    {
-      "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
-      "line": 170,
+      "line": 51,
       "column": 5,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
@@ -100,8 +91,8 @@
     },
     {
       "file": "src/components/molecules/food-search/FoodSearchResultsList.tsx",
-      "line": 240,
-      "column": 17,
+      "line": 114,
+      "column": 15,
       "type": "RESTRICTED_HTML_TAG",
       "element": "button",
       "suggestedReplacement": "<Button> (from Design System @/components/ui)",
