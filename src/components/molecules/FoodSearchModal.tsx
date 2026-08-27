@@ -6,8 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, type FoodItem } from '@/lib/tacoStore';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
+import { MacroSummary } from './MacroSummary';
 import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
 
 type FoodAddPayload = {
@@ -180,9 +182,54 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
         <div className="flex items-center justify-between gap-3 border-t border-border-divider pt-3 shrink-0">
           <div className="flex items-center gap-2 text-style-legal text-text-secondary" aria-live="polite">
-            {selectedFoods.length > 0
-              ? `${selectedFoods.length} ${selectedFoods.length === 1 ? 'alimento selecionado' : 'alimentos selecionados'}`
-              : 'Nenhum alimento selecionado'}
+            {selectedFoods.length > 0 ? (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="primary"
+                      tabIndex={0}
+                      className="cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      {selectedFoods.length} {selectedFoods.length === 1 ? 'alimento selecionado' : 'alimentos selecionados'}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="start" className="max-w-md whitespace-normal p-3">
+                    <div className="space-y-2">
+                      <div className="flex items-baseline justify-between gap-3 border-b border-border-divider pb-2">
+                        <p className="text-style-caption font-semibold text-text-primary">Alimentos selecionados</p>
+                        <p className="shrink-0 text-style-chart-micro font-medium text-text-muted">Macros por 100 g</p>
+                      </div>
+                      <ul className="space-y-1 pt-1">
+                        {selectedFoods.map((food) => (
+                          <li key={food.id} className="flex min-w-0 items-center justify-between gap-2">
+                            <div className="flex min-w-0 flex-1 items-center gap-1">
+                              <span className="min-w-0 truncate text-style-legal font-semibold text-text-primary" title={food.name}>{food.name}</span>
+                              {food.isFavorite && (
+                                <>
+                                  <Star size={12} aria-hidden="true" className="shrink-0 fill-warning text-warning" />
+                                  <span className="sr-only">Favorito</span>
+                                </>
+                              )}
+                            </div>
+                            <MacroSummary
+                              protein={food.proteinG}
+                              carbs={food.carbsG}
+                              fats={food.fatG ?? food.fatsG}
+                              kcal={food.kcal}
+                              data-testid={`selected-food-macros-${food.id}`}
+                              className="shrink-0 text-style-chart-micro"
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              'Nenhum alimento selecionado'
+            )}
             {selectedFoods.length > 0 && (
               <Button type="button" variant="quiet" size="compact" onClick={() => setSelectedFoodIds(new Set())} className="inline-flex items-center gap-1 text-primary hover:underline" aria-label="Limpar seleção">
                 <X size={13} aria-hidden="true" /> Limpar seleção

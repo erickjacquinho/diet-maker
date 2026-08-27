@@ -242,6 +242,28 @@ describe('FoodSearchModal component', () => {
     expect(searchInput).toHaveFocus();
   });
 
+  it('uses the shadcn tooltip to reveal the full food name in the results table', async () => {
+    const onAddFood = vi.fn();
+    const onClose = vi.fn();
+
+    render(
+      <FoodSearchModal
+        isOpen={true}
+        onClose={onClose}
+        mealTitle="Refeição 1"
+        onAddFood={onAddFood}
+      />
+    );
+
+    const table = screen.getByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
+    const firstFoodName = within(table).getByText('Arroz, integral, cozido', { exact: true });
+
+    expect(firstFoodName).not.toHaveAttribute('title');
+    fireEvent.pointerMove(firstFoodName, { pointerType: 'mouse' });
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Arroz, integral, cozido');
+  });
+
   it('sorts foods by macro columns (protein, carbs, fats, kcal) and name when clicking table headers', () => {
     const onAddFood = vi.fn();
     const onClose = vi.fn();
@@ -298,7 +320,7 @@ describe('FoodSearchModal component', () => {
     expect(within(table).getByRole('columnheader', { name: /Calorias/ })).toHaveAttribute('aria-sort', 'ascending');
   });
 
-  it('displays tooltip with selected foods in order when hovering over the selection indicator', () => {
+  it('displays a badge and tooltip with selected foods in order', async () => {
     const onAddFood = vi.fn();
     const onClose = vi.fn();
 
@@ -316,6 +338,52 @@ describe('FoodSearchModal component', () => {
     fireEvent.click(checkboxes[1]);
     fireEvent.click(checkboxes[2]);
 
-    expect(screen.getByText(/2 alimentos selecionados/i)).toBeInTheDocument();
+    const selectionBadge = screen.getByText(/2 alimentos selecionados/i);
+    expect(selectionBadge).toHaveAttribute('tabindex', '0');
+
+    const selectedFoodNames = checkboxes.slice(1, 3).map((checkbox) => {
+      const row = checkbox.closest('tr');
+      return within(row as HTMLElement).getAllByRole('cell')[1].querySelector('span.text-style-body-small')?.textContent?.trim();
+    });
+
+    const firstSelectedRow = checkboxes[1].closest('tr');
+    fireEvent.click(within(firstSelectedRow as HTMLElement).getByRole('button', { name: /Favoritar/i }));
+
+    fireEvent.focus(selectionBadge);
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('Alimentos selecionados');
+    expect(tooltip).toHaveTextContent('Macros por 100 g');
+
+    const tooltipHeader = screen.getByText('Alimentos selecionados').parentElement;
+    expect(tooltipHeader).toHaveClass('border-b', 'border-border-divider');
+
+    const tooltipItems = within(tooltip).getAllByRole('listitem');
+    expect(tooltipItems).toHaveLength(2);
+    tooltipItems.forEach((item) => {
+      expect(item).toHaveClass('flex', 'items-center', 'justify-between');
+      expect(item).not.toHaveClass('border-b');
+    });
+    expect(tooltipItems[0]).toHaveTextContent('Favorito');
+    expect(tooltipItems[0].querySelector('svg')).toHaveClass('fill-warning', 'text-warning');
+    expect(tooltipItems[1].querySelector('svg')).toBeNull();
+
+    const favoriteFoodName = tooltipItems[0].querySelector(`span[title="${selectedFoodNames[0]}"]`);
+    expect(favoriteFoodName).toBeInTheDocument();
+    expect(favoriteFoodName?.nextElementSibling).toBe(tooltipItems[0].querySelector('svg'));
+
+    checkboxes.slice(1, 3).forEach((checkbox, index) => {
+      const row = checkbox.closest('tr');
+      const cells = within(row as HTMLElement).getAllByRole('cell');
+      const item = tooltipItems[index];
+      const foodName = selectedFoodNames[index];
+
+      expect(item).toHaveTextContent(foodName ?? '');
+      expect(item).toHaveTextContent(`P ${cells[2].textContent?.trim()}`);
+      expect(item).toHaveTextContent(`C ${cells[3].textContent?.trim()}`);
+      expect(item).toHaveTextContent(`G ${cells[4].textContent?.trim()}`);
+      expect(item).toHaveTextContent(cells[5].textContent?.trim() ?? '');
+      expect(within(item).getByTestId(/selected-food-macros-/)).toHaveClass('flex-nowrap', 'whitespace-nowrap');
+    });
   });
 });

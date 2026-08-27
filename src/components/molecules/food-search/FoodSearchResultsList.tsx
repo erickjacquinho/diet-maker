@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { Star } from 'lucide-react';
 import { Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/components/molecules/DataTable';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
 import { FoodItem } from '@/lib/tacoStore';
 import { cn } from '@/lib/utils';
@@ -42,12 +43,22 @@ export function FoodSearchResultsList({
         headerClassName: 'w-80 px-3 text-left',
         className: 'w-80 h-table-row-food text-left py-1 px-3 font-bold text-style-body-small text-text-primary',
         cell: (food) => (
-          <div className="grid h-full min-w-0 content-center">
-            <div className="flex min-w-0 items-center gap-0.5 whitespace-nowrap">
-              <span className="min-w-0 truncate whitespace-nowrap text-style-body-small font-bold text-text-primary" title={food.name}>
-                {food.name}
-              </span>
-              <Button
+            <div className="grid h-full min-w-0 content-center">
+              <div className="flex min-w-0 items-center gap-0.5 whitespace-nowrap">
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <span
+                      tabIndex={0}
+                      className="min-w-0 truncate whitespace-nowrap text-style-body-small font-bold text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      {food.name}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="start" className="max-w-md whitespace-normal">
+                    {food.name}
+                  </TooltipContent>
+                </Tooltip>
+                <Button
                 type="button"
                 variant="quiet"
                 size="compact"
@@ -156,45 +167,47 @@ export function FoodSearchResultsList({
 
   return (
     <div className="my-2 flex-1 min-h-table-modal max-h-table-modal flex flex-col bg-surface overflow-hidden">
-      <DataTable
-        data={searchResults}
-        columns={columns}
-        getRowId={(food) => food.id}
-        caption="Lista de resultados de alimentos da base TACO"
-        emptyMessage="Nenhum alimento encontrado."
-        sort={sort}
-        selection={{
-          mode,
-          selectedRowIds: selectedFoodIds,
-          onSelectionChange: (nextSet) => {
-            if (mode === 'single') {
-              const selectedId = Array.from(nextSet)[0];
-              const found = searchResults.find((f) => f.id === selectedId) || null;
-              if (found) {
-                onToggleFood(found);
+      <TooltipProvider delayDuration={200}>
+        <DataTable
+          data={searchResults}
+          columns={columns}
+          getRowId={(food) => food.id}
+          caption="Lista de resultados de alimentos da base TACO"
+          emptyMessage="Nenhum alimento encontrado."
+          sort={sort}
+          selection={{
+            mode,
+            selectedRowIds: selectedFoodIds,
+            onSelectionChange: (nextSet) => {
+              if (mode === 'single') {
+                const selectedId = Array.from(nextSet)[0];
+                const found = searchResults.find((f) => f.id === selectedId) || null;
+                if (found) {
+                  onToggleFood(found);
+                } else {
+                  const previous = searchResults.find((f) => selectedFoodIds.has(f.id));
+                  if (previous) onToggleFood(previous);
+                }
               } else {
-                const previous = searchResults.find((f) => selectedFoodIds.has(f.id));
-                if (previous) onToggleFood(previous);
+                const changedFoods = searchResults.filter((food) => selectedFoodIds.has(food.id) !== nextSet.has(food.id));
+                if (onToggleAll && changedFoods.length === searchResults.length) {
+                  onToggleAll();
+                } else {
+                  changedFoods.forEach(onToggleFood);
+                }
               }
-            } else {
-              const changedFoods = searchResults.filter((food) => selectedFoodIds.has(food.id) !== nextSet.has(food.id));
-              if (onToggleAll && changedFoods.length === searchResults.length) {
-                onToggleAll();
-              } else {
-                changedFoods.forEach(onToggleFood);
-              }
-            }
-          },
-          selectOnRowClick: true,
-          selectAllAriaLabel: 'Selecionar todos os alimentos visíveis',
-          selectRowAriaLabel: (food) => `Selecionar ${food.name}`,
-        }}
-        stickyHeader
-        maxHeight="table-modal"
-        virtualization={{ overscan: 8 }}
-        tableClassName="table-fixed w-max min-w-full"
-        className="flex-1 min-h-0"
-      />
+            },
+            selectOnRowClick: true,
+            selectAllAriaLabel: 'Selecionar todos os alimentos visíveis',
+            selectRowAriaLabel: (food) => `Selecionar ${food.name}`,
+          }}
+          stickyHeader
+          maxHeight="table-modal"
+          virtualization={{ overscan: 8 }}
+          tableClassName="table-fixed w-max min-w-full"
+          className="flex-1 min-h-0"
+        />
+      </TooltipProvider>
     </div>
   );
 }
