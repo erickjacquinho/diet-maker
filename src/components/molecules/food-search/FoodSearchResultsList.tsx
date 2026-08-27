@@ -42,7 +42,7 @@ export function FoodSearchResultsList({
         headerClassName: 'w-56 px-3 text-left',
         className: 'w-56 h-table-row-food text-left py-1 px-3 font-bold text-style-body-small text-text-primary',
         cell: (food) => (
-          <div className="flex h-full min-w-0 flex-col justify-center gap-0">
+          <div className="grid h-full min-w-0 content-center">
             <div className="flex min-w-0 items-center gap-0.5 whitespace-nowrap">
               <span className="min-w-0 truncate whitespace-nowrap text-style-body-small font-bold text-text-primary" title={food.name}>
                 {food.name}
@@ -76,7 +76,7 @@ export function FoodSearchResultsList({
                 />
               </Button>
             </div>
-            <span className={cn(textStyle('metadata'), 'truncate whitespace-nowrap')}>
+            <span className={cn(textStyle('metadata'), '-mt-1 truncate whitespace-nowrap')}>
               {food.preparo && food.preparo !== 'inNatura' ? `${food.preparo} · ` : ''}
               {food.category || 'Geral'}
             </span>

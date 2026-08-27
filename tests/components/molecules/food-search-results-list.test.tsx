@@ -39,8 +39,8 @@ describe('FoodSearchResultsList', () => {
     expect(nameCell?.querySelector('span[title="Arroz integral"]')).toHaveClass('whitespace-nowrap', 'truncate');
     expect(nameCell?.querySelector('span[title="Arroz integral"]')).not.toHaveClass('break-words');
     expect(screen.getByText('cozido · Cereais')).toBeInTheDocument();
-    const nameStack = nameCell?.querySelector('.flex.flex-col');
-    expect(nameStack).toHaveClass('h-full', 'justify-center', 'gap-0');
+    const nameStack = nameCell?.querySelector('.grid');
+    expect(nameStack).toHaveClass('h-full', 'content-center');
     expect(nameStack?.firstElementChild).toHaveClass('flex', 'items-center', 'gap-0.5', 'whitespace-nowrap');
     expect(nameStack?.firstElementChild).not.toHaveClass('flex-wrap');
     expect(nameStack?.firstElementChild?.firstElementChild).toHaveAttribute('title', 'Arroz integral');
@@ -50,6 +50,7 @@ describe('FoodSearchResultsList', () => {
       'text-style-legal',
       'font-medium',
       'text-text-muted',
+      '-mt-1',
     );
   });
 
