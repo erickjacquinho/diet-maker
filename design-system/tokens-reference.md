@@ -84,6 +84,15 @@
 - Espessura fixa: **1px** (`border-1`).
 - Cor padrão: `border-subtle` (`#D6D0C5`) / `border-border`.
 
+### 3.4 Tokens de componentes
+- `cmp.dialog.max-height`: `90vh` (limite vertical de diálogos com conteúdo rolável).
+- `cmp.data-table.max-height.compact`: `400px` (regiões de dados compactas).
+- `cmp.data-table.max-height.modal`: `450px` (tabelas roláveis em modais).
+- `cmp.data-table.max-height.compact-body`: `364px` (corpo rolável com header reservado).
+- `cmp.data-table.max-height.modal-body`: `414px` (corpo rolável com header reservado).
+- `cmp.data-table.row-height.food`: `60px` (linhas da tabela de seleção de alimentos).
+- `cmp.hold-to-delete.progress-duration`: `1500ms` (duração visual padrão da retenção).
+
 ---
 
 ## 4. Ícones, Animação e Z-Index

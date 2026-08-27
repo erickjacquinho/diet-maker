@@ -10,7 +10,7 @@
 | Current layer | `molecule` |
 | Target layer | `molecule` |
 | Sources | `src/components/molecules/DataTable.tsx` |
-| Public exports | `DataTableColumnDef` (type), `DataTableSortState` (type), `DataTablePagination` (type), `DataTableProps` (type), `DataTable` (component) |
+| Public exports | `DataTableColumnDef` (type), `DataTableSortState` (type), `DataTablePagination` (type), `DataTableSelectionConfig` (type), `DataTableSelectionMode` (type), `DataTableMaxHeight` (type), `DataTableVirtualizationConfig` (type), `DataTableProps` (type), `DataTable` (component) |
 
 ## Purpose
 
@@ -26,11 +26,11 @@ Caption acessível, cabeçalho com `scope="col"`, corpo de células tipadas, lin
 
 ## Allowed variants
 
-Usa as variantes `standard` ou `compact` da categoria por meio dos primitivos e aceita linhas estáticas ou interativas fornecidas pelo consumidor. Não oferece seleção, multi-sort, virtualização ou paginação remota.
+Usa as variantes `standard` ou `compact` da categoria por meio dos primitivos, aceita linhas estáticas ou interativas fornecidas pelo consumidor, seleção controlada nos modos `single` ou `multi`, alturas semânticas `table-compact` ou `table-modal` e virtualização opcional para datasets locais grandes. Não oferece multi-sort ou paginação remota.
 
 ## Particular states
 
-Expõe estados `empty`, `loading`, `error` e `read-only` sem dados falsos. Ordenação e paginação são controladas; quando a página informada sai do intervalo, a última página válida é renderizada.
+Expõe estados `empty`, `loading`, `error` e `read-only` sem dados falsos. Ordenação, paginação e seleção são controladas; quando a página informada sai do intervalo, a última página válida é renderizada. Linhas selecionáveis anunciam `aria-selected` e podem ser acionadas por clique, Enter ou Espaço quando `selectOnRowClick` está ativo. Com virtualização, somente as linhas próximas da viewport são montadas, preservando a ordem e a contagem acessível do conjunto completo.
 
 ## Composition
 
@@ -55,6 +55,7 @@ Nenhuma exceção aprovada.
 - identidade, source, exports e categoria coincidem com o registro;
 - a tabela mantém caption, escopos, chaves estáveis, estados anunciados e foco visível nos controles;
 - a ordenação alterna ascendente, descendente e estado limpo em uma única coluna;
+- a seleção única ou múltipla mantém `aria-selected`, checkboxes rotulados e acionamento por teclado quando habilitada;
 - a expansão opcional permanece em linhas associadas dentro de `TableBody`;
 - nenhum tipo ou import de domínio aparece na fonte compartilhada.
 

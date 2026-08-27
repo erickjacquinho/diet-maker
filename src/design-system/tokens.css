@@ -132,6 +132,13 @@
   --cmp-button-secondary-background-hover: var(--sys-color-surface-hover);
   --cmp-button-secondary-border-hover: var(--sys-color-border-hover);
   --cmp-input-border-default: var(--sys-color-border-control-essential);
+  --cmp-dialog-max-height: 90vh;
+  --cmp-data-table-max-height-compact: 400px;
+  --cmp-data-table-max-height-modal: 450px;
+  --cmp-data-table-max-height-compact-body: calc(var(--cmp-data-table-max-height-compact) - 36px);
+  --cmp-data-table-max-height-modal-body: calc(var(--cmp-data-table-max-height-modal) - 36px);
+  --cmp-data-table-row-height-food: 60px;
+  --cmp-hold-to-delete-progress-duration: 1500ms;
   --cmp-meal-title-input-width: 350px;
   --cmp-card-padding-default: var(--ref-space-4);
   --cmp-card-background-hover: var(--sys-color-surface-hover);

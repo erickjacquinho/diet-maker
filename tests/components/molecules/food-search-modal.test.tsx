@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
 
@@ -26,6 +26,10 @@ describe('FoodSearchModal component', () => {
     expect(screen.getByText('Carboidrato')).toBeInTheDocument();
     expect(screen.getByText('Gorduras')).toBeInTheDocument();
     expect(screen.getByText('Calorias')).toBeInTheDocument();
+
+    const table = screen.getByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
+    expect(table).toHaveAttribute('aria-rowcount', '598');
+    expect(within(table).getAllByRole('row').length).toBeLessThan(598);
 
     // Ensure NO quantity/gram selector is present in this alert
     expect(screen.queryByText(/^Gramatura:$/i)).not.toBeInTheDocument();
@@ -94,8 +98,8 @@ describe('FoodSearchModal component', () => {
     fireEvent.change(searchInput, { target: { value: 'alimento-sem-resultado' } });
 
     const emptyState = screen.getByText(/Nenhum resultado para/i).parentElement;
-    expect(emptyState).toHaveClass('min-h-[450px]');
-    expect(emptyState).toHaveClass('max-h-[450px]');
+    expect(emptyState).toHaveClass('min-h-table-modal');
+    expect(emptyState).toHaveClass('max-h-table-modal');
   });
 
   it('supports toggle all and clear selection', () => {
@@ -252,27 +256,46 @@ describe('FoodSearchModal component', () => {
     );
 
     // Find sort buttons in headers
-    const proteinHeader = screen.getByRole('button', { name: 'Proteína' });
+    const proteinHeader = screen.getByRole('button', { name: 'Ordenar por Proteína' });
     expect(proteinHeader).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
+    const getVisibleFoodNames = () =>
+      within(table)
+        .getAllByRole('row')
+        .slice(1)
+        .map((row) => within(row).getAllByRole('cell')[1]?.textContent);
+    const defaultOrder = getVisibleFoodNames();
 
-    // Click to sort by protein desc (highest protein first)
+    // The canonical DataTable cycle is ascending -> descending -> cleared.
     fireEvent.click(proteinHeader);
-    expect(proteinHeader).toHaveAttribute('title', expect.stringMatching(/maior para menor/i));
+    expect(proteinHeader).toHaveAttribute('aria-pressed', 'true');
+    expect(within(table).getByRole('columnheader', { name: /Proteína/ })).toHaveAttribute('aria-sort', 'ascending');
+
+    // Click again to sort by protein descending.
+    fireEvent.click(screen.getByRole('button', { name: 'Ordenar por Proteína' }));
+    expect(screen.getByRole('button', { name: 'Ordenar por Proteína' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(table).getByRole('columnheader', { name: /Proteína/ })).toHaveAttribute('aria-sort', 'descending');
+
+    // A third click restores the original filtered order and neutral state.
+    fireEvent.click(screen.getByRole('button', { name: 'Ordenar por Proteína' }));
+    expect(screen.getByRole('button', { name: 'Ordenar por Proteína' })).toHaveAttribute('aria-pressed', 'false');
+    expect(within(table).getByRole('columnheader', { name: /Proteína/ })).toHaveAttribute('aria-sort', 'none');
+    expect(getVisibleFoodNames()).toEqual(defaultOrder);
 
     // Find carbs header and click
-    const carbsHeader = screen.getByRole('button', { name: 'Carboidrato' });
+    const carbsHeader = screen.getByRole('button', { name: 'Ordenar por Carboidrato' });
     fireEvent.click(carbsHeader);
-    expect(carbsHeader).toHaveAttribute('title', expect.stringMatching(/maior para menor/i));
+    expect(within(table).getByRole('columnheader', { name: /Carboidrato/ })).toHaveAttribute('aria-sort', 'ascending');
 
     // Find fats header and click
-    const fatsHeader = screen.getByRole('button', { name: 'Gorduras' });
+    const fatsHeader = screen.getByRole('button', { name: 'Ordenar por Gorduras' });
     fireEvent.click(fatsHeader);
-    expect(fatsHeader).toHaveAttribute('title', expect.stringMatching(/maior para menor/i));
+    expect(within(table).getByRole('columnheader', { name: /Gorduras/ })).toHaveAttribute('aria-sort', 'ascending');
 
     // Find kcal header and click
-    const kcalHeader = screen.getByRole('button', { name: 'Calorias' });
+    const kcalHeader = screen.getByRole('button', { name: 'Ordenar por Calorias' });
     fireEvent.click(kcalHeader);
-    expect(kcalHeader).toHaveAttribute('title', expect.stringMatching(/maior para menor/i));
+    expect(within(table).getByRole('columnheader', { name: /Calorias/ })).toHaveAttribute('aria-sort', 'ascending');
   });
 
   it('displays tooltip with selected foods in order when hovering over the selection indicator', () => {

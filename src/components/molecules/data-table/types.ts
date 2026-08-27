@@ -25,6 +25,12 @@ export interface DataTablePagination {
 
 export type DataTableSelectionMode = 'single' | 'multi';
 
+export type DataTableMaxHeight = 'table-compact' | 'table-modal';
+
+export interface DataTableVirtualizationConfig {
+  overscan?: number;
+}
+
 export interface DataTableSelectionConfig<TData> {
   mode: DataTableSelectionMode;
   selectedRowIds: Set<string> | string[];
@@ -51,7 +57,8 @@ export interface DataTableProps<TData> {
   pagination?: DataTablePagination;
   selection?: DataTableSelectionConfig<TData>;
   stickyHeader?: boolean;
-  maxHeight?: string | number;
+  maxHeight?: DataTableMaxHeight;
+  virtualization?: DataTableVirtualizationConfig;
   renderRow?: (row: TData, index: number) => ReactNode;
   renderExpandedRow?: (row: TData, index: number) => ReactNode;
   expandedRowId?: string | null;

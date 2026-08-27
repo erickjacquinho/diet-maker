@@ -308,15 +308,63 @@ describe('DataTable contract', () => {
     expect(screen.getByRole('checkbox', { name: 'Selecionar Alfa' })).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('renders sticky header and max height wrapper correctly', () => {
+  it('supports keyboard selection on the focused row without double toggling child controls', () => {
+    function RowClickHarness() {
+      const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+      return (
+        <DataTable
+          data={rows}
+          columns={columns}
+          getRowId={(row) => row.id}
+          caption="Dados com seleção por teclado"
+          emptyMessage="Nenhum registro encontrado."
+          selection={{
+            mode: 'single',
+            selectedRowIds: selectedIds,
+            onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectOnRowClick: true,
+            selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
+          }}
+        />
+      );
+    }
+
+    render(<RowClickHarness />);
+    const row1 = screen.getByText('Alfa').closest('tr')!;
+
+    expect(row1).toHaveAttribute('tabindex', '0');
+    expect(row1).toHaveAttribute('aria-selected', 'false');
+    fireEvent.keyDown(row1, { key: 'Enter' });
+    expect(row1).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(row1, { key: ' ' });
+    expect(row1).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('keeps the header outside the scrollable body and preserves max height', () => {
     const { container } = renderTable({
       stickyHeader: true,
-      maxHeight: 400,
+      maxHeight: 'table-compact',
     });
 
-    const scrollContainer = container.querySelector('.overflow-y-auto');
-    expect(scrollContainer).toBeInTheDocument();
-    expect(scrollContainer).toHaveStyle({ maxHeight: '400px' });
+    const tableBody = container.querySelector('tbody');
+    expect(tableBody).toBeInTheDocument();
+    expect(container.querySelector('.overflow-auto')).not.toBeInTheDocument();
+    expect(tableBody).toHaveClass('block', 'overflow-y-auto');
+    expect(tableBody).toHaveClass('max-h-table-compact-body');
+
+    const tableContainer = container.querySelector('.rounded-t-control');
+    expect(tableContainer).toBeInTheDocument();
+    expect(tableContainer).toHaveClass('overflow-hidden');
+    expect(tableContainer).not.toHaveClass('max-h-table-compact');
+    expect(tableContainer).toHaveClass('border');
+
+    const table = container.querySelector('table');
+    expect(table).toBeInTheDocument();
+    expect(table?.parentElement).toHaveClass('overflow-visible');
+    expect(container.querySelector('thead')).toHaveClass('block', 'bg-surface-subtle');
+    expect(container.querySelector('thead')).not.toHaveClass('sticky', 'top-0');
+    expect(container.querySelector('thead tr')).toHaveClass('table', 'table-fixed', 'w-full');
+    expect(container.querySelector('tbody tr')).toHaveClass('table', 'table-fixed', 'w-full');
   });
 });
 

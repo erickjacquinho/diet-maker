@@ -13,11 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Button, Badge } from '@/components/atoms';
 import { Search, ArrowLeftRight, X, Star } from 'lucide-react';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, FoodItem } from '@/lib/tacoStore';
-import {
-  FoodSearchResultsList,
-  FoodSortField,
-  FoodSortConfig,
-} from './food-search/FoodSearchResultsList';
+import type { DataTableSortState } from '@/components/molecules/DataTable';
+import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
 import { cn } from '@/lib/utils';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 
@@ -52,22 +49,9 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
-  const [sortConfig, setSortConfig] = useState<FoodSortConfig | null>(null);
+  const [sortState, setSortState] = useState<DataTableSortState | null>(null);
 
   const allFoods = useMemo(() => getAllFoods(), [refreshKey]);
-
-  const handleSort = useCallback((field: FoodSortField) => {
-    setSortConfig((prev) => {
-      const defaultDir = field === 'name' ? 'asc' : 'desc';
-      if (!prev || prev.field !== field) {
-        return { field, direction: defaultDir };
-      }
-      if (prev.direction === defaultDir) {
-        return { field, direction: defaultDir === 'asc' ? 'desc' : 'asc' };
-      }
-      return null;
-    });
-  }, []);
 
   const searchResults = useMemo(() => {
     let list: FoodItem[];
@@ -78,26 +62,8 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
       list = onlyFavorites ? results.filter((f) => f.isFavorite) : results;
     }
 
-    if (!sortConfig) return list;
-
-    return [...list].sort((a, b) => {
-      const dir = sortConfig.direction === 'asc' ? 1 : -1;
-      switch (sortConfig.field) {
-        case 'name':
-          return a.name.localeCompare(b.name, 'pt-BR') * dir;
-        case 'protein':
-          return (a.proteinG - b.proteinG) * dir;
-        case 'carbs':
-          return (a.carbsG - b.carbsG) * dir;
-        case 'fats':
-          return ((a.fatG ?? a.fatsG ?? 0) - (b.fatG ?? b.fatsG ?? 0)) * dir;
-        case 'kcal':
-          return (a.kcal - b.kcal) * dir;
-        default:
-          return 0;
-      }
-    });
-  }, [deferredQuery, allFoods, onlyFavorites, sortConfig]);
+    return list;
+  }, [deferredQuery, allFoods, onlyFavorites]);
 
   const handleToggleFavorite = useCallback((foodId: string) => {
     toggleFavoriteFood(foodId);
@@ -111,6 +77,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
   const handleClose = useCallback(() => {
     setSelectedFood(null);
     setQuery('');
+    setSortState(null);
     onClose();
   }, [onClose]);
 
@@ -130,7 +97,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-6 gap-4">
+      <DialogContent className="max-w-4xl max-h-dialog flex flex-col p-6 gap-4">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <ArrowLeftRight size={18} className="text-primary" />
@@ -187,14 +154,17 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
             <Search size={14} className="absolute left-3 top-2.5 text-text-muted pointer-events-none" />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {query && (
-                <button
+                <Button
                   type="button"
+                  variant="quiet"
+                  size="compact"
+                  iconOnly
                   onClick={() => setQuery('')}
-                  className="text-text-muted hover:text-text-primary p-0.5 rounded-compact transition-colors cursor-pointer"
+                  className="size-8 p-1 text-text-muted hover:text-text-primary"
                   aria-label="Limpar busca"
                 >
                   <X size={14} />
-                </button>
+                </Button>
               )}
               <Badge variant="neutral" aria-hidden="true" className="pointer-events-none text-style-chart-micro font-mono">
                 Ctrl + F
@@ -202,15 +172,18 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="quiet"
+            size="compact"
+            iconOnly
             role="switch"
             aria-checked={onlyFavorites}
             aria-label={onlyFavorites ? 'Exibindo apenas favoritos' : 'Filtrar apenas favoritos'}
             title={onlyFavorites ? 'Exibindo apenas favoritos (clique para mostrar todos)' : 'Filtrar apenas favoritos'}
             onClick={() => setOnlyFavorites((prev) => !prev)}
             className={cn(
-              'group size-9 rounded-control border flex items-center justify-center transition-colors duration-fast shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus cursor-pointer',
+              'group size-9 rounded-control border transition-colors duration-fast shrink-0',
               onlyFavorites
                 ? 'bg-warning border-warning text-on-warning hover:brightness-95'
                 : 'border-input bg-surface text-warning hover:bg-warning hover:border-warning hover:text-on-warning'
@@ -226,7 +199,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
                   : 'text-warning fill-warning group-hover:text-on-warning group-hover:fill-on-warning'
               )}
             />
-          </button>
+          </Button>
         </div>
 
         {/* Food Search Results Table */}
@@ -237,12 +210,8 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
             query={query}
             onlyFavorites={onlyFavorites}
             onToggleFood={handleSelectFood}
-            onToggleAll={() => {}}
             onToggleFavorite={handleToggleFavorite}
-            isAllSelected={false}
-            isSomeSelected={selectedFood !== null}
-            sortConfig={sortConfig}
-            onSort={handleSort}
+            sort={{ state: sortState, onChange: setSortState }}
             mode="single"
           />
         </div>

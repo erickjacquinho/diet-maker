@@ -111,14 +111,16 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         header: 'Plano Alimentar',
         sortable: true,
         sortValue: (diet) => diet.name,
-        headerClassName: 'text-left min-w-[180px] px-3',
-        className: 'text-left py-2 px-3 font-bold text-style-legal text-text-primary min-w-[180px]',
+        headerClassName: 'text-left w-48 px-3',
+        className: 'text-left py-2 px-3 text-style-body-small text-text-primary w-48',
         cell: (diet) => (
-          <div className="flex flex-col min-w-0">
-            <span className="truncate block font-bold text-text-primary" title={diet.name}>
-              {diet.name}
-            </span>
-            <span className="text-style-chart-micro text-text-muted font-normal truncate">
+          <div className="flex flex-col min-w-0 gap-0.5">
+            <div className="relative flex min-w-0 items-center">
+              <span className="block whitespace-normal break-words text-style-body-small font-bold text-text-primary" title={diet.name}>
+                {diet.name}
+              </span>
+            </div>
+            <span className={`${textStyle('metadata')} truncate`}>
               {diet.date || 'Sem data'}
             </span>
           </div>
@@ -130,16 +132,9 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         sortable: true,
         sortValue: (diet) => diet.modeLabel,
         align: 'center',
-        headerClassName: 'w-28 text-center px-3',
-        className: 'w-28 text-center py-2 px-3',
-        cell: (diet) => (
-          <Badge
-            variant={diet.mode === 'carb_cycling' ? 'primary' : 'neutral'}
-            className="text-[11px] whitespace-nowrap"
-          >
-            {diet.modeLabel}
-          </Badge>
-        ),
+        headerClassName: 'w-24 text-center px-3',
+        className: 'w-24 text-center py-2 px-3',
+        cell: (diet) => <Badge variant={diet.mode === 'carb_cycling' ? 'primary' : 'neutral'}>{diet.modeLabel}</Badge>,
       },
       {
         id: 'protein',
@@ -147,9 +142,13 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         sortable: true,
         sortValue: (diet) => diet.proteinG,
         align: 'right',
-        headerClassName: 'w-20 sm:w-24 text-right px-3 text-macro-protein',
-        className: 'w-20 sm:w-24 text-right font-bold text-macro-protein tabular-nums py-2.5 px-3 text-style-legal',
-        cell: (diet) => `${diet.proteinG}g`,
+        headerClassName: 'w-20 text-right px-3 text-macro-protein',
+        className: 'w-20 text-right font-bold text-macro-protein tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (diet) => (
+          <>
+            {diet.proteinG} <span className="text-style-chart-micro text-text-muted font-normal">g</span>
+          </>
+        ),
       },
       {
         id: 'carbs',
@@ -157,9 +156,13 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         sortable: true,
         sortValue: (diet) => diet.carbsG,
         align: 'right',
-        headerClassName: 'w-20 sm:w-24 text-right px-3 text-macro-carbohydrate',
-        className: 'w-20 sm:w-24 text-right font-bold text-macro-carbohydrate tabular-nums py-2.5 px-3 text-style-legal',
-        cell: (diet) => `${diet.carbsG}g`,
+        headerClassName: 'w-20 text-right px-3 text-macro-carbohydrate',
+        className: 'w-20 text-right font-bold text-macro-carbohydrate tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (diet) => (
+          <>
+            {diet.carbsG} <span className="text-style-chart-micro text-text-muted font-normal">g</span>
+          </>
+        ),
       },
       {
         id: 'fats',
@@ -167,9 +170,13 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         sortable: true,
         sortValue: (diet) => diet.fatsG,
         align: 'right',
-        headerClassName: 'w-20 sm:w-24 text-right px-3 text-macro-fat',
-        className: 'w-20 sm:w-24 text-right font-bold text-macro-fat tabular-nums py-2.5 px-3 text-style-legal',
-        cell: (diet) => `${diet.fatsG}g`,
+        headerClassName: 'w-20 text-right px-3 text-macro-fat',
+        className: 'w-20 text-right font-bold text-macro-fat tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (diet) => (
+          <>
+            {diet.fatsG} <span className="text-style-chart-micro text-text-muted font-normal">g</span>
+          </>
+        ),
       },
       {
         id: 'kcal',
@@ -177,19 +184,27 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         sortable: true,
         sortValue: (diet) => diet.targetKcal,
         align: 'right',
-        headerClassName: 'w-24 sm:w-28 text-right px-4',
-        className: 'w-24 sm:w-28 text-right font-bold text-text-primary tabular-nums py-2.5 px-4 text-style-legal',
-        cell: (diet) => `${diet.targetKcal} kcal`,
+        headerClassName: 'w-24 text-right px-4',
+        className: 'w-24 text-right font-bold text-text-primary tabular-nums py-2.5 px-4 text-style-legal',
+        cell: (diet) => (
+          <>
+            {diet.targetKcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
+          </>
+        ),
       },
       {
         id: 'meals',
         header: 'Refeições',
         sortable: true,
         sortValue: (diet) => diet.mealsCount,
-        align: 'center',
-        headerClassName: 'w-20 sm:w-24 text-center px-3',
-        className: 'w-20 sm:w-24 text-center text-text-secondary tabular-nums py-2.5 px-3 text-style-legal',
-        cell: (diet) => `${diet.mealsCount} ${diet.mealsCount === 1 ? 'ref.' : 'refs.'}`,
+        align: 'right',
+        headerClassName: 'w-20 text-right px-3',
+        className: 'w-20 text-right tabular-nums py-2.5 px-3 text-style-legal',
+        cell: (diet) => (
+          <>
+            {diet.mealsCount} <span className="text-style-chart-micro text-text-muted font-normal">{diet.mealsCount === 1 ? 'ref.' : 'refs.'}</span>
+          </>
+        ),
       },
     ],
     []
@@ -197,9 +212,9 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-6 gap-4">
+      <DialogContent className="max-w-4xl max-h-dialog flex flex-col p-6 gap-4">
         {/* Header no padrão de modais de seleção */}
-        <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
+        <DialogHeader className="border-b border-border-divider pb-3 shrink-0">
           <div className="flex items-center gap-2 text-text-primary">
             <div className="p-2 rounded-control bg-primary-soft text-primary">
               <History size={18} aria-hidden="true" />
@@ -208,7 +223,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
               <DialogTitle className={textStyle('dialog-title')}>
                 Importar Dieta Anterior
               </DialogTitle>
-              <DialogDescription className="text-style-legal text-text-muted mt-0.5">
+              <DialogDescription className="text-style-legal text-text-muted mt-1">
                 {patientName ? (
                   <span>
                     Histórico de dietas de <strong>{patientName}</strong>. Selecione uma dieta para importar metas ou duplicar refeições.
@@ -249,7 +264,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
                 size="compact"
                 iconOnly
                 onClick={() => setQuery('')}
-                className="text-text-muted hover:text-text-primary p-0.5 rounded-compact transition-colors cursor-pointer absolute right-16 top-1/2 -translate-y-1/2 h-auto"
+                className="text-text-muted hover:text-text-primary p-1 rounded-compact transition-colors cursor-pointer absolute right-16 top-1/2 -translate-y-1/2 h-auto"
                 aria-label="Limpar busca"
               >
                 <X size={14} />
@@ -258,7 +273,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
             <Badge
               variant="neutral"
               title="Atalho Ctrl+F"
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 border-border-divider bg-surface-subtle px-2 py-0.5 text-style-chart-micro text-text-muted font-mono"
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 border-border-divider bg-surface-subtle px-2 py-1 text-style-chart-micro text-text-muted"
             >
               Ctrl+F
             </Badge>
@@ -266,50 +281,46 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
         </div>
 
         {/* Tabela Padronizada DataTable */}
-        {filteredDiets.length === 0 ? (
-          <div className="flex-1 min-h-[380px] max-h-[450px] flex flex-col items-center justify-center p-8 text-center text-text-muted gap-2 border border-dashed border-border-divider rounded-control my-2 bg-surface-subtle">
-            <AlertCircle size={28} className="text-warning" aria-hidden="true" />
-            <span className="font-semibold text-text-secondary">
-              Nenhuma dieta anterior encontrada
-            </span>
-            <span className="text-style-caption max-w-sm">
-              {query
-                ? `Nenhum resultado para "${query}". Tente buscar por outros termos.`
-                : 'Este paciente não possui histórico de dietas para importação.'}
-            </span>
-          </div>
-        ) : (
-          <div className="my-2 flex-1 min-h-[380px] max-h-[450px] flex flex-col">
-            <DataTable
-              data={filteredDiets}
-              columns={columns}
-              getRowId={(diet) => diet.id}
-              caption="Histórico de dietas anteriores para importação"
-              emptyMessage="Nenhuma dieta anterior encontrada."
-              sort={{
-                state: sortState,
-                onChange: setSortState,
-              }}
-              selection={{
-                mode: 'single',
-                selectedRowIds: selectedRowIds,
-                onSelectionChange: (nextSet) => {
-                  const id = Array.from(nextSet)[0] ?? null;
-                  setSelectedId(id);
-                },
-                selectOnRowClick: true,
-                selectRowAriaLabel: (diet) => `Selecionar ${diet.name}`,
-              }}
-              stickyHeader
-              maxHeight="450px"
-              tableClassName="table-fixed w-full"
-              className="flex-1 min-h-0"
-            />
-          </div>
-        )}
+        <div className="my-2 flex-1 min-h-table-modal max-h-table-modal flex flex-col bg-surface overflow-hidden">
+          <DataTable
+            data={filteredDiets}
+            columns={columns}
+            getRowId={(diet) => diet.id}
+            caption="Histórico de dietas anteriores para importação"
+            emptyMessage={
+              <span className="inline-flex flex-col items-center justify-center gap-2 py-8 text-center">
+                <AlertCircle size={28} className="text-warning" aria-hidden="true" />
+                <span className={textStyle('caption-strong')}>Nenhuma dieta anterior encontrada</span>
+                <span className="text-style-caption text-text-secondary max-w-sm">
+                  {query
+                    ? `Nenhum resultado para "${query}". Tente buscar por outros termos.`
+                    : 'Este paciente não possui histórico de dietas para importação.'}
+                </span>
+              </span>
+            }
+            sort={{
+              state: sortState,
+              onChange: setSortState,
+            }}
+            selection={{
+              mode: 'single',
+              selectedRowIds: selectedRowIds,
+              onSelectionChange: (nextSet) => {
+                const id = Array.from(nextSet)[0] ?? null;
+                setSelectedId(id);
+              },
+              selectOnRowClick: true,
+              selectRowAriaLabel: (diet) => `Selecionar ${diet.name}`,
+            }}
+            stickyHeader
+            maxHeight="table-modal"
+            tableClassName="table-fixed w-max min-w-full"
+            className="flex-1 min-h-0"
+          />
+        </div>
 
         {/* Footer com Ações */}
-        <DialogFooter className="flex items-center justify-between gap-3 border-t border-border-divider pt-3 mt-1 sm:justify-between shrink-0">
+        <DialogFooter className="flex items-center justify-between gap-3 border-t border-border-divider pt-3 mt-1 shrink-0">
           <div className="flex items-center gap-2 text-style-legal text-text-secondary" aria-live="polite">
             {selectedDiet ? (
               <>
@@ -342,7 +353,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
               size="standard"
               disabled={!selectedDiet}
               onClick={handleMacrosClick}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-2"
               title={!selectedDiet ? 'Selecione uma dieta na tabela' : 'Importar apenas metas nutricionais'}
             >
               <Sparkles size={14} aria-hidden="true" />
@@ -354,7 +365,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
               size="standard"
               disabled={!selectedDiet}
               onClick={handleMealsClick}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-2"
               title={!selectedDiet ? 'Selecione uma dieta na tabela' : 'Duplicar todas as refeições para o novo plano'}
             >
               <Copy size={14} aria-hidden="true" />

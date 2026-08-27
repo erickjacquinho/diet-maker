@@ -30,7 +30,7 @@ Tabela: caption acessível, header, body, rows e cells. Métrica: label, value e
 
 ## Geometry
 
-Table header mínimo 40; row mínimo 44; cells usam padding inline `space-related` e block `space-inline`. Números alinham à direita e na baseline; texto à esquerda. Avatar usa 32, 36 ou 44 e `radius-round`. Table border/divider 1px. Conteúdo pode rolar horizontalmente somente dentro de ScrollArea nomeada.
+Table header mínimo 40; row mínimo 44; cells usam padding inline `space-related` e block `space-inline`. Números alinham à direita e na baseline por padrão; tabelas compactas de seleção podem centralizar valores numéricos curtos quando isso melhora a leitura comparativa. Texto fica à esquerda. Avatar usa 32, 36 ou 44 e `radius-round`. Table border/divider 1px. Conteúdo pode rolar horizontalmente somente dentro de ScrollArea nomeada.
 
 ## Typography
 
@@ -81,11 +81,11 @@ Tabela pode conter badges, actions e valores, cada qual sob sua categoria. Não 
 
 ## Content and overflow
 
-Números usam dígitos tabulares, locale pt-BR e alinhamento à direita. Células textuais podem truncar com título/expansão; dados críticos quebram. Empty ocupa todas as colunas. IDs podem usar ellipsis com cópia acessível.
+Números usam dígitos tabulares, locale pt-BR e alinhamento à direita por padrão; tabelas compactas de seleção podem declarar centralização contextual. Células textuais podem truncar com título/expansão; dados críticos quebram. Empty ocupa todas as colunas. IDs podem usar ellipsis com cópia acessível.
 
 ## Forbidden decisions
 
-Centralizar números comparáveis; remover headers visuais sem alternativa; zebra; usar cor como único significado; altura de row abaixo de 44; border acima de 1px; font size local; transformar dado read-only em input disabled.
+Centralizar números comparáveis fora de tabelas compactas de seleção ou sem justificativa contextual; remover headers visuais sem alternativa; zebra; usar cor como único significado; altura de row abaixo de 44; border acima de 1px; font size local; transformar dado read-only em input disabled.
 
 ## Current examples
 

@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, type FoodItem } from '@/lib/tacoStore';
-import { FoodSearchResultsList, type FoodSortConfig, type FoodSortField } from './food-search/FoodSearchResultsList';
+import type { DataTableSortState } from '@/components/molecules/DataTable';
+import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
 
 type FoodAddPayload = {
   foodId?: string;
@@ -26,34 +27,6 @@ export interface FoodSearchModalProps {
   onAddFood: (foodItem: FoodAddPayload | FoodAddPayload[]) => void;
 }
 
-function sortFoods(foods: FoodItem[], config: FoodSortConfig | null) {
-  if (!config) return foods;
-  return [...foods].sort((left, right) => {
-    const leftValue = config.field === 'name'
-      ? left.name
-      : config.field === 'protein'
-        ? left.proteinG
-        : config.field === 'carbs'
-          ? left.carbsG
-          : config.field === 'fats'
-            ? (left.fatG ?? left.fatsG)
-            : left.kcal;
-    const rightValue = config.field === 'name'
-      ? right.name
-      : config.field === 'protein'
-        ? right.proteinG
-        : config.field === 'carbs'
-          ? right.carbsG
-          : config.field === 'fats'
-            ? (right.fatG ?? right.fatsG)
-            : right.kcal;
-    const comparison = typeof leftValue === 'string'
-      ? leftValue.localeCompare(String(rightValue), 'pt-BR')
-      : Number(leftValue) - Number(rightValue);
-    return config.direction === 'asc' ? comparison : -comparison;
-  });
-}
-
 export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   isOpen,
   onClose,
@@ -64,7 +37,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   const [selectedFoodIds, setSelectedFoodIds] = useState<Set<string>>(new Set());
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [favoriteVersion, setFavoriteVersion] = useState(0);
-  const [sortConfig, setSortConfig] = useState<FoodSortConfig | null>(null);
+  const [sortState, setSortState] = useState<DataTableSortState | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -72,7 +45,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
       setQuery('');
       setSelectedFoodIds(new Set());
       setOnlyFavorites(false);
-      setSortConfig(null);
+      setSortState(null);
     }
   }, [isOpen]);
 
@@ -94,10 +67,9 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   // A TACO inteira é lida uma vez por abertura. Digitar no campo só filtra o pool já carregado.
   const allFoods = useMemo(() => getAllFoods(), [isOpen, favoriteVersion]);
   const searchResults = useMemo(() => {
-    const searched = query.trim() ? searchTacoFoods(query, allFoods) : allFoods.slice(0, 15);
-    const filtered = onlyFavorites ? searched.filter((food) => food.isFavorite) : searched;
-    return sortFoods(filtered.slice(0, 30), sortConfig);
-  }, [allFoods, onlyFavorites, query, sortConfig]);
+    const searched = query.trim() ? searchTacoFoods(query, allFoods) : allFoods;
+    return onlyFavorites ? searched.filter((food) => food.isFavorite) : searched;
+  }, [allFoods, onlyFavorites, query]);
 
   const selectedFoods = useMemo(
     () => allFoods.filter((food) => selectedFoodIds.has(food.id)),
@@ -122,12 +94,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
     });
   };
 
-  const handleSort = (field: FoodSortField) => {
-    setSortConfig((current) => current?.field === field
-      ? { field, direction: current.direction === 'desc' ? 'asc' : 'desc' }
-      : { field, direction: 'desc' });
-  };
-
   const handleToggleFavorite = (foodId: string) => {
     toggleFavoriteFood(foodId);
     setFavoriteVersion((version) => version + 1);
@@ -150,7 +116,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-dialog flex flex-col">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <Utensils size={18} className="text-success" />
@@ -209,10 +175,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
           onToggleFood={handleToggleFood}
           onToggleAll={handleToggleAll}
           onToggleFavorite={handleToggleFavorite}
-          isAllSelected={searchResults.length > 0 && searchResults.every((food) => selectedFoodIds.has(food.id))}
-          isSomeSelected={selectedFoodIds.size > 0}
-          sortConfig={sortConfig}
-          onSort={handleSort}
+          sort={{ state: sortState, onChange: setSortState }}
         />
 
         <div className="flex items-center justify-between gap-3 border-t border-border-divider pt-3 shrink-0">

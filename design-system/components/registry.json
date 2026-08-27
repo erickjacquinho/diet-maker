@@ -2424,7 +2424,7 @@
     {
       "id": "molecule-macro-proportion-bar",
       "name": "MacroProportionBar",
-      "nature": "domain-nutrition",
+      "nature": "domain",
       "lifecycle": "implemented",
       "currentLayer": "molecule",
       "targetLayer": "molecule",
@@ -2544,6 +2544,10 @@
         { "name": "DataTableColumnDef", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTableSortState", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTablePagination", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableSelectionConfig", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableSelectionMode", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableMaxHeight", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableVirtualizationConfig", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTableProps", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTable", "kind": "component", "documentedBy": "profile" }
       ],

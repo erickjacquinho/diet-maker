@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { ImportPreviousDietModal } from '@/components/molecules/ImportPreviousDietModal';
 import type { PreviousDietSummary } from '@/lib/dietDuplication';
 
@@ -47,8 +47,22 @@ describe('ImportPreviousDietModal', () => {
     expect(screen.getByText('Importar Dieta Anterior')).toBeInTheDocument();
     expect(screen.getByText('Dieta Hipertrofia')).toBeInTheDocument();
     expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
-    expect(screen.getByText('2600 kcal')).toBeInTheDocument();
-    expect(screen.getByText('2100 kcal')).toBeInTheDocument();
+    expect(screen.getByText('2600')).toBeInTheDocument();
+    expect(screen.getByText('2100')).toBeInTheDocument();
+    expect(screen.getAllByText('kcal')).toHaveLength(2);
+
+    const dietName = screen.getByText('Dieta Hipertrofia');
+    expect(dietName.closest('td')).toHaveClass('py-2');
+    expect(dietName.closest('td')).toHaveClass('w-48');
+    expect(dietName.parentElement).toHaveClass('relative', 'items-center');
+    expect(dietName.parentElement?.parentElement).toHaveClass('gap-0.5');
+    expect(dietName).toHaveClass('whitespace-normal', 'break-words');
+    expect(dietName).not.toHaveClass('truncate');
+    expect(screen.getByText('20/08/2026')).toHaveClass(
+      'text-style-legal',
+      'font-medium',
+      'text-text-muted',
+    );
 
     const macrosBtn = screen.getByRole('button', { name: /Puxar apenas os macros/i });
     const mealsBtn = screen.getByRole('button', { name: /Puxar todas as refeições/i });
@@ -145,6 +159,77 @@ describe('ImportPreviousDietModal', () => {
     );
 
     expect(screen.getByText(/Nenhuma dieta anterior encontrada/i)).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' })).toBeInTheDocument();
+  });
+
+  it('should filter diets by name and clear the search without leaving the table', () => {
+    render(
+      <ImportPreviousDietModal
+        isOpen={true}
+        onClose={vi.fn()}
+        diets={mockDiets}
+        patientName="João Silva"
+        onPullMacrosOnly={vi.fn()}
+        onPullAllMeals={vi.fn()}
+      />
+    );
+
+    const search = screen.getByRole('searchbox', { name: 'Buscar por nome ou data da dieta' });
+    fireEvent.change(search, { target: { value: 'Ciclo' } });
+
+    expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
+    expect(screen.queryByText('Dieta Hipertrofia')).not.toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Limpar busca' }));
+    expect(screen.getByText('Dieta Hipertrofia')).toBeInTheDocument();
+    expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
+  });
+
+  it('should sort numeric columns through the DataTable contract', () => {
+    render(
+      <ImportPreviousDietModal
+        isOpen={true}
+        onClose={vi.fn()}
+        diets={mockDiets}
+        patientName="João Silva"
+        onPullMacrosOnly={vi.fn()}
+        onPullAllMeals={vi.fn()}
+      />
+    );
+
+    const table = screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' });
+    const sortButton = screen.getByRole('button', { name: 'Ordenar por Proteína' });
+    fireEvent.click(sortButton);
+
+    const rows = within(table).getAllByRole('row');
+    expect(within(rows[1]).getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
+    expect(within(table).getByRole('columnheader', { name: /Proteína/ })).toHaveAttribute('aria-sort', 'ascending');
+  });
+
+  it('should select a diet from the row with Enter and Space', () => {
+    render(
+      <ImportPreviousDietModal
+        isOpen={true}
+        onClose={vi.fn()}
+        diets={mockDiets}
+        patientName="João Silva"
+        onPullMacrosOnly={vi.fn()}
+        onPullAllMeals={vi.fn()}
+      />
+    );
+
+    const row = screen.getByText('Dieta Hipertrofia').closest('tr');
+    expect(row).toHaveAttribute('tabindex', '0');
+    if (!row) return;
+
+    fireEvent.keyDown(row, { key: 'Enter' });
+    expect(row).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('button', { name: /Puxar apenas os macros/i })).toBeEnabled();
+
+    fireEvent.keyDown(row, { key: ' ' });
+    expect(row).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('button', { name: /Puxar apenas os macros/i })).toBeDisabled();
   });
 
   it('renders Checkbox components instead of text header Sel. and toggles on click', () => {
