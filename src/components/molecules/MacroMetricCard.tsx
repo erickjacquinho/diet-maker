@@ -77,14 +77,6 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
 
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-style-page-title font-bold text-text-primary my-1 tabular-nums">
           <span>{currentValue}</span>
-          {isTargetActive && gPerKgRatio && (
-            <span className={cn(colorClass, 'text-style-legal font-bold inline-flex items-baseline gap-1.5')}>
-              <span>{gPerKgRatio}</span>
-              {gPerKgMeta !== undefined && (
-                <span className="font-normal text-text-muted">(meta: {gPerKgMeta})</span>
-              )}
-            </span>
-          )}
           {isTargetActive ? (
             <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
           ) : gPerKgRatio ? (
@@ -95,6 +87,11 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
             <span className="text-style-legal font-normal text-text-muted">{subtitle}</span>
           ) : (
             <span className="text-style-legal font-normal italic text-text-muted">Definir em Ajustar Metas</span>
+          )}
+          {isTargetActive && gPerKgRatio && (
+            <span className={cn(colorClass, 'text-style-legal font-bold inline-flex items-baseline gap-1.5 ml-auto')}>
+              <span>{gPerKgRatio}</span>
+            </span>
           )}
         </div>
       </div>

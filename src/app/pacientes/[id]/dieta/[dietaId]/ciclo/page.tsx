@@ -909,20 +909,22 @@ export default function DedicatedCarbCyclingPage() {
                     {DAYS_OF_WEEK.map((day) => {
                       const isAssigned = item.assignedDays.includes(day.id);
                       return (
-                        <button
+                        <Button
                           key={day.id}
                           type="button"
+                          variant="quiet"
+                          size="compact"
                           onClick={() => handleToggleDay(item.id, day.id)}
                           aria-pressed={isAssigned}
                           className={cn(
-                            'h-7 w-9 flex items-center justify-center rounded-control text-style-chart-micro font-bold transition-all cursor-pointer text-center border box-border select-none shrink-0',
+                            'h-7 w-9 p-0 rounded-control text-style-chart-micro font-bold transition-all text-center border box-border select-none shrink-0',
                             isAssigned
                               ? 'bg-primary text-on-primary border-primary shadow-xs'
                               : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
                           )}
                         >
                           {day.shortLabel}
-                        </button>
+                        </Button>
                       );
                     })}
 
@@ -930,8 +932,10 @@ export default function DedicatedCarbCyclingPage() {
                     <div className="h-4 w-px bg-border-divider mx-1.5 shrink-0" aria-hidden="true" />
 
                     {/* Botão Selecionar Todos à Direita do Divisor */}
-                    <button
+                    <Button
                       type="button"
+                      variant="quiet"
+                      size="compact"
                       onClick={() => handleSelectAllDays(item.id)}
                       title={
                         isAllDaysSelected
@@ -940,7 +944,7 @@ export default function DedicatedCarbCyclingPage() {
                       }
                       aria-pressed={isAllDaysSelected}
                       className={cn(
-                        'h-7 px-2.5 flex items-center justify-center gap-1.5 rounded-control text-style-chart-micro font-bold transition-all cursor-pointer border box-border select-none shrink-0',
+                        'h-7 px-2 rounded-control text-style-chart-micro font-bold transition-all border box-border select-none shrink-0',
                         isAllDaysSelected
                           ? 'bg-primary text-on-primary border-primary shadow-xs'
                           : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
@@ -948,7 +952,7 @@ export default function DedicatedCarbCyclingPage() {
                     >
                       <CheckCheck size={13} aria-hidden="true" />
                       <span>Todos</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </Surface>

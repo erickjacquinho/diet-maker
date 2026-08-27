@@ -106,13 +106,14 @@ function TableHeaderRow<TData>({
     <TableRow className={cn('bg-surface-subtle hover:bg-surface-subtle border-b border-border-divider', className)}>
       {selection && (
         <TableHead className="w-10 px-3 text-center h-9 bg-surface-subtle" scope="col">
-          {selection.mode === 'multi' && (
-            <Checkbox
-              checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-              onCheckedChange={onToggleAll}
-              aria-label={selection.selectAllAriaLabel || 'Selecionar todas as linhas'}
-            />
-          )}
+          <Checkbox
+            checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+            onCheckedChange={onToggleAll}
+            aria-label={
+              selection.selectAllAriaLabel ||
+              (selection.mode === 'single' ? 'Alternar seleção' : 'Selecionar todas as linhas')
+            }
+          />
         </TableHead>
       )}
       {columns.map((column) => {
@@ -233,23 +234,28 @@ export function DataTable<TData>({
   const handleToggleAll = React.useCallback(() => {
     if (!selection) return;
     const nextSet = new Set(selectedSet);
-    if (allSelected) {
-      selectableVisibleRows.forEach(({ row, index }) => {
-        nextSet.delete(getRowId(row, index));
-      });
+    if (selection.mode === 'single') {
+      if (someSelected || allSelected) {
+        nextSet.clear();
+      } else if (selectableVisibleRows.length > 0) {
+        nextSet.add(getRowId(selectableVisibleRows[0].row, selectableVisibleRows[0].index));
+      }
     } else {
-      selectableVisibleRows.forEach(({ row, index }) => {
-        nextSet.add(getRowId(row, index));
-      });
+      if (allSelected) {
+        selectableVisibleRows.forEach(({ row, index }) => {
+          nextSet.delete(getRowId(row, index));
+        });
+      } else {
+        selectableVisibleRows.forEach(({ row, index }) => {
+          nextSet.add(getRowId(row, index));
+        });
+      }
     }
     const selectedRows = data.filter((row, idx) => nextSet.has(getRowId(row, idx)));
     selection.onSelectionChange(nextSet, selectedRows);
-  }, [selection, selectedSet, allSelected, selectableVisibleRows, getRowId, data]);
+  }, [selection, selectedSet, allSelected, someSelected, selectableVisibleRows, getRowId, data]);
 
   const handleToggleRow = React.useCallback((row: TData, index: number) => {
-    if (!selection) return;
-    const isSelectable = !selection.isSelectable || selection.isSelectable(row, index);
-    if (!isSelectable) return;
 
     const rowId = getRowId(row, index);
     let nextSet: Set<string>;

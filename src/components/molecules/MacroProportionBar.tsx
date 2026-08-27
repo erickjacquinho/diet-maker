@@ -112,27 +112,47 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             size === 'compact' ? 'h-2' : 'h-2.5'
           )}
         >
-          {distribution.proteinPct > 0 && (
-            <div
-              style={{ width: `${distribution.proteinPct}%` }}
-              className="h-full bg-macro-protein transition-all duration-300"
-              title={`Proteínas: ${distribution.proteinPct}% (${safeP}g · ${distribution.proteinKcal} kcal)`}
-            />
-          )}
-          {distribution.carbsPct > 0 && (
-            <div
-              style={{ width: `${distribution.carbsPct}%` }}
-              className="h-full bg-macro-carbohydrate transition-all duration-300"
-              title={`Carboidratos: ${distribution.carbsPct}% (${safeC}g · ${distribution.carbsKcal} kcal)`}
-            />
-          )}
-          {distribution.fatsPct > 0 && (
-            <div
-              style={{ width: `${distribution.fatsPct}%` }}
-              className="h-full bg-macro-fat transition-all duration-300"
-              title={`Gorduras: ${distribution.fatsPct}% (${safeF}g · ${distribution.fatsKcal} kcal)`}
-            />
-          )}
+          <svg
+            aria-hidden="true"
+            className="block size-full"
+            focusable="false"
+            preserveAspectRatio="none"
+            viewBox="0 0 100 1"
+          >
+            {distribution.proteinPct > 0 && (
+              <g>
+                <rect
+                  x={0}
+                  y={0}
+                  width={distribution.proteinPct}
+                  height={1}
+                  className="fill-macro-protein transition-width duration-standard"
+                />
+              </g>
+            )}
+            {distribution.carbsPct > 0 && (
+              <g>
+                <rect
+                  x={distribution.proteinPct}
+                  y={0}
+                  width={distribution.carbsPct}
+                  height={1}
+                  className="fill-macro-carbohydrate transition-width duration-standard"
+                />
+              </g>
+            )}
+            {distribution.fatsPct > 0 && (
+              <g>
+                <rect
+                  x={distribution.proteinPct + distribution.carbsPct}
+                  y={0}
+                  width={distribution.fatsPct}
+                  height={1}
+                  className="fill-macro-fat transition-width duration-standard"
+                />
+              </g>
+            )}
+          </svg>
         </div>
       ) : (
         <div

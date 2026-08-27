@@ -243,7 +243,7 @@ describe('DataTable contract', () => {
     expect(row2Checkbox).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('supports single-selection mode without master checkbox in header', () => {
+  it('supports single-selection mode with header toggle to clear or toggle selection', () => {
     function SingleSelectionHarness() {
       const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['row-1']));
       return (
@@ -257,6 +257,7 @@ describe('DataTable contract', () => {
             mode: 'single',
             selectedRowIds: selectedIds,
             onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectAllAriaLabel: 'Alternar seleção',
             selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
           }}
         />
@@ -264,7 +265,9 @@ describe('DataTable contract', () => {
     }
 
     render(<SingleSelectionHarness />);
-    expect(screen.queryByRole('checkbox', { name: /selecionar todos/i })).not.toBeInTheDocument();
+    const masterCheckbox = screen.getByRole('checkbox', { name: 'Alternar seleção' });
+    expect(masterCheckbox).toBeInTheDocument();
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
 
     const row1Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Alfa' });
     const row2Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Beta' });
@@ -272,10 +275,17 @@ describe('DataTable contract', () => {
     expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
     expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
 
-    // Selecting row2 unselects row1
+    // Clicking master checkbox clears selection in single mode
+    fireEvent.click(masterCheckbox);
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'false');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
+
+    // Selecting row2 selects row2
     fireEvent.click(row2Checkbox);
     expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
     expect(row2Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
   });
 
   it('supports selectOnRowClick to toggle selection by clicking anywhere on the row', () => {

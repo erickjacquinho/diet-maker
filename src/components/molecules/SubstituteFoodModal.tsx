@@ -97,7 +97,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl max-h-dialog flex flex-col p-6 gap-4">
+      <DialogContent className="max-w-5xl max-h-dialog flex flex-col p-6 gap-4">
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <ArrowLeftRight size={18} className="text-primary" />

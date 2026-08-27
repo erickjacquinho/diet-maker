@@ -39,8 +39,8 @@ export function FoodSearchResultsList({
         sortable: true,
         sortValue: (food) => food.name,
         sortLabel: 'Nome (100g base)',
-        headerClassName: 'w-56 px-3 text-left',
-        className: 'w-56 h-table-row-food text-left py-1 px-3 font-bold text-style-body-small text-text-primary',
+        headerClassName: 'w-80 px-3 text-left',
+        className: 'w-80 h-table-row-food text-left py-1 px-3 font-bold text-style-body-small text-text-primary',
         cell: (food) => (
           <div className="grid h-full min-w-0 content-center">
             <div className="flex min-w-0 items-center gap-0.5 whitespace-nowrap">
@@ -90,8 +90,8 @@ export function FoodSearchResultsList({
         sortable: true,
         sortValue: (food) => food.proteinG,
         sortLabel: 'Proteína',
-        headerClassName: 'w-28 px-3 text-center text-macro-protein',
-        className: 'w-28 text-center font-bold text-macro-protein tabular-nums py-2 px-3 text-style-legal',
+        headerClassName: 'w-32 px-3 text-center text-macro-protein',
+        className: 'w-32 text-center font-bold text-macro-protein tabular-nums py-2 px-3 text-style-legal',
         cell: (food) => `${food.proteinG}g`,
       },
       {
@@ -112,8 +112,8 @@ export function FoodSearchResultsList({
         sortable: true,
         sortValue: (food) => food.fatG ?? food.fatsG,
         sortLabel: 'Gorduras',
-        headerClassName: 'w-28 px-3 text-center text-macro-fat',
-        className: 'w-28 text-center font-bold text-macro-fat tabular-nums py-2 px-3 text-style-legal',
+        headerClassName: 'w-32 px-3 text-center text-macro-fat',
+        className: 'w-32 text-center font-bold text-macro-fat tabular-nums py-2 px-3 text-style-legal',
         cell: (food) => `${food.fatG ?? food.fatsG}g`,
       },
       {

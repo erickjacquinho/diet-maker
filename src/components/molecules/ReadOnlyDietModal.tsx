@@ -41,7 +41,7 @@ export const ReadOnlyDietModal: React.FC<ReadOnlyDietModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-5">
+      <DialogContent className="max-w-2xl max-h-dialog overflow-y-auto p-6 flex flex-col gap-5">
         <DialogHeader className="pr-0 flex flex-col gap-4 border-b border-border-divider pb-4">
           <div className="flex items-start gap-3 min-w-0 pr-10">
             <div className="p-2.5 rounded-control bg-primary-soft text-primary shrink-0 mt-0.5">

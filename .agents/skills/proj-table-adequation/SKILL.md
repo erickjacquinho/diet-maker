@@ -49,12 +49,13 @@ Refer to disclosed references as needed:
      errorMessage={errorMessage}
      selection={selectionConfig} // Omit if table has no selection
      stickyHeader={isScrollable}  // Use for modal or fixed-height views
-     maxHeight={maxHeight}        // e.g. "450px" or 400
+     maxHeight="table-modal"     // semantic fixed-height variant
      sort={sortConfig}
      pagination={paginationConfig}
      className="flex-1 min-h-0"
    />
    ```
+   Use `table-compact` for compact data regions or `table-modal` for scrollable modal tables. Do not pass raw pixel values; the canonical heights are component tokens.
 3. Configure `selection` according to domain intent:
    - Use `mode: 'multi'` for multi-item selection with automatic master header checkbox.
    - Use `mode: 'single'` for mutual-exclusion item selection with neutral header.

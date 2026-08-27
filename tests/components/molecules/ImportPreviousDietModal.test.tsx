@@ -49,16 +49,26 @@ describe('ImportPreviousDietModal', () => {
     expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
     expect(screen.getByText('2600')).toBeInTheDocument();
     expect(screen.getByText('2100')).toBeInTheDocument();
-    expect(screen.getAllByText('kcal')).toHaveLength(2);
+
+    const table = screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' });
+    expect(within(table).getByRole('columnheader', { name: /Plano Alimentar/ })).toBeInTheDocument();
+    expect(within(table).getByRole('columnheader', { name: /Data/ })).toBeInTheDocument();
+    expect(within(table).getByRole('columnheader', { name: /Macros/ })).toBeInTheDocument();
+    expect(within(table).queryByRole('columnheader', { name: /Proteína/ })).not.toBeInTheDocument();
+    expect(within(table).queryByRole('columnheader', { name: /Carboidrato/ })).not.toBeInTheDocument();
+    expect(within(table).queryByRole('columnheader', { name: /Gorduras/ })).not.toBeInTheDocument();
+    expect(within(table).getByRole('columnheader', { name: /Calorias/ })).toBeInTheDocument();
+    expect(within(table).getAllByTestId('macro-summary')).toHaveLength(2);
+    expect(within(table).getAllByText('kcal')).toHaveLength(2);
 
     const dietName = screen.getByText('Dieta Hipertrofia');
-    expect(dietName.closest('td')).toHaveClass('py-2');
-    expect(dietName.closest('td')).toHaveClass('w-48');
-    expect(dietName.parentElement).toHaveClass('relative', 'items-center');
-    expect(dietName.parentElement?.parentElement).toHaveClass('gap-0.5');
+    expect(dietName.closest('td')).toHaveClass('w-64');
     expect(dietName).toHaveClass('whitespace-normal', 'break-words');
     expect(dietName).not.toHaveClass('truncate');
-    expect(screen.getByText('20/08/2026')).toHaveClass(
+
+    const dateCell = screen.getByText('20/08/2026');
+    expect(dateCell.closest('td')).toHaveClass('w-28');
+    expect(dateCell).toHaveClass(
       'text-style-legal',
       'font-medium',
       'text-text-muted',
@@ -199,12 +209,12 @@ describe('ImportPreviousDietModal', () => {
     );
 
     const table = screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' });
-    const sortButton = screen.getByRole('button', { name: 'Ordenar por Proteína' });
+    const sortButton = screen.getByRole('button', { name: 'Ordenar por Refeições' });
     fireEvent.click(sortButton);
 
     const rows = within(table).getAllByRole('row');
     expect(within(rows[1]).getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
-    expect(within(table).getByRole('columnheader', { name: /Proteína/ })).toHaveAttribute('aria-sort', 'ascending');
+    expect(within(table).getByRole('columnheader', { name: /Refeições/ })).toHaveAttribute('aria-sort', 'ascending');
   });
 
   it('should select a diet from the row with Enter and Space', () => {
@@ -232,7 +242,7 @@ describe('ImportPreviousDietModal', () => {
     expect(screen.getByRole('button', { name: /Puxar apenas os macros/i })).toBeDisabled();
   });
 
-  it('renders Checkbox components instead of text header Sel. and toggles on click', () => {
+  it('renders Checkbox components in header and rows, and toggles appropriately on click', () => {
     render(
       <ImportPreviousDietModal
         isOpen={true}
@@ -246,17 +256,29 @@ describe('ImportPreviousDietModal', () => {
 
     expect(screen.queryByText('Sel.')).not.toBeInTheDocument();
 
-    const checkboxes = screen.getAllByRole('checkbox');
-    expect(checkboxes).toHaveLength(2);
-    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'false');
+    const headerCheckbox = screen.getByRole('checkbox', { name: 'Alternar seleção de dieta' });
+    const row1Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Dieta Hipertrofia' });
+    const row2Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Ciclo de Carbos Cut' });
 
-    // Click checkbox directly
-    fireEvent.click(checkboxes[0]);
-    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'true');
+    expect(headerCheckbox).toHaveAttribute('aria-checked', 'false');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
 
-    // Click again to unselect
-    fireEvent.click(checkboxes[0]);
-    expect(checkboxes[0]).toHaveAttribute('aria-checked', 'false');
+    // Click row 1 checkbox directly
+    fireEvent.click(row1Checkbox);
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(headerCheckbox).toHaveAttribute('aria-checked', 'mixed');
+
+    // Click header checkbox to clear selection
+    fireEvent.click(headerCheckbox);
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(headerCheckbox).toHaveAttribute('aria-checked', 'false');
+
+    // Click row 1 checkbox to select, then click again to unselect
+    fireEvent.click(row1Checkbox);
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(row1Checkbox);
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
   });
 });
 

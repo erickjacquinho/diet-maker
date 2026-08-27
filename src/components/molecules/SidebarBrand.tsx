@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
-import { Avatar } from '@/components/atoms';
+import { Avatar, Button } from '@/components/atoms';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface SidebarBrandProps {
@@ -28,14 +28,17 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
         <div className="flex w-full flex-col items-center gap-3">
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <button
+              <Button
                 type="button"
+                variant="quiet"
+                size="compact"
+                iconOnly
                 onClick={toggleCollapse}
-                className="flex items-center justify-center rounded-control p-1 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="text-text-muted hover:bg-surface-hover hover:text-text-primary"
                 aria-label="Expandir Menu"
               >
                 <PanelLeftOpen className="size-5 shrink-0" aria-hidden="true" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-style-legal font-semibold">
               Expandir Menu
@@ -68,14 +71,17 @@ export const SidebarBrand: React.FC<SidebarBrandProps> = ({
           </Link>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <button
+              <Button
                 type="button"
+                variant="quiet"
+                size="compact"
+                iconOnly
                 onClick={toggleCollapse}
-                className="flex shrink-0 items-center justify-center rounded-control p-1 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="shrink-0 text-text-muted hover:bg-surface-hover hover:text-text-primary"
                 aria-label="Recolher Menu"
               >
                 <PanelLeftClose className="size-5 shrink-0" aria-hidden="true" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-style-legal font-semibold">
               Recolher Menu

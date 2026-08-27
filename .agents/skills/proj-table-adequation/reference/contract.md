@@ -6,6 +6,7 @@
 import {
   DataTable,
   type DataTableColumnDef,
+  type DataTableMaxHeight,
   type DataTableProps,
   type DataTableSelectionConfig,
   type DataTableSelectionMode,
@@ -18,6 +19,8 @@ import { Checkbox } from '@/components/atoms/Checkbox';
 
 ```typescript
 export type DataTableSelectionMode = 'single' | 'multi';
+
+export type DataTableMaxHeight = 'table-compact' | 'table-modal';
 
 export interface DataTableSelectionConfig<TData> {
   mode: DataTableSelectionMode;
@@ -61,7 +64,7 @@ export interface DataTableProps<TData> {
   };
   selection?: DataTableSelectionConfig<TData>;
   stickyHeader?: boolean;
-  maxHeight?: string | number;
+  maxHeight?: DataTableMaxHeight;
   renderRow?: (row: TData, index: number) => ReactNode;
   renderExpandedRow?: (row: TData, index: number) => ReactNode;
   expandedRowId?: string | null;

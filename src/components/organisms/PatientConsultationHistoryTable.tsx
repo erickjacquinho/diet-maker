@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Layers, Scale, Utensils } from 'lucide-react';
 import { textStyle } from '@/design-system';
+import { Button } from '@/components/atoms';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import type { BodyAssessment, HistoricalDiet } from '@/lib/patientsStore';
@@ -133,8 +134,10 @@ export function PatientConsultationHistoryTable({
           aria-label="Filtrar histórico por tipo de atendimento"
           className="flex items-center gap-1.5 rounded-surface border border-border-subtle bg-surface-subtle/60 p-1"
         >
-          <button
+          <Button
             type="button"
+            variant="quiet"
+            size="compact"
             role="tab"
             aria-selected={filter === 'all'}
             onClick={() => setFilter('all')}
@@ -152,10 +155,12 @@ export function PatientConsultationHistoryTable({
             >
               {totalAll}
             </Badge>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="quiet"
+            size="compact"
             role="tab"
             aria-selected={filter === 'assessments'}
             onClick={() => setFilter('assessments')}
@@ -173,10 +178,12 @@ export function PatientConsultationHistoryTable({
             >
               {totalAssessments}
             </Badge>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="quiet"
+            size="compact"
             role="tab"
             aria-selected={filter === 'diets'}
             onClick={() => setFilter('diets')}
@@ -194,7 +201,7 @@ export function PatientConsultationHistoryTable({
             >
               {totalDiets}
             </Badge>
-          </button>
+          </Button>
         </div>
 
         <span className={textStyle('caption')}>

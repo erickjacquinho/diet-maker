@@ -37,7 +37,6 @@ describe('Component UI Seam: MacroMetricCard', () => {
 
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('3.12 g/kg')).toBeInTheDocument();
-    expect(screen.getByText('(meta: 3.0)')).toBeInTheDocument();
   });
 
   it('renders ghost / no-target state when hasTarget is false or targetValue is empty', () => {
@@ -56,7 +55,6 @@ describe('Component UI Seam: MacroMetricCard', () => {
 
     expect(screen.getByText('Gorduras')).toBeInTheDocument();
     expect(screen.getByText('0g')).toBeInTheDocument();
-    expect(screen.getByText('(sem meta)')).toBeInTheDocument();
     expect(screen.getByText('Sem meta')).toBeInTheDocument();
     expect(screen.getByText('Definir em Ajustar Metas')).toBeInTheDocument();
   });

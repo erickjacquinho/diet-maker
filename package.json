@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "audit:atomic-design": "node scripts/audit-atomic-design.mjs",
     "audit:z-index": "node scripts/audit-z-index.mjs --strict",
+    "resolve:table": "node .agents/skills/proj-table-adequation-v2/scripts/resolve-table-contract.mjs",
+    "verify:table": "node .agents/skills/proj-table-adequation-v2/scripts/audit-table-conformance.mjs --strict",
     "verify:design-system": "node scripts/verify-design-system-components.mjs --strict",
     "verify:design-system-legacy": "node scripts/verify-design-system-legacy.mjs --strict",
     "verify:links": "node scripts/verify-links.js",

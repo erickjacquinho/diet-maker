@@ -199,8 +199,6 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
   const defaultAriaLabel = ariaLabel || `Pressione e segure por ${delaySecondsText} segundos para confirmar a exclusão`;
   const defaultTitle = title || `Pressione e segure por ${delaySecondsText}s para excluir`;
 
-  const progressBgClass = variant === 'destructive-outline' ? 'bg-error/20' : 'bg-black/25';
-
   return (
     <ShadcnButton
       ref={ref}
@@ -237,7 +235,6 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
       }}
       className={cn(
         'relative overflow-hidden select-none cursor-pointer transition-all',
-        isHolding && 'scale-[0.98]',
         className
       )}
       {...props}
@@ -247,17 +244,13 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
         aria-hidden="true"
         data-testid="hold-progress-bar"
         className={cn(
-          'absolute inset-y-0 left-0 pointer-events-none rounded-inherit transition-all',
-          progressBgClass
+          'absolute inset-y-0 left-0 w-0 pointer-events-none rounded-inherit transition-width ease-linear bg-error-soft',
+          isHolding ? 'w-full duration-hold' : 'duration-fast'
         )}
-        style={{
-          width: isHolding ? '100%' : '0%',
-          transition: isHolding ? `width ${delayMs}ms linear` : 'width 200ms ease-out',
-        }}
       />
 
       {/* Conteúdo do Botão (Ícone e Rótulo) */}
-      <span className="relative z-10 flex items-center justify-center gap-1.5 w-full pointer-events-none">
+      <span className="relative z-raised flex items-center justify-center gap-2 w-full pointer-events-none">
         {defaultIcon}
         <span>{isHolding && holdingLabel ? holdingLabel : children}</span>
       </span>

@@ -22,7 +22,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
 
     const progressBar = screen.getByTestId('hold-progress-bar');
     expect(progressBar).toBeInTheDocument();
-    expect(progressBar).toHaveStyle({ width: '0%' });
+    expect(progressBar).toHaveClass('w-0');
   });
 
   it('does not fire onConfirm on a simple instant click', () => {
@@ -44,7 +44,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
 
     fireEvent.pointerDown(button, { button: 0 });
 
-    expect(progressBar).toHaveStyle({ width: '100%' });
+    expect(progressBar).toHaveClass('w-full', 'duration-hold');
     expect(handleConfirm).not.toHaveBeenCalled();
   });
 
@@ -56,7 +56,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
     const progressBar = screen.getByTestId('hold-progress-bar');
 
     fireEvent.pointerDown(button, { button: 0 });
-    expect(progressBar).toHaveStyle({ width: '100%' });
+    expect(progressBar).toHaveClass('w-full');
 
     // Avança 800ms (menos de 1500ms)
     act(() => {
@@ -65,7 +65,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
 
     fireEvent.pointerUp(button);
 
-    expect(progressBar).toHaveStyle({ width: '0%' });
+    expect(progressBar).toHaveClass('w-0', 'duration-fast');
     expect(handleConfirm).not.toHaveBeenCalled();
 
     // Avança o restante do tempo para garantir que o timer foi cancelado
@@ -84,14 +84,14 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
     const progressBar = screen.getByTestId('hold-progress-bar');
 
     fireEvent.pointerDown(button, { button: 0 });
-    expect(progressBar).toHaveStyle({ width: '100%' });
+    expect(progressBar).toHaveClass('w-full');
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
     fireEvent.pointerLeave(button);
-    expect(progressBar).toHaveStyle({ width: '0%' });
+    expect(progressBar).toHaveClass('w-0');
 
     act(() => {
       vi.advanceTimersByTime(1500);
@@ -146,7 +146,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
     const progressBar = screen.getByTestId('hold-progress-bar');
 
     fireEvent.keyDown(button, { key: ' ' });
-    expect(progressBar).toHaveStyle({ width: '100%' });
+    expect(progressBar).toHaveClass('w-full');
 
     act(() => {
       vi.advanceTimersByTime(1500);
@@ -163,14 +163,14 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
     const progressBar = screen.getByTestId('hold-progress-bar');
 
     fireEvent.touchStart(button);
-    expect(progressBar).toHaveStyle({ width: '100%' });
+    expect(progressBar).toHaveClass('w-full');
 
     act(() => {
       vi.advanceTimersByTime(700);
     });
 
     fireEvent.touchEnd(button);
-    expect(progressBar).toHaveStyle({ width: '0%' });
+    expect(progressBar).toHaveClass('w-0');
     expect(handleConfirm).not.toHaveBeenCalled();
   });
 
