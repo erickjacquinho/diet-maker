@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
@@ -8,10 +8,12 @@ import {
 } from '../../fixtures/patient-profile';
 
 const push = vi.fn();
+const replace = vi.fn();
+const router = { push, replace };
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: PATIENT_PROFILE_FIXTURES.patient.id }),
-  useRouter: () => ({ push }),
+  useRouter: () => router,
 }));
 
 vi.mock('next/link', () => ({
@@ -24,6 +26,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
   beforeEach(() => {
     localStorage.clear();
     push.mockClear();
+    replace.mockClear();
     localStorage.setItem(
       'nutridiet_patients',
       JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
@@ -75,10 +78,10 @@ describe('PatientDetailPage history with two stacked tables', () => {
           name: 'Plano cutting agosto',
           date: '04/08/2026',
           status: 'Ativa',
-          targetKcal: 2020,
-          proteinG: 150,
-          carbsG: 220,
-          fatsG: 60,
+          simpleTargetKcal: 2020,
+          simpleTargetProtein: 150,
+          simpleTargetCarbs: 220,
+          simpleTargetFats: 60,
         },
       ]),
     );
@@ -105,10 +108,10 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Histórico de prescrições dietéticas/,
     });
     expect(dietsTable).toBeInTheDocument();
-    expect(screen.getByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(screen.getByText('Plano Ativo')).toBeInTheDocument();
-    expect(screen.getByText('2020 kcal')).toBeInTheDocument();
-    expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Plano cutting agosto')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Plano Ativo')).toBeInTheDocument();
+    expect(within(dietsTable).getByRole('cell', { name: /2020\s+kcal/ })).toBeInTheDocument();
+    expect(within(dietsTable).getByText(/P\s*150g/)).toBeInTheDocument();
 
     // Abertura do modal de cardápio
     const verCardapioBtn = screen.getByRole('button', {
@@ -116,6 +119,69 @@ describe('PatientDetailPage history with two stacked tables', () => {
     });
     fireEvent.click(verCardapioBtn);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('renders carb cycling averages and variation details in the diet history', async () => {
+    localStorage.setItem(
+      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'diet-cycle',
+          patientId: PATIENT_PROFILE_FIXTURES.patient.id,
+          name: 'Plano ciclo agosto',
+          createdAt: '24/08/2026',
+          updatedAt: '24/08/2026',
+          mode: 'carb_cycling',
+          simpleTargetKcal: 0,
+          simpleTargetProtein: 0,
+          simpleTargetCarbs: 0,
+          simpleTargetFats: 0,
+          simpleMeals: [],
+          carbCyclingVariationsCount: 2,
+          carbCyclingVariations: [
+            {
+              id: 'high',
+              name: 'Dia Alto Carbo',
+              type: 'high',
+              assignedDays: ['seg', 'qua', 'sex'],
+              targetKcal: 2300,
+              targetProtein: 180,
+              targetCarbs: 260,
+              targetFats: 55,
+              meals: [],
+            },
+            {
+              id: 'low',
+              name: 'Dia Baixo Carbo',
+              type: 'low',
+              assignedDays: ['ter', 'qui', 'sab', 'dom'],
+              targetKcal: 1950,
+              targetProtein: 180,
+              targetCarbs: 150,
+              targetFats: 55,
+              meals: [],
+            },
+          ],
+        },
+      ]),
+    );
+
+    render(<PatientDetailPage />);
+
+    const dietsTable = await screen.findByRole('table', {
+      name: /Histórico de prescrições dietéticas/,
+    });
+    expect(within(dietsTable).getByText('Ciclo de Carboidratos')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('2100 kcal')).toBeInTheDocument();
+    expect(within(dietsTable).getByText(/C\s*197g/)).toBeInTheDocument();
+
+    fireEvent.click(
+      within(dietsTable).getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }),
+    );
+
+    expect(within(dietsTable).getByText('Variações do ciclo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Baixo Carbo')).toBeInTheDocument();
   });
 
   it('opens confirmation modal and deletes a prescription diet from history', async () => {
@@ -127,10 +193,10 @@ describe('PatientDetailPage history with two stacked tables', () => {
           name: 'Plano cutting agosto',
           date: '04/08/2026',
           status: 'Ativa',
-          targetKcal: 2020,
-          proteinG: 150,
-          carbsG: 220,
-          fatsG: 60,
+          simpleTargetKcal: 2020,
+          simpleTargetProtein: 150,
+          simpleTargetCarbs: 220,
+          simpleTargetFats: 60,
         },
       ]),
     );
@@ -141,7 +207,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Histórico de prescrições dietéticas/,
     });
     expect(dietsTable).toBeInTheDocument();
-    expect(screen.getByText('Plano cutting agosto')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Plano cutting agosto')).toBeInTheDocument();
 
     // Clica no botão de excluir ao lado de editar
     const deleteBtn = screen.getByRole('button', {
@@ -156,7 +222,12 @@ describe('PatientDetailPage history with two stacked tables', () => {
 
     // Clica em confirmar exclusão
     const confirmBtn = screen.getByRole('button', { name: 'Sim, Excluir Prescrição' });
-    fireEvent.click(confirmBtn);
+    vi.useFakeTimers();
+    fireEvent.pointerDown(confirmBtn, { button: 0 });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    vi.useRealTimers();
 
     // Dieta removida da tabela e estado vazio renderizado
     await waitFor(() => {
