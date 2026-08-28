@@ -34,6 +34,42 @@ describe('PatientDietsTable', () => {
     },
   ];
 
+  const cycleDiet: HistoricalDiet = {
+    id: 'diet-cycle',
+    name: 'Plano ciclo agosto',
+    date: '24/08/2026',
+    targetKcal: 2100,
+    proteinG: 180,
+    carbsG: 197,
+    fatsG: 55,
+    status: 'Ativa',
+    mode: 'carb_cycling',
+    carbCyclingVariations: [
+      {
+        id: 'high',
+        name: 'Dia Alto Carbo',
+        type: 'high',
+        assignedDays: ['seg', 'qua', 'sex'],
+        targetKcal: 2300,
+        proteinG: 180,
+        carbsG: 260,
+        fatsG: 55,
+        mealsCount: 4,
+      },
+      {
+        id: 'low',
+        name: 'Dia Baixo Carbo',
+        type: 'low',
+        assignedDays: ['ter', 'qui', 'sab', 'dom'],
+        targetKcal: 1950,
+        proteinG: 180,
+        carbsG: 150,
+        fatsG: 55,
+        mealsCount: 3,
+      },
+    ],
+  };
+
   it('renders empty state when no diets exist', () => {
     render(<PatientDietsTable patientId="p1" diets={[]} onOpenReadOnlyDiet={vi.fn()} />);
 
@@ -56,6 +92,40 @@ describe('PatientDietsTable', () => {
     expect(screen.getByText('Dieta Manutenção Julho')).toBeInTheDocument();
     expect(screen.getByText('Histórica')).toBeInTheDocument();
     expect(screen.getByText('2400 kcal')).toBeInTheDocument();
+  });
+
+  it('renders the weighted cycle summary and mode label', () => {
+    render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
+
+    expect(screen.getByText('Ciclo de Carboidratos')).toBeInTheDocument();
+    expect(screen.getByText('2100 kcal')).toBeInTheDocument();
+    expect(screen.getByText(/P\s*180g/)).toBeInTheDocument();
+    expect(screen.getByText(/C\s*197g/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('expands and collapses cycle variations without triggering the diet action', () => {
+    const handleOpen = vi.fn();
+    render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={handleOpen} />);
+
+    const expandButton = screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' });
+    expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
+
+    fireEvent.click(expandButton);
+
+    expect(expandButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Seg, Qua, Sex')).toBeInTheDocument();
+    expect(screen.getByText('2300', { exact: true })).toBeInTheDocument();
+    expect(screen.getByText('4 refeições')).toBeInTheDocument();
+    expect(handleOpen).not.toHaveBeenCalled();
+
+    fireEvent.click(expandButton);
+    expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
   });
 
   it('triggers onOpenReadOnlyDiet when "Ver Cardápio" button is clicked', () => {

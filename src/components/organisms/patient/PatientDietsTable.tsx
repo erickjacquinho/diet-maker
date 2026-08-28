@@ -2,11 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import {
-  Calendar,
-  Eye,
-  Utensils,
-} from 'lucide-react';
+import { Calendar, ChevronDown, Eye, Utensils } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -14,6 +10,7 @@ import { EditIconButton, DeleteIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import type { HistoricalDiet } from '@/lib/patientsStore';
+import { DAYS_OF_WEEK } from '@/lib/dietStore';
 
 export interface PatientDietsTableProps {
   patientId: string;
@@ -61,18 +58,99 @@ const columns: DataTableColumnDef<HistoricalDiet>[] = [
   },
 ];
 
+function formatAssignedDays(days: string[] = []): string {
+  return days
+    .map((dayId) => DAYS_OF_WEEK.find((day) => day.id === dayId)?.shortLabel ?? dayId)
+    .join(', ');
+}
+
+function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
+  const variations = diet.carbCyclingVariations ?? [];
+  const daysAssigned = variations.reduce(
+    (total, variation) => total + (variation.assignedDays?.length ?? 0),
+    0,
+  );
+
+  return (
+    <TableRow id={`diet-cycle-details-${diet.id}`} className="bg-surface-subtle/40">
+      <TableCell colSpan={6} className="border-b border-t border-border-subtle p-4">
+        <div className="flex flex-col gap-3" data-testid="diet-cycle-details">
+          <div className="flex items-center justify-between gap-3">
+            <span className={`flex items-center gap-1.5 ${textStyle('caption-strong')}`}>
+              <Calendar size={13} className="text-primary" aria-hidden="true" />
+              <span>Variações do ciclo</span>
+            </span>
+            <span className={textStyle('metadata')}>
+              Média semanal ponderada ·{' '}
+              {daysAssigned > 0 ? `${daysAssigned} dias atribuídos` : 'dias não atribuídos'}
+            </span>
+          </div>
+
+          {variations.length > 0 ? (
+            <div className="grid grid-cols-3 gap-3">
+              {variations.map((variation) => {
+                const assignedDays = formatAssignedDays(variation.assignedDays);
+
+                return (
+                  <div
+                    key={variation.id}
+                    className="min-w-0 rounded-control border border-border-subtle bg-surface p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={textStyle('table-cell-strong')}>{variation.name}</span>
+                      <span className={textStyle('metadata')}>
+                        {variation.assignedDays?.length ?? 0} dias
+                      </span>
+                    </div>
+                    <MacroSummary
+                      protein={variation.proteinG}
+                      carbs={variation.carbsG}
+                      fats={variation.fatsG}
+                      kcal={variation.targetKcal}
+                      className="mt-2"
+                    />
+                    <div className={`mt-2 flex items-center gap-1.5 ${textStyle('metadata')}`}>
+                      <Calendar size={12} className="shrink-0" aria-hidden="true" />
+                      <span>{assignedDays || 'Nenhum dia vinculado'}</span>
+                    </div>
+                    <div className={`mt-1 flex items-center gap-1.5 ${textStyle('metadata')}`}>
+                      <Utensils size={12} className="shrink-0" aria-hidden="true" />
+                      <span>
+                        {variation.mealsCount}{' '}
+                        {variation.mealsCount === 1 ? 'refeição' : 'refeições'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className={textStyle('caption')}>Este ciclo não possui variações configuradas.</p>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function DietTableRow({
   patientId,
   diet,
+  isExpanded,
+  onToggleExpand,
   onOpenReadOnlyDiet,
   onDeleteDiet,
 }: {
   patientId: string;
   diet: HistoricalDiet;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
   onDeleteDiet?: (diet: HistoricalDiet) => void;
 }) {
   const isActive = diet.status === 'Ativa';
+  const isCarbCycling = diet.mode === 'carb_cycling';
+  const hasCycleDetails = isCarbCycling && (diet.carbCyclingVariations?.length ?? 0) > 0;
 
   return (
     <TableRow
@@ -92,11 +170,44 @@ export function DietTableRow({
 
       {/* 2. Nome do Plano */}
       <TableCell className="whitespace-nowrap px-4 py-3.5">
-        <div className="flex items-center gap-2">
-          <Utensils size={14} className="shrink-0 text-primary" aria-hidden="true" />
-          <span className={`font-semibold text-text-primary ${textStyle('body-strong')}`}>
-            {diet.name}
-          </span>
+        <div className="flex flex-col items-start gap-1.5">
+          <div className="flex items-center gap-2">
+            <Utensils size={14} className="shrink-0 text-primary" aria-hidden="true" />
+            <span className={`font-semibold text-text-primary ${textStyle('body-strong')}`}>
+              {diet.name}
+            </span>
+          </div>
+          {isCarbCycling && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant="primary">Ciclo de Carboidratos</Badge>
+              {hasCycleDetails && (
+                <Button
+                  type="button"
+                  variant="quiet"
+                  size="compact"
+                  aria-expanded={isExpanded}
+                  aria-controls={`diet-cycle-details-${diet.id}`}
+                  aria-label={
+                    isExpanded
+                      ? `Recolher variações de ${diet.name}`
+                      : `Ver variações de ${diet.name}`
+                  }
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onToggleExpand();
+                  }}
+                  className="inline-flex items-center gap-1 px-1 text-text-secondary hover:text-text-primary"
+                >
+                  <span>{isExpanded ? 'Ocultar variações' : 'Ver variações'}</span>
+                  <ChevronDown
+                    size={13}
+                    aria-hidden="true"
+                    className={isExpanded ? 'rotate-180' : undefined}
+                  />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </TableCell>
 
@@ -166,6 +277,8 @@ export function PatientDietsTable({
   onOpenReadOnlyDiet,
   onDeleteDiet,
 }: PatientDietsTableProps) {
+  const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
+
   if (diets.length === 0) {
     return (
       <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
@@ -188,10 +301,20 @@ export function PatientDietsTable({
         <DietTableRow
           patientId={patientId}
           diet={diet}
+          isExpanded={expandedDietId === diet.id}
+          onToggleExpand={() =>
+            setExpandedDietId((currentId) => (currentId === diet.id ? null : diet.id))
+          }
           onOpenReadOnlyDiet={onOpenReadOnlyDiet}
           onDeleteDiet={onDeleteDiet}
         />
       )}
+      expandedRowId={expandedDietId}
+      renderExpandedRow={(diet) =>
+        diet.mode === 'carb_cycling' && (diet.carbCyclingVariations?.length ?? 0) > 0 ? (
+          <DietCycleDetails diet={diet} />
+        ) : null
+      }
       className="border border-border-subtle rounded-surface overflow-hidden"
       tableClassName="table-fixed"
     />
