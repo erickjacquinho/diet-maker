@@ -12,7 +12,7 @@
 
 **Purpose**: Prepare deterministic fixtures for the supported variation counts and incomplete historical records.
 
-- [ ] T001 [skill: $tdd] [P] Add reusable historical cycle fixtures for one, four, and eight variations, including unassigned days and zero meals, in `tests/fixtures/patient-profile.ts`.
+- [X] T001 [skill: $tdd] [P] Add reusable historical cycle fixtures for one, four, and eight variations, including unassigned days and zero meals, in `tests/fixtures/patient-profile.ts`.
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Purpose**: Establish the shared read-only formatting and data-boundary rules before user-story work.
 
-- [ ] T002 [skill: $proj-table-adequation-v2] Define the display projection rules for canonical day ordering, comma-separated day labels, meal-count text, and missing-value fallbacks in `src/components/organisms/patient/PatientDietsTable.tsx`, without re-reading storage or mutating historical data.
+- [X] T002 [skill: $proj-table-adequation-v2] Define the display projection rules for canonical day ordering, comma-separated day labels, meal-count text, and missing-value fallbacks in `src/components/organisms/patient/PatientDietsTable.tsx`, without re-reading storage or mutating historical data.
 
 **Checkpoint**: Shared fixture and display-boundary foundation are ready; user-story work can begin.
 
@@ -36,16 +36,16 @@
 
 > Write these tests first and ensure they fail before the corresponding implementation tasks.
 
-- [ ] T003 [skill: $tdd] [P] [US1] Add component scenarios for one, three, four, and eight variations, asserting one row per variation, preserved order, comma-separated days, required values, and absence of the old card-grid structure in `tests/components/organisms/patient-diets-table.test.tsx`.
-- [ ] T004 [skill: $tdd] [P] [US1] Add a profile-history integration scenario with at least four stored cycle variations and assert that the expanded variation rows preserve the weighted parent summary in `tests/app/pacientes/patient-profile-history.test.tsx`.
+- [X] T003 [skill: $tdd] [P] [US1] Add component scenarios for one, three, four, and eight variations, asserting one row per variation, preserved order, comma-separated days, required values, and absence of the old card-grid structure in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T004 [skill: $tdd] [P] [US1] Add a profile-history integration scenario with at least four stored cycle variations and assert that the expanded variation rows preserve the weighted parent summary in `tests/app/pacientes/patient-profile-history.test.tsx`.
 
 ### Implementation for User Story 1
 
-- [ ] T005 [skill: $proj-table-adequation-v2] [US1] Replace the card grid in `DietCycleDetails` with a compact read-only tabular variation view in `src/components/organisms/patient/PatientDietsTable.tsx`.
-- [ ] T006 [skill: $proj-table-adequation-v2] [US1] Add stable variation columns for name/type, assigned days, protein, carbohydrates, fats, calories, and meals in `src/components/organisms/patient/PatientDietsTable.tsx`, keeping units and the required reading order explicit.
-- [ ] T007 [skill: $proj-table-adequation-v2] [US1] Format assigned days as a single comma-and-space-separated value such as `Ter, Qui`, ordered by the canonical week in `src/components/organisms/patient/PatientDietsTable.tsx`.
-- [ ] T008 [skill: $proj-table-adequation-v2] [US1] Keep variation rows at standard height by preventing textual wrapping from creating a second content band, while preserving an accessible full-value path for long names or day text in `src/components/organisms/patient/PatientDietsTable.tsx`.
-- [ ] T009 [skill: $proj-table-adequation-v2] [US1] Add explicit no-variation, no-assigned-day, and no-meal states without dropping historical variation rows in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T005 [skill: $proj-table-adequation-v2] [US1] Replace the card grid in `DietCycleDetails` with a compact read-only tabular variation view in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T006 [skill: $proj-table-adequation-v2] [US1] Add stable variation columns for name/type, assigned days, protein, carbohydrates, fats, calories, and meals in `src/components/organisms/patient/PatientDietsTable.tsx`, keeping units and the required reading order explicit.
+- [X] T007 [skill: $proj-table-adequation-v2] [US1] Format assigned days as a single comma-and-space-separated value such as `Ter, Qui`, ordered by the canonical week in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T008 [skill: $proj-table-adequation-v2] [US1] Keep variation rows at standard height by preventing textual wrapping from creating a second content band, while preserving an accessible full-value path for long names or day text in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T009 [skill: $proj-table-adequation-v2] [US1] Add explicit no-variation, no-assigned-day, and no-meal states without dropping historical variation rows in `src/components/organisms/patient/PatientDietsTable.tsx`.
 
 **Checkpoint**: User Story 1 is independently usable with one through eight variations and no card-grid layout.
 
@@ -59,13 +59,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T010 [skill: $tdd] [P] [US2] Add a selector regression scenario with uneven day assignments to assert the weighted weekly average remains the parent prescription summary in `tests/lib/patient-profile-selectors.test.ts`.
-- [ ] T011 [skill: $tdd] [US2] Add component assertions that the parent row retains the standard height before, during, and after expansion, and that its summary values remain unchanged in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T010 [skill: $tdd] [P] [US2] Add a selector regression scenario with uneven day assignments to assert the weighted weekly average remains the parent prescription summary in `tests/lib/patient-profile-selectors.test.ts`.
+- [X] T011 [skill: $tdd] [US2] Add component assertions that the parent row retains the standard height before, during, and after expansion, and that its summary values remain unchanged in `tests/components/organisms/patient-diets-table.test.tsx`.
 
 ### Implementation for User Story 2
 
-- [ ] T012 [skill: $proj-table-adequation-v2] [US2] Preserve the existing weighted-summary data flow and ensure the parent prescription row remains a single standard-height row while the detail region is inserted below it in `src/components/organisms/patient/PatientDietsTable.tsx`.
-- [ ] T013 [skill: $proj-table-adequation-v2] [US2] Preserve the parent row's status, view-menu, edit, and delete action contracts while integrating the new variation detail rows in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T012 [skill: $proj-table-adequation-v2] [US2] Preserve the existing weighted-summary data flow and ensure the parent prescription row remains a single standard-height row while the detail region is inserted below it in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T013 [skill: $proj-table-adequation-v2] [US2] Preserve the parent row's status, view-menu, edit, and delete action contracts while integrating the new variation detail rows in `src/components/organisms/patient/PatientDietsTable.tsx`.
 
 **Checkpoint**: User Stories 1 and 2 work together without changing the longitudinal prescription summary or parent-row geometry.
 
@@ -79,13 +79,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T014 [skill: $tdd] [P] [US3] Add accessibility scenarios for named expansion state, expanded-region relationship, semantic variation headers, explicit units, visible focus, and keyboard operation in `tests/components/organisms/patient-diets-table.test.tsx`.
-- [ ] T015 [skill: $tdd] [P] [US3] Add regression scenarios proving expansion does not invoke view/edit/delete callbacks and that simple diets do not expose cycle details in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T014 [skill: $tdd] [P] [US3] Add accessibility scenarios for named expansion state, expanded-region relationship, semantic variation headers, explicit units, visible focus, and keyboard operation in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T015 [skill: $tdd] [P] [US3] Add regression scenarios proving expansion does not invoke view/edit/delete callbacks and that simple diets do not expose cycle details in `tests/components/organisms/patient-diets-table.test.tsx`.
 
 ### Implementation for User Story 3
 
-- [ ] T016 [skill: $ui-styling] [US3] Keep the expansion control's accessible name, expanded state, detail-region relationship, focus behavior, and event isolation intact while replacing the detail presentation in `src/components/organisms/patient/PatientDietsTable.tsx`.
-- [ ] T017 [skill: $ui-styling] [US3] Preserve the simple-diet rendering path and read-only behavior, including explicit non-color meaning for variation type and states, in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T016 [skill: $ui-styling] [US3] Keep the expansion control's accessible name, expanded state, detail-region relationship, focus behavior, and event isolation intact while replacing the detail presentation in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T017 [skill: $ui-styling] [US3] Preserve the simple-diet rendering path and read-only behavior, including explicit non-color meaning for variation type and states, in `src/components/organisms/patient/PatientDietsTable.tsx`.
 
 **Checkpoint**: All user stories are independently testable; expansion is accessible and cannot trigger unrelated prescription actions.
 
@@ -95,9 +95,9 @@
 
 **Purpose**: Validate the complete feature against project contracts and record reproducible manual checks.
 
-- [ ] T018 [skill: general] [P] Update the runnable expected outcomes and edge-case scenarios for the variation-row view in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
-- [ ] T019 [skill: $proj-table-adequation-v2] Run the focused Vitest suite, type-check, lint, table resolver, and design-system audits for the changed target; record any pre-existing baseline findings separately in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
-- [ ] T020 [skill: $webapp-testing] Perform the desktop manual scenario at 1024px and a wider viewport with four and eight variations, then record the observed pass/fail evidence in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
+- [X] T018 [skill: general] [P] Update the runnable expected outcomes and edge-case scenarios for the variation-row view in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
+- [X] T019 [skill: $proj-table-adequation-v2] Run the focused Vitest suite, type-check, lint, table resolver, and design-system audits for the changed target; record any pre-existing baseline findings separately in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
+- [X] T020 [skill: $webapp-testing] Perform the desktop manual scenario at 1024px and a wider viewport with four and eight variations, then record the observed pass/fail evidence in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
 
 ---
 

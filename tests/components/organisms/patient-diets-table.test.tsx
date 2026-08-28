@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { PatientDietsTable } from '@/components/organisms/patient/PatientDietsTable';
 import type { HistoricalDiet } from '@/lib/patientsStore';
+import { PATIENT_PROFILE_CARB_CYCLING_VARIATIONS } from '../../fixtures/patient-profile';
 
 vi.mock('next/link', () => ({
   default: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
@@ -115,6 +116,26 @@ describe('PatientDietsTable', () => {
     expect(rows[1]).toHaveClass('h-table-row');
   });
 
+  it('preserves the parent summary and standard height before, during and after expansion', () => {
+    render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
+
+    const parentRow = screen.getAllByRole('row')[1];
+    const summaryBefore = parentRow.textContent;
+    expect(parentRow).toHaveClass('h-table-row');
+    expect(parentRow).toHaveTextContent('2100 kcal');
+    expect(parentRow).toHaveTextContent(/P\s*180g/);
+    expect(parentRow).toHaveTextContent(/C\s*197g/);
+
+    const expandButton = screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' });
+    fireEvent.click(expandButton);
+    expect(parentRow).toHaveClass('h-table-row');
+    expect(parentRow.textContent).toBe(summaryBefore);
+
+    fireEvent.click(expandButton);
+    expect(parentRow).toHaveClass('h-table-row');
+    expect(parentRow.textContent).toBe(summaryBefore);
+  });
+
   it('expands and collapses cycle variations without triggering the diet action', () => {
     const handleOpen = vi.fn();
     render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={handleOpen} />);
@@ -127,13 +148,130 @@ describe('PatientDietsTable', () => {
     expect(expandButton).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByRole('row')[1]).toHaveClass('h-table-row');
     expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
-    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo · Tipo Alto')).toBeInTheDocument();
     expect(screen.getByText('Seg, Qua, Sex')).toBeInTheDocument();
-    expect(screen.getByText('2300', { exact: true })).toBeInTheDocument();
+    expect(screen.getByText('2300 kcal')).toBeInTheDocument();
     expect(screen.getByText('4 refeições')).toBeInTheDocument();
     expect(handleOpen).not.toHaveBeenCalled();
 
     fireEvent.click(expandButton);
+    expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['one', PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.one],
+    ['three', PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four.slice(0, 3)],
+    ['four', PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four],
+    ['eight', PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.eight],
+  ] as const)('renders %s cycle variations as ordered standard-height rows', (_label, variations) => {
+    const diet: HistoricalDiet = {
+      ...cycleDiet,
+      carbCyclingVariations: variations,
+    };
+
+    render(<PatientDietsTable patientId="p1" diets={[diet]} onOpenReadOnlyDiet={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
+
+    const variationTable = screen.getByRole('table', {
+      name: 'Variações do ciclo de Plano ciclo agosto',
+    });
+    const variationRows = within(variationTable).getAllByRole('row');
+    expect(variationRows).toHaveLength(variations.length + 1);
+    expect(variationRows.slice(1).map((row) => row.textContent)).toEqual(
+      variations.map((variation) => expect.stringContaining(variation.name)),
+    );
+    expect(within(variationTable).queryByTestId('diet-cycle-variation-cards')).not.toBeInTheDocument();
+  });
+
+  it('keeps assigned days in one canonical comma-separated column and exposes explicit empty states', () => {
+    const diet: HistoricalDiet = {
+      ...cycleDiet,
+      carbCyclingVariations: [
+        {
+          ...PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four[1],
+          assignedDays: ['qui', 'ter'],
+        },
+        PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four[3],
+      ],
+    };
+
+    render(<PatientDietsTable patientId="p1" diets={[diet]} onOpenReadOnlyDiet={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
+
+    const variationTable = screen.getByRole('table', {
+      name: 'Variações do ciclo de Plano ciclo agosto',
+    });
+    expect(within(variationTable).getByText('Ter, Qui')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Nenhum dia atribuído')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Nenhuma refeição')).toBeInTheDocument();
+  });
+
+  it('shows a contextual empty state for a cycle without historical variations', () => {
+    const diet: HistoricalDiet = {
+      ...cycleDiet,
+      carbCyclingVariations: [],
+    };
+
+    render(<PatientDietsTable patientId="p1" diets={[diet]} onOpenReadOnlyDiet={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
+
+    expect(screen.getByText('Este ciclo não possui variações configuradas.')).toBeInTheDocument();
+  });
+
+  it('exposes the expansion relationship, semantic headers, units and keyboard-ready focus', () => {
+    render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
+
+    const expandButton = screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' });
+    const detailsId = expandButton.getAttribute('aria-controls');
+    expect(detailsId).toBeTruthy();
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+
+    expandButton.focus();
+    expect(expandButton).toHaveFocus();
+    fireEvent.keyDown(expandButton, { key: 'Enter', code: 'Enter' });
+    fireEvent.keyUp(expandButton, { key: 'Enter', code: 'Enter' });
+    fireEvent.click(expandButton);
+
+    expect(expandButton).toHaveAttribute('aria-expanded', 'true');
+    expect(expandButton).toHaveFocus();
+    expect(document.getElementById(detailsId as string)).toBeInTheDocument();
+
+    const variationTable = screen.getByRole('table', {
+      name: 'Variações do ciclo de Plano ciclo agosto',
+    });
+    expect(within(variationTable).getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'Variação',
+      'Dias',
+      'Proteína',
+      'Carboidratos',
+      'Gorduras',
+      'Calorias',
+      'Refeições',
+    ]);
+    expect(within(variationTable).getAllByText('180 g')).toHaveLength(2);
+    expect(within(variationTable).getByText('2300 kcal')).toBeInTheDocument();
+    expect(within(variationTable).getByText('4 refeições')).toBeInTheDocument();
+  });
+
+  it('isolates expansion from prescription actions and keeps simple diets without cycle details', () => {
+    const handleOpen = vi.fn();
+    const handleDelete = vi.fn();
+    const { unmount } = render(
+      <PatientDietsTable
+        patientId="p1"
+        diets={[cycleDiet]}
+        onOpenReadOnlyDiet={handleOpen}
+        onDeleteDiet={handleDelete}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
+    expect(handleOpen).not.toHaveBeenCalled();
+    expect(handleDelete).not.toHaveBeenCalled();
+
+    unmount();
+    render(<PatientDietsTable patientId="p1" diets={mockDiets} onOpenReadOnlyDiet={handleOpen} />);
+    expect(screen.queryByRole('button', { name: /Ver variações/ })).not.toBeInTheDocument();
     expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
   });
 

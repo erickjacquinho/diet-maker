@@ -24,6 +24,12 @@ Expected outcome:
 - Missing days, missing meals, and no-variation states remain explicit.
 - Simple diets and existing view/edit/delete actions retain their behavior.
 
+The compact variation table uses the following reading order: `Variação`, `Dias`,
+`Proteína`, `Carboidratos`, `Gorduras`, `Calorias`, `Refeições`. Each variation
+remains one semantic table row, including records with `Nenhum dia atribuído` or
+`Nenhuma refeição`; a cycle with no records shows `Este ciclo não possui variações
+configuradas.` after expansion.
+
 Run static validation:
 
 ```powershell
@@ -41,6 +47,16 @@ npm run verify:design-system -- --strict
 
 Any pre-existing baseline findings must be recorded separately from findings introduced by this feature. The target feature must not add new table or design-system errors.
 
+Observed automated validation on 2026-08-28:
+
+- Focused Vitest: passed, 3 files and 28 tests.
+- `npm run type-check`: passed.
+- `npm run lint`: passed.
+- Table resolver: passed; target uses the canonical `DataTable` and `Table` primitives, with no arbitrary table classes.
+- `npm run verify:table -- --target src/components/organisms/patient/PatientDietsTable.tsx --strict`: passed with 0 errors and 1 pre-existing warning for the uncatalogued `MacroSummary` child.
+- `npm run verify:design-system -- --strict`: remains a pre-existing baseline failure involving registry/profile drift and other components, including the target's missing registry entry; no new target-specific error was introduced by this feature.
+- `npm test -- --reporter=verbose`: the full suite exceeded the repository hook's 90-second limit and reported pre-existing overlay z-index, design-system catalog, and legacy-audit failures outside this feature; the focused feature suite remains green.
+
 ## Manual scenario
 
 1. Start the desktop application with `npm run dev`.
@@ -55,9 +71,25 @@ Any pre-existing baseline findings must be recorded separately from findings int
 5. Collapse the details and confirm the parent row returns to the same state without changing its summary.
 6. Repeat with a simple diet and confirm no cycle details are offered.
 
+Edge-case checks:
+
+- Run the same scenario with 1, 3, 4, and 8 variations; the detail table row count
+  must be the variation count plus its single header row.
+- Use a variation whose source days are out of order, such as `qui`, `ter`; the
+  rendered value must be `Ter, Qui`.
+- Use a long variation name and confirm the row remains single-line while the full
+  value remains available through the cell's accessible title/text.
+
 ## Accessibility scenario
 
 - Reach the expansion control with the keyboard.
 - Activate it with the keyboard and verify that the open/closed state is announced by its accessible name/state.
 - Move through the variation rows and ensure each value has semantic column context and pronounced units.
 - Confirm visible focus and that color is not the only indication of variation type or state.
+
+Observed manual validation on 2026-08-28:
+
+- Production server (`next start`) with Playwright: passed at 1024px and 1440px.
+- Eight variation rows remained visible in vertical order; the parent and all variation rows measured 44px (`h-table-row`).
+- `Ter, Qui`, no-day and no-meal states were visible; expansion and re-collapse worked through the named control.
+- An initial development-server attempt was inconclusive because HMR/static assets returned 400 responses; the final production-server run passed after rebuilding in isolation.

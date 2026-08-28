@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
+  PATIENT_PROFILE_CARB_CYCLING_VARIATIONS,
   PATIENT_PROFILE_FIXTURES,
 } from '../../fixtures/patient-profile';
 
@@ -180,8 +181,72 @@ describe('PatientDetailPage history with two stacked tables', () => {
     );
 
     expect(within(dietsTable).getByText('Variações do ciclo')).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Dia Alto Carbo')).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Dia Baixo Carbo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Alto Carbo · Tipo Alto')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Baixo Carbo · Tipo Baixo')).toBeInTheDocument();
+  });
+
+  it('keeps the weighted parent summary while displaying four stored variations as rows', async () => {
+    const storedVariations = PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four.map((variation) => ({
+      id: variation.id,
+      name: variation.name,
+      type: variation.type,
+      assignedDays: variation.assignedDays,
+      targetKcal: variation.targetKcal,
+      targetProtein: variation.proteinG,
+      targetCarbs: variation.carbsG,
+      targetFats: variation.fatsG,
+      meals: Array.from({ length: variation.mealsCount }, (_, index) => ({
+        id: `${variation.id}-meal-${index + 1}`,
+        name: `Refeição ${index + 1}`,
+        time: '08:00',
+        items: [],
+      })),
+    }));
+
+    localStorage.setItem(
+      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
+      JSON.stringify([
+        {
+          id: 'diet-cycle-four',
+          patientId: PATIENT_PROFILE_FIXTURES.patient.id,
+          name: 'Plano ciclo quatro variações',
+          createdAt: '24/08/2026',
+          updatedAt: '24/08/2026',
+          mode: 'carb_cycling',
+          simpleTargetKcal: 0,
+          simpleTargetProtein: 0,
+          simpleTargetCarbs: 0,
+          simpleTargetFats: 0,
+          simpleMeals: [],
+          carbCyclingVariations: storedVariations,
+        },
+      ]),
+    );
+
+    render(<PatientDetailPage />);
+
+    const dietsTable = await screen.findByRole('table', {
+      name: /Histórico de prescrições dietéticas/,
+    });
+    expect(within(dietsTable).getByText('Plano ciclo quatro variações')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('2100 kcal')).toBeInTheDocument();
+    expect(within(dietsTable).getByText(/C\s*207g/)).toBeInTheDocument();
+
+    fireEvent.click(
+      within(dietsTable).getByRole('button', {
+        name: 'Ver variações de Plano ciclo quatro variações',
+      }),
+    );
+
+    const variationTable = within(dietsTable).getByRole('table', {
+      name: 'Variações do ciclo de Plano ciclo quatro variações',
+    });
+    expect(within(variationTable).getAllByRole('row')).toHaveLength(5);
+    expect(within(variationTable).getByText('Dia Alto · Tipo Alto')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Moderado · Tipo Moderado')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Baixo · Tipo Baixo')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Livre · Tipo Zero')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Nenhum dia atribuído')).toBeInTheDocument();
   });
 
   it('opens confirmation modal and deletes a prescription diet from history', async () => {

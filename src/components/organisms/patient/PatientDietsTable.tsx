@@ -5,11 +5,19 @@ import Link from 'next/link';
 import { Calendar, ChevronDown, Eye, Utensils } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
-import { TableCell, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { EditIconButton, DeleteIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
-import type { HistoricalDiet } from '@/lib/patientsStore';
+import type { HistoricalDiet, HistoricalDietVariation } from '@/lib/patientsStore';
 import { DAYS_OF_WEEK } from '@/lib/dietStore';
 
 export interface PatientDietsTableProps {
@@ -23,45 +31,70 @@ const columns: DataTableColumnDef<HistoricalDiet>[] = [
   {
     id: 'date',
     header: 'Data de Prescrição',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-[140px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-36',
     cell: () => null,
   },
   {
     id: 'name',
     header: 'Plano Alimentar',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-[220px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-56',
     cell: () => null,
   },
   {
     id: 'status',
     header: 'Status',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[120px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-32',
     cell: () => null,
   },
   {
     id: 'macros',
     header: 'Macronutrientes',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-[200px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-52',
     cell: () => null,
   },
   {
     id: 'calories',
     header: 'Calorias',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[110px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-28',
     cell: () => null,
   },
   {
     id: 'actions',
     header: 'Ações',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-[190px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-48',
     cell: () => null,
   },
 ];
 
 function formatAssignedDays(days: string[] = []): string {
-  return days
-    .map((dayId) => DAYS_OF_WEEK.find((day) => day.id === dayId)?.shortLabel ?? dayId)
-    .join(', ');
+  const uniqueDays = Array.from(new Set(days));
+  const orderedKnownDays = DAYS_OF_WEEK
+    .filter((day) => uniqueDays.includes(day.id))
+    .map((day) => day.shortLabel);
+  const unknownDays = uniqueDays.filter((dayId) => !DAYS_OF_WEEK.some((day) => day.id === dayId));
+
+  return [...orderedKnownDays, ...unknownDays].join(', ');
+}
+
+function formatVariationDays(days: string[] = []): string {
+  return formatAssignedDays(days) || 'Nenhum dia atribuído';
+}
+
+function formatVariationMeals(mealsCount: number): string {
+  if (mealsCount <= 0) return 'Nenhuma refeição';
+  return `${mealsCount} ${mealsCount === 1 ? 'refeição' : 'refeições'}`;
+}
+
+function formatVariationType(variation: HistoricalDietVariation): string {
+  const labels: Record<HistoricalDietVariation['type'], string> = {
+    high: 'Alto',
+    medium: 'Moderado',
+    low: 'Baixo',
+    zero: 'Zero',
+    custom: 'Personalizado',
+  };
+
+  return labels[variation.type] ?? variation.type;
 }
 
 function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
@@ -87,43 +120,68 @@ function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
           </div>
 
           {variations.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
-              {variations.map((variation) => {
-                const assignedDays = formatAssignedDays(variation.assignedDays);
+            <Table
+              aria-label={`Variações do ciclo de ${diet.name}`}
+              className="table-fixed border border-border-subtle bg-surface"
+            >
+              <TableCaption className="sr-only">
+                Variações históricas do ciclo de {diet.name}
+              </TableCaption>
+              <TableHeader>
+                <TableRow className="bg-surface-subtle hover:bg-surface-subtle">
+                  <TableHead scope="col" className="h-table-row w-1/4 px-3 py-1">Variação</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/6 px-3 py-1">Dias</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Proteína</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Carboidratos</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Gorduras</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Calorias</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Refeições</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {variations.map((variation) => {
+                  const assignedDays = formatVariationDays(variation.assignedDays);
+                  const variationType = formatVariationType(variation);
+                  const variationLabel = `${variation.name} · Tipo ${variationType}`;
 
-                return (
-                  <div
-                    key={variation.id}
-                    className="min-w-0 rounded-control border border-border-subtle bg-surface p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={textStyle('table-cell-strong')}>{variation.name}</span>
-                      <span className={textStyle('metadata')}>
-                        {variation.assignedDays?.length ?? 0} dias
-                      </span>
-                    </div>
-                    <MacroSummary
-                      protein={variation.proteinG}
-                      carbs={variation.carbsG}
-                      fats={variation.fatsG}
-                      kcal={variation.targetKcal}
-                      className="mt-2"
-                    />
-                    <div className={`mt-2 flex items-center gap-1.5 ${textStyle('metadata')}`}>
-                      <Calendar size={12} className="shrink-0" aria-hidden="true" />
-                      <span>{assignedDays || 'Nenhum dia vinculado'}</span>
-                    </div>
-                    <div className={`mt-1 flex items-center gap-1.5 ${textStyle('metadata')}`}>
-                      <Utensils size={12} className="shrink-0" aria-hidden="true" />
-                      <span>
-                        {variation.mealsCount}{' '}
-                        {variation.mealsCount === 1 ? 'refeição' : 'refeições'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  return (
+                    <TableRow key={variation.id} className="h-table-row">
+                      <TableCell
+                        className="h-table-row max-w-0 whitespace-nowrap px-3 py-1"
+                        title={variationLabel}
+                      >
+                        <span className={`block truncate ${textStyle('table-cell-strong')}`}>
+                          {variationLabel}
+                        </span>
+                      </TableCell>
+                      <TableCell
+                        className={`h-table-row max-w-0 whitespace-nowrap px-3 py-1 ${textStyle('metadata')}`}
+                        title={assignedDays}
+                      >
+                        <span className="block truncate">{assignedDays}</span>
+                      </TableCell>
+                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
+                        <span className={textStyle('table-number')}>{variation.proteinG} g</span>
+                      </TableCell>
+                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
+                        <span className={textStyle('table-number')}>{variation.carbsG} g</span>
+                      </TableCell>
+                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
+                        <span className={textStyle('table-number')}>{variation.fatsG} g</span>
+                      </TableCell>
+                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
+                        <span className={textStyle('table-number')}>{variation.targetKcal} kcal</span>
+                      </TableCell>
+                      <TableCell
+                        className={`h-table-row whitespace-nowrap px-3 py-1 ${textStyle('metadata')}`}
+                      >
+                        {formatVariationMeals(variation.mealsCount)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           ) : (
             <p className={textStyle('caption')}>Este ciclo não possui variações configuradas.</p>
           )}
@@ -150,7 +208,7 @@ export function DietTableRow({
 }) {
   const isActive = diet.status === 'Ativa';
   const isCarbCycling = diet.mode === 'carb_cycling';
-  const hasCycleDetails = isCarbCycling && (diet.carbCyclingVariations?.length ?? 0) > 0;
+  const hasCycleDetails = isCarbCycling;
 
   return (
     <TableRow
@@ -312,12 +370,11 @@ export function PatientDietsTable({
       )}
       expandedRowId={expandedDietId}
       renderExpandedRow={(diet) =>
-        diet.mode === 'carb_cycling' && (diet.carbCyclingVariations?.length ?? 0) > 0 ? (
+        diet.mode === 'carb_cycling' ? (
           <DietCycleDetails diet={diet} />
         ) : null
       }
       className="border border-border-subtle rounded-surface overflow-hidden"
-      tableClassName="table-fixed"
     />
   );
 }

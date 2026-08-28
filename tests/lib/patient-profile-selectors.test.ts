@@ -5,9 +5,10 @@ import {
   selectActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
-import type { FullDietPlan } from '@/lib/dietStore';
+import type { DayOfWeek, FullDietPlan } from '@/lib/dietStore';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
+  PATIENT_PROFILE_CARB_CYCLING_VARIATIONS,
   PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_MULTIPLE_ACTIVE_DIETS,
 } from '../fixtures/patient-profile';
@@ -120,5 +121,46 @@ describe('patient profile selectors', () => {
         mealsCount: 0,
       }),
     ]);
+  });
+
+  it('weights an uneven cycle by assigned days and keeps unassigned variations in the snapshot', () => {
+    const cycle: FullDietPlan = {
+      id: 'diet-cycle-uneven',
+      patientId: 'patient-1',
+      name: 'Ciclo desigual',
+      createdAt: '21/08/2026',
+      updatedAt: '21/08/2026',
+      mode: 'carb_cycling',
+      simpleTargetKcal: 0,
+      simpleTargetProtein: 0,
+      simpleTargetCarbs: 0,
+      simpleTargetFats: 0,
+      simpleMeals: [],
+      carbCyclingVariations: PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four.map((variation) => ({
+        id: variation.id,
+        name: variation.name,
+        type: variation.type,
+        assignedDays: variation.assignedDays as DayOfWeek[] | undefined,
+        targetKcal: variation.targetKcal,
+        targetProtein: variation.proteinG,
+        targetCarbs: variation.carbsG,
+        targetFats: variation.fatsG,
+        meals: [],
+      })),
+    };
+
+    const [history] = buildPatientDietHistory([cycle as unknown as StoredDietRecord]);
+
+    expect(history).toMatchObject({
+      targetKcal: 2100,
+      proteinG: 180,
+      carbsG: 207,
+      fatsG: 60,
+    });
+    expect(history.carbCyclingVariations).toHaveLength(4);
+    expect(history.carbCyclingVariations?.[3]).toMatchObject({
+      id: 'cycle-zero',
+      assignedDays: [],
+    });
   });
 });
