@@ -7,7 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    pool: 'forks',
+    pool: 'threads',
     maxWorkers: 4,
     watch: false,
     testTimeout: 60_000,
