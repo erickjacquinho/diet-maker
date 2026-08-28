@@ -107,6 +107,14 @@ describe('PatientDietsTable', () => {
     );
   });
 
+  it('keeps the main cycle row at the standard table height', () => {
+    render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).toHaveTextContent('Plano ciclo agosto');
+    expect(rows[1]).toHaveClass('h-table-row');
+  });
+
   it('expands and collapses cycle variations without triggering the diet action', () => {
     const handleOpen = vi.fn();
     render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={handleOpen} />);
@@ -117,6 +125,7 @@ describe('PatientDietsTable', () => {
     fireEvent.click(expandButton);
 
     expect(expandButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getAllByRole('row')[1]).toHaveClass('h-table-row');
     expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
     expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
     expect(screen.getByText('Seg, Qua, Sex')).toBeInTheDocument();

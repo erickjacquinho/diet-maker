@@ -154,14 +154,14 @@ export function DietTableRow({
 
   return (
     <TableRow
-      className={`transition-colors ${
+      className={`h-table-row transition-colors ${
         isActive
           ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/50'
           : 'hover:bg-surface-hover'
       }`}
     >
       {/* 1. Data */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5">
+      <TableCell className="whitespace-nowrap px-4 py-1">
         <div className="flex items-center gap-1.5">
           <Calendar size={13} className="shrink-0 text-text-muted" aria-hidden="true" />
           <span className={textStyle('table-cell-strong')}>{diet.date}</span>
@@ -169,57 +169,58 @@ export function DietTableRow({
       </TableCell>
 
       {/* 2. Nome do Plano */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5">
-        <div className="flex flex-col items-start gap-1.5">
-          <div className="flex items-center gap-2">
-            <Utensils size={14} className="shrink-0 text-primary" aria-hidden="true" />
-            <span className={`font-semibold text-text-primary ${textStyle('body-strong')}`}>
-              {diet.name}
-            </span>
-          </div>
+      <TableCell className="whitespace-nowrap px-4 py-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <Utensils size={14} className="shrink-0 text-primary" aria-hidden="true" />
+          <span
+            className={`min-w-0 truncate font-semibold text-text-primary ${textStyle('body-strong')}`}
+            title={diet.name}
+          >
+            {diet.name}
+          </span>
           {isCarbCycling && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Badge variant="primary">Ciclo de Carboidratos</Badge>
-              {hasCycleDetails && (
-                <Button
-                  type="button"
-                  variant="quiet"
-                  size="compact"
-                  aria-expanded={isExpanded}
-                  aria-controls={`diet-cycle-details-${diet.id}`}
-                  aria-label={
-                    isExpanded
-                      ? `Recolher variações de ${diet.name}`
-                      : `Ver variações de ${diet.name}`
-                  }
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onToggleExpand();
-                  }}
-                  className="inline-flex items-center gap-1 px-1 text-text-secondary hover:text-text-primary"
-                >
-                  <span>{isExpanded ? 'Ocultar variações' : 'Ver variações'}</span>
-                  <ChevronDown
-                    size={13}
-                    aria-hidden="true"
-                    className={isExpanded ? 'rotate-180' : undefined}
-                  />
-                </Button>
-              )}
-            </div>
+            <Badge variant="primary" className="shrink-0">
+              Ciclo de Carboidratos
+            </Badge>
+          )}
+          {hasCycleDetails && (
+            <Button
+              type="button"
+              variant="quiet"
+              size="compact"
+              aria-expanded={isExpanded}
+              aria-controls={`diet-cycle-details-${diet.id}`}
+              aria-label={
+                isExpanded
+                  ? `Recolher variações de ${diet.name}`
+                  : `Ver variações de ${diet.name}`
+              }
+              title={isExpanded ? 'Ocultar variações' : 'Ver variações'}
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleExpand();
+              }}
+              className="shrink-0 p-0 text-text-secondary hover:text-text-primary"
+            >
+              <ChevronDown
+                size={15}
+                aria-hidden="true"
+                className={isExpanded ? 'rotate-180' : undefined}
+              />
+            </Button>
           )}
         </div>
       </TableCell>
 
       {/* 3. Status */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5 text-center">
+      <TableCell className="whitespace-nowrap px-4 py-1 text-center">
         <Badge variant={isActive ? 'primary' : 'neutral'}>
           {isActive ? 'Plano Ativo' : 'Histórica'}
         </Badge>
       </TableCell>
 
       {/* 4. Macros */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5">
+      <TableCell className="whitespace-nowrap px-4 py-1">
         <MacroSummary
           protein={diet.proteinG}
           carbs={diet.carbsG}
@@ -230,14 +231,14 @@ export function DietTableRow({
       </TableCell>
 
       {/* 5. Calorias */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5 text-center">
+      <TableCell className="whitespace-nowrap px-4 py-1 text-center">
         <span className={`font-bold text-text-primary ${textStyle('table-number')}`}>
           {diet.targetKcal} kcal
         </span>
       </TableCell>
 
       {/* 6. Ações */}
-      <TableCell className="whitespace-nowrap px-4 py-3.5 text-right">
+      <TableCell className="whitespace-nowrap px-4 py-1 text-right">
         <div className="flex items-center justify-end gap-2">
           <Button
             type="button"

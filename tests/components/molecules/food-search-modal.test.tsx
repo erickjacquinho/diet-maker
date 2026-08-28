@@ -1,7 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
+
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+beforeAll(() => {
+  Element.prototype.scrollIntoView = vi.fn();
+});
+
+afterAll(() => {
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
 
 describe('FoodSearchModal component', () => {
   it('renders table columns matching meal food list and does not render a quantity selector', () => {
@@ -218,6 +228,33 @@ describe('FoodSearchModal component', () => {
     // Click again to turn off
     fireEvent.click(toggleSwitch);
     expect(toggleSwitch).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('filters the results table by food type with the standard selector', async () => {
+    const onAddFood = vi.fn();
+    const onClose = vi.fn();
+
+    render(
+      <FoodSearchModal
+        isOpen={true}
+        onClose={onClose}
+        mealTitle="Refeição 1"
+        onAddFood={onAddFood}
+      />
+    );
+
+    const foodTypeSelect = screen.getByRole('combobox', { name: 'Tipo de alimento' });
+    expect(foodTypeSelect).toHaveTextContent('Todos os tipos');
+
+    fireEvent.click(foodTypeSelect);
+    fireEvent.click(await screen.findByRole('option', { name: 'Frutas' }));
+
+    expect(foodTypeSelect).toHaveTextContent('Frutas');
+
+    const table = screen.getByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
+    expect(table).toHaveAttribute('aria-rowcount');
+    expect(within(table).getAllByText('Frutas', { exact: true }).length).toBeGreaterThan(0);
+    expect(within(table).queryByText('Arroz, integral, cozido', { exact: true })).not.toBeInTheDocument();
   });
 
   it('shows the Ctrl+F badge and focuses the search field with the shortcut', () => {

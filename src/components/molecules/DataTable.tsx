@@ -256,6 +256,7 @@ export function DataTable<TData>({
   }, [selection, selectedSet, allSelected, someSelected, selectableVisibleRows, getRowId, data]);
 
   const handleToggleRow = React.useCallback((row: TData, index: number) => {
+    if (!selection) return;
 
     const rowId = getRowId(row, index);
     let nextSet: Set<string>;

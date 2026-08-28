@@ -137,6 +137,48 @@ describe('dietDuplication utility', () => {
       const summaries = buildPreviousDietSummaries([], []);
       expect(summaries).toEqual([]);
     });
+
+    it('should summarize a carb cycling diet using the weighted weekly average', () => {
+      const cyclingDiet: FullDietPlan = {
+        ...mockStoredDiet,
+        id: 'diet-cycle-101',
+        mode: 'carb_cycling',
+        carbCyclingVariations: [
+          {
+            id: 'var-high',
+            name: 'Dia Alto Carbo',
+            type: 'high',
+            assignedDays: ['seg', 'qua', 'sex'],
+            targetKcal: 2300,
+            targetProtein: 180,
+            targetCarbs: 260,
+            targetFats: 55,
+            meals: [],
+          },
+          {
+            id: 'var-low',
+            name: 'Dia Baixo Carbo',
+            type: 'low',
+            assignedDays: ['ter', 'qui', 'sab', 'dom'],
+            targetKcal: 1950,
+            targetProtein: 180,
+            targetCarbs: 150,
+            targetFats: 55,
+            meals: [],
+          },
+        ],
+      };
+
+      const [summary] = buildPreviousDietSummaries([cyclingDiet]);
+
+      expect(summary.modeLabel).toBe('Ciclo de Carboidratos');
+      expect(summary.targetKcal).toBe(2100);
+      expect(summary.proteinG).toBe(180);
+      expect(summary.carbsG).toBe(197);
+      expect(summary.fatsG).toBe(55);
+      expect(summary.variationsCount).toBe(2);
+      expect(summary.daysAssignedCount).toBe(7);
+    });
   });
 
   describe('cloneMealsWithFreshIds', () => {

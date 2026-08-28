@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SelectField } from '@/components/atoms';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, type FoodItem } from '@/lib/tacoStore';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
 import { MacroSummary } from './MacroSummary';
@@ -38,6 +39,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   const [query, setQuery] = useState('');
   const [selectedFoodIds, setSelectedFoodIds] = useState<Set<string>>(new Set());
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [foodTypeFilter, setFoodTypeFilter] = useState('all');
   const [favoriteVersion, setFavoriteVersion] = useState(0);
   const [sortState, setSortState] = useState<DataTableSortState | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +49,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
       setQuery('');
       setSelectedFoodIds(new Set());
       setOnlyFavorites(false);
+      setFoodTypeFilter('all');
       setSortState(null);
     }
   }, [isOpen]);
@@ -68,10 +71,24 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   // A TACO inteira é lida uma vez por abertura. Digitar no campo só filtra o pool já carregado.
   const allFoods = useMemo(() => getAllFoods(), [isOpen, favoriteVersion]);
+  const foodTypeOptions = useMemo(() => {
+    const categories = Array.from(new Set(allFoods.map((food) => food.category || 'Geral')))
+      .sort((first, second) => first.localeCompare(second, 'pt-BR'));
+
+    return [
+      { value: 'all', label: 'Todos os tipos' },
+      ...categories.map((category) => ({ value: category, label: category })),
+    ];
+  }, [allFoods]);
+
   const searchResults = useMemo(() => {
     const searched = query.trim() ? searchTacoFoods(query, allFoods) : allFoods;
-    return onlyFavorites ? searched.filter((food) => food.isFavorite) : searched;
-  }, [allFoods, onlyFavorites, query]);
+    const favoriteFiltered = onlyFavorites ? searched.filter((food) => food.isFavorite) : searched;
+
+    return foodTypeFilter === 'all'
+      ? favoriteFiltered
+      : favoriteFiltered.filter((food) => (food.category || 'Geral') === foodTypeFilter);
+  }, [allFoods, foodTypeFilter, onlyFavorites, query]);
 
   const selectedFoods = useMemo(
     () => allFoods.filter((food) => selectedFoodIds.has(food.id)),
@@ -167,6 +184,20 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
           >
             <Star size={16} aria-hidden="true" className={onlyFavorites ? 'fill-current text-on-warning' : 'text-text-muted group-hover:fill-current group-hover:text-on-warning'} />
           </Button>
+        </div>
+
+        <div className="flex items-end gap-2 pt-2 shrink-0">
+          <SelectField
+            id="food-type-filter"
+            label="Tipo de alimento"
+            value={foodTypeFilter}
+            onValueChange={setFoodTypeFilter}
+            placeholder="Todos os tipos"
+            options={foodTypeOptions}
+            layer="modal"
+            className="w-64"
+            triggerClassName="bg-surface"
+          />
         </div>
 
         <FoodSearchResultsList

@@ -1,5 +1,6 @@
 ﻿import type { FullDietPlan, DietMeal, CarbCyclingVariation } from './dietStore';
 import type { HistoricalDiet } from './patientsStore';
+import { calculateWeeklyCycleAverage } from './dietStore';
 import { normalizeDateToISO } from './date-only';
 import { calculatePresetCalories } from './presetUtils';
 
@@ -14,6 +15,8 @@ export interface PreviousDietSummary {
   carbsG: number;
   fatsG: number;
   mealsCount: number;
+  variationsCount?: number;
+  daysAssignedCount?: number;
   fullPlan?: FullDietPlan;
   historicalDiet?: HistoricalDiet;
 }
@@ -36,7 +39,9 @@ export function buildPreviousDietSummaries(
     seenIds.add(diet.id);
 
     const isCycling = diet.mode === 'carb_cycling';
-    const firstVariation = isCycling && diet.carbCyclingVariations?.length ? diet.carbCyclingVariations[0] : null;
+    const variations = isCycling ? diet.carbCyclingVariations || [] : [];
+    const firstVariation = variations.length > 0 ? variations[0] : null;
+    const cycleAverage = variations.length > 0 ? calculateWeeklyCycleAverage(variations) : null;
 
     let targetKcal = diet.simpleTargetKcal || 0;
     let proteinG = diet.simpleTargetProtein || 0;
@@ -44,12 +49,12 @@ export function buildPreviousDietSummaries(
     let fatsG = diet.simpleTargetFats || 0;
     let mealsCount = (diet.simpleMeals || []).length;
 
-    if (isCycling && firstVariation) {
-      targetKcal = firstVariation.targetKcal || calculatePresetCalories(firstVariation.targetProtein, firstVariation.targetCarbs, firstVariation.targetFats);
-      proteinG = firstVariation.targetProtein || 0;
-      carbsG = firstVariation.targetCarbs || 0;
-      fatsG = firstVariation.targetFats || 0;
-      mealsCount = (firstVariation.meals || []).length;
+    if (isCycling && cycleAverage) {
+      targetKcal = cycleAverage.avgKcal;
+      proteinG = cycleAverage.avgProtein;
+      carbsG = cycleAverage.avgCarbs;
+      fatsG = cycleAverage.avgFats;
+      mealsCount = (firstVariation?.meals || []).length;
     }
 
     if (!targetKcal && (proteinG || carbsG || fatsG)) {
@@ -69,6 +74,8 @@ export function buildPreviousDietSummaries(
       carbsG,
       fatsG,
       mealsCount,
+      variationsCount: isCycling ? variations.length : undefined,
+      daysAssignedCount: isCycling ? cycleAverage?.daysAssignedCount : undefined,
       fullPlan: diet,
     });
   }

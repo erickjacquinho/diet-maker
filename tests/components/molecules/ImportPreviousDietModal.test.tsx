@@ -28,6 +28,46 @@ const mockDiets: PreviousDietSummary[] = [
     carbsG: 200,
     fatsG: 55,
     mealsCount: 3,
+    variationsCount: 2,
+    daysAssignedCount: 7,
+    fullPlan: {
+      id: 'diet-2',
+      patientId: 'patient-1',
+      name: 'Ciclo de Carbos Cut',
+      createdAt: '10/05/2026',
+      updatedAt: '10/05/2026',
+      mode: 'carb_cycling',
+      simpleTargetKcal: 2100,
+      simpleTargetProtein: 180,
+      simpleTargetCarbs: 200,
+      simpleTargetFats: 55,
+      simpleMeals: [],
+      carbCyclingVariationsCount: 2,
+      carbCyclingVariations: [
+        {
+          id: 'var-high',
+          name: 'Dia Alto Carbo',
+          type: 'high',
+          assignedDays: ['seg', 'qua', 'sex'],
+          targetKcal: 2300,
+          targetProtein: 180,
+          targetCarbs: 260,
+          targetFats: 55,
+          meals: [],
+        },
+        {
+          id: 'var-low',
+          name: 'Dia Baixo Carbo',
+          type: 'low',
+          assignedDays: ['ter', 'qui', 'sab', 'dom'],
+          targetKcal: 1950,
+          targetProtein: 180,
+          targetCarbs: 150,
+          targetFats: 55,
+          meals: [],
+        },
+      ],
+    },
   },
 ];
 
@@ -196,6 +236,37 @@ describe('ImportPreviousDietModal', () => {
     expect(screen.getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
   });
 
+  it('should expand and collapse the variations of a carb cycling diet without selecting the row', () => {
+    render(
+      <ImportPreviousDietModal
+        isOpen={true}
+        onClose={vi.fn()}
+        diets={mockDiets}
+        patientName="João Silva"
+        onPullMacrosOnly={vi.fn()}
+        onPullAllMeals={vi.fn()}
+      />
+    );
+
+    const expandButton = screen.getByRole('button', { name: 'Ver variações de Ciclo de Carbos Cut' });
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
+
+    fireEvent.click(expandButton);
+
+    expect(expandButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Dia Baixo Carbo')).toBeInTheDocument();
+    expect(screen.getByText('Média semanal ponderada · 7 dias atribuídos')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Puxar apenas os macros/i })).toBeDisabled();
+
+    fireEvent.click(expandButton);
+
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Variações do ciclo')).not.toBeInTheDocument();
+  });
+
   it('should sort numeric columns through the DataTable contract', () => {
     render(
       <ImportPreviousDietModal
@@ -209,12 +280,12 @@ describe('ImportPreviousDietModal', () => {
     );
 
     const table = screen.getByRole('table', { name: 'Histórico de dietas anteriores para importação' });
-    const sortButton = screen.getByRole('button', { name: 'Ordenar por Refeições' });
+    const sortButton = screen.getByRole('button', { name: 'Ordenar por Calorias' });
     fireEvent.click(sortButton);
 
     const rows = within(table).getAllByRole('row');
     expect(within(rows[1]).getByText('Ciclo de Carbos Cut')).toBeInTheDocument();
-    expect(within(table).getByRole('columnheader', { name: /Refeições/ })).toHaveAttribute('aria-sort', 'ascending');
+    expect(within(table).getByRole('columnheader', { name: /Calorias/ })).toHaveAttribute('aria-sort', 'ascending');
   });
 
   it('should select a diet from the row with Enter and Space', () => {
