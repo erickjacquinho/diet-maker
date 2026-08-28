@@ -11,6 +11,7 @@ import {
   PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_MULTIPLE_ACTIVE_DIETS,
 } from '../fixtures/patient-profile';
+import type { StoredDietRecord } from '@/lib/patientsStore';
 
 describe('patient profile selectors', () => {
   it('selects the latest physical assessment across ISO and pt-BR dates', () => {
@@ -92,7 +93,7 @@ describe('patient profile selectors', () => {
       ],
     };
 
-    const [history] = buildPatientDietHistory([cycle]);
+    const [history] = buildPatientDietHistory([cycle as unknown as StoredDietRecord]);
 
     expect(history).toMatchObject({
       id: 'diet-cycle',
