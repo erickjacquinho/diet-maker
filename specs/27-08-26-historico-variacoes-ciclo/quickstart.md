@@ -93,3 +93,47 @@ Observed manual validation on 2026-08-28:
 - Eight variation rows remained visible in vertical order; the parent and all variation rows measured 44px (`h-table-row`).
 - `Ter, Qui`, no-day and no-meal states were visible; expansion and re-collapse worked through the named control.
 - An initial development-server attempt was inconclusive because HMR/static assets returned 400 responses; the final production-server run passed after rebuilding in isolation.
+
+## Follow-up: compactação do histórico
+
+The compact principal table now presents the plan column as `Simples` or
+`Ciclo de carboidratos`, keeps a compact status column with `Ativo` or
+`Histórico`, and removes the visible prescription name and redundant mode tag.
+View, edit, and delete remain compact icon controls; the view control keeps its
+accessible name, `title`, and callback. The expanded table keeps one row per
+variation, shows the type beside the name, truncates only an overflowing name,
+and keeps all days, macros, calories, and meals visible without horizontal
+scrolling.
+
+Focused follow-up validation:
+
+```powershell
+npm exec -- vitest run tests/components/organisms/patient-diets-table.test.tsx tests/app/pacientes/patient-profile-history.test.tsx --reporter=dot --pool=forks --maxWorkers=1
+npm run type-check
+npm run lint
+$env:NODE_OPTIONS='--max-old-space-size=4096'; npm run build
+npm run resolve:table -- src/components/organisms/patient/PatientDietsTable.tsx
+npm run verify:table -- --strict
+```
+
+Observed follow-up validation on 2026-08-28:
+
+- Focused Vitest: passed, 2 files and 23 tests.
+- Type-check and lint: passed.
+- Production build: passed with the documented heap setting; an earlier default
+  worker attempt exited before compilation output, so the build was rerun with
+  `NODE_OPTIONS` and completed successfully.
+- Table resolver: passed; `PatientDietsTable` resolves to the canonical
+  `DataTable` and table primitives.
+- Global table audit: the target has no error and retains only the known
+  `TABLE016` warning for the uncatalogued `MacroSummary` child. Existing errors
+  remain in unrelated table consumers and are not part of this follow-up.
+- Playwright through `with_server.py` against the development server passed at
+  1024px and 1440px with eight variations. At 1024px, the main table measured
+  `684/684` (`scrollWidth/clientWidth`) and the expanded table `650/650`; at
+  1440px the measurements were `1084/1084` and `1050/1050`. The corresponding
+  containers matched those values, so neither table exposed horizontal scroll.
+- The manual scenario also confirmed one header plus eight variation rows,
+  `Ciclo de carboidratos`, `Ativo`, icon-only view action with an accessible
+  name, full long-name `title`, visible `· Tipo Alto`, and 44px parent/data row
+  heights.

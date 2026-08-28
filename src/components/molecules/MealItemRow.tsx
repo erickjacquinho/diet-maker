@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
+export type DropPosition = 'top' | 'bottom' | null;
+
 export interface MealItemRowProps {
   id?: string;
   index?: number;
@@ -28,10 +30,12 @@ export interface MealItemRowProps {
   onRemove?: () => void;
   isDragging?: boolean;
   isDragOver?: boolean;
+  dragOverPosition?: DropPosition;
   onDragStart?: (index: number) => void;
   onDragEnd?: () => void;
-  onDragOver?: (e: React.DragEvent, index: number) => void;
-  onDrop?: (e: React.DragEvent, index: number) => void;
+  onDragOver?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
+  onDragLeave?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
+  onDrop?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
   isReorderingActive?: boolean;
 }
 
@@ -49,9 +53,11 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   onRemove,
   isDragging = false,
   isDragOver = false,
+  dragOverPosition = null,
   onDragStart,
   onDragEnd,
   onDragOver,
+  onDragLeave,
   onDrop,
 }) => {
 
@@ -89,12 +95,25 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
   return (
     <TableRow
-      onDragOver={(e) => onDragOver?.(e, index)}
-      onDrop={(e) => onDrop?.(e, index)}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOver?.(e, index);
+      }}
+      onDragEnter={(e) => {
+        e.preventDefault();
+      }}
+      onDragLeave={(e) => {
+        onDragLeave?.(e, index);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop?.(e, index);
+      }}
       className={cn(
         'group/row border-b border-border-divider transition-all duration-fast select-none hover:bg-surface-hover',
-        isDragging && 'opacity-40 border-dashed border-primary bg-primary-soft/20',
-        isDragOver && 'border-t-2 border-t-primary ring-1 ring-primary/20 bg-surface'
+        isDragging && 'opacity-30 bg-surface-subtle border-dashed border-border-divider',
+        isDragOver && dragOverPosition === 'top' && 'border-t-2 border-t-primary bg-primary-soft/15 ring-1 ring-primary/20',
+        isDragOver && dragOverPosition === 'bottom' && 'border-b-2 border-b-primary bg-primary-soft/15 ring-1 ring-primary/20'
       )}
     >
       {/* 1. Drag handle */}
@@ -103,10 +122,17 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           draggable
           onDragStart={(e) => {
             e.stopPropagation();
+            if (e.dataTransfer) {
+              e.dataTransfer.setData('text/plain', String(index));
+              e.dataTransfer.effectAllowed = 'move';
+            }
             onDragStart?.(index);
           }}
           onDragEnd={onDragEnd}
-          className="text-text-muted hover:text-text-primary cursor-grab active:cursor-grabbing p-1 -m-1 rounded-control hover:bg-surface-hover transition-colors inline-flex items-center justify-center"
+          className={cn(
+            'p-1 -m-1 rounded-control transition-colors inline-flex items-center justify-center cursor-grab active:cursor-grabbing',
+            isDragOver ? 'text-primary bg-primary-soft' : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+          )}
           title="Arrastar para reordenar"
           aria-label={`Reordenar ${name}`}
         >
@@ -193,9 +219,9 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         {kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
       </TableCell>
 
-      {/* 9. Remover alimento */}
+      {/* 9. Remover alimento (visível apenas em hover / focus-within) */}
       <TableCell className="w-12 px-2 text-center py-2">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-fast group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
           <DeleteIconButton
             size="compact"
             onClick={onRemove}

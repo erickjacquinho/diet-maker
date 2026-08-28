@@ -14,6 +14,13 @@
 
 - Q: Como os dias atribuídos devem ser exibidos na linha de cada variação? → A: Uma única coluna com os dias separados por vírgula e espaço, por exemplo `Ter, Qui`.
 
+### Session 2026-08-28
+
+- Q: Como reduzir a largura da tabela principal? → A: A coluna `Plano Alimentar` exibe somente o tipo `Simples` ou `Ciclo de carboidratos`; o nome da dieta e a tag redundante deixam de ser exibidos.
+- Q: O status deve ser removido? → A: Não nesta etapa; ele permanece em uma coluna própria e compacta, com os rótulos `Ativo` e `Histórico`.
+- Q: Como preservar a leitura sem scroll lateral? → A: As duas tabelas usam toda a largura disponível, removem larguras mínimas desnecessárias e mantêm conteúdo textual controlado; a tabela de variações reduz as colunas de identificação e trunca somente o nome da variação.
+- Q: Como preservar as ações no espaço reduzido? → A: Visualizar cardápio, editar e excluir permanecem como ícones compactos com nome acessível e tooltip.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Consultar todas as variações de um ciclo (Priority: P1)
@@ -89,9 +96,14 @@ Como nutricionista, quero expandir os detalhes sem abrir, editar ou excluir a pr
 - **FR-010**: O controle de expansão MUST alternar somente os detalhes do ciclo, preservar o resumo e a altura da linha principal e não disparar as ações de visualizar cardápio, editar ou excluir.
 - **FR-011**: O controle de expansão MUST expor estado aberto/fechado, nome acessível, relação com a área expandida e operação equivalente por teclado e ponteiro.
 - **FR-012**: A tabela de variações MUST fornecer cabeçalhos ou contexto equivalente para que cada valor seja compreensível sem depender de posição visual ou cor; um cabeçalho visualmente discreto pode continuar disponível semanticamente.
-- **FR-013**: Dietas simples MUST preservar sua apresentação, seus valores, sua ordenação e suas ações atuais no histórico.
+- **FR-013**: Dietas simples MUST preservar seus valores, sua ordenação, suas ações e a ausência de detalhes de ciclo no histórico; a apresentação compartilhada passa a usar o tipo da dieta e os novos rótulos de status definidos nesta sessão.
 - **FR-014**: A ordem das variações MUST seguir a ordem registrada na prescrição histórica, salvo quando uma regra de ordenação explícita do produto já estiver definida.
 - **FR-015**: O conteúdo histórico MUST ser somente leitura; a expansão não pode editar dias, metas ou refeições.
+- **FR-016**: A célula `Plano Alimentar` MUST exibir somente `Simples` ou `Ciclo de carboidratos`, sem o nome da prescrição e sem uma tag adicional de modo.
+- **FR-017**: O status MUST permanecer em coluna própria, com largura compacta e os rótulos `Ativo` e `Histórico`.
+- **FR-018**: A tabela principal e a tabela expandida de variações MUST ocupar a largura disponível sem scroll horizontal em viewports desktop a partir de 1024px.
+- **FR-019**: As ações de visualizar, editar e excluir MUST permanecer disponíveis como controles iconográficos compactos, com `title`, nome acessível e os callbacks/links existentes.
+- **FR-020**: Na tabela de variações, a coluna de identificação MUST preservar o tipo visível e truncar apenas o nome longo, mantendo o valor completo consultável sem aumentar a altura da linha.
 
 ### Non-Functional Requirements
 
@@ -100,6 +112,7 @@ Como nutricionista, quero expandir os detalhes sem abrir, editar ou excluir a pr
 - **NFR-003**: A expansão MUST suportar visualmente pelo menos oito variações sem sobreposição, clipping de valores críticos ou mudança inesperada da altura padrão das linhas.
 - **NFR-004**: A visualização MUST manter a ordem de leitura proteína, carboidratos, gorduras, calorias e refeições de forma consistente entre as variações.
 - **NFR-005**: A apresentação MUST usar a linguagem visual, tipografia, espaçamentos, cores semânticas, ícones e estados definidos pelo Design System vigente.
+- **NFR-006**: O layout MUST manter `scrollWidth` menor ou igual a `clientWidth` na tabela principal e na tabela expandida em 1024px e 1440px, sem clipping de dados críticos.
 
 ### Key Entities
 
@@ -115,8 +128,10 @@ Como nutricionista, quero expandir os detalhes sem abrir, editar ou excluir a pr
 - **SC-002**: A abertura e o fechamento da expansão não alteram a altura da linha principal, o resumo ponderado, o status ou as ações da prescrição.
 - **SC-003**: Um nutricionista consegue identificar os dias, macros, calorias e refeições de qualquer variação em até 10 segundos após expandir a prescrição.
 - **SC-004**: Variações sem dias ou refeições permanecem identificáveis em 100% dos casos testados, com mensagens explícitas de ausência.
-- **SC-005**: Dietas simples continuam passando pelos cenários existentes de histórico sem mudança observável de apresentação ou comportamento.
+- **SC-005**: Dietas simples continuam passando pelos cenários existentes de histórico sem mudança observável de comportamento, ações, valores ou ordenação; a troca intencional para o rótulo de tipo não é considerada regressão.
 - **SC-006**: Todos os controles da expansão são operáveis por teclado e possuem nome e estado acessíveis em 100% dos cenários testados.
+- **SC-007**: Em 1024px e 1440px, a tabela principal e a tabela expandida não exibem scroll horizontal e mantêm todos os valores críticos consultáveis.
+- **SC-008**: Em 100% dos registros testados, a célula de plano informa o tipo da dieta e o status usa os rótulos `Ativo` ou `Histórico`.
 
 ## Assumptions
 
@@ -127,3 +142,5 @@ Como nutricionista, quero expandir os detalhes sem abrir, editar ou excluir a pr
 - A quantidade de variações esperada para a primeira versão é pequena, mas a visualização deve permanecer previsível pelo menos até oito variações.
 - O escopo atual é desktop a partir de 1024px; mobile, tablet e dark mode permanecem fora do escopo.
 - Não haverá nova persistência, sincronização externa, edição inline ou alteração no construtor de ciclos como parte desta feature.
+- A compactação visual pode substituir o botão textual de visualizar por um ícone, desde que seu nome acessível, tooltip e comportamento sejam preservados.
+- A ausência de scroll horizontal será obtida por distribuição compacta das colunas e truncamento acessível de texto longo; dados críticos não serão ocultados.

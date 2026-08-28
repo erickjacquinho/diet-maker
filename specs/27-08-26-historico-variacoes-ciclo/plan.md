@@ -10,7 +10,7 @@
 
 Reformular a expansão de uma prescrição de ciclo de carboidratos no histórico do perfil para apresentar uma linha tabular por variação, com uma única coluna de dias no formato `Ter, Qui`, macros, calorias e refeições. A linha principal da prescrição continua sendo o resumo da média semanal ponderada e permanece com altura padrão. A mudança reutiliza o histórico já normalizado e os contratos visuais existentes, sem alterar o armazenamento da dieta ou o construtor de ciclos.
 
-The implementation will keep the outer prescription table and its existing actions intact. The expanded content will become a compact, read-only variation table/list with stable rows, explicit empty states, canonical weekly-day ordering, accessible semantic context, and no card grid.
+The implementation will keep the outer prescription table and its existing action contracts intact while making its controls iconographic and compact. The `Plano Alimentar` cell will show only the diet type, and the status will remain as a compact dedicated column with `Ativo`/`Histórico`. The expanded content will remain a compact, read-only variation table/list with stable rows, explicit empty states, canonical weekly-day ordering, accessible semantic context, no card grid, and no horizontal scrolling.
 
 ## Technical Context
 
@@ -34,7 +34,7 @@ The implementation will keep the outer prescription table and its existing actio
 
 **Performance Goals**: Expanding a history row with up to eight variations must remain visually stable and immediately usable, without a layout defect caused by card wrapping or row-content overflow.
 
-**Constraints**: Main and variation rows must preserve the standard table height; days are one comma-separated text value; the history is read-only; desktop scope, WCAG 2.2 AA, canonical tokens, accessible table context, and existing row actions are mandatory.
+**Constraints**: Main and variation rows must preserve the standard table height; the main and variation tables must fit the available desktop width from 1024px without horizontal scrolling; the plan cell shows only the diet type; status remains a compact dedicated column; days are one comma-separated text value; long variation names truncate with an accessible full-value path; the history is read-only; desktop scope, WCAG 2.2 AA, canonical tokens, accessible table context, and existing action contracts are mandatory.
 
 **Scale/Scope**: One profile history table, one expanded cycle at a time, one row per historical variation, validated for one through at least eight variations. No changes to diet construction, persistence, imports, or external integrations.
 
@@ -103,6 +103,14 @@ tests/
 - Keep the visual row at the standard table height. Long text receives an accessible full-value path instead of forcing a second content line.
 - Keep semantic headers available even if their visual treatment is discreet; do not remove context solely to make the view look simpler.
 - Keep the parent prescription row and its weighted weekly summary unchanged when the details are opened or closed.
+- Reduce the variation-identification column to the space needed for the visible type and truncate only the variation name; keep the remaining metric columns compact and prevent horizontal scrolling.
+
+### Main prescription table density
+
+- Keep the existing column order and dedicated status column, but replace the visible plan name/tag combination with the mode label `Simples` or `Ciclo de carboidratos`.
+- Use `Ativo` and `Histórico` for status and keep the status badge compact rather than allocating unnecessary minimum width.
+- Render view, edit, and delete as compact icon controls; preserve their accessible names, titles, links, callbacks, and action isolation.
+- Use a full-width fixed table without unnecessary minimum-width constraints so the principal table does not create horizontal overflow from 1024px onward.
 
 ### Data flow
 
@@ -124,6 +132,7 @@ tests/
 - Keep the variation data read-only and ensure the expansion control cannot trigger view, edit, or delete actions.
 - Provide semantic table headers or an equivalent accessible name/value relationship for every data column.
 - Keep units attached to macro, calorie, and meal values so the table does not rely on visual position or color.
+- Verify both table containers at 1024px and 1440px with no horizontal overflow and no clipping of critical values.
 
 ## Constitution Check — Post-Design
 
@@ -137,4 +146,4 @@ tests/
 
 ## Complexity Tracking
 
-No constitution violations. The feature remains within the existing profile organism, selector, canonical table family, and test locations.
+No constitution violations. The feature remains within the existing profile organism, selector, canonical table family, and test locations; the follow-up density changes do not alter domain types or persistence.

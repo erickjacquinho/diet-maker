@@ -64,4 +64,24 @@ describe('useDietMealActions item deletion undo', () => {
     expect(result.current.meals[0].items.map((item) => item.id)).toEqual(['item-1', 'item-2', 'item-3']);
     expect(result.current.meals[0].items[1].quantityGrams).toBe(120);
   });
+
+  it('reorders items within a meal correctly', () => {
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState(mealsFixture);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      // Move 'Frango' (index 2) to first position (index 0)
+      result.current.actions.handleReorderItems('meal-1', 2, 0);
+    });
+
+    expect(result.current.meals[0].items.map((item) => item.id)).toEqual(['item-3', 'item-1', 'item-2']);
+  });
 });

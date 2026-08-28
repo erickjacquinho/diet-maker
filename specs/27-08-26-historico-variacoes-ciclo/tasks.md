@@ -153,3 +153,22 @@ Task: T004 [US1] Profile-history integration coverage for four or more variation
 - Every task identifies an exact file or feature artifact and an observable outcome.
 - The feature does not add persistence, migrations, external interfaces, editing, or changes to the diet constructor.
 - Implementation must be executed through `/speckit-implement` after human validation of these artifacts.
+
+## Phase 7: Follow-up — Compactação do histórico dietético
+
+**Purpose**: Apply the approved density and labeling changes to both the principal prescription table and the expanded variation table without changing domain data or action contracts.
+
+- [X] T021 [skill: $tdd] [P] Add regression scenarios for type-only plan labels, compact `Ativo`/`Histórico` statuses, removed visible diet name/tag, and icon-only action names in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T022 [skill: $tdd] [P] Add variation scenarios for long-name truncation with visible type, preserved row height, and complete accessible title in `tests/components/organisms/patient-diets-table.test.tsx`.
+- [X] T023 [skill: $tdd] [P] Add profile-history integration coverage for the new labels, retained weighted summary, preserved action behavior, and simple-diet regression in `tests/app/pacientes/patient-profile-history.test.tsx`.
+- [X] T024 [skill: $proj-table-adequation-v2] [US1] Compact the principal table layout, replace the plan cell content with the diet type, update status labels, and render the view action as an icon while preserving all action contracts in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T025 [skill: $proj-table-adequation-v2] [US1] Reduce unnecessary variation-column width, keep the type visible, truncate only long variation names, and prevent horizontal overflow in the expanded table in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T026 [skill: $ui-styling] [US2] Apply canonical compact spacing, focus, tooltip, accessible-name, and no-scroll presentation rules to both table paths in `src/components/organisms/patient/PatientDietsTable.tsx`.
+- [X] T027 [skill: $webapp-testing] [P] Validate both tables at 1024px and 1440px with Playwright, including `scrollWidth <= clientWidth`, icon actions, long-name truncation, eight variations, and standard row heights; record evidence in `specs/27-08-26-historico-variacoes-ciclo/quickstart.md`.
+- [X] T028 [skill: general] Update `specs/27-08-26-historico-variacoes-ciclo/quickstart.md` and `implementation-log.md` with the follow-up acceptance criteria, commands, results, and known baseline limitations.
+
+### Follow-up Dependencies
+
+- T021, T022, and T023 define the regression contract before implementation tasks T024–T026.
+- T024 and T025 may proceed in parallel after T021–T023 because they affect separate table paths within the same organism and must be coordinated before T026.
+- T027 and T028 depend on all implementation tasks and their focused regressions.

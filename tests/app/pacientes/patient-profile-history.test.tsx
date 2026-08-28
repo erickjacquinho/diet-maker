@@ -109,8 +109,9 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Histórico de prescrições dietéticas/,
     });
     expect(dietsTable).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Plano Ativo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Simples')).toBeInTheDocument();
+    expect(within(dietsTable).queryByText('Plano cutting agosto')).not.toBeInTheDocument();
+    expect(within(dietsTable).getByText('Ativo')).toBeInTheDocument();
     expect(within(dietsTable).getByRole('cell', { name: /2020\s+kcal/ })).toBeInTheDocument();
     expect(within(dietsTable).getByText(/P\s*150g/)).toBeInTheDocument();
 
@@ -172,7 +173,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
     const dietsTable = await screen.findByRole('table', {
       name: /Histórico de prescrições dietéticas/,
     });
-    expect(within(dietsTable).getByText('Ciclo de Carboidratos')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Ciclo de carboidratos')).toBeInTheDocument();
     expect(within(dietsTable).getByText('2100 kcal')).toBeInTheDocument();
     expect(within(dietsTable).getByText(/C\s*197g/)).toBeInTheDocument();
 
@@ -181,8 +182,10 @@ describe('PatientDetailPage history with two stacked tables', () => {
     );
 
     expect(within(dietsTable).getByText('Variações do ciclo')).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Dia Alto Carbo · Tipo Alto')).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Dia Baixo Carbo · Tipo Baixo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText(/Tipo\s+Alto/)).toBeInTheDocument();
+    expect(within(dietsTable).getByText('Dia Baixo Carbo')).toBeInTheDocument();
+    expect(within(dietsTable).getByText(/Tipo\s+Baixo/)).toBeInTheDocument();
   });
 
   it('keeps the weighted parent summary while displaying four stored variations as rows', async () => {
@@ -228,7 +231,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
     const dietsTable = await screen.findByRole('table', {
       name: /Histórico de prescrições dietéticas/,
     });
-    expect(within(dietsTable).getByText('Plano ciclo quatro variações')).toBeInTheDocument();
+    expect(within(dietsTable).queryByText('Plano ciclo quatro variações')).not.toBeInTheDocument();
     expect(within(dietsTable).getByText('2100 kcal')).toBeInTheDocument();
     expect(within(dietsTable).getByText(/C\s*207g/)).toBeInTheDocument();
 
@@ -242,10 +245,14 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: 'Variações do ciclo de Plano ciclo quatro variações',
     });
     expect(within(variationTable).getAllByRole('row')).toHaveLength(5);
-    expect(within(variationTable).getByText('Dia Alto · Tipo Alto')).toBeInTheDocument();
-    expect(within(variationTable).getByText('Dia Moderado · Tipo Moderado')).toBeInTheDocument();
-    expect(within(variationTable).getByText('Dia Baixo · Tipo Baixo')).toBeInTheDocument();
-    expect(within(variationTable).getByText('Dia Livre · Tipo Zero')).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Alto')).toBeInTheDocument();
+    expect(within(variationTable).getByText(/Tipo\s+Alto/)).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Moderado')).toBeInTheDocument();
+    expect(within(variationTable).getByText(/Tipo\s+Moderado/)).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Baixo')).toBeInTheDocument();
+    expect(within(variationTable).getByText(/Tipo\s+Baixo/)).toBeInTheDocument();
+    expect(within(variationTable).getByText('Dia Livre')).toBeInTheDocument();
+    expect(within(variationTable).getByText(/Tipo\s+Zero/)).toBeInTheDocument();
     expect(within(variationTable).getByText('Nenhum dia atribuído')).toBeInTheDocument();
   });
 
@@ -272,7 +279,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Histórico de prescrições dietéticas/,
     });
     expect(dietsTable).toBeInTheDocument();
-    expect(within(dietsTable).getByText('Plano cutting agosto')).toBeInTheDocument();
+    expect(within(dietsTable).queryByText('Plano cutting agosto')).not.toBeInTheDocument();
 
     // Clica no botão de excluir ao lado de editar
     const deleteBtn = screen.getByRole('button', {

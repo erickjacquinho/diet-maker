@@ -115,7 +115,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   const [draftTime, setDraftTime] = useState(time);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragOverState, setDragOverState] = useState<{ index: number; position: 'top' | 'bottom' } | null>(null);
 
   useEffect(() => setDraftTitle(title), [title]);
   useEffect(() => setDraftTime(time), [time]);
@@ -413,25 +413,56 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                       index={idx}
                       {...item}
                       isDragging={draggedIndex === idx}
-                      isDragOver={dragOverIndex === idx && draggedIndex !== idx}
+                      isDragOver={dragOverState?.index === idx && draggedIndex !== idx}
+                      dragOverPosition={dragOverState?.index === idx && draggedIndex !== idx ? dragOverState.position : null}
                       onDragStart={(index) => setDraggedIndex(index)}
                       onDragEnd={() => {
                         setDraggedIndex(null);
-                        setDragOverIndex(null);
+                        setDragOverState(null);
                       }}
                       onDragOver={(e, index) => {
                         e.preventDefault();
-                        if (draggedIndex !== null && draggedIndex !== index) {
-                          setDragOverIndex(index);
+                        if (e.dataTransfer) {
+                          e.dataTransfer.dropEffect = 'move';
+                        }
+                        if (draggedIndex === null || draggedIndex === index) {
+                          setDragOverState(null);
+                          return;
+                        }
+                        const clientY = typeof e.clientY === 'number' ? e.clientY : (e.nativeEvent as MouseEvent)?.clientY ?? 0;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const isBottomHalf = (clientY - rect.top) > (rect.height / 2);
+                        const position = isBottomHalf ? 'bottom' : 'top';
+                        setDragOverState({ index, position });
+                      }}
+                      onDragLeave={(e, index) => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                          if (dragOverState?.index === index) {
+                            setDragOverState(null);
+                          }
                         }
                       }}
                       onDrop={(e, index) => {
                         e.preventDefault();
-                        if (draggedIndex !== null && draggedIndex !== index) {
-                          onReorderItems?.(draggedIndex, index);
+                        e.stopPropagation();
+                        const source = draggedIndex !== null
+                          ? draggedIndex
+                          : (e.dataTransfer && e.dataTransfer.getData('text/plain') ? Number(e.dataTransfer.getData('text/plain')) : null);
+
+                        if (source !== null && !isNaN(source)) {
+                          const clientY = typeof e.clientY === 'number' ? e.clientY : (e.nativeEvent as MouseEvent)?.clientY ?? 0;
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const isBottomHalf = (clientY - rect.top) > (rect.height / 2);
+                          let target = isBottomHalf ? index + 1 : index;
+                          if (source < target) {
+                            target -= 1;
+                          }
+                          if (source !== target) {
+                            onReorderItems?.(source, target);
+                          }
                         }
                         setDraggedIndex(null);
-                        setDragOverIndex(null);
+                        setDragOverState(null);
                       }}
                       onQuantityChange={(newGrams) => onQuantityChange && onQuantityChange(idx, newGrams)}
                       onSubstitute={() => onSubstituteItem && onSubstituteItem(idx)}

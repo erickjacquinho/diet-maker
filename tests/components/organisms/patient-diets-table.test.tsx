@@ -82,23 +82,30 @@ describe('PatientDietsTable', () => {
   it('renders table columns, status badges and macros correctly', () => {
     render(<PatientDietsTable patientId="p1" diets={mockDiets} onOpenReadOnlyDiet={vi.fn()} />);
 
-    expect(screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ })).toBeInTheDocument();
-    expect(screen.getByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(screen.getByText('Plano Ativo')).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ });
+    const rows = within(table).getAllByRole('row');
+    expect(within(rows[1]).getByText('Simples')).toBeInTheDocument();
+    expect(rows[1]).not.toHaveTextContent('Plano cutting agosto');
+    expect(within(rows[1]).getByText('Ativo')).toBeInTheDocument();
+    expect(rows[1]).toHaveClass('hover:bg-primary-soft/30');
     expect(screen.getByText('2020 kcal')).toBeInTheDocument();
     expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(screen.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(screen.getByText(/G\s*60g/)).toBeInTheDocument();
 
-    expect(screen.getByText('Dieta Manutenção Julho')).toBeInTheDocument();
-    expect(screen.getByText('Histórica')).toBeInTheDocument();
+    expect(within(rows[2]).getByText('Simples')).toBeInTheDocument();
+    expect(rows[2]).not.toHaveTextContent('Dieta Manutenção Julho');
+    expect(within(rows[2]).getByText('Histórico')).toBeInTheDocument();
+    expect(rows[2]).toHaveClass('hover:bg-transparent');
     expect(screen.getByText('2400 kcal')).toBeInTheDocument();
   });
 
   it('renders the weighted cycle summary and mode label', () => {
     render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
 
-    expect(screen.getByText('Ciclo de Carboidratos')).toBeInTheDocument();
+    const parentRow = screen.getAllByRole('row')[1];
+    expect(within(parentRow).getByText('Ciclo de carboidratos')).toBeInTheDocument();
+    expect(parentRow).not.toHaveTextContent('Plano ciclo agosto');
     expect(screen.getByText('2100 kcal')).toBeInTheDocument();
     expect(screen.getByText(/P\s*180g/)).toBeInTheDocument();
     expect(screen.getByText(/C\s*197g/)).toBeInTheDocument();
@@ -112,8 +119,36 @@ describe('PatientDietsTable', () => {
     render(<PatientDietsTable patientId="p1" diets={[cycleDiet]} onOpenReadOnlyDiet={vi.fn()} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Plano ciclo agosto');
+    expect(rows[1]).toHaveTextContent('Ciclo de carboidratos');
+    expect(rows[1]).not.toHaveTextContent('Plano ciclo agosto');
     expect(rows[1]).toHaveClass('h-table-row');
+  });
+
+  it('keeps prescription actions as compact named icons', () => {
+    const handleOpen = vi.fn();
+    render(
+      <PatientDietsTable
+        patientId="p1"
+        diets={mockDiets}
+        onOpenReadOnlyDiet={handleOpen}
+        onDeleteDiet={vi.fn()}
+      />,
+    );
+
+    const simpleRow = screen.getAllByRole('row')[1];
+    const viewButton = within(simpleRow).getByRole('button', {
+      name: 'Ver cardápio completo da dieta Plano cutting agosto',
+    });
+    expect(viewButton.parentElement).toHaveClass('opacity-0');
+    expect(viewButton.parentElement).toHaveClass('group-hover:opacity-100');
+    expect(viewButton.parentElement).toHaveClass('group-focus-within:opacity-100');
+    expect(viewButton).toHaveAttribute('title', 'Ver cardápio completo da dieta Plano cutting agosto');
+    expect(viewButton).not.toHaveTextContent('Ver Cardápio');
+    expect(within(simpleRow).getByRole('link', { name: 'Editar Plano cutting agosto no Construtor de Dietas' })).toBeInTheDocument();
+    expect(within(simpleRow).getByRole('button', { name: 'Excluir prescrição Plano cutting agosto' })).toBeInTheDocument();
+
+    fireEvent.click(viewButton);
+    expect(handleOpen).toHaveBeenCalledWith(mockDiets[0]);
   });
 
   it('preserves the parent summary and standard height before, during and after expansion', () => {
@@ -148,7 +183,8 @@ describe('PatientDietsTable', () => {
     expect(expandButton).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByRole('row')[1]).toHaveClass('h-table-row');
     expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
-    expect(screen.getByText('Dia Alto Carbo · Tipo Alto')).toBeInTheDocument();
+    expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
+    expect(screen.getByText(/Tipo\s+Alto/)).toBeInTheDocument();
     expect(screen.getByText('Seg, Qua, Sex')).toBeInTheDocument();
     expect(screen.getByText('2300 kcal')).toBeInTheDocument();
     expect(screen.getByText('4 refeições')).toBeInTheDocument();
@@ -206,6 +242,28 @@ describe('PatientDietsTable', () => {
     expect(within(variationTable).getByText('Nenhuma refeição')).toBeInTheDocument();
   });
 
+  it('truncates only a long variation name while keeping its type visible', () => {
+    const longName = 'Dia com uma descrição histórica muito longa para a coluna';
+    const diet: HistoricalDiet = {
+      ...cycleDiet,
+      carbCyclingVariations: [{
+        ...cycleDiet.carbCyclingVariations![0],
+        name: longName,
+      }],
+    };
+
+    render(<PatientDietsTable patientId="p1" diets={[diet]} onOpenReadOnlyDiet={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
+
+    const variationTable = screen.getByRole('table', {
+      name: 'Variações do ciclo de Plano ciclo agosto',
+    });
+    const variationRow = within(variationTable).getAllByRole('row')[1];
+    expect(variationRow).toHaveClass('h-table-row');
+    expect(within(variationRow).getByTitle(longName)).toHaveClass('truncate');
+    expect(within(variationRow).getByText(/Tipo\s+Alto/)).toBeInTheDocument();
+  });
+
   it('shows a contextual empty state for a cycle without historical variations', () => {
     const diet: HistoricalDiet = {
       ...cycleDiet,
@@ -239,17 +297,26 @@ describe('PatientDietsTable', () => {
     const variationTable = screen.getByRole('table', {
       name: 'Variações do ciclo de Plano ciclo agosto',
     });
+    expect(screen.getByTestId('diet-cycle-details').closest('tr')).toHaveClass(
+      'hover:bg-surface-subtle/40',
+    );
+    expect(within(variationTable).getAllByRole('row')[1]).toHaveClass('hover:bg-surface');
     expect(within(variationTable).getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'Variação',
       'Dias',
-      'Proteína',
-      'Carboidratos',
-      'Gorduras',
+      'Macronutrientes',
       'Calorias',
       'Refeições',
     ]);
-    expect(within(variationTable).getAllByText('180 g')).toHaveLength(2);
+    expect(variationTable.parentElement).toHaveClass('rounded-surface', 'border', 'overflow-hidden');
+    expect(within(variationTable).getAllByRole('columnheader')[3]).toHaveClass('text-center');
+    const macroSummaries = within(variationTable).getAllByTestId('macro-summary');
+    expect(macroSummaries).toHaveLength(2);
+    expect(macroSummaries[0]).toHaveTextContent(/P\s*180g/);
+    expect(macroSummaries[0]).toHaveTextContent(/C\s*260g/);
+    expect(macroSummaries[0]).toHaveTextContent(/G\s*55g/);
     expect(within(variationTable).getByText('2300 kcal')).toBeInTheDocument();
+    expect(within(variationTable).getByText('2300 kcal').closest('td')).toHaveClass('text-center');
     expect(within(variationTable).getByText('4 refeições')).toBeInTheDocument();
   });
 

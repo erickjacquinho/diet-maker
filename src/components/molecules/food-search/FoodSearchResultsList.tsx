@@ -43,7 +43,7 @@ export function FoodSearchResultsList({
         headerClassName: 'w-80 px-3 text-left',
         className: 'w-80 h-table-row-food text-left py-1 px-3 font-bold text-style-body-small text-text-primary',
         cell: (food) => (
-            <div className="grid h-full min-w-0 content-center">
+            <div className="grid h-full min-w-0 content-center -mt-1.5">
               <div className="flex min-w-0 items-center gap-0.5 whitespace-nowrap">
                 <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
@@ -193,7 +193,7 @@ export function FoodSearchResultsList({
                 if (onToggleAll && changedFoods.length === searchResults.length) {
                   onToggleAll();
                 } else {
-                  changedFoods.forEach(onToggleFood);
+                  changedFoods.forEach((food) => onToggleFood(food));
                 }
               }
             },

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, ChevronDown, Eye, Utensils } from 'lucide-react';
+import { Calendar, ChevronDown, Eye } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,40 +31,44 @@ const columns: DataTableColumnDef<HistoricalDiet>[] = [
   {
     id: 'date',
     header: 'Data de Prescrição',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-36',
+    headerClassName: 'w-1/6 whitespace-nowrap px-2 py-3',
     cell: () => null,
   },
   {
     id: 'name',
     header: 'Plano Alimentar',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-56',
+    headerClassName: 'w-1/4 whitespace-nowrap px-2 py-3',
     cell: () => null,
   },
   {
     id: 'status',
     header: 'Status',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-32',
+    headerClassName: 'w-1/12 whitespace-nowrap px-2 py-3 text-center',
     cell: () => null,
   },
   {
     id: 'macros',
     header: 'Macronutrientes',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-52',
+    headerClassName: 'w-1/4 whitespace-nowrap px-2 py-3',
     cell: () => null,
   },
   {
     id: 'calories',
     header: 'Calorias',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-28',
+    headerClassName: 'w-1/12 whitespace-nowrap px-2 py-3 text-center',
     cell: () => null,
   },
   {
     id: 'actions',
     header: 'Ações',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-48',
+    headerClassName: 'w-1/6 whitespace-nowrap px-2 py-3 text-right',
     cell: () => null,
   },
 ];
+
+function formatDietType(diet: HistoricalDiet): string {
+  return diet.mode === 'carb_cycling' ? 'Ciclo de carboidratos' : 'Simples';
+}
 
 function formatAssignedDays(days: string[] = []): string {
   const uniqueDays = Array.from(new Set(days));
@@ -105,7 +109,10 @@ function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
   );
 
   return (
-    <TableRow id={`diet-cycle-details-${diet.id}`} className="bg-surface-subtle/40">
+    <TableRow
+      id={`diet-cycle-details-${diet.id}`}
+      className="bg-surface-subtle/40 hover:bg-surface-subtle/40"
+    >
       <TableCell colSpan={6} className="border-b border-t border-border-subtle p-4">
         <div className="flex flex-col gap-3" data-testid="diet-cycle-details">
           <div className="flex items-center justify-between gap-3">
@@ -122,58 +129,63 @@ function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
           {variations.length > 0 ? (
             <Table
               aria-label={`Variações do ciclo de ${diet.name}`}
-              className="table-fixed border border-border-subtle bg-surface"
+              containerClassName="overflow-hidden rounded-surface border border-border-subtle"
+              className="w-full table-fixed bg-surface"
             >
               <TableCaption className="sr-only">
                 Variações históricas do ciclo de {diet.name}
               </TableCaption>
               <TableHeader>
                 <TableRow className="bg-surface-subtle hover:bg-surface-subtle">
-                  <TableHead scope="col" className="h-table-row w-1/4 px-3 py-1">Variação</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/6 px-3 py-1">Dias</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Proteína</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Carboidratos</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Gorduras</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Calorias</TableHead>
-                  <TableHead scope="col" className="h-table-row w-1/12 px-3 py-1">Refeições</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/3 px-2 py-1">Variação</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/6 px-2 py-1">Dias</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/4 px-2 py-1">Macronutrientes</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/12 px-2 py-1 text-center">Calorias</TableHead>
+                  <TableHead scope="col" className="h-table-row w-1/6 px-2 py-1">Refeições</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {variations.map((variation) => {
                   const assignedDays = formatVariationDays(variation.assignedDays);
                   const variationType = formatVariationType(variation);
-                  const variationLabel = `${variation.name} · Tipo ${variationType}`;
 
                   return (
-                    <TableRow key={variation.id} className="h-table-row">
-                      <TableCell
-                        className="h-table-row max-w-0 whitespace-nowrap px-3 py-1"
-                        title={variationLabel}
-                      >
-                        <span className={`block truncate ${textStyle('table-cell-strong')}`}>
-                          {variationLabel}
-                        </span>
+                    <TableRow key={variation.id} className="h-table-row bg-surface hover:bg-surface">
+                      <TableCell className="h-table-row max-w-0 whitespace-nowrap px-2 py-1">
+                        <div className="flex min-w-0 items-center gap-1">
+                          <span
+                            className={`min-w-0 truncate ${textStyle('table-cell-strong')}`}
+                            title={variation.name}
+                          >
+                            {variation.name}
+                          </span>
+                          <span className={`shrink-0 ${textStyle('table-cell-strong')}`}>
+                            · Tipo {variationType}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell
-                        className={`h-table-row max-w-0 whitespace-nowrap px-3 py-1 ${textStyle('metadata')}`}
+                        className={`h-table-row max-w-0 whitespace-nowrap px-2 py-1 ${textStyle('metadata')}`}
                         title={assignedDays}
                       >
                         <span className="block truncate">{assignedDays}</span>
                       </TableCell>
-                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
-                        <span className={textStyle('table-number')}>{variation.proteinG} g</span>
+                      <TableCell className="h-table-row min-w-0 whitespace-nowrap px-2 py-1">
+                        <MacroSummary
+                          protein={variation.proteinG}
+                          carbs={variation.carbsG}
+                          fats={variation.fatsG}
+                          showKcal={false}
+                          className={textStyle('table-number')}
+                        />
                       </TableCell>
-                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
-                        <span className={textStyle('table-number')}>{variation.carbsG} g</span>
-                      </TableCell>
-                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
-                        <span className={textStyle('table-number')}>{variation.fatsG} g</span>
-                      </TableCell>
-                      <TableCell className="h-table-row whitespace-nowrap px-3 py-1 tabular-nums">
-                        <span className={textStyle('table-number')}>{variation.targetKcal} kcal</span>
+                      <TableCell className="h-table-row whitespace-nowrap px-2 py-1 text-center tabular-nums">
+                        <span className={`font-bold text-text-primary ${textStyle('table-number')}`}>
+                          {variation.targetKcal} kcal
+                        </span>
                       </TableCell>
                       <TableCell
-                        className={`h-table-row whitespace-nowrap px-3 py-1 ${textStyle('metadata')}`}
+                        className={`h-table-row whitespace-nowrap px-2 py-1 ${textStyle('metadata')}`}
                       >
                         {formatVariationMeals(variation.mealsCount)}
                       </TableCell>
@@ -183,7 +195,9 @@ function DietCycleDetails({ diet }: { diet: HistoricalDiet }) {
               </TableBody>
             </Table>
           ) : (
-            <p className={textStyle('caption')}>Este ciclo não possui variações configuradas.</p>
+            <p className={textStyle('caption')}>
+              Este ciclo não possui variações configuradas.
+            </p>
           )}
         </div>
       </TableCell>
@@ -212,35 +226,28 @@ export function DietTableRow({
 
   return (
     <TableRow
-      className={`h-table-row transition-colors ${
+      className={`group h-table-row transition-colors ${
         isActive
-          ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/50'
-          : 'hover:bg-surface-hover'
+        ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/30'
+          : 'bg-transparent hover:bg-transparent'
       }`}
     >
       {/* 1. Data */}
-      <TableCell className="whitespace-nowrap px-4 py-1">
+      <TableCell className="whitespace-nowrap px-1 py-1">
         <div className="flex items-center gap-1.5">
           <Calendar size={13} className="shrink-0 text-text-muted" aria-hidden="true" />
           <span className={textStyle('table-cell-strong')}>{diet.date}</span>
         </div>
       </TableCell>
 
-      {/* 2. Nome do Plano */}
-      <TableCell className="whitespace-nowrap px-4 py-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <Utensils size={14} className="shrink-0 text-primary" aria-hidden="true" />
+      {/* 2. Tipo do Plano */}
+      <TableCell className="min-w-0 whitespace-nowrap px-1 py-1">
+        <div className="flex min-w-0 items-center gap-1">
           <span
-            className={`min-w-0 truncate font-semibold text-text-primary ${textStyle('body-strong')}`}
-            title={diet.name}
+            className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
           >
-            {diet.name}
+            {formatDietType(diet)}
           </span>
-          {isCarbCycling && (
-            <Badge variant="primary" className="shrink-0">
-              Ciclo de Carboidratos
-            </Badge>
-          )}
           {hasCycleDetails && (
             <Button
               type="button"
@@ -271,14 +278,14 @@ export function DietTableRow({
       </TableCell>
 
       {/* 3. Status */}
-      <TableCell className="whitespace-nowrap px-4 py-1 text-center">
-        <Badge variant={isActive ? 'primary' : 'neutral'}>
-          {isActive ? 'Plano Ativo' : 'Histórica'}
+      <TableCell className="whitespace-nowrap px-1 py-1 text-center">
+        <Badge variant={isActive ? 'primary' : 'neutral'} className="px-1">
+          {isActive ? 'Ativo' : 'Histórico'}
         </Badge>
       </TableCell>
 
       {/* 4. Macros */}
-      <TableCell className="whitespace-nowrap px-4 py-1">
+      <TableCell className="min-w-0 whitespace-nowrap px-1 py-1">
         <MacroSummary
           protein={diet.proteinG}
           carbs={diet.carbsG}
@@ -289,25 +296,25 @@ export function DietTableRow({
       </TableCell>
 
       {/* 5. Calorias */}
-      <TableCell className="whitespace-nowrap px-4 py-1 text-center">
+      <TableCell className="whitespace-nowrap px-1 py-1 text-center">
         <span className={`font-bold text-text-primary ${textStyle('table-number')}`}>
           {diet.targetKcal} kcal
         </span>
       </TableCell>
 
       {/* 6. Ações */}
-      <TableCell className="whitespace-nowrap px-4 py-1 text-right">
-        <div className="flex items-center justify-end gap-2">
+      <TableCell className="whitespace-nowrap px-1 py-1 text-right">
+        <div className="pointer-events-none flex items-center justify-end gap-1 opacity-0 transition-opacity duration-fast group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
           <Button
             type="button"
             variant="secondary"
             size="compact"
+            iconOnly
             onClick={() => onOpenReadOnlyDiet(diet)}
-            className="flex items-center gap-1.5"
             aria-label={`Ver cardápio completo da dieta ${diet.name}`}
+            title={`Ver cardápio completo da dieta ${diet.name}`}
           >
             <Eye size={13} aria-hidden="true" />
-            <span>Ver Cardápio</span>
           </Button>
           <Link
             href={`/pacientes/${patientId}/dieta/${diet.id}`}
@@ -374,6 +381,7 @@ export function PatientDietsTable({
           <DietCycleDetails diet={diet} />
         ) : null
       }
+      tableClassName="table-fixed"
       className="border border-border-subtle rounded-surface overflow-hidden"
     />
   );
