@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildNextEventSummary,
+  buildPatientDietHistory,
   selectActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
+import type { FullDietPlan } from '@/lib/dietStore';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
   PATIENT_PROFILE_DIETS,
@@ -49,5 +51,73 @@ describe('patient profile selectors', () => {
       date: '12/08/2026',
       label: 'Atualização de dieta',
     });
+  });
+
+  it('maps carb cycling plans to a weighted weekly history summary', () => {
+    const cycle: FullDietPlan = {
+      id: 'diet-cycle',
+      patientId: 'patient-1',
+      name: 'Ciclo de Carboidratos',
+      createdAt: '20/08/2026',
+      updatedAt: '20/08/2026',
+      mode: 'carb_cycling',
+      simpleTargetKcal: 0,
+      simpleTargetProtein: 0,
+      simpleTargetCarbs: 0,
+      simpleTargetFats: 0,
+      simpleMeals: [],
+      carbCyclingVariations: [
+        {
+          id: 'high',
+          name: 'Dia Alto Carbo',
+          type: 'high',
+          assignedDays: ['seg', 'qua', 'sex'],
+          targetKcal: 2300,
+          targetProtein: 180,
+          targetCarbs: 260,
+          targetFats: 55,
+          meals: [{ id: 'meal-high', name: 'Café', time: '08:00', items: [] }],
+        },
+        {
+          id: 'low',
+          name: 'Dia Baixo Carbo',
+          type: 'low',
+          assignedDays: ['ter', 'qui', 'sab', 'dom'],
+          targetKcal: 1950,
+          targetProtein: 180,
+          targetCarbs: 150,
+          targetFats: 55,
+          meals: [],
+        },
+      ],
+    };
+
+    const [history] = buildPatientDietHistory([cycle]);
+
+    expect(history).toMatchObject({
+      id: 'diet-cycle',
+      mode: 'carb_cycling',
+      targetKcal: 2100,
+      proteinG: 180,
+      carbsG: 197,
+      fatsG: 55,
+    });
+    expect(history.carbCyclingVariations).toEqual([
+      expect.objectContaining({
+        id: 'high',
+        name: 'Dia Alto Carbo',
+        assignedDays: ['seg', 'qua', 'sex'],
+        targetKcal: 2300,
+        proteinG: 180,
+        carbsG: 260,
+        fatsG: 55,
+        mealsCount: 1,
+      }),
+      expect.objectContaining({
+        id: 'low',
+        assignedDays: ['ter', 'qui', 'sab', 'dom'],
+        mealsCount: 0,
+      }),
+    ]);
   });
 });
