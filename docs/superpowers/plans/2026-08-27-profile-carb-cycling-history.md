@@ -303,7 +303,7 @@ it('expands and collapses cycle variations without triggering the diet action', 
   expect(screen.getByText('Variações do ciclo')).toBeInTheDocument();
   expect(screen.getByText('Dia Alto Carbo')).toBeInTheDocument();
   expect(screen.getByText('Seg, Qua, Sex')).toBeInTheDocument();
-  expect(screen.getByText('2300 kcal')).toBeInTheDocument();
+  expect(screen.getByText('2300', { exact: true })).toBeInTheDocument();
   expect(screen.getByText('4 refeições')).toBeInTheDocument();
   expect(handleOpen).not.toHaveBeenCalled();
 
