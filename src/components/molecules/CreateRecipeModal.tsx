@@ -109,7 +109,7 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Receita (Ctrl+S)"
             >
-              Salvar Receita <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Salvar Receita <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

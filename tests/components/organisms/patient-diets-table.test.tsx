@@ -139,9 +139,9 @@ describe('PatientDietsTable', () => {
     const viewButton = within(simpleRow).getByRole('button', {
       name: 'Ver cardápio completo da dieta Plano cutting agosto',
     });
-    expect(viewButton.parentElement).toHaveClass('opacity-0');
-    expect(viewButton.parentElement).toHaveClass('group-hover:opacity-100');
-    expect(viewButton.parentElement).toHaveClass('group-focus-within:opacity-100');
+    expect(viewButton.parentElement).toHaveClass('invisible');
+    expect(viewButton.parentElement).toHaveClass('group-hover:visible');
+    expect(viewButton.parentElement).toHaveClass('group-focus-within:visible');
     expect(viewButton).toHaveAttribute('title', 'Ver cardápio completo da dieta Plano cutting agosto');
     expect(viewButton).not.toHaveTextContent('Ver Cardápio');
     expect(within(simpleRow).getByRole('link', { name: 'Editar Plano cutting agosto no Construtor de Dietas' })).toBeInTheDocument();

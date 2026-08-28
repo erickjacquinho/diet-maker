@@ -5,7 +5,7 @@ Consulte o documento mestre em [**index.md**](./index.md).
 ## Navegação Rápida
 
 - 📊 [Dashboard Visual Interativo (.html)](./dashboard-pesquisa-concorrentes.html)
-- 📈 [01. Panorama do Mercado de Nutrição no Brasil](./01-panorama-mercado-nutricao.md)
+- 📈 [01. Panorama do Mercado de Nutrição no Brasil](./01-metodologia-e-panorama-geral.md)
 - 📋 [02. Tabela Comparativa dos 10 Concorrentes](./02-tabela-comparativa-10-concorrentes.md)
 - 🏆 [03. Concorrentes Top Tier (Webdiet, Dietbox, Nutrium, Avanutri, Dietpro)](./03-concorrentes-top-tier.md)
 - ⚡ [04. Concorrentes Mid-Tier & Especialistas (Dietwin, Nutrilize, SAN, HubNutri, EasyDiet)](./04-concorrentes-mid-tier-e-especialistas.md)

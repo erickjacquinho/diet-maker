@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { MacroTrackerHeader } from '../organisms';
@@ -89,7 +89,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         >
           <Save size={14} aria-hidden="true" />
           <span>
-            Salvar Prescrição <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+            Salvar Prescrição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
           </span>
         </Button>
       )}

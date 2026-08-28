@@ -148,7 +148,7 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Alimento (Ctrl+S)"
             >
-              {food ? 'Salvar Alterações' : 'Salvar Alimento'} <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              {food ? 'Salvar Alterações' : 'Salvar Alimento'} <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

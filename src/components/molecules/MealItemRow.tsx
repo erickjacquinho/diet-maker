@@ -110,8 +110,8 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
         onDrop?.(e, index);
       }}
       className={cn(
-        'group/row border-b border-border-divider transition-all duration-fast select-none hover:bg-surface-hover',
-        isDragging && 'opacity-30 bg-surface-subtle border-dashed border-border-divider',
+        'group/row border-b border-border-divider transition-colors duration-fast select-none hover:bg-surface-hover',
+        isDragging && 'opacity-disabled bg-surface-subtle border-dashed border-border-divider',
         isDragOver && dragOverPosition === 'top' && 'border-t-2 border-t-primary bg-primary-soft/15 ring-1 ring-primary/20',
         isDragOver && dragOverPosition === 'bottom' && 'border-b-2 border-b-primary bg-primary-soft/15 ring-1 ring-primary/20'
       )}
@@ -130,7 +130,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           }}
           onDragEnd={onDragEnd}
           className={cn(
-            'p-1 -m-1 rounded-control transition-colors inline-flex items-center justify-center cursor-grab active:cursor-grabbing',
+            'p-1 -m-1 rounded-control transition-colors duration-fast inline-flex items-center justify-center cursor-grab active:cursor-grabbing',
             isDragOver ? 'text-primary bg-primary-soft' : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
           )}
           title="Arrastar para reordenar"
@@ -154,7 +154,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
       {/* 3. Ações do alimento */}
       <TableCell className="w-20 px-2 text-center py-2">
-        <div className="flex items-center justify-center gap-1 opacity-0 pointer-events-none transition-opacity duration-fast group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
+        <div className="flex items-center justify-center gap-1 invisible pointer-events-none group-hover/row:visible group-hover/row:pointer-events-auto group-focus-within/row:visible group-focus-within/row:pointer-events-auto">
           <SubstituteIconButton
             size="compact"
             onClick={onSubstitute}
@@ -221,7 +221,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
       {/* 9. Remover alimento (visível apenas em hover / focus-within) */}
       <TableCell className="w-12 px-2 text-center py-2">
-        <div className="flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-fast group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
+        <div className="flex items-center justify-center invisible pointer-events-none group-hover/row:visible group-hover/row:pointer-events-auto group-focus-within/row:visible group-focus-within/row:pointer-events-auto">
           <DeleteIconButton
             size="compact"
             onClick={onRemove}

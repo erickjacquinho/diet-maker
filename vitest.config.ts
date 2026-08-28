@@ -6,15 +6,10 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    environmentMatchGlobs: [
-      ['tests/design-system/**', 'node'],
-      ['src/lib/**', 'node'],
-    ],
     globals: true,
-    pool: 'threads',
-    maxWorkers: 4,
+    pool: 'forks',
     watch: false,
-    testTimeout: 60_000,
+    testTimeout: 30_000,
     setupFiles: ['./vitest.setup.ts'],
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',

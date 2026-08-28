@@ -60,8 +60,8 @@ describe('MealItemRow quantity keyboard navigation', () => {
 
     expect(substituteButton).toHaveClass('border-border-subtle');
     expect(duplicateButton).toHaveClass('border-border-subtle');
-    expect(substituteButton.parentElement).toHaveClass('opacity-0');
-    expect(substituteButton.parentElement).toHaveClass('group-hover/row:opacity-100');
-    expect(substituteButton.parentElement).toHaveClass('group-focus-within/row:opacity-100');
+    expect(substituteButton.parentElement).toHaveClass('invisible');
+    expect(substituteButton.parentElement).toHaveClass('group-hover/row:visible');
+    expect(substituteButton.parentElement).toHaveClass('group-focus-within/row:visible');
   });
 });

@@ -304,7 +304,7 @@ export function DietTableRow({
 
       {/* 6. Ações */}
       <TableCell className="whitespace-nowrap px-1 py-1 text-right">
-        <div className="pointer-events-none flex items-center justify-end gap-1 opacity-0 transition-opacity duration-fast group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+        <div className="pointer-events-none flex items-center justify-end gap-1 invisible group-hover:pointer-events-auto group-hover:visible group-focus-within:pointer-events-auto group-focus-within:visible">
           <Button
             type="button"
             variant="secondary"

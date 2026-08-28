@@ -66,7 +66,7 @@ function SortableHeader<TData>({
       aria-pressed={active}
       title={`Ordenar por ${label} (${sortHint})`}
       className={cn(
-        'inline-flex items-center justify-center gap-1.5 font-bold text-style-chart-micro uppercase tracking-wider h-auto py-1 px-1 -mx-1 hover:bg-transparent',
+        'inline-flex items-center justify-center gap-1.5 font-bold text-style-chart-micro tracking-overline h-auto py-1 px-1 -mx-1 hover:bg-transparent',
         active ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
       )}
     >
@@ -126,7 +126,7 @@ function TableHeaderRow<TData>({
             scope="col"
             aria-sort={ariaSort}
             className={cn(
-              'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary',
+              'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
               alignClass(column.align),
               column.headerClassName
             )}

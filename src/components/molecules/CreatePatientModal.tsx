@@ -129,7 +129,7 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Paciente (Ctrl+S)"
             >
-              Salvar Paciente <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Salvar Paciente <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

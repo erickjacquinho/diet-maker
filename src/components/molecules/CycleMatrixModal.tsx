@@ -417,10 +417,10 @@ export function CycleMatrixModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden bg-surface border-border-subtle shadow-xl">
+      <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden bg-surface border-border-subtle">
         {/* Header Superior Dedicado */}
         <DialogHeader className="p-6 pr-16 pb-4 border-b border-border-subtle bg-surface">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-control bg-success-soft text-success flex items-center justify-center shrink-0">
                 <SlidersHorizontal size={20} aria-hidden="true" />
@@ -488,8 +488,8 @@ export function CycleMatrixModal({
                 onDragEnd={handleDragEnd}
                 onDrop={(e) => handleDrop(e, index)}
                 className={cn(
-                  'bg-surface rounded-control border border-border-subtle p-4 flex flex-col gap-3 shadow-subtle hover:border-border-hover transition-all',
-                  isDraggingThis && 'opacity-40 border-dashed border-success',
+                  'bg-surface rounded-control border border-border-subtle p-4 flex flex-col gap-3 hover:border-border-hover transition-colors duration-fast',
+                  isDraggingThis && 'opacity-disabled border-dashed border-success',
                   isDragOverThis && 'border-t-2 border-t-success ring-2 ring-success/20 bg-surface'
                 )}
               >
@@ -640,7 +640,7 @@ export function CycleMatrixModal({
                       onClick={() => handlePasteValues(item.id)}
                       title={copiedValues ? `Colar valores copiados de "${copiedValues.sourceName}"` : 'Nenhum valor copiado'}
                       aria-label="Colar valores na variação"
-                      className="size-7 p-0 rounded-control text-text-muted hover:text-text-primary hover:bg-surface-subtle disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="size-7 p-0 rounded-control text-text-muted hover:text-text-primary hover:bg-surface-subtle disabled:opacity-disabled disabled:cursor-not-allowed"
                     >
                       <ClipboardPaste size={13} aria-hidden="true" />
                     </Button>
@@ -656,7 +656,7 @@ export function CycleMatrixModal({
 
                 {/* Linha 2: Escala Semanal Alinhada à Esquerda + Divisor + Botão Selecionar Todos */}
                 <div className="flex flex-wrap items-center justify-start gap-3 pt-2 border-t border-border-subtle">
-                  <div className="flex items-center gap-1.5 text-style-chart-micro font-bold text-text-muted uppercase shrink-0">
+                  <div className="flex items-center gap-1.5 text-style-chart-micro font-bold text-text-muted tracking-overline shrink-0">
                     <Calendar size={12} aria-hidden="true" />
                     <span>Escala:</span>
                   </div>
@@ -673,9 +673,9 @@ export function CycleMatrixModal({
                           onClick={() => handleToggleDay(item.id, day.id)}
                           aria-pressed={isAssigned}
                           className={cn(
-                            'h-7 w-9 p-0 rounded-control text-style-chart-micro font-bold transition-all text-center border box-border select-none shrink-0',
+                            'h-7 w-9 p-0 rounded-control text-style-chart-micro font-bold transition-colors duration-fast text-center border box-border select-none shrink-0',
                             isAssigned
-                              ? 'bg-primary text-on-primary border-primary shadow-xs'
+                              ? 'bg-primary text-on-primary border-primary'
                               : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
                           )}
                         >
@@ -696,9 +696,9 @@ export function CycleMatrixModal({
                       title={isAllDaysSelected ? "Desmarcar todos os dias desta variação" : "Selecionar todos os dias da semana para esta variação"}
                       aria-pressed={isAllDaysSelected}
                       className={cn(
-                        'h-7 px-2 rounded-control text-style-chart-micro font-bold transition-all border box-border select-none shrink-0',
+                        'h-7 px-2 rounded-control text-style-chart-micro font-bold transition-colors duration-fast border box-border select-none shrink-0',
                         isAllDaysSelected
-                          ? 'bg-primary text-on-primary border-primary shadow-xs'
+                          ? 'bg-primary text-on-primary border-primary'
                           : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
                       )}
                     >
@@ -724,7 +724,7 @@ export function CycleMatrixModal({
         </div>
 
         {/* Rodapé da Tela: Resumo Semanal e Salvar */}
-        <DialogFooter className="p-4 px-6 border-t border-border-subtle bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <DialogFooter className="p-4 px-6 border-t border-border-subtle bg-surface flex flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-success shrink-0" aria-hidden="true" />
@@ -766,7 +766,7 @@ export function CycleMatrixModal({
               title="Salvar Configurações (Ctrl+S)"
             >
               <span>
-                Salvar Configurações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                Salvar Configurações <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </span>
             </Button>
           </div>

@@ -123,7 +123,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
       )}
     >
       {/* Cabeçalho do Painel */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-border-subtle">
+      <div className="flex flex-row items-center justify-between gap-3 pb-2.5 border-b border-border-subtle">
         <div className="flex items-center gap-2.5">
           <div className="size-7 rounded-control bg-primary-soft text-primary flex items-center justify-center shrink-0">
             <Repeat size={15} aria-hidden="true" />
@@ -181,7 +181,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
       <div
         role="tablist"
         aria-label="Variações do ciclo"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+        className="grid grid-cols-3 gap-3"
         onDragOver={(e) => e.preventDefault()}
       >
         {variations.map((v, index) => {
@@ -205,11 +205,11 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
               onDragLeave={(e) => handleDragLeave(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               className={cn(
-                'group relative flex flex-col justify-between gap-2 p-3 rounded-control border text-left transition-all duration-fast cursor-pointer select-none',
+                'group relative flex flex-col justify-between gap-2 p-3 rounded-control border text-left transition-colors duration-fast cursor-pointer select-none',
                 isActive
-                  ? 'bg-surface border-primary shadow-xs ring-1 ring-primary'
+                  ? 'bg-surface border-primary ring-1 ring-primary'
                   : 'bg-surface-subtle border-border-subtle hover:border-border-hover hover:bg-surface',
-                isDraggingThis && 'opacity-40 border-dashed border-primary',
+                isDraggingThis && 'opacity-disabled border-dashed border-primary',
                 isDragOverThis && 'border-t-2 border-t-primary ring-2 ring-primary/20 bg-surface'
               )}
             >

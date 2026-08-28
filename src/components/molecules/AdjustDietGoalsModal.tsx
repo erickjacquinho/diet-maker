@@ -120,7 +120,7 @@ export function AdjustDietGoalsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-surface sm:max-w-2xl p-6">
+      <DialogContent className="max-w-2xl bg-surface p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-text-primary text-style-body font-bold">
             <Edit3 className="w-4 h-4 text-primary" aria-hidden="true" />
@@ -149,14 +149,14 @@ export function AdjustDietGoalsModal({
               >
                 <ToggleGroupItem
                   value="grams"
-                  className="w-24 h-7 text-xs font-semibold"
+                  className="w-24 h-7 text-style-legal font-semibold"
                   aria-label="Definir em Gramas"
                 >
                   Gramas (g)
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="g_per_kg"
-                  className="w-24 h-7 text-xs font-semibold"
+                  className="w-24 h-7 text-style-legal font-semibold"
                   aria-label="Definir em g/kg corporal"
                 >
                   g/kg
@@ -187,14 +187,14 @@ export function AdjustDietGoalsModal({
                 >
                   <ToggleGroupItem
                     value="grams"
-                    className="w-24 h-7 text-xs font-semibold"
+                    className="w-24 h-7 text-style-legal font-semibold"
                     aria-label="Definir em Gramas"
                   >
                     Gramas (g)
                   </ToggleGroupItem>
                   <ToggleGroupItem
                     value="g_per_kg"
-                    className="w-24 h-7 text-xs font-semibold"
+                    className="w-24 h-7 text-style-legal font-semibold"
                     aria-label="Definir em g/kg corporal"
                   >
                     g/kg
@@ -292,7 +292,7 @@ export function AdjustDietGoalsModal({
               >
                 <div className="flex items-center gap-1.5">
                   <Flame className="w-4 h-4 text-warning shrink-0" aria-hidden="true" />
-                  <span className="text-style-body font-bold text-text-primary tabular-nums text-base">
+                  <span className="text-style-body font-bold text-text-primary tabular-nums">
                     {distribution.totalKcal}
                   </span>
                   <span className="text-style-legal text-text-muted font-medium">kcal</span>
@@ -319,7 +319,7 @@ export function AdjustDietGoalsModal({
         </div>
 
 
-        <DialogFooter className="flex items-center justify-between sm:justify-between w-full gap-2 pt-2">
+        <DialogFooter className="flex items-center justify-between w-full gap-2 pt-2">
           <Button
             variant="quiet"
             size="compact"
@@ -342,7 +342,7 @@ export function AdjustDietGoalsModal({
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Metas (Ctrl+S)"
             >
-              Salvar Metas <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Salvar Metas <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </DialogFooter>

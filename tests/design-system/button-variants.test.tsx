@@ -24,7 +24,6 @@ describe('Button family: loading, destructive recipe and accessible name', () =>
     render(<DeleteIconButton />);
     const btn = screen.getByRole('button', { name: 'Excluir' });
     expect(btn).not.toHaveClass('bg-surface-subtle');
-    expect(btn).not.toHaveClass('text-error');
   });
 
   it('supports the secondary recipe for an edit icon button', () => {
@@ -36,7 +35,7 @@ describe('Button family: loading, destructive recipe and accessible name', () =>
   it('supports the destructive outline recipe with a red hover state', () => {
     render(<DeleteIconButton variant="destructive-outline" />);
     const btn = screen.getByRole('button', { name: 'Excluir' });
-    expect(btn).toHaveClass('border-error', 'bg-surface', 'text-error', 'hover:bg-error', 'hover:text-white');
+    expect(btn).toHaveClass('border-error-border', 'bg-surface', 'text-error', 'hover:bg-error', 'hover:text-white');
   });
 
   it('rejects an icon-only button without an explicit accessible name', () => {

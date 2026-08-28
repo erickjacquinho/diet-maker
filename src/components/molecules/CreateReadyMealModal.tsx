@@ -75,7 +75,7 @@ export function CreateReadyMealModal({ open, onOpenChange, onSave }: CreateReady
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Refeição (Ctrl+S)"
             >
-              Salvar Refeição <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Salvar Refeição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

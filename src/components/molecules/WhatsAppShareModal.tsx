@@ -70,7 +70,7 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText }: WhatsAppSh
               aria-keyshortcuts="Control+s Meta+s"
               title="Abrir WhatsApp (Ctrl+S)"
             >
-              Abrir WhatsApp <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Abrir WhatsApp <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </DialogFooter>

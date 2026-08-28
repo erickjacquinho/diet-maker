@@ -113,7 +113,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
         {foodToSubstitute && (
           <div className="bg-surface-subtle border border-border-subtle rounded-control p-3 flex items-center justify-between gap-3 shrink-0">
             <div className="flex flex-col min-w-0">
-              <span className="text-style-chart-micro font-bold uppercase tracking-wider text-text-muted">
+              <span className="text-style-chart-micro font-bold tracking-overline text-text-muted">
                 Alimento Atual a ser Substituído
               </span>
               <span className="font-bold text-style-body text-text-primary truncate">

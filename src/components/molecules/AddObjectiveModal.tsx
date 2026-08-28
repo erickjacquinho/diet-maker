@@ -94,7 +94,7 @@ export function AddObjectiveModal({
               aria-keyshortcuts="Control+s Meta+s"
               title="Adicionar Objetivo (Ctrl+S)"
             >
-              Adicionar <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+              Adicionar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

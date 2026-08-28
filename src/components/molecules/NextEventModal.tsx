@@ -115,7 +115,7 @@ export function NextEventModal({
           </DialogHeader>
 
           <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <DatePickerField
                 id="next-event-date"
                 label="Data"
@@ -161,7 +161,7 @@ export function NextEventModal({
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar (Ctrl+S)"
               >
-                Salvar <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                Salvar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>
             </DialogFooter>
           </form>

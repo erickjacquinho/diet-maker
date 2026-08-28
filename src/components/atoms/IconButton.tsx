@@ -70,9 +70,9 @@ export const EditIconButton: React.FC<ExplicitIconButtonProps> = ({
     <Pencil size={14} className="shrink-0" />
   </IconButton>
 );
+
 /**
- * DeleteIconButton - Destructive outline icon-only component for Delete actions across the application.
- * Normal: red border and red icon. Hover: red background, red border, and white icon.
+ * DeleteIconButton - Destructive icon-only component for Delete actions across the application.
  */
 export const DeleteIconButton: React.FC<ExplicitIconButtonProps> = ({
   className = '',

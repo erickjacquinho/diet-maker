@@ -70,8 +70,8 @@ function RecordIndicators({ row }: { row: PatientListRow }) {
             data-indicator="assessment"
             className={`shrink-0 transition-opacity ${
               row.history.hasAssessment
-                ? 'text-text-muted opacity-100'
-                : 'opacity-0 pointer-events-none'
+                ? 'text-text-muted visible'
+                : 'invisible pointer-events-none'
             }`}
           />
           <Utensils
@@ -81,8 +81,8 @@ function RecordIndicators({ row }: { row: PatientListRow }) {
             data-indicator="diet"
             className={`shrink-0 transition-opacity ${
               row.history.hasDiet
-                ? 'text-text-muted opacity-100'
-                : 'opacity-0 pointer-events-none'
+                ? 'text-text-muted visible'
+                : 'invisible pointer-events-none'
             }`}
           />
         </span>

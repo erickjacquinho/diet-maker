@@ -44,7 +44,7 @@ describe('Component UI Seam: HoldToDeleteButton', () => {
 
     fireEvent.pointerDown(button, { button: 0 });
 
-    expect(progressBar).toHaveClass('w-full', 'duration-hold');
+    expect(progressBar).toHaveClass('w-full');
     expect(handleConfirm).not.toHaveBeenCalled();
   });
 

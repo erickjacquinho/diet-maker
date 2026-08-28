@@ -34,7 +34,7 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
     <Surface
       variant="default"
       density="standard"
-      className={cn('p-5 sm:p-6 flex flex-col gap-4', className)}
+      className={cn('p-5 flex flex-col gap-4', className)}
       aria-label="Resumo de metas nutricionais"
     >
       {showPatientContext && patientName && (
@@ -51,7 +51,7 @@ export const MacroTrackerHeader: React.FC<MacroTrackerHeaderProps> = ({
 
       <div
         data-testid="macro-metrics-grid"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-4 gap-4"
       >
         {metrics.map((metric, index) => (
           <MacroMetricCard key={`${metric.label}-${index}`} {...metric} />

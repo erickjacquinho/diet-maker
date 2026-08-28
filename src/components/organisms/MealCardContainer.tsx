@@ -252,7 +252,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                     <div className="flex items-start gap-3">
                       {/* Coluna de Horas */}
                       <div className="flex flex-col gap-1 items-center">
-                        <span className={cn(textStyle('legal'), 'text-text-muted uppercase font-medium')}>
+                        <span className={cn(textStyle('legal'), 'text-text-muted font-medium')}>
                           Hora
                         </span>
                         <div
@@ -286,7 +286,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
                       {/* Coluna de Minutos */}
                       <div className="flex flex-col gap-1 items-center">
-                        <span className={cn(textStyle('legal'), 'text-text-muted uppercase font-medium')}>
+                        <span className={cn(textStyle('legal'), 'text-text-muted font-medium')}>
                           Min
                         </span>
                         <div
@@ -384,23 +384,23 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <TableHeader className="bg-surface-subtle">
                   <TableRow className="hover:bg-surface-subtle border-b border-border-divider">
                     <TableHead className="w-10 px-2 text-center h-8" aria-label="Reordenar" />
-                    <TableHead className="text-left font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary h-8">
+                    <TableHead className="text-left font-bold text-style-chart-micro tracking-overline text-text-secondary h-8">
                       Nome
                     </TableHead>
                     <TableHead className="w-20 px-2 text-center h-8" aria-label="Ações do alimento" />
-                    <TableHead className="w-24 text-center font-bold text-style-chart-micro uppercase tracking-wider text-text-secondary h-8">
+                    <TableHead className="w-24 text-center font-bold text-style-chart-micro tracking-overline text-text-secondary h-8">
                       Quantidade
                     </TableHead>
-                    <TableHead className="w-20 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-protein h-8">
+                    <TableHead className="w-20 text-right font-bold text-style-chart-micro tracking-overline text-macro-protein h-8">
                       Proteína
                     </TableHead>
-                    <TableHead className="w-24 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-carbohydrate h-8">
+                    <TableHead className="w-24 text-right font-bold text-style-chart-micro tracking-overline text-macro-carbohydrate h-8">
                       Carboidrato
                     </TableHead>
-                    <TableHead className="w-20 text-right font-bold text-style-chart-micro uppercase tracking-wider text-macro-fat h-8">
+                    <TableHead className="w-20 text-right font-bold text-style-chart-micro tracking-overline text-macro-fat h-8">
                       Gorduras
                     </TableHead>
-                    <TableHead className="w-24 text-right font-bold text-style-chart-micro uppercase tracking-wider text-text-primary h-8">
+                    <TableHead className="w-24 text-right font-bold text-style-chart-micro tracking-overline text-text-primary h-8">
                       Calorias
                     </TableHead>
                     <TableHead className="w-12 px-2 text-center h-8" aria-label="Remover alimento" />

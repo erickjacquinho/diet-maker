@@ -63,7 +63,7 @@ export function ScaleDietModal({
             aria-keyshortcuts="Control+s Meta+s"
             title="Aplicar Ajuste (Ctrl+S)"
           >
-            Aplicar Ajuste <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+            Aplicar Ajuste <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
           </Button>
         </DialogFooter>
       </DialogContent>

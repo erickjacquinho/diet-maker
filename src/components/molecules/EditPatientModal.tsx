@@ -102,7 +102,7 @@ export function EditPatientModal({
 
           {draft && (
             <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="edit-patient-name" className={textStyle('field-label')}>Nome Completo do Paciente</label>
                   <Input id="edit-patient-name" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className="mt-1" />
@@ -113,7 +113,7 @@ export function EditPatientModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <SelectField
                     id="edit-patient-gender"
@@ -188,7 +188,7 @@ export function EditPatientModal({
                   aria-keyshortcuts="Control+s Meta+s"
                   title="Salvar Alterações (Ctrl+S)"
                 >
-                  Salvar Alterações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                  Salvar Alterações <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
                 </Button>
               </DialogFooter>
             </form>

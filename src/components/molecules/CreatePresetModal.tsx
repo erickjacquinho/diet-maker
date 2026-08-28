@@ -152,7 +152,7 @@ export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetMo
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar Preset (Ctrl+S)"
               >
-                Salvar Preset <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                Salvar Preset <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>
             </div>
           </form>

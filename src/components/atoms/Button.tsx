@@ -234,7 +234,7 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
         e.preventDefault();
       }}
       className={cn(
-        'relative overflow-hidden select-none cursor-pointer transition-all',
+        'relative overflow-hidden select-none cursor-pointer transition-colors',
         className
       )}
       {...props}
@@ -243,9 +243,10 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
       <span
         aria-hidden="true"
         data-testid="hold-progress-bar"
+        style={isHolding ? { transitionDuration: '800ms' } : undefined}
         className={cn(
           'absolute inset-y-0 left-0 w-0 pointer-events-none rounded-inherit transition-width ease-linear bg-error-soft',
-          isHolding ? 'w-full duration-hold' : 'duration-fast'
+          isHolding ? 'w-full' : 'duration-fast'
         )}
       />
 

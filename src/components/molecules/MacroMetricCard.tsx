@@ -51,14 +51,14 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
       variant="subtle"
       density="standard"
       className={cn(
-        'flex flex-col justify-between p-4 transition-all duration-fast',
-        !isTargetActive && 'opacity-75 border border-dashed border-border-control-essential/50 bg-surface-subtle/40 shadow-none select-none',
+        'flex flex-col justify-between p-4 transition-colors duration-fast',
+        !isTargetActive && 'opacity-subdued border border-dashed border-border-control-essential/50 bg-surface-subtle/40 shadow-none select-none',
         className
       )}
     >
       <div>
         <div className="flex items-center justify-between text-style-legal font-semibold text-text-muted mb-1.5 min-h-6">
-          <span className={cn(colorClass, 'font-bold text-style-field-label', !isTargetActive && 'opacity-90')}>
+          <span className={cn(colorClass, 'font-bold text-style-field-label', !isTargetActive && 'opacity-subdued')}>
             {label}
           </span>
           {statusBadgeText && (
@@ -81,7 +81,7 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
             <span className="text-style-legal font-normal text-text-muted">/ {targetValue}</span>
           ) : gPerKgRatio ? (
             <span className="text-style-legal font-normal text-text-muted">
-              {gPerKgRatio} <span className="text-style-chart-micro opacity-75">(sem meta g/kg)</span>
+              {gPerKgRatio} <span className="text-style-chart-micro opacity-subdued">(sem meta g/kg)</span>
             </span>
           ) : subtitle ? (
             <span className="text-style-legal font-normal text-text-muted">{subtitle}</span>
@@ -100,7 +100,7 @@ export const MacroMetricCard: React.FC<MacroMetricCardProps> = ({
         <ProgressBar
           value={isTargetActive ? percentage : 0}
           colorVariant={isTargetActive ? macroColor : 'primary'}
-          className={!isTargetActive ? 'opacity-30' : ''}
+          className={!isTargetActive ? 'opacity-disabled' : ''}
           aria-label={`Progresso de ${label}`}
         />
       </div>

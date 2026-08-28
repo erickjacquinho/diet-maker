@@ -454,7 +454,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top" align="start" className="max-w-md whitespace-normal p-3">
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                       <div className="flex items-baseline justify-between gap-3 border-b border-border-divider pb-2">
                         <p className="text-style-caption font-semibold text-text-primary">
                           {selectedMeals.length === 0 && selectedRecipes.length === 0 ? 'Alimentos selecionados' : 'Itens selecionados'}
@@ -463,7 +463,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                           {selectedMeals.length === 0 && selectedRecipes.length === 0 ? 'Macros por 100 g' : 'Macros calculados'}
                         </p>
                       </div>
-                      <ul className="space-y-1.5 pt-1 max-h-48 overflow-y-auto">
+                      <ul className="flex flex-col gap-1.5 pt-1 max-h-48 overflow-y-auto">
                         {selectedFoods.map((food) => (
                           <li key={`food-${food.id}`} className="flex min-w-0 items-center justify-between gap-2">
                             <div className="flex min-w-0 flex-1 items-center gap-1">

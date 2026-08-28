@@ -52,11 +52,11 @@ describe('MealCardContainer', () => {
     expect(screen.getByText('Feijão Preto')).toBeInTheDocument();
     expect(screen.getByText('Frango Grelhado')).toBeInTheDocument();
 
-    // Verify delete button is present within a hover-only opacity-0 wrapper
+    // Verify delete button is present within a hover-only invisible wrapper
     const deleteButtons = screen.getAllByRole('button', { name: /remover/i });
     expect(deleteButtons).toHaveLength(3);
-    expect(deleteButtons[0].parentElement).toHaveClass('opacity-0');
-    expect(deleteButtons[0].parentElement).toHaveClass('group-hover/row:opacity-100');
+    expect(deleteButtons[0].parentElement).toHaveClass('invisible');
+    expect(deleteButtons[0].parentElement).toHaveClass('group-hover/row:visible');
 
     // Drag handle elements
     const arrozDragHandle = screen.getByLabelText('Reordenar Arroz Integral');

@@ -47,9 +47,9 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
           data-state={activeCategory === 'foods' ? 'active' : 'inactive'}
           aria-selected={activeCategory === 'foods'}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-all duration-standard',
+            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'foods'
-              ? 'bg-surface text-text-primary shadow-subtle border-border-subtle font-bold'
+              ? 'bg-surface text-text-primary border-border-subtle font-bold'
               : 'text-text-secondary hover:text-text-primary'
           )}
         >
@@ -76,9 +76,9 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
           data-state={activeCategory === 'meals' ? 'active' : 'inactive'}
           aria-selected={activeCategory === 'meals'}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-all duration-standard',
+            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'meals'
-              ? 'bg-surface text-text-primary shadow-subtle border-border-subtle font-bold'
+              ? 'bg-surface text-text-primary border-border-subtle font-bold'
               : 'text-text-secondary hover:text-text-primary'
           )}
         >
@@ -105,9 +105,9 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
           data-state={activeCategory === 'recipes' ? 'active' : 'inactive'}
           aria-selected={activeCategory === 'recipes'}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-all duration-standard',
+            'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'recipes'
-              ? 'bg-surface text-text-primary shadow-subtle border-border-subtle font-bold'
+              ? 'bg-surface text-text-primary border-border-subtle font-bold'
               : 'text-text-secondary hover:text-text-primary'
           )}
         >

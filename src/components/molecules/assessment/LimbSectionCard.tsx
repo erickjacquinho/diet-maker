@@ -15,7 +15,7 @@ export function LimbSectionCard({ title, subtitle, children }: LimbSectionCardPr
         <span className={textStyle('caption-strong')}>{title}</span>
         <span className={textStyle('helper')}>{subtitle}</span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">{children}</div>
+      <div className="grid grid-cols-2 gap-3 items-start">{children}</div>
     </Surface>
   );
 }

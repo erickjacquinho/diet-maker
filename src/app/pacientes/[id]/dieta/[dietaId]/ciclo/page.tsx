@@ -593,7 +593,7 @@ export default function DedicatedCarbCyclingPage() {
       >
         <Save size={14} aria-hidden="true" />
         <span>
-          Salvar Configurações <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+          Salvar Configurações <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
         </span>
       </Button>
     </div>
@@ -662,12 +662,12 @@ export default function DedicatedCarbCyclingPage() {
               : `⚠️ ${assignedDaysSet.size}/7 dias distribuídos`}
           </span>
         </div>
-        <MetricBoxGroup items={metricItems} className="shadow-xs" />
+        <MetricBoxGroup items={metricItems} />
       </section>
 
       {/* 4. Seção de Variações do Ciclo em 2 Linhas com Drag & Drop */}
       <section aria-label="Variações do ciclo de carboidratos" className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-row items-center justify-between gap-3">
           <div>
             <h2 className={textStyle('section-title')}>Variações do Ciclo</h2>
             <p className={textStyle('legal')}>
@@ -729,8 +729,8 @@ export default function DedicatedCarbCyclingPage() {
                 onDragLeave={(e) => handleDragLeave(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
                 className={cn(
-                  'p-4 flex flex-col gap-3 rounded-surface border border-border-subtle hover:border-border-hover transition-all bg-surface',
-                  isDraggingThis && 'opacity-40 border-dashed border-primary',
+                  'p-4 flex flex-col gap-3 rounded-surface border border-border-subtle hover:border-border-hover transition-colors duration-fast bg-surface',
+                  isDraggingThis && 'opacity-disabled border-dashed border-primary',
                   isDragOverThis && 'border-t-2 border-t-primary ring-2 ring-primary/20 bg-surface'
                 )}
               >
@@ -900,7 +900,7 @@ export default function DedicatedCarbCyclingPage() {
 
                 {/* Linha 2: Escala Semanal Alinhada à Esquerda + Divisor + Botão 'Todos' */}
                 <div className="flex flex-wrap items-center justify-start gap-3 pt-2.5 border-t border-border-subtle">
-                  <div className="flex items-center gap-1.5 text-style-chart-micro font-bold text-text-muted uppercase shrink-0">
+                  <div className="flex items-center gap-1.5 text-style-chart-micro font-bold text-text-muted tracking-overline shrink-0">
                     <Calendar size={12} aria-hidden="true" />
                     <span>Escala:</span>
                   </div>
@@ -917,9 +917,9 @@ export default function DedicatedCarbCyclingPage() {
                           onClick={() => handleToggleDay(item.id, day.id)}
                           aria-pressed={isAssigned}
                           className={cn(
-                            'h-7 w-9 p-0 rounded-control text-style-chart-micro font-bold transition-all text-center border box-border select-none shrink-0',
+                            'h-7 w-9 p-0 rounded-control text-style-chart-micro font-bold transition-colors duration-fast text-center border box-border select-none shrink-0',
                             isAssigned
-                              ? 'bg-primary text-on-primary border-primary shadow-xs'
+                              ? 'bg-primary text-on-primary border-primary'
                               : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
                           )}
                         >
@@ -944,9 +944,9 @@ export default function DedicatedCarbCyclingPage() {
                       }
                       aria-pressed={isAllDaysSelected}
                       className={cn(
-                        'h-7 px-2 rounded-control text-style-chart-micro font-bold transition-all border box-border select-none shrink-0',
+                        'h-7 px-2 rounded-control text-style-chart-micro font-bold transition-colors duration-fast border box-border select-none shrink-0',
                         isAllDaysSelected
-                          ? 'bg-primary text-on-primary border-primary shadow-xs'
+                          ? 'bg-primary text-on-primary border-primary'
                           : 'bg-surface-subtle text-text-muted hover:text-text-primary hover:bg-surface border-border-subtle'
                       )}
                     >

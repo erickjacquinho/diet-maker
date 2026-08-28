@@ -56,7 +56,7 @@ export function EditAssessmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-dialog max-w-lg sm:max-w-xl md:max-w-2xl flex flex-col p-5 overflow-hidden gap-0">
+      <DialogContent className="max-h-dialog max-w-2xl flex flex-col p-5 overflow-hidden gap-0">
         <DialogHeader className="shrink-0 pb-3 border-b border-border-subtle">
           <DialogTitle className={textStyle('dialog-title')}>
             <Scale className="size-4 text-success shrink-0 inline-block mr-2" aria-hidden="true" />
@@ -136,7 +136,7 @@ export function EditAssessmentModal({
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar avaliação (Ctrl+S)"
               >
-                Salvar avaliação <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span>
+                Salvar avaliação <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>
             </DialogFooter>
           </form>
