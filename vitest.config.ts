@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
+    environmentMatchGlobs: [
+      ['tests/design-system/**', 'node'],
+      ['src/lib/**', 'node'],
+    ],
     globals: true,
     pool: 'threads',
     maxWorkers: 4,
