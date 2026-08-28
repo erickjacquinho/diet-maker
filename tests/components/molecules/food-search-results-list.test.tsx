@@ -34,8 +34,8 @@ describe('FoodSearchResultsList', () => {
     const nameHeader = within(table).getByRole('columnheader', { name: 'Nome (100g base)' });
     const nameCell = screen.getByText('Arroz integral').closest('td');
 
-    expect(nameHeader).toHaveClass('text-left', 'w-56');
-    expect(nameCell).toHaveClass('text-left', 'w-56', 'h-table-row-food', 'py-1');
+    expect(nameHeader).toHaveClass('text-left', 'w-80');
+    expect(nameCell).toHaveClass('text-left', 'w-80', 'h-table-row-food', 'py-1');
     expect(nameCell?.querySelector('span[title="Arroz integral"]')).toHaveClass('whitespace-nowrap', 'truncate');
     expect(nameCell?.querySelector('span[title="Arroz integral"]')).not.toHaveClass('break-words');
     expect(screen.getByText('cozido · Cereais')).toBeInTheDocument();

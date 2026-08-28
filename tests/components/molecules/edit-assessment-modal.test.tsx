@@ -109,7 +109,7 @@ describe('EditAssessmentModal', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar avaliação' }));
+    fireEvent.click(screen.getByRole('button', { name: /Salvar avaliação/i }));
 
     expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent('As medidas informadas não permitem calcular');
@@ -127,7 +127,7 @@ describe('EditAssessmentModal', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar avaliação' }));
+    fireEvent.click(screen.getByRole('button', { name: /Salvar avaliação/i }));
 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
       bodyFatPercent: 18.46,

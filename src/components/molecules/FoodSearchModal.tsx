@@ -443,14 +443,25 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                       tabIndex={0}
                       className="cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                      {totalSelectedCount} {totalSelectedCount === 1 ? 'item selecionado' : 'itens selecionados'}
+                      {totalSelectedCount}{' '}
+                      {selectedMeals.length === 0 && selectedRecipes.length === 0
+                        ? totalSelectedCount === 1
+                          ? 'alimento selecionado'
+                          : 'alimentos selecionados'
+                        : totalSelectedCount === 1
+                          ? 'item selecionado'
+                          : 'itens selecionados'}
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top" align="start" className="max-w-md whitespace-normal p-3">
                     <div className="space-y-2">
                       <div className="flex items-baseline justify-between gap-3 border-b border-border-divider pb-2">
-                        <p className="text-style-caption font-semibold text-text-primary">Itens selecionados</p>
-                        <p className="shrink-0 text-style-chart-micro font-medium text-text-muted">Macros calculados</p>
+                        <p className="text-style-caption font-semibold text-text-primary">
+                          {selectedMeals.length === 0 && selectedRecipes.length === 0 ? 'Alimentos selecionados' : 'Itens selecionados'}
+                        </p>
+                        <p className="shrink-0 text-style-chart-micro font-medium text-text-muted">
+                          {selectedMeals.length === 0 && selectedRecipes.length === 0 ? 'Macros por 100 g' : 'Macros calculados'}
+                        </p>
                       </div>
                       <ul className="space-y-1.5 pt-1 max-h-48 overflow-y-auto">
                         {selectedFoods.map((food) => (
@@ -522,6 +533,8 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            ) : activeCategory === 'foods' ? (
+              'Nenhum alimento selecionado'
             ) : (
               'Nenhum item selecionado'
             )}

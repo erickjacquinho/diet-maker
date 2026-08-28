@@ -49,6 +49,7 @@ export function FoodSearchResultsList({
                   <TooltipTrigger asChild>
                     <span
                       tabIndex={0}
+                      title={food.name}
                       className="min-w-0 truncate whitespace-nowrap text-style-body-small font-bold text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       {food.name}

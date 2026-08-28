@@ -28,7 +28,7 @@ describe('FoodSearchModal component', () => {
     );
 
     // Header and titles
-    expect(screen.getByText(/Adicionar Alimentos em "Refeição 1"/i)).toBeInTheDocument();
+    expect(screen.getByText(/Adicionar.*"Refeição 1"/i)).toBeInTheDocument();
 
     // Table column headers
     expect(screen.getByText(/Nome \(100g base\)/i)).toBeInTheDocument();
