@@ -28,14 +28,16 @@ Este documento complementa:
 
 ### 2.2 Dieta
 
-| Estado de domínio | Rótulo na interface | Pode editar? | Pode ser fonte de cópia? |
-| --- | --- | --- | --- |
-| `IN_CREATION` | Em Criação | Sim, se for a última dieta | Não |
-| `ACTIVE` | Vigente | Sim, se for a última dieta | Sim |
-| `SNAPSHOT` | Histórico | Não | Sim |
+| Estado/origem | Rótulo na interface | Armazenamento | Pode editar? | Pode ser fonte de cópia? | Aparece no histórico? |
+| --- | --- | --- | --- | --- | --- |
+| `LOCAL_DRAFT` | Em Criação | IndexedDB do navegador | Sim | Não | Não |
+| `ACTIVE` | Vigente | Backend/banco | Sim, se for a última | Sim | Sim |
+| `SNAPSHOT` | Histórico | Backend/banco | Não | Sim | Sim |
 
-O código atual que exibe `Ativa`/`Histórica` deve ser adaptado para os rótulos
-acima. O estado não pode ser calculado somente no componente da tabela.
+`Em Criação` é um estado de apresentação do `DietDraft` local, não um estado
+persistido de `DietPlan`. O código atual que exibe `Ativa`/`Histórica` deve ser
+adaptado para os rótulos acima, e o estado não pode ser calculado somente no
+componente da tabela. A tela não deve consultar drafts pelo `DietRepository`.
 
 ## 3. Tela `/pacientes`
 
@@ -215,8 +217,11 @@ O cartão não pode promover dieta, alterar metas ou gravar por clique no resumo
 ### 6.1 Cabeçalho
 
 - **Nova Dieta** abre `/pacientes/[id]/dieta/nova`.
-- O contador mostra somente dietas com registro histórico, incluindo
-  **Em Criação** que já possuam alimento.
+- O contador consulta somente `DietPlan` persistidos no backend/banco.
+- Um draft **Em Criação** não aparece no contador nem no histórico, mesmo depois
+  de receber alimentos.
+- Se houver um draft local recuperável, a interface pode oferecer **Retomar
+  rascunho** separadamente do histórico.
 
 ### 6.2 Linha de dieta
 
@@ -224,19 +229,24 @@ Cada linha pode mostrar:
 
 - data persistida e formatada;
 - tipo e modo do plano;
-- estado `Em Criação`, `Vigente` ou `Histórico`;
+- estado `Vigente` ou `Histórico`;
 - macros e kcal do snapshot/projeção;
 - ações compatíveis com o estado.
 
+Drafts locais **Em Criação** não são linhas do histórico. Quando exibidos como
+retomáveis, devem ser identificados como drafts locais e não como dietas
+persistidas.
+
 ### 6.3 Ações por estado
 
-| Ação | Em Criação (última) | Vigente (última) | Histórico |
+| Ação | Draft local Em Criação | Vigente (última) | Histórico |
 | --- | --- | --- | --- |
-| Abrir cardápio | Permitido | Permitido | Permitido |
+| Retomar editor | Permitido | Permitido | Bloqueado; usar cópia |
+| Abrir cardápio | Pelo editor local | Permitido | Permitido |
 | Editar | Permitido | Permitido | Bloqueado |
-| Expandir ciclo | Permitido | Permitido | Permitido |
-| Puxar informações | Não é ação da linha | Não é ação da linha | Disponível via nova dieta |
-| Excluir | Permitir descartar com confirmação | Não excluir; substituir ao salvar nova dieta | Bloqueado |
+| Expandir ciclo | Somente no editor local | Permitido | Permitido |
+| Puxar informações | Pode preencher o draft | Não é ação da linha | Disponível via nova dieta |
+| Descartar/excluir | Remover draft local com confirmação | Não excluir; substituir ou editar ao salvar | Bloqueado |
 
 Dietas históricas não podem exibir link de edição. O componente atual que
 renderiza um link de edição para todas as linhas deve ser alterado.
@@ -260,13 +270,18 @@ renderiza um link de edição para todas as linhas deve ser alterado.
 
 ### 6.6 Excluir/descartar dieta
 
-Para preservar o histórico clínico, a política recomendada é:
+Para preservar o histórico clínico, a política aprovada é:
 
-- **Em Criação:** pode ser descartada com confirmação, removendo o registro de
-  criação e seu draft;
+- **Em Criação:** é um draft local e pode ser descartado com confirmação,
+  removendo somente o registro do `DietDraftStore`/IndexedDB; nenhuma chamada
+  ao backend é feita;
 - **Vigente:** não pode ser apagada pelo histórico; deve ser substituída ao
-  salvar uma nova dieta;
+  salvar uma nova dieta ou atualizada ao salvar uma edição autorizada;
 - **Histórico:** não pode ser apagado pelo fluxo normal.
+
+O primeiro alimento e o autosave não criam nem atualizam uma linha do histórico.
+Somente **Salvar** persiste o draft no backend/banco e, em caso de sucesso,
+remove o draft local.
 
 Se a política de retenção mudar, ela exigirá nova decisão de domínio; não deve
 ser implementada apenas mudando o texto do modal.
@@ -294,7 +309,7 @@ ser implementada apenas mudando o texto do modal.
 
 ## 8. Matriz de formulários e modais
 
-| Componente | Rascunho local | Salva ao confirmar | Confirmação de descarte |
+| Componente | Rascunho local | Operação ao confirmar | Confirmação de descarte |
 | --- | --- | --- | --- |
 | `CreatePatientModal` | Sim | `createPatient` | Não, cancelar descarta |
 | `EditPatientModal` | Sim | `updatePatient` | Sim, se alterado |
@@ -302,8 +317,9 @@ ser implementada apenas mudando o texto do modal.
 | `DeletePatientModal` | Não | `archivePatient` | Confirmação prolongada |
 | `NextEventModal` | Sim | `setNextFollowUp` | Sim, se alterado |
 | Remover acompanhamento | Não | `clearNextFollowUp` | Confirmação |
+| `DietEditor` | Sim, em IndexedDB | `saveDietAsActive` no backend/banco | Sim, remove o draft local |
 | `ReadOnlyDietModal` | Não | Nenhuma | Não |
-| `DeleteDietModal` | Não | `discardDiet` apenas para `IN_CREATION` | Confirmação |
+| `DeleteDietModal` | Não | `discardDietDraft` somente para draft local | Confirmação |
 | `EditAssessmentModal` | Sim | `saveBodyAssessment` | Sim, se alterado |
 
 Nenhum modal pode fechar silenciosamente deixando o usuário acreditar que os
@@ -313,12 +329,14 @@ dados foram salvos.
 
 1. O perfil só pode iniciar dieta ou avaliação para paciente ativo.
 2. Dieta histórica aberta por linha é leitura; não deve cair em rota editável.
-3. Uma rota de edição deve validar no caso de uso se a dieta ainda é a última.
-4. Se outro salvamento tornar a dieta histórica durante a edição, o salvamento
-   deve falhar com mensagem clara e oferecer criação por cópia.
-5. Navegação após salvamento deve ocorrer somente depois da confirmação da
-   persistência.
-6. Falha de persistência não pode produzir toast de sucesso.
+3. Uma rota de edição deve carregar um draft local quando existir; o caso de
+   uso deve validar no salvamento se a dieta base ainda é a última.
+4. Se outro salvamento tornar a dieta base histórica durante a edição, o
+   salvamento deve falhar com mensagem clara e oferecer criação por cópia.
+5. Navegação após **Salvar** deve ocorrer somente depois da confirmação da
+   persistência no backend; nesse momento o draft local é removido.
+6. Falha de autosave local ou de persistência no backend não pode produzir
+   toast de sucesso. Em falha do backend, o draft local deve permanecer.
 7. Foco deve retornar ao botão que abriu o modal quando o modal fechar.
 8. `Esc`, clique externo e fechamento devem respeitar o estado de alterações.
 9. Ações destrutivas exigem confirmação acessível e não dependem apenas de
@@ -337,9 +355,13 @@ dados foram salvos.
 | Restaurar paciente | Tela administrativa futura / `restorePatient` |
 | Salvar próximo acompanhamento | `setNextFollowUp` |
 | Remover próximo acompanhamento | `clearNextFollowUp` |
+| Abrir nova dieta | `createDietDraft` |
+| Retomar draft local | `resumeDietDraft` |
+| Adicionar alimento ou editar dieta | `addFoodToMeal` / `autosaveDietDraft` — somente IndexedDB |
+| Salvar dieta explicitamente | `saveDietAsActive` — somente então usa o backend/banco |
 | Carregar histórico de dietas | `listPatientDietHistory` |
 | Abrir snapshot | `getDietSnapshot` |
-| Descartar dieta em criação | `discardDiet` |
+| Descartar dieta em criação | `discardDietDraft` — remove somente o draft local |
 | Carregar avaliações | `listPatientAssessments` |
 | Salvar avaliação | `saveBodyAssessment` |
 
@@ -361,7 +383,10 @@ Mensagens devem indicar se:
 - nada foi gravado;
 - a operação foi concluída;
 - o dado foi arquivado, e não apagado;
-- é necessário recarregar ou abrir uma nova dieta por cópia.
+- é necessário recarregar ou abrir uma nova dieta por cópia;
+- o autosave foi salvo somente no draft local;
+- o salvamento no backend falhou e o draft local foi preservado para nova
+  tentativa.
 
 ## 12. Critérios de aceitação de `/pacientes`
 
@@ -376,12 +401,18 @@ Mensagens devem indicar se:
 - WhatsApp não é tratado como salvamento;
 - arquivar paciente preserva dietas e avaliações;
 - paciente arquivado não aparece na lista nem inicia novos registros;
-- dieta Em Criação aparece no histórico somente após o primeiro alimento;
-- dietas Em Criação não aparecem como fonte de cópia;
+- abrir uma nova dieta cria somente um draft local em IndexedDB;
+- adicionar o primeiro alimento e executar autosave não altera o histórico nem
+  cria `DietPlan` no backend;
+- drafts Em Criação não aparecem no histórico nem como fonte de cópia;
+- salvar explicitamente persiste a dieta no backend e a torna Vigente;
+- após o sucesso do backend, o draft local é removido;
+- se o backend falhar, o draft local permanece e nada clínico é confirmado;
 - somente a última dieta permite edição;
 - dietas históricas abrem em modo somente leitura;
 - a dieta vigente anterior permanece íntegra quando uma nova é salva;
-- dieta Em Criação pode ser descartada com confirmação;
+- dieta Em Criação pode ser descartada com confirmação, removendo somente o
+  draft local;
 - avaliações podem ser criadas, editadas e expandidas sem misturar estados;
 - todos os modais protegem alterações não salvas;
 - nenhum botão de `/pacientes` acessa diretamente a persistência.
@@ -394,10 +425,13 @@ Esta especificação exige, no mínimo:
 2. trocar o texto e o caso de uso do modal de exclusão de paciente;
 3. impedir edição de dietas que não sejam a última;
 4. impedir exclusão de snapshots e da dieta vigente pelo fluxo normal;
-5. mapear `Ativa`/`Histórica` para `Vigente`/`Histórico` e adicionar `Em Criação`;
+5. mapear `Ativa`/`Histórica` para `Vigente`/`Histórico` e tratar `Em Criação`
+   como draft local, fora do histórico;
 6. remover fontes duplicadas embutidas em `Patient`;
-7. retirar acesso direto dos componentes a `localStorage`;
-8. centralizar mensagens de sucesso/erro nos casos de uso e adaptadores de UI;
-9. adicionar testes de interação para cada ação da matriz;
-10. manter a navegação atual, trocando apenas os pontos que violarem este
+7. retirar acesso direto dos componentes a `localStorage` e IndexedDB;
+8. garantir que o `DietDraftStore` use IndexedDB para autosave e descarte local;
+9. garantir que somente **Salvar** chame a persistência de dieta no backend;
+10. centralizar mensagens de sucesso/erro nos casos de uso e adaptadores de UI;
+11. adicionar testes de interação para cada ação da matriz;
+12. manter a navegação atual, trocando apenas os pontos que violarem este
     contrato.

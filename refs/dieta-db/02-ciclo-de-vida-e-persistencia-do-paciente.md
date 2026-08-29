@@ -79,6 +79,8 @@ Esta decisão complementa a [Decisão 01 — Fluxo de Paciente e Dieta](./01-flu
    independente; deve ser calculado a partir dos registros relacionados.
 4. A linha do tempo do paciente deve consultar relações persistidas, sem
    depender de arrays embutidos no cadastro.
+5. Autosave ou alteração de um `DietDraft` local não atualiza atividade,
+   histórico ou qualquer projeção persistida do paciente.
 
 ### 2.7 Arquivamento e restauração
 
@@ -137,6 +139,13 @@ Avaliações, dietas e consultas devem guardar `patientId` e não copiar o objet
 inteiro do paciente. Quando um documento precisar mostrar o nome ou peso do
 paciente, deve usar uma projeção de leitura ou o snapshot clínico apropriado.
 
+A relação `Patient 1 ─── N DietPlan` inclui somente dietas confirmadas e
+persistidas no backend/banco, nos estados **Vigente** ou **Histórico**. Uma
+dieta **Em Criação** é um `DietDraft` local em IndexedDB e não aparece no
+perfil como dieta persistida, nem entra na linha do tempo, nas contagens ou no
+histórico até o salvamento explícito. A interface pode oferecer a retomada do
+draft local separadamente do histórico.
+
 ## 5. Operações da aplicação
 
 Os casos de uso relacionados ao paciente são:
@@ -166,6 +175,10 @@ O primeiro conjunto de portas deve ser equivalente a:
 - `PatientRepository` — cadastro, consulta, atualização, arquivamento e
   restauração;
 - `BodyAssessmentRepository` — criação, edição e consulta por paciente;
+- `DietRepository` — leitura de dietas confirmadas e persistência da dieta
+  somente após o salvamento explícito;
+- `DietDraftStore` — drafts locais de dieta, preferencialmente em IndexedDB,
+  fora do histórico persistido;
 - `ObjectiveCatalogRepository` — opções padrão e personalizadas do workspace;
 - `PatientTimelineReader` — projeções de histórico e última atividade;
 - `TransactionRunner` — operações atômicas que atualizam paciente e projeções.
@@ -253,11 +266,13 @@ O adaptador inicial deverá mapear:
 | `nutridiet_patients` | `Patient` |
 | `nutridiet_assessments_<patientId>` | `BodyAssessment` relacionado |
 | `diet_maker_custom_objectives` | `ObjectiveOption` do workspace |
-| `nutridiet_diets_<patientId>` | `DietPlan` e entidades da Decisão 01 |
+| `nutridiet_diets_<patientId>` | `DietPlan` e entidades da Decisão 01 apenas para dietas confirmadas; drafts legados vão para `DietDraftStore` local |
 
 O mapeamento deve gerar IDs novos, registrar a associação com o ID legado
 apenas durante a migração e não continuar alimentando as chaves antigas depois
-da conversão bem-sucedida.
+da conversão bem-sucedida. Registros legados com estado **Em Criação** não
+podem ser persistidos como `DietPlan` no backend: devem ser convertidos em
+draft local ou aguardarem o salvamento explícito do usuário.
 
 ## 11. Validação
 
