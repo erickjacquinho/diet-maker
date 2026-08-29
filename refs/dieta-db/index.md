@@ -12,6 +12,7 @@ O primeiro fluxo a ser completamente definido é:
 ## Decisões
 
 - [01 — Fluxo de paciente e dieta](./01-fluxo-paciente-dieta.md)
+- [02 — Ciclo de vida e persistência do paciente](./02-ciclo-de-vida-e-persistencia-do-paciente.md)
 
 ## Regras desta pasta
 
