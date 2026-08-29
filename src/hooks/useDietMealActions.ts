@@ -12,6 +12,11 @@ import {
 } from '@/lib/mealVariations';
 import { toast } from 'sonner';
 
+const createPastedMealItems = (items: DietItem[]) => items.map((item, index) => ({
+  ...item,
+  id: `item-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
+}));
+
 export function useDietMealActions({
   foodSearchMealIndex,
   currentMeals,
@@ -31,6 +36,11 @@ export function useDietMealActions({
     item: DietItem;
     index: number;
     variationId: string;
+    token: string;
+  } | null>(null);
+  const lastDeletedMealRef = useRef<{
+    meal: DietMeal;
+    index: number;
     token: string;
   } | null>(null);
 
@@ -54,10 +64,47 @@ export function useDietMealActions({
 
   const handleRemoveMeal = useCallback(
     (mealId: string) => {
-      updateActiveMeals((prev) => prev.filter((m) => m.id !== mealId));
-      toast.info('Refeição removida');
+      const mealIndex = currentMeals.findIndex((meal) => meal.id === mealId);
+      const meal = mealIndex >= 0 ? currentMeals[mealIndex] : undefined;
+      if (!meal) return;
+
+      const deletedMeal: DietMeal = {
+        ...meal,
+        items: meal.items.map((item) => ({ ...item })),
+        variations: meal.variations?.map((variation) => ({
+          ...variation,
+          items: variation.items.map((item) => ({ ...item })),
+        })),
+      };
+      const deletionToken = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      lastDeletedMealRef.current = {
+        meal: deletedMeal,
+        index: mealIndex,
+        token: deletionToken,
+      };
+
+      updateActiveMeals((prev) => prev.filter((currentMeal) => currentMeal.id !== mealId));
+      toast.success(`Refeição "${meal.name}" removida.`, {
+        duration: 6000,
+        action: {
+          label: 'Desfazer',
+          onClick: () => {
+            const deleted = lastDeletedMealRef.current;
+            if (!deleted || deleted.token !== deletionToken) return;
+
+            updateActiveMeals((prev) => {
+              if (prev.some((currentMeal) => currentMeal.id === deleted.meal.id)) return prev;
+
+              const restoredMeals = [...prev];
+              restoredMeals.splice(Math.min(deleted.index, restoredMeals.length), 0, deleted.meal);
+              return restoredMeals;
+            });
+            lastDeletedMealRef.current = null;
+          },
+        },
+      });
     },
-    [updateActiveMeals]
+    [currentMeals, updateActiveMeals]
   );
 
   const handleUpdateMealHeader = useCallback(
@@ -261,10 +308,7 @@ export function useDietMealActions({
     (mealId: string) => {
       if (!copiedMealItems || copiedMealItems.length === 0) return;
 
-      const pastedItems = copiedMealItems.map((item, index) => ({
-        ...item,
-        id: `item-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
-      }));
+      const pastedItems = createPastedMealItems(copiedMealItems);
 
       updateActiveMeals((prev) =>
         prev.map((meal) => (
@@ -277,6 +321,29 @@ export function useDietMealActions({
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
     [copiedMealItems, resolveActiveId, updateActiveMeals]
+  );
+
+  const handlePasteMealAndReplace = useCallback(
+    (mealId: string) => {
+      if (!copiedMealItems || copiedMealItems.length === 0) return;
+
+      const targetMeal = currentMeals.find((meal) => meal.id === mealId);
+      if (!targetMeal) return;
+
+      const activeVariationId = resolveActiveId(targetMeal);
+
+      const pastedItems = createPastedMealItems(copiedMealItems);
+      updateActiveMeals((prev) =>
+        prev.map((meal) => (
+          meal.id === mealId
+            ? updateMealVariationItems(meal, activeVariationId, () => pastedItems)
+            : meal
+        ))
+      );
+
+      toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} e substituído${pastedItems.length === 1 ? '' : 's'} na refeição`);
+    },
+    [copiedMealItems, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handleDuplicateItem = useCallback(
@@ -367,6 +434,7 @@ export function useDietMealActions({
     handleDuplicateMeal,
     handleCopyMeal,
     handlePasteMeal,
+    handlePasteMealAndReplace,
     hasCopiedMeal: copiedMealItems !== null && copiedMealItems.length > 0,
     handleDuplicateItem,
     handleRemoveMeal,

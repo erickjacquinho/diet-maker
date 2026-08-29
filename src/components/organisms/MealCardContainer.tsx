@@ -5,9 +5,26 @@ import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
-import { ClipboardCopy, ClipboardPaste, Clock, Copy, Percent, Plus } from 'lucide-react';
+import { AlertTriangle, ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
@@ -76,6 +93,7 @@ export interface MealCardContainerProps {
   onDuplicate?: () => void;
   onCopyMeal?: () => void;
   onPasteMeal?: () => void;
+  onPasteMealAndReplace?: () => void;
   canPasteMeal?: boolean;
   onScale?: () => void;
   scaleDisabled?: boolean;
@@ -108,6 +126,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   onDuplicate,
   onCopyMeal,
   onPasteMeal,
+  onPasteMealAndReplace,
   canPasteMeal = false,
   onScale,
   scaleDisabled = false,
@@ -128,8 +147,10 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   const [draftTitle, setDraftTitle] = useState(title);
   const [draftTime, setDraftTime] = useState(time);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [isPasteReplaceAlertOpen, setIsPasteReplaceAlertOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverState, setDragOverState] = useState<{ index: number; position: 'top' | 'bottom' } | null>(null);
+  const isScaleActionDisabled = true;
 
   useEffect(() => setDraftTitle(title), [title]);
   useEffect(() => setDraftTime(time), [time]);
@@ -363,6 +384,84 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
             aria-label="Ações da refeição"
             className="flex items-center gap-2 shrink-0"
           >
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="compact"
+                  iconOnly
+                  aria-label="Mais ações da refeição"
+                  title="Mais ações da refeição"
+                  onClick={(event) => {
+                    const trigger = event.currentTarget;
+                    const bounds = trigger.getBoundingClientRect();
+
+                    trigger.dispatchEvent(
+                      new MouseEvent('contextmenu', {
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: bounds.left,
+                        clientY: bounds.bottom,
+                      }),
+                    );
+                  }}
+                >
+                  <MoreHorizontal size={14} aria-hidden="true" />
+                </Button>
+              </ContextMenuTrigger>
+              <ContextMenuContent
+                className="-ml-0.5 mt-1 min-w-48 rounded-control border-border-subtle bg-surface p-1 text-text-primary shadow-floating"
+              >
+                <ContextMenuItem
+                  onSelect={onDuplicate}
+                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                >
+                  <Copy size={14} aria-hidden="true" />
+                  <span>Duplicar</span>
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onSelect={onCopyMeal}
+                  disabled={items.length === 0}
+                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                >
+                  <ClipboardCopy size={14} aria-hidden="true" />
+                  <span>Copiar</span>
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onSelect={onPasteMeal}
+                  disabled={!canPasteMeal}
+                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                >
+                  <ClipboardPaste size={14} aria-hidden="true" />
+                  <span>Colar</span>
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onSelect={() => setIsPasteReplaceAlertOpen(true)}
+                  disabled={!canPasteMeal}
+                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                >
+                  <Replace size={14} aria-hidden="true" />
+                  <span>Colar e substituir</span>
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onSelect={onScale}
+                  disabled={isScaleActionDisabled || scaleDisabled}
+                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                >
+                  <Percent size={14} aria-hidden="true" />
+                  <span>Escalar</span>
+                </ContextMenuItem>
+                <ContextMenuSeparator className="bg-border-divider" />
+                <ContextMenuItem
+                  onSelect={onDeleteMeal}
+                  className="gap-2 rounded-control text-style-nav-item text-error focus:bg-error-soft focus:text-error"
+                >
+                  <Trash2 size={14} aria-hidden="true" />
+                  <span>Excluir da refeição</span>
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
             <div role="group" aria-label="Transferir alimentos da refeição" className="flex items-center gap-1.5">
               <Button
                 onClick={onCopyMeal}
@@ -421,7 +520,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <Copy size={12} />
                 <span>Duplicar</span>
               </Button>
-              <Button onClick={onScale} disabled={scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
+              <Button onClick={onScale} disabled={isScaleActionDisabled || scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
                 <Percent size={12} />
                 <span>Escalar</span>
               </Button>
@@ -566,6 +665,29 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
       </div>
       </TabsContent>
       </Tabs>
+
+      <AlertDialog open={isPasteReplaceAlertOpen} onOpenChange={setIsPasteReplaceAlertOpen}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-text-primary">
+              <AlertTriangle className="size-4 text-warning" aria-hidden="true" />
+              <span>Substituir alimentos?</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Os alimentos atuais desta variação serão removidos e substituídos pelos alimentos copiados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={onPasteMealAndReplace}
+            >
+              Substituir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </Surface>
   );

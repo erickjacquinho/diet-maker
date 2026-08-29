@@ -67,6 +67,63 @@ describe('useDietMealActions item deletion undo', () => {
     expect(result.current.meals[0].items[1].quantityGrams).toBe(120);
   });
 
+  it('restores the deleted meal at its original position from the toast action', () => {
+    const beforeMeal: DietMeal = {
+      id: 'meal-before',
+      name: 'Café da manhã',
+      time: '08:00',
+      items: [{ id: 'before-item', name: 'Banana', quantityGrams: 100, protein: 1, carbs: 23, fats: 0, kcal: 90 }],
+    };
+    const afterMeal: DietMeal = {
+      id: 'meal-after',
+      name: 'Jantar',
+      time: '20:00',
+      items: [{ id: 'after-item', name: 'Sopa', quantityGrams: 300, protein: 8, carbs: 18, fats: 4, kcal: 140 }],
+    };
+    const mealToDelete: DietMeal = {
+      ...mealsFixture[0],
+      variations: [{
+        id: 'variation-2',
+        items: [{ ...mealsFixture[0].items[0], id: 'variation-item-1' }],
+      }],
+    };
+
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState([beforeMeal, mealToDelete, afterMeal]);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleRemoveMeal('meal-1');
+    });
+
+    expect(result.current.meals.map((meal) => meal.id)).toEqual(['meal-before', 'meal-after']);
+
+    const successToast = vi.mocked(toast.success);
+    const toastOptions = successToast.mock.calls[0]?.[1] as {
+      duration: number;
+      action: { label: string; onClick: () => void };
+    };
+
+    expect(successToast.mock.calls[0]?.[0]).toBe('Refeição "Almoço" removida.');
+    expect(toastOptions.duration).toBe(6000);
+    expect(toastOptions.action.label).toBe('Desfazer');
+
+    act(() => {
+      toastOptions.action.onClick();
+    });
+
+    expect(result.current.meals.map((meal) => meal.id)).toEqual(['meal-before', 'meal-1', 'meal-after']);
+    expect(result.current.meals[1].items[0].id).toBe('item-1');
+    expect(result.current.meals[1].variations?.[0].items[0].id).toBe('variation-item-1');
+  });
+
   it('reorders items within a meal correctly', () => {
     const { result } = renderHook(() => {
       const [meals, setMeals] = useState(mealsFixture);
@@ -146,5 +203,35 @@ describe('useDietMealActions item deletion undo', () => {
 
   it('returns the base variation id for a legacy meal when no selection is supplied', () => {
     expect(getBaseMealVariationId('meal-1')).toBe('meal-1::variation-1');
+  });
+
+  it('replaces the active variation after a quick confirmation when pasting', () => {
+    const sourceMeal = mealsFixture[0];
+    const targetMeal: DietMeal = {
+      id: 'meal-2',
+      name: 'Jantar',
+      time: '20:00',
+      items: [{ id: 'target-item', name: 'Sopa', quantityGrams: 300, protein: 8, carbs: 18, fats: 4, kcal: 140 }],
+    };
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState([sourceMeal, targetMeal]);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleCopyMeal('meal-1');
+    });
+    act(() => {
+      result.current.actions.handlePasteMealAndReplace('meal-2');
+    });
+
+    expect(result.current.meals[1].items.map((item) => item.name)).toEqual(['Arroz', 'Feijão', 'Frango']);
+    expect(result.current.meals[1].items.map((item) => item.id)).not.toEqual(sourceMeal.items.map((item) => item.id));
   });
 });

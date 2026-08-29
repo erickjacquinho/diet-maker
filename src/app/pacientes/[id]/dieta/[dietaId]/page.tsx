@@ -68,6 +68,7 @@ export default function DietBuilderPage() {
     handleDuplicateMeal,
     handleCopyMeal,
     handlePasteMeal,
+    handlePasteMealAndReplace,
     hasCopiedMeal,
     handleDuplicateItem,
     handleRemoveMeal,
@@ -135,6 +136,7 @@ export default function DietBuilderPage() {
         onDuplicate: () => handleDuplicateMeal(meal.id),
         onCopyMeal: () => handleCopyMeal(meal.id),
         onPasteMeal: () => handlePasteMeal(meal.id),
+        onPasteMealAndReplace: () => handlePasteMealAndReplace(meal.id),
         canPasteMeal: hasCopiedMeal,
         onScale: () => {
           setFoodSearchMealIndex(mealIdx);
@@ -179,7 +181,7 @@ export default function DietBuilderPage() {
         },
       };
     });
-  }, [currentMeals, mealGroups, getActiveMealVariationId, handleSelectMealVariation, handleAddMealVariation, handleRemoveMealVariation, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems, isNewDiet]);
+  }, [currentMeals, mealGroups, getActiveMealVariationId, handleSelectMealVariation, handleAddMealVariation, handleRemoveMealVariation, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, handlePasteMealAndReplace, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems, isNewDiet]);
 
 
   if (!dietPlan || !patient) {

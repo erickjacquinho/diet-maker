@@ -54,7 +54,27 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   const safeF = Math.max(0, Math.round(fatsG * 10) / 10);
 
   const distribution = useMemo(() => {
-    return calculateMacroDistributionPct(safeP, safeC, safeF);
+    const calculated = calculateMacroDistributionPct(safeP, safeC, safeF);
+    const percentages = [calculated.proteinPct, calculated.carbsPct, calculated.fatsPct];
+    const roundedTotal = percentages.reduce((total, percentage) => total + percentage, 0);
+
+    if (roundedTotal === 0 || roundedTotal === 100) return calculated;
+
+    let lastVisibleIndex = -1;
+    percentages.forEach((percentage, index) => {
+      if (percentage > 0) lastVisibleIndex = index;
+    });
+
+    if (lastVisibleIndex < 0) return calculated;
+
+    percentages[lastVisibleIndex] += 100 - roundedTotal;
+
+    return {
+      ...calculated,
+      proteinPct: percentages[0],
+      carbsPct: percentages[1],
+      fatsPct: percentages[2],
+    };
   }, [safeP, safeC, safeF]);
 
   const computedKcal = calculatePresetCalories(safeP, safeC, safeF);

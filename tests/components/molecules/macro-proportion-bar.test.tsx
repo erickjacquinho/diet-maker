@@ -75,6 +75,25 @@ describe('MacroProportionBar', () => {
     expect(screen.getByText(/450 kcal/)).toBeInTheDocument();
   });
 
+  it.each([
+    [30, 30, 13.3, ['33', '33', '34']],
+    [1, 1, 1, ['24', '24', '52']],
+  ])('fills the bar to exactly 100% after percentage rounding', (proteinG, carbsG, fatsG, expectedWidths) => {
+    render(
+      <MacroProportionBar
+        proteinG={proteinG}
+        carbsG={carbsG}
+        fatsG={fatsG}
+      />
+    );
+
+    const progressbar = screen.getByRole('progressbar', { name: /Proporção calórica/i });
+    const segmentWidths = Array.from(progressbar.querySelectorAll('rect')).map((segment) => segment.getAttribute('width'));
+
+    expect(segmentWidths).toEqual(expectedWidths);
+    expect(segmentWidths.reduce((total, width) => total + Number(width), 0)).toBe(100);
+  });
+
   it('respects showDividers and showCalories flags', () => {
     render(
       <MacroProportionBar
