@@ -4,6 +4,7 @@ import { calculatePresetCalories } from './presetUtils';
 import { recordPatientActivity } from './patientsStore';
 import { calculateMealTotals, calculateMealsTotal } from './macroCalculations';
 import { getStorageItem, setStorageItem } from './storage';
+import { normalizeMealVariations } from './mealVariations';
 
 export { calculateMealTotals, calculateMealsTotal };
 
@@ -23,6 +24,11 @@ export interface DietItem {
   kcal: number;
 }
 
+export interface DietMealVariation {
+  id: string;
+  items: DietItem[];
+}
+
 export function getItemGrams(item: DietItem): number {
   return item.quantityGrams ?? item.grams ?? 100;
 }
@@ -40,6 +46,8 @@ export interface DietMeal {
   name: string;
   time: string;
   items: DietItem[];
+  /** Additional options; the compatible `items` field remains Variation 1. */
+  variations?: DietMealVariation[];
 }
 
 export type CarbCyclingDayType = 'high' | 'medium' | 'low' | 'zero' | 'custom';
@@ -144,9 +152,28 @@ export function calculateWeeklyCycleAverage(variations: CarbCyclingVariation[]):
 
 export const DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
+export function normalizeDietPlan(diet: FullDietPlan): FullDietPlan {
+  return {
+    ...diet,
+    simpleMeals: Array.isArray(diet.simpleMeals)
+      ? diet.simpleMeals.map(normalizeMealVariations)
+      : [],
+    carbCyclingVariations: Array.isArray(diet.carbCyclingVariations)
+      ? diet.carbCyclingVariations.map((variation) => ({
+          ...variation,
+          meals: Array.isArray(variation.meals)
+            ? variation.meals.map(normalizeMealVariations)
+            : [],
+        }))
+      : [],
+  };
+}
+
 export function getPatientDietsFromStorage(patientId: string): FullDietPlan[] {
   const saved = getStorageItem<FullDietPlan[]>(`${DIETS_KEY_PREFIX}${patientId}`, []);
-  return Array.isArray(saved) ? saved : [];
+  return Array.isArray(saved)
+    ? saved.filter((diet): diet is FullDietPlan => Boolean(diet)).map(normalizeDietPlan)
+    : [];
 }
 
 export function getDietFromStorage(patientId: string, dietId: string): FullDietPlan | null {
@@ -158,10 +185,10 @@ export function saveDietToStorage(diet: FullDietPlan): FullDietPlan {
   const current = getPatientDietsFromStorage(diet.patientId);
   const existingIndex = current.findIndex((d) => d.id === diet.id);
 
-  const updatedDiet = {
+  const updatedDiet = normalizeDietPlan({
     ...diet,
     updatedAt: new Date().toLocaleDateString('pt-BR'),
-  };
+  });
 
   const updatedList = existingIndex >= 0
     ? current.map((d) => (d.id === diet.id ? updatedDiet : d))

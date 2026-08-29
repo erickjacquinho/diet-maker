@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
 import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/dietStore';
+import { updateMealVariationItems } from '@/lib/mealVariations';
+import { cloneMealsWithFreshIds } from '@/lib/dietDuplication';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { MealFoodToSubstitute } from '@/components/molecules/SubstituteFoodModal';
 import { toast } from 'sonner';
@@ -16,6 +18,7 @@ export function useDietBuilderModals({
   activeVariationId,
   setDietPlan,
   updateActiveMeals,
+  getActiveMealVariationId,
 }: {
   patient: Patient | null;
   dietPlan: FullDietPlan | null;
@@ -27,6 +30,7 @@ export function useDietBuilderModals({
   activeVariationId: string;
   setDietPlan: React.Dispatch<React.SetStateAction<FullDietPlan | null>>;
   updateActiveMeals: (updater: (prevMeals: DietMeal[]) => DietMeal[]) => void;
+  getActiveMealVariationId: (mealId: string, meal?: DietMeal) => string;
 }) {
   const [foodSearchMealIndex, setFoodSearchMealIndex] = useState<number | null>(null);
   const [isScaleModalOpen, setIsScaleModalOpen] = useState(false);
@@ -54,9 +58,7 @@ export function useDietBuilderModals({
     (percent: number) => {
       const factor = 1 + percent / 100;
       updateActiveMeals((prev) =>
-        prev.map((meal) => ({
-          ...meal,
-          items: meal.items.map((item) => {
+        prev.map((meal) => updateMealVariationItems(meal, getActiveMealVariationId(meal.id, meal), (items) => items.map((item) => {
             const currentGrams = item.quantityGrams || item.grams || 100;
             const p = item.protein ?? item.proteinG ?? 0;
             const c = item.carbs ?? item.carbsG ?? 0;
@@ -70,13 +72,12 @@ export function useDietBuilderModals({
               carbs: Math.round(c * factor * 10) / 10,
               fats: Math.round(f * factor * 10) / 10,
             };
-          }),
-        }))
+          })))
       );
       toast.success(`Dieta ajustada em ${percent > 0 ? '+' : ''}${percent}%`);
       setIsScaleModalOpen(false);
     },
-    [updateActiveMeals]
+    [getActiveMealVariationId, updateActiveMeals]
   );
 
   const handleCopyVariation = useCallback(() => {
@@ -90,7 +91,7 @@ export function useDietBuilderModals({
         ...prev,
         carbCyclingVariations: prev.carbCyclingVariations.map((v) =>
           v.id === copyTargetId
-            ? { ...v, meals: JSON.parse(JSON.stringify(source.meals)) }
+            ? { ...v, meals: cloneMealsWithFreshIds(source.meals) }
             : v
         ),
       };

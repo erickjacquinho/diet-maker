@@ -130,4 +130,35 @@ describe('Diet Domain: dietStore', () => {
     expect(plan.carbCyclingVariations[0].targetFats).toBe(0);
     expect(plan.carbCyclingVariations[0].targetKcal).toBe(0);
   });
+
+  it('round-trips optional meal variations while keeping legacy meals compatible', () => {
+    const plan = createInitialDietPlan('pat-variations', {});
+    plan.simpleMeals = [
+      {
+        id: 'meal-variation-store',
+        name: 'Almoço',
+        time: '12:00',
+        items: [{ id: 'item-base', name: 'Arroz', quantityGrams: 100, protein: 2, carbs: 28, fats: 0, kcal: 130 }],
+        variations: [
+          {
+            id: 'meal-variation-store::variation-2',
+            items: [{ id: 'item-extra', name: 'Batata', quantityGrams: 150, protein: 3, carbs: 30, fats: 0, kcal: 140 }],
+          },
+        ],
+      },
+      {
+        id: 'meal-legacy-store',
+        name: 'Lanche',
+        time: '16:00',
+        items: [],
+      },
+    ];
+
+    saveDietToStorage(plan);
+
+    const fetched = getDietFromStorage('pat-variations', plan.id);
+    expect(fetched?.simpleMeals[0].variations).toHaveLength(1);
+    expect(fetched?.simpleMeals[0].variations?.[0].items[0].name).toBe('Batata');
+    expect(fetched?.simpleMeals[1].variations).toBeUndefined();
+  });
 });

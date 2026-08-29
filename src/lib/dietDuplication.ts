@@ -3,6 +3,7 @@ import type { HistoricalDiet } from './patientsStore';
 import { calculateWeeklyCycleAverage } from './dietStore';
 import { normalizeDateToISO } from './date-only';
 import { calculatePresetCalories } from './presetUtils';
+import { cloneMealGroupWithFreshIds } from './mealVariations';
 
 export interface PreviousDietSummary {
   id: string;
@@ -113,14 +114,7 @@ export function buildPreviousDietSummaries(
 }
 
 export function cloneMealsWithFreshIds(meals: DietMeal[] = []): DietMeal[] {
-  return meals.map((meal) => ({
-    ...meal,
-    id: `meal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    items: (meal.items || []).map((item) => ({
-      ...item,
-      id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    })),
-  }));
+  return meals.map(cloneMealGroupWithFreshIds);
 }
 
 export function cloneDietForNewDraft(

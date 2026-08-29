@@ -9,6 +9,12 @@ import {
   FullDietPlan,
 } from '@/lib/dietStore';
 import {
+  getBaseMealVariationId,
+  getMealVariationContextKey,
+  getActiveMealVariationId as resolveActiveMealVariationId,
+  type ActiveMealVariationIds,
+} from '@/lib/mealVariations';
+import {
   PreviousDietSummary,
   buildPreviousDietSummaries,
   cloneDietForNewDraft,
@@ -32,6 +38,7 @@ export function useDietBuilderPage() {
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [activeVariationId, setActiveVariationId] = useState<string>('var-high');
+  const [activeMealVariationIds, setActiveMealVariationIds] = useState<ActiveMealVariationIds>({});
 
   // Load Patient & Diet Plan
   useEffect(() => {
@@ -44,6 +51,7 @@ export function useDietBuilderPage() {
     dietaId,
     patient,
     setActiveVariationId,
+    setActiveMealVariationIds,
   });
 
   // Calculations hook
@@ -55,7 +63,28 @@ export function useDietBuilderPage() {
     targetFat,
     currentTotals,
     macroMetrics,
-  } = useDietCalculations(dietPlan, activeVariationId, patient);
+    mealGroups,
+  } = useDietCalculations(dietPlan, activeVariationId, patient, activeMealVariationIds);
+
+  const getActiveMealVariationId = useCallback(
+    (mealId: string, mealOverride?: DietMeal) => {
+      const mode = dietPlan?.mode || 'simple';
+      const contextKey = getMealVariationContextKey(mode, mealId, activeVariationId);
+      const meal = mealOverride || mealGroups.find((candidate) => candidate.id === mealId);
+      if (!meal) return activeMealVariationIds[contextKey] || getBaseMealVariationId(mealId);
+      return resolveActiveMealVariationId(meal, activeMealVariationIds[contextKey]);
+    },
+    [activeMealVariationIds, activeVariationId, dietPlan?.mode, mealGroups]
+  );
+
+  const handleSelectMealVariation = useCallback(
+    (mealId: string, variationId: string) => {
+      const mode = dietPlan?.mode || 'simple';
+      const contextKey = getMealVariationContextKey(mode, mealId, activeVariationId);
+      setActiveMealVariationIds((prev) => ({ ...prev, [contextKey]: variationId }));
+    },
+    [activeVariationId, dietPlan?.mode]
+  );
 
   const updateActiveMeals = useCallback(
     (updater: (prevMeals: DietMeal[]) => DietMeal[]) => {
@@ -88,13 +117,16 @@ export function useDietBuilderPage() {
     activeVariationId,
     setDietPlan,
     updateActiveMeals,
+    getActiveMealVariationId,
   });
 
   // Meal Actions hook
   const mealActions = useDietMealActions({
     foodSearchMealIndex: modals.foodSearchMealIndex,
-    currentMeals,
+    currentMeals: mealGroups,
     updateActiveMeals,
+    getActiveMealVariationId,
+    onSelectMealVariation: handleSelectMealVariation,
   });
 
   const handleModeChange = useCallback((newMode: 'simple' | 'carb_cycling') => {
@@ -294,9 +326,13 @@ export function useDietBuilderPage() {
     dietPlan,
     activeVariationId,
     setActiveVariationId,
+    activeMealVariationIds,
+    getActiveMealVariationId,
+    handleSelectMealVariation,
     ...modals,
     ...mealActions,
     currentMeals,
+    mealGroups,
     targetKcal,
     targetProt,
     targetCarb,

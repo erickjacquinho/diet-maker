@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { FoodSearchResultsList } from '@/components/molecules/food-search/FoodSearchResultsList';
 import type { FoodItem } from '@/lib/tacoStore';
@@ -20,7 +20,7 @@ const foods: FoodItem[] = [
 ];
 
 describe('FoodSearchResultsList', () => {
-  it('keeps the name column left-aligned with compact stacked text', () => {
+  it('keeps the name column left-aligned with compact stacked text', async () => {
     render(
       <FoodSearchResultsList
         searchResults={foods}
@@ -33,17 +33,19 @@ describe('FoodSearchResultsList', () => {
     const table = screen.getByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
     const nameHeader = within(table).getByRole('columnheader', { name: 'Nome (100g base)' });
     const nameCell = screen.getByText('Arroz integral').closest('td');
+    const nameStack = nameCell?.querySelector('.grid');
+    const nameTrigger = nameStack?.firstElementChild?.firstElementChild;
 
     expect(nameHeader).toHaveClass('text-left', 'w-80');
     expect(nameCell).toHaveClass('text-left', 'w-80', 'h-table-row-food', 'py-1');
-    expect(nameCell?.querySelector('span[title="Arroz integral"]')).toHaveClass('whitespace-nowrap', 'truncate');
-    expect(nameCell?.querySelector('span[title="Arroz integral"]')).not.toHaveClass('break-words');
+    expect(nameTrigger).toHaveClass('whitespace-nowrap', 'truncate');
+    expect(nameTrigger).not.toHaveClass('break-words');
+    expect(nameTrigger).not.toHaveAttribute('title');
     expect(screen.getByText('cozido · Cereais')).toBeInTheDocument();
-    const nameStack = nameCell?.querySelector('.grid');
     expect(nameStack).toHaveClass('h-full', 'content-center');
     expect(nameStack?.firstElementChild).toHaveClass('flex', 'items-center', 'gap-0.5', 'whitespace-nowrap');
     expect(nameStack?.firstElementChild).not.toHaveClass('flex-wrap');
-    expect(nameStack?.firstElementChild?.firstElementChild).toHaveAttribute('title', 'Arroz integral');
+    expect(nameTrigger).toHaveAttribute('tabindex', '0');
     expect(nameStack?.firstElementChild?.lastElementChild).toHaveClass('shrink-0', 'whitespace-nowrap');
     expect(nameStack?.firstElementChild?.lastElementChild).not.toHaveClass('absolute');
     expect(screen.getByText('cozido · Cereais')).toHaveClass(
@@ -52,6 +54,9 @@ describe('FoodSearchResultsList', () => {
       'text-text-muted',
       '-mt-1',
     );
+
+    fireEvent.pointerMove(nameTrigger as HTMLElement, { pointerType: 'mouse' });
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Arroz integral');
   });
 
   it('centers nutritional columns and restores their sorting indicators', () => {

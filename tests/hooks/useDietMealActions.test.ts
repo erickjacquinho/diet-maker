@@ -4,12 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { toast } from 'sonner';
 import { DietMeal } from '@/lib/dietStore';
 import { useDietMealActions } from '@/hooks/useDietMealActions';
+import { getBaseMealVariationId } from '@/lib/mealVariations';
 
 vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    info: vi.fn(),
-  },
+      toast: {
+        success: vi.fn(),
+        info: vi.fn(),
+        error: vi.fn(),
+      },
 }));
 
 const mealsFixture: DietMeal[] = [
@@ -83,5 +85,66 @@ describe('useDietMealActions item deletion undo', () => {
     });
 
     expect(result.current.meals[0].items.map((item) => item.id)).toEqual(['item-3', 'item-1', 'item-2']);
+  });
+
+  it('adds a variation from the active option and selects the appended copy', () => {
+    const sourceMeal: DietMeal = {
+      ...mealsFixture[0],
+      variations: [{ id: 'variation-2', items: [{ ...mealsFixture[0].items[0], id: 'variation-item-2' }] }],
+    };
+
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState([sourceMeal]);
+      const [activeVariationId, setActiveVariationId] = useState('variation-2');
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+        getActiveMealVariationId: () => activeVariationId,
+        onSelectMealVariation: (_mealId, variationId) => setActiveVariationId(variationId),
+      });
+
+      return { meals, activeVariationId, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleAddMealVariation('meal-1');
+    });
+
+    expect(result.current.meals[0].variations).toHaveLength(2);
+    expect(result.current.activeVariationId).toBe(result.current.meals[0].variations?.[1].id);
+    expect(result.current.meals[0].variations?.[1].items[0].name).toBe('Arroz');
+    expect(result.current.meals[0].variations?.[1].items[0].id).not.toBe('variation-item-2');
+    expect(result.current.meals[0].items[0].id).toBe('item-1');
+  });
+
+  it('changes quantity only in the selected variation', () => {
+    const sourceMeal: DietMeal = {
+      ...mealsFixture[0],
+      variations: [{ id: 'variation-2', items: [{ ...mealsFixture[0].items[0], id: 'variation-item-2' }] }],
+    };
+
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState([sourceMeal]);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+        getActiveMealVariationId: () => 'variation-2',
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleUpdateItemGram('meal-1', 'variation-item-2', 200);
+    });
+
+    expect(result.current.meals[0].items[0].quantityGrams).toBe(100);
+    expect(result.current.meals[0].variations?.[0].items[0].quantityGrams).toBe(200);
+  });
+
+  it('returns the base variation id for a legacy meal when no selection is supplied', () => {
+    expect(getBaseMealVariationId('meal-1')).toBe('meal-1::variation-1');
   });
 });

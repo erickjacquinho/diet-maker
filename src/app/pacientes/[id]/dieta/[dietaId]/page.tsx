@@ -14,6 +14,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 import { MealCardContainerProps } from '@/components/organisms';
 import { calculateMealsTotal, saveDietToStorage } from '@/lib/dietStore';
+import { getMealVariationOptions } from '@/lib/mealVariations';
 
 export default function DietBuilderPage() {
   const {
@@ -55,6 +56,7 @@ export default function DietBuilderPage() {
     setFoodToSubstitute,
     handleSubstituteFood,
     currentMeals,
+    mealGroups,
     macroMetrics,
     handleModeChange,
     handleVariationsCountChange,
@@ -74,6 +76,10 @@ export default function DietBuilderPage() {
     handleUpdateItemGram,
     handleRemoveItem,
     handleReorderItems,
+    handleAddMealVariation,
+    handleRemoveMealVariation,
+    getActiveMealVariationId,
+    handleSelectMealVariation,
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,
@@ -94,6 +100,9 @@ export default function DietBuilderPage() {
 
   const mealsData: MealCardContainerProps[] = useMemo(() => {
     return currentMeals.map((meal, mealIdx) => {
+      const sourceMeal = mealGroups[mealIdx] || meal;
+      const variationOptions = getMealVariationOptions(sourceMeal);
+      const activeMealVariationId = getActiveMealVariationId(meal.id, sourceMeal);
       const totals = calculateMealsTotal([meal]);
       return {
         id: meal.id,
@@ -112,6 +121,14 @@ export default function DietBuilderPage() {
           fats: it.fats,
           quantityGrams: it.quantityGrams,
         })),
+        variationOptions: variationOptions.length > 1
+          ? variationOptions.map(({ id, label }) => ({ id, label }))
+          : undefined,
+        activeVariationId: activeMealVariationId,
+        onVariationChange: (variationId: string) => handleSelectMealVariation(meal.id, variationId),
+        onAddVariation: () => handleAddMealVariation(meal.id),
+        onRemoveVariation: () => handleRemoveMealVariation(meal.id),
+        variationLimitReached: variationOptions.length >= 5,
         onTitleChange: (newTitle: string) => handleUpdateMealHeader(meal.id, { name: newTitle }),
         onTimeChange: (newTime: string) => handleUpdateMealHeader(meal.id, { time: newTime }),
         onAddFoodClick: () => setFoodSearchMealIndex(mealIdx),
@@ -162,7 +179,7 @@ export default function DietBuilderPage() {
         },
       };
     });
-  }, [currentMeals, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems, isNewDiet]);
+  }, [currentMeals, mealGroups, getActiveMealVariationId, handleSelectMealVariation, handleAddMealVariation, handleRemoveMealVariation, handleUpdateMealHeader, setFoodSearchMealIndex, setIsScaleModalOpen, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems, isNewDiet]);
 
 
   if (!dietPlan || !patient) {

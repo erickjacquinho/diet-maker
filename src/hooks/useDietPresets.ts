@@ -11,6 +11,7 @@ interface UseDietPresetsOptions {
   dietaId: string;
   patient: Patient | null;
   setActiveVariationId: React.Dispatch<React.SetStateAction<string>>;
+  setActiveMealVariationIds?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export function useDietPresets({
@@ -18,6 +19,7 @@ export function useDietPresets({
   dietaId,
   patient,
   setActiveVariationId,
+  setActiveMealVariationIds,
 }: UseDietPresetsOptions) {
   const [dietPlan, setDietPlan] = useState<FullDietPlan | null>(null);
 
@@ -37,6 +39,7 @@ export function useDietPresets({
         mode: saved.mode || 'simple',
       };
       setDietPlan(normalizedSaved);
+      setActiveMealVariationIds?.({});
       if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
         setActiveVariationId((prev) => {
           const exists = saved.carbCyclingVariations.some((v) => v.id === prev);
@@ -59,7 +62,8 @@ export function useDietPresets({
     initialPlan.mode = 'simple';
 
     setDietPlan(initialPlan);
-  }, [dietaId, patient, patientId, setActiveVariationId]);
+    setActiveMealVariationIds?.({});
+  }, [dietaId, patient, patientId, setActiveMealVariationIds, setActiveVariationId]);
 
   // Sync only on explicit storage/sync events from other sources/modals when data exists
   useEffect(() => {
@@ -74,6 +78,7 @@ export function useDietPresets({
       const saved = getDietFromStorage(patientId, dietaId);
       if (saved) {
         setDietPlan(saved);
+        setActiveMealVariationIds?.({});
         if (saved.carbCyclingVariations && saved.carbCyclingVariations.length > 0) {
           setActiveVariationId((prev) => {
             const exists = saved.carbCyclingVariations.some((v) => v.id === prev);
@@ -90,7 +95,7 @@ export function useDietPresets({
       window.removeEventListener('storage', handleSync);
       window.removeEventListener('nutridiet-diet-sync', handleSync);
     };
-  }, [dietaId, patientId, setActiveVariationId]);
+  }, [dietaId, patientId, setActiveMealVariationIds, setActiveVariationId]);
 
   return { dietPlan, setDietPlan };
 }

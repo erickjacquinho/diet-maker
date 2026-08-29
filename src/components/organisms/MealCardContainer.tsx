@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
 import { ClipboardCopy, ClipboardPaste, Clock, Copy, Percent, Plus } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
@@ -84,9 +85,16 @@ export interface MealCardContainerProps {
   onDuplicateItem?: (index: number) => void;
   onQuantityChange?: (index: number, newGrams: number) => void;
   onReorderItems?: (sourceIndex: number, targetIndex: number) => void;
+  variationOptions?: Array<{ id: string; label: string }>;
+  activeVariationId?: string;
+  onVariationChange?: (variationId: string) => void;
+  onAddVariation?: () => void;
+  onRemoveVariation?: () => void;
+  variationLimitReached?: boolean;
 }
 
 export const MealCardContainer: React.FC<MealCardContainerProps> = ({
+  id,
   title,
   time,
   kcal,
@@ -109,6 +117,12 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   onDuplicateItem,
   onQuantityChange,
   onReorderItems,
+  variationOptions = [],
+  activeVariationId,
+  onVariationChange,
+  onAddVariation,
+  onRemoveVariation,
+  variationLimitReached = false,
 }) => {
 
   const [draftTitle, setDraftTitle] = useState(title);
@@ -158,6 +172,10 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   const { hour: currentHour, minute: currentMinute } = parseHourAndMinute(draftTime);
+  const hasVariationTabs = variationOptions.length > 1;
+  const selectedVariationId = activeVariationId || variationOptions[0]?.id || '';
+  const activeVariationLabel = variationOptions.find((option) => option.id === selectedVariationId)?.label || 'Variação ativa';
+  const variationLimitMessageId = id ? `${id}-variation-limit` : 'meal-variation-limit';
 
   const handleSelectHour = (newHour: string) => {
     const nextTime = `${newHour}:${currentMinute}`;
@@ -173,6 +191,12 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
   return (
     <Surface variant="default" density="highlight" className="flex flex-col justify-between gap-4">
+      <Tabs
+        value={selectedVariationId}
+        onValueChange={hasVariationTabs ? onVariationChange : undefined}
+        activationMode="manual"
+      >
+      <TabsContent value={selectedVariationId} asChild forceMount className="mt-0">
       <div className="flex flex-col gap-4 flex-1">
         {/* Meal Header */}
         <div className="flex items-center justify-between pb-3 border-b border-border-subtle gap-2 flex-wrap">
@@ -320,6 +344,19 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 </PopoverContent>
               </Popover>
             </div>
+            {hasVariationTabs && (
+              <TabsList aria-label="Variações da refeição" className="h-control-compact shrink-0">
+                {variationOptions.map((option) => (
+                  <TabsTrigger
+                    key={option.id}
+                    value={option.id}
+                    aria-label={option.label}
+                  >
+                    {option.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            )}
           </div>
           <div
             role="group"
@@ -350,6 +387,36 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
             </div>
             <div role="separator" aria-orientation="vertical" className="h-5 w-px bg-border-divider" />
             <div className="flex items-center gap-1.5">
+              {hasVariationTabs && onRemoveVariation && (
+                <DeleteIconButton
+                  size="compact"
+                  onClick={onRemoveVariation}
+                  title={`Excluir ${activeVariationLabel}`}
+                  aria-label={`Excluir ${activeVariationLabel}`}
+                />
+              )}
+              {onAddVariation && (
+                <div className="flex items-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="compact"
+                    onClick={onAddVariation}
+                    disabled={variationLimitReached}
+                    aria-describedby={variationLimitReached ? variationLimitMessageId : undefined}
+                    title={variationLimitReached ? 'Limite de 5 variações atingido' : 'Adicionar variação'}
+                    className="flex items-center gap-1 text-style-legal"
+                  >
+                    <Plus size={12} aria-hidden="true" />
+                    <span>Adicionar variação</span>
+                  </Button>
+                  {variationLimitReached && (
+                    <span id={variationLimitMessageId} className="sr-only">
+                      Limite de 5 variações atingido. Remova uma opção antes de adicionar outra.
+                    </span>
+                  )}
+                </div>
+              )}
               <Button onClick={onDuplicate} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
                 <Copy size={12} />
                 <span>Duplicar</span>
@@ -497,6 +564,8 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           kcal={displayKcal}
         />
       </div>
+      </TabsContent>
+      </Tabs>
 
     </Surface>
   );

@@ -197,6 +197,27 @@ describe('dietDuplication utility', () => {
       expect(cloned[0].items[0].name).toBe('Ovo cozido');
       expect(cloned[0].items[0].quantityGrams).toBe(100);
     });
+
+    it('clones every variation and keeps option edits independent', () => {
+      const sourceMeal: DietMeal = {
+        ...mockStoredDiet.simpleMeals[0],
+        variations: [
+          {
+            id: 'variation-source-2',
+            items: [{ ...mockStoredDiet.simpleMeals[0].items[0], id: 'variation-item-source' }],
+          },
+        ],
+      };
+
+      const [cloned] = cloneMealsWithFreshIds([sourceMeal]);
+
+      expect(cloned.variations).toHaveLength(1);
+      expect(cloned.variations?.[0].id).not.toBe(sourceMeal.variations?.[0].id);
+      expect(cloned.variations?.[0].items[0].id).not.toBe(sourceMeal.variations?.[0].items[0].id);
+
+      cloned.variations![0].items[0].quantityGrams = 999;
+      expect(sourceMeal.variations![0].items[0].quantityGrams).toBe(100);
+    });
   });
 
   describe('cloneDietForNewDraft', () => {

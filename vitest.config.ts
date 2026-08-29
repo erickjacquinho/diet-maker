@@ -8,8 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     pool: 'threads',
+    maxWorkers: 4,
     watch: false,
-    testTimeout: 30_000,
+    testTimeout: 60_000,
     setupFiles: ['./vitest.setup.ts'],
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',

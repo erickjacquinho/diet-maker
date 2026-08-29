@@ -3094,7 +3094,9 @@
       ],
       "profile": "design-system/components/profiles/organisms/meal-card-container.md",
       "consumers": [
-        "organism-sidebar-nav"
+        "template-diet-builder-template",
+        "src/components/organisms/diet/DietMealsSection.tsx",
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",

@@ -6,13 +6,22 @@ import {
   calculateKcalFromMacros,
   buildMacroMetricCardProps,
 } from '@/lib/nutrition/macroCalculations';
+import { projectMealGroups, type ActiveMealVariationIds } from '@/lib/mealVariations';
 
 export function useDietCalculations(
   dietPlan: FullDietPlan | null,
   activeVariationId: string,
-  patient: Patient | null
+  patient: Patient | null,
+  activeMealVariationIds: ActiveMealVariationIds = {}
 ) {
-  const { currentMeals, targetKcal, targetProt, targetCarb, targetFat } = useMemo(() => {
+  const {
+    mealGroups,
+    currentMeals,
+    targetKcal,
+    targetProt,
+    targetCarb,
+    targetFat,
+  } = useMemo(() => {
     if (!dietPlan) {
       const pProt = patient?.targetProtein ?? 0;
       const pCarb = patient?.targetCarbs ?? 0;
@@ -20,6 +29,7 @@ export function useDietCalculations(
       const pKcal = patient?.targetKcal ?? calculateKcalFromMacros(pProt, pCarb, pFat);
 
       return {
+        mealGroups: [],
         currentMeals: [],
         targetKcal: pKcal,
         targetProt: pProt,
@@ -34,8 +44,10 @@ export function useDietCalculations(
       const fat = Number(dietPlan.simpleTargetFats) || 0;
       const kcal = Number(dietPlan.simpleTargetKcal) || calculateKcalFromMacros(prot, carb, fat);
 
+      const mealGroups = dietPlan.simpleMeals || [];
       return {
-        currentMeals: dietPlan.simpleMeals || [],
+        mealGroups,
+        currentMeals: projectMealGroups(dietPlan.simpleMeals || [], 'simple', undefined, activeMealVariationIds),
         targetKcal: kcal,
         targetProt: prot,
         targetCarb: carb,
@@ -53,15 +65,17 @@ export function useDietCalculations(
         ? (Number(activeVar.targetKcal) || calculateKcalFromMacros(prot, carb, fat))
         : (patient?.targetKcal ?? calculateKcalFromMacros(prot, carb, fat));
 
+      const mealGroups = activeVar ? activeVar.meals : [];
       return {
-        currentMeals: activeVar ? activeVar.meals : [],
+        mealGroups,
+        currentMeals: projectMealGroups(mealGroups, 'carb_cycling', activeVar?.id, activeMealVariationIds),
         targetKcal: kcal,
         targetProt: prot,
         targetCarb: carb,
         targetFat: fat,
       };
     }
-  }, [dietPlan, activeVariationId, patient]);
+  }, [dietPlan, activeVariationId, patient, activeMealVariationIds]);
 
   const currentTotals = useMemo(
     () => calculateMealTotals(currentMeals.flatMap((m) => m.items)),
@@ -108,6 +122,7 @@ export function useDietCalculations(
   }, [patient?.weightKg, currentTotals, targetKcal, targetProt, targetCarb, targetFat]);
 
   return {
+    mealGroups,
     currentMeals,
     targetKcal,
     targetProt,
