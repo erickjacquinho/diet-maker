@@ -48,7 +48,8 @@ A arquitetura também define a fronteira de propriedade dos dados nutricionais:
 A arquitetura e o plano de validação estão consolidados em Markdown. A
 implementação do `DietDraftStore`, a integração das telas e a migração ainda
 não começaram. As Decisões 05–09 registram o domínio e a topologia aprovados
-para a V1. A Decisão 10 aguarda somente prova técnica do motor local.
+para a V1; as Decisões 11 e 12 registram recuperação local e autenticação
+futura. A Decisão 10 aguarda somente prova técnica do motor local.
 
 Os dados existentes em `localStorage` são exclusivamente de teste e serão
 descartados na implantação da arquitetura nova; não haverá migração desses
