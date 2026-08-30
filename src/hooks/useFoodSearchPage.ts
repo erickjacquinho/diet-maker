@@ -25,6 +25,7 @@ export function useFoodSearchPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
+  const [pendingDeleteCustomFoodId, setPendingDeleteCustomFoodId] = useState<string | null>(null);
 
   useEffect(() => {
     setFoods(getAllFoods());
@@ -54,12 +55,25 @@ export function useFoodSearchPage() {
   }, []);
 
   const handleDeleteCustomFood = useCallback((id: string) => {
-    if (confirm('Tem certeza que deseja excluir este alimento customizado?')) {
-      deleteCustomFood(id);
-      setFoods(getAllFoods());
-      setIsModalOpen(false);
-      setEditingFoodId(null);
-    }
+    setPendingDeleteCustomFoodId(id);
+  }, []);
+
+  const handleCancelDeleteCustomFood = useCallback(() => {
+    setPendingDeleteCustomFoodId(null);
+  }, []);
+
+  const handleConfirmDeleteCustomFood = useCallback(() => {
+    if (pendingDeleteCustomFoodId === null) return;
+
+    deleteCustomFood(pendingDeleteCustomFoodId);
+    setFoods(getAllFoods());
+    setIsModalOpen(false);
+    setEditingFoodId(null);
+    setPendingDeleteCustomFoodId(null);
+  }, [pendingDeleteCustomFoodId]);
+
+  const handleDeleteCustomFoodDialogChange = useCallback((open: boolean) => {
+    if (!open) setPendingDeleteCustomFoodId(null);
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -152,6 +166,10 @@ export function useFoodSearchPage() {
     handleOpenEditModal,
     handleSaveCustomFood,
     handleDeleteCustomFood,
+    isDeleteCustomFoodConfirmationOpen: pendingDeleteCustomFoodId !== null,
+    handleCancelDeleteCustomFood,
+    handleConfirmDeleteCustomFood,
+    handleDeleteCustomFoodDialogChange,
     resetFilters,
   };
 }

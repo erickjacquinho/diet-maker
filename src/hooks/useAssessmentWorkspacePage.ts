@@ -31,6 +31,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false);
 
   const isNew = assessmentId === 'nova';
 
@@ -329,20 +330,31 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     router.push(`/pacientes/${patient.id}`);
   }, [draft, patient, composition, previousAssessment, isNew, router]);
 
-  const handleCancel = useCallback(() => {
-    if (isDirty) {
-      const confirmLeave = window.confirm(
-        'Você possui alterações não salvas na avaliação. Deseja sair mesmo assim?'
-      );
-      if (!confirmLeave) return;
-    }
-
+  const navigateBack = useCallback(() => {
     if (patient) {
       router.push(`/pacientes/${patient.id}`);
     } else {
       router.push('/pacientes');
     }
-  }, [isDirty, patient, router]);
+  }, [patient, router]);
+
+  const handleCancel = useCallback(() => {
+    if (isDirty) {
+      setIsLeaveConfirmationOpen(true);
+      return;
+    }
+
+    navigateBack();
+  }, [isDirty, navigateBack]);
+
+  const handleCancelLeaveConfirmation = useCallback(() => {
+    setIsLeaveConfirmationOpen(false);
+  }, []);
+
+  const handleConfirmLeave = useCallback(() => {
+    setIsLeaveConfirmationOpen(false);
+    navigateBack();
+  }, [navigateBack]);
 
   const handleCopySummary = useCallback(() => {
     if (!draft || !patient || !composition.isValid) return;
@@ -405,11 +417,14 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     isSaving,
     isDirty,
     isCopied,
+    isLeaveConfirmationOpen,
     submitError,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCancelLeaveConfirmation,
+    handleConfirmLeave,
     handleCopySummary,
   };
 }

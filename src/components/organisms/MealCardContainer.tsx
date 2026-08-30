@@ -5,18 +5,8 @@ import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
-import { AlertTriangle, ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
+import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
+import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   ContextMenu,
@@ -666,28 +656,15 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
       </TabsContent>
       </Tabs>
 
-      <AlertDialog open={isPasteReplaceAlertOpen} onOpenChange={setIsPasteReplaceAlertOpen}>
-        <AlertDialogContent className="max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-text-primary">
-              <AlertTriangle className="size-4 text-warning" aria-hidden="true" />
-              <span>Substituir alimentos?</span>
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Os alimentos atuais desta variação serão removidos e substituídos pelos alimentos copiados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={onPasteMealAndReplace}
-            >
-              Substituir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationAlertDialog
+        open={isPasteReplaceAlertOpen}
+        onOpenChange={setIsPasteReplaceAlertOpen}
+        title="Substituir alimentos?"
+        description="Os alimentos atuais desta variação serão removidos e substituídos pelos alimentos copiados."
+        confirmLabel="Substituir"
+        confirmVariant="destructive"
+        onConfirm={onPasteMealAndReplace ?? (() => undefined)}
+      />
 
     </Surface>
   );

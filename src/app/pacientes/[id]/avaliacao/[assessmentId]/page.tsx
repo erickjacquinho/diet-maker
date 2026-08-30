@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, AlertTriangle, Calendar, User, Ruler } from 'lucide-react';
 import { PageContextHeader } from '@/components/molecules';
+import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import { AssessmentContinuousFields } from '@/components/molecules/assessment/AssessmentContinuousFields';
 import { AssessmentSummaryPanel } from '@/components/organisms/assessment/AssessmentSummaryPanel';
 import { Surface, SecondaryActionButton } from '@/components/atoms';
@@ -28,10 +29,13 @@ export default function AssessmentWorkspacePage() {
     isSaving,
     isCopied,
     submitError,
+    isLeaveConfirmationOpen,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCancelLeaveConfirmation,
+    handleConfirmLeave,
     handleCopySummary,
   } = useAssessmentWorkspacePage(patientId, assessmentId);
 
@@ -137,6 +141,18 @@ export default function AssessmentWorkspacePage() {
           />
         </div>
       </div>
+
+      <ConfirmationAlertDialog
+        open={isLeaveConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelLeaveConfirmation();
+        }}
+        title="Sair sem salvar?"
+        description="Você possui alterações não salvas na avaliação. Deseja sair mesmo assim?"
+        confirmLabel="Sair"
+        onConfirm={handleConfirmLeave}
+        cancelLabel="Continuar editando"
+      />
     </div>
   );
 }

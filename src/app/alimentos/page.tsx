@@ -5,6 +5,7 @@ import { useFoodSearchPage } from '@/hooks/useFoodSearchPage';
 import { FoodFilterHeader } from '@/components/organisms/foods/FoodFilterHeader';
 import { FoodTableSection } from '@/components/organisms/foods/FoodTableSection';
 import { CustomFoodModal } from '@/components/molecules/CustomFoodModal';
+import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 
 export default function FoodsPage() {
   const {
@@ -34,6 +35,9 @@ export default function FoodsPage() {
     handleOpenEditModal,
     handleSaveCustomFood,
     handleDeleteCustomFood,
+    isDeleteCustomFoodConfirmationOpen,
+    handleConfirmDeleteCustomFood,
+    handleDeleteCustomFoodDialogChange,
     resetFilters,
   } = useFoodSearchPage();
 
@@ -74,6 +78,16 @@ export default function FoodsPage() {
         food={editingFood}
         onSave={handleSaveCustomFood}
         onDelete={(foodId) => handleDeleteCustomFood(foodId)}
+      />
+
+      <ConfirmationAlertDialog
+        open={isDeleteCustomFoodConfirmationOpen}
+        onOpenChange={handleDeleteCustomFoodDialogChange}
+        title="Excluir alimento customizado?"
+        description="Tem certeza que deseja excluir este alimento customizado?"
+        confirmLabel="Excluir"
+        confirmVariant="destructive"
+        onConfirm={handleConfirmDeleteCustomFood}
       />
     </div>
   );

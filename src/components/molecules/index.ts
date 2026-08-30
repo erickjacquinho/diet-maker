@@ -30,5 +30,6 @@ export * from './MacroSummary';
 export * from './MacroProportionBar';
 export * from './SubstituteFoodModal';
 export * from './ImportPreviousDietModal';
+export * from './ConfirmationAlertDialog';
 export * from '@/components/atoms/SelectField';
 

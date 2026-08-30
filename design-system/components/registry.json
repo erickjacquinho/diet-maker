@@ -1156,6 +1156,87 @@
       "exceptions": []
     },
     {
+      "id": "ui-alert-dialog",
+      "name": "AlertDialog",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/alert-dialog.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AlertDialog",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogPortal",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogOverlay",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogTitle",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogDescription",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogAction",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogCancel",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/alert-dialog.md",
+      "consumers": [
+        "molecule-confirmation-alert-dialog"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "ui-dropdown-menu",
       "name": "DropdownMenu",
       "nature": "ui-generic",
@@ -3578,6 +3659,44 @@
         "src/app/alimentos/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-confirmation-alert-dialog",
+      "name": "ConfirmationAlertDialog",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/ConfirmationAlertDialog.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ConfirmationAlertDialogProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "ConfirmationAlertDialog",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/confirmation-alert-dialog.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx",
+        "src/app/pacientes/[id]/avaliacao/[assessmentId]/page.tsx",
+        "organism-meal-card-container"
+      ],
+      "primitiveBase": "ui-alert-dialog",
       "specStatus": "homologated",
       "exceptions": []
     },

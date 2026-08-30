@@ -1,0 +1,6 @@
+{
+  "task": "Criar o SDD da primeira etapa de implementação de refs/dieta-db. A primeira etapa é Prova técnica e base local: validar PGlite + Drizzle, persistência e reabertura, transações atômicas, migration simples, separação de drafts em IndexedDB, bloqueio da segunda aba, portabilidade lógica JSON e funcionamento offline após o carregamento dos recursos. Registrar resultados e limitações e fixar o adaptador somente se aprovado. Criar os artefatos Spec Kit e encerrar antes da implementação.",
+  "slug": "prova-tecnica-base-local",
+  "feature_dir": "specs/30-08-26-prova-tecnica-base-local",
+  "date": "2026-08-30"
+}
