@@ -18,9 +18,9 @@ description: "Task list for the local database technical proof"
 
 **Purpose**: Criar o workspace descartável e os comandos mínimos sem adicionar dependências ao aplicativo principal.
 
-- [ ] T001 [skill: general] Criar o workspace isolado e seu manifesto de dependências em `poc/local-db-proof/package.json`, incluindo scripts separados para desenvolvimento, type-check, testes e navegador.
-- [ ] T002 [skill: $frontend-architecture-mindset] [P] Configurar TypeScript, bundler e página técnica mínima em `poc/local-db-proof/tsconfig.json`, `poc/local-db-proof/vite.config.ts` e `poc/local-db-proof/index.html`, sem importar o harness para `src/app` ou `src/components`.
-- [ ] T003 [skill: $webapp-testing] Configurar os runners determinísticos da PoC em `poc/local-db-proof/vitest.config.ts` e `poc/local-db-proof/playwright.config.ts`, distinguindo testes de runtime dos cenários reais de navegador.
+- [x] T001 [skill: general] Criar o workspace isolado e seu manifesto de dependências em `poc/local-db-proof/package.json`, incluindo scripts separados para desenvolvimento, type-check, testes e navegador.
+- [x] T002 [skill: $frontend-architecture-mindset] [P] Configurar TypeScript, bundler e página técnica mínima em `poc/local-db-proof/tsconfig.json`, `poc/local-db-proof/vite.config.ts` e `poc/local-db-proof/index.html`, sem importar o harness para `src/app` ou `src/components`.
+- [x] T003 [skill: $webapp-testing] Configurar os runners determinísticos da PoC em `poc/local-db-proof/vitest.config.ts` e `poc/local-db-proof/playwright.config.ts`, distinguindo testes de runtime dos cenários reais de navegador.
 
 ---
 
@@ -30,12 +30,12 @@ description: "Task list for the local database technical proof"
 
 **⚠️ CRITICAL**: Nenhuma história pode começar antes desta fase e da confirmação de que a PoC não altera a aplicação principal.
 
-- [ ] T004 [skill: $backend-architect-ddd] [P] Definir os tipos de erro, resultado e porta interna do adaptador em `poc/local-db-proof/src/contracts.ts`, cobrindo inicialização, persistência, migration, importação e lock sem expor registros físicos ao domínio.
-- [ ] T005 [skill: $tdd] [P] Criar a fixture sintética determinística e suas asserções em `poc/local-db-proof/src/fixture.ts` e `poc/local-db-proof/tests/support/fixture-assertions.ts`, incluindo múltiplas Contas/Pacientes, estados ACTIVE/SNAPSHOT, refeições, itens nutricionais, paciente arquivado e draft contextual.
-- [ ] T006 [skill: $database-migrations-pro] [P] Definir o schema relacional mínimo e a configuração de migrations em `poc/local-db-proof/src/db/schema.ts` e `poc/local-db-proof/drizzle.config.ts`, refletindo as entidades e invariantes de `data-model.md`.
-- [ ] T007 [skill: $database-migrations-pro] Gerar a migration inicial e o executor versionado em `poc/local-db-proof/drizzle/0000_initial.sql` e `poc/local-db-proof/src/db/migrations.ts`, usando fluxo explícito generate/migrate e sem `drizzle-kit push` como caminho canônico.
-- [ ] T008 [skill: $backend-architect-ddd] Implementar a abertura, fechamento e configuração de durabilidade do banco em `poc/local-db-proof/src/db/client.ts`, usando armazenamento persistente e falha explícita quando a persistência real não puder ser comprovada.
-- [ ] T009 [skill: $backend-patterns] [P] Implementar o coletor de evidências e resultados nominais em `poc/local-db-proof/src/report.ts`, com versão, modo, cenário, pass/fail, limitação e tempos de abertura, consulta e gravação.
+- [x] T004 [skill: $backend-architect-ddd] [P] Definir os tipos de erro, resultado e porta interna do adaptador em `poc/local-db-proof/src/contracts.ts`, cobrindo inicialização, persistência, migration, importação e lock sem expor registros físicos ao domínio.
+- [x] T005 [skill: $tdd] [P] Criar a fixture sintética determinística e suas asserções em `poc/local-db-proof/src/fixture.ts` e `poc/local-db-proof/tests/support/fixture-assertions.ts`, incluindo múltiplas Contas/Pacientes, estados ACTIVE/SNAPSHOT, refeições, itens nutricionais, paciente arquivado e draft contextual.
+- [x] T006 [skill: $database-migrations-pro] [P] Definir o schema relacional mínimo e a configuração de migrations em `poc/local-db-proof/src/db/schema.ts` e `poc/local-db-proof/drizzle.config.ts`, refletindo as entidades e invariantes de `data-model.md`.
+- [x] T007 [skill: $database-migrations-pro] Gerar a migration inicial e o executor versionado em `poc/local-db-proof/drizzle/0000_initial.sql` e `poc/local-db-proof/src/db/migrations.ts`, usando fluxo explícito generate/migrate e sem `drizzle-kit push` como caminho canônico.
+- [x] T008 [skill: $backend-architect-ddd] Implementar a abertura, fechamento e configuração de durabilidade do banco em `poc/local-db-proof/src/db/client.ts`, usando armazenamento persistente e falha explícita quando a persistência real não puder ser comprovada.
+- [x] T009 [skill: $backend-patterns] [P] Implementar o coletor de evidências e resultados nominais em `poc/local-db-proof/src/report.ts`, com versão, modo, cenário, pass/fail, limitação e tempos de abertura, consulta e gravação.
 
 **Checkpoint**: workspace executável, fixture carregável, schema/migration inicial revisável, erros tipados e relatório prontos; nenhum módulo do produto foi integrado.
 
@@ -49,13 +49,13 @@ description: "Task list for the local database technical proof"
 
 ### Tests for User Story 1
 
-- [ ] T010 [skill: $tdd] [P] [US1] Escrever primeiro os testes de persistência, reabertura e falha de armazenamento em `poc/local-db-proof/tests/db.integration.test.ts`, deixando-os falhar antes da implementação do fluxo.
+- [x] T010 [skill: $tdd] [P] [US1] Escrever primeiro os testes de persistência, reabertura e falha de armazenamento em `poc/local-db-proof/tests/db.integration.test.ts`, deixando-os falhar antes da implementação do fluxo.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [skill: $backend-architect-ddd] [US1] Implementar operações mínimas de leitura, gravação e fechamento para a fixture em `poc/local-db-proof/src/db/repositories.ts`, mantendo o domínio independente do motor.
-- [ ] T012 [skill: $frontend-architecture-mindset] [US1] Implementar o cenário de inicialização, seed, medição e reabertura em `poc/local-db-proof/src/harness.ts`, usando o coletor de `poc/local-db-proof/src/report.ts`.
-- [ ] T013 [skill: general] [US1] Executar a validação independente da história e registrar evidências de persistência/reabertura no bloco US1 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T011 [skill: $backend-architect-ddd] [US1] Implementar operações mínimas de leitura, gravação e fechamento para a fixture em `poc/local-db-proof/src/db/repositories.ts`, mantendo o domínio independente do motor.
+- [x] T012 [skill: $frontend-architecture-mindset] [US1] Implementar o cenário de inicialização, seed, medição e reabertura em `poc/local-db-proof/src/harness.ts`, usando o coletor de `poc/local-db-proof/src/report.ts`.
+- [x] T013 [skill: general] [US1] Executar a validação independente da história e registrar evidências de persistência/reabertura no bloco US1 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
 
 **Checkpoint**: A base persistente sobrevive à reabertura e falhas de armazenamento são explícitas; a história entrega o MVP técnico sem dependência das demais.
 
@@ -69,17 +69,17 @@ description: "Task list for the local database technical proof"
 
 ### Tests for User Story 2
 
-- [ ] T014 [skill: $tdd] [P] [US2] Escrever primeiro os testes de transação, rollback, escopo e unicidade em `poc/local-db-proof/tests/transaction.integration.test.ts`, cobrindo cabeçalho/filhos e no máximo uma dieta ACTIVE por paciente.
-- [ ] T015 [skill: $tdd] [P] [US2] Escrever primeiro os testes de isolamento do draft em `poc/local-db-proof/tests/drafts.integration.test.ts`, comparando o estado confirmado antes e depois de autosave, update, discard e falha.
-- [ ] T016 [skill: $webapp-testing] [P] [US2] Escrever primeiro o cenário real de duas abas em `poc/local-db-proof/tests/browser/single-tab.spec.ts`, exigindo bloqueio antes de abrir, consultar ou editar a base.
+- [x] T014 [skill: $tdd] [P] [US2] Escrever primeiro os testes de transação, rollback, escopo e unicidade em `poc/local-db-proof/tests/transaction.integration.test.ts`, cobrindo cabeçalho/filhos e no máximo uma dieta ACTIVE por paciente.
+- [x] T015 [skill: $tdd] [P] [US2] Escrever primeiro os testes de isolamento do draft em `poc/local-db-proof/tests/drafts.integration.test.ts`, comparando o estado confirmado antes e depois de autosave, update, discard e falha.
+- [x] T016 [skill: $webapp-testing] [P] [US2] Escrever primeiro o cenário real de duas abas em `poc/local-db-proof/tests/browser/single-tab.spec.ts`, exigindo bloqueio antes de abrir, consultar ou editar a base.
 
 ### Implementation for User Story 2
 
-- [ ] T017 [skill: $backend-architect-ddd] [US2] Implementar gravação composta atômica, validação de escopo, foreign keys e unicidade de vigência em `poc/local-db-proof/src/db/repositories.ts`, preservando rollback completo.
-- [ ] T018 [skill: $backend-architect-ddd] [US2] Implementar o armazenamento separado de drafts em `poc/local-db-proof/src/drafts/draft-store.ts`, com ordenação do último estado, contexto Conta/Paciente e exclusão do transporte confirmado.
-- [ ] T019 [skill: $webapp-testing] [US2] Implementar o lock exclusivo e fail-closed de instância em `poc/local-db-proof/src/locking/single-tab-lock.ts`, usando Web Locks quando disponível e sem fallback por `localStorage`.
-- [ ] T020 [skill: $frontend-architecture-mindset] [US2] Encadear aquisição do lock antes da abertura do banco em `poc/local-db-proof/src/db/client.ts` e `poc/local-db-proof/src/harness.ts`, com mensagem técnica explícita para a segunda aba.
-- [ ] T021 [skill: general] [US2] Executar a validação independente da história e registrar rollback, isolamento, lock e limitações no bloco US2 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T017 [skill: $backend-architect-ddd] [US2] Implementar gravação composta atômica, validação de escopo, foreign keys e unicidade de vigência em `poc/local-db-proof/src/db/repositories.ts`, preservando rollback completo.
+- [x] T018 [skill: $backend-architect-ddd] [US2] Implementar o armazenamento separado de drafts em `poc/local-db-proof/src/drafts/draft-store.ts`, com ordenação do último estado, contexto Conta/Paciente e exclusão do transporte confirmado.
+- [x] T019 [skill: $webapp-testing] [US2] Implementar o lock exclusivo e fail-closed de instância em `poc/local-db-proof/src/locking/single-tab-lock.ts`, usando Web Locks quando disponível e sem fallback por `localStorage`.
+- [x] T020 [skill: $frontend-architecture-mindset] [US2] Encadear aquisição do lock antes da abertura do banco em `poc/local-db-proof/src/db/client.ts` e `poc/local-db-proof/src/harness.ts`, com mensagem técnica explícita para a segunda aba.
+- [x] T021 [skill: general] [US2] Executar a validação independente da história e registrar rollback, isolamento, lock e limitações no bloco US2 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
 
 **Checkpoint**: Falha de transação não deixa registros parciais, draft não toca a base confirmada e apenas uma aba opera a instância.
 
@@ -93,15 +93,15 @@ description: "Task list for the local database technical proof"
 
 ### Tests for User Story 3
 
-- [ ] T022 [skill: $tdd] [P] [US3] Escrever primeiro os testes de migration em `poc/local-db-proof/tests/migration.integration.test.ts`, incluindo preservação da fixture, reexecução e versão incompatível.
-- [ ] T023 [skill: $tdd] [P] [US3] Escrever primeiro os testes de exportação/importação lógica em `poc/local-db-proof/tests/portability.integration.test.ts`, incluindo JSON inválido, relações inconsistentes e exclusão de drafts.
+- [x] T022 [skill: $tdd] [P] [US3] Escrever primeiro os testes de migration em `poc/local-db-proof/tests/migration.integration.test.ts`, incluindo preservação da fixture, reexecução e versão incompatível.
+- [x] T023 [skill: $tdd] [P] [US3] Escrever primeiro os testes de exportação/importação lógica em `poc/local-db-proof/tests/portability.integration.test.ts`, incluindo JSON inválido, relações inconsistentes e exclusão de drafts.
 
 ### Implementation for User Story 3
 
-- [ ] T024 [skill: $database-migrations-pro] [US3] Implementar a aplicação explícita da evolução aditiva e a validação de schema em `poc/local-db-proof/src/db/migrations.ts` e `poc/local-db-proof/drizzle/0001_add_fixture_metadata.sql`, preservando a fixture existente.
-- [ ] T025 [skill: $backend-patterns] [US3] Implementar o envelope, serialização e desserialização da amostra em `poc/local-db-proof/src/portability/sample-transfer.ts`, preservando IDs, relações e valores nutricionais.
-- [ ] T026 [skill: $backend-patterns] [US3] Implementar rejeição antes da mutação para `formatVersion`, `schemaVersion`, JSON e relações inválidas em `poc/local-db-proof/src/portability/sample-transfer.ts`.
-- [ ] T027 [skill: general] [US3] Executar a validação independente da história e registrar migration, round-trip e rejeições no bloco US3 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T024 [skill: $database-migrations-pro] [US3] Implementar a aplicação explícita da evolução aditiva e a validação de schema em `poc/local-db-proof/src/db/migrations.ts` e `poc/local-db-proof/drizzle/0001_add_fixture_metadata.sql`, preservando a fixture existente.
+- [x] T025 [skill: $backend-patterns] [US3] Implementar o envelope, serialização e desserialização da amostra em `poc/local-db-proof/src/portability/sample-transfer.ts`, preservando IDs, relações e valores nutricionais.
+- [x] T026 [skill: $backend-patterns] [US3] Implementar rejeição antes da mutação para `formatVersion`, `schemaVersion`, JSON e relações inválidas em `poc/local-db-proof/src/portability/sample-transfer.ts`.
+- [x] T027 [skill: general] [US3] Executar a validação independente da história e registrar migration, round-trip e rejeições no bloco US3 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
 
 **Checkpoint**: A base evolui com migration revisável e a portabilidade lógica não altera identidade, relações ou snapshots.
 
@@ -115,13 +115,13 @@ description: "Task list for the local database technical proof"
 
 ### Tests for User Story 4
 
-- [ ] T028 [skill: $webapp-testing] [P] [US4] Escrever primeiro o cenário de rede desligada em `poc/local-db-proof/tests/browser/offline.spec.ts`, incluindo sucesso após preparação e erro explícito quando o recurso ainda não foi carregado.
+- [x] T028 [skill: $webapp-testing] [P] [US4] Escrever primeiro o cenário de rede desligada em `poc/local-db-proof/tests/browser/offline.spec.ts`, incluindo sucesso após preparação e erro explícito quando o recurso ainda não foi carregado.
 
 ### Implementation for User Story 4
 
-- [ ] T029 [skill: $frontend-architecture-mindset] [US4] Implementar o cenário de preparação de recursos e execução local em `poc/local-db-proof/src/offline-scenario.ts`, sem chamadas remotas silenciosas ou fallback para `localStorage`.
-- [ ] T030 [skill: $webapp-testing] [US4] Integrar o cenário offline ao harness técnico em `poc/local-db-proof/src/harness.ts` e `poc/local-db-proof/index.html`, mantendo a saída mínima, sem tela clínica e compatível com teclado.
-- [ ] T031 [skill: general] [US4] Executar a validação independente da história e registrar rede, recursos preparados, tempos e limitações no bloco US4 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T029 [skill: $frontend-architecture-mindset] [US4] Implementar o cenário de preparação de recursos e execução local em `poc/local-db-proof/src/offline-scenario.ts`, sem chamadas remotas silenciosas ou fallback para `localStorage`.
+- [x] T030 [skill: $webapp-testing] [US4] Integrar o cenário offline ao harness técnico em `poc/local-db-proof/src/harness.ts` e `poc/local-db-proof/index.html`, mantendo a saída mínima, sem tela clínica e compatível com teclado.
+- [x] T031 [skill: general] [US4] Executar a validação independente da história e registrar rede, recursos preparados, tempos e limitações no bloco US4 de `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
 
 **Checkpoint**: Operações preparadas funcionam sem rede e o relatório não confunde offline básico com PWA ou cache avançado.
 
@@ -131,10 +131,10 @@ description: "Task list for the local database technical proof"
 
 **Purpose**: Consolidar a decisão técnica, validar fronteiras e deixar evidência pronta para revisão humana.
 
-- [ ] T032 [skill: general] [P] Consolidar o relatório final com matriz de verificações, versões, tempos, limitações e decisão `approved`, `rejected` ou `needs re-evaluation` em `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
-- [ ] T033 [skill: general] [P] Executar os comandos de `specs/30-08-26-prova-tecnica-base-local/quickstart.md` e registrar qualquer divergência ou ajuste no próprio `poc-report.md`.
-- [ ] T034 [skill: $code-reviewer-expert] Auditar a fronteira da PoC em `poc/local-db-proof/` e `package.json`, confirmando que não foram adicionados imports do motor a `src/`, que `localStorage` não é fallback e que não há migrador de dados legados.
-- [ ] T035 [skill: general] Executar type-check, lint e a bateria completa da PoC definidos em `poc/local-db-proof/package.json`, registrando comandos e resultados finais em `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T032 [skill: general] [P] Consolidar o relatório final com matriz de verificações, versões, tempos, limitações e decisão `approved`, `rejected` ou `needs re-evaluation` em `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
+- [x] T033 [skill: general] [P] Executar os comandos de `specs/30-08-26-prova-tecnica-base-local/quickstart.md` e registrar qualquer divergência ou ajuste no próprio `poc-report.md`.
+- [x] T034 [skill: $code-reviewer-expert] Auditar a fronteira da PoC em `poc/local-db-proof/` e `package.json`, confirmando que não foram adicionados imports do motor a `src/`, que `localStorage` não é fallback e que não há migrador de dados legados.
+- [x] T035 [skill: general] Executar type-check, lint e a bateria completa da PoC definidos em `poc/local-db-proof/package.json`, registrando comandos e resultados finais em `specs/30-08-26-prova-tecnica-base-local/poc-report.md`.
 
 ---
 
