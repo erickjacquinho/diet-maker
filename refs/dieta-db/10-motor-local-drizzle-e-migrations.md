@@ -1,6 +1,6 @@
 # Decisão 10 — Motor Local, Drizzle e Estratégia de Migrations
 
-- **Status:** Recomendação técnica; prova de conceito pendente
+- **Status:** Prova técnica autorizada; validação pendente
 - **Data:** 2026-08-30
 - **Escopo:** Implementação futura da persistência relacional local
 
@@ -92,6 +92,10 @@ JSON local.
 8. `drizzle-kit push` fica restrito a experimentos locais; o banco canônico usa
    migrations versionadas.
 
+As migrations desta decisão são evoluções futuras do schema canônico. Elas não
+se aplicam aos dados atuais em `localStorage`, pois esses registros são de teste
+e serão descartados, sem conversão para o novo banco.
+
 ## 5. Requisitos da prova de conceito
 
 Antes de congelar PGlite como motor da V1, a prova de conceito deverá validar:
@@ -105,7 +109,7 @@ Antes de congelar PGlite como motor da V1, a prova de conceito deverá validar:
 | Migrations | schema inicial e pelo menos uma evolução restauram os dados |
 | Volume | catálogo, centenas de pacientes e milhares de itens mantêm resposta aceitável |
 | Abas | comportamento de duas abas é conhecido e documentado |
-| Exportação | `.nutridiet` exporta e restaura o estado relacional completo |
+| Exportação | `.nutridiet` exporta e restaura o estado relacional completo conforme a Decisão 11 |
 | Draft | falha ou remoção do draft não remove dados canônicos |
 
 O critério não é somente a query funcionar. A prova precisa confirmar ciclo de

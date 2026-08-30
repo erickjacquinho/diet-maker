@@ -1,6 +1,6 @@
 # Decisão 05 — Arquitetura de Backend e Escopos de Dados
 
-- **Status:** Proposta de arquitetura; pendente de confirmação final
+- **Status:** Aprovado pelo usuário para especificação; implementação pendente
 - **Data:** 2026-08-29
 - **Escopo:** Propriedade, persistência e isolamento dos dados dietéticos
 
@@ -58,7 +58,7 @@ clínica a um único profissional e permitir membros da Conta no futuro.
 
 ```text
 Account
-├── account members e configurações
+├── account members e configurações (futuro; fora da V1)
 ├── catálogo TACO (leitura do sistema)
 ├── alimentos customizados
 ├── receitas

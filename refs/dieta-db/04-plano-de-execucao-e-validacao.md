@@ -89,8 +89,8 @@ risco de misturar estado de apresentação, draft e persistência confirmada.
   da dieta vigente;
 - criar fixtures de dieta simples, ciclo de carboidratos, dieta vigente,
   snapshot e draft local;
-- registrar explicitamente que o storage legado de dietas confirmadas é apenas
-  um adaptador temporário durante a migração.
+- registrar explicitamente que o storage legado de dietas confirmadas contém
+  apenas dados de teste e será descartado, sem adaptador de migração.
 
 **Saída:** contratos compiláveis e fixtures, sem mudança de comportamento da
 interface.
@@ -158,17 +158,14 @@ uma nova dieta torna-se a única vigente.
 **Saída:** nenhuma operação de apresentação ou descarte local destrói uma
 prescrição confirmada.
 
-### Fase 5 — Migração e retirada de fontes concorrentes
+### Fase 5 — Descarte do armazenamento legado de teste
 
-- classificar registros legados em confirmados e drafts/incompletos;
-- migrar somente dietas confirmadas para `DietPlan`;
-- converter drafts legados para `DietDraftStore` local ou deixá-los aguardando
-  confirmação explícita, conforme a política de migração escolhida;
-- excluir `nova` e estados de criação das consultas de histórico;
-- impedir gravação simultânea no modelo antigo e no modelo novo;
-- preservar IDs legados somente como metadado temporário de migração;
-- remover gradualmente acessos diretos de componentes ao storage legado;
-- validar restauração, integridade e ausência de duplicidade.
+- descartar os registros atuais em `localStorage`, pois são dados de teste;
+- iniciar o banco canônico sem conversão, IDs legados ou adaptador de leitura;
+- excluir estados legados de criação das consultas de histórico;
+- impedir qualquer gravação simultânea no modelo antigo e no modelo novo;
+- remover acessos diretos de componentes ao storage legado;
+- validar que a aplicação reinicializada não encontra fontes concorrentes.
 
 **Saída:** existe uma única fonte canônica para dietas confirmadas e uma única
 fonte local para drafts.
@@ -231,7 +228,7 @@ verdadeiros:
 4. somente **Salvar** cria ou atualiza dieta confirmada;
 5. sucesso remove o draft e falha o preserva;
 6. snapshots são imutáveis e a vigente é única por paciente;
-7. migração não mantém fontes concorrentes;
+7. descarte do legado não mantém fontes concorrentes;
 8. testes de unidade, integração e interface da matriz passam;
 9. documentação das Decisões 01–03 e deste plano continua consistente;
 10. qualquer exceção restante está registrada como nova decisão de domínio.

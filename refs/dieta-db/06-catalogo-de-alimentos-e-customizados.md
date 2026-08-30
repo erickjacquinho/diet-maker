@@ -1,6 +1,6 @@
 # Decisão 06 — Catálogo de Alimentos e Alimentos Customizados
 
-- **Status:** Proposta de arquitetura; pendente de confirmação final
+- **Status:** Aprovado pelo usuário para especificação; implementação pendente
 - **Data:** 2026-08-29
 - **Escopo:** Dados nutricionais reutilizáveis pertencentes à Conta
 
@@ -83,8 +83,9 @@ Alimentos customizados são dados da Conta. Portanto:
 - podem ser exportados/importados junto do perfil `.nutridiet`, quando esse
   módulo for executado.
 
-O armazenamento legado em `localStorage` é apenas fonte de migração. Nenhuma
-tela nova deve gravar diretamente em `nutridiet_custom_foods`.
+Os dados legados de `localStorage` existentes são dados de teste e serão
+descartados antes da implantação. Nenhuma tela nova deve gravar diretamente em
+`nutridiet_custom_foods`.
 
 ## 6. Regras de cálculo
 

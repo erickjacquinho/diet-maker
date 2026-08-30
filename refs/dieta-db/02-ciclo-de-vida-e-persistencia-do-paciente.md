@@ -25,7 +25,7 @@ Esta decisão complementa a [Decisão 01 — Fluxo de Paciente e Dieta](./01-flu
    salvo em formatos diferentes para o mesmo paciente.
 5. Código e iniciais são dados de apresentação. As iniciais devem ser derivadas
    do nome, e não tratadas como fonte primária.
-6. IDs legados só existem durante a migração dos dados antigos e não fazem
+6. Os dados atuais são de teste e serão descartados; IDs legados não fazem
    parte do modelo novo.
 
 ### 2.2 Edição
@@ -262,29 +262,22 @@ comportamento de arquivamento, relações e versionamento.
 8. Qualquer nova relação clínica deve ter entidade, chave estrangeira,
    repositório e consulta de histórico próprios.
 9. Alterações de schema exigem migration e teste de restauração/arquivamento.
-10. A migração do legado deve ocorrer por adaptador único, sem manter dois
-    modelos gravando simultaneamente.
+10. Os dados legados atuais são de teste e devem ser descartados antes da
+    implantação, sem conversão para o novo modelo.
 
-## 10. Migração do armazenamento legado
+## 10. Descarte do armazenamento legado de teste
 
-O adaptador inicial deverá mapear:
+Não haverá migração dos registros existentes nas chaves de `localStorage`.
+Esses dados são testes e não representam prontuário de produção.
 
-| Legado | Modelo novo |
-| --- | --- |
-| `nutridiet_patients` | `Patient` dentro da Conta ativa |
-| `nutridiet_assessments_<patientId>` | `BodyAssessment` relacionado |
-| `diet_maker_custom_objectives` | `ObjectiveOption` da Conta |
-| `nutridiet_diets_<patientId>` | `DietPlan` e entidades da Decisão 01 apenas para dietas confirmadas; drafts legados vão para `DietDraftStore` local |
-
-O mapeamento deve gerar IDs novos, registrar a associação com o ID legado
-apenas durante a migração e não continuar alimentando as chaves antigas depois
-da conversão bem-sucedida. Registros legados com estado **Em Criação** não
-podem ser persistidos como `DietPlan` no backend: devem ser convertidos em
-draft local ou aguardarem o salvamento explícito do usuário.
+Antes da primeira execução com a nova arquitetura, o ambiente é reinicializado
+sem pacientes, receitas, refeições, avaliações, objetivos ou dietas legados.
+O sistema novo deve iniciar com uma única fonte canônica, sem adaptador de
+leitura, IDs antigos ou gravação simultânea no storage anterior.
 
 ## 11. Validação
 
-Antes de migrar avaliações ou outros módulos, deve ser comprovado que:
+Antes de executar os módulos clínicos, deve ser comprovado que:
 
 - criar paciente persiste todos os campos esperados;
 - editar e cancelar respeitam o formulário temporário;
@@ -296,7 +289,7 @@ Antes de migrar avaliações ou outros módulos, deve ser comprovado que:
 - paciente arquivado não inicia novos registros;
 - restaurar reativa o paciente e preserva seu histórico;
 - versões antigas não sobrescrevem edições mais recentes;
-- a migração não cria duplicidade nem mantém fontes concorrentes.
+- o ambiente reinicializado não lê nem grava chaves legadas.
 
 ## 12. Fora desta decisão
 

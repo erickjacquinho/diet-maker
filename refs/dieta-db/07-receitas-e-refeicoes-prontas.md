@@ -1,6 +1,6 @@
 # Decisão 07 — Receitas e Refeições Prontas
 
-- **Status:** Proposta de arquitetura; pendente de confirmação final
+- **Status:** Aprovado pelo usuário para especificação; implementação pendente
 - **Data:** 2026-08-29
 - **Escopo:** Biblioteca reutilizável da Conta do nutricionista
 

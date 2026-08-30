@@ -79,6 +79,9 @@ Não fazem parte desta topologia inicial:
 Essas capacidades poderão ser adicionadas por um adaptador online sem alterar
 as regras de propriedade ou os casos de uso do domínio.
 
+Os princípios da autenticação futura, que não sincroniza prontuários, estão na
+[Decisão 12 — Autenticação online futura e soberania dos dados locais](./12-autenticacao-online-e-soberania-local.md).
+
 ## 5. Preparação para a evolução online
 
 Mesmo sendo local-first, a V1 deve:

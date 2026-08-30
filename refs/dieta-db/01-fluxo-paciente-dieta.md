@@ -267,8 +267,8 @@ uma nova tentativa.
 11. Componentes não importam IndexedDB, `localStorage` ou o provedor de banco.
 12. Após sucesso do backend, o draft local deve ser removido; em caso de erro,
     deve ser preservado.
-13. O legado atual de `localStorage` deve ser tratado como fonte de migração,
-    não como novo modelo de domínio.
+13. O `localStorage` atual contém somente dados de teste e deve ser descartado
+    antes da implantação; ele não é fonte de migração nem modelo de domínio.
 
 ## 9. Validação do primeiro fluxo
 

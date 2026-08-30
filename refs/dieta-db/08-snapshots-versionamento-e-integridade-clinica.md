@@ -1,6 +1,6 @@
 # Decisão 08 — Snapshots, Versionamento e Integridade Clínica
 
-- **Status:** Proposta de arquitetura; pendente de confirmação final
+- **Status:** Aprovado pelo usuário para especificação; implementação pendente
 - **Data:** 2026-08-29
 - **Escopo:** Proteção das prescrições contra alterações do catálogo
 
