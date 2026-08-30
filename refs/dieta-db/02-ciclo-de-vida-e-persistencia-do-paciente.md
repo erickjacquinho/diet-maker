@@ -7,8 +7,9 @@
 ## 1. Objetivo
 
 Definir todos os dados e operações que pertencem ao paciente sem transformar o
-paciente em um objeto que contenha toda a sua história. Dietas e avaliações são
-registros relacionados e devem ter repositórios próprios.
+paciente em um objeto que contenha toda a sua história. O paciente pertence a
+uma Conta; dietas e avaliações são registros relacionados e devem ter
+repositórios próprios.
 
 Esta decisão complementa a [Decisão 01 — Fluxo de Paciente e Dieta](./01-fluxo-paciente-dieta.md).
 
@@ -40,8 +41,8 @@ Esta decisão complementa a [Decisão 01 — Fluxo de Paciente e Dieta](./01-flu
 ### 2.3 Objetivos
 
 1. O objetivo selecionado é salvo como valor do paciente.
-2. Objetivos padrão e objetivos personalizados pertencem ao catálogo do
-   consultório/workspace, não ficam duplicados dentro de cada paciente.
+2. Objetivos padrão e objetivos personalizados pertencem ao catálogo da Conta,
+   não ficam duplicados dentro de cada paciente.
 3. Adicionar um objetivo personalizado deve ser uma operação explícita,
    normalizada e idempotente.
 4. Remover um objetivo do catálogo não remove nem altera o objetivo já salvo em
@@ -101,6 +102,7 @@ necessárias:
 ```text
 Patient
 ├── id (imutável)
+├── accountId (Conta proprietária)
 ├── displayCode
 ├── name
 ├── demographics
@@ -129,14 +131,17 @@ projeções de leitura.
 Patient 1 ─── N DietPlan
 Patient 1 ─── N BodyAssessment
 Patient 1 ─── N ConsultationRecord (quando o módulo existir)
-Workspace 1 ─── N ObjectiveOption
+Account 1 ─── N Patient
+Account 1 ─── N ObjectiveOption
 ```
 
 As dietas seguem as regras da Decisão 01: a dieta vigente e os snapshots não
 podem ser alterados pela edição cadastral do paciente.
 
 Avaliações, dietas e consultas devem guardar `patientId` e não copiar o objeto
-inteiro do paciente. Quando um documento precisar mostrar o nome ou peso do
+inteiro do paciente. Todos os registros persistidos também guardam `accountId`
+e a aplicação deve validar que `patient.accountId` corresponde ao escopo da
+operação. Quando um documento precisar mostrar o nome ou peso do
 paciente, deve usar uma projeção de leitura ou o snapshot clínico apropriado.
 
 A relação `Patient 1 ─── N DietPlan` inclui somente dietas confirmadas e
@@ -173,13 +178,15 @@ arquivamento ou exclusão física.
 O primeiro conjunto de portas deve ser equivalente a:
 
 - `PatientRepository` — cadastro, consulta, atualização, arquivamento e
-  restauração;
+  restauração, sempre filtrado por `accountId`;
 - `BodyAssessmentRepository` — criação, edição e consulta por paciente;
 - `DietRepository` — leitura de dietas confirmadas e persistência da dieta
   somente após o salvamento explícito;
 - `DietDraftStore` — drafts locais de dieta, preferencialmente em IndexedDB,
   fora do histórico persistido;
-- `ObjectiveCatalogRepository` — opções padrão e personalizadas do workspace;
+- `ObjectiveCatalogRepository` — opções padrão e personalizadas da Conta;
+- `AccountContext` — escopo da Conta autenticada/ativa usado pelos casos de
+  uso, nunca recebido como autoridade cega da interface;
 - `PatientTimelineReader` — projeções de histórico e última atividade;
 - `TransactionRunner` — operações atômicas que atualizam paciente e projeções.
 
@@ -194,8 +201,9 @@ comportamento de arquivamento, relações e versionamento.
 1. Validar campos obrigatórios e valores numéricos.
 2. Normalizar contato e objetivo.
 3. Gerar ID na camada de aplicação/infraestrutura.
-4. Persistir o paciente com `archivedAt = null`.
-5. Retornar a entidade criada para navegação ao perfil.
+4. Associar o paciente à Conta ativa validada.
+5. Persistir o paciente com `archivedAt = null`.
+6. Retornar a entidade criada para navegação ao perfil.
 
 ### 7.2 Atualizar paciente
 
@@ -263,9 +271,9 @@ O adaptador inicial deverá mapear:
 
 | Legado | Modelo novo |
 | --- | --- |
-| `nutridiet_patients` | `Patient` |
+| `nutridiet_patients` | `Patient` dentro da Conta ativa |
 | `nutridiet_assessments_<patientId>` | `BodyAssessment` relacionado |
-| `diet_maker_custom_objectives` | `ObjectiveOption` do workspace |
+| `diet_maker_custom_objectives` | `ObjectiveOption` da Conta |
 | `nutridiet_diets_<patientId>` | `DietPlan` e entidades da Decisão 01 apenas para dietas confirmadas; drafts legados vão para `DietDraftStore` local |
 
 O mapeamento deve gerar IDs novos, registrar a associação com o ID legado

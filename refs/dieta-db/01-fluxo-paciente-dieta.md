@@ -15,9 +15,12 @@ O primeiro fluxo cobre:
 
 `Paciente → Nova dieta → Puxar informações → Adicionar alimentos → Salvar → Histórico`
 
-Ficam fora desta decisão as avaliações físicas, receitas, refeições prontas,
-exportação do arquivo mestre e sincronização online. Elas deverão consumir os
-mesmos princípios quando forem abordadas.
+Ficam fora do fluxo vertical desta decisão as avaliações físicas, receitas,
+refeições prontas, exportação do arquivo mestre e sincronização online. As
+fronteiras de backend e os contratos de catálogo são definidos nas Decisões
+[05](./05-arquitetura-backend-e-escopos-de-dados.md) a
+[08](./08-snapshots-versionamento-e-integridade-clinica.md), sem depender de
+telas específicas.
 
 ## 2. Regras funcionais congeladas
 
@@ -184,13 +187,13 @@ O modelo deve ser relacional, mesmo enquanto o aplicativo funciona offline:
 
 - **Patient:** cadastro e identidade do paciente;
 - **DietPlan:** dono, datas, estado e metadados de uma dieta confirmada,
-  persistida no backend/banco;
+  persistida no backend/banco, sempre dentro de uma Conta e de um Paciente;
 - **DietMeal:** refeição pertencente ao plano, com nome e horário;
 - **DietMealItem:** alimento, quantidade, ordem, substituições e valores
   nutricionais usados no plano;
 - **DietItemSnapshot:** nome, unidade, macros e kcal congelados no momento da
   prescrição;
-- **DietDraft:** documento local em IndexedDB, com `draftId`, `patientId`,
+- **DietDraft:** documento local em IndexedDB, com `draftId`, `accountId`, `patientId`,
   payload da dieta, `baseDietId` opcional, versão esperada e timestamp. Não é
   uma relação persistida de `Patient` até o salvamento explícito.
 
