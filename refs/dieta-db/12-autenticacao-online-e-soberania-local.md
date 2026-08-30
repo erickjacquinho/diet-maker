@@ -36,6 +36,10 @@ Os dados clínicos permanecem no banco relacional local e só são abertos após
 validação de acesso ao perfil profissional. Autenticação é um controle de
 acesso; não é replicação, backup nem transporte de prontuário.
 
+A autenticação da interface não substitui a proteção do arquivo exportado. A
+política de proteção local e de backup está na
+[Decisão 13 — Proteção local e backup criptografado](./13-protecao-local-e-backup-criptografado.md).
+
 ## 3. Limites da futura Conta online
 
 ```text

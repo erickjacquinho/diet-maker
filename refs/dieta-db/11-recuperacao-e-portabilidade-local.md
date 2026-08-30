@@ -7,15 +7,16 @@
 ## 1. Decisão aprovada
 
 A V1 oferecerá exportação e importação manual de um arquivo mestre
-`.nutridiet`. Não haverá pop-ups invasivos, backup automático em nuvem nem
-sincronização automática entre dispositivos.
+`.nutridiet` criptografado. Não haverá pop-ups invasivos, backup automático em
+nuvem nem sincronização automática entre dispositivos.
 
 O arquivo é o mecanismo de portabilidade e recuperação quando o navegador for
 limpo, o computador for trocado ou o banco local precisar ser restaurado.
 
 ## 2. Conteúdo do arquivo mestre
 
-Uma exportação inclui somente dados canônicos confirmados da Conta local:
+O conteúdo criptografado de uma exportação inclui somente dados canônicos
+confirmados da Conta local:
 
 - identificação e configurações da Conta/perfil profissional;
 - alimentos customizados, receitas e refeições prontas;
@@ -32,17 +33,20 @@ local ao navegador e não constitui prescrição nem histórico clínico.
 
 1. O nutricionista aciona uma exportação explicitamente.
 2. O sistema lê apenas o banco relacional canônico.
-3. Gera um arquivo com manifesto, versão de schema e checksum.
+3. Gera um arquivo criptografado e autenticado, com versão de schema e dados de
+   integridade conforme a Decisão 13.
 4. Não envia o conteúdo clínico para a nuvem.
 
 ### Importar/restaurar
 
 1. O nutricionista escolhe explicitamente um arquivo `.nutridiet`.
-2. O sistema valida manifesto, checksum e compatibilidade de schema.
-3. Executa migrations compatíveis antes da restauração, quando necessário.
-4. A restauração substitui o conteúdo canônico da Conta local após confirmação
+2. O sistema valida o formato e desbloqueia o conteúdo criptografado antes de
+   ler dados clínicos.
+3. Valida a integridade e a compatibilidade de schema.
+4. Executa migrations compatíveis antes da restauração, quando necessário.
+5. A restauração substitui o conteúdo canônico da Conta local após confirmação
    explícita; a V1 não faz mesclagem automática de duas bases.
-5. Drafts locais existentes são descartados ou preservados somente mediante
+6. Drafts locais existentes são descartados ou preservados somente mediante
    confirmação explícita, pois não pertencem ao backup clínico.
 
 ## 4. Limites e feedback

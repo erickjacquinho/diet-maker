@@ -42,6 +42,7 @@ A arquitetura também define a fronteira de propriedade dos dados nutricionais:
 - [10 — Motor local, Drizzle e estratégia de migrations](./10-motor-local-drizzle-e-migrations.md)
 - [11 — Recuperação e portabilidade local](./11-recuperacao-e-portabilidade-local.md)
 - [12 — Autenticação online futura e soberania dos dados locais](./12-autenticacao-online-e-soberania-local.md)
+- [13 — Proteção local e backup criptografado](./13-protecao-local-e-backup-criptografado.md)
 
 ## Estado da execução
 
@@ -49,7 +50,8 @@ A arquitetura e o plano de validação estão consolidados em Markdown. A
 implementação do `DietDraftStore`, a integração das telas e a migração ainda
 não começaram. As Decisões 05–09 registram o domínio e a topologia aprovados
 para a V1; as Decisões 11 e 12 registram recuperação local e autenticação
-futura. A Decisão 10 aguarda somente prova técnica do motor local.
+futura. A Decisão 13 registra a proteção local e dos backups. A Decisão 10
+aguarda somente prova técnica do motor local.
 
 Os dados existentes em `localStorage` são exclusivamente de teste e serão
 descartados na implantação da arquitetura nova; não haverá migração desses
