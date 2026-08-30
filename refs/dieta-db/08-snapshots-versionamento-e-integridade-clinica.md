@@ -6,8 +6,14 @@
 
 ## 1. Regra central
 
-Catálogos são dados vivos da Conta. Prescrições salvas são registros clínicos
-congelados.
+Catálogos são dados vivos da Conta. Prescrições salvas conservam os valores
+confirmados e não acompanham alterações do catálogo.
+
+Isso não altera a edição explícita da dieta vigente aprovada na Decisão 01:
+salvar uma edição atualiza essa dieta e incrementa sua versão. A V1 não cria
+histórico imutável de cada edição da vigente. O snapshot histórico torna-se
+somente leitura quando outra dieta assume a vigência. Preservar cada revisão
+entregue exigiria decisão própria e não é acrescentado por esta adequação.
 
 Uma dieta salva nunca deve calcular seus nutrientes por meio de um `JOIN` vivo
 com o alimento, a receita ou a refeição pronta atual. O item prescrito deve
@@ -21,11 +27,18 @@ Quando o nutricionista insere um alimento, receita ou refeição pronta no
 `DietDraft`, o draft captura:
 
 - `sourceType` e `sourceId`;
-- `sourceVersion`, quando existir;
+- `sourceVersion` do item customizado/receita/template ou versão identificada
+  do dataset TACO usado como origem;
 - nome e descrição exibíveis;
 - quantidade e unidade prescritas;
 - nutrientes calculados para aquela quantidade;
 - composição necessária para edição e exportação futura.
+
+Para permitir recálculo sem leitura viva, o snapshot também preserva a base
+nutricional original, `measurementBasis`, estado do alimento, conversões
+explícitas aplicadas, origem da energia e versão da regra de cálculo da
+Decisão 06. Receitas incluem rendimento e peso preparado quando utilizados.
+Alterar uma quantidade usa essa base, não os totais previamente arredondados.
 
 Esse snapshot local permite que o draft não mude silenciosamente se o catálogo
 for editado enquanto a dieta ainda está sendo montada. O nutricionista pode
@@ -42,6 +55,12 @@ Ao acionar **Salvar**, o caso de uso valida o draft e grava, na mesma transaçã
 - metadados de origem para rastreabilidade;
 - versão da dieta e datas clínicas.
 
+O plano preserva ainda o peso de referência e as metas utilizados na prescrição,
+inclusive por variação do ciclo; leitura e exportação não substituem esses
+valores pelo cadastro atual. Modos, dias atribuídos, alternativas de refeição e
+substituições sobrevivem à gravação e ao backup. Alternativas não são somadas
+como alimentos consumidos simultaneamente; o total indica a opção considerada.
+
 O item persistido pode manter `sourceId` e `sourceVersion` como proveniência,
 mas sua leitura clínica não pode exigir que a entidade de origem continue ativa
 ou sequer exista. A integridade histórica vem do snapshot, não de uma
@@ -57,7 +76,7 @@ referência viva obrigatória ao catálogo.
 | Arquivar alimento | continua legível | deixa de ser opção ativa | não altera |
 | Arquivar receita | continua legível | deixa de ser opção ativa | não altera |
 | Arquivar refeição pronta | continua legível | deixa de ser opção ativa | não altera |
-| Salvar dieta | remove o draft após sucesso | cria snapshot clínico | torna a versão vigente |
+| Salvar dieta | remove só a revisão confirmada; reconcilia falhas conforme 01 | cria snapshot clínico | torna a versão vigente |
 
 ## 4. Versionamento e concorrência
 
@@ -68,9 +87,13 @@ Toda entidade editável da Conta e todo `DietPlan` confirmado devem possuir:
 - atualização condicional pela versão esperada;
 - erro explícito de conflito quando outra alteração foi salva antes.
 
-O draft originado de uma dieta vigente guarda `baseDietId` e `baseDietVersion`
-somente para detectar conflito. Ele não atualiza a dieta vigente durante o
-autosave.
+O draft originado de uma vigente guarda `baseDietId` e `baseDietVersion` para
+detectar conflito. Esses campos não atualizam a vigente durante o autosave nem
+criam histórico de suas edições. Não são necessários hashes ou gerações de base.
+
+`draftRevision` ordena o autosave; a versão da dieta controla sua atualização.
+O salvamento segue a Decisão 01. Antes de restaurar um backup, resolver os
+drafts pendentes e fechar os contextos de edição, conforme a Decisão 11.
 
 Se duas tentativas salvarem uma nova dieta simultaneamente, a transação deve
 garantir que exista no máximo uma dieta `Vigente` por Paciente. A dieta anterior

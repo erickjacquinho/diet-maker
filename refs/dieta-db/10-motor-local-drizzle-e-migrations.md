@@ -21,9 +21,10 @@ PGlite como banco relacional local no navegador
 futuro adaptador PostgreSQL/Supabase
 ```
 
-Essa recomendação ainda não autoriza instalação de dependências ou criação do
-banco. Ela será confirmada somente depois da prova de conceito descrita neste
-documento.
+A prova técnica isolada está autorizada para avaliar essa recomendação. Isso
+não autoriza substituir a persistência da aplicação, instalar dependências no
+projeto principal ou criar sua base clínica antes de registrar o resultado e
+seguir o processo de implementação aprovado. Esta adequação é documental.
 
 ## 2. Por que essa combinação é a preferida
 
@@ -85,8 +86,8 @@ JSON local.
 3. O Drizzle Kit gera migrations versionadas a partir do schema.
 4. Cada migration é revisada antes de ser aplicada.
 5. A versão do schema faz parte do manifesto do arquivo `.nutridiet`.
-6. A abertura de um arquivo antigo executa migrações compatíveis antes da
-   leitura dos dados.
+6. Arquivo com versão diferente só é importado quando existe conversão
+   explicitamente implementada e validada; caso contrário, é rejeitado.
 7. A migração nunca deve apagar dados clínicos sem uma política explícita de
    preservação ou transformação.
 8. `drizzle-kit push` fica restrito a experimentos locais; o banco canônico usa
@@ -96,24 +97,83 @@ As migrations desta decisão são evoluções futuras do schema canônico. Elas 
 se aplicam aos dados atuais em `localStorage`, pois esses registros são de teste
 e serão descartados, sem conversão para o novo banco.
 
-## 5. Requisitos da prova de conceito
+### 4.1 Compatibilidade sem infraestrutura antecipada
 
-Antes de congelar PGlite como motor da V1, a prova de conceito deverá validar:
+`schemaVersion` identifica o modelo dos dados e `formatVersion` identifica o
+formato lógico do `.nutridiet`. O arquivo contém JSON da aplicação, não uma
+cópia dos arquivos físicos do PGlite.
 
-| Área | Evidência necessária |
+A V1 aceita o formato/schema que implementa e rejeita versões não suportadas
+sem alterar a base. Não é necessário construir agora conversores de todas as
+versões futuras ou antigas. Uma evolução real do schema deve trazer sua
+migration e, quando necessário, seu conversor de backup.
+
+A versão de PGlite fica fixada nas dependências. Atualizar o motor exige
+verificar a compatibilidade da base e validar o caminho de atualização antes
+de distribuir a mudança. Não haverá agora gerenciamento de várias versões do
+motor, troca automática de bases ou recuperação por gerações.
+[Referência sobre upgrades do PGlite](https://pglite.dev/docs/upgrade).
+
+### 4.2 Persistência e uma única aba ativa
+
+- Configurar armazenamento persistente explicitamente. O modo em memória
+  serve somente a testes; a aplicação não pode anunciar sucesso antes da
+  confirmação de persistência do adaptador.
+- Não usar `relaxedDurability` para antecipar a confirmação de gravações.
+- Manter **uma única aba ativa por origem/perfil de navegador**. Uma trava
+  exclusiva de abertura, validada na PoC, impede a segunda aba de abrir o
+  banco e orienta usar ou fechar a primeira.
+- A segunda aba não consulta nem edita a base. Não implementar eleição de
+  líder, leitura compartilhada, transferência automática ou sincronização
+  entre abas. Depois de fechar a primeira, o usuário pode reabrir a segunda.
+- Na aba ativa, impedir envios simultâneos do mesmo formulário e suspender
+  edições durante restauração ou migration.
+
+A trava pertence à infraestrutura, não aos componentes de domínio. Seu
+objetivo é impedir duas instâncias do motor sobre a mesma base, sem oferecer
+uso simultâneo como funcionalidade. Se não for possível obter a exclusividade,
+não abrir uma segunda instância.
+
+Referências: [filesystems do PGlite](https://pglite.dev/docs/filesystems) e
+[API e durabilidade](https://pglite.dev/docs/api).
+
+## 5. Prova de conceito enxuta
+
+A PoC responde se PGlite + Drizzle atende à persistência necessária. Usar dados
+sintéticos representativos, uma interface técnica mínima e o navegador desktop
+utilizado no projeto, registrando versões e modo de execução.
+
+| Verificação | Evidência necessária |
 | --- | --- |
-| Persistência | dados sobrevivem a reload, fechamento e reabertura do navegador |
-| Transação | salvar receita e ingredientes confirma ou desfaz tudo |
-| Dieta | salvar dieta troca a vigente e cria histórico sem estado parcial |
-| Escopo | consultas não atravessam `accountId` ou `patientId` |
-| Migrations | schema inicial e pelo menos uma evolução restauram os dados |
-| Volume | catálogo, centenas de pacientes e milhares de itens mantêm resposta aceitável |
-| Abas | comportamento de duas abas é conhecido e documentado |
-| Exportação | `.nutridiet` criptografado exporta e restaura o estado relacional completo conforme as Decisões 11 e 13 |
-| Draft | falha ou remoção do draft não remove dados canônicos |
+| Persistência | Gravar, fechar e reabrir a base mantendo os dados; falha de armazenamento produz erro explícito |
+| Transação | Cabeçalho e filhos confirmam juntos; erro intermediário desfaz toda a gravação |
+| Escopo e vigência | Relações respeitam Conta/Paciente e não permitem duas dietas vigentes para o mesmo paciente |
+| Migration | Aplicar uma evolução simples do schema sem perder os registros da fixture |
+| Draft separado | Gravar/remover um draft não altera a dieta confirmada |
+| Aba única | Segunda aba bloqueada antes de abrir o banco; fechamento da primeira permite nova abertura |
+| Portabilidade lógica | Exportar e importar uma amostra em JSON preservando IDs, relações e valores nutricionais |
+| Rede | As operações locais da amostra funcionam sem rede depois de carregar seus recursos |
 
-O critério não é somente a query funcionar. A prova precisa confirmar ciclo de
-vida, falhas, recuperação e separação de armazenamento.
+A exportação da amostra valida a capacidade do adaptador; não antecipa o
+exportador completo da Conta nem sua interface. Os testes do fluxo clínico e do
+backup completo pertencem aos SDDs correspondentes, conforme a Decisão 14.
+
+Registrar os tempos observados de abertura, consulta e gravação e investigar
+travamentos que inviabilizem o uso. A meta de busca abaixo de 100 ms está nos
+[requisitos consolidados](./index.md#requisitos-consolidados) e deve ser
+verificada na integração da busca. Não criar nesta PoC uma
+certificação de vários navegadores, uma carga obrigatória de 100 mil itens ou
+novos limites de memória/latência sem necessidade medida.
+
+A disponibilidade offline das telas existentes será verificada na integração,
+conforme a Decisão 09. Não é necessário construir instalação de PWA,
+sincronização em segundo plano ou uma plataforma de atualização para aprovar
+o motor.
+
+O relatório registra o que foi executado, resultados e limitações. Falha em
+persistência, atomicidade, isolamento ou exclusividade impede aprovar o motor;
+uma consulta isolada funcionando não basta. A bateria de testes é proporcional
+ao fluxo entregue, sem prometer resistência a toda falha física do dispositivo.
 
 ## 6. Alternativas e motivo para não escolhê-las agora
 

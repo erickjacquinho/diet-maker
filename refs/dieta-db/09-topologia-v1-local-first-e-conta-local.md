@@ -27,8 +27,8 @@ rascunhos de dieta ainda não confirmados.
 Na V1:
 
 - existe uma Conta ativa por banco/perfil local;
-- o `accountId` é estável e acompanha todos os dados persistidos;
-- o perfil do nutricionista descrito no ADR-008 representa a Conta local;
+- o `accountId` é estável e acompanha todos os dados persistidos da Conta;
+- o perfil local do nutricionista representa a Conta, conforme a Decisão 05;
 - alimentos customizados, receitas e refeições prontas pertencem à Conta;
 - pacientes, consultas, avaliações e dietas confirmadas pertencem à Conta +
   Paciente;
@@ -59,10 +59,42 @@ Uma dieta **Em Criação**:
 - não aparece no histórico do paciente;
 - não altera a atividade persistida;
 - não cria `DietPlan`, snapshot ou dieta vigente;
-- é removida após sucesso do salvamento ou descarte confirmado.
+- tem sua revisão confirmada removida após salvamento, ou é removida por
+  descarte confirmado; falhas e reconciliação seguem a Decisão 01, seção 6.
 
 O draft pode carregar `accountId` e `patientId` para validar o contexto, mas
 isso não o transforma em entidade persistida.
+
+### 3.3 Offline básico e retenção local
+
+O uso sem rede já faz parte da proposta. O primeiro carregamento precisa de
+conexão; depois de preparar/cachear os recursos necessários, os fluxos locais
+existentes devem abrir, consultar e salvar sem internet. A validação da
+integração inclui reabertura e navegação para pacientes locais.
+
+Isso exige disponibilizar os recursos das telas e do motor local, não apenas
+persistir o banco. Não inclui instalação de PWA, sincronização em segundo
+plano, gerenciamento avançado de cache ou plataforma de atualização. A janela
+de oito horas da Decisão 12 só se aplica à autenticação futura.
+
+A V1 permite uma única aba ativa, com bloqueio simples da segunda conforme a
+Decisão 10. Não há leitura ou edição simultânea em várias abas.
+
+Dados locais pertencem à origem e ao perfil do navegador; mudar um deles não
+transfere automaticamente a base. Quando disponível, a aplicação pode
+solicitar retenção persistente ao navegador, sem bloquear o uso por recusa nem
+criar um painel de monitoramento de armazenamento.
+
+Limpeza do navegador, sessão privada ou perda do dispositivo podem apagar
+dados. A recuperação depende do último `.nutridiet` exportado; alterações
+posteriores e drafts não estão nesse backup. Erros de gravação devem ser
+informados sem sucesso falso ou fallback silencioso para outro armazenamento.
+
+**Justificativa:** manter o trabalho local e informar seus limites sem
+transformar disponibilidade offline em uma nova frente de funcionalidades.
+
+Referências: [recursos offline](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Offline_and_background_operation)
+e [retenção do armazenamento](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
 
 ## 4. O que fica fora da V1
 
@@ -87,7 +119,8 @@ Os princípios da autenticação futura, que não sincroniza prontuários, estã
 Mesmo sendo local-first, a V1 deve:
 
 1. gerar IDs globais, preferencialmente UUID v7;
-2. guardar `accountId` em todas as entidades persistidas;
+2. guardar `accountId` em todas as entidades persistidas da Conta, exceto a
+   referência TACO de sistema definida na Decisão 06;
 3. manter versões e `updatedAt` para detecção de conflitos futura;
 4. concentrar queries nos repositórios;
 5. executar salvamentos compostos em transações;
@@ -107,8 +140,8 @@ integra ao Drizzle, mas a escolha só será congelada após uma prova técnica d
 - persistência e reabertura do banco;
 - migrations versionadas;
 - transações de dieta e catálogo;
-- volume de pacientes, receitas e itens;
-- comportamento em duas abas;
+- uma amostra representativa de pacientes, receitas e itens;
+- bloqueio da segunda aba, sem uso simultâneo;
 - exportação e importação do arquivo `.nutridiet`.
 
 Essa prova técnica não faz parte desta decisão e não deve antecipar a criação

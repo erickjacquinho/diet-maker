@@ -1,82 +1,89 @@
-# Decisão 14 — Consolidação e Portão de Execução da V1
+# Decisão 14 — Consolidação e Divisão da Implementação em SDDs
 
-- **Status:** Aprovado pelo usuário para especificação; execução técnica pendente
+- **Status:** Escopo documental ajustado; SDDs de persistência ainda não criados
 - **Data:** 2026-08-30
-- **Escopo:** Encerramento das decisões de produto e critério para iniciar a
-  implementação da persistência local
+- **Escopo:** Entregas separadas da persistência local, sem ampliar a proposta
 
-## 1. Conclusão da definição de produto
+## 1. Proposta preservada
 
-As decisões necessárias para a arquitetura de armazenamento da V1 estão
-consolidadas. Não há outra escolha de produto que bloqueie o início do trabalho
-técnico de persistência.
+- Uma Conta e um profissional por base local, sem login ou sincronização na V1.
+- Biblioteca de alimentos customizados, receitas e refeições prontas da Conta.
+- Pacientes, acompanhamento existente, prescrições e histórico por Conta + Paciente.
+- `DietDraft` somente em IndexedDB; autosave não cria prescrição confirmada.
+- **Salvar** confirma a dieta em transação; a vigente anterior vira histórico.
+- Vigente editável por salvamento explícito; histórica somente leitura.
+- Backup manual `.nutridiet` em JSON, **sem criptografia e sem senha**.
+- Uso local sem rede após preparação dos recursos necessários da aplicação.
+- Uma única aba ativa, sem funcionalidade de uso simultâneo.
 
-Em especial, já estão definidos:
+## 2. Situação das etapas
 
-- propriedade por **Conta** dos alimentos customizados, receitas e refeições
-  prontas, conforme as [Decisões 05](05-arquitetura-backend-e-escopos-de-dados.md),
-  [06](06-catalogo-de-alimentos-e-customizados.md) e
-  [07](07-receitas-e-refeicoes-prontas.md);
-- propriedade por **Conta + Paciente** das informações clínicas, prescrições e
-  histórico;
-- `DietDraft` **Em Criação** somente local, em IndexedDB, sem entidade
-  canônica até o salvamento explícito;
-- dieta **Vigente** e snapshots **Históricos** apenas no banco canônico, com
-  integridade e imutabilidade preservadas;
-- V1 local-first, uma Conta e um profissional por base, sem sincronização ou
-  compartilhamento de dados clínicos;
-- backup mestre `.nutridiet` manual, criptografado e protegido por senha
-  escolhida em cada exportação;
-- autenticação online futura limitada a validar o acesso à Conta local, sem
-  leitura, cópia ou armazenamento de dados clínicos na nuvem.
+As Decisões 04 e 10 já definiam fases técnicas, mas não havia SDDs separados
+para esta arquitetura em `specs/`. A Decisão 04 detalha o fluxo de dietas; ela
+não representa seis features nem exige um SDD por fase interna.
 
-## 2. Único portão antes de congelar o motor local
+A tabela abaixo organiza os próximos SDDs. Os números indicam ordem de
+trabalho, não IDs definitivos de pasta. Esta revisão não cria `spec.md`,
+`plan.md` ou `tasks.md`, nem marca implementação como concluída.
 
-O único ponto pendente é técnico, não de produto: executar a prova de conceito
-de **PGlite + Drizzle** prevista na [Decisão 10](10-motor-local-drizzle-e-migrations.md).
+## 3. Divisão em SDDs
 
-Ela deve confirmar, com evidências, persistência após reabertura, transações,
-migrations, isolamento por `accountId` e `patientId`, comportamento entre abas,
-volume de dados, separação do `DietDraft` e backup/restauração criptografados.
+| Ordem | SDD | Entrega e limite | Dependência |
+| --- | --- | --- | --- |
+| 1 | Prova técnica e base local | Validar PGlite + Drizzle, persistência, transações, migration simples, separação de drafts e bloqueio da segunda aba. Registrar resultado e fixar o adaptador somente se aprovado. Sem integrar todos os módulos. | Nenhuma |
+| 2 | Conta e pacientes | Persistir perfil local e cadastro de pacientes, incluindo edição e arquivamento. Preservar o contrato de restauração sem criar tela administrativa futura. Criar somente contratos/tabelas necessários, sem migrar dados de teste. | 1 aprovado |
+| 3 | Dietas: rascunho, salvamento e histórico | Entregar o primeiro fluxo vertical completo da Decisão 01 e as fases da Decisão 04, usando TACO e preservando modos/variações já existentes. Validar autosave, vigência, snapshots e cópia. | 2 |
+| 4 | Biblioteca reutilizável | Persistir alimentos customizados, receitas e refeições prontas e integrá-los à prescrição, sem referências que alterem dietas já salvas. | 3 |
+| 5 | Avaliações e acompanhamento existentes | Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos, sem criar agenda, prontuário ampliado ou novos fluxos clínicos. | 3 |
+| 6 | Backup manual simples | Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional. Sem senha, criptografia, automação ou mesclagem. | 4 e 5 |
 
-Se a prova for aprovada, PGlite será congelado como adaptador de infraestrutura
-da V1. Se falhar em requisito essencial, o domínio, os casos de uso e os
-contratos de repositório permanecem; somente o adaptador de banco é substituído.
+Cada SDD deve ter seus próprios requisitos, plano, tarefas e validação. Os
+testes acompanham a entrega a que pertencem; não há uma feature separada de
+“homologação avançada”. A execução dos planos segue `/speckit-implement`,
+conforme as instruções do projeto.
 
-## 3. Ordem autorizada depois da prova técnica
+A integração deve substituir o armazenamento legado por módulo, sem duas
+fontes canônicas para a mesma entidade. Os registros legados são de teste e
+serão descartados, sem construir um migrador.
 
-1. Registrar o resultado da prova e fixar o adaptador de infraestrutura.
-2. Criar contratos de domínio, casos de uso e repositórios tipados, sem acoplar
-   componentes a Drizzle, PGlite ou IndexedDB.
-3. Implementar o banco canônico e migrations para Conta, catálogo, pacientes,
-   dados clínicos, dietas confirmadas e snapshots.
-4. Implementar o `DietDraftStore` isolado em IndexedDB e só então integrar o
-   construtor de dieta e seu autosave.
-5. Implementar salvamento explícito transacional, histórico e descarte do
-   armazenamento legado de teste.
-6. Implementar exportação e restauração do `.nutridiet` criptografado.
+## 4. Portão técnico proporcional
 
-Autenticação online, sincronização, colaboração, múltiplos profissionais e
-armazenamento clínico remoto não fazem parte dessa sequência inicial.
+A prova da Decisão 10 deve comprovar persistência real, atomicidade,
+integridade e exclusividade da instância. Não precisa implementar o produto
+inteiro para escolher o motor.
 
-## 4. Itens que podem ser decididos durante a implementação
+Se PGlite falhar em requisito essencial, registrar a limitação e reavaliar o
+adaptador. Os contratos de domínio permanecem independentes do motor.
 
-Os itens abaixo refinam experiência ou implementação, mas não alteram o modelo
-de dados nem bloqueiam a V1:
+O funcionamento offline básico é verificado nos fluxos integrados. Não inclui
+instalação de PWA, sincronização em segundo plano, coordenação de abas ou
+plataforma de atualização. A disponibilidade das telas sem rede exige seus
+recursos previamente carregados/cacheados; banco local sozinho não basta.
 
-- regra de qualidade da senha do `.nutridiet`, confirmação e texto de alerta;
-- nome sugerido do arquivo e conteúdo não clínico do cabeçalho técnico;
-- textos e etapas de confirmação para substituir uma base na restauração;
-- opção futura de proteger PDF de dieta com senha;
-- eventual exportação estruturada isolada de dados de dieta, que deverá ser
-  criptografada quando existir.
+## 5. Excesso retirado e justificativas
 
-## 5. Limites preservados
+| Ajuste | Justificativa |
+| --- | --- |
+| Backup JSON sem criptografia ou senha | Orientação explícita do usuário; elimina chaves, recuperação de senha e envelope criptográfico |
+| Uma aba ativa, com bloqueio simples da segunda | Evita duas instâncias do banco sem implementar colaboração, eleição de líder ou sincronização |
+| Sem gerações de base e preservação de drafts na restauração | Resolver edições pendentes antes e substituir em uma transação elimina a necessidade desses mecanismos |
+| Sem tabela de recibos e protocolo genérico de operações | ID estável da dieta, versão esperada e bloqueio de envio atendem ao fluxo local; resultado incerto é conferido antes de repetir |
+| PoC com amostra representativa, sem nova certificação em vários navegadores | Valida o risco do motor sem impor volumes e metas operacionais não solicitados |
+| Sem infraestrutura de upgrades automáticos do motor | Fixar a versão e validar mudanças quando necessárias evita construir antecipadamente uma plataforma de atualização |
+| Offline limitado aos fluxos locais existentes | Preserva a proposta sem acrescentar funcionalidades de PWA ou trabalho em segundo plano |
 
-- Não há implementação autorizada por esta decisão; a execução segue o plano
-  técnico aprovado e o processo de implementação do projeto.
-- Dados atuais em `localStorage` são de teste e podem ser descartados; não
-  haverá migração nem coexistência com o modelo canônico novo.
-- O domínio continua independente da biblioteca de banco e dos mecanismos de
-  autenticação, preservando a troca futura de adaptadores sem reescrever as
-  regras clínicas.
+## 6. Proteções mantidas e justificativas
+
+| Proteção | Por que permanece |
+| --- | --- |
+| Capturar o último estado do editor e ordenar autosave | Evitar que Salvar perca a última digitação ou que um callback recrie um draft descartado |
+| Transações, relações e uma vigente por paciente | Evitar dados parciais, referências inválidas e duas prescrições vigentes |
+| Versão esperada e ID estável no salvamento | Detectar rascunhos desatualizados e impedir duplicação em novas tentativas |
+| Snapshots e regras nutricionais explícitas | Preservar o que foi prescrito e não recalcular o histórico pelo catálogo atual |
+| Validar backup antes de substituir a base, com confirmação | Evitar importação inválida e perda acidental dos dados atuais |
+| Informar limites do armazenamento e do arquivo sem senha | Não prometer recuperação ou sigilo que a solução simples não oferece |
+
+Não fazem parte desta implementação: autenticação futura, nuvem, outbox,
+sincronização, colaboração, múltiplos profissionais, backup automático,
+criptografia, revisão histórica de cada edição, exportação isolada `.diet`
+ou migração dos dados de teste.

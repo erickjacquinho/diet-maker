@@ -1,71 +1,87 @@
 # Decisão 11 — Recuperação e Portabilidade Local
 
-- **Status:** Aprovado pelo usuário para especificação; implementação pendente
+- **Status:** Escopo corrigido conforme orientação do usuário; implementação pendente
 - **Data:** 2026-08-30
-- **Escopo:** Backup, exportação e restauração dos dados canônicos locais
+- **Escopo:** Backup manual simples dos dados canônicos locais
 
-## 1. Decisão aprovada
+## 1. Decisão
 
-A V1 oferecerá exportação e importação manual de um arquivo mestre
-`.nutridiet` criptografado. Não haverá pop-ups invasivos, backup automático em
-nuvem nem sincronização automática entre dispositivos.
+A V1 oferece **Exportar backup** e **Restaurar backup** por um arquivo mestre
+`.nutridiet`: JSON UTF-8, sem criptografia e sem senha.
 
-A senha é exclusiva desse arquivo mestre e é escolhida pelo nutricionista a
-cada exportação. PDF e mensagens de dieta entregues ao paciente não pertencem
-ao fluxo de backup ou restauração e não exigem senha por padrão. A política de
-proteção correspondente está consolidada na [Decisão 13](13-protecao-local-e-backup-criptografado.md).
+Não há backup automático, envio para nuvem, sincronização entre dispositivos
+ou lembretes recorrentes. O usuário escolhe quando exportar e onde guardar o
+arquivo. PDF e mensagens de dieta continuam independentes desse fluxo.
 
-O arquivo é o mecanismo de portabilidade e recuperação quando o navegador for
-limpo, o computador for trocado ou o banco local precisar ser restaurado.
+Esta orientação substitui a exigência anterior de backup criptografado. Os
+limites de privacidade estão na
+[Decisão 13](13-protecao-local-e-backup-simples.md).
 
-## 2. Conteúdo do arquivo mestre
+## 2. Conteúdo do arquivo
 
-O conteúdo criptografado de uma exportação inclui somente dados canônicos
-confirmados da Conta local:
+O arquivo contém somente os dados confirmados da Conta:
 
-- identificação e configurações da Conta/perfil profissional;
+- identificação e configurações do perfil profissional;
 - alimentos customizados, receitas e refeições prontas;
-- pacientes, consultas, avaliações e objetivos;
-- dietas vigentes e snapshots históricos;
-- `schemaVersion`, datas, IDs e metadados necessários à integridade.
+- pacientes, consultas, avaliações e objetivos já contemplados no produto;
+- dietas vigentes, snapshots históricos e registros arquivados;
+- IDs, relações, versões e datas necessários para restaurar esses dados.
 
-`DietDraft` **Em Criação** não integra o arquivo mestre. Ele é temporário,
-local ao navegador e não constitui prescrição nem histórico clínico.
+O cabeçalho lógico contém identificador da aplicação, `formatVersion`,
+`schemaVersion` e data da exportação. Os dados ficam em uma estrutura
+normalizada definida no SDD do backup. Não é um dump físico do motor nem um
+arquivo SQL executável.
 
-## 3. Operações permitidas
+`DietDraft` e outros estados temporários do editor não integram o arquivo.
+Exportar não transforma rascunho em prescrição salva.
 
-### Exportar
+## 3. Exportar
 
-1. O nutricionista aciona uma exportação explicitamente.
-2. O sistema lê apenas o banco relacional canônico.
-3. Gera um arquivo criptografado e autenticado, com versão de schema e dados de
-   integridade conforme a Decisão 13.
-4. Não envia o conteúdo clínico para a nuvem.
+1. O usuário aciona **Exportar backup**.
+2. A aplicação captura uma visão consistente das tabelas confirmadas, sem
+   misturar partes de salvamentos diferentes.
+3. Serializa o conteúdo em JSON e oferece o download `.nutridiet`.
 
-### Importar/restaurar
+Durante a captura, não intercalar mutações com a leitura das tabelas. A
+exclusividade não precisa durar até o usuário escolher a pasta de download.
+Falha na geração não altera a base nem deve ser apresentada como backup
+concluído. Não há pedido de senha.
 
-1. O nutricionista escolhe explicitamente um arquivo `.nutridiet`.
-2. O sistema valida o formato e desbloqueia o conteúdo criptografado antes de
-   ler dados clínicos.
-3. Valida a integridade e a compatibilidade de schema.
-4. Executa migrations compatíveis antes da restauração, quando necessário.
-5. A restauração substitui o conteúdo canônico da Conta local após confirmação
-   explícita; a V1 não faz mesclagem automática de duas bases.
-6. Drafts locais existentes são descartados ou preservados somente mediante
-   confirmação explícita, pois não pertencem ao backup clínico.
+## 4. Restaurar
 
-## 4. Limites e feedback
+1. O usuário seleciona o arquivo.
+2. Antes de modificar a base, a aplicação valida JSON, identificador, versões
+   suportadas, tipos, IDs, relações, uma única Conta e unicidade da dieta
+   vigente. Não executa SQL ou código contido no arquivo.
+3. Informa que a restauração **substitui toda a base atual, sem mesclar**, e
+   solicita confirmação explícita.
+4. A restauração só começa sem rascunhos ou edições pendentes: o usuário deve
+   salvá-los ou descartá-los explicitamente antes. A aplicação não os apaga
+   silenciosamente nem tenta reaplicá-los à base importada.
+5. Na única aba ativa, suspende novas edições, conclui gravações pendentes e
+   substitui os dados canônicos em **uma transação**.
+6. Após o commit, recarrega o contexto e as consultas antes de liberar a edição.
 
-- A interface pode indicar que a base é local e pode ser exportada, sem criar
-  alerta recorrente ou bloquear o trabalho clínico.
-- Falha de exportação ou importação não pode alterar parcialmente o banco
-  canônico.
-- Importação inválida não abre nem sobrescreve a Conta local.
-- O arquivo não é um canal de comunicação entre profissionais; na V1 existe
-  somente uma Conta e um profissional por base.
+Arquivo inválido, versão não suportada, cancelamento ou erro com rollback
+mantêm a base canônica anterior. Se houver interrupção, a recuperação nativa
+do banco deve deixar o estado anterior ou o importado completo, nunca uma
+mistura. A inicialização relê a base; não reutiliza formulários anteriores.
 
-## 5. O que não faz parte desta decisão
+Não implementar troca entre gerações de bases, preservação de drafts
+incompatíveis, mesclagem, conversores universais ou coordenação entre abas.
+Compatibilidade de futuras versões segue a Decisão 10.
 
-Não há backup automático, armazenamento remoto do arquivo, colaboração,
-sincronização, mesclagem de bases nem recuperação de dados apagados sem um
-arquivo exportado previamente.
+## 5. Limites
+
+- Qualquer pessoa com acesso ao arquivo pode ler os dados; não há proteção
+  por senha ou criptografia.
+- O backup permite recuperar somente o que foi exportado. Alterações
+  posteriores e drafts não estão protegidos por esse arquivo.
+- Limpeza do navegador ou perda do dispositivo pode apagar a base local.
+- Entregar o download não comprova que o usuário guardou uma cópia recuperável.
+- A interface explica esses limites no fluxo de backup, sem alertas recorrentes.
+
+**Justificativa:** JSON versionado, validação antes da importação e substituição
+transacional atendem à portabilidade manual pedida. Senhas, cifragem e
+gerenciamento de várias bases acrescentariam fluxos e manutenção sem atender
+a uma necessidade solicitada.

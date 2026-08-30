@@ -79,7 +79,7 @@ Campos do contrato:
 | Gênero | Valor selecionado no catálogo da interface |
 | Objetivo | Valor do catálogo de objetivos |
 | Proteínas, carboidratos e gorduras | Metas padrão numéricas e não negativas |
-| Kcal | Derivada das metas de macros no cadastro inicial |
+| Kcal | Sugestão inicial derivada dos macros; meta manual explícita preservada conforme a [Decisão 06](./06-catalogo-de-alimentos-e-customizados.md) |
 
 Comportamentos:
 
@@ -281,7 +281,8 @@ Para preservar o histórico clínico, a política aprovada é:
 
 O primeiro alimento e o autosave não criam nem atualizam uma linha do histórico.
 Somente **Salvar** persiste o draft no backend/banco e, em caso de sucesso,
-remove o draft local.
+remove apenas a revisão confirmada. Falhas de limpeza e resultados
+desconhecidos seguem a Decisão 01, seção 6.
 
 Se a política de retenção mudar, ela exigirá nova decisão de domínio; não deve
 ser implementada apenas mudando o texto do modal.
@@ -333,10 +334,11 @@ dados foram salvos.
    uso deve validar no salvamento se a dieta base ainda é a última.
 4. Se outro salvamento tornar a dieta base histórica durante a edição, o
    salvamento deve falhar com mensagem clara e oferecer criação por cópia.
-5. Navegação após **Salvar** deve ocorrer somente depois da confirmação da
-   persistência no backend; nesse momento o draft local é removido.
-6. Falha de autosave local ou de persistência no backend não pode produzir
-   toast de sucesso. Em falha do backend, o draft local deve permanecer.
+5. Navegação após **Salvar** ocorre somente depois da confirmação durável da
+   persistência; remover apenas a revisão confirmada conforme a Decisão 01.
+6. Falha de autosave ou rollback não produz toast de sucesso. Resultado
+   desconhecido exige conferir a dieta pelo ID; falha somente na limpeza informa que a
+   prescrição foi salva e que a limpeza local está pendente.
 7. Foco deve retornar ao botão que abriu o modal quando o modal fechar.
 8. `Esc`, clique externo e fechamento devem respeitar o estado de alterações.
 9. Ações destrutivas exigem confirmação acessível e não dependem apenas de
@@ -376,17 +378,25 @@ Toda operação de confirmação deve possuir os estados:
 5. conflito de versão, quando aplicável.
 
 O botão de confirmação deve ficar indisponível durante o envio para evitar
-duplo acionamento, mas o caso de uso também deve ser idempotente.
+duplo acionamento. No salvamento da dieta, ID estável e versão esperada também
+impedem duplicação e sobrescrita, conforme a Decisão 01.
 
 Mensagens devem indicar se:
 
-- nada foi gravado;
+- nada foi gravado, somente quando o rollback estiver confirmado;
 - a operação foi concluída;
 - o dado foi arquivado, e não apagado;
 - é necessário recarregar ou abrir uma nova dieta por cópia;
 - o autosave foi salvo somente no draft local;
-- o salvamento no backend falhou e o draft local foi preservado para nova
-  tentativa.
+- o rollback foi confirmado e o draft foi preservado para nova tentativa;
+- o resultado ainda precisa ser conferido antes de repetir o salvamento;
+- a prescrição foi salva, mas a limpeza local precisa ser repetida.
+
+Durante o envio, suspender a edição do draft e drenar autosaves pendentes,
+incluindo o último input, conforme a Decisão 01. A aplicação permite somente
+uma aba ativa; a segunda é bloqueada antes de abrir a base, conforme a Decisão 10.
+No salvamento de dieta, explicar resultado incerto ou limpeza pendente quando
+ocorrerem, sem exigir esses estados extras em todo formulário.
 
 ## 12. Critérios de aceitação de `/pacientes`
 
@@ -406,8 +416,9 @@ Mensagens devem indicar se:
   cria `DietPlan` no backend;
 - drafts Em Criação não aparecem no histórico nem como fonte de cópia;
 - salvar explicitamente persiste a dieta no backend e a torna Vigente;
-- após o sucesso do backend, o draft local é removido;
-- se o backend falhar, o draft local permanece e nada clínico é confirmado;
+- após commit confirmado, remover somente a revisão confirmada do draft;
+- em rollback, preservar o draft; em resultado desconhecido, reconciliar antes
+  de confirmar ou repetir; falha de limpeza não repete o commit;
 - somente a última dieta permite edição;
 - dietas históricas abrem em modo somente leitura;
 - a dieta vigente anterior permanece íntegra quando uma nova é salva;

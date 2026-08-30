@@ -8,7 +8,7 @@
 
 Estruturar o fluxo principal do NutriDiet com uma separação explícita entre o
 rascunho local e a prescrição clínica persistida. Enquanto a dieta está **Em
-Criação**, ela existe somente no navegador, preferencialmente em IndexedDB. O
+Criação**, ela existe somente no navegador, em IndexedDB. O
 backend/banco só recebe uma dieta quando o nutricionista aciona **Salvar**.
 
 O primeiro fluxo cobre:
@@ -73,7 +73,7 @@ telas específicas.
 
 O editor mantém um `DietDraft` local separado da última versão confirmada:
 
-- o draft é armazenado por `DietDraftStore`, preferencialmente em IndexedDB;
+- o draft é armazenado por `DietDraftStore` em IndexedDB;
 - alterações durante a digitação, inclusive o primeiro alimento, são salvas
   automaticamente somente nesse draft local;
 - fechar ou reabrir a tela pode recuperar o draft no mesmo navegador/dispositivo;
@@ -81,9 +81,10 @@ O editor mantém um `DietDraft` local separado da última versão confirmada:
   cria `DietPlan`, snapshot ou histórico;
 - somente **Salvar** valida o draft e aplica a versão ao registro canônico no
   backend/banco;
-- depois da confirmação bem-sucedida do backend, o draft local é removido;
-- se o salvamento falhar, o draft local permanece disponível para tentar de
-  novo e nenhuma confirmação falsa pode ser exibida;
+- depois da confirmação durável do backend, somente a revisão confirmada do
+  draft é removida, conforme o protocolo da seção 6;
+- falha anterior ao commit preserva o draft; resultado desconhecido exige
+  conferência da dieta pelo ID, sem afirmar sucesso ou rollback sem evidência;
 - descartar uma dieta **Em Criação** remove somente o draft local, mediante
   confirmação, sem alterar o backend/banco.
 
@@ -194,7 +195,8 @@ O modelo deve ser relacional, mesmo enquanto o aplicativo funciona offline:
 - **DietItemSnapshot:** nome, unidade, macros e kcal congelados no momento da
   prescrição;
 - **DietDraft:** documento local em IndexedDB, com `draftId`, `accountId`, `patientId`,
-  payload da dieta, `baseDietId` opcional, versão esperada e timestamp. Não é
+  `draftRevision`, payload, `baseDietId` e `baseDietVersion` opcionais,
+  `targetDietId` reservado no primeiro salvamento e timestamp. Não é
   uma relação persistida de `Patient` até o salvamento explícito.
 
 O alimento mestre pode mudar. Os valores usados dentro de uma dieta salva não
@@ -219,23 +221,46 @@ que duas dietas sejam vigentes simultaneamente.
 
 ### 6.2 Salvamento ativo
 
-1. Carregar o draft local e validar o plano completo e seus itens.
-2. Abrir uma transação no backend/banco somente após a ação explícita
-   **Salvar**.
-3. Para uma nova dieta, criar `DietPlan` como **Vigente**. Para uma edição da
-   dieta vigente, validar `baseDietId` e a versão esperada antes de atualizar o
-   plano.
-4. Se houver dieta vigente anterior diferente da dieta salva, congelá-la como
-   snapshot histórico.
-5. Gravar a dieta atual, refeições, itens e snapshots nutricionais.
-6. Garantir que apenas essa dieta esteja vigente para o paciente.
-7. Confirmar a transação.
-8. Somente após o sucesso confirmado, remover o draft local do IndexedDB.
-9. Atualizar o histórico e retornar à tela do paciente, conforme o fluxo atual.
+1. Suspender a edição e desabilitar novos envios enquanto salva. Concluir os
+   autosaves pendentes e capturar o último valor do editor, mesmo se o usuário
+   clicar em **Salvar** antes do debounce.
+2. Persistir a revisão capturada no draft. Para nova dieta, o caso de uso
+   reserva `targetDietId` uma única vez e o guarda no draft antes da transação;
+   novas tentativas reutilizam esse ID. Reservar o ID não cria uma dieta.
+3. Validar Conta, paciente ativo, plano e snapshots. Abrir a transação apenas
+   após **Salvar**. Para edição, exigir que `baseDietId` ainda seja vigente e
+   corresponda a `baseDietVersion`.
+4. Para nova dieta, conferir se o ID reservado já foi salvo antes de criar
+   qualquer registro. Se já existir, conferir o resultado; nunca gerar outra
+   dieta automaticamente para contornar a tentativa anterior.
+5. Na mesma transação, demover a vigente anterior quando houver nova dieta e
+   gravar plano, refeições, itens e snapshots, garantindo uma única vigente.
+6. Aguardar o commit e a confirmação de persistência do adaptador.
+7. Remover somente o draft/revisão confirmados. Autosaves antigos não podem
+   recriar o draft salvo ou descartado.
+8. Atualizar o histórico e retornar à tela do paciente. Uma falha só na
+   limpeza local não desfaz o salvamento confirmado.
 
-Uma falha antes da confirmação deve deixar a base no estado anterior, sem dieta
-parcialmente vigente ou histórico incompleto, e deve manter o draft local para
-uma nova tentativa.
+A V1 usa uma única aba ativa, conforme a Decisão 10. Não criar tabela de
+recibos, log de operações, hash de conteúdo ou protocolo genérico de retry.
+ID estável, versão esperada e bloqueio de envio são as proteções do fluxo.
+
+### 6.3 Tratamento de falhas
+
+| Situação | Comportamento |
+| --- | --- |
+| Erro com rollback confirmado | Preservar o draft e informar que a prescrição não foi salva |
+| Interrupção sem resultado confirmado | Reabrir a base e conferir a dieta pelo ID estável antes de repetir; preservar o draft e não reenviar automaticamente |
+| Commit confirmado e erro na limpeza | Informar que a prescrição foi salva e repetir somente a limpeza |
+| Draft desatualizado | Preservar o conteúdo e exigir conferência, sem sobrescrever a dieta atual |
+
+Se a leitura não permitir confirmar o resultado após uma interrupção, manter
+o rascunho disponível para conferência e não anunciar sucesso ou rollback.
+Não há transação única entre o banco relacional e o armazenamento de drafts.
+
+**Justificativa:** essas regras evitam perda do último input, duplicação de
+dietas e descarte prematuro do draft sem construir um sistema adicional de
+coordenação e recuperação de operações.
 
 ## 7. Proteções e erros
 
@@ -243,12 +268,12 @@ uma nova tentativa.
   não apenas desabilitadas na UI.
 - A operação de puxar informações deve fazer cópia profunda e gerar novos IDs.
 - Datas persistidas devem usar formato ISO; formatação local pertence à UI.
-- Conflito entre draft e versão confirmada deve ser detectado por versão ou
-  timestamp, nunca resolvido silenciosamente.
+- Conflito entre draft e versão confirmada deve ser detectado por versão
+  monotônica; timestamp é informativo, não controle de concorrência.
 - Indisponibilidade do IndexedDB ou do backend deve produzir feedback explícito
   e impedir que o usuário receba uma falsa confirmação de salvamento.
-- Todas as gravações de dieta devem ser idempotentes quando repetidas com a
-  mesma operação e versão.
+- Repetir um envio não pode duplicar dietas nem ignorar a versão esperada;
+  aplicar as regras da seção 6, sem criar outra identidade de operação.
 
 ## 8. Guardrails obrigatórios
 
@@ -265,8 +290,8 @@ uma nova tentativa.
 10. Mudança de schema exige migration, atualização do contrato de exportação e
    teste de regressão.
 11. Componentes não importam IndexedDB, `localStorage` ou o provedor de banco.
-12. Após sucesso do backend, o draft local deve ser removido; em caso de erro,
-    deve ser preservado.
+12. Remover somente a revisão confirmada; distinguir rollback, resultado
+    desconhecido e limpeza pendente conforme a seção 6.3.
 13. O `localStorage` atual contém somente dados de teste e deve ser descartado
     antes da implantação; ele não é fonte de migração nem modelo de domínio.
 
@@ -283,13 +308,17 @@ Antes de migrar outro módulo, este fluxo precisa comprovar:
 - puxar metas cria uma nova dieta sem alterar a origem;
 - puxar a dieta completa gera novos IDs;
 - salvar explicitamente persiste a dieta e a torna a única vigente;
-- após o salvamento confirmado, o draft local é removido;
-- falha no salvamento mantém o draft e não altera o backend;
+- após o salvamento confirmado, somente a revisão confirmada do draft é removida;
+- rollback confirmado mantém o draft e não altera os dados clínicos;
 - descartar **Em Criação** remove somente o draft local;
 - a vigente anterior permanece íntegra como snapshot;
 - dieta histórica abre somente para leitura;
 - draft é recuperado após reabrir a tela;
 - falha de transação não deixa registros parciais.
+- salvar antes do debounce confirma o último valor visível;
+- autosave antigo não recria um draft salvo ou descartado;
+- interrupção após commit exige conferir o ID estável antes de uma nova tentativa;
+- falha de limpeza não é apresentada como falha do salvamento clínico.
 
 ## 10. Fora desta decisão
 

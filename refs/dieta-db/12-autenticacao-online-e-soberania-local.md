@@ -10,6 +10,10 @@ A autenticação será adicionada posteriormente como um serviço online de
 identidade, ativação e validação do perfil profissional. Ela não transforma o
 NutriDiet em um produto de prontuário em nuvem.
 
+Todo requisito de sessão, vinculação online e janela de oito horas deste
+documento se aplica somente a essa fase futura. A V1 de persistência opera sem
+login online, conforme as Decisões 09, 13 e 14.
+
 O serviço online valida que a chave/perfil profissional corresponde ao usuário
 autenticado por ID e senha. Cada Conta terá inicialmente um único profissional
 proprietário, com perfil único e intransferível. Não haverá membros, equipes ou
@@ -36,9 +40,9 @@ Os dados clínicos permanecem no banco relacional local e só são abertos após
 validação de acesso ao perfil profissional. Autenticação é um controle de
 acesso; não é replicação, backup nem transporte de prontuário.
 
-A autenticação da interface não substitui a proteção do arquivo exportado. A
-política de proteção local e de backup está na
-[Decisão 13 — Proteção local e backup criptografado](./13-protecao-local-e-backup-criptografado.md).
+Uma futura senha de login não protege o arquivo exportado. O backup atual é
+JSON sem senha nem criptografia, conforme a
+[Decisão 13 — Proteção local e backup simples](./13-protecao-local-e-backup-simples.md).
 
 ## 3. Limites da futura Conta online
 
@@ -75,6 +79,12 @@ os dados clínicos durante o bloqueio.
 Se o aplicativo nunca tiver sido carregado online antes, ele não estará
 disponível sem internet: a PWA precisa primeiro obter e armazenar os recursos
 da interface a partir da hospedagem.
+
+A restauração técnica do `.nutridiet` permanece local e não exige senha do
+arquivo. Na fase autenticada, restaurar não autoriza exibir prontuários nem
+renova a janela de acesso na fase autenticada: abrir a Conta restaurada exige
+uma autorização válida para o perfil correspondente. A V1 sem autenticação
+não aplica essa restrição futura.
 
 ## 5. Fora desta decisão
 

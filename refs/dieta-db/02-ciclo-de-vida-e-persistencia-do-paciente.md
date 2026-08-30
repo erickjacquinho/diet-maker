@@ -182,7 +182,7 @@ O primeiro conjunto de portas deve ser equivalente a:
 - `BodyAssessmentRepository` — criação, edição e consulta por paciente;
 - `DietRepository` — leitura de dietas confirmadas e persistência da dieta
   somente após o salvamento explícito;
-- `DietDraftStore` — drafts locais de dieta, preferencialmente em IndexedDB,
+- `DietDraftStore` — drafts locais de dieta em IndexedDB,
   fora do histórico persistido;
 - `ObjectiveCatalogRepository` — opções padrão e personalizadas da Conta;
 - `AccountContext` — escopo da Conta autenticada/ativa usado pelos casos de
@@ -224,10 +224,15 @@ comportamento de arquivamento, relações e versionamento.
 ### 7.4 Arquivar paciente
 
 1. Carregar o paciente pela versão esperada.
-2. Definir `archivedAt` e atualizar `updatedAt`.
+2. Definir `archivedAt`, atualizar `updatedAt` e incrementar a versão.
 3. Manter dietas, avaliações e snapshots intactos.
 4. Impedir novas mutações clínicas enquanto arquivado.
 5. Invalidar ou marcar como resolvidos os drafts de edição daquele paciente.
+
+A invalidação local não participa da transação relacional: falha nessa limpeza
+não desarquiva o paciente. Todo salvamento revalida o estado ativo na transação,
+inclusive quando outra aba conserva um formulário antigo. A restauração não
+reativa automaticamente drafts invalidados pelo arquivamento.
 
 ### 7.5 Restaurar paciente
 

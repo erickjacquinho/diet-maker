@@ -21,8 +21,9 @@ o nutricionista aciona **Salvar**.
 ## 2. Backend canônico
 
 O backend/banco canônico será relacional e compatível com PostgreSQL, acessado
-por uma camada de repositórios tipados. A escolha de infraestrutura segue a
-arquitetura já registrada no ADR-008:
+por uma camada de repositórios tipados. Esta decisão concentra a arquitetura
+antes resumida no ADR-008; a escolha do motor segue a
+[Decisão 10](./10-motor-local-drizzle-e-migrations.md):
 
 ```text
 Domínio puro
@@ -39,18 +40,20 @@ PostgreSQL / Supabase
 ```
 
 No modo offline-first, o banco relacional local é a persistência canônica dos
-dados salvos. IndexedDB é reservado para drafts de dieta e não substitui o
-banco relacional da Conta ou do Paciente.
+dados salvos. O acesso documental direto ao IndexedDB é reservado ao
+`DietDraftStore`; o próprio motor relacional pode usá-lo internamente como
+filesystem, conforme a Decisão 10.
 
 O provedor online não deve aparecer nos componentes, hooks ou regras de
-domínio. Supabase/PostgreSQL será uma implementação alternativa dos mesmos
-contratos, quando a sincronização online for ativada.
+domínio. Um adaptador Supabase/PostgreSQL e eventual sincronização dependem
+de decisão futura própria; a autenticação da Decisão 12 não os ativa.
 
 A topologia aprovada para a V1 está detalhada na
 [Decisão 09 — Topologia da V1 local-first e Conta local](./09-topologia-v1-local-first-e-conta-local.md).
 
 No modo de Conta única do aplicativo local, `Account` pode ser representada
-internamente pelo perfil do nutricionista descrito no ADR-008. A entidade
+internamente pelo perfil local do nutricionista, com identidade e configurações
+próprias, conforme a [Decisão 09](./09-topologia-v1-local-first-e-conta-local.md).
 `Account` continua sendo a fronteira conceitual para não acoplar a modelagem
 clínica a um único profissional e permitir membros da Conta no futuro.
 
@@ -124,6 +127,10 @@ do escopo por omissão.
 Os contratos não expõem tabelas, SQL, chaves de `localStorage`, IndexedDB ou
 tipos do Supabase. A UI conhece apenas casos de uso e modelos de leitura.
 
+Na V1 há somente uma aba ativa. Restauração suspende edições e recarrega o
+contexto após substituir a base, conforme as Decisões 10 e 11. Não há geração
+de base nem coordenação de comandos entre abas.
+
 ## 5. Limites transacionais
 
 As operações abaixo são transações atômicas no backend/banco canônico:
@@ -145,8 +152,9 @@ dieta vigente anterior precisam confirmar ou falhar juntos.
 
 1. Registros persistidos usam identificadores globais, preferencialmente UUID
    v7, sem IDs sequenciais por Conta.
-2. `accountId` é gravado em todas as entidades de negócio persistidas, mesmo
-   quando a relação já poderia ser inferida por outra tabela.
+2. `accountId` é gravado em todas as entidades de negócio da Conta, mesmo
+   quando a relação já poderia ser inferida por outra tabela. A exceção é o
+   catálogo TACO do sistema, sem proprietário de Conta, conforme a Decisão 06.
 3. No modo online, o `accountId` efetivo vem da sessão/autorização no servidor;
    o cliente não pode escolher livremente uma Conta para ler ou gravar.
 4. O adaptador Supabase/PostgreSQL deverá aplicar isolamento por Conta no
@@ -154,6 +162,27 @@ dieta vigente anterior precisam confirmar ou falhar juntos.
 5. Uma referência de catálogo nunca autoriza acesso a dados de outra Conta.
 6. Exclusão física de dados clínicos não faz parte do fluxo normal; catálogo e
    pacientes usam arquivamento quando houver histórico ou dependências.
+
+### 6.1 Garantias do schema relacional
+
+O schema e os repositórios devem demonstrar conjuntamente:
+
+- unicidade de `ACTIVE` por `(accountId, patientId)`, mediante índice único
+  parcial ou garantia equivalente do motor, além da transação de vigência;
+- chaves estrangeiras compostas que impeçam associar uma dieta ao paciente de
+  outra Conta e um item/refeição a outro plano ou paciente;
+- `CHECK`, nulabilidade e validação de domínio coerentes para estados,
+  versões positivas, quantidades e bases de cálculo válidas;
+- ausência de cascata de exclusão do catálogo para snapshots clínicos e de
+  exclusão física do paciente pelos casos de uso normais;
+- proveniência de catálogo separada da propriedade dos filhos da dieta: uma
+  origem ausente não invalida um snapshot completo;
+- validação das mesmas invariantes ao importar, sem desabilitar restrições
+  para aceitar uma base inconsistente.
+
+**Justificativa:** filtros de aplicação não bastam para impedir referências
+cruzadas ou duas vigentes quando há erro no adaptador, na importação ou no
+salvamento. As restrições são defesa de integridade, não autenticação local.
 
 ## 7. O que não faz parte desta decisão
 

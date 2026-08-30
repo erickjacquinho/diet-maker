@@ -9,13 +9,18 @@
 
 ---
 
+> **Persistência consolidada — 2026-08-30:** requisitos, vocabulário,
+> decisões e etapas estão reunidos em [dieta-db](../../refs/dieta-db/index.md).
+> Este PRD preserva a visão geral do produto; os contratos de armazenamento
+> devem ser mantidos naquela pasta, sem versões paralelas.
+
 ## 1. Executive Summary
 
 ### 1.1 Problem Statement
 Nutricionistas clínicos e esportivos perdem tempo precioso durante e após as consultas utilizando softwares genéricos lentos, dependentes de conexão de internet ou planilhas complexas com cálculos manuais de macronutrientes. A adaptação rápida de gramaturas, o envio de orientações pelo WhatsApp e o ajuste de escala de porções consomem minutos excessivos, reduzindo a atenção dedicada ao paciente e limitando a capacidade de atendimento.
 
 ### 1.2 Proposed Solution
-O **NutriDiet Local Pro** é um aplicativo web local (offline-first), ultra-rápido e visualmente intuitivo, desenvolvido para centralizar a criação, adequação, cópia/cola e escala de dietas em ambiente visual. Ele une a base oficial brasileira de alimentos (TACO) a um construtor de refeições com recalculo instantâneo de macronutrientes, controle de metas manuais estritas (g/kg e Kcal), exportação limpa para PDF/WhatsApp e armazenamento local persistente em arquivos `.diet`.
+O **NutriDiet Local Pro** é um aplicativo web local (offline-first), ultra-rápido e visualmente intuitivo, desenvolvido para centralizar a criação, adequação, cópia/cola e escala de dietas em ambiente visual. Ele une a base oficial brasileira de alimentos (TACO) a um construtor de refeições com recalculo instantâneo de macronutrientes, controle de metas manuais estritas (g/kg e Kcal), exportação para PDF/WhatsApp e banco relacional local com backup manual `.nutridiet` em JSON, sem criptografia e sem senha.
 
 ### 1.3 Platform Scope
 O projeto será desenvolvido exclusivamente para visualização e uso em **desktop**, considerando a faixa oficial a partir de `1024px`.
@@ -31,9 +36,9 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
 
 ### 1.4 Success Criteria & KPIs
 - **Velocidade de Prescrição**: Tempo médio de criação/adaptação completa de uma dieta < 5 minutos.
-- **Precisão Nutricional**: 100% de exatidão nos cálculos de calorias, macronutrientes e g/kg baseados na tabela TACO e peso do paciente.
-- **Desempenho da Aplicação**: Carregamento da aplicação e tempo de resposta de busca de alimentos < 100ms.
-- **Portabilidade de Dados**: 100% dos dados dos pacientes salvas em arquivos locais `.diet` portáveis, com zero dependência de nuvem externa.
+- **Precisão Nutricional**: Resultados reproduzíveis a partir da TACO, valores informados e peso de referência da prescrição, com energia e arredondamento definidos na Decisão 06.
+- **Desempenho da Aplicação**: Busca de alimentos em < 100 ms após inicialização. A PoC registra abertura e gravação com amostra representativa, sem acrescentar metas de volume ou memória não solicitadas.
+- **Portabilidade de Dados**: Exportação/importação integral dos dados confirmados da Conta pelo `.nutridiet`, sem dependência de nuvem. Recuperação limitada ao último arquivo exportado disponível; drafts ficam fora do backup.
 
 ---
 
@@ -80,15 +85,17 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
   - Gerar texto estruturado por refeições, quantidades, horários e orientações de hidratação com botão "Copiar Texto".
   - Gerar arquivo PDF com cabeçalho clínico, dados do paciente, tabela de refeições, metas e observações.
 
-#### User Story 5: Armazenamento e Gestão de Arquivos Locais (.diet)
+#### User Story 5: Persistência Local e Backup Mestre (.nutridiet)
+
 - **Como** nutricionista,
-- **Eu quero** salvar e abrir arquivos `.diet` diretamente nas pastas do meu computador e ter auto-save no navegador,
-- **Para que** meus dados fiquem 100% protegidos, offline e sob meu controle total.
-- **Acceptance Criteria**:
-  - Permitir baixar o arquivo `.diet` (JSON estruturado) a qualquer momento.
-  - Permitir carregar/importar arquivos `.diet` salvos anteriormente no disco.
-  - Manter backup automático no `IndexedDB`/`LocalStorage` contra fechamento acidental da aba.
-  - *Referência de Arquitetura*: [ADR-002: Persistência Híbrida e Arquivos Locais](file:///c:/Programmer/diet-maker/docs/adr/ADR-002-data-persistence-and-local-file-format.md).
+- **Eu quero** salvar os dados confirmados no banco local, proteger a edição
+  com autosave e exportar/restaurar manualmente o arquivo mestre da Conta,
+- **Para que** eu possa trabalhar offline e manter uma cópia portável sob meu controle.
+
+Os critérios de aceite e limites desta história estão nos
+[requisitos consolidados de dieta-db](../../refs/dieta-db/index.md#requisitos-consolidados).
+A [divisão em SDDs](../../refs/dieta-db/14-consolidacao-e-portao-de-execucao.md)
+organiza sua implementação sem acrescentar funcionalidades.
 
 ### 2.3 Non-Goals (Fora do Escopo)
 - Prontuário eletrônico estendido ou anamnese médica completa.
@@ -102,43 +109,19 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
 ## 3. Technical Specifications & Architecture
 
 ### 3.1 Stack Tecnológica
-- **Frontend Core**: React 19 + Vite 8.
+- **Frontend Core**: React 19 + Next.js App Router, conforme ADR-006.
 - **Estilização**: TailwindCSS v4 + Lucide React Icons.
 - **Manipulação de PDF**: `jspdf` + `html2canvas`.
-- **Persistência**: HTML5 File API (Upload/Download de `.diet`) + IndexedDB / LocalStorage.
+- **Persistência**: Repositórios tipados e banco relacional local; PGlite + Drizzle sujeitos à prova técnica. IndexedDB separado para drafts; File API para backup manual `.nutridiet` em JSON, sem criptografia ou senha.
 
-### 3.2 Estrutura do Arquivo de Dados (`.diet` / JSON Schema)
-```json
-{
-  "app": "NutriDiet",
-  "version": "1.0",
-  "exportDate": "2026-07-29T00:00:00.000Z",
-  "patient": {
-    "id": "pat-123",
-    "name": "Carlos Eduardo",
-    "weight": 80.0,
-    "height": 178,
-    "age": 30,
-    "objective": "Hipertrofia Muscular",
-    "targetKcal": 2500,
-    "targetProtein": 160,
-    "targetCarb": 280,
-    "targetFat": 65
-  },
-  "meals": [
-    {
-      "id": "meal-1",
-      "name": "Café da Manhã",
-      "time": "08:00",
-      "items": [
-        { "tacoId": "taco-18", "name": "Ovo de galinha inteiro cozido", "amountG": 150, "unit": "g" }
-      ],
-      "substitutes": [],
-      "notes": "Consumir com café preto sem açúcar"
-    }
-  ]
-}
-```
+### 3.2 Contrato do Arquivo Mestre (`.nutridiet`)
+
+O contrato é mantido exclusivamente em
+[dieta-db — Recuperação e portabilidade local](../../refs/dieta-db/11-recuperacao-e-portabilidade-local.md),
+com os limites de proteção na
+[Decisão 13](../../refs/dieta-db/13-protecao-local-e-backup-simples.md).
+Não manter neste PRD outro schema, formato ou protocolo de restauração.
+
 
 ---
 
@@ -146,11 +129,13 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
 
 ### 4.1 Technical Risks & Mitigations
 - **Risco**: Perda de dados por fechamento acidental da janela do navegador durante a consulta.
-  - **Mitigação**: Implementar salvamento automático síncrono no `IndexedDB` a cada alteração de input.
+  - **Mitigação**: Autosave e tratamento de falhas definidos na [Decisão 01](../../refs/dieta-db/01-fluxo-paciente-dieta.md); limitações e validação centralizadas em dieta-db.
+- **Risco**: Limpeza/expulsão do armazenamento pelo navegador ou perda do dispositivo.
+  - **Mitigação**: Retenção local e backup manual conforme as [Decisões 09](../../refs/dieta-db/09-topologia-v1-local-first-e-conta-local.md) e [11](../../refs/dieta-db/11-recuperacao-e-portabilidade-local.md).
 - **Risco**: Incompatibilidade na geração do PDF com tabelas grandes.
   - **Mitigação**: Renderização de página dupla adaptativa via `html2canvas` com tratamento de quebra de página A4.
 
 ### 4.2 Roadmap de Lançamento (Fases)
-- **Fase 1 (MVP Local)**: Construtor por refeições, Tabela TACO, Metas Manuais, Escala %, Exportador WhatsApp/PDF e suporte a arquivos `.diet`.
+- **Fase 1 (MVP Local)**: Construtor por refeições, Tabela TACO, Metas Manuais, Escala %, Exportador WhatsApp/PDF, persistência relacional local, drafts separados e backup mestre `.nutridiet`. Execução conforme Decisões 04 e 14, após a prova técnica da Decisão 10.
 - **Fase 2 (Templates Avançados)**: Biblioteca expandida de protocolos nutricionais (Low Carb, Cetogênica, FODMAPs, Jejum Intermitente).
 - **Fase 3 (Impressão Personalizada)**: Suporte a inclusão de logotipo personalizado do consultório no cabeçalho do PDF.

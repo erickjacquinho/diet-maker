@@ -1,18 +1,18 @@
-# ADR-002: Modelo de Persistência Híbrida e Formato de Arquivo Local (.diet)
+# ADR-002: Persistência Local e Portabilidade
 
-- **Status**: Aceito
-- **Data**: 2026-07-29
+- **Status**: Conteúdo vigente consolidado em `refs/dieta-db/`
+- **Data original**: 2026-07-29
+- **Consolidação**: 2026-08-30
 
-## Contexto
-O nutricionista precisa organizar o histórico e as dietas dos seus pacientes diretamente no seu computador (em pastas próprias), além de garantir que uma queda de energia ou fechamento acidental da aba do navegador durante o atendimento não faça perder os dados em digitação.
+Este endereço permanece para preservar referências existentes. Os requisitos
+e decisões de persistência são mantidos somente no
+[guia central de dieta-db](../../refs/dieta-db/index.md).
 
-## Decisão
-Adotar um **Modelo de Persistência Híbrida**:
-1. **Arquivos Locais `.diet` / `.json`**: Formato aberto e portável contendo os dados do paciente, histórico de dietas e refeições. Permite ao usuário organizar seus arquivos de pacientes em pastas do seu sistema operacional.
-2. **Auto-Save Local (IndexedDB / LocalStorage)**: O estado da sessão atual em edição é sincronizado automaticamente no armazenamento local do navegador em tempo real.
-3. **Privacidade Total (Zero-Cloud)**: Nenhum dado do paciente trafega ou é armazenado em servidores externos ou nuvem de terceiros.
+- [Requisitos consolidados](../../refs/dieta-db/index.md#requisitos-consolidados)
+- [Draft, autosave e salvamento](../../refs/dieta-db/01-fluxo-paciente-dieta.md)
+- [Operação local e offline](../../refs/dieta-db/09-topologia-v1-local-first-e-conta-local.md)
+- [Backup e restauração](../../refs/dieta-db/11-recuperacao-e-portabilidade-local.md)
+- [Backup simples e limites de proteção](../../refs/dieta-db/13-protecao-local-e-backup-simples.md)
 
-## Consequências
-- Total soberania do usuário sobre seus dados (conformidade natural com LGPD/privacidade).
-- Funcionamento 100% offline.
-- Facilidade de transferência de dietas entre computadores via pen drive ou nuvem pessoal (Google Drive/Dropbox do usuário).
+A consolidação preserva a decisão vigente; este arquivo não define um formato
+alternativo nem novos requisitos.

@@ -101,6 +101,50 @@ O serviço de domínio deve centralizar conversões, energia e arredondamento.
 Componentes não devem recalcular macros a partir de campos alternativos ou
 strings formatadas.
 
+### 6.1 Energia de referência, calculada e meta
+
+- **Energia de referência:** kcal informadas na TACO ou no alimento customizado,
+  por sua base de medida. Esse valor é escalado com a quantidade e é a fonte
+  dos totais prescritos quando disponível; zero informado é diferente de ausente.
+- **Energia calculada:** `4 × proteína + 4 × carboidrato + 9 × gordura`. Só
+  substitui energia de referência ausente quando essa estimativa estiver
+  explicitamente identificada no dado como `CALCULATED_449`. Nunca sobrescreve
+  silenciosamente uma energia informada (`REFERENCE`).
+- **Meta energética:** objetivo informado pelo nutricionista. Uma sugestão
+  inicial baseada nos macros não torna essa meta equivalente ao total dos
+  alimentos nem autoriza sobrescrever uma meta manual.
+
+Receitas, refeições e dietas somam a energia dos snapshots de seus componentes
+na quantidade prescrita. Não recalculam esse total por 4–4–9 apenas por haver
+macros disponíveis. A presença de componentes estimados permanece rastreável.
+
+Exemplo de regressão com a base atual: 100 g de arroz tipo 1 cozido possuem
+128 kcal de referência, enquanto seus macros resultam em 124,2 kcal por 4–4–9.
+A prescrição preserva 128 kcal; em 50 g, 64 kcal. A divergência não deve ser
+corrigida alterando os valores da fonte.
+
+### 6.2 Precisão, validade e recálculo
+
+1. Quantidades e bases são decimais finitos; quantidade prescrita e divisor são
+   positivos. Nutrientes e energia são não negativos. Ausência não vira zero
+   silenciosamente, e `NaN`/infinito são rejeitados.
+2. Manter representação decimal com precisão suficiente para ida e volta entre
+   domínio, SQL e arquivo mestre, sem arredondamentos intermediários por item
+   ou refeição. A representação concreta é fixada e testada na prova técnica.
+3. Arredondar somente a apresentação: macros e fibras em uma casa decimal,
+   kcal inteiras, g/kg em duas casas, com arredondamento decimal de metade para
+   cima. Totais exibidos derivam dos valores internos, não da soma de rótulos
+   já arredondados; a interface pode explicar diferenças de arredondamento.
+4. Alterar quantidade recalcula a partir da base original congelada e das
+   conversões registradas. Alternar 100 g → 50 g → 100 g recupera o mesmo valor.
+5. Registrar `calculationVersion` e a proveniência da energia no snapshot. Uma
+   evolução do cálculo não recalcula prescrições históricas ao abri-las.
+
+**Justificativa:** distinguir os três significados de energia e conservar a
+base de cálculo evita que a mesma prescrição mude entre editor, receita,
+histórico e exportação. A escolha preserva a composição de referência e as
+metas manuais já previstas no produto.
+
 ## 7. Fora desta decisão
 
 Não são definidos aqui layout de cadastro, filtros da tela, importação de

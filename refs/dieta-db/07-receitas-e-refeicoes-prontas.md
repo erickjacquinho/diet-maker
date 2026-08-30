@@ -49,7 +49,7 @@ explicitamente.
 
 Ao salvar uma receita, o caso de uso deve:
 
-1. validar todos os ingredientes dentro da mesma Conta;
+1. validar ingredientes TACO de sistema ou customizados da Conta ativa;
 2. normalizar quantidades e unidades;
 3. congelar o snapshot nutricional de cada ingrediente naquela versão;
 4. somar os nutrientes totais da preparação;
@@ -60,8 +60,11 @@ Quando `preparedWeightGrams` existir, a receita também pode expor valores por
 100 g preparada. Sem peso preparado, o sistema não deve estimar rendimento por
 peso; deve oferecer apenas a base suportada pelos dados informados.
 
-O cálculo deve preservar precisão internamente e arredondar somente na borda
-de apresentação ou no contrato final definido para a prescrição.
+`yieldPortions` e, quando informado, `preparedWeightGrams` devem ser positivos
+e finitos. Não substituir rendimento inválido por 1 nem inferir densidade.
+Energia, precisão, arredondamento e versão de cálculo seguem a Decisão 06,
+seção 6. O total da receita soma a energia dos ingredientes; não substitui kcal
+de referência pela energia calculada a partir dos macros.
 
 ## 4. Refeição pronta como agregado da Conta
 
