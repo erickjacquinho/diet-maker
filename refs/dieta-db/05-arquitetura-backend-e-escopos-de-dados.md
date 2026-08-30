@@ -46,6 +46,9 @@ O provedor online não deve aparecer nos componentes, hooks ou regras de
 domínio. Supabase/PostgreSQL será uma implementação alternativa dos mesmos
 contratos, quando a sincronização online for ativada.
 
+A topologia aprovada para a V1 está detalhada na
+[Decisão 09 — Topologia da V1 local-first e Conta local](./09-topologia-v1-local-first-e-conta-local.md).
+
 No modo de Conta única do aplicativo local, `Account` pode ser representada
 internamente pelo perfil do nutricionista descrito no ADR-008. A entidade
 `Account` continua sendo a fronteira conceitual para não acoplar a modelagem

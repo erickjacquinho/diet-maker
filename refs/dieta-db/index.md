@@ -38,13 +38,14 @@ A arquitetura também define a fronteira de propriedade dos dados nutricionais:
 - [06 — Catálogo de alimentos e alimentos customizados](./06-catalogo-de-alimentos-e-customizados.md)
 - [07 — Receitas e refeições prontas](./07-receitas-e-refeicoes-prontas.md)
 - [08 — Snapshots, versionamento e integridade clínica](./08-snapshots-versionamento-e-integridade-clinica.md)
+- [09 — Topologia da V1 local-first e Conta local](./09-topologia-v1-local-first-e-conta-local.md)
 
 ## Estado da execução
 
 A arquitetura e o plano de validação estão consolidados em Markdown. A
 implementação do `DietDraftStore`, a integração das telas e a migração ainda
 não começaram. As Decisões 05–08 registram a proposta de backend e domínio dos
-catálogos para confirmação antes da execução.
+catálogos; a Decisão 09 registra a topologia local-first aprovada para a V1.
 
 ## Regras desta pasta
 
