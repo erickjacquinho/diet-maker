@@ -39,6 +39,7 @@ A arquitetura também define a fronteira de propriedade dos dados nutricionais:
 - [07 — Receitas e refeições prontas](./07-receitas-e-refeicoes-prontas.md)
 - [08 — Snapshots, versionamento e integridade clínica](./08-snapshots-versionamento-e-integridade-clinica.md)
 - [09 — Topologia da V1 local-first e Conta local](./09-topologia-v1-local-first-e-conta-local.md)
+- [10 — Motor local, Drizzle e estratégia de migrations](./10-motor-local-drizzle-e-migrations.md)
 
 ## Estado da execução
 

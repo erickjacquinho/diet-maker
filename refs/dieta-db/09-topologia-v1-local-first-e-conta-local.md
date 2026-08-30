@@ -94,9 +94,12 @@ Mesmo sendo local-first, a V1 deve:
 
 ## 6. Próxima decisão técnica
 
-A próxima decisão será escolher o motor do banco relacional local. PGlite é o
-candidato preferencial porque mantém PostgreSQL no navegador e se integra ao
-Drizzle, mas a escolha só será congelada após uma prova técnica de:
+A próxima decisão é avaliar o motor do banco relacional local. A recomendação e
+os critérios estão registrados na
+[Decisão 10 — Motor local, Drizzle e estratégia de migrations](./10-motor-local-drizzle-e-migrations.md).
+
+PGlite é o candidato preferencial porque mantém PostgreSQL no navegador e se
+integra ao Drizzle, mas a escolha só será congelada após uma prova técnica de:
 
 - persistência e reabertura do banco;
 - migrations versionadas;
