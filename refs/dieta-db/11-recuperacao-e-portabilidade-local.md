@@ -10,6 +10,11 @@ A V1 oferecerá exportação e importação manual de um arquivo mestre
 `.nutridiet` criptografado. Não haverá pop-ups invasivos, backup automático em
 nuvem nem sincronização automática entre dispositivos.
 
+A senha é exclusiva desse arquivo mestre e é escolhida pelo nutricionista a
+cada exportação. PDF e mensagens de dieta entregues ao paciente não pertencem
+ao fluxo de backup ou restauração e não exigem senha por padrão. A política de
+proteção correspondente está consolidada na [Decisão 13](13-protecao-local-e-backup-criptografado.md).
+
 O arquivo é o mecanismo de portabilidade e recuperação quando o navegador for
 limpo, o computador for trocado ou o banco local precisar ser restaurado.
 

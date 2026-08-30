@@ -1,6 +1,6 @@
 # Decisão 13 — Proteção Local e Backup Criptografado
 
-- **Status:** Aprovado para a V1; política de senha/chave do backup pendente
+- **Status:** Aprovado pelo usuário para especificação; implementação pendente
 - **Data:** 2026-08-30
 - **Escopo:** Proteção em camadas dos dados clínicos locais e do `.nutridiet`
 
@@ -62,21 +62,30 @@ alterar a Conta local.
 6. Não enviar a senha, a chave nem o payload clínico ao serviço de autenticação.
 7. Falha de decifragem ou integridade não pode sobrescrever o banco local.
 
-## 5. Pendência: origem da senha/chave do backup
+## 5. Senha do backup aprovada
 
-A única decisão restante é como o nutricionista desbloqueia o `.nutridiet` em
-outro dispositivo:
+Em cada exportação do arquivo mestre `.nutridiet`, o nutricionista escolhe uma
+senha. Essa senha protege aquele arquivo, é exigida para restaurá-lo em outro
+dispositivo e não depende da conta ou da autenticação online do NutriDiet.
 
-- senha escolhida pelo nutricionista no momento da exportação; ou
-- chave vinculada ao perfil profissional online.
+Ela mantém o backup restaurável mesmo que o serviço de autenticação esteja
+indisponível. Em contrapartida, uma senha perdida não pode ser recuperada pelo
+NutriDiet sem comprometer a confidencialidade do arquivo.
 
-A recomendação é a primeira opção: senha escolhida na exportação. Ela mantém o
-backup independente do serviço online e permite restauração mesmo se esse
-serviço estiver indisponível. A consequência é que uma senha perdida não pode
-ser recuperada pelo NutriDiet sem comprometer a confidencialidade do arquivo.
+O escopo da senha fica explicitamente limitado ao backup mestre:
+
+| Artefato | Finalidade | Proteção por senha na V1 |
+|---|---|---|
+| `.nutridiet` | Backup e restauração do conteúdo canônico local | Obrigatória, escolhida a cada exportação |
+| PDF ou mensagem de dieta | Entrega da prescrição ao paciente | Não por padrão |
+| Exportação estruturada isolada de dados de dieta | Não faz parte da V1 | Quando existir, deverá ser criptografada |
+
+PDF e mensagens enviados ao paciente não são backups e não entram no fluxo de
+importação/restauração. Uma opção futura de PDF protegido pode ser oferecida,
+mas não é requisito da V1.
 
 ## 6. Fora desta decisão
 
 Não são definidos aqui criptografia do banco PGlite, recuperação de senha do
-backup, envio do arquivo para nuvem, backup automático ou sincronização de
-dados clínicos.
+backup, envio do arquivo para nuvem, backup automático, sincronização de dados
+clínicos ou exportação estruturada isolada de dados de dieta.
