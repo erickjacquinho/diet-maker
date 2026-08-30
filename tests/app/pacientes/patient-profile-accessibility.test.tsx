@@ -5,10 +5,11 @@ import PatientDetailPage from '@/app/pacientes/[id]/page';
 import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
 
 const push = vi.fn();
+const router = { push, replace: vi.fn() };
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: PATIENT_PROFILE_FIXTURES.patient.id }),
-  useRouter: () => ({ push }),
+  useRouter: () => router,
 }));
 
 vi.mock('next/link', () => ({
@@ -43,14 +44,17 @@ describe('PatientDetailPage accessibility', () => {
       'text-text-primary',
     );
     expect(screen.getByRole('button', { name: 'Excluir Paciente' })).toHaveClass(
-      'border-error',
+      'border-error-border',
       'bg-surface',
       'text-error',
       'hover:bg-error',
       'hover:text-white',
     );
-    expect(screen.getByRole('region', { name: 'Histórico de consultas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Histórico de avaliações físicas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Histórico de prescrições dietéticas' })).toBeInTheDocument();
   });
+
+
 
   it('keeps the follow-up dialog fields labelled and keyboard-addressable', async () => {
     render(<PatientDetailPage />);
@@ -69,7 +73,8 @@ describe('PatientDetailPage accessibility', () => {
     );
     expect(screen.getByRole('combobox')).toHaveAttribute('id', 'next-event-type');
     const cancelButton = screen.getByRole('button', { name: 'Cancelar' });
-    const saveButton = screen.getByRole('button', { name: 'Salvar' });
+    const saveButton = screen.getByRole('button', { name: 'Salvar (Ctrl+S)' });
+    expect(saveButton).toHaveAttribute('aria-keyshortcuts', 'Control+s Meta+s');
     expect(cancelButton).toHaveClass('h-control-standard');
     expect(saveButton).toHaveClass('h-control-standard');
     expect(cancelButton.parentElement).toHaveClass('gap-2');

@@ -71,6 +71,9 @@ export function DietContextSection({
           activeVariationId={activeDietModeProps.activeVariationId}
           onSelectVariation={activeDietModeProps.onSelectVariation}
           onCopyMealsBetweenVariations={activeDietModeProps.onCopyMealsBetweenVariations}
+          onOpenCycleMatrix={activeDietModeProps.onOpenCycleMatrix}
+          onAddVariation={activeDietModeProps.onAddVariation}
+          onReorderVariations={activeDietModeProps.onReorderVariations}
         />
       )}
     </section>

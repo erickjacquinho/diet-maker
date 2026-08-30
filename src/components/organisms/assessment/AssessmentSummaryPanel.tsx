@@ -111,7 +111,7 @@ export function AssessmentSummaryPanel({
       className={`flex flex-col gap-4 sticky top-6 ${className}`}
     >
       {/* Bloco 1: Composição Corporal de Alta Performance (Grid 2x2 Bento) */}
-      <Surface variant="default" className="p-5 rounded-surface border border-border-subtle shadow-card flex flex-col gap-4">
+      <Surface variant="default" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-border-subtle pb-3">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-control bg-primary-soft text-primary">
@@ -131,7 +131,7 @@ export function AssessmentSummaryPanel({
             <div className="flex items-center justify-between gap-1">
               <span className="text-style-legal font-bold tracking-label text-text-muted">Body Fat</span>
               {bfBadge && (
-                <Badge variant={bfBadge.tone} className="text-[10px] h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
+                <Badge variant={bfBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
                   {bfBadge.label}
                 </Badge>
               )}
@@ -162,7 +162,7 @@ export function AssessmentSummaryPanel({
             <div className="flex items-center justify-between gap-1">
               <span className="text-style-legal font-bold tracking-label text-text-muted">FFMI</span>
               {ffmiBadge && (
-                <Badge variant={ffmiBadge.tone} className="text-[10px] h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
+                <Badge variant={ffmiBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
                   {ffmiBadge.label}
                 </Badge>
               )}
@@ -176,7 +176,7 @@ export function AssessmentSummaryPanel({
         {/* Barra de Distribuição de Massa Corporal */}
         {leanPct !== null && fatPct !== null && (
           <div className="flex flex-col gap-1.5 pt-1 border-t border-border-subtle/60">
-            <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-text-secondary">
+            <div className="flex items-center justify-between text-style-chart-micro font-mono tabular-nums text-text-secondary">
               <span className="font-semibold text-success">{leanPct}% Massa Magra</span>
               <span className="font-medium text-warning">{fatPct}% Gordura</span>
             </div>
@@ -186,7 +186,7 @@ export function AssessmentSummaryPanel({
       </Surface>
 
       {/* Bloco 2: Recomposição Corporal vs. Avaliação Anterior */}
-      <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle shadow-card flex flex-col gap-3">
+      <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-3">
         <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
           <Scale className="size-4 text-text-muted" aria-hidden="true" />
           <h4 className={textStyle('caption-strong')}>Recomposição Corporal</h4>
@@ -220,10 +220,10 @@ export function AssessmentSummaryPanel({
           variant="primary"
           onClick={onSave}
           disabled={isSaving}
-          className="w-full flex items-center justify-center gap-2 shadow-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 font-medium"
         >
           <Save size={16} aria-hidden="true" />
-          <span>Salvar Avaliação <span className="opacity-70 text-[11px] font-mono">(Ctrl+S)</span></span>
+          <span>Salvar Avaliação <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></span>
         </Button>
 
         {onCopySummary && composition.isValid && (

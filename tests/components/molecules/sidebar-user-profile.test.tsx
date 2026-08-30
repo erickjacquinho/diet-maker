@@ -46,4 +46,35 @@ describe('SidebarUserProfile', () => {
     fireEvent.click(accountButton);
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
+
+  it('renders dropdown menu with quick actions and account option when onSave and onOpen are provided', async () => {
+    const onSave = vi.fn();
+    const onOpen = vi.fn();
+    const onOpenAccount = vi.fn();
+
+    renderProfile({
+      doctorName: 'Dr. Alice',
+      doctorRole: 'Nutricionista',
+      onSave,
+      onOpen,
+      onOpenAccount,
+    });
+
+    const trigger = screen.getByRole('button', {
+      name: 'Abrir menu de conta de Dr. Alice',
+    });
+
+    fireEvent.pointerDown(trigger, { button: 0 });
+
+    const saveItem = await screen.findByRole('menuitem', { name: /Salvar Arquivo Local/i });
+    const openItem = screen.getByRole('menuitem', { name: /Abrir Arquivo \.diet/i });
+    const accountItem = screen.getByRole('menuitem', { name: /Configurações da Conta/i });
+
+    expect(saveItem).toBeInTheDocument();
+    expect(openItem).toBeInTheDocument();
+    expect(accountItem).toBeInTheDocument();
+
+    fireEvent.click(saveItem);
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
 });

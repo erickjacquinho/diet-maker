@@ -20,7 +20,15 @@ export * from './PageContextHeader';
 export * from './NextEventModal';
 export * from './AddObjectiveModal';
 export * from './DeletePatientModal';
+export * from './DeleteDietModal';
+export * from './DeleteMealFoodModal';
 export * from './DataTable';
 export * from './ActionDropdown';
 export * from './CarbCyclingVariationPanel';
+export * from './CycleMatrixModal';
+export * from './MacroSummary';
+export * from './MacroProportionBar';
+export * from './SubstituteFoodModal';
+export * from './ImportPreviousDietModal';
 export * from '@/components/atoms/SelectField';
+

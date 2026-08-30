@@ -119,4 +119,33 @@ describe('PatientListTable', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Ver perfil de Ana Lima' }));
     expect(onNavigate).not.toHaveBeenCalled();
   });
+
+  it('renders concise labels without line breaks when patient has no assessments and no scheduled event', () => {
+    const emptyPatient: Patient = {
+      id: 'patient-empty',
+      name: 'Gustavo Nogueira',
+      age: 29,
+      gender: 'Masculino',
+      heightCm: 178,
+      weightKg: 75,
+      targetKcal: 2200,
+      targetProtein: 150,
+      targetCarbs: 250,
+      targetFats: 70,
+      objective: 'Bulking',
+      lastConsultation: '03/08/2026',
+      initials: 'GN',
+    };
+
+    render(
+      <PatientListTable
+        rows={buildPatientListRows([emptyPatient], '2026-08-03')}
+      />,
+    );
+
+    expect(screen.getByText('Sem avaliação')).toBeInTheDocument();
+    expect(screen.getByText('Sem histórico')).toBeInTheDocument();
+    expect(screen.getByText('Sem próximo evento')).toBeInTheDocument();
+    expect(screen.getByText('Definir no perfil')).toBeInTheDocument();
+  });
 });

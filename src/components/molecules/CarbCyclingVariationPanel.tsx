@@ -1,171 +1,275 @@
 'use client';
 
-import React from 'react';
-import { Badge, Button, Surface, VariationCard } from '@/components/atoms';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Repeat, Copy, Check } from 'lucide-react';
-import { CarbCyclingVariation } from '@/lib/dietStore';
+import React, { useState } from 'react';
+import { Button, Surface } from '@/components/atoms';
+import { MacroSummary } from './MacroSummary';
+import {
+  Repeat,
+  Copy,
+  Check,
+  SlidersHorizontal,
+  Plus,
+  Calendar,
+  GripVertical,
+} from 'lucide-react';
+import { CarbCyclingVariation, DAYS_OF_WEEK } from '@/lib/dietStore';
 import { cn } from '@/lib/utils';
 
 export interface CarbCyclingVariationPanelProps {
-  variationsCount: 2 | 3;
-  onVariationsCountChange: (count: 2 | 3) => void;
+  variationsCount?: 2 | 3 | number;
+  onVariationsCountChange?: (count: 2 | 3) => void;
   variations: CarbCyclingVariation[];
   activeVariationId: string;
   onSelectVariation: (id: string) => void;
   onCopyMealsBetweenVariations?: () => void;
+  onOpenCycleMatrix?: () => void;
+  onAddVariation?: () => void;
+  onReorderVariations?: (newVariations: CarbCyclingVariation[]) => void;
   className?: string;
 }
 
-const getVariationBadgeVariant = (type: CarbCyclingVariation['type']) => {
-  if (type === 'high') return 'protein';
-  if (type === 'medium') return 'carbohydrate';
-  return 'kcal';
-};
-
-const getVariationTypeLabel = (type: CarbCyclingVariation['type']) => {
-  if (type === 'high') return 'Alto Carb';
-  if (type === 'medium') return 'Médio Carb';
-  return 'Baixo Carb';
-};
-
 export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps> = ({
-  variationsCount,
-  onVariationsCountChange,
   variations,
   activeVariationId,
   onSelectVariation,
   onCopyMealsBetweenVariations,
+  onOpenCycleMatrix,
+  onAddVariation,
+  onReorderVariations,
   className,
 }) => {
-  const visibleVariations =
-    variationsCount === 2
-      ? variations.filter((v) => v.type === 'high' || v.type === 'low')
-      : variations;
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent, index: number) => {
+    // Evita flickering ao passar por elementos filhos
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    if (dragOverIndex === index) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleDragEnd = () => {
+    // Garante que nenhum estado residual de drag fique preso caso o usuário solte fora ou aperte ESC
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const sourceIdx = draggedIndex ?? Number(e.dataTransfer.getData('text/plain'));
+
+    if (
+      Number.isInteger(sourceIdx) &&
+      sourceIdx >= 0 &&
+      sourceIdx < variations.length &&
+      sourceIdx !== targetIndex
+    ) {
+      const newVariations = [...variations];
+      const [draggedItem] = newVariations.splice(sourceIdx, 1);
+      newVariations.splice(targetIndex, 0, draggedItem);
+
+      if (onReorderVariations) {
+        onReorderVariations(newVariations);
+      }
+    }
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  // Suporte a reordenação por teclado (Alt + Seta Cima / Baixo)
+  const handleKeyDown = (e: React.KeyboardEvent, index: number, variationId: string) => {
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      const targetIndex = e.key === 'ArrowUp' ? index - 1 : index + 1;
+      if (targetIndex >= 0 && targetIndex < variations.length && onReorderVariations) {
+        const newVariations = [...variations];
+        const [movedItem] = newVariations.splice(index, 1);
+        newVariations.splice(targetIndex, 0, movedItem);
+        onReorderVariations(newVariations);
+      }
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelectVariation(variationId);
+    }
+  };
 
   return (
     <Surface
       variant="default"
       data-testid="carb-cycling-variation-panel"
       aria-label="Variações do ciclo de carboidratos"
-      className={cn('p-5 flex flex-col gap-4 border-border-subtle shadow-none animate-in fade-in duration-standard', className)}
+      className={cn(
+        'p-4 flex flex-col gap-3.5 border-border-subtle shadow-none animate-in fade-in duration-standard',
+        className
+      )}
     >
-      {/* Cabeçalho da Box de Variações */}
-      <div className="flex flex-row items-center justify-between gap-4 pb-3 border-b border-border-subtle">
+      {/* Cabeçalho do Painel */}
+      <div className="flex flex-row items-center justify-between gap-3 pb-2.5 border-b border-border-subtle">
         <div className="flex items-center gap-2.5">
-          <div className="size-8 rounded-control bg-success-soft text-success flex items-center justify-center shrink-0">
-            <Repeat size={16} aria-hidden="true" />
+          <div className="size-7 rounded-control bg-primary-soft text-primary flex items-center justify-center shrink-0">
+            <Repeat size={15} aria-hidden="true" />
           </div>
           <div>
-            <h4 className="text-style-body font-bold text-text-primary">
-              Variações do Ciclo de Carboidratos
+            <h4 className="text-style-body-small font-bold text-text-primary">
+              Variações do Ciclo
             </h4>
             <p className="text-style-legal text-text-muted">
-              Selecione o dia do ciclo para visualizar e prescrever os alimentos e metas correspondentes.
+              Selecione o dia do ciclo para visualizar e prescrever os alimentos correspondentes.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-style-legal font-bold text-text-muted">Número de variações</span>
-            <ToggleGroup
-              type="single"
-              value={String(variationsCount)}
-              onValueChange={(val) => {
-                if (val) onVariationsCountChange(Number(val) as 2 | 3);
-              }}
-              aria-label="Número de variações"
+        <div className="flex items-center gap-2 shrink-0">
+          {onOpenCycleMatrix && (
+            <Button
+              variant="secondary"
+              size="compact"
+              onClick={onOpenCycleMatrix}
+              className="flex items-center gap-1.5 font-bold text-style-chart-micro bg-surface hover:bg-surface-hover h-8 px-2.5"
             >
-              <ToggleGroupItem
-                value="2"
-                role="button"
-                aria-selected={variationsCount === 2}
-                onClick={() => onVariationsCountChange(2)}
-                className="px-2.5 py-1 text-style-legal font-bold"
-              >
-                2 Variações (Alto / Baixo)
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="3"
-                role="button"
-                aria-selected={variationsCount === 3}
-                onClick={() => onVariationsCountChange(3)}
-                className="px-2.5 py-1 text-style-legal font-bold"
-              >
-                3 Variações (Alto / Médio / Baixo)
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+              <SlidersHorizontal size={13} className="text-primary" aria-hidden="true" />
+              <span>Configurar Ciclo</span>
+            </Button>
+          )}
 
           {onCopyMealsBetweenVariations && (
             <Button
               variant="secondary"
               size="compact"
               onClick={onCopyMealsBetweenVariations}
-              className="flex items-center gap-1.5 font-bold text-style-legal"
+              className="flex items-center gap-1.5 font-bold text-style-chart-micro h-8 px-2.5"
             >
-              <Copy size={13} aria-hidden="true" />
-              <span>Copiar Refeições entre Dias</span>
+              <Copy size={12} aria-hidden="true" />
+              <span>Copiar Refeições</span>
+            </Button>
+          )}
+
+          {onAddVariation && (
+            <Button
+              variant="secondary"
+              size="compact"
+              onClick={onAddVariation}
+              className="flex items-center gap-1.5 font-bold text-style-chart-micro h-8 px-2.5"
+            >
+              <Plus size={13} className="text-primary" aria-hidden="true" />
+              <span>Adicionar Dia</span>
             </Button>
           )}
         </div>
       </div>
 
-      {/* Grid de Cards das Variações */}
+      {/* Grid de Variações em Colunas */}
       <div
         role="tablist"
-        aria-label="Seleção da variação ativa"
-        className={cn(
-          'grid gap-3',
-          variationsCount === 2 ? 'grid-cols-2' : 'grid-cols-3'
-        )}
+        aria-label="Variações do ciclo"
+        className="grid grid-cols-3 gap-3"
+        onDragOver={(e) => e.preventDefault()}
       >
-        {visibleVariations.map((v) => {
-          const isActive = activeVariationId === v.id;
-          const badgeVariant = getVariationBadgeVariant(v.type);
-          const typeLabel = getVariationTypeLabel(v.type);
+        {variations.map((v, index) => {
+          const isActive = v.id === activeVariationId;
+          const isDraggingThis = draggedIndex === index;
+          const isDragOverThis = dragOverIndex === index && draggedIndex !== index;
+          const assignedDaysLabels = (v.assignedDays || []).map(
+            (dayId) => DAYS_OF_WEEK.find((d) => d.id === dayId)?.shortLabel || dayId
+          );
 
           return (
-            <VariationCard
+            <div
               key={v.id}
-              isActive={isActive}
+              role="tab"
+              aria-selected={isActive}
+              aria-pressed={isActive}
               tabIndex={0}
               onClick={() => onSelectVariation(v.id)}
+              onKeyDown={(e) => handleKeyDown(e, index, v.id)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={(e) => handleDragLeave(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              className={cn(
+                'group relative flex flex-col justify-between gap-2 p-3 rounded-control border text-left transition-colors duration-fast cursor-pointer select-none',
+                isActive
+                  ? 'bg-surface border-primary ring-1 ring-primary'
+                  : 'bg-surface-subtle border-border-subtle hover:border-border-hover hover:bg-surface',
+                isDraggingThis && 'opacity-disabled border-dashed border-primary',
+                isDragOverThis && 'border-t-2 border-t-primary ring-2 ring-primary/20 bg-surface'
+              )}
             >
-              <div className="flex items-center justify-between gap-2 w-full">
-                <div className="flex items-center gap-2">
-                  <span className="text-style-body-small font-bold text-text-primary">
-                    {v.name}
-                  </span>
-                  <Badge variant={badgeVariant} className="text-style-chart-micro font-bold">
-                    {typeLabel}
-                  </Badge>
+              {/* Linha 1: Grip, Indicador e Nome */}
+              <div className="flex items-center gap-2 min-w-0 w-full text-left">
+                <div
+                  draggable
+                  onDragStart={(e) => {
+                    e.stopPropagation();
+                    handleDragStart(e, index);
+                  }}
+                  onDragEnd={handleDragEnd}
+                  className="text-text-muted group-hover:text-text-primary cursor-grab active:cursor-grabbing shrink-0 p-0.5 -m-0.5 rounded-control hover:bg-surface-subtle"
+                  title="Arrastar para reordenar (ou use Alt + Setas no teclado)"
+                >
+                  <GripVertical size={15} aria-hidden="true" />
                 </div>
-                {isActive && (
-                  <div className="size-5 rounded-round bg-success text-on-primary flex items-center justify-center shrink-0">
-                    <Check size={12} aria-hidden="true" />
+
+                {isActive ? (
+                  <div className="size-4 rounded-round bg-primary text-on-primary flex items-center justify-center shrink-0">
+                    <Check size={10} strokeWidth={3} aria-hidden="true" />
                   </div>
+                ) : (
+                  <div className="size-2 rounded-round bg-border-hover shrink-0" />
+                )}
+
+                <span
+                  className={cn(
+                    'text-style-body-small font-bold truncate text-left',
+                    isActive ? 'text-text-primary' : 'text-text-muted group-hover:text-text-primary'
+                  )}
+                >
+                  {v.name}
+                </span>
+
+                {v.customBadge && (
+                  <span className="text-style-chart-micro px-1.5 py-0.5 rounded-control bg-primary-soft text-primary font-semibold shrink-0 ml-auto">
+                    {v.customBadge}
+                  </span>
                 )}
               </div>
 
-              <div className="flex items-baseline justify-between gap-2 pt-2 border-t border-border-subtle w-full">
-                <div>
-                  <span className="text-style-body font-bold text-text-primary">
-                    {v.targetKcal} <span className="text-style-legal font-normal text-text-muted">kcal</span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-style-legal">
-                  <span className="font-bold text-macro-carbohydrate">
-                    {v.targetCarbs}g C
-                  </span>
-                  <span className="text-text-muted">•</span>
-                  <span className="text-text-muted">
-                    P: {v.targetProtein}g · G: {v.targetFats}g
-                  </span>
-                </div>
+              {/* Linha 2: Macros e Kcal logo abaixo */}
+              <MacroSummary
+                protein={v.targetProtein}
+                carbs={v.targetCarbs}
+                fats={v.targetFats}
+                kcal={v.targetKcal}
+              />
+
+              {/* Linha 3: Dias da semana abreviados */}
+              <div className="flex items-center gap-1.5 pt-1.5 border-t border-border-subtle/70 text-style-legal text-text-muted text-left">
+                <Calendar size={12} className="shrink-0 text-text-muted" aria-hidden="true" />
+                <span className="font-medium text-style-chart-micro truncate" title={assignedDaysLabels.join(', ')}>
+                  {assignedDaysLabels.length > 0
+                    ? assignedDaysLabels.join(', ')
+                    : 'Nenhum dia vinculado'}
+                </span>
               </div>
-            </VariationCard>
+            </div>
           );
         })}
       </div>

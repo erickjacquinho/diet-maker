@@ -38,7 +38,7 @@ Base declarada: `atom-surface`. Compound parts pertencem a esta família e não 
 
 ## Content rules
 
-Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual.
+Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual. Em agrupamentos de cards de métricas, a ordem de renderização segue obrigatoriamente a sequência: 1º Proteína, 2º Carboidrato, 3º Gordura, e totalizador de Calorias.
 
 ## Exceptions
 

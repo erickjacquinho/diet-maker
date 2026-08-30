@@ -10,6 +10,7 @@ import {
   FileText,
   Save,
   Edit3,
+  History,
 } from 'lucide-react';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
@@ -33,7 +34,11 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onAddMeal,
   onScaleDiet,
   onOpenScaleModal,
+  scaleDisabled = false,
   onOpenAdjustGoalsModal,
+  onPullPreviousGoals,
+  onOpenImportPreviousDietModal,
+  hasPreviousDiets = true,
   onOpenWhatsAppModal,
   onWhatsAppShare,
   onExportPDF,
@@ -50,7 +55,11 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
     onSelectVariation: () => {},
   };
 
-  const activeDietModeProps = dietModeProps || defaultDietModeProps;
+  const activeDietModeProps: DietModeSwitcherProps = {
+    ...defaultDietModeProps,
+    ...dietModeProps,
+    mode: dietModeProps?.mode || 'simple',
+  };
 
   const resolvedName = patient?.name || patientName || macroTrackerData?.patientName || 'Paciente';
   const resolvedInitials = patient?.initials || patientInitials || macroTrackerData?.patientInitials || 'P';
@@ -64,13 +73,24 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   const handleAdjustGoals = onOpenAdjustGoalsModal || macroTrackerData?.onAdjustGoals;
   const handleScale = onOpenScaleModal || onScaleDiet;
   const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
+  const handlePullPrevious = onOpenImportPreviousDietModal || onPullPreviousGoals;
 
   const headerActions = (
     <>
       {onSaveDiet && (
-        <Button onClick={onSaveDiet} variant="primary" size="compact" className="flex items-center gap-1.5">
+        <Button
+          onClick={onSaveDiet}
+          variant="primary"
+          size="compact"
+          className="flex items-center gap-1.5"
+          aria-keyshortcuts="Control+s Meta+s"
+          aria-label="Salvar Prescrição"
+          title="Salvar Prescrição e fechar (Ctrl+S)"
+        >
           <Save size={14} aria-hidden="true" />
-          <span>Salvar Prescrição</span>
+          <span>
+            Salvar Prescrição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+          </span>
         </Button>
       )}
 
@@ -125,7 +145,24 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         />
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-2 flex-wrap">
+            {handlePullPrevious && (
+              <Button
+                onClick={handlePullPrevious}
+                disabled={hasPreviousDiets === false}
+                variant="secondary"
+                size="compact"
+                className="flex items-center gap-1.5"
+                title={
+                  hasPreviousDiets === false
+                    ? 'Nenhuma dieta anterior cadastrada para este paciente'
+                    : 'Puxar metas ou refeições de dietas anteriores'
+                }
+              >
+                <History size={13} aria-hidden="true" />
+                <span>Puxar Metas Anteriores</span>
+              </Button>
+            )}
             {handleAdjustGoals && (
               <Button onClick={handleAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
                 <Edit3 size={13} aria-hidden="true" />
@@ -133,7 +170,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
               </Button>
             )}
             {handleScale && (
-              <Button onClick={handleScale} variant="secondary" size="compact" className="flex items-center gap-1.5">
+              <Button onClick={handleScale} disabled={scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1.5">
                 <Percent size={14} aria-hidden="true" />
                 <span>Escalar</span>
               </Button>
@@ -142,7 +179,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           <MacroTrackerHeader
             patientInitials={resolvedInitials}
             patientName={resolvedName}
-            patientWeightKg={resolvedWeightKg || 70}
+            patientWeightKg={resolvedWeightKg}
             patientGoalDescription={resolvedObjective}
             metrics={metricsToRender}
             showPatientContext={false}

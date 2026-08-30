@@ -13,6 +13,10 @@
     font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+  input:focus::placeholder,
+  textarea:focus::placeholder {
+    color: transparent;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

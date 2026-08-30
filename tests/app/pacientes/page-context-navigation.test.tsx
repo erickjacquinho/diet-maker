@@ -7,10 +7,11 @@ import DedicatedConsultationPage from '@/app/pacientes/[id]/consulta/[date]/page
 import type { Patient } from '@/lib/patientsStore';
 
 const routeParams: Record<string, string> = {};
+const router = { push: vi.fn(), replace: vi.fn() };
 
 vi.mock('next/navigation', () => ({
   useParams: () => routeParams,
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => router,
 }));
 
 vi.mock('next/link', () => ({

@@ -18,7 +18,35 @@ export type MetricBoxGroupItems =
       MetricBoxGroupItem,
       MetricBoxGroupItem,
       MetricBoxGroupItem,
-    ];
+    ]
+  | readonly [
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+    ]
+  | readonly [
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+    ]
+  | readonly [
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+      MetricBoxGroupItem,
+    ]
+  | readonly MetricBoxGroupItem[];
 
 export interface MetricBoxGroupProps extends HTMLAttributes<HTMLDivElement> {
   items: MetricBoxGroupItems;
@@ -30,13 +58,16 @@ const gridColumns: Record<number, string> = {
   3: 'grid-cols-3',
   4: 'grid-cols-4',
   5: 'grid-cols-5',
+  6: 'grid-cols-6',
+  7: 'grid-cols-7',
+  8: 'grid-cols-8',
 };
 
 export function MetricBoxGroup({ items, className, ...props }: MetricBoxGroupProps) {
   const itemCount = items.length;
 
-  if (itemCount < 1 || itemCount > 5) {
-    throw new RangeError('MetricBoxGroup requires between 1 and 5 items.');
+  if (itemCount < 1 || itemCount > 8) {
+    throw new RangeError('MetricBoxGroup requires between 1 and 8 items.');
   }
 
   return (

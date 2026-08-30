@@ -22,7 +22,9 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **Component Decision Rules** | [.agents/rules/component-decision.md](file:///c:/Programmer/diet-maker/.agents/rules/component-decision.md) | Sequência Usar -> Configurar -> Variar -> Compor -> Criar e vedações de API |
 | **PRD & Requirements** | [docs/prd/PRD.md](file:///c:/Programmer/diet-maker/docs/prd/PRD.md) | Requisitos de produto, estórias de usuário e critérios de aceite |
 | **Domain Context** | [docs/context/CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md) | Termos nutricionais, tabela TACO, VET e fórmulas de macros |
-| **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-007 |
+| **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-008 |
+| **Pesquisa Mercadológica** | [refs/pesquisa-mercadologica/index.md](file:///c:/Programmer/diet-maker/refs/pesquisa-mercadologica/index.md) | Panorama do mercado brasileiro, concorrentes, personas e proposta de valor |
+| **Dieta DB & Persistência** | [refs/dieta-db/index.md](file:///c:/Programmer/diet-maker/refs/dieta-db/index.md) | Arquitetura do banco relacional local, receitas, refeições e arquivo mestre |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
 ### Design System component catalog

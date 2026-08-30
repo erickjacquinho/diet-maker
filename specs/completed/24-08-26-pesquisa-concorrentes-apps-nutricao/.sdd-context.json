@@ -1,0 +1,6 @@
+{
+  "task": "levantamento dos principais apps brasileiros para nutricionistas para administrar dieta e medidas dos pacientes. liste ao menos 10 bons concorrentes do mercado, os maiores. crie algumas sub categorias de pesquisa sobre cada um: preco (ticket medio, preco de planos, se achar churn e ltv); analise swot; nicho de mercado; principais estados e nichos atuantes; tambem me de mais informacoes relevantes sobre os concorrentes. crie uma estrutura bem separada para entendimento facil dos arquivos. crie um .html completo para mostrar o resultado da pesquisa",
+  "slug": "pesquisa-concorrentes-apps-nutricao",
+  "feature_dir": "specs/24-08-26-pesquisa-concorrentes-apps-nutricao",
+  "date": "2026-08-24"
+}

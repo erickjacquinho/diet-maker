@@ -6,16 +6,10 @@ import {
   addCustomFood,
   updateCustomFood,
   deleteCustomFood,
+  scoreFoodItem,
   FoodItem,
 } from '@/lib/tacoStore';
 import { CustomFoodPayload } from '@/components/molecules/CustomFoodModal';
-
-function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
 
 export function useFoodSearchPage() {
   const [foods, setFoods] = useState<FoodItem[]>([]);
@@ -92,7 +86,7 @@ export function useFoodSearchPage() {
   }, [foods]);
 
   const filteredFoods = useMemo(() => {
-    return foods.filter((food) => {
+    const filtered = foods.filter((food) => {
       if (activeTab === 'favorites' && !food.isFavorite) return false;
       if (activeTab === 'custom' && !food.isCustom) return false;
 
@@ -105,15 +99,18 @@ export function useFoodSearchPage() {
       if (macroPreset === 'high-fiber' && (food.fiberG || 0) < 3) return false;
 
       if (searchTerm.trim()) {
-        const query = normalizeText(searchTerm.trim());
-        const nameNorm = normalizeText(food.name);
-        const catNorm = normalizeText(food.category || '');
-        return nameNorm.includes(query) || catNorm.includes(query);
+        return scoreFoodItem(food, searchTerm) > 0;
       }
 
       return true;
     });
-  }, [foods, activeTab, categoryFilter, preparoFilter, macroPreset, searchTerm]);
+
+    if (searchTerm.trim() && !sorting) {
+      return [...filtered].sort((a, b) => scoreFoodItem(b, searchTerm) - scoreFoodItem(a, searchTerm));
+    }
+
+    return filtered;
+  }, [foods, activeTab, categoryFilter, preparoFilter, macroPreset, searchTerm, sorting]);
 
   useEffect(() => {
     setPageIndex(0);

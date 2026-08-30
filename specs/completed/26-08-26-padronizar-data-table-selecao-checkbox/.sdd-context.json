@@ -1,0 +1,6 @@
+{
+  "task": "Padronizar o componente DataTable para suportar selecao single e multi com atomo Checkbox unificado, tipografia, estilizacao e posicionamento consistentes em todas as tabelas",
+  "slug": "padronizar-data-table-selecao-checkbox",
+  "feature_dir": "specs/26-08-26-padronizar-data-table-selecao-checkbox",
+  "date": "2026-08-26"
+}

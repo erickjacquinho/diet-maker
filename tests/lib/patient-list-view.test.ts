@@ -70,7 +70,7 @@ describe('patient list history projection', () => {
     });
 
     expect(history.hasAssessment).toBe(true);
-    expect(history.bodyFatLabel).toBe('Sem avaliação corporal recente');
+    expect(history.bodyFatLabel).toBe('Sem avaliação');
   });
 
   it('reads assessment and diet history without mutating the patient entity', () => {

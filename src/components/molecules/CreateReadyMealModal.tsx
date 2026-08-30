@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AutoKcalSection } from './AutoKcalSection';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { textStyle } from '@/design-system';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface ReadyMealFormData {
   name: string;
@@ -36,6 +37,13 @@ const INITIAL_FORM: ReadyMealFormData = {
 
 export function CreateReadyMealModal({ open, onOpenChange, onSave }: CreateReadyMealModalProps) {
   const [formData, setFormData] = useState<ReadyMealFormData>({ ...INITIAL_FORM });
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
   const update = <K extends keyof ReadyMealFormData>(key: K, value: ReadyMealFormData[K]) => setFormData((current) => ({ ...current, [key]: value }));
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -52,12 +60,24 @@ export function CreateReadyMealModal({ open, onOpenChange, onSave }: CreateReady
         <DialogHeader className="border-b border-border-subtle pb-3">
           <DialogTitle className="font-bold text-style-body text-text-primary">Novo Bloco de Refeição</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div><label htmlFor="ready-meal-name" className={`${textStyle('field-label')} block mb-1`}>Nome do Bloco de Refeição</label><Input id="ready-meal-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Café da Manhã Proteico Padrão" /></div>
           <div><label htmlFor="ready-meal-time" className={`${textStyle('field-label')} block mb-1`}>Horário Sugerido</label><Input id="ready-meal-time" value={formData.suggestedTime} onChange={(event) => update('suggestedTime', event.target.value)} placeholder="08:00" /></div>
           <AutoKcalSection title="Macronutrientes & Calorias Calculadas" proteinG={formData.proteinG} carbsG={formData.carbsG} fatsG={formData.fatsG} onProteinChange={(value) => update('proteinG', value)} onCarbsChange={(value) => update('carbsG', value)} onFatsChange={(value) => update('fatsG', value)} />
           <div><label htmlFor="ready-meal-items" className={`${textStyle('field-label')} block mb-1`}>Alimentos Incluídos (Resumo)</label><Textarea id="ready-meal-items" rows={2} value={formData.itemsPreview} onChange={(event) => update('itemsPreview', event.target.value)} placeholder="Ex: Ovo cozido (150g), Aveia em flocos (40g), Banana (100g)" className="resize-none" /></div>
-          <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button><Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Refeição</Button></div>
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="compact"
+              className="flex-1"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Refeição (Ctrl+S)"
+            >
+              Salvar Refeição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

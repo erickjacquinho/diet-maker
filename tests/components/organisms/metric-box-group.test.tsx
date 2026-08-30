@@ -98,10 +98,10 @@ describe('MetricBoxGroup', () => {
 
   it('rejects an invalid runtime item count', () => {
     expect(() => render(<MetricBoxGroup items={createItems(0)} />)).toThrow(
-      'MetricBoxGroup requires between 1 and 5 items.',
+      'MetricBoxGroup requires between 1 and 8 items.',
     );
-    expect(() => render(<MetricBoxGroup items={createItems(6)} />)).toThrow(
-      'MetricBoxGroup requires between 1 and 5 items.',
+    expect(() => render(<MetricBoxGroup items={createItems(9)} />)).toThrow(
+      'MetricBoxGroup requires between 1 and 8 items.',
     );
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { AutoKcalSection } from './AutoKcalSection';
 import { RecipeIngredientRow } from './RecipeIngredientRow';
@@ -13,6 +13,7 @@ import { SelectField } from '@/components/atoms';
 import { calculateRecipeNutrients, type Recipe, type RecipeIngredient } from '@/lib/recipesStore';
 import { searchTacoFoods, type FoodItem } from '@/lib/tacoStore';
 import { textStyle } from '@/design-system';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface CreateRecipeModalProps {
   open: boolean;
@@ -28,6 +29,13 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [foodQuery, setFoodQuery] = useState('');
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -74,7 +82,7 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-screen overflow-y-auto">
         <DialogHeader className="border-b border-border-subtle pb-3"><DialogTitle className="font-bold text-style-body text-text-primary">{recipe ? 'Editar Receita Culinária' : 'Nova Receita Culinária'}</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div><label htmlFor="recipe-name" className={`${textStyle('field-label')} block mb-1`}>Nome da Receita</label><Input id="recipe-name" required value={formData.name} onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))} placeholder="Ex: Bolo de Banana com Aveia e Whey" /></div>
           <div className="grid grid-cols-2 gap-2">
             <SelectField
@@ -91,7 +99,19 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
           {formData.ingredients.length > 0 && <div className="flex flex-col gap-2"><span className="text-style-legal font-bold text-text-primary tracking-overline">Ingredientes Adicionados ({formData.ingredients.length})</span><div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">{formData.ingredients.map((ingredient, index) => <RecipeIngredientRow key={`${ingredient.foodId}-${index}`} ingredient={ingredient} onAmountChange={(amount) => updateIngredient(index, amount)} onRemove={() => setFormData((current) => ({ ...current, ingredients: current.ingredients.filter((_, ingredientIndex) => ingredientIndex !== index) }))} />)}</div></div>}
           <AutoKcalSection title={`Macros Calculados por Porção (1 de ${formData.servings})`} proteinG={summary.portionProteinG} carbsG={summary.portionCarbsG} fatsG={summary.portionFatsG} readOnly />
           <div><label htmlFor="recipe-instructions" className={`${textStyle('field-label')} block mb-1`}>Modo de Preparo / Orientações</label><Textarea id="recipe-instructions" rows={3} value={formData.instructions} onChange={(event) => setFormData((current) => ({ ...current, instructions: event.target.value }))} placeholder="Descreva o passo a passo do preparo da receita..." className="resize-none" /></div>
-          <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button><Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Receita</Button></div>
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="compact"
+              className="flex-1"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Receita (Ctrl+S)"
+            >
+              Salvar Receita <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

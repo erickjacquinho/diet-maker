@@ -1,6 +1,0 @@
-{
-  "task": "Compactar somente o quadro interno de contexto da dieta, mantendo o paciente à esquerda e o modelo de dieta à direita",
-  "slug": "compactar-contexto-dieta",
-  "feature_dir": "specs/001-compactar-contexto-dieta",
-  "date": "2026-08-07"
-}

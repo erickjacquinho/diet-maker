@@ -6,7 +6,7 @@ describe("canonical component recipes", () => {
   it("creates the documented button variants and sizes", () => {
     expect(recipes.button({ variant: "primary", size: "standard", state: "default" })).toContain("bg-primary");
     expect(recipes.button({ variant: "destructive", size: "compact", state: "loading" })).toContain("cursor-wait");
-    expect(recipes.button({ variant: "destructive-outline", size: "standard", state: "default" })).toContain("border-error");
+    expect(recipes.button({ variant: "destructive-outline", size: "standard", state: "default" })).toContain("border-error-border");
     expect(recipes.button({ variant: "destructive-outline", size: "standard", state: "default" })).toContain("hover:bg-error");
   });
 

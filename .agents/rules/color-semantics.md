@@ -30,9 +30,9 @@ A aplicação de cor no NutriDiet segue o princípio da **escassez cromática**:
 
 ### 1.5 Cores de Domínio Nutricional
 Cores específicas fixadas para macronutrientes na exibição de dietas e tabelas TACO:
-- **Carboidratos:** Tom alaranjado/âmbar dedicado (`--color-macro-carb`).
-- **Proteínas:** Tom avermelhado/coral dedicado (`--color-macro-protein`).
-- **Gorduras (Lípedes):** Tom amarelo/dourado dedicado (`--color-macro-fat`).
+- **Carboidratos:** Tom amarelo-alaranjado/âmbar vivo dedicado (`--color-macro-carb` / `macro-carbohydrate`).
+- **Proteínas:** Tom avermelhado/coral dedicado (`--color-macro-protein` / `macro-protein`).
+- **Gorduras (Lipídios):** Tom verde-azulado/teal dedicado (`--color-macro-fat` / `macro-fat`).
 - **Fibras / Micronutrientes:** Tom esverdeado/teat dedicado (`--color-macro-fiber`).
 
 ## 2. Acessibilidade de Contraste (WCAG 2.2 AA)

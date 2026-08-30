@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
-import { FullDietPlan, DietMeal } from '@/lib/dietStore';
+import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/dietStore';
+import { updateMealVariationItems } from '@/lib/mealVariations';
+import { cloneMealsWithFreshIds } from '@/lib/dietDuplication';
 import { calculatePresetCalories } from '@/lib/presetUtils';
+import { MealFoodToSubstitute } from '@/components/molecules/SubstituteFoodModal';
 import { toast } from 'sonner';
 
 export function useDietBuilderModals({
@@ -15,6 +18,7 @@ export function useDietBuilderModals({
   activeVariationId,
   setDietPlan,
   updateActiveMeals,
+  getActiveMealVariationId,
 }: {
   patient: Patient | null;
   dietPlan: FullDietPlan | null;
@@ -26,6 +30,7 @@ export function useDietBuilderModals({
   activeVariationId: string;
   setDietPlan: React.Dispatch<React.SetStateAction<FullDietPlan | null>>;
   updateActiveMeals: (updater: (prevMeals: DietMeal[]) => DietMeal[]) => void;
+  getActiveMealVariationId: (mealId: string, meal?: DietMeal) => string;
 }) {
   const [foodSearchMealIndex, setFoodSearchMealIndex] = useState<number | null>(null);
   const [isScaleModalOpen, setIsScaleModalOpen] = useState(false);
@@ -35,21 +40,25 @@ export function useDietBuilderModals({
   const [copySourceId, setCopySourceId] = useState<string>('var-high');
   const [copyTargetId, setCopyTargetId] = useState<string>('var-low');
 
+  const [isCycleMatrixOpen, setIsCycleMatrixOpen] = useState(false);
+
   const [isAdjustGoalsModalOpen, setIsAdjustGoalsModalOpen] = useState(false);
-  const [tempTargetProt, setTempTargetProt] = useState<number>(160);
-  const [tempTargetCarb, setTempTargetCarb] = useState<number>(240);
-  const [tempTargetFat, setTempTargetFat] = useState<number>(65);
+  const [tempVariationName, setTempVariationName] = useState<string>('');
+  const [tempTargetProt, setTempTargetProt] = useState<number>(targetProt || 0);
+  const [tempTargetCarb, setTempTargetCarb] = useState<number>(targetCarb || 0);
+  const [tempTargetFat, setTempTargetFat] = useState<number>(targetFat || 0);
 
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [whatsAppText, setWhatsAppText] = useState('');
+
+  const [foodToSubstitute, setFoodToSubstitute] = useState<MealFoodToSubstitute | null>(null);
+  const [isImportPreviousDietModalOpen, setIsImportPreviousDietModalOpen] = useState(false);
 
   const handleApplyScale = useCallback(
     (percent: number) => {
       const factor = 1 + percent / 100;
       updateActiveMeals((prev) =>
-        prev.map((meal) => ({
-          ...meal,
-          items: meal.items.map((item) => {
+        prev.map((meal) => updateMealVariationItems(meal, getActiveMealVariationId(meal.id, meal), (items) => items.map((item) => {
             const currentGrams = item.quantityGrams || item.grams || 100;
             const p = item.protein ?? item.proteinG ?? 0;
             const c = item.carbs ?? item.carbsG ?? 0;
@@ -63,13 +72,12 @@ export function useDietBuilderModals({
               carbs: Math.round(c * factor * 10) / 10,
               fats: Math.round(f * factor * 10) / 10,
             };
-          }),
-        }))
+          })))
       );
       toast.success(`Dieta ajustada em ${percent > 0 ? '+' : ''}${percent}%`);
       setIsScaleModalOpen(false);
     },
-    [updateActiveMeals]
+    [getActiveMealVariationId, updateActiveMeals]
   );
 
   const handleCopyVariation = useCallback(() => {
@@ -83,7 +91,7 @@ export function useDietBuilderModals({
         ...prev,
         carbCyclingVariations: prev.carbCyclingVariations.map((v) =>
           v.id === copyTargetId
-            ? { ...v, meals: JSON.parse(JSON.stringify(source.meals)) }
+            ? { ...v, meals: cloneMealsWithFreshIds(source.meals) }
             : v
         ),
       };
@@ -112,6 +120,7 @@ export function useDietBuilderModals({
             v.id === activeVariationId
               ? {
                   ...v,
+                  name: tempVariationName.trim() || v.name,
                   targetKcal,
                   targetProtein: tempTargetProt,
                   targetCarbs: tempTargetCarb,
@@ -124,14 +133,29 @@ export function useDietBuilderModals({
     });
     toast.success('Metas de macronutrientes atualizadas!');
     setIsAdjustGoalsModalOpen(false);
-  }, [dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, activeVariationId, setDietPlan]);
+  }, [dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, tempVariationName, activeVariationId, setDietPlan]);
 
   const openAdjustGoalsModal = useCallback(() => {
     setTempTargetProt(targetProt);
     setTempTargetCarb(targetCarb);
     setTempTargetFat(targetFat);
+    if (dietPlan?.mode === 'carb_cycling') {
+      const activeVar = dietPlan.carbCyclingVariations.find((v) => v.id === activeVariationId);
+      setTempVariationName(activeVar?.name || '');
+    }
     setIsAdjustGoalsModalOpen(true);
-  }, [targetProt, targetCarb, targetFat]);
+  }, [targetProt, targetCarb, targetFat, dietPlan, activeVariationId]);
+
+  const handleSaveCycleMatrix = useCallback((updatedVariations: CarbCyclingVariation[]) => {
+    setDietPlan((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        carbCyclingVariationsCount: updatedVariations.length,
+        carbCyclingVariations: updatedVariations,
+      };
+    });
+  }, [setDietPlan]);
 
   const openWhatsAppModal = useCallback(() => {
     if (!patient || !dietPlan) return;
@@ -162,8 +186,13 @@ export function useDietBuilderModals({
     setCopySourceId,
     copyTargetId,
     setCopyTargetId,
+    isCycleMatrixOpen,
+    setIsCycleMatrixOpen,
+    handleSaveCycleMatrix,
     isAdjustGoalsModalOpen,
     setIsAdjustGoalsModalOpen,
+    tempVariationName,
+    setTempVariationName,
     tempTargetProt,
     setTempTargetProt,
     tempTargetCarb,
@@ -174,6 +203,11 @@ export function useDietBuilderModals({
     setIsWhatsAppModalOpen,
     whatsAppText,
     setWhatsAppText,
+    foodToSubstitute,
+    setFoodToSubstitute,
+    isImportPreviousDietModalOpen,
+    setIsImportPreviousDietModalOpen,
+    openImportPreviousDietModal: () => setIsImportPreviousDietModalOpen(true),
     handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,

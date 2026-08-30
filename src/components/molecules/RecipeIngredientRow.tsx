@@ -1,6 +1,5 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
-import { IconButton } from '@/components/atoms';
+import { DeleteIconButton } from '@/components/atoms';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { RecipeIngredient } from '@/lib/recipesStore';
@@ -41,14 +40,12 @@ export const RecipeIngredientRow: React.FC<RecipeIngredientRowProps> = ({
           <span className="text-style-legal font-bold text-text-muted">g</span>
         </div>
 
-        <IconButton
-          variant="quiet"
+        <DeleteIconButton
+          size="compact"
           onClick={onRemove}
+          title={`Remover ${ingredient.name}`}
           aria-label={`Remover ${ingredient.name}`}
-          className="text-text-muted hover:text-error h-7 w-7 p-0"
-        >
-          <Trash2 size={14} />
-        </IconButton>
+        />
       </div>
     </div>
   );

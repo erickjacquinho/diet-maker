@@ -193,4 +193,188 @@ describe('DataTable contract', () => {
     expect(screen.getByTestId('expanded-row-2')).toBeInTheDocument();
     expect(screen.queryByTestId('expanded-row-1')).not.toBeInTheDocument();
   });
+
+  it('supports multi-selection mode with row checkboxes and header master toggle', () => {
+    function MultiSelectionHarness() {
+      const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['row-1']));
+      return (
+        <DataTable
+          data={rows}
+          columns={columns}
+          getRowId={(row) => row.id}
+          caption="Dados com seleção múltipla"
+          emptyMessage="Nenhum registro encontrado."
+          selection={{
+            mode: 'multi',
+            selectedRowIds: selectedIds,
+            onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectAllAriaLabel: 'Selecionar todos',
+            selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
+          }}
+        />
+      );
+    }
+
+    render(<MultiSelectionHarness />);
+    const masterCheckbox = screen.getByRole('checkbox', { name: 'Selecionar todos' });
+    const row1Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Alfa' });
+    const row2Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Beta' });
+
+    // Initial state: 1 selected out of 2 => indeterminate/mixed
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
+
+    // Clicking master checkbox selects all
+    fireEvent.click(masterCheckbox);
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'true');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'true');
+
+    // Clicking master checkbox when all are selected unselects all
+    fireEvent.click(masterCheckbox);
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'false');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
+
+    // Clicking row2 checkbox selects row2
+    fireEvent.click(row2Checkbox);
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('supports single-selection mode with header toggle to clear or toggle selection', () => {
+    function SingleSelectionHarness() {
+      const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['row-1']));
+      return (
+        <DataTable
+          data={rows}
+          columns={columns}
+          getRowId={(row) => row.id}
+          caption="Dados com seleção única"
+          emptyMessage="Nenhum registro encontrado."
+          selection={{
+            mode: 'single',
+            selectedRowIds: selectedIds,
+            onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectAllAriaLabel: 'Alternar seleção',
+            selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
+          }}
+        />
+      );
+    }
+
+    render(<SingleSelectionHarness />);
+    const masterCheckbox = screen.getByRole('checkbox', { name: 'Alternar seleção' });
+    expect(masterCheckbox).toBeInTheDocument();
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
+
+    const row1Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Alfa' });
+    const row2Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Beta' });
+
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
+
+    // Clicking master checkbox clears selection in single mode
+    fireEvent.click(masterCheckbox);
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'false');
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'false');
+
+    // Selecting row2 selects row2
+    fireEvent.click(row2Checkbox);
+    expect(row1Checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(row2Checkbox).toHaveAttribute('aria-checked', 'true');
+    expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
+  });
+
+  it('supports selectOnRowClick to toggle selection by clicking anywhere on the row', () => {
+    function RowClickHarness() {
+      const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+      return (
+        <DataTable
+          data={rows}
+          columns={columns}
+          getRowId={(row) => row.id}
+          caption="Dados com clique na linha"
+          emptyMessage="Nenhum registro encontrado."
+          selection={{
+            mode: 'multi',
+            selectedRowIds: selectedIds,
+            onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectOnRowClick: true,
+            selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
+          }}
+        />
+      );
+    }
+
+    render(<RowClickHarness />);
+    const row1 = screen.getByText('Alfa').closest('tr')!;
+    expect(row1).not.toHaveAttribute('data-state', 'selected');
+
+    fireEvent.click(row1);
+    expect(row1).toHaveAttribute('data-state', 'selected');
+    expect(screen.getByRole('checkbox', { name: 'Selecionar Alfa' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('supports keyboard selection on the focused row without double toggling child controls', () => {
+    function RowClickHarness() {
+      const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+      return (
+        <DataTable
+          data={rows}
+          columns={columns}
+          getRowId={(row) => row.id}
+          caption="Dados com seleção por teclado"
+          emptyMessage="Nenhum registro encontrado."
+          selection={{
+            mode: 'single',
+            selectedRowIds: selectedIds,
+            onSelectionChange: (nextSet) => setSelectedIds(nextSet),
+            selectOnRowClick: true,
+            selectRowAriaLabel: (row) => `Selecionar ${row.name}`,
+          }}
+        />
+      );
+    }
+
+    render(<RowClickHarness />);
+    const row1 = screen.getByText('Alfa').closest('tr')!;
+
+    expect(row1).toHaveAttribute('tabindex', '0');
+    expect(row1).toHaveAttribute('aria-selected', 'false');
+    fireEvent.keyDown(row1, { key: 'Enter' });
+    expect(row1).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(row1, { key: ' ' });
+    expect(row1).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('keeps the header outside the scrollable body and preserves max height', () => {
+    const { container } = renderTable({
+      stickyHeader: true,
+      maxHeight: 'table-compact',
+    });
+
+    const tableBody = container.querySelector('tbody');
+    expect(tableBody).toBeInTheDocument();
+    expect(container.querySelector('.overflow-auto')).not.toBeInTheDocument();
+    expect(tableBody).toHaveClass('block', 'overflow-y-auto');
+    expect(tableBody).toHaveClass('max-h-table-compact-body');
+
+    const tableContainer = container.querySelector('.rounded-t-control');
+    expect(tableContainer).toBeInTheDocument();
+    expect(tableContainer).toHaveClass('overflow-hidden');
+    expect(tableContainer).not.toHaveClass('max-h-table-compact');
+    expect(tableContainer).toHaveClass('border');
+
+    const table = container.querySelector('table');
+    expect(table).toBeInTheDocument();
+    expect(table?.parentElement).toHaveClass('overflow-visible');
+    expect(container.querySelector('thead')).toHaveClass('block', 'bg-surface-subtle');
+    expect(container.querySelector('thead')).not.toHaveClass('sticky', 'top-0');
+    expect(container.querySelector('thead tr')).toHaveClass('table', 'table-fixed', 'w-full');
+    expect(container.querySelector('tbody tr')).toHaveClass('table', 'table-fixed', 'w-full');
+  });
 });
+

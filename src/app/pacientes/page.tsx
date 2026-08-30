@@ -106,7 +106,7 @@ export default function PatientsListPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar por nome ou objetivo..."
                 aria-label="Buscar pacientes por nome ou objetivo"
-                className="text-style-legal text-text-primary placeholder:text-text-muted"
+                className="text-style-legal text-text-primary placeholder:text-text-muted focus:placeholder:text-transparent"
               />
             </InputGroup>
             <span role="status" aria-live="polite" className="text-style-legal text-text-muted whitespace-nowrap">

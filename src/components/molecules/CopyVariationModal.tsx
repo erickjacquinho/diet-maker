@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button, SelectField } from '@/components/atoms';
 import { Copy } from 'lucide-react';
 import { CarbCyclingVariation } from '@/lib/dietStore';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 interface CopyVariationModalProps {
   isOpen: boolean;
@@ -25,6 +26,11 @@ export function CopyVariationModal({
   setCopyTargetId,
   onCopy,
 }: CopyVariationModalProps) {
+  useSaveShortcut({
+    onSave: onCopy,
+    enabled: isOpen,
+    priority: 10,
+  });
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -72,8 +78,13 @@ export function CopyVariationModal({
           <Button variant="quiet" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={onCopy}>
-            Confirmar Cópia
+          <Button
+            variant="primary"
+            onClick={onCopy}
+            aria-keyshortcuts="Control+s Meta+s"
+            title="Confirmar Cópia (Ctrl+S)"
+          >
+            Confirmar Cópia <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
           </Button>
         </DialogFooter>
       </DialogContent>

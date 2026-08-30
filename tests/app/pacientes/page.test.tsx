@@ -101,7 +101,7 @@ describe('PatientsListPage', () => {
     render(<PatientsListPage />);
 
     const indicators = await screen.findByTestId('record-indicators');
-    expect(indicators.querySelector('[data-indicator="assessment"]')).toHaveClass('opacity-0');
+    expect(indicators.querySelector('[data-indicator="assessment"]')).toHaveClass('invisible', 'pointer-events-none');
     expect(indicators.querySelector('[data-indicator="diet"]')).toHaveClass('text-text-muted');
   });
 });

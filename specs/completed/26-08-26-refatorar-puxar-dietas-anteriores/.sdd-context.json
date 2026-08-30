@@ -1,0 +1,6 @@
+{
+  "task": "em /dieta/nova no botao vamos refatorar o botao Puxar Metas Anteriores. quero um botao que leve a um modal em que haja uma tabela de selecao das dietas anteriores. abaixo dela haverao dois botoes: um botao para puxar apenas os macros e outro botao para puxar todas as refeicoes (nao e editar a dieta, e duplicar para uma nova dieta e assim alterar para uma nova variacao). caso nao hajam dietas anteriores, o botao deve estar desabilitado",
+  "slug": "refatorar-puxar-dietas-anteriores",
+  "feature_dir": "specs/26-08-26-refatorar-puxar-dietas-anteriores",
+  "date": "2026-08-26"
+}

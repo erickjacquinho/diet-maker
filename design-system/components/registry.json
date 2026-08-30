@@ -2052,6 +2052,16 @@
           "name": "SecondaryActionButton",
           "kind": "compound-part",
           "documentedBy": "profile"
+        },
+        {
+          "name": "HoldToDeleteButtonProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "HoldToDeleteButton",
+          "kind": "compound-part",
+          "documentedBy": "profile"
         }
       ],
       "profile": "design-system/components/profiles/atoms/button.md",
@@ -2412,6 +2422,47 @@
       "exceptions": []
     },
     {
+      "id": "molecule-macro-proportion-bar",
+      "name": "MacroProportionBar",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/MacroProportionBar.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "MacroProportionBarProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "MacroProportionBar",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/macro-proportion-bar.md",
+      "consumers": [
+        "molecule-adjust-diet-goals-modal",
+        "organism-meal-card-container",
+        "molecule-read-only-diet-modal",
+        "page-refeicoes-prontas"
+      ],
+      "primitiveBase": "atom-surface",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "molecule-metric-box",
       "name": "MetricBox",
       "nature": "product-generic",
@@ -2493,6 +2544,10 @@
         { "name": "DataTableColumnDef", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTableSortState", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTablePagination", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableSelectionConfig", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableSelectionMode", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableMaxHeight", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DataTableVirtualizationConfig", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTableProps", "kind": "type", "documentedBy": "non-visual" },
         { "name": "DataTable", "kind": "component", "documentedBy": "profile" }
       ],
@@ -3039,7 +3094,9 @@
       ],
       "profile": "design-system/components/profiles/organisms/meal-card-container.md",
       "consumers": [
-        "organism-sidebar-nav"
+        "template-diet-builder-template",
+        "src/components/organisms/diet/DietMealsSection.tsx",
+        "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",

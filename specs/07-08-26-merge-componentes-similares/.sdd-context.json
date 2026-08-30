@@ -1,6 +1,0 @@
-{
-  "task": "Planejar um merge seletivo de componentes React similares no src/components, usando composição e preservando contratos do design system. Priorizar a remoção do alias deprecated src/components/atoms/Input.tsx em favor de src/components/ui/input.tsx; avaliar a composição de AdjustDietGoalsModal com AutoKcalSection; extrair peças internas compartilhadas entre MealItemRow e RecipeIngredientRow, entre CreatePatientModal e EditPatientModal, e entre FoodSearchModal e CreateRecipeModal. Revisar também a possível redundância entre atoms/Badge e ui/badge. Manter separados os domínios e fluxos públicos quando houver diferenças reais, não criar um modal universal com boolean flags, não fundir MetricBox com MacroMetricCard, RecipeCard com MealCardContainer, DataTable com organismos de tabela, nem SidebarNav com suas partes compound. Preservar primitivos em src/components/ui, atualizar catalogo e perfis do design system quando necessario, e definir verificacoes de comportamento, acessibilidade e regressao visual.",
-  "slug": "merge-componentes-similares",
-  "feature_dir": "specs/07-08-26-merge-componentes-similares",
-  "date": "2026-08-07"
-}

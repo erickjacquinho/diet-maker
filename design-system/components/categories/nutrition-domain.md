@@ -84,9 +84,16 @@ MacroMetric compõe label/value/unit/progress; food row compõe identificação,
 
 Usar `kcal`, `g` e `%` conforme contexto; números com locale pt-BR, precisão definida pelo cálculo de domínio e dígitos tabulares. Nome de alimento quebra até duas linhas; tabela pode truncar com acesso ao nome completo. Totais ausentes exibem estado empty, não zero falso.
 
+### Ordem Canônica Normativa (Macros + Calorias)
+Toda e qualquer criação, agrupamento ou apresentação de macronutrientes + energia (cards de métricas, headers de rastreamento, tabelas de alimentos/ingredientes, modais de metas e resumos) **DEVE OBRIGATORIAMENTE** seguir a sequência canônica fixa:
+1. **Proteína (`P` / protein)** — gramas (`g`)
+2. **Carboidrato (`C` / carbohydrate)** — gramas (`g`)
+3. **Gordura (`G` / fat)** — gramas (`g`)
+4. **Calorias (`kcal` / calories)** — quilocalorias (`kcal`)
+
 ## Forbidden decisions
 
-Inventar cor para calorias/micronutriente; trocar cores oficiais de macros; usar macro color para severity; omitir unidade; colorir card inteiro; arredondamento pill; shadow; border acima de 1px; cálculo ou precisão decididos no componente visual; input disabled para consulta.
+Inventar cor para calorias/micronutriente; trocar cores oficiais de macros; alterar ou inverter a ordem canônica (proteína → carboidrato → gordura → calorias); usar macro color para severity; omitir unidade; colorir card inteiro; arredondamento pill; shadow; border acima de 1px; cálculo ou precisão decididos no componente visual; input disabled para consulta.
 
 ## Current examples
 

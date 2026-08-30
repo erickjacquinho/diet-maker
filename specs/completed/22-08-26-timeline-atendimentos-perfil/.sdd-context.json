@@ -1,0 +1,6 @@
+{
+  "task": "Refatorar o Historico de Consultas do perfil do paciente com Timeline de Atendimentos e Filtros Rapidos",
+  "slug": "timeline-atendimentos-perfil",
+  "feature_dir": "specs/22-08-26-timeline-atendimentos-perfil",
+  "date": "2026-08-22"
+}

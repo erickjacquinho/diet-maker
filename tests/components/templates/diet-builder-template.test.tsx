@@ -145,7 +145,7 @@ describe('DietBuilderTemplate top composition', () => {
     });
 
     const mealsRegion = screen.getByRole('region', { name: 'Refeições' });
-    expect(within(mealsRegion).getByRole('heading', { name: 'Café da manhã' })).toBeInTheDocument();
+    expect(within(mealsRegion).getByDisplayValue('Café da manhã')).toBeInTheDocument();
     fireEvent.click(within(mealsRegion).getByRole('button', { name: 'Nova Refeição' }));
     expect(onAddMeal).toHaveBeenCalledTimes(1);
   });

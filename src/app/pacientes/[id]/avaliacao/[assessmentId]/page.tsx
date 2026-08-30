@@ -70,7 +70,7 @@ export default function AssessmentWorkspacePage() {
       />
 
       {/* Barra de Contexto do Paciente & Data */}
-      <Surface variant="subtle" density="compact" className="px-5 py-2.5 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4 shadow-xs">
+      <Surface variant="subtle" density="compact" className="px-5 py-2.5 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" aria-hidden="true" />
@@ -80,7 +80,7 @@ export default function AssessmentWorkspacePage() {
             </span>
           </div>
 
-          <div className="h-4 w-px bg-border-subtle hidden sm:block" />
+          <div className="h-4 w-px bg-border-subtle block" />
 
           <div className="flex items-center gap-1.5 text-style-caption text-text-secondary">
             <Ruler className="size-3.5 text-text-muted" aria-hidden="true" />

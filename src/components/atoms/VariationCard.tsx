@@ -15,7 +15,7 @@ export const VariationCard = React.forwardRef<HTMLButtonElement, VariationCardPr
         className={cn(
           'group p-4 rounded-surface border text-left transition-colors duration-fast flex flex-col justify-between gap-3 cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           isActive
-            ? 'bg-surface border-success ring-2 ring-success shadow-none'
+            ? 'bg-surface border-primary ring-2 ring-primary shadow-none'
             : 'bg-surface-subtle border-border-subtle hover:border-border-hover hover:bg-surface',
           className
         )}

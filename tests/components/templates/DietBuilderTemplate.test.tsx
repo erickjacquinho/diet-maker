@@ -35,4 +35,70 @@ describe('DietBuilderTemplate header action dropdown', () => {
     fireEvent.click(whatsappItem);
     expect(handleWhatsApp).toHaveBeenCalled();
   });
+
+  it('renders Puxar Metas Anteriores button and triggers onPullPreviousGoals callback', () => {
+    const handlePull = vi.fn();
+
+    render(
+      <DietBuilderTemplate
+        patientId="pat-1"
+        patientName="Carlos Silva"
+        patientObjective="Emagrecimento"
+        onPullPreviousGoals={handlePull}
+        onOpenAdjustGoalsModal={vi.fn()}
+      />,
+    );
+
+    const pullButton = screen.getByRole('button', { name: /puxar metas anteriores/i });
+    expect(pullButton).toBeInTheDocument();
+    expect(pullButton).toBeEnabled();
+
+    fireEvent.click(pullButton);
+    expect(handlePull).toHaveBeenCalled();
+  });
+
+  it('disables Puxar Metas Anteriores button when hasPreviousDiets is false', () => {
+    const handleOpenModal = vi.fn();
+
+    render(
+      <DietBuilderTemplate
+        patientId="pat-1"
+        patientName="Carlos Silva"
+        patientObjective="Emagrecimento"
+        hasPreviousDiets={false}
+        onOpenImportPreviousDietModal={handleOpenModal}
+      />,
+    );
+
+    const pullButton = screen.getByRole('button', { name: /puxar metas anteriores/i });
+    expect(pullButton).toBeInTheDocument();
+    expect(pullButton).toBeDisabled();
+    expect(pullButton).toHaveAttribute(
+      'title',
+      'Nenhuma dieta anterior cadastrada para este paciente'
+    );
+
+    fireEvent.click(pullButton);
+    expect(handleOpenModal).not.toHaveBeenCalled();
+  });
+
+  it('triggers onOpenImportPreviousDietModal when hasPreviousDiets is true and button is clicked', () => {
+    const handleOpenModal = vi.fn();
+
+    render(
+      <DietBuilderTemplate
+        patientId="pat-1"
+        patientName="Carlos Silva"
+        patientObjective="Emagrecimento"
+        hasPreviousDiets={true}
+        onOpenImportPreviousDietModal={handleOpenModal}
+      />,
+    );
+
+    const pullButton = screen.getByRole('button', { name: /puxar metas anteriores/i });
+    expect(pullButton).toBeEnabled();
+
+    fireEvent.click(pullButton);
+    expect(handleOpenModal).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,0 +1,6 @@
+{
+  "task": "Modularizar a barra de proporção de macros para torná-la 100% reutilizável em qualquer tela sem esforço",
+  "slug": "modularizacao-barra-proporcao-macros",
+  "feature_dir": "specs/25-08-26-modularizacao-barra-proporcao-macros",
+  "date": "2026-08-25"
+}

@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildNextEventSummary,
+  buildPatientDietHistory,
   selectActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
+import type { DayOfWeek, FullDietPlan } from '@/lib/dietStore';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
+  PATIENT_PROFILE_CARB_CYCLING_VARIATIONS,
   PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_MULTIPLE_ACTIVE_DIETS,
 } from '../fixtures/patient-profile';
+import type { StoredDietRecord } from '@/lib/patientsStore';
 
 describe('patient profile selectors', () => {
   it('selects the latest physical assessment across ISO and pt-BR dates', () => {
@@ -48,6 +52,115 @@ describe('patient profile selectors', () => {
     expect(buildNextEventSummary({ date: '2026-08-12', type: 'diet-update' })).toEqual({
       date: '12/08/2026',
       label: 'Atualização de dieta',
+    });
+  });
+
+  it('maps carb cycling plans to a weighted weekly history summary', () => {
+    const cycle: FullDietPlan = {
+      id: 'diet-cycle',
+      patientId: 'patient-1',
+      name: 'Ciclo de Carboidratos',
+      createdAt: '20/08/2026',
+      updatedAt: '20/08/2026',
+      mode: 'carb_cycling',
+      simpleTargetKcal: 0,
+      simpleTargetProtein: 0,
+      simpleTargetCarbs: 0,
+      simpleTargetFats: 0,
+      simpleMeals: [],
+      carbCyclingVariations: [
+        {
+          id: 'high',
+          name: 'Dia Alto Carbo',
+          type: 'high',
+          assignedDays: ['seg', 'qua', 'sex'],
+          targetKcal: 2300,
+          targetProtein: 180,
+          targetCarbs: 260,
+          targetFats: 55,
+          meals: [{ id: 'meal-high', name: 'Café', time: '08:00', items: [] }],
+        },
+        {
+          id: 'low',
+          name: 'Dia Baixo Carbo',
+          type: 'low',
+          assignedDays: ['ter', 'qui', 'sab', 'dom'],
+          targetKcal: 1950,
+          targetProtein: 180,
+          targetCarbs: 150,
+          targetFats: 55,
+          meals: [],
+        },
+      ],
+    };
+
+    const [history] = buildPatientDietHistory([cycle as unknown as StoredDietRecord]);
+
+    expect(history).toMatchObject({
+      id: 'diet-cycle',
+      mode: 'carb_cycling',
+      targetKcal: 2100,
+      proteinG: 180,
+      carbsG: 197,
+      fatsG: 55,
+    });
+    expect(history.carbCyclingVariations).toEqual([
+      expect.objectContaining({
+        id: 'high',
+        name: 'Dia Alto Carbo',
+        assignedDays: ['seg', 'qua', 'sex'],
+        targetKcal: 2300,
+        proteinG: 180,
+        carbsG: 260,
+        fatsG: 55,
+        mealsCount: 1,
+      }),
+      expect.objectContaining({
+        id: 'low',
+        assignedDays: ['ter', 'qui', 'sab', 'dom'],
+        mealsCount: 0,
+      }),
+    ]);
+  });
+
+  it('weights an uneven cycle by assigned days and keeps unassigned variations in the snapshot', () => {
+    const cycle: FullDietPlan = {
+      id: 'diet-cycle-uneven',
+      patientId: 'patient-1',
+      name: 'Ciclo desigual',
+      createdAt: '21/08/2026',
+      updatedAt: '21/08/2026',
+      mode: 'carb_cycling',
+      simpleTargetKcal: 0,
+      simpleTargetProtein: 0,
+      simpleTargetCarbs: 0,
+      simpleTargetFats: 0,
+      simpleMeals: [],
+      carbCyclingVariations: PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four.map((variation) => ({
+        id: variation.id,
+        name: variation.name,
+        type: variation.type,
+        assignedDays: variation.assignedDays as DayOfWeek[] | undefined,
+        targetKcal: variation.targetKcal,
+        targetProtein: variation.proteinG,
+        targetCarbs: variation.carbsG,
+        targetFats: variation.fatsG,
+        meals: [],
+      })),
+    };
+
+    const [history] = buildPatientDietHistory([cycle as unknown as StoredDietRecord]);
+
+    expect(history).toMatchObject({
+      targetKcal: 2100,
+      proteinG: 180,
+      carbsG: 207,
+      fatsG: 60,
+    });
+    expect(history.carbCyclingVariations).toHaveLength(4);
+    expect(history.carbCyclingVariations?.[3]).toMatchObject({
+      id: 'cycle-zero',
+      assignedDays: [],
     });
   });
 });

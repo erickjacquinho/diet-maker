@@ -23,6 +23,24 @@ export interface DataTablePagination {
   onPageChange: (pageIndex: number) => void;
 }
 
+export type DataTableSelectionMode = 'single' | 'multi';
+
+export type DataTableMaxHeight = 'table-compact' | 'table-modal';
+
+export interface DataTableVirtualizationConfig {
+  overscan?: number;
+}
+
+export interface DataTableSelectionConfig<TData> {
+  mode: DataTableSelectionMode;
+  selectedRowIds: Set<string> | string[];
+  onSelectionChange: (selectedIds: Set<string>, selectedRows: TData[]) => void;
+  isSelectable?: (row: TData, index: number) => boolean;
+  selectOnRowClick?: boolean;
+  selectAllAriaLabel?: string;
+  selectRowAriaLabel?: (row: TData, index: number) => string;
+}
+
 export interface DataTableProps<TData> {
   data: TData[];
   columns: DataTableColumnDef<TData>[];
@@ -37,6 +55,10 @@ export interface DataTableProps<TData> {
     onChange: (state: DataTableSortState | null) => void;
   };
   pagination?: DataTablePagination;
+  selection?: DataTableSelectionConfig<TData>;
+  stickyHeader?: boolean;
+  maxHeight?: DataTableMaxHeight;
+  virtualization?: DataTableVirtualizationConfig;
   renderRow?: (row: TData, index: number) => ReactNode;
   renderExpandedRow?: (row: TData, index: number) => ReactNode;
   expandedRowId?: string | null;
@@ -49,3 +71,4 @@ export interface IndexedRow<TData> {
   row: TData;
   index: number;
 }
+

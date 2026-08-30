@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { SelectField } from '@/components/atoms';
 import { calculateMacroGrams, calculatePresetCalories, type MacroMode } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface CreatePresetData {
   title: string;
@@ -57,6 +58,13 @@ const INITIAL_FORM: PresetFormData = {
 export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetModalProps) {
   const [formData, setFormData] = useState<PresetFormData>({ ...INITIAL_FORM });
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open && !isDiscardConfirmOpen,
+    priority: 10,
+  });
 
   const proteinG = calculateMacroGrams({ mode: formData.proteinMode, value: formData.proteinValue }, formData.referenceWeight);
   const carbsG = calculateMacroGrams({ mode: formData.carbsMode, value: formData.carbsValue }, formData.referenceWeight);
@@ -113,7 +121,7 @@ export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetMo
       <Dialog open={open} onOpenChange={requestClose}>
         <DialogContent className="max-w-md max-h-screen overflow-y-auto" onInteractOutside={(event) => { if (hasContent) { event.preventDefault(); setIsDiscardConfirmOpen(true); } }}>
           <DialogHeader className="border-b border-border-subtle pb-3"><DialogTitle className="font-bold text-style-body text-text-primary">Novo Preset de Dieta</DialogTitle></DialogHeader>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+          <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
             <div><label htmlFor="preset-title" className={`${textStyle('field-label')} block mb-1`}>Título do Protocolo</label><Input id="preset-title" required value={formData.title} onChange={(event) => update('title', event.target.value)} placeholder="Ex: Protocolo Cutting Low Carb 1800kcal" /></div>
             <div>
               <SelectField
@@ -134,7 +142,19 @@ export function CreatePresetModal({ open, onOpenChange, onSave }: CreatePresetMo
             {hasMultiplicative && <div className="p-3 bg-warning-soft border border-warning-border rounded-control flex items-center justify-between gap-2"><div><label htmlFor="preset-reference-weight" className={`${textStyle('field-label')} block`}>Peso de Referência (kg)</label><span className="text-style-legal text-text-muted block">Estimativa para cálculo total (g/kg × kg)</span></div><Input id="preset-reference-weight" type="number" min={1} value={formData.referenceWeight} onChange={(event) => update('referenceWeight', Number(event.target.value))} className="font-bold text-center w-20 shrink-0" /></div>}
             <div className="p-3 bg-macro-kcal-soft border border-macro-kcal-border rounded-control flex items-center justify-between"><div><span className={`${textStyle('field-label')} block`}>Calorias Totais (Calculadas)</span><span className="text-style-legal text-text-muted block">Auto: (Prot × 4) + (Carb × 4) + (Gord × 9)</span></div><Badge variant="secondary" className="font-bold text-style-body-small text-macro-kcal bg-macro-kcal-soft border-none px-3 py-1">{calculatedKcal} kcal</Badge></div>
             <div><label htmlFor="preset-description" className={`${textStyle('field-label')} block mb-1`}>Descrição Breve</label><Textarea id="preset-description" rows={2} value={formData.description} onChange={(event) => update('description', event.target.value)} placeholder="Orientações e indicações deste preset..." className="resize-none" /></div>
-            <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} className="flex-1">Cancelar</Button><Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Preset</Button></div>
+            <div className="flex gap-2 pt-2">
+              <Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} className="flex-1">Cancelar</Button>
+              <Button
+                type="submit"
+                variant="primary"
+                size="compact"
+                className="flex-1"
+                aria-keyshortcuts="Control+s Meta+s"
+                title="Salvar Preset (Ctrl+S)"
+              >
+                Salvar Preset <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

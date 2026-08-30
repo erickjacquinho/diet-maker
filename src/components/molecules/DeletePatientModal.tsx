@@ -4,6 +4,7 @@ import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
+import { HoldToDeleteButton } from '@/components/atoms';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface DeletePatientModalProps {
   open: boolean;
@@ -25,6 +27,11 @@ export function DeletePatientModal({
   onOpenChange,
   onConfirmDelete,
 }: DeletePatientModalProps) {
+  useSaveShortcut({
+    onSave: onConfirmDelete,
+    enabled: open,
+    priority: 10,
+  });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-surface border-border-subtle p-6 rounded-surface">
@@ -57,15 +64,13 @@ export function DeletePatientModal({
           >
             Cancelar
           </Button>
-          <Button
-            type="button"
-            onClick={onConfirmDelete}
-            variant="destructive"
+          <HoldToDeleteButton
+            onConfirm={onConfirmDelete}
             size="compact"
             className="flex-1"
           >
             Sim, Excluir Paciente
-          </Button>
+          </HoldToDeleteButton>
         </div>
       </DialogContent>
     </Dialog>

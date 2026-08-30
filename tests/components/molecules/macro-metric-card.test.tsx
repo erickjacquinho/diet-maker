@@ -23,5 +23,6 @@ describe("MacroMetricCard Surface composition", () => {
     expect(screen.getByText("/ 160g")).toBeInTheDocument();
     expect(screen.getByText("94%")).toBeInTheDocument();
     expect(screen.getByText("2.1 g/kg")).toBeInTheDocument();
+    expect(screen.getByText("150g").parentElement).toContainElement(screen.getByText("2.1 g/kg"));
   });
 });

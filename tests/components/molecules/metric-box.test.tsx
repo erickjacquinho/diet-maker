@@ -33,7 +33,7 @@ describe("MetricBox Surface composition", () => {
     );
 
     const root = screen.getByTestId("metric-tinted");
-    expect(root).toHaveClass("bg-primary-soft/50", "border-primary-border", "rounded-surface");
+    expect(root).toHaveClass("bg-macro-protein-soft/50", "border-macro-protein-border", "rounded-surface");
     expect(screen.getByText("150 g")).toHaveClass("text-macro-protein");
   });
 

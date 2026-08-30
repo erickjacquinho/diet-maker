@@ -49,3 +49,10 @@ export function nextSortState<TData>(
   if (current.direction === 'asc') return { columnId: column.id, direction: 'desc' };
   return null;
 }
+
+export function normalizeSelectionSet(selected: Set<string> | string[] | undefined | null): Set<string> {
+  if (!selected) return new Set();
+  if (selected instanceof Set) return selected;
+  return new Set(selected);
+}
+

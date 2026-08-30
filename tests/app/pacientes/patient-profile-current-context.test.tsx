@@ -8,10 +8,11 @@ import {
 } from '../../fixtures/patient-profile';
 
 const push = vi.fn();
+const router = { push, replace: vi.fn() };
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: PATIENT_PROFILE_FIXTURES.patient.id }),
-  useRouter: () => ({ push }),
+  useRouter: () => router,
 }));
 
 vi.mock('next/link', () => ({

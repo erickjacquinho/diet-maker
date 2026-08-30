@@ -12,6 +12,7 @@ export interface Patient {
   targetCarbs: number;
   targetFats: number;
   objective: string;
+  maritalStatus?: string;
   phone?: string;
   whatsapp?: string;
   lastConsultation: string;
@@ -43,6 +44,35 @@ export const DEFAULT_OBJECTIVES = [
   'Manutenção',
 ];
 
+export const DEFAULT_MARITAL_STATUSES = [
+  'Solteiro(a)',
+  'Comprometido(a)',
+];
+
+export interface HistoricalDietMeal {
+  name: string;
+  time: string;
+  kcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatsG: number;
+  itemsSummary?: string;
+}
+
+export type HistoricalDietVariationType = 'high' | 'medium' | 'low' | 'zero' | 'custom';
+
+export interface HistoricalDietVariation {
+  id: string;
+  name: string;
+  type: HistoricalDietVariationType;
+  assignedDays?: string[];
+  targetKcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatsG: number;
+  mealsCount: number;
+}
+
 export interface HistoricalDiet {
   id: string;
   name: string;
@@ -52,15 +82,9 @@ export interface HistoricalDiet {
   carbsG: number;
   fatsG: number;
   status: 'Ativa' | 'Histórica';
-  meals?: Array<{
-    name: string;
-    time: string;
-    kcal: number;
-    proteinG: number;
-    carbsG: number;
-    fatsG: number;
-    itemsSummary?: string;
-  }>;
+  mode?: 'simple' | 'carb_cycling';
+  carbCyclingVariations?: HistoricalDietVariation[];
+  meals?: HistoricalDietMeal[];
 }
 
 export interface BodyAssessment {

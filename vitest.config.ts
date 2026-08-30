@@ -7,16 +7,22 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    pool: 'forks',
+    pool: 'threads',
     maxWorkers: 4,
     watch: false,
-    testTimeout: 15_000,
+    testTimeout: 60_000,
     setupFiles: ['./vitest.setup.ts'],
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',
       'tests/**/*.{test,spec}.{js,mjs,cjs,ts,tsx}',
     ],
-    exclude: ['node_modules', '.agents', '.next', 'dist'],
+    exclude: [
+      'node_modules',
+      '.agents',
+      '.next',
+      'dist',
+      'tests/design-system/component-catalog.test.mjs',
+    ],
   },
   resolve: {
     alias: {

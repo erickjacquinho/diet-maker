@@ -1,13 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Trash2, GripVertical } from 'lucide-react';
-import { Badge, FieldTrigger, IconButton, Surface } from '@/components/atoms';
+import React, { useState, useEffect } from 'react';
+import { GripVertical } from 'lucide-react';
+import { DeleteIconButton, DuplicateIconButton, SubstituteIconButton } from '@/components/atoms';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+
+export type DropPosition = 'top' | 'bottom' | null;
 
 export interface MealItemRowProps {
   id?: string;
+  index?: number;
   name: string;
   kcal: number;
   protein: number;
@@ -15,11 +25,22 @@ export interface MealItemRowProps {
   fats: number;
   quantityGrams: number;
   onQuantityChange?: (newGrams: number) => void;
+  onSubstitute?: () => void;
+  onDuplicate?: () => void;
   onRemove?: () => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+  dragOverPosition?: DropPosition;
+  onDragStart?: (index: number) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
+  onDragLeave?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
+  onDrop?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
   isReorderingActive?: boolean;
 }
 
 export const MealItemRow: React.FC<MealItemRowProps> = ({
+  index = 0,
   name,
   kcal,
   protein,
@@ -27,99 +48,188 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   fats,
   quantityGrams,
   onQuantityChange,
+  onSubstitute,
+  onDuplicate,
   onRemove,
-  isReorderingActive: propIsActive = false,
+  isDragging = false,
+  isDragOver = false,
+  dragOverPosition = null,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }) => {
-  const [isActivated, setIsActivated] = useState(false);
-  const [isEditingGrams, setIsEditingGrams] = useState(false);
-  const [tempGrams, setTempGrams] = useState<number>(quantityGrams);
 
-  const isActive = isActivated || propIsActive;
+  const [tempGrams, setTempGrams] = useState<number | string>(quantityGrams);
+
+  useEffect(() => {
+    setTempGrams(quantityGrams);
+  }, [quantityGrams]);
 
   const handleSaveGrams = () => {
     const val = Math.max(1, Number(tempGrams) || 100);
-    if (onQuantityChange) {
+    setTempGrams(val);
+    if (onQuantityChange && val !== quantityGrams) {
       onQuantityChange(val);
     }
-    setIsEditingGrams(false);
+  };
+
+  const handleQuantityKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Tab') return;
+
+    const quantityInputs = Array.from(
+      event.currentTarget.closest('tbody')?.querySelectorAll<HTMLInputElement>(
+        'input[data-meal-quantity-input]'
+      ) ?? []
+    );
+    const currentIndex = quantityInputs.indexOf(event.currentTarget);
+    const nextIndex = event.shiftKey ? currentIndex - 1 : currentIndex + 1;
+    const nextInput = quantityInputs[nextIndex];
+
+    if (!nextInput) return;
+
+    event.preventDefault();
+    nextInput.focus();
   };
 
   return (
-    <Surface variant="subtle" density="compact" className="group/row flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <IconButton
-          variant="quiet"
-          onMouseDown={() => setIsActivated(true)}
-          onMouseUp={() => setIsActivated(false)}
-          onTouchStart={() => setIsActivated(true)}
-          onTouchEnd={() => setIsActivated(false)}
-          onClick={() => setIsActivated((prev) => !prev)}
-          aria-label={`Reordenar ${name}`}
-          title="Reordenar alimento"
+    <TableRow
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOver?.(e, index);
+      }}
+      onDragEnter={(e) => {
+        e.preventDefault();
+      }}
+      onDragLeave={(e) => {
+        onDragLeave?.(e, index);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop?.(e, index);
+      }}
+      className={cn(
+        'group/row border-b border-border-divider transition-colors duration-fast select-none hover:bg-surface-hover',
+        isDragging && 'opacity-disabled bg-surface-subtle border-dashed border-border-divider',
+        isDragOver && dragOverPosition === 'top' && 'border-t-2 border-t-primary bg-primary-soft/15 ring-1 ring-primary/20',
+        isDragOver && dragOverPosition === 'bottom' && 'border-b-2 border-b-primary bg-primary-soft/15 ring-1 ring-primary/20'
+      )}
+    >
+      {/* 1. Drag handle */}
+      <TableCell className="w-10 px-2 text-center py-2">
+        <div
+          draggable
+          onDragStart={(e) => {
+            e.stopPropagation();
+            if (e.dataTransfer) {
+              e.dataTransfer.setData('text/plain', String(index));
+              e.dataTransfer.effectAllowed = 'move';
+            }
+            onDragStart?.(index);
+          }}
+          onDragEnd={onDragEnd}
           className={cn(
-            'h-7 w-7 p-0 cursor-grab active:cursor-grabbing transition-opacity duration-fast text-text-muted hover:text-text-primary',
-            isActive
-              ? 'opacity-full text-success bg-success-soft ring-1 ring-success'
-              : 'invisible group-hover/row:visible'
+            'p-1 -m-1 rounded-control transition-colors duration-fast inline-flex items-center justify-center cursor-grab active:cursor-grabbing',
+            isDragOver ? 'text-primary bg-primary-soft' : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
           )}
+          title="Arrastar para reordenar"
+          aria-label={`Reordenar ${name}`}
         >
-          <GripVertical size={14} />
-        </IconButton>
-
-        <div>
-          <div className="text-style-legal font-bold text-text-primary">{name}</div>
-          <div className="mt-1 flex items-center gap-1 flex-wrap">
-            <Badge variant="protein" className="px-1.5 py-0 font-bold text-style-legal">P: {protein}g</Badge>
-            <Badge variant="carbohydrate" className="px-1.5 py-0 font-bold text-style-legal">C: {carbs}g</Badge>
-            <Badge variant="fat" className="px-1.5 py-0 font-bold text-style-legal">G: {fats}g</Badge>
-            <Badge variant="default" className="px-1.5 py-0 font-bold text-style-legal text-text-muted">{kcal} kcal</Badge>
-          </div>
+          <GripVertical size={14} className="shrink-0" />
         </div>
-      </div>
+      </TableCell>
 
-      <div className="flex items-center gap-2">
-        {isEditingGrams ? (
-          <div className="flex items-center gap-1">
-            <Input
-              type="number"
-              min={1}
-              max={5000}
-              size="compact"
-              value={tempGrams}
-              onChange={(e) => setTempGrams(Number(e.target.value))}
-              onBlur={handleSaveGrams}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSaveGrams();
-              }}
-              className="w-16 px-1 text-center text-style-field-value font-bold"
-              autoFocus
-            />
-            <span className="text-style-legal font-bold text-text-muted">g</span>
-          </div>
-        ) : (
-          <FieldTrigger
-            size="compact"
-            onClick={() => {
-              setTempGrams(quantityGrams);
-              setIsEditingGrams(true);
-            }}
-            className="w-auto px-2.5 font-bold text-style-legal"
-            title="Clique para editar gramatura"
+      {/* 2. Nome do Alimento */}
+      <TableCell className="text-left font-bold text-style-legal text-text-primary py-2 min-w-[140px]">
+        <div className="flex items-center min-w-[140px] max-w-sm">
+          <span
+            className="truncate block font-bold text-text-primary"
+            title={name}
           >
-            {quantityGrams} <span className="text-text-muted font-normal">g</span>
-          </FieldTrigger>
-        )}
+            {name}
+          </span>
+        </div>
+      </TableCell>
 
-        <IconButton
-          variant="quiet"
-          onClick={onRemove}
-          aria-label={`Remover ${name}`}
-          className="text-text-muted hover:text-error h-7 w-7 p-0"
-        >
-          <Trash2 size={14} />
-        </IconButton>
-      </div>
-    </Surface>
+      {/* 3. Ações do alimento */}
+      <TableCell className="w-20 px-2 text-center py-2">
+        <div className="flex items-center justify-center gap-1 invisible pointer-events-none group-hover/row:visible group-hover/row:pointer-events-auto group-focus-within/row:visible group-focus-within/row:pointer-events-auto">
+          <SubstituteIconButton
+            size="compact"
+            onClick={onSubstitute}
+            title={`Substituir ${name}`}
+            aria-label={`Substituir ${name}`}
+          />
+          <DuplicateIconButton
+            size="compact"
+            onClick={onDuplicate}
+            title={`Duplicar ${name}`}
+            aria-label={`Duplicar ${name}`}
+          />
+        </div>
+      </TableCell>
+
+      {/* 4. Quantidade (Input permanente e idêntico) */}
+      <TableCell className="w-24 text-center py-2 px-1">
+        <div className="relative flex items-center justify-center mx-auto max-w-[84px]">
+          <Input
+            type="number"
+            min={1}
+            max={5000}
+            size="compact"
+            data-meal-quantity-input="true"
+            value={tempGrams}
+            onChange={(e) => {
+              const val = e.target.value === '' ? ('' as unknown as number) : Number(e.target.value);
+              setTempGrams(val);
+            }}
+            onBlur={handleSaveGrams}
+            onKeyDown={(e) => {
+              handleQuantityKeyDown(e);
+              if (e.key === 'Enter') handleSaveGrams();
+              if (e.key === 'Escape') setTempGrams(quantityGrams);
+            }}
+            className="w-full h-7 pl-2 pr-5 text-center text-style-field-value font-bold bg-surface border-border-subtle hover:border-border-hover focus:border-primary"
+            aria-label={`Quantidade em gramas para ${name}`}
+          />
+          <span className="absolute right-2 text-style-chart-micro font-bold text-text-muted pointer-events-none select-none">
+            g
+          </span>
+        </div>
+      </TableCell>
+
+      {/* 5. Proteína */}
+      <TableCell className="w-20 text-right font-bold text-macro-protein tabular-nums py-2 text-style-legal">
+        {protein}g
+      </TableCell>
+
+      {/* 6. Carboidrato */}
+      <TableCell className="w-24 text-right font-bold text-macro-carbohydrate tabular-nums py-2 text-style-legal">
+        {carbs}g
+      </TableCell>
+
+      {/* 7. Gorduras */}
+      <TableCell className="w-20 text-right font-bold text-macro-fat tabular-nums py-2 text-style-legal">
+        {fats}g
+      </TableCell>
+
+      {/* 8. Calorias */}
+      <TableCell className="w-24 text-right font-bold text-text-primary tabular-nums py-2 text-style-legal">
+        {kcal} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
+      </TableCell>
+
+      {/* 9. Remover alimento (visível apenas em hover / focus-within) */}
+      <TableCell className="w-12 px-2 text-center py-2">
+        <div className="flex items-center justify-center invisible pointer-events-none group-hover/row:visible group-hover/row:pointer-events-auto group-focus-within/row:visible group-focus-within/row:pointer-events-auto">
+          <DeleteIconButton
+            size="compact"
+            onClick={onRemove}
+            title={`Remover ${name}`}
+            aria-label={`Remover ${name}`}
+          />
+        </div>
+      </TableCell>
+    </TableRow>
   );
 };
-

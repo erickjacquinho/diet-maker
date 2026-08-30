@@ -73,35 +73,34 @@ describe('DietModeSwitcher', () => {
   });
 
   it('reveals cycle controls in the same context and preserves the selected variation', () => {
-    const onVariationsCountChange = vi.fn();
     const onSelectVariation = vi.fn();
     const onCopyMealsBetweenVariations = vi.fn();
+    const onOpenCycleMatrix = vi.fn();
 
     render(
       <DietModeSwitcher
         {...makeProps({
           mode: 'carb_cycling',
-          onVariationsCountChange,
           onSelectVariation,
           onCopyMealsBetweenVariations,
+          onOpenCycleMatrix,
         })}
       />,
     );
 
     const group = screen.getByRole('group', { name: 'Modelo de dieta' });
     expect(within(group).getByRole('tab', { name: 'Ciclo de Carboidratos' })).toHaveAttribute('data-state', 'active');
-    expect(within(group).getByText('Número de variações')).toBeInTheDocument();
-    expect(within(group).getByRole('button', { name: /2 variações/i })).toBeInTheDocument();
-    expect(within(group).getByRole('button', { name: /3 variações/i })).toBeInTheDocument();
-    expect(within(group).getByRole('button', { name: 'Copiar Refeições entre Dias' })).toBeInTheDocument();
-    expect(within(group).getByRole('button', { name: /Dia Alto Carbo/i })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(group).getByText('Variações do Ciclo')).toBeInTheDocument();
+    expect(within(group).getByRole('button', { name: /Configurar Ciclo/i })).toBeInTheDocument();
+    expect(within(group).getByRole('button', { name: /Copiar Refeições/i })).toBeInTheDocument();
+    expect(within(group).getByRole('tab', { name: /Dia Alto Carbo/i })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(within(group).getByRole('button', { name: /3 variações/i }));
-    fireEvent.click(within(group).getByRole('button', { name: /Dia Baixo Carbo/i }));
-    fireEvent.click(within(group).getByRole('button', { name: 'Copiar Refeições entre Dias' }));
+    fireEvent.click(within(group).getByRole('tab', { name: /Dia Baixo Carbo/i }));
+    fireEvent.click(within(group).getByRole('button', { name: /Copiar Refeições/i }));
+    fireEvent.click(within(group).getByRole('button', { name: /Configurar Ciclo/i }));
 
-    expect(onVariationsCountChange).toHaveBeenCalledWith(3);
     expect(onSelectVariation).toHaveBeenCalledWith('var-low');
     expect(onCopyMealsBetweenVariations).toHaveBeenCalledTimes(1);
+    expect(onOpenCycleMatrix).toHaveBeenCalledTimes(1);
   });
 });

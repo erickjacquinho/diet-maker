@@ -44,13 +44,13 @@ export function AssessmentMeasurementField({
         <label htmlFor={id} className={`${textStyle('field-label')} truncate flex items-center gap-1`}>
           <span>{label}</span>
           {isRequired && (
-            <span className="text-error font-bold text-xs" title="Campo obrigatório">
+            <span className="text-error font-bold text-style-legal" title="Campo obrigatório">
               *
             </span>
           )}
           {isAutoFilled && (
             <span
-              className="text-[10px] font-bold font-mono text-primary bg-primary-soft px-1 rounded flex items-center cursor-help"
+              className="text-style-chart-micro font-bold font-mono text-primary bg-primary-soft px-1 rounded flex items-center cursor-help"
               title="Medida replicada automaticamente da avaliação anterior"
             >
               ✦ Auto
@@ -59,7 +59,7 @@ export function AssessmentMeasurementField({
           <span className="text-text-muted font-normal">({unit})</span>
         </label>
         {hasPrevious && (
-          <span className="text-[11px] text-text-muted font-mono tabular-nums whitespace-nowrap">
+          <span className="text-style-chart-micro text-text-muted font-mono tabular-nums whitespace-nowrap">
             Ant: {previousValue} {unit}
           </span>
         )}
@@ -83,7 +83,7 @@ export function AssessmentMeasurementField({
         {showDelta && (
           <div className="absolute right-2.5 pointer-events-none flex items-center">
             <span
-              className={`text-[11px] font-semibold font-mono tabular-nums ${
+              className={`text-style-chart-micro font-semibold font-mono tabular-nums ${
                 delta < 0 ? 'text-success' : 'text-text-secondary'
               }`}
             >

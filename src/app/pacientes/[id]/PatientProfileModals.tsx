@@ -8,6 +8,7 @@ import {
   NextEventModal,
   AddObjectiveModal,
   DeletePatientModal,
+  DeleteDietModal,
 } from '@/components/molecules';
 import type { Patient, BodyAssessment, HistoricalDiet, PatientNextEvent } from '@/lib/patientsStore';
 
@@ -19,6 +20,10 @@ export interface PatientProfileModalsProps {
   setIsEditModalOpen: (open: boolean) => void;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: (open: boolean) => void;
+  isDeleteDietModalOpen?: boolean;
+  setIsDeleteDietModalOpen?: (open: boolean) => void;
+  dietToDelete?: HistoricalDiet | null;
+  handleDeleteDiet?: () => void;
   isNextEventModalOpen: boolean;
   setIsNextEventModalOpen: (open: boolean) => void;
   isAddObjectiveModalOpen: boolean;
@@ -46,6 +51,10 @@ export function PatientProfileModals({
   setIsEditModalOpen,
   isDeleteModalOpen,
   setIsDeleteModalOpen,
+  isDeleteDietModalOpen,
+  setIsDeleteDietModalOpen,
+  dietToDelete,
+  handleDeleteDiet,
   isNextEventModalOpen,
   setIsNextEventModalOpen,
   isAddObjectiveModalOpen,
@@ -82,6 +91,16 @@ export function PatientProfileModals({
         patientName={patient.name}
         onConfirmDelete={handleDeletePatient}
       />
+
+      {dietToDelete && isDeleteDietModalOpen !== undefined && setIsDeleteDietModalOpen && handleDeleteDiet && (
+        <DeleteDietModal
+          open={isDeleteDietModalOpen}
+          onOpenChange={setIsDeleteDietModalOpen}
+          dietName={dietToDelete.name}
+          dietDate={dietToDelete.date}
+          onConfirmDelete={handleDeleteDiet}
+        />
+      )}
 
       <NextEventModal
         open={isNextEventModalOpen}

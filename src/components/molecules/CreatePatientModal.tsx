@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,6 +13,7 @@ import { SelectField } from '@/components/atoms';
 import { DEFAULT_OBJECTIVES } from '@/lib/patientsStore';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 import { textStyle } from '@/design-system';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface CreatePatientFormData {
   name: string;
@@ -48,6 +49,13 @@ const INITIAL_FORM: CreatePatientFormData = {
 
 export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatientModalProps) {
   const [formData, setFormData] = useState<CreatePatientFormData>({ ...INITIAL_FORM });
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
 
   const reset = () => setFormData({ ...INITIAL_FORM });
   const update = <K extends keyof CreatePatientFormData>(key: K, value: CreatePatientFormData[K]) => {
@@ -69,7 +77,7 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
           <DialogTitle className="font-bold text-style-body text-text-primary">Cadastrar Novo Paciente</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div>
             <label htmlFor="new-patient-name" className={`${textStyle('field-label')} block mb-1`}>Nome Completo</label>
             <Input id="new-patient-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Carlos Eduardo Silva" />
@@ -113,7 +121,16 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
-            <Button type="submit" variant="primary" size="compact" className="flex-1">Salvar Paciente</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="compact"
+              className="flex-1"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Paciente (Ctrl+S)"
+            >
+              Salvar Paciente <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+            </Button>
           </div>
         </form>
       </DialogContent>

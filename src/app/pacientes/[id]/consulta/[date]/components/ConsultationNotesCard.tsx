@@ -16,7 +16,7 @@ export function ConsultationNotesCard({
     <div className="flex flex-col gap-6">
       <Card className="bg-surface border-border-subtle shadow-floating rounded-surface p-5 flex flex-col gap-4">
         <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
-          <ClipboardList size={16} className="text-success" />
+          <ClipboardList size={16} className="text-primary" />
           <h3 className="font-bold text-style-legal text-text-primary tracking-overline">
             Prontuário & Conduta Nutricional
           </h3>
@@ -58,7 +58,9 @@ export function ConsultationNotesCard({
           </div>
           <div className="flex justify-between py-1.5 border-b border-border-subtle/60">
             <span className="text-text-muted font-medium">Status do Plano</span>
-            <span className="font-bold text-success">{consultation.diet?.status || 'N/A'}</span>
+            <span className={`font-bold ${consultation.diet?.status === 'Ativa' ? 'text-primary' : 'text-text-secondary'}`}>
+              {consultation.diet?.status || 'N/A'}
+            </span>
           </div>
           <div className="flex justify-between py-1.5">
             <span className="text-text-muted font-medium">Data do Registro</span>

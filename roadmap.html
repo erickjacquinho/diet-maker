@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Roadmap interativo para a montagem de dietas do NutriDiet."
+    />
+    <title>Roadmap — Montagem de Dietas</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+      :root {
+        --canvas: #fcfaf7;
+        --surface: #ffffff;
+        --surface-subtle: #f8f6f2;
+        --surface-soft: #f3f0ea;
+        --border: #d6d0c5;
+        --border-divider: #e3ded5;
+        --text-primary: #201c18;
+        --text-secondary: #4b463f;
+        --text-muted: #615b53;
+        --primary: #2746b3;
+        --primary-hover: #203a96;
+        --primary-soft: #e9edff;
+        --primary-border: #c8d2ff;
+        --success: #237a4b;
+        --success-soft: #e8f5ed;
+        --warning: #ca8a04;
+        --warning-soft: #fefce8;
+        --error: #b42318;
+        --shadow-sm: 0 2px 8px rgba(32, 28, 24, 0.05);
+        --shadow-md: 0 12px 32px rgba(32, 28, 24, 0.08);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 1024px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-width: 1024px;
+        margin: 0;
+        background: var(--canvas);
+        color: var(--text-primary);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .app-shell {
+        width: min(1184px, calc(100% - 64px));
+        margin: 0 auto;
+        padding: 48px 0 64px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        margin-bottom: 48px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border: 1px solid var(--primary-border);
+        border-radius: 8px;
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .save-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--success);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .save-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background: var(--success);
+      }
+
+      .text-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        transition: border-color 150ms var(--ease), color 150ms var(--ease),
+          background 150ms var(--ease), transform 150ms var(--ease);
+      }
+
+      .text-button:hover {
+        border-color: var(--primary-border);
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .text-button:active {
+        transform: translateY(1px);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 336px;
+        align-items: end;
+        gap: 48px;
+        margin-bottom: 32px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        width: 24px;
+        height: 1px;
+        background: var(--primary);
+        content: "";
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 720px;
+        margin-bottom: 16px;
+        font-size: 32px;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+      }
+
+      .hero-description {
+        max-width: 720px;
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .progress-card {
+        padding: 24px;
+        border: 1px solid var(--border-divider);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .progress-card-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .progress-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .progress-value {
+        color: var(--primary);
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .progress-track {
+        height: 8px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: var(--surface-soft);
+      }
+
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        border-radius: 2px;
+        background: var(--primary);
+        transition: width 200ms var(--ease);
+      }
+
+      .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 12px;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      .roadmap-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        align-items: start;
+      }
+
+      .main-column,
+      .side-column {
+        display: grid;
+        gap: 24px;
+      }
+
+      .panel {
+        border: 1px solid var(--border-divider);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 24px 24px 20px;
+        border-bottom: 1px solid var(--border-divider);
+      }
+
+      .panel-kicker {
+        margin-bottom: 8px;
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .panel-title {
+        margin-bottom: 0;
+        font-size: 20px;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
+      }
+
+      .panel-count {
+        flex: 0 0 auto;
+        padding: 4px 8px;
+        border: 1px solid var(--primary-border);
+        border-radius: 4px;
+        background: var(--primary-soft);
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .panel-body {
+        padding: 8px 24px 24px;
+      }
+
+      .checklist {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .checklist-item {
+        position: relative;
+      }
+
+      .checklist-item + .checklist-item::before {
+        position: absolute;
+        top: -8px;
+        right: 0;
+        left: 0;
+        height: 1px;
+        background: var(--surface-soft);
+        content: "";
+      }
+
+      .checklist-label {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        padding: 16px 0;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        cursor: pointer;
+        transition: color 150ms var(--ease);
+      }
+
+      .checklist-label:hover {
+        color: var(--text-primary);
+      }
+
+      .checklist-label input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .checkmark {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        place-items: center;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface);
+        color: transparent;
+        transition: border-color 150ms var(--ease), background 150ms var(--ease),
+          color 150ms var(--ease), transform 150ms var(--ease);
+      }
+
+      .checklist-label:hover .checkmark {
+        border-color: var(--primary);
+      }
+
+      .checklist-label input:focus-visible + .checkmark {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .checklist-label input:checked + .checkmark {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: var(--surface);
+      }
+
+      .checklist-label input:active + .checkmark {
+        transform: scale(0.94);
+      }
+
+      .checklist-copy {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .checklist-title {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .checklist-description {
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .checklist-label input:checked ~ .checklist-copy .checklist-title,
+      .checklist-label input:checked ~ .checklist-copy .checklist-description {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        text-decoration-thickness: 1px;
+      }
+
+      .feature-item {
+        padding: 16px 0;
+      }
+
+      .feature-item + .feature-item {
+        border-top: 1px solid var(--surface-soft);
+      }
+
+      .feature-item > .checklist-label {
+        padding: 8px 0 12px;
+      }
+
+      .feature-item > .checklist-label .checkmark {
+        width: 22px;
+        height: 22px;
+      }
+
+      .feature-item > .checklist-label .checklist-title {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .subtasks {
+        display: grid;
+        gap: 4px;
+        margin: 0 0 0 32px;
+        padding: 0 0 0 16px;
+        border-left: 1px solid var(--primary-border);
+        list-style: none;
+      }
+
+      .subtasks .checklist-label {
+        grid-template-columns: 18px minmax(0, 1fr);
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 13px;
+      }
+
+      .subtasks .checkmark {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+      }
+
+      .subtasks .checkmark svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .objective-card {
+        padding: 24px;
+        border: 1px solid var(--primary-border);
+        border-radius: 8px;
+        background: var(--primary-soft);
+      }
+
+      .objective-card h2 {
+        margin-bottom: 12px;
+        color: var(--primary);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .objective-card p {
+        margin-bottom: 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .scope-card {
+        overflow: hidden;
+      }
+
+      .scope-card .panel-body {
+        padding-top: 12px;
+      }
+
+      .scope-label {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        padding: 12px 0;
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+
+      .scope-icon {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        place-items: center;
+        border-radius: 9999px;
+        background: var(--warning-soft);
+        color: var(--warning);
+      }
+
+      .empty-state {
+        display: none;
+        padding: 32px 16px;
+        color: var(--text-muted);
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 320px;
+        padding: 12px 16px;
+        border: 1px solid var(--success-soft);
+        border-radius: 6px;
+        background: var(--surface);
+        box-shadow: var(--shadow-md);
+        color: var(--success);
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+      }
+
+      .toast.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 1100px) {
+        .app-shell {
+          width: calc(100% - 48px);
+        }
+
+        .hero {
+          grid-template-columns: minmax(0, 1fr) 300px;
+          gap: 32px;
+        }
+
+        .roadmap-grid {
+          grid-template-columns: minmax(0, 1.25fr) minmax(288px, 0.85fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Direção aprovada: arquivo único, autocontido, com checklist persistente via localStorage. -->
+    <div class="app-shell">
+      <header class="topbar" aria-label="Cabeçalho do roadmap">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+            </svg>
+          </span>
+          NutriDiet · Produto
+        </div>
+
+        <div class="topbar-actions">
+          <span class="save-state" aria-live="polite">
+            <span class="save-dot" aria-hidden="true"></span>
+            Salvo automaticamente
+          </span>
+          <button class="text-button" id="clear-progress" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 3-6.7" />
+              <path d="M3 4v6h6" />
+            </svg>
+            Limpar progresso
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Planejamento de produto</p>
+            <h1 id="page-title">Roadmap — Montagem de Dietas</h1>
+            <p class="hero-description">
+              Um mapa compartilhado para tornar a montagem da dieta mais rápida para o nutricionista e mais simples para o paciente seguir.
+            </p>
+          </div>
+
+          <aside class="progress-card" aria-label="Progresso do roadmap">
+            <div class="progress-card-heading">
+              <span class="progress-label">Progresso geral</span>
+              <strong class="progress-value" id="progress-percent">0%</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-meta">
+              <span id="progress-count">0 de 0 concluídos</span>
+              <span id="progress-status">Em andamento</span>
+            </div>
+          </aside>
+        </section>
+
+        <div class="roadmap-grid">
+          <div class="main-column">
+            <section class="objective-card" aria-labelledby="objective-title">
+              <h2 id="objective-title">Objetivo</h2>
+              <p>
+                Tornar a montagem da dieta mais rápida para o nutricionista e mais simples para o paciente seguir.
+              </p>
+            </section>
+
+            <section class="panel" aria-labelledby="features-title">
+              <header class="panel-header">
+                <div>
+                  <div class="panel-kicker">Entrega principal</div>
+                  <h2 class="panel-title" id="features-title">Próximas funcionalidades</h2>
+                </div>
+                <span class="panel-count">5 frentes</span>
+              </header>
+
+              <div class="panel-body">
+                <ol class="checklist" id="feature-list">
+                  <li class="checklist-item feature-item" data-group="feature-1">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-1" aria-describedby="feature-1-description" />
+                      <span class="checkmark" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m5 12 4 4L19 6" />
+                        </svg>
+                      </span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">1. Refeições prontas no modal de alimentos</span>
+                        <span class="checklist-description" id="feature-1-description">Adicionar uma área separada para refeições prontas dentro do modal de seleção de alimentos.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 1">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-1-foods" data-parent="feature-1" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Carregar alimentos.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-1-amounts" data-parent="feature-1" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Carregar quantidades em gramas.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-1-substitutions" data-parent="feature-1" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Carregar substituições ou opções já configuradas.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-2">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-2" aria-describedby="feature-2-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">2. Salvar refeição ou receita durante a montagem</span>
+                        <span class="checklist-description" id="feature-2-description">Adicionar no card da refeição uma ação para salvar a refeição atual como uma nova refeição pronta ou receita, podendo reutilizá-la em outras dietas.</span>
+                      </span>
+                    </label>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-3">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-3" aria-describedby="feature-3-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">3. Opções completas de refeição</span>
+                        <span class="checklist-description" id="feature-3-description">Permitir criar opções completas para uma refeição, com todos os alimentos e quantidades editáveis pelo nutricionista. O paciente deverá poder escolher uma opção completa, sem precisar misturar substituições entre opções.</span>
+                      </span>
+                    </label>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-4">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-4" aria-describedby="feature-4-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">4. Substituições equivalentes por macro</span>
+                        <span class="checklist-description" id="feature-4-description">Permitir selecionar um macro de referência — proteína, carboidrato, gordura ou kcal — e gerar quantidades proporcionais em gramas para os alimentos substitutos. O nutricionista poderá revisar e alterar todos os alimentos e quantidades antes de confirmar a opção.</span>
+                      </span>
+                    </label>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-5">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-5" aria-describedby="feature-5-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">5. Refatoração da escala</span>
+                        <span class="checklist-description" id="feature-5-description">Refatorar a escala para uma experiência mais visual, flexível e fácil de entender, com controle claro sobre o que será alterado.</span>
+                      </span>
+                    </label>
+                  </li>
+                </ol>
+              </div>
+            </section>
+          </div>
+
+          <aside class="side-column">
+            <section class="panel" aria-labelledby="screens-title">
+              <header class="panel-header">
+                <div>
+                  <div class="panel-kicker">Mapa de impacto</div>
+                  <h2 class="panel-title" id="screens-title">Telas e componentes envolvidos</h2>
+                </div>
+                <span class="panel-count">6 itens</span>
+              </header>
+              <div class="panel-body">
+                <ul class="checklist">
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-diet-builder" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Construtor de dieta</span><span class="checklist-description">`/pacientes/[id]/dieta/[dietaId]` — opções completas, salvamento da refeição e edição das substituições.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-food-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de seleção de alimentos</span><span class="checklist-description">`FoodSearchModal` — grupo separado para refeições prontas.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-save-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de salvar refeição/receita</span><span class="checklist-description">Nome e tipo do conteúdo salvo.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-equivalent-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de opções e substituições equivalentes</span><span class="checklist-description">Seleção do macro de referência e calibração em gramas.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-meals-library" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de refeições prontas</span><span class="checklist-description">`/refeicoes-prontas` — visualizar e reutilizar refeições salvas.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-recipes-library" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de receitas</span><span class="checklist-description">`/receitas` — salvar e reutilizar receitas criadas durante a dieta.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-scale-interface" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Interface de escala</span><span class="checklist-description">Substituir o fluxo atual por uma versão visual.</span></span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="future-title">
+              <header class="panel-header">
+                <div>
+                  <div class="panel-kicker">Depois da primeira entrega</div>
+                  <h2 class="panel-title" id="future-title">Etapas futuras</h2>
+                </div>
+                <span class="panel-count">2 itens</span>
+              </header>
+              <div class="panel-body">
+                <ul class="checklist">
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="future-autosave" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Autosave e recuperação de rascunho</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="future-export" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Exportação e entrega da dieta</span></span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
+            <section class="panel scope-card" aria-labelledby="scope-title">
+              <header class="panel-header">
+                <div>
+                  <div class="panel-kicker">Limites definidos</div>
+                  <h2 class="panel-title" id="scope-title">Fora do escopo atual</h2>
+                </div>
+              </header>
+              <div class="panel-body">
+                <div class="scope-label">
+                  <span class="scope-icon" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  </span>
+                  <span>Medidas caseiras. A prescrição será feita somente em gramas.</span>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+      Progresso salvo neste navegador.
+    </div>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = "nutridiet-roadmap-progress-v1";
+        const checkboxes = Array.from(document.querySelectorAll("input[type=checkbox][data-id]"));
+        const progressPercent = document.getElementById("progress-percent");
+        const progressFill = document.getElementById("progress-fill");
+        const progressCount = document.getElementById("progress-count");
+        const progressStatus = document.getElementById("progress-status");
+        const clearButton = document.getElementById("clear-progress");
+        const toast = document.getElementById("toast");
+        let toastTimer;
+        let memoryState = {};
+
+        const readState = () => {
+          try {
+            const saved = window.localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+          } catch (error) {
+            return memoryState;
+          }
+        };
+
+        const writeState = (state) => {
+          memoryState = state;
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          } catch (error) {
+            // O estado em memória mantém a sessão funcionando quando o navegador bloqueia storage.
+          }
+        };
+
+        const showToast = () => {
+          window.clearTimeout(toastTimer);
+          toast.classList.add("is-visible");
+          toastTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+        };
+
+        const updateParentFromChildren = (parentId) => {
+          const children = checkboxes.filter((checkbox) => checkbox.dataset.parent === parentId);
+          const parent = checkboxes.find((checkbox) => checkbox.dataset.id === parentId);
+          if (!parent || children.length === 0) return;
+          parent.checked = children.every((child) => child.checked);
+          parent.indeterminate = children.some((child) => child.checked) && !parent.checked;
+        };
+
+        const updateChildrenFromParent = (parentId, checked) => {
+          checkboxes
+            .filter((checkbox) => checkbox.dataset.parent === parentId)
+            .forEach((checkbox) => {
+              checkbox.checked = checked;
+            });
+        };
+
+        const updateProgress = () => {
+          const completed = checkboxes.filter((checkbox) => checkbox.checked).length;
+          const total = checkboxes.length;
+          const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+          progressPercent.textContent = `${percentage}%`;
+          progressFill.style.width = `${percentage}%`;
+          progressCount.textContent = `${completed} de ${total} concluídos`;
+          progressStatus.textContent = percentage === 100 ? "Concluído" : percentage > 0 ? "Em andamento" : "A começar";
+        };
+
+        const save = (showFeedback = true) => {
+          const state = Object.fromEntries(
+            checkboxes.map((checkbox) => [checkbox.dataset.id, checkbox.checked])
+          );
+          writeState(state);
+          updateProgress();
+          if (showFeedback) showToast();
+        };
+
+        const restore = () => {
+          const state = readState();
+          checkboxes.forEach((checkbox) => {
+            checkbox.checked = state[checkbox.dataset.id] === true;
+          });
+          checkboxes
+            .filter((checkbox) => !checkbox.dataset.parent)
+            .forEach((parent) => updateParentFromChildren(parent.dataset.id));
+          updateProgress();
+        };
+
+        checkboxes.forEach((checkbox) => {
+          checkbox.addEventListener("change", () => {
+            if (!checkbox.dataset.parent) {
+              updateChildrenFromParent(checkbox.dataset.id, checkbox.checked);
+            }
+            if (checkbox.dataset.parent) {
+              updateParentFromChildren(checkbox.dataset.parent);
+            }
+            save();
+          });
+        });
+
+        clearButton.addEventListener("click", () => {
+          const shouldClear = window.confirm("Limpar todas as marcações do roadmap?");
+          if (!shouldClear) return;
+          checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+            checkbox.indeterminate = false;
+          });
+          save(false);
+          toast.textContent = "Progresso limpo. Comece uma nova rodada.";
+          showToast();
+          window.setTimeout(() => {
+            toast.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>Progresso salvo neste navegador.';
+          }, 2400);
+        });
+
+        restore();
+      })();
+    </script>
+  </body>
+</html>

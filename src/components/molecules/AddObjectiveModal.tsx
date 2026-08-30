@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface AddObjectiveModalProps {
   open: boolean;
@@ -25,6 +26,13 @@ export function AddObjectiveModal({
   onAddObjective,
 }: AddObjectiveModalProps) {
   const [input, setInput] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
 
   useEffect(() => {
     if (open) setInput('');
@@ -51,7 +59,7 @@ export function AddObjectiveModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div>
             <label htmlFor="objective-description-input" className={textStyle('field-label')}>
               Descrição do Objetivo
@@ -83,8 +91,10 @@ export function AddObjectiveModal({
               variant="primary"
               size="compact"
               className="flex-1"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Adicionar Objetivo (Ctrl+S)"
             >
-              Adicionar
+              Adicionar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
             </Button>
           </div>
         </form>

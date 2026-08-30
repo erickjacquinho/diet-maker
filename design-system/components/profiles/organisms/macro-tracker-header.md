@@ -38,7 +38,7 @@ Base declarada: `atom-surface`. Compõe `Surface`, `PatientBadgeHeader` e `Macro
 
 ## Content rules
 
-Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual.
+Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual. A ordem canônica obrigatória do tracker é: 1º Proteína (`P`), 2º Carboidrato (`C`), 3º Gordura (`G`), acompanhada do totalizador de Calorias (`kcal`).
 
 ## Exceptions
 

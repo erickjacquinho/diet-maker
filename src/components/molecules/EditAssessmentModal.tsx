@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Scale } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Surface } from '@/components/atoms';
 import { MetricBox } from './MetricBox';
 import { useAssessmentForm } from '@/hooks/useAssessmentForm';
 import { AssessmentContinuousFields } from './assessment/AssessmentContinuousFields';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export { useAssessmentForm };
 
@@ -35,6 +36,14 @@ export function EditAssessmentModal({
   onOpenChange,
   onSave,
 }: EditAssessmentModalProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
+
   const { draft, composition, submitError, updateNumericField, handleSubmit } =
     useAssessmentForm({
       assessment,
@@ -47,7 +56,7 @@ export function EditAssessmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg sm:max-w-xl md:max-w-2xl flex flex-col p-5 overflow-hidden gap-0">
+      <DialogContent className="max-h-dialog max-w-2xl flex flex-col p-5 overflow-hidden gap-0">
         <DialogHeader className="shrink-0 pb-3 border-b border-border-subtle">
           <DialogTitle className={textStyle('dialog-title')}>
             <Scale className="size-4 text-success shrink-0 inline-block mr-2" aria-hidden="true" />
@@ -60,6 +69,7 @@ export function EditAssessmentModal({
 
         {draft && (
           <form
+            ref={formRef}
             aria-label="Avaliação física"
             noValidate
             onSubmit={handleSubmit}
@@ -119,8 +129,14 @@ export function EditAssessmentModal({
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" size="compact">
-                Salvar avaliação
+              <Button
+                type="submit"
+                variant="primary"
+                size="compact"
+                aria-keyshortcuts="Control+s Meta+s"
+                title="Salvar avaliação (Ctrl+S)"
+              >
+                Salvar avaliação <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>
             </DialogFooter>
           </form>

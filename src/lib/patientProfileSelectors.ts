@@ -1,9 +1,11 @@
 import type {
   BodyAssessment,
   HistoricalDiet,
+  HistoricalDietVariation,
   PatientNextEvent,
   StoredDietRecord,
 } from './patientsStore';
+import { calculateWeeklyCycleAverage, type CarbCyclingVariation } from './dietStore';
 import { normalizeDateToISO } from './date-only';
 
 export interface ActivePlanSummary {
@@ -78,17 +80,47 @@ function numericRecordValue(record: StoredDietRecord, key: string): number {
   return typeof value === 'number' ? value : Number(value) || 0;
 }
 
+function mapHistoricalVariation(variation: CarbCyclingVariation): HistoricalDietVariation {
+  return {
+    id: String(variation.id),
+    name: variation.name || 'Variação de carboidratos',
+    type: variation.type || 'custom',
+    assignedDays: Array.isArray(variation.assignedDays) ? [...variation.assignedDays] : [],
+    targetKcal: Number(variation.targetKcal) || 0,
+    proteinG: Number(variation.targetProtein) || 0,
+    carbsG: Number(variation.targetCarbs) || 0,
+    fatsG: Number(variation.targetFats) || 0,
+    mealsCount: Array.isArray(variation.meals) ? variation.meals.length : 0,
+  };
+}
+
 export function buildPatientDietHistory(records: StoredDietRecord[]): HistoricalDiet[] {
-  const mapped = records.map((record, index) => ({
-    id: String(record.id ?? `diet-${index}`),
-    name: String(record.name ?? 'Prescrição Alimentar'),
-    date: String(record.date ?? record.updatedAt ?? record.createdAt ?? ''),
-    targetKcal: numericRecordValue(record, 'simpleTargetKcal'),
-    proteinG: numericRecordValue(record, 'simpleTargetProtein'),
-    carbsG: numericRecordValue(record, 'simpleTargetCarbs'),
-    fatsG: numericRecordValue(record, 'simpleTargetFats'),
-    status: record.status === 'Histórica' ? 'Histórica' : 'Ativa',
-  } satisfies HistoricalDiet));
+  const mapped = records.map((record, index) => {
+    const mode = record.mode === 'carb_cycling' ? 'carb_cycling' : 'simple';
+    const variations = mode === 'carb_cycling' && Array.isArray(record.carbCyclingVariations)
+      ? record.carbCyclingVariations as CarbCyclingVariation[]
+      : [];
+    const cycleAverage = variations.length > 0 ? calculateWeeklyCycleAverage(variations) : null;
+
+    const simpleProtein = numericRecordValue(record, 'simpleTargetProtein');
+    const simpleCarbs = numericRecordValue(record, 'simpleTargetCarbs');
+    const simpleFats = numericRecordValue(record, 'simpleTargetFats');
+
+    return {
+      id: String(record.id ?? `diet-${index}`),
+      name: String(record.name ?? 'Prescrição Alimentar'),
+      date: String(record.date ?? record.updatedAt ?? record.createdAt ?? ''),
+      targetKcal: cycleAverage?.avgKcal ?? numericRecordValue(record, 'simpleTargetKcal'),
+      proteinG: cycleAverage?.avgProtein ?? simpleProtein,
+      carbsG: cycleAverage?.avgCarbs ?? simpleCarbs,
+      fatsG: cycleAverage?.avgFats ?? simpleFats,
+      status: record.status === 'Histórica' ? 'Histórica' : 'Ativa',
+      mode,
+      carbCyclingVariations: mode === 'carb_cycling'
+        ? variations.map(mapHistoricalVariation)
+        : undefined,
+    } satisfies HistoricalDiet;
+  });
 
   const sorted = [...mapped].sort((left, right) =>
     (normalizePatientDateKey(right.date) ?? '').localeCompare(normalizePatientDateKey(left.date) ?? ''),

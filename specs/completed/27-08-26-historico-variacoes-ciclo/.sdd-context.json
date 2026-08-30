@@ -1,0 +1,6 @@
+{
+  "task": "Reformular o modulo expandivel da tabela /perfil Historico de prescricoes dieteticas para dietas de ciclo de carboidratos. A representacao atual com cards funciona com 3 variacoes, mas fica progressivamente ruim e bugada com 4 ou mais. Criar uma visualizacao tabular simples em que cada variacao seja uma linha, exibindo nome, dias atribuidos de forma compacta (por exemplo Seg · Qua · Sex), macros, calorias e quantidade de refeicoes. Manter a linha principal da prescricao com altura padrao, preservar a media semanal ponderada e o comportamento de expandir/recolher, tratar variacoes sem dias e garantir acessibilidade. Encerrar no planejamento e nos artefatos SDD; nao implementar nesta etapa.",
+  "slug": "historico-variacoes-ciclo",
+  "feature_dir": "specs/27-08-26-historico-variacoes-ciclo",
+  "date": "2026-08-27"
+}

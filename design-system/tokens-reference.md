@@ -12,9 +12,9 @@
 - `ref.color.warm.100`: `#ECE8E0` (Surface soft)
 - `ref.color.warm.150`: `#E3DED5` (Border divider)
 - `ref.color.warm.200`: `#D6D0C5` (Border subtle)
-- `ref.color.warm.300`: `#B8B1A5` (Border hover)
+- `ref.color.warm.300`: `#B8B1A5` (Border hover / Border control essential)
 - `ref.color.warm.500`: `#948D81` (Disabled)
-- `ref.color.warm.600`: `#7A7369` (Border control essential)
+- `ref.color.warm.600`: `#7A7369`
 - `ref.color.warm.700`: `#615B53` (Text muted)
 - `ref.color.warm.800`: `#4B463F` (Text secondary)
 - `ref.color.warm.950`: `#201C18` (Text primary)
@@ -28,14 +28,16 @@
 - `ref.color.blue.900`: `#192F7A` (`primary-pressed`)
 
 ### 1.3 Macronutrientes (Domínio Nutricional)
+- **Ordem Canônica Obrigatória:** **1º Proteína (`P`) → 2º Carboidrato (`C`) → 3º Gordura (`G`) → 4º Calorias (`kcal`)**
 - **Proteínas:** `macro-protein` `#B8325A` | Soft `#FBEAF0` | Border `#E8BDC9`
-- **Carboidratos:** `macro-carbohydrate` `#A55B00` | Soft `#FFF1D6` | Border `#E7C997`
+- **Carboidratos:** `macro-carbohydrate` `#C87A00` | Soft `#FFF6E5` | Border `#FCDAA4`
 - **Gorduras:** `macro-fat` `#0F766E` | Soft `#E6F4F1` | Border `#B6DAD5`
+- **Calorias:** `text-primary` (`#201C18`) / `primary` (`#2746B3`) | Unidade `kcal`
 
-### 1.4 Feedback Semântico
+### 1.4 Feedback Semântico & Favoritos
 - **Informação:** `info` `#3157A4` | Soft `#EAF0FB` | Border `#C7D5ED`
 - **Sucesso:** `success` `#237A4B` | Soft `#E8F5ED` | Border `#B9DCC8`
-- **Alerta:** `warning` `#8A5D00` | Soft `#FFF3D6` | Border `#E6D19B`
+- **Alerta / Favorito:** `warning` `#EAB308` | Pressed `#CA8A04` | Soft `#FEFCE8` | Border `#FEF08A`
 - **Erro:** `error` `#B42318` | Soft `#FDECEA` | Border `#E6B8B2`
 
 ---
@@ -81,6 +83,15 @@
 ### 3.3 Bordas
 - Espessura fixa: **1px** (`border-1`).
 - Cor padrão: `border-subtle` (`#D6D0C5`) / `border-border`.
+
+### 3.4 Tokens de componentes
+- `cmp.dialog.max-height`: `90vh` (limite vertical de diálogos com conteúdo rolável).
+- `cmp.data-table.max-height.compact`: `400px` (regiões de dados compactas).
+- `cmp.data-table.max-height.modal`: `450px` (tabelas roláveis em modais).
+- `cmp.data-table.max-height.compact-body`: `364px` (corpo rolável com header reservado).
+- `cmp.data-table.max-height.modal-body`: `414px` (corpo rolável com header reservado).
+- `cmp.data-table.row-height.food`: `60px` (linhas da tabela de seleção de alimentos).
+- `cmp.hold-to-delete.progress-duration`: `1500ms` (duração visual padrão da retenção).
 
 ---
 

@@ -19,7 +19,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean
 }
 
-const Button: React.FC<ButtonProps> = ({ className, variant, size, iconOnly = false, state, loading = false, asChild = false, ref, disabled, children, ...props }) => {
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, iconOnly = false, state, loading = false, asChild = false, disabled, children, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
   const resolvedState = state ?? (loading ? "loading" : disabled ? "disabled" : "default")
   const isLoading = resolvedState === "loading"
@@ -44,7 +44,7 @@ const Button: React.FC<ButtonProps> = ({ className, variant, size, iconOnly = fa
       )}
     </Comp>
   )
-}
+})
 Button.displayName = "Button"
 
 export { Button, buttonVariants }

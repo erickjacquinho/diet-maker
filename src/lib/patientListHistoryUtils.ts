@@ -57,7 +57,7 @@ export function computePatientListHistory(input: PatientListHistoryInput): Patie
     bodyFatDeltaDays,
     bodyFatLabel:
       currentBodyFatPercent === null
-        ? 'Sem avaliação corporal recente'
+        ? 'Sem avaliação'
         : formatBodyFatPercent(currentBodyFatPercent),
     bodyFatDeltaLabel:
       bodyFatDeltaPercent === null || bodyFatDeltaDays === null

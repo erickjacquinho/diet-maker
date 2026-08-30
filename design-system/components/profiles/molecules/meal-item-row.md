@@ -38,7 +38,7 @@ Base declarada: `atom-surface`. Compound parts pertencem a esta família e não 
 
 ## Content rules
 
-Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual.
+Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui nome textual. As colunas de nutrientes seguem rigorosamente a ordem canônica: Proteína (`g`), Carboidrato (`g`), Gordura (`g`) e Calorias (`kcal`).
 
 ## Exceptions
 

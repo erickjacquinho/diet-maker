@@ -22,9 +22,9 @@ export interface MetricBoxProps extends React.HTMLAttributes<HTMLDivElement> {
 const tintedToneClasses: Record<MetricBoxTone, string> = {
   default: 'bg-surface-subtle/60 border-border-subtle',
   muted: 'bg-surface-subtle/60 border-border-subtle',
-  protein: 'bg-primary-soft/50 border-primary-border',
-  carbohydrate: 'bg-warning-soft/50 border-warning-border',
-  fat: 'bg-success-soft/50 border-success-border',
+  protein: 'bg-macro-protein-soft/50 border-macro-protein-border',
+  carbohydrate: 'bg-macro-carbohydrate-soft/50 border-macro-carbohydrate-border',
+  fat: 'bg-macro-fat-soft/50 border-macro-fat-border',
   success: 'bg-success-soft/50 border-success-border',
   warning: 'bg-warning-soft/50 border-warning-border',
 };

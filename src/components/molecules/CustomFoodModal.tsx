@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Trash2 } from 'lucide-react';
 import { AutoKcalSection } from './AutoKcalSection';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
 import { SelectField } from '@/components/atoms';
 import type { FoodItem } from '@/lib/tacoStore';
 import { textStyle } from '@/design-system';
+import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import {
   UNITS,
   CATEGORIES,
@@ -34,6 +35,13 @@ export interface CustomFoodModalProps {
 
 export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: CustomFoodModalProps) {
   const [formData, setFormData] = useState<CustomFoodFormData>(() => formFromFood(food));
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+  });
 
   useEffect(() => {
     if (open) setFormData(formFromFood(food));
@@ -75,7 +83,7 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div className="grid grid-cols-12 gap-2">
             <div className="col-span-6">
               <label htmlFor="custom-food-name" className={`${textStyle('field-label')} block mb-1`}>Nome do Alimento / Suplemento</label>
@@ -132,7 +140,16 @@ export function CustomFoodModal({ open, food, onOpenChange, onSave, onDelete }: 
           <div className="flex items-center gap-2 pt-2">
             {food && <Button type="button" variant="destructive" size="compact" onClick={() => onDelete(food.id)}><Trash2 size={13} />Excluir</Button>}
             <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
-            <Button type="submit" variant="primary" size="compact" className="flex-1">{food ? 'Salvar Alterações' : 'Salvar Alimento'}</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="compact"
+              className="flex-1"
+              aria-keyshortcuts="Control+s Meta+s"
+              title="Salvar Alimento (Ctrl+S)"
+            >
+              {food ? 'Salvar Alterações' : 'Salvar Alimento'} <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+            </Button>
           </div>
         </form>
       </DialogContent>

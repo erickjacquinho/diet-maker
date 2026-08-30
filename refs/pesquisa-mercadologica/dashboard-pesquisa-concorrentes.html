@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa Mercadológica Ultra-Detalhada — Apps Brasileiros para Nutricionistas</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            warm: {
+              50: '#FAF9F6',
+              100: '#F4F2EB',
+              200: '#E8E5DA',
+              300: '#D5D1C3',
+              400: '#ABA593',
+              500: '#8A8472',
+              800: '#34322C',
+              900: '#1E1D19',
+            },
+            brand: {
+              50: '#F2F8F4',
+              100: '#E1EFE5',
+              600: '#2E6B47',
+              700: '#245538',
+              800: '#1C432C',
+              900: '#153322',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8F7F2;
+      color: #1F2937;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #F1EFE9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #D5D1C3;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-full font-sans antialiased flex flex-col custom-scrollbar">
+
+  <!-- TOPBAR HEADER -->
+  <header class="bg-white border-b border-warm-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-700 text-white flex items-center justify-center shadow-inner shrink-0">
+          <i data-lucide="pie-chart" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-warm-900 tracking-tight">Pesquisa Mercadológica & Inteligência Competitiva</h1>
+            <span class="px-2 py-0.5 text-[11px] font-semibold bg-brand-100 text-brand-800 rounded-full border border-brand-200">Brasil 2026</span>
+          </div>
+          <p class="text-xs text-warm-500 font-medium">10 Concorrentes • Análise SWOT Central • GTM/CPO • App do Paciente • Parecer Local-First</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <button onclick="switchTab('cards')" id="btnTabCards" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-700 text-white shadow-sm">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Concorrentes (10)
+        </button>
+        <button onclick="switchTab('swotCentral')" id="btnTabSwotCentral" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> SWOT Central
+        </button>
+        <button onclick="switchTab('strategy')" id="btnTabStrategy" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> Vetores de Ataque
+        </button>
+        <button onclick="switchTab('patientApp')" id="btnTabPatientApp" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> App Paciente
+        </button>
+        <button onclick="switchTab('architecture')" id="btnTabArchitecture" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Parecer Local-First
+        </button>
+        <button onclick="switchTab('table')" id="btnTabTable" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="table" class="w-3.5 h-3.5"></i> Matriz Preços
+        </button>
+        <button onclick="switchTab('gaps')" id="btnTabGaps" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-warm-100 text-warm-800 hover:bg-warm-200">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i> Gaps & UVP
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- SUMMARY KPI STATS -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-warm-200 shadow-sm flex items-center gap-3.5">
+        <div class="p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-[11px] text-warm-500 font-semibold uppercase tracking-wider">Mercado Ativo (TAM)</div>
+          <div class="text-lg font-bold text-warm-900">> 205.000 <span class="text-xs font-normal text-warm-500">profissionais</span></div>
+          <div class="text-[11px] text-emerald-600 font-medium">+25k formandos/ano</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-warm-200 shadow-sm flex items-center gap-3.5">
+        <div class="p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-100">
+          <i data-lucide="credit-card" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-[11px] text-warm-500 font-semibold uppercase tracking-wider">Ticket Médio Mensal</div>
+          <div class="text-lg font-bold text-warm-900">R$ 102,00 <span class="text-xs font-normal text-warm-500">/mês</span></div>
+          <div class="text-[11px] text-blue-600 font-medium">Faixa: R$ 39 a R$ 180</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-warm-200 shadow-sm flex items-center gap-3.5">
+        <div class="p-3 bg-amber-50 text-amber-700 rounded-lg border border-amber-100">
+          <i data-lucide="user-minus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-[11px] text-warm-500 font-semibold uppercase tracking-wider">Abandono de Dietas</div>
+          <div class="text-lg font-bold text-rose-700">68% <span class="text-xs font-normal text-warm-500">&lt;30 dias</span></div>
+          <div class="text-[11px] text-amber-600 font-medium">Maior gargalo do setor</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-warm-200 shadow-sm flex items-center gap-3.5">
+        <div class="p-3 bg-purple-50 text-purple-700 rounded-lg border border-purple-100">
+          <i data-lucide="trending-up" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-[11px] text-warm-500 font-semibold uppercase tracking-wider">Custo de Servidor Local</div>
+          <div class="text-lg font-bold text-emerald-700">R$ 0,00 <span class="text-xs font-normal text-warm-500">/user</span></div>
+          <div class="text-[11px] text-emerald-600 font-medium">Margem bruta: 99%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH & FILTER BAR (FOR CARDS & TABLE) -->
+    <section id="filterSection" class="bg-white p-4 rounded-xl border border-warm-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div class="relative w-full md:w-96">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-warm-400"></i>
+        <input type="text" id="searchInput" onkeyup="filterCompetitors()" placeholder="Buscar por nome, nicho, estado ou recurso..." 
+               class="w-full pl-9 pr-4 py-2 bg-warm-50 border border-warm-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:bg-white transition">
+      </div>
+
+      <div class="flex flex-wrap gap-2 w-full md:w-auto">
+        <select id="filterTier" onchange="filterCompetitors()" class="px-3 py-2 bg-warm-50 border border-warm-200 rounded-lg text-xs font-medium text-warm-800 focus:outline-none focus:ring-2 focus:ring-brand-600">
+          <option value="ALL">Todos os Tiers (10)</option>
+          <option value="TOP">Top 5 Líderes</option>
+          <option value="MID">Mid-Tier & Especialistas</option>
+        </select>
+
+        <select id="filterNiche" onchange="filterCompetitors()" class="px-3 py-2 bg-warm-50 border border-warm-200 rounded-lg text-xs font-medium text-warm-800 focus:outline-none focus:ring-2 focus:ring-brand-600">
+          <option value="ALL">Todos os Nichos</option>
+          <option value="Clinico">Clínico Geral / Emagrecimento</option>
+          <option value="Esportivo">Esportivo & Fisiologia</option>
+          <option value="Hospitalar">Hospitalar / UAN</option>
+          <option value="Iniciante">Recém-Formados / Low Cost</option>
+        </select>
+
+        <select id="filterPrice" onchange="filterCompetitors()" class="px-3 py-2 bg-warm-50 border border-warm-200 rounded-lg text-xs font-medium text-warm-800 focus:outline-none focus:ring-2 focus:ring-brand-600">
+          <option value="ALL">Todas as Faixas de Preço</option>
+          <option value="LOW">Até R$ 70/mês</option>
+          <option value="MED">R$ 70 a R$ 110/mês</option>
+          <option value="HIGH">Acima de R$ 110/mês</option>
+        </select>
+
+        <button onclick="resetFilters()" class="px-3 py-2 text-xs font-medium text-warm-500 hover:text-warm-900 border border-warm-200 rounded-lg hover:bg-warm-100 transition">
+          Limpar
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 1: COMPETITOR CARDS -->
+    <div id="viewCards" class="space-y-6">
+      <div id="competitorsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- VIEW 2: SWOT CRUZADA & CENTRAL -->
+    <div id="viewSwotCentral" class="hidden space-y-6">
+      
+      <!-- HEADER BANNER -->
+      <div class="bg-white rounded-2xl p-6 border border-warm-200 shadow-sm space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 text-xs font-bold bg-purple-100 text-purple-800 rounded-full border border-purple-200">Diagnóstico Setorial Consolidado</span>
+          <span class="text-xs text-warm-500 font-mono">10 Concorrentes Filtrados</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-warm-900 tracking-tight">Análise SWOT Central do Mercado Brasileiro de Nutrição</h2>
+        <p class="text-xs sm:text-sm text-warm-600 leading-relaxed">
+          Síntese dos padrões de maior frequência estatística identificados entre os 10 maiores softwares do país, filtrando as forças consolidadas, vulnerabilidades crônicas e oportunidades abertas.
+        </p>
+      </div>
+
+      <!-- FREQUENCY METRICS BARS -->
+      <div class="bg-white rounded-xl p-6 border border-warm-200 shadow-sm space-y-5">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-warm-800 flex items-center gap-2">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-700"></i>
+          Filtro de Frequência dos Atributos no Mercado (Incidência em 10 Concorrentes)
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <!-- Fraquezas Mais Recorrentes -->
+          <div class="space-y-3 bg-rose-50/50 p-4 rounded-xl border border-rose-100">
+            <div class="font-bold text-rose-900 flex items-center justify-between">
+              <span>⚠️ Fraquezas Crônicas Mais Frequentes (Gaps)</span>
+              <span class="text-[10px] text-rose-700">Incidência</span>
+            </div>
+            
+            <div class="space-y-2">
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Falta de escala proporcional de macros (% / fator)</span>
+                  <span class="font-bold text-rose-700">100% (10/10)</span>
+                </div>
+                <div class="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Lentidão e excesso de cliques para montar dieta</span>
+                  <span class="font-bold text-rose-700">90% (9/10)</span>
+                </div>
+                <div class="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: 90%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Zero suporte offline (100% dependente de internet)</span>
+                  <span class="font-bold text-rose-700">80% (8/10)</span>
+                </div>
+                <div class="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Vendor Lock-in (bloqueio de dados ao cancelar)</span>
+                  <span class="font-bold text-rose-700">70% (7/10)</span>
+                </div>
+                <div class="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Falta de exportador limpo e ágil para WhatsApp</span>
+                  <span class="font-bold text-rose-700">70% (7/10)</span>
+                </div>
+                <div class="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: 70%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Forças e Ameaças Mais Recorrentes -->
+          <div class="space-y-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+            <div class="font-bold text-emerald-900 flex items-center justify-between">
+              <span>✅ Forças e Ameaças Mais Frequentes</span>
+              <span class="text-[10px] text-emerald-700">Incidência</span>
+            </div>
+            
+            <div class="space-y-2">
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Bases oficiais (TACO/IBGE) digitalizadas</span>
+                  <span class="font-bold text-emerald-700">80% (8/10)</span>
+                </div>
+                <div class="w-full bg-emerald-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-emerald-600 h-full rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Protocolos clássicos de composição (Pollock)</span>
+                  <span class="font-bold text-emerald-700">70% (7/10)</span>
+                </div>
+                <div class="w-full bg-emerald-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-emerald-600 h-full rounded-full" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Evasão de nutricionistas para Planilhas Excel</span>
+                  <span class="font-bold text-amber-700">80% (8/10) [Ameaça]</span>
+                </div>
+                <div class="w-full bg-amber-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-amber-600 h-full rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Resistência do paciente em baixar novos apps</span>
+                  <span class="font-bold text-amber-700">70% (7/10) [Ameaça]</span>
+                </div>
+                <div class="w-full bg-amber-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-amber-600 h-full rounded-full" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1 text-warm-800 font-medium">
+                  <span>Demanda por prescrição rápida ao vivo (&lt;5 min)</span>
+                  <span class="font-bold text-blue-700">90% (9/10) [Oportunidade]</span>
+                </div>
+                <div class="w-full bg-blue-200 h-2 rounded-full overflow-hidden">
+                  <div class="bg-blue-600 h-full rounded-full" style="width: 90%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER SWOT MATRIX (4 CARDS) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- FORÇAS CENTRAIS -->
+        <div class="bg-white p-5 rounded-xl border border-emerald-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+            <div class="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            </div>
+            FORÇAS CONSOLIDADAS DO MERCADO (STRENGTHS)
+          </div>
+          <ul class="space-y-2 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0"></span>
+              <span><strong>Digitalização de Tabelas Oficiais:</strong> Alta penetração de bases nutricionais padronizadas (TACO, TBCA, IBGE).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0"></span>
+              <span><strong>Aderência Antropométrica:</strong> Ampla biblioteca de protocolos científicos validados (Pollock 3/7, Petroski, Faulkner).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0"></span>
+              <span><strong>Ecossistemas Integrados:</strong> Módulos agregados de controle financeiro, agendamento de consultas e teleconsulta.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0"></span>
+              <span><strong>Comunidades e Conteúdo:</strong> Forte presença das marcas líderes em eventos acadêmicos e redes sociais.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- FRAQUEZAS CENTRAIS -->
+        <div class="bg-white p-5 rounded-xl border border-rose-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
+            <div class="p-2 bg-rose-100 rounded-lg text-rose-700">
+              <i data-lucide="minus-circle" class="w-4 h-4"></i>
+            </div>
+            FRAQUEZAS CRÔNICAS DO MERCADO (WEAKNESSES)
+          </div>
+          <ul class="space-y-2 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mt-1.5 shrink-0"></span>
+              <span><strong>Latência & Lentidão na Consulta:</strong> Montagem de dietas consome 15-25 min devido a múltiplos modais e requisições de nuvem.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mt-1.5 shrink-0"></span>
+              <span><strong>Zero Suporte Offline no Browser:</strong> 8 em cada 10 softwares ficam 100% inoperantes caso o Wi-Fi do consultório caia.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mt-1.5 shrink-0"></span>
+              <span><strong>Vendor Lock-in e Retenção Forçada:</strong> Cancelar a mensalidade bloqueia o acesso ao histórico de todos os pacientes.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mt-1.5 shrink-0"></span>
+              <span><strong>Inexistência de Escala em Lote:</strong> Nenhum software permite reajustar calorias ou refeições por porcentagem (+15% / -10%) em 1 clique.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- OPORTUNIDADES CENTRAIS -->
+        <div class="bg-white p-5 rounded-xl border border-blue-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-blue-800 font-bold text-sm">
+            <div class="p-2 bg-blue-100 rounded-lg text-blue-700">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i>
+            </div>
+            OPORTUNIDADES DE DISRUPÇÃO (OPPORTUNITIES)
+          </div>
+          <ul class="space-y-2 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Prescrição Instantânea ao Vivo (&lt;5 min):</strong> Permitir que o paciente saia da consulta com o plano pronto no celular.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Soberania e Formato Aberto (.diet JSON):</strong> Arquivos locais e portáveis sem mensalidade confiscatória perpétua.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Entrega Direta no WhatsApp com Emojis:</strong> Eliminar a fricção de exigir que o paciente baixe aplicativos pesados.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Atração de 25k Novos Graduados/Ano:</strong> Ferramenta profissional acessível sem custos proibitivos de início de carreira.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AMEAÇAS CENTRAIS -->
+        <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-amber-800 font-bold text-sm">
+            <div class="p-2 bg-amber-100 rounded-lg text-amber-700">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            </div>
+            AMEAÇAS DO AMBIENTE COMPETITIVO (THREATS)
+          </div>
+          <ul class="space-y-2 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+              <span><strong>Resistência do Paciente a Apps:</strong> Queda no uso ativo de diários alimentares em aplicativos mobile fechados.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+              <span><strong>Refúgio em Planilhas Excel:</strong> Profissionais que abandonam SaaS caros por preferirem a velocidade mecânica do teclado.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+              <span><strong>Pressão Inflacionária de Nuvem:</strong> Reajustes sucessivos de mensalidades gerando churn em momentos de sazonalidade.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+              <span><strong>Entrada de Soluções de Operadoras:</strong> Grandes grupos de saúde criando plataformas próprias e engessando o profissional.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: VETORES DE ATAQUE (MARKETING & PRODUTO) -->
+    <div id="viewStrategy" class="hidden space-y-6">
+      
+      <!-- HERO STRATEGY -->
+      <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-emerald-950 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+        <div class="max-w-4xl space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-emerald-700/60 border border-emerald-500/40 rounded-full text-xs font-semibold tracking-wide uppercase text-emerald-200">
+              Estratégia Integrada de Produto (CPO) & Growth (CMO)
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Os 5 Vetores de Ataque: Como Vencer os Líderes de Mercado
+          </h2>
+          <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+            Desconstrução das fragilidades dos gigantes em armas de aquisição e diferenciação radical de produto para o NutriDiet Local Pro.
+          </p>
+        </div>
+      </div>
+
+      <!-- 5 ATTACK VECTORS GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- VETOR 1 -->
+        <div class="bg-white p-5 rounded-xl border border-warm-200 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-rose-100 text-rose-800">Vetor 1: Velocidade</span>
+              <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">"The 3-Minute Prescribing Sprint"</h4>
+            <p class="text-xs text-warm-600 mt-1 leading-relaxed">
+              <strong>Dor Atacada:</strong> Os 15-25 minutos de espera constrangedora na consulta enquanto o SaaS carrega requisições HTTP.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-warm-100 text-xs space-y-1.5">
+            <div class="text-brand-800 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Arma de Produto:
+            </div>
+            <p class="text-[11px] text-warm-700">Busca TACO 100% in-memory (&lt;16ms) com navegação completa por teclado (<code class="bg-warm-100 px-1 py-0.5 rounded">Tab</code>, <code class="bg-warm-100 px-1 py-0.5 rounded">Enter</code>).</p>
+            <div class="text-purple-800 font-semibold flex items-center gap-1 mt-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Campanha GTM:
+            </div>
+            <p class="text-[11px] text-warm-700">Desafio em vídeo: "Montando uma dieta de 3.000 kcal completa em menos de 3 minutos".</p>
+          </div>
+        </div>
+
+        <!-- VETOR 2 -->
+        <div class="bg-white p-5 rounded-xl border border-warm-200 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-purple-100 text-purple-800">Vetor 2: Anti-Lock-in</span>
+              <i data-lucide="shield" class="w-4 h-4 text-purple-600"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">"Sua Dieta, Seus Arquivos, Para Sempre"</h4>
+            <p class="text-xs text-warm-600 mt-1 leading-relaxed">
+              <strong>Dor Atacada:</strong> A "Taxa de Refém" — pagar R$ 140/mês para não perder as dietas cadastradas ao longo dos anos.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-warm-100 text-xs space-y-1.5">
+            <div class="text-brand-800 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Arma de Produto:
+            </div>
+            <p class="text-[11px] text-warm-700">Formato universal aberto <code class="bg-warm-100 px-1 py-0.5 rounded">.diet</code> (JSON puro) salvo no seu disco ou Google Drive pessoal.</p>
+            <div class="text-purple-800 font-semibold flex items-center gap-1 mt-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Campanha GTM:
+            </div>
+            <p class="text-[11px] text-warm-700">"Liberdade Digital: Seus dados pertencem a você, não à empresa de software."</p>
+          </div>
+        </div>
+
+        <!-- VETOR 3 -->
+        <div class="bg-white p-5 rounded-xl border border-warm-200 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-emerald-100 text-emerald-800">Vetor 3: WhatsApp-First</span>
+              <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">"Zero Fricção: Onde o Paciente Vive"</h4>
+            <p class="text-xs text-warm-600 mt-1 leading-relaxed">
+              <strong>Dor Atacada:</strong> A falácia do app do paciente (70% de abandono em 30 dias e esquecimento de senhas).
+            </p>
+          </div>
+          <div class="pt-3 border-t border-warm-100 text-xs space-y-1.5">
+            <div class="text-brand-800 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Arma de Produto:
+            </div>
+            <p class="text-[11px] text-warm-700">Exportador com 1 clique formatado com emojis temáticos (🍳, 🥗, 🍎) e recuo claro de substitutos.</p>
+            <div class="text-purple-800 font-semibold flex items-center gap-1 mt-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Campanha GTM:
+            </div>
+            <p class="text-[11px] text-warm-700">"92% dos pacientes preferem a dieta no WhatsApp. Entregue sem exigir downloads."</p>
+          </div>
+        </div>
+
+        <!-- VETOR 4 -->
+        <div class="bg-white p-5 rounded-xl border border-warm-200 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-blue-100 text-blue-800">Vetor 4: Escala em Lote</span>
+              <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">"Ajuste de Fases em 1 Clique"</h4>
+            <p class="text-xs text-warm-600 mt-1 leading-relaxed">
+              <strong>Dor Atacada:</strong> Recalcular gramatura por gramatura na calculadora manual para mudar 250 kcal da dieta.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-warm-100 text-xs space-y-1.5">
+            <div class="text-brand-800 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Arma de Produto:
+            </div>
+            <p class="text-[11px] text-warm-700">Modal de Escala Proporcional (% / Fator) com arredondamento inteligente de balança (múltiplos de 5g).</p>
+            <div class="text-purple-800 font-semibold flex items-center gap-1 mt-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Campanha GTM:
+            </div>
+            <p class="text-[11px] text-warm-700">"Passe de Bulking para Cutting em 3 segundos sem refazer a matemática."</p>
+          </div>
+        </div>
+
+        <!-- VETOR 5 -->
+        <div class="bg-white p-5 rounded-xl border border-warm-200 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-amber-100 text-amber-800">Vetor 5: Recém-Formados</span>
+              <i data-lucide="graduation-cap" class="w-4 h-4 text-amber-600"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">"O Cavalo de Tróia dos 25k Formandos"</h4>
+            <p class="text-xs text-warm-600 mt-1 leading-relaxed">
+              <strong>Dor Atacada:</strong> Iniciar a carreira sem orçamento para pagar R$ 1.500/ano em assinaturas fixas.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-warm-100 text-xs space-y-1.5">
+            <div class="text-brand-800 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Arma de Produto:
+            </div>
+            <p class="text-[11px] text-warm-700">Acesso profissional completo e gratuito sem armadilhas de bloqueio de tempo.</p>
+            <div class="text-purple-800 font-semibold flex items-center gap-1 mt-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Campanha GTM:
+            </div>
+            <p class="text-[11px] text-warm-700">Parcerias com ligas acadêmicas e professores: "A ferramenta oficial para o seu 1º consultório."</p>
+          </div>
+        </div>
+
+        <!-- MATRIZ DE CONVERSÃO CARD -->
+        <div class="bg-warm-100/70 p-5 rounded-xl border border-warm-300/80 shadow-sm space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-warm-200 text-warm-800">Scorecard de Crescimento</span>
+              <i data-lucide="target" class="w-4 h-4 text-brand-700"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900 mt-2">Métricas Alvo de Produto & GTM</h4>
+            <ul class="text-xs text-warm-700 mt-2 space-y-1 font-mono">
+              <li>• Time-to-Prescribe: <strong>&lt; 4 min</strong></li>
+              <li>• NPS de Consulta: <strong>&gt; 75</strong></li>
+              <li>• K-Factor Viral: <strong>&gt; 1.2</strong></li>
+              <li>• Custo de Nuvem/User: <strong>R$ 0,00</strong></li>
+            </ul>
+          </div>
+          <div class="pt-3 border-t border-warm-200 text-xs text-warm-600 font-medium">
+            O crescimento é impulsionado pelo compartilhamento viral de templates <code class="text-brand-800 font-bold">.diet</code> entre profissionais.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VIEW 4: APP DO PACIENTE, CHECKLIST & ADESÃO -->
+    <div id="viewPatientApp" class="hidden space-y-6">
+      
+      <!-- HERO PATIENT APP BANNER -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-brand-900 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+        <div class="max-w-4xl space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-blue-700/60 border border-blue-500/40 rounded-full text-xs font-semibold tracking-wide uppercase text-blue-200">
+              Engajamento do Paciente & Resolução de Adesão
+            </span>
+            <span class="text-xs text-blue-200 font-mono">MyFitnessPal vs. Apps de Nutrição</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            A Experiência do Paciente: O Fim do Abandono de Dietas
+          </h2>
+          <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
+            Pesquisa aprofundada sobre por que 68% dos pacientes abandonam o plano antes de 30 dias e como a arquitetura <strong class="text-white">"Magic-Link Diet PWA"</strong> elimina downloads, senhas e fricção cognitiva.
+          </p>
+        </div>
+      </div>
+
+      <!-- ADHERENCE PAIN STATS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="bg-white p-5 rounded-xl border border-rose-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
+            <div class="p-2 bg-rose-50 rounded-lg text-rose-600">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+            </div>
+            Motivo #1 de Abandono (42%)
+          </div>
+          <h5 class="font-bold text-warm-900">Dúvida na Troca Fora de Casa</h5>
+          <p class="text-warm-600 leading-relaxed">
+            O paciente não tem o alimento prescrito no momento e não sabe o que pode substituir rapidamente sem quebrar as calorias.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-amber-800 font-bold text-sm">
+            <div class="p-2 bg-amber-50 rounded-lg text-amber-600">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            Motivo #2 de Abandono (31%)
+          </div>
+          <h5 class="font-bold text-warm-900">PDF Perdido & Senha Esquecida</h5>
+          <p class="text-warm-600 leading-relaxed">
+            O PDF fica soterrado na galeria do WhatsApp e o aplicativo de 80MB desloga o paciente, que desiste de logar novamente.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-purple-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-purple-800 font-bold text-sm">
+            <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
+            Motivo #3 de Abandono (27%)
+          </div>
+          <h5 class="font-bold text-warm-900">Silêncio de 45 Dias até o Retorno</h5>
+          <p class="text-warm-600 leading-relaxed">
+            Como o nutricionista não tem visibilidade diária da adesão, o paciente perde a disciplina e a sensação de acompanhamento.
+          </p>
+        </div>
+      </div>
+
+      <!-- COMPARATIVE: APPS DO PACIENTE NO BRASIL -->
+      <div class="bg-white rounded-xl border border-warm-200 shadow-sm overflow-hidden p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-warm-900 flex items-center gap-2">
+              <i data-lucide="smartphone" class="w-4 h-4 text-brand-700"></i>
+              Como os 10 Concorrentes Tratam o Paciente Hoje?
+            </h3>
+            <p class="text-xs text-warm-500">Mapeamento direto de interatividade, checkboxes e substituições</p>
+          </div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-warm-100 text-warm-700 rounded-lg">Apenas 3 possuem App</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-warm-100 border-b border-warm-200 text-warm-800 font-bold uppercase tracking-wider">
+                <th class="py-2.5 px-3">Concorrente</th>
+                <th class="py-2.5 px-3">Tem App Paciente?</th>
+                <th class="py-2.5 px-3">Como Acessa</th>
+                <th class="py-2.5 px-3">Checkboxes & Trocas</th>
+                <th class="py-2.5 px-3 text-rose-800">Fricções Identificadas</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-warm-200 text-warm-800 text-[11px]">
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Dietbox</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded">Sim (App Nativo)</span></td>
+                <td class="py-2.5 px-3 font-mono">App Store / Play Store</td>
+                <td class="py-2.5 px-3">Marcação "Comi", diário fotográfico, aba de substitutos.</td>
+                <td class="py-2.5 px-3 text-rose-700">~35% não baixam o app; app pesado e com muitas abas.</td>
+              </tr>
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Webdiet</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded">Sim (App Nativo)</span></td>
+                <td class="py-2.5 px-3 font-mono">App Store / Play Store</td>
+                <td class="py-2.5 px-3">Registro de refeições, receitas, chat com nutricionista.</td>
+                <td class="py-2.5 px-3 text-rose-700">Interface confusa; banners e receitas poluem a dieta.</td>
+              </tr>
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Nutrium</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded">Sim (App + Portal)</span></td>
+                <td class="py-2.5 px-3 font-mono">App ou Web Portal</td>
+                <td class="py-2.5 px-3">Checklist limpo, substitutos prescritos, água e peso.</td>
+                <td class="py-2.5 px-3 text-rose-700">Exige login formal internacional; custo alto pro nutri.</td>
+              </tr>
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Avanutri</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-warm-200 text-warm-700 font-bold rounded">Não (PDF)</span></td>
+                <td class="py-2.5 px-3 font-mono">WhatsApp / E-mail</td>
+                <td class="py-2.5 px-3 text-warm-400">PDF estático sem qualquer interatividade.</td>
+                <td class="py-2.5 px-3 text-rose-700">Documento morto que se perde no WhatsApp.</td>
+              </tr>
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Dietpro</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-warm-200 text-warm-700 font-bold rounded">Não (PDF/Papel)</span></td>
+                <td class="py-2.5 px-3 font-mono">Impressão / PDF</td>
+                <td class="py-2.5 px-3 text-warm-400">Papel impresso ou PDF de várias páginas.</td>
+                <td class="py-2.5 px-3 text-rose-700">Zero feedback entre consultas; zero adesão digital.</td>
+              </tr>
+              <tr class="hover:bg-warm-50">
+                <td class="py-2.5 px-3 font-bold text-warm-900">Dietwin, Nutrilize, SAN, HubNutri, EasyDiet</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-warm-200 text-warm-700 font-bold rounded">Não (PDFs)</span></td>
+                <td class="py-2.5 px-3 font-mono">Links estáticos ou PDF</td>
+                <td class="py-2.5 px-3 text-warm-400">Apenas visualização passiva de texto e tabela.</td>
+                <td class="py-2.5 px-3 text-rose-700">Sem retorno para o prontuário, sem checkboxes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO: THE "MAGIC-LINK DIET PWA" -->
+      <div class="bg-white rounded-xl border border-warm-200 shadow-sm p-6 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-warm-200 pb-4">
+          <div>
+            <span class="px-2.5 py-0.5 text-xs font-bold bg-brand-100 text-brand-800 rounded-full border border-brand-200">Demonstração Interativa da Solução</span>
+            <h3 class="text-lg font-bold text-warm-900 mt-1">Como Funciona o "Magic-Link Diet PWA" (Visão do Paciente)</h3>
+            <p class="text-xs text-warm-500">Experimente clicar nos checkboxes e trocar alimentos abaixo:</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-warm-600 font-medium">Progresso de Adesão Hoje:</span>
+            <span id="adherencePercent" class="text-sm font-extrabold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-200">33%</span>
+          </div>
+        </div>
+
+        <!-- SIMULATED MOBILE SCREEN -->
+        <div class="max-w-md mx-auto bg-warm-50 border-4 border-warm-800 rounded-3xl p-4 shadow-xl space-y-4">
+          <!-- PHONE TOP BAR -->
+          <div class="flex items-center justify-between text-xs text-warm-600 border-b border-warm-200 pb-2">
+            <div class="flex items-center gap-1 font-bold text-warm-900">
+              <i data-lucide="user" class="w-3.5 h-3.5 text-brand-700"></i> Maria Silva
+            </div>
+            <div class="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-2 py-0.5 rounded-full">
+              ● Prescrito por Dr. Lucas (Nutri)
+            </div>
+          </div>
+
+          <!-- PROGRESS BAR -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] text-warm-700 font-semibold">
+              <span>Metas do Dia (Segunda-Feira)</span>
+              <span id="checkedCountText">1 de 3 Refeições</span>
+            </div>
+            <div class="w-full bg-warm-200 h-2 rounded-full overflow-hidden">
+              <div id="progressBarFill" class="bg-brand-700 h-full rounded-full transition-all duration-300" style="width: 33%"></div>
+            </div>
+          </div>
+
+          <!-- MEAL 1: CAFE DA MANHA -->
+          <div class="bg-white p-3.5 rounded-xl border border-warm-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="mealCheck1" checked onchange="updateDemoAdherence()" class="w-4 h-4 text-brand-700 rounded focus:ring-brand-600 cursor-pointer">
+                <label for="mealCheck1" class="text-xs font-bold text-warm-900 cursor-pointer">☕ 08:00 — Café da Manhã</label>
+              </div>
+              <span class="text-[10px] font-mono text-warm-500 font-semibold">380 kcal</span>
+            </div>
+            
+            <div class="pl-6 text-[11px] text-warm-700 space-y-1">
+              <div class="flex items-center justify-between">
+                <span>• 2 Ovos mexidos (100g)</span>
+              </div>
+              <div class="flex items-center justify-between bg-warm-50 p-1.5 rounded border border-warm-200">
+                <span id="carbItem1">• <strong>Pão Francês</strong> (50g)</span>
+                <button onclick="toggleSwapMenu(1)" class="text-[10px] text-brand-700 font-bold hover:underline flex items-center gap-0.5">
+                  <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Trocar
+                </button>
+              </div>
+              <!-- Swap Dropdown simulated -->
+              <div id="swapMenu1" class="hidden p-2 bg-brand-50 border border-brand-200 rounded text-[10px] space-y-1">
+                <div class="font-bold text-brand-900">Opções autorizadas pelo Nutri:</div>
+                <div onclick="selectSwap(1, 'Pão Francês (50g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Pão Francês (50g)</div>
+                <div onclick="selectSwap(1, 'Tapioca (40g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Tapioca (40g)</div>
+                <div onclick="selectSwap(1, 'Cuscuz cozido (60g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Cuscuz cozido (60g)</div>
+                <div onclick="selectSwap(1, 'Aveia em flocos (30g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Aveia em flocos (30g)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEAL 2: ALMOCO -->
+          <div class="bg-white p-3.5 rounded-xl border border-warm-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="mealCheck2" onchange="updateDemoAdherence()" class="w-4 h-4 text-brand-700 rounded focus:ring-brand-600 cursor-pointer">
+                <label for="mealCheck2" class="text-xs font-bold text-warm-900 cursor-pointer">🥗 12:30 — Almoço</label>
+              </div>
+              <span class="text-[10px] font-mono text-warm-500 font-semibold">620 kcal</span>
+            </div>
+            
+            <div class="pl-6 text-[11px] text-warm-700 space-y-1">
+              <div class="flex items-center justify-between">
+                <span>• Peito de frango grelhado (150g)</span>
+              </div>
+              <div class="flex items-center justify-between bg-warm-50 p-1.5 rounded border border-warm-200">
+                <span id="carbItem2">• <strong>Arroz Branco</strong> (120g) + Feijão (80g)</span>
+                <button onclick="toggleSwapMenu(2)" class="text-[10px] text-brand-700 font-bold hover:underline flex items-center gap-0.5">
+                  <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Trocar
+                </button>
+              </div>
+              <!-- Swap Dropdown simulated -->
+              <div id="swapMenu2" class="hidden p-2 bg-brand-50 border border-brand-200 rounded text-[10px] space-y-1">
+                <div class="font-bold text-brand-900">Opções autorizadas pelo Nutri:</div>
+                <div onclick="selectSwap(2, 'Arroz Branco (120g) + Feijão (80g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Arroz + Feijão</div>
+                <div onclick="selectSwap(2, 'Batata Doce cozida (160g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Batata Doce cozida (160g)</div>
+                <div onclick="selectSwap(2, 'Mandioca cozida (130g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Mandioca cozida (130g)</div>
+                <div onclick="selectSwap(2, 'Macarrão integral (120g)')" class="p-1 hover:bg-white rounded cursor-pointer">✓ Macarrão integral (120g)</div>
+              </div>
+              <div>• Salada verde à vontade + Azeite (5ml)</div>
+            </div>
+          </div>
+
+          <!-- MEAL 3: JANTAR -->
+          <div class="bg-white p-3.5 rounded-xl border border-warm-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="mealCheck3" onchange="updateDemoAdherence()" class="w-4 h-4 text-brand-700 rounded focus:ring-brand-600 cursor-pointer">
+                <label for="mealCheck3" class="text-xs font-bold text-warm-900 cursor-pointer">🍲 19:30 — Jantar</label>
+              </div>
+              <span class="text-[10px] font-mono text-warm-500 font-semibold">510 kcal</span>
+            </div>
+            
+            <div class="pl-6 text-[11px] text-warm-700 space-y-1">
+              <div>• Patinho moído grelhado (130g)</div>
+              <div>• Batata inglesa assada (150g)</div>
+              <div>• Brócolis e cenoura no vapor</div>
+            </div>
+          </div>
+
+          <!-- BOTTOM SYNC STATUS -->
+          <div class="text-center text-[10px] text-emerald-800 font-semibold bg-emerald-50 p-2 rounded-lg border border-emerald-200 flex items-center justify-center gap-1.5">
+            <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i>
+            Sincronizado automaticamente com o prontuário do Nutricionista
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VIEW 5: PARECER ARQUITETURA (LOCAL-FIRST VS NUVEM VS OFFLINE) (NEW!) -->
+    <div id="viewArchitecture" class="hidden space-y-6">
+      
+      <!-- HERO ARCHITECTURE BANNER -->
+      <div class="bg-gradient-to-r from-emerald-900 via-teal-950 to-brand-900 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+        <div class="max-w-4xl space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-emerald-700/60 border border-emerald-500/40 rounded-full text-xs font-semibold tracking-wide uppercase text-emerald-200">
+              Parecer Técnico & Estratégico de Engenharia
+            </span>
+            <span class="text-xs text-emerald-300 font-mono">100% Nuvem vs. 100% Offline vs. Local-First</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            A Arquitetura Vencedora: Por Que o Modelo Local-First é Imbatível
+          </h2>
+          <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+            Análise aprofundada de infraestrutura, custos, segurança jurídica (LGPD) e por que processar 100% no cliente cria a maior barreira de defesa contra concorrentes tradicionais.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3 MODELS COMPARISON CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- MODELO 1: 100% NUVEM -->
+        <div class="bg-white p-5 rounded-xl border border-rose-200 shadow-sm space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-rose-100 text-rose-800">Modelo 1: 100% Nuvem</span>
+              <i data-lucide="cloud-off" class="w-4 h-4 text-rose-500"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900">SaaS Convencional (Webdiet / Dietbox)</h4>
+            <p class="text-xs text-warm-600 leading-relaxed">
+              Tudo é processado em servidores remotos (AWS/Postgres). A cada alimento digitado, o browser aguarda uma resposta HTTP.
+            </p>
+            <div class="space-y-1.5 text-xs text-warm-700 pt-2 border-t border-warm-100">
+              <div class="text-rose-700 font-semibold flex items-center gap-1">❌ Pontos Críticos:</div>
+              <ul class="list-disc list-inside text-[11px] space-y-1 text-rose-900">
+                <li>Latência constante na consulta viva</li>
+                <li>Wi-Fi caiu no consultório = trava tudo</li>
+                <li>Custo alto de servidor (força mensalidade)</li>
+                <li>Vendor lock-in agressivo de dados</li>
+              </ul>
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-warm-500 bg-rose-50 p-2 rounded border border-rose-100 text-center">
+            Custo Infra: <strong>R$ 8 a R$ 25/mês por usuário</strong>
+          </div>
+        </div>
+
+        <!-- MODELO 2: 100% OFFLINE DESKTOP -->
+        <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-amber-100 text-amber-800">Modelo 2: 100% Offline</span>
+              <i data-lucide="monitor" class="w-4 h-4 text-amber-500"></i>
+            </div>
+            <h4 class="text-base font-bold text-warm-900">Desktop Legado (Avanutri / Dietpro .exe)</h4>
+            <p class="text-xs text-warm-600 leading-relaxed">
+              Software instalado localmente via executável (.exe) sem qualquer dependência de internet.
+            </p>
+            <div class="space-y-1.5 text-xs text-warm-700 pt-2 border-t border-warm-100">
+              <div class="text-amber-700 font-semibold flex items-center gap-1">⚠️ Pontos Críticos:</div>
+              <ul class="list-disc list-inside text-[11px] space-y-1 text-amber-900">
+                <li>Roda apenas em Windows (não roda no Mac/iPad)</li>
+                <li>Se o computador pifar, perde tudo</li>
+                <li>Atualizações manuais e complexas</li>
+                <li>Impossível mandar link para WhatsApp do paciente</li>
+              </ul>
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-warm-500 bg-amber-50 p-2 rounded border border-amber-100 text-center">
+            Custo Infra: <strong>R$ 0,00</strong> (mas produto isolado)
+          </div>
+        </div>
+
+        <!-- MODELO 3: LOCAL-FIRST WEB (VENCEDOR) -->
+        <div class="bg-gradient-to-b from-brand-50/60 to-white p-5 rounded-xl border-2 border-brand-600 shadow-md space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-brand-700 text-white">Modelo 3: Local-First Web</span>
+              <i data-lucide="sparkles" class="w-4 h-4 text-brand-700"></i>
+            </div>
+            <h4 class="text-base font-bold text-brand-900">NutriDiet Local Pro (Recomendado)</h4>
+            <p class="text-xs text-warm-700 leading-relaxed">
+              Aplicação web moderna (Next.js/PWA) onde 100% dos cálculos, TACO e dados rodam na RAM e disco local do nutricionista.
+            </p>
+            <div class="space-y-1.5 text-xs text-warm-700 pt-2 border-t border-brand-200">
+              <div class="text-brand-800 font-semibold flex items-center gap-1">✅ Super Vantagens:</div>
+              <ul class="list-disc list-inside text-[11px] space-y-1 text-brand-950">
+                <li>Busca instantânea TACO em &lt;16ms</li>
+                <li>100% funcional offline no consultório</li>
+                <li>Soberania total (.diet JSON no seu disco)</li>
+                <li>Link Mágico gerado para WhatsApp</li>
+              </ul>
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-emerald-800 bg-emerald-100/70 p-2 rounded border border-emerald-300 text-center font-bold">
+            Custo Infra: R$ 0,00 (Margem Bruta 99%)
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LOCAL-FIRST ARCHITECTURE DIAGRAM & MITIGATIONS -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- MITIGAÇÕES TÉCNICAS -->
+        <div class="bg-white p-6 rounded-xl border border-warm-200 shadow-sm space-y-4">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-warm-900 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-700"></i>
+            Como Mitigar os 3 Riscos do Salvamento Local
+          </h4>
+          
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-warm-50 rounded-lg border border-warm-200 space-y-1">
+              <div class="font-bold text-warm-900 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                Risco 1: Limpeza de Cache do Chrome
+              </div>
+              <p class="text-warm-600 text-[11px]">
+                <strong>Mitigação:</strong> Uso da <em>File System Access API</em> para salvar arquivos reais <code class="text-brand-800 font-mono">.diet</code> em uma pasta física escolhida no computador (Documentos) ou Google Drive pessoal.
+              </p>
+            </div>
+
+            <div class="p-3 bg-warm-50 rounded-lg border border-warm-200 space-y-1">
+              <div class="font-bold text-warm-900 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                Risco 2: Uso em Múltiplos Dispositivos (Laptop & Desktop)
+              </div>
+              <p class="text-warm-600 text-[11px]">
+                <strong>Mitigação:</strong> Salvar a pasta de pacientes dentro da pasta do Google Drive / iCloud do sistema operacional. Sincronização automática e gratuita sem servidor central.
+              </p>
+            </div>
+
+            <div class="p-3 bg-warm-50 rounded-lg border border-warm-200 space-y-1">
+              <div class="font-bold text-warm-900 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                Risco 3: Compartilhamento com o Paciente
+              </div>
+              <p class="text-warm-600 text-[11px]">
+                <strong>Mitigação:</strong> Empacotamento de payload criptografado leve em um link único (Magic-Link) que o paciente abre no celular sem login e sem servidores pesados.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AS VANTAGENS ECONÔMICAS (BUSINESS MOAT) -->
+        <div class="bg-white p-6 rounded-xl border border-warm-200 shadow-sm space-y-4">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-warm-900 flex items-center gap-2">
+            <i data-lucide="coins" class="w-4 h-4 text-amber-600"></i>
+            O "Moat" Econômico Imbatível
+          </h4>
+
+          <p class="text-xs text-warm-600 leading-relaxed">
+            Ao transferir o processamento de dados para o navegador do cliente e armazenar arquivos localmente, você desconstrói a estrutura de custos de todos os concorrentes tradicionais:
+          </p>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2.5 bg-rose-50 rounded-lg border border-rose-100">
+              <div>
+                <div class="font-bold text-rose-900">Concorrentes SaaS (100.000 Usuários)</div>
+                <div class="text-[10px] text-rose-700">AWS, Bancos Relacionais, Tráfego de Imagens</div>
+              </div>
+              <div class="font-extrabold text-rose-700 font-mono text-sm">~ R$ 80.000 /mês</div>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div>
+                <div class="font-bold text-emerald-900">NutriDiet Local-First (100.000 Usuários)</div>
+                <div class="text-[10px] text-emerald-700">Cloudflare Pages / Vercel Edge Estático</div>
+              </div>
+              <div class="font-extrabold text-emerald-800 font-mono text-sm">&lt; R$ 100 /mês</div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-brand-50 rounded-lg border border-brand-200 text-[11px] text-brand-900">
+            <strong>Poder de Precificação:</strong> Essa eficiência permite oferecer o software com uma versão gratuita matadora ou licença única/vitalícia, conquistando o mercado sem risco financeiro.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VIEW 6: COMPARATIVE TABLE -->
+    <div id="viewTable" class="hidden bg-white rounded-xl border border-warm-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-warm-100 border-b border-warm-200 text-warm-800 font-bold uppercase tracking-wider">
+              <th class="py-3 px-4"># Concorrente</th>
+              <th class="py-3 px-4">Fundação / Sede</th>
+              <th class="py-3 px-4">Plataforma</th>
+              <th class="py-3 px-4">Preço Mensal</th>
+              <th class="py-3 px-4">Plano Anual</th>
+              <th class="py-3 px-4">Ticket / LTV</th>
+              <th class="py-3 px-4">Churn Est.</th>
+              <th class="py-3 px-4">Nicho Principal</th>
+              <th class="py-3 px-4">Antropometria</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-warm-200 text-warm-900">
+            <!-- Rendered dynamically by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 7: GAPS & UVP BREAKDOWN -->
+    <div id="viewGaps" class="hidden space-y-6">
+      <div class="bg-gradient-to-br from-brand-900 via-brand-800 to-emerald-900 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+        <div class="max-w-3xl">
+          <span class="px-3 py-1 bg-brand-700/60 border border-brand-500/40 rounded-full text-xs font-semibold tracking-wide uppercase text-emerald-200">
+            Proposta Única de Valor (UVP)
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold mt-3 tracking-tight">
+            A ferramenta de elaboração e escala de dietas mais rápida e soberana do mercado.
+          </h2>
+          <p class="mt-3 text-sm text-emerald-100 leading-relaxed">
+            Elimina o gargalo dos softwares em nuvem convencionais: 100% offline, montagem em &lt;5 minutos, escala percentual de macros em 1 clique, zero risco de bloqueio de dados (formato .diet) e exportação amigável para WhatsApp.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl border border-warm-200 shadow-sm space-y-4">
+          <div class="flex items-center gap-3 text-red-700 font-bold text-base">
+            <div class="p-2 bg-red-50 rounded-lg border border-red-100">
+              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            Dores Crônicas dos Softwares em Nuvem
+          </div>
+          <ul class="space-y-2.5 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+              <span><strong>Lentidão na Consulta:</strong> Requisições assíncronas a cada alimento tornam a montagem da dieta arrastada (>15 min).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+              <span><strong>Vendor Lock-in:</strong> Cancelar a mensalidade de R$ 130/mês significa perder o acesso ao histórico de centenas de pacientes.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+              <span><strong>Rigidez de Recalculo:</strong> Alterar 200 kcal exige abrir alimento por alimento para diminuir 10g aqui e 15g ali.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+              <span><strong>Dependência de Internet:</strong> Qualquer oscilação de Wi-Fi no consultório interrompe o atendimento clínico.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl border border-warm-200 shadow-sm space-y-4">
+          <div class="flex items-center gap-3 text-emerald-800 font-bold text-base">
+            <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+            Diferenciais de Disrupção do NutriDiet
+          </div>
+          <ul class="space-y-2.5 text-xs text-warm-700">
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <span><strong>Prescrição em &lt; 5 min:</strong> Computação reativa 100% no cliente (JavaScript puro) com busca TACO em &lt;50ms.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <span><strong>Soberania Total (.diet JSON):</strong> Arquivos portáveis no seu computador ou no Google Drive pessoal sem mensalidade confiscatória.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <span><strong>Escala Proporcional (% / Fator):</strong> Redimensione refeições ou o dia todo em lote com arredondamento inteligente de balança.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <span><strong>Entrega de Alto Impacto:</strong> Texto estruturado com emojis para WhatsApp e PDF de 1 página sem erros de quebra.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-warm-200 mt-12 py-6 text-center text-xs text-warm-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>NutriDiet Local Pro — Inteligência Competitiva de Mercado</div>
+      <div class="font-mono text-[11px] text-warm-400">refs/pesquisa-mercadologica/dashboard-pesquisa-concorrentes.html</div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT DATA & LOGIC -->
+  <script>
+    const competitors = [
+      {
+        id: "webdiet",
+        name: "Webdiet",
+        tier: "TOP",
+        tierLabel: "Líder de Mercado",
+        foundation: "2015",
+        headquarters: "Rio de Janeiro / RJ",
+        platform: "Web Cloud + App",
+        monthlyPrice: 139.90,
+        annualPriceMonthly: 89.90,
+        annualPriceTotal: 1078.80,
+        ticketMedio: 110.00,
+        churn: "4,5%",
+        ltv: "R$ 2.450",
+        cac: "R$ 450",
+        nicheKey: "Clinico",
+        nicheLabel: "Clínico Geral, Emagrecimento, Estudantes",
+        states: ["SP", "RJ", "MG", "BA", "PR"],
+        measures: "Pollock 3/7, Guedes, Petroski, Faulkner, Durnin, Slaughter, Bioimpedância, Fotos posturais",
+        foods: "TACO 4ª ed, TBCA v7.2, USDA, IBGE, Industrializados, Suplementos",
+        summary: "Líder em autoridade e marketing no Brasil, com vasto acervo de lâminas educativas, e-books e receitas.",
+        swot: {
+          strengths: [
+            "Maior autoridade e recall de marca do mercado BR",
+            "Vasto acervo de lâminas educativas, e-books e receitas prontas",
+            "Módulo financeiro e agendamento online integrados",
+            "Forte comunidade acadêmica e parcerias com influenciadores",
+            "Personalização avançada de logotipo e cores no PDF clínico"
+          ],
+          weaknesses: [
+            "Interface visual poluída com excesso de abas e modais",
+            "Latência de rede perceptível ao adicionar alimentos na consulta",
+            "Bloqueio total de acesso aos dados caso a assinatura seja cancelada",
+            "Ausência total de funcionamento offline no navegador",
+            "Dificuldade para redimensionar dietas em lote (% ou calorias)"
+          ],
+          opportunities: [
+            "Integrações com wearables e sensores contínuos de glicose (CGM)",
+            "Marketplace de suplementos e testes genéticos",
+            "Cursos e certificações exclusivas para a comunidade"
+          ],
+          threats: [
+            "Migração de nutricionistas para softwares locais ultra-rápidos",
+            "Rejeição da categoria ao modelo de retenção forçada (lock-in)"
+          ]
+        }
+      },
+      {
+        id: "dietbox",
+        name: "Dietbox",
+        tier: "TOP",
+        tierLabel: "Pioneiro App Paciente",
+        foundation: "2012",
+        headquarters: "Porto Alegre / RS",
+        platform: "Web Cloud + App",
+        monthlyPrice: 129.90,
+        annualPriceMonthly: 79.90,
+        annualPriceTotal: 958.80,
+        ticketMedio: 102.00,
+        churn: "5,0%",
+        ltv: "R$ 2.040",
+        cac: "R$ 380",
+        nicheKey: "Clinico",
+        nicheLabel: "Consultórios focados em App do Paciente",
+        states: ["SP", "RS", "SC", "PR", "RJ"],
+        measures: "Pollock 3/7, Petroski, Faulkner, Weststrate, Circunferências, RCQ, RCEst",
+        foods: "TACO, IBGE POF, Tabela própria Dietbox, Marcas comerciais",
+        summary: "Pioneiro no aplicativo interativo para o paciente com diário fotográfico, registro de água e chat.",
+        swot: {
+          strengths: [
+            "Aplicativo móvel para pacientes líder em engajamento (4.8★)",
+            "Notificações automáticas de água e diário fotográfico",
+            "Agendamento online com link público para bio do Instagram",
+            "Teleconsulta com sala de vídeo integrada na própria ferramenta",
+            "Interface do paciente moderna, gamificada e intuitiva"
+          ],
+          weaknesses: [
+            "Construtor de dietas web com muitos cliques e telas modais",
+            "Dificuldade para redimensionar gramaturas e macros rapidamente",
+            "Inoperante sem conexão ativa e estável com a internet",
+            "Fórmulas de metas pouco flexíveis para atletas de alta performance",
+            "Custo elevado de mensalidade para recém-formados"
+          ],
+          opportunities: [
+            "Monetização do app do paciente via assinaturas premium",
+            "Parcerias com farmácias de manipulação e laboratórios",
+            "Clube de benefícios com descontos em produtos saudáveis"
+          ],
+          threats: [
+            "Pacientes adultos/idosos que rejeitam baixar apps e exigem WhatsApp",
+            "Crescimento de soluções locais sem latência de rede"
+          ]
+        }
+      },
+      {
+        id: "nutrium",
+        name: "Nutrium (Brasil)",
+        tier: "TOP",
+        tierLabel: "Internacional Premium",
+        foundation: "2015",
+        headquarters: "Braga, PT / São Paulo, SP",
+        platform: "Web Cloud + App",
+        monthlyPrice: 180.00,
+        annualPriceMonthly: 135.00,
+        annualPriceTotal: 1620.00,
+        ticketMedio: 145.00,
+        churn: "5,8%",
+        ltv: "R$ 2.500",
+        cac: "R$ 550",
+        nicheKey: "Clinico",
+        nicheLabel: "Nutrição Premium, Clínicas Integradas",
+        states: ["SP", "RJ", "DF", "PR"],
+        measures: "Protocolo ISAK (níveis 1 e 2), Pollock 3/7, Durnin & Womersley, OMS pediátrico",
+        foods: "USDA, TACO, CIQUAL, McCance, Análise avançada de micronutrientes",
+        summary: "Plataforma de alto padrão com design minimalista europeu, análise de micronutrientes e suporte multi-moeda.",
+        swot: {
+          strengths: [
+            "Design de interface mais elegante e minimalista do setor",
+            "Suporte nativo a múltiplos idiomas, moedas e fusos horários",
+            "Análise bromatológica e de micronutrientes mais detalhada",
+            "Portal do paciente integrado com sincronização móvel fluida"
+          ],
+          weaknesses: [
+            "Mensalidade mais cara do mercado brasileiro",
+            "Fórmulas de gasto calórico automáticas muito rígidas",
+            "Baixa aderência a hábitos e nomenclaturas populares do Brasil",
+            "Sem ferramentas de escala percentual de macros em lote"
+          ],
+          opportunities: [
+            "Atendimento de teleconsultas para brasileiros que residem no exterior",
+            "Grandes clínicas corporativas multinacionais"
+          ],
+          threats: [
+            "Perda de novos formandos para softwares nacionais mais baratos",
+            "Concorrentes integrados a Pix e WhatsApp nativo"
+          ]
+        }
+      },
+      {
+        id: "avanutri",
+        name: "Avanutri (Cloud & Desktop)",
+        tier: "TOP",
+        tierLabel: "Padrão-Ouro Antropometria",
+        foundation: "2004",
+        headquarters: "Três Rios / RJ",
+        platform: "Cloud + Desktop Legado",
+        monthlyPrice: 89.90,
+        annualPriceMonthly: 69.90,
+        annualPriceTotal: 838.80,
+        ticketMedio: 85.00,
+        churn: "3,2%",
+        ltv: "R$ 2.650",
+        cac: "R$ 220",
+        nicheKey: "Esportivo",
+        nicheLabel: "Nutrição Esportiva, Academias, Clubes",
+        states: ["RJ", "SP", "MG", "BA", "PE"],
+        measures: "Pollock 3/7, Petroski, Faulkner, Guedes, Durnin, Slaughter, Somatocarta Heath-Carter, 5 Massas",
+        foods: "TACO, USDA, IBGE, Tabela própria Avanutri",
+        summary: "Líder absoluta em avaliação física e equipamentos antropométricos no Brasil, com altíssima fidelidade esportiva.",
+        swot: {
+          strengths: [
+            "Padrão-ouro em avaliação física e composição corporal",
+            "Venda cruzada com adipômetros e estadiômetros próprios",
+            "Ampla biblioteca de protocolos científicos esportivos",
+            "Opção de versão desktop totalmente offline"
+          ],
+          weaknesses: [
+            "Interface gráfica defasada e pouco atraente",
+            "Relatórios e PDFs gerados visualmente arcaicos",
+            "Módulo de cálculo dietético pouco ágil e engessado",
+            "Sem formatação elegante para envio no WhatsApp"
+          ],
+          opportunities: [
+            "Redesenho visual completo com UI moderna e Tailwind",
+            "Adipômetros digitais com conexão Bluetooth direta"
+          ],
+          threats: [
+            "Softwares web modernos incorporando protocolos de dobras",
+            "Rejeição estética pela nova geração de nutricionistas"
+          ]
+        }
+      },
+      {
+        id: "dietpro",
+        name: "Dietpro (Clínico & Cloud)",
+        tier: "TOP",
+        tierLabel: "Tradição Acadêmica",
+        foundation: "1988",
+        headquarters: "Viçosa / MG",
+        platform: "Cloud + Desktop Módulos",
+        monthlyPrice: 99.00,
+        annualPriceMonthly: 79.00,
+        annualPriceTotal: 948.00,
+        ticketMedio: 88.00,
+        churn: "3,8%",
+        ltv: "R$ 2.300",
+        cac: "R$ 310",
+        nicheKey: "Hospitalar",
+        nicheLabel: "Acadêmico, Universidades, Hospitais",
+        states: ["MG", "SP", "RS", "RJ"],
+        measures: "Pollock, Faulkner, Weststrate, Deurenberg, Curvas OMS (Score-Z e Percentis), FFMI",
+        foods: "TACO completa, TBCA, IBGE, Fórmulas de gasto (Harris, Schofield, Cunningham, Katch)",
+        summary: "Nascido na Universidade Federal de Viçosa (UFV), é a maior referência em rigor científico e cálculo bromatológico.",
+        swot: {
+          strengths: [
+            "Maior tradição acadêmica e credibilidade científica BR",
+            "Rigor bromatológico extremo em cálculos nutricionais",
+            "Forte presença em laboratórios de faculdades federais",
+            "Cálculos completos de micronutrientes e interações"
+          ],
+          weaknesses: [
+            "Curva de aprendizado íngreme com dezenas de abas",
+            "Interface técnica densa, pouco amigável para consultas",
+            "Lentidão na elaboração prática de dietas ágeis",
+            "Não possui exportador moderno estruturado para WhatsApp"
+          ],
+          opportunities: [
+            "Módulos avançados para nutrição hospitalar e enteral",
+            "Automação de prescrições complexas para nefrologia"
+          ],
+          threats: [
+            "Estudantes abandonando a ferramenta pós-formatura",
+            "Preferência por ferramentas focadas em velocidade"
+          ]
+        }
+      },
+      {
+        id: "dietwin",
+        name: "Dietwin (Profissional & Web)",
+        tier: "MID",
+        tierLabel: "Hospitalar & UAN",
+        foundation: "1995",
+        headquarters: "Porto Alegre / RS",
+        platform: "Web Cloud + Desktop",
+        monthlyPrice: 119.00,
+        annualPriceMonthly: 89.00,
+        annualPriceTotal: 1068.00,
+        ticketMedio: 95.00,
+        churn: "4,2%",
+        ltv: "R$ 2.260",
+        cac: "R$ 350",
+        nicheKey: "Hospitalar",
+        nicheLabel: "Hospitais, Clínicas Renais, Restaurantes UAN",
+        states: ["RS", "SC", "PR", "SP"],
+        measures: "Dobras básicas, IMC, Estimativas para acamados (Chumlea), Panturrilha, RCQ",
+        foods: "TACO, Dietwin Foods, Fórmulas enterais/parenterais, Fichas técnicas com custo/kg",
+        summary: "Especialista em nutrição clínica pesada, nutrição enteral, parenteral e fichas técnicas para cozinhas industriais.",
+        swot: {
+          strengths: [
+            "Altíssima robustez para nutrição hospitalar e enteral",
+            "Fichas técnicas completas com fator de correção/cocção",
+            "Histórico consolidado de mais de 25 anos no mercado",
+            "Cálculos precisos de custo por porção e cardápios UAN"
+          ],
+          weaknesses: [
+            "Interface visual corporativa densa e ultrapassada",
+            "Pouco atrativo para consultórios privados de estética",
+            "Fluxo de montagem de dietas ambulatoriais lento",
+            "Falta de integração moderna com WhatsApp e mobile"
+          ],
+          opportunities: [
+            "Módulo SaaS focado em gestão de compras para restaurantes",
+            "Parcerias com grandes operadoras de planos de saúde"
+          ],
+          threats: [
+            "Migração de consultórios particulares para Webdiet",
+            "Entrada de ERPs de alimentação com módulos integrados"
+          ]
+        }
+      },
+      {
+        id: "nutrilize",
+        name: "Nutrilize",
+        tier: "MID",
+        tierLabel: "Low Cost & Teleconsulta",
+        foundation: "2018",
+        headquarters: "Goiânia / GO",
+        platform: "Web Cloud",
+        monthlyPrice: 79.90,
+        annualPriceMonthly: 59.90,
+        annualPriceTotal: 718.80,
+        ticketMedio: 68.00,
+        churn: "6,2%",
+        ltv: "R$ 1.100",
+        cac: "R$ 230",
+        nicheKey: "Iniciante",
+        nicheLabel: "Recém-Formados, Atendimento Online",
+        states: ["SP", "GO", "MG", "Nordeste"],
+        measures: "Dobras essenciais (Pollock 3), Circunferências, Bioimpedância, Gráficos de peso/IMC",
+        foods: "TACO, TBCA simplificada",
+        summary: "Plataforma focada em simplicidade operacional e preço competitivo para quem está iniciando o consultório.",
+        swot: {
+          strengths: [
+            "Preço de entrada muito competitivo",
+            "Interface web limpa, intuitiva e sem complicação",
+            "Prontuário focado na agilidade de teleconsultas",
+            "Fácil compartilhamento de prescrições em PDF"
+          ],
+          weaknesses: [
+            "Base de alimentos menos extensa que líderes de mercado",
+            "Poucos protocolos antropométricos avançados",
+            "Sem suporte a funcionamento offline no navegador",
+            "Recursos limitados de personalização e escala em lote"
+          ],
+          opportunities: [
+            "Parcerias com turmas de formandos de nutrição",
+            "Módulo de agendamento de teleconsultas com link Pix"
+          ],
+          threats: [
+            "Guerra de preços com softwares freemium/gratuitos",
+            "Absorção de usuários por Webdiet/Dietbox em promoções"
+          ]
+        }
+      },
+      {
+        id: "san",
+        name: "Sistema SAN",
+        tier: "MID",
+        tierLabel: "Especialista Composição",
+        foundation: "2008",
+        headquarters: "Curitiba / PR",
+        platform: "Desktop + Web Companion",
+        monthlyPrice: 49.16,
+        annualPriceMonthly: 49.16,
+        annualPriceTotal: 590.00,
+        ticketMedio: 52.00,
+        churn: "2,8%",
+        ltv: "R$ 1.850",
+        cac: "R$ 170",
+        nicheKey: "Esportivo",
+        nicheLabel: "Avaliadores Físicos, Personal Trainers, Esportistas",
+        states: ["SP", "PR", "SC", "RS"],
+        measures: "5 Massas Corporais (Drinkwater), Somatotipo Heath-Carter, Pollock 3/7, Petroski, Diâmetros ósseos",
+        foods: "Tabela básica de macronutrientes",
+        summary: "Software especializado em relatórios visuais de composição corporal, muito utilizado em academias e estúdios.",
+        swot: {
+          strengths: [
+            "Especialização extrema em composição corporal",
+            "Gráficos de Somatocarta de Heath-Carter de alta precisão",
+            "Custo fixo baixo (anuidade/vitalício sem mensalidade)",
+            "Excelente relatório impresso de evolução física"
+          ],
+          weaknesses: [
+            "Módulo de cálculo dietético rudimentar e incompleto",
+            "Não atende o fluxo completo da consulta nutricional",
+            "Interface puramente técnica e utilitária",
+            "Não possui aplicativo para o paciente"
+          ],
+          opportunities: [
+            "Integrações via API com softwares focados em dieta",
+            "Parcerias com fabricantes de balanças de bioimpedância"
+          ],
+          threats: [
+            "Softwares completos englobando relatórios de somatotipo",
+            "Perda de relevância para nutricionistas generalistas"
+          ]
+        }
+      },
+      {
+        id: "hubnutri",
+        name: "HubNutri",
+        tier: "MID",
+        tierLabel: "Nutrição Integrativa",
+        foundation: "2020",
+        headquarters: "Campinas / SP",
+        platform: "Web Cloud",
+        monthlyPrice: 89.00,
+        annualPriceMonthly: 59.00,
+        annualPriceTotal: 708.00,
+        ticketMedio: 78.00,
+        churn: "5,5%",
+        ltv: "R$ 1.420",
+        cac: "R$ 290",
+        nicheKey: "Clinico",
+        nicheLabel: "Nutrição Funcional, Fitoterapia, Integrativa",
+        states: ["SP", "RJ", "DF"],
+        measures: "Pollock 3 e 7 dobras, Circunferências corporais, Bioimpedância e Fotos posturais",
+        foods: "TACO, Tabela de Suplementos e Fitoterápicos (com dosagens e posologias)",
+        summary: "Plataforma focada em pequenos consultórios com módulos práticos de prescrição magistral e fitoterapia.",
+        swot: {
+          strengths: [
+            "Módulo dedicado a fitoterápicos, fórmulas e manipulados",
+            "Painel financeiro simples e integrado ao prontuário",
+            "Relatórios visuais com identidade gráfica personalizável",
+            "Boa gestão de receitas culinárias personalizadas"
+          ],
+          weaknesses: [
+            "Menor reconhecimento de marca que Webdiet e Dietbox",
+            "Ausência de app nativo próprio para o paciente",
+            "Lentidão em planos alimentares com muitos alimentos",
+            "Sem suporte a funcionamento offline"
+          ],
+          opportunities: [
+            "Posicionamento no nicho em alta de nutrição integrativa",
+            "Integração com farmácias de manipulação para orçamentos"
+          ],
+          threats: [
+            "Concorrentes maiores desenvolvendo módulos magistrais",
+            "Pressão competitiva por preços mais baixos"
+          ]
+        }
+      },
+      {
+        id: "easydiet",
+        name: "EasyDiet Pro",
+        tier: "MID",
+        tierLabel: "Ultraleve & Econômico",
+        foundation: "2021",
+        headquarters: "Belo Horizonte / MG",
+        platform: "Web Cloud",
+        monthlyPrice: 59.90,
+        annualPriceMonthly: 39.90,
+        annualPriceTotal: 478.80,
+        ticketMedio: 48.00,
+        churn: "6,8%",
+        ltv: "R$ 700",
+        cac: "R$ 110",
+        nicheKey: "Iniciante",
+        nicheLabel: "Estudantes, Atendimentos Informais, Low-Cost",
+        states: ["Nacional"],
+        measures: "Peso, Altura, IMC, Relação Cintura-Quadril e Circunferências básicas",
+        foods: "TACO resumida",
+        summary: "Solução ultraleve voltada para estudantes e nutricionistas que buscam apenas uma calculadora web de dietas sem custos altos.",
+        swot: {
+          strengths: [
+            "Menor preço de mensalidade do mercado nacional",
+            "Interface muito simples e direta de operar",
+            "Curva de aprendizado nula (abre e já calcula)",
+            "Rápido carregamento em conexões modestas"
+          ],
+          weaknesses: [
+            "Módulo de avaliação física quase inexistente",
+            "Relatórios e PDFs extremamente básicos",
+            "Sem suporte offline e sem app do paciente",
+            "Falta de personalização profissional para consultório"
+          ],
+          opportunities: [
+            "Captação maciça de estudantes nas universidades",
+            "Modelo Freemium (grátis até 3 pacientes)"
+          ],
+          threats: [
+            "Planilhas Excel gratuitas com macros",
+            "Softwares locais mais completos e gratuitos"
+          ]
+        }
+      }
+    ];
+
+    function renderCards(list) {
+      const container = document.getElementById('competitorsGrid');
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="col-span-2 text-center py-12 bg-white rounded-xl border border-warm-200">
+            <i data-lucide="inbox" class="w-8 h-8 text-warm-400 mx-auto mb-2"></i>
+            <div class="text-sm font-bold text-warm-800">Nenhum concorrente encontrado</div>
+            <div class="text-xs text-warm-500">Tente ajustar os filtros de busca acima.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = list.map((c, idx) => `
+        <div class="bg-white rounded-xl border border-warm-200 shadow-sm overflow-hidden flex flex-col hover:border-warm-300 transition">
+          <!-- CARD HEADER -->
+          <div class="p-5 border-b border-warm-100 flex items-start justify-between bg-warm-50/50">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-warm-400">#${idx + 1}</span>
+                <h3 class="text-lg font-bold text-warm-900">${c.name}</h3>
+                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full ${c.tier === 'TOP' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
+                  ${c.tierLabel}
+                </span>
+              </div>
+              <div class="text-[11px] text-warm-500 font-mono mt-0.5">Fundação: ${c.foundation} • Sede: ${c.headquarters}</div>
+              <p class="text-xs text-warm-600 mt-1">${c.summary}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-xs text-warm-500 font-medium">Ticket Médio</div>
+              <div class="text-base font-extrabold text-brand-700">R$ ${c.ticketMedio.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <!-- PRICING & SAAS METRICS STRIP -->
+          <div class="px-5 py-3 bg-warm-100/50 border-b border-warm-200 grid grid-cols-4 gap-2 text-center text-xs">
+            <div>
+              <div class="text-[10px] text-warm-500 font-medium">Mensal</div>
+              <div class="font-bold text-warm-900">R$ ${c.monthlyPrice.toFixed(2)}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-warm-500 font-medium">Plano Anual</div>
+              <div class="font-bold text-emerald-700">R$ ${c.annualPriceMonthly.toFixed(2)}<span class="text-[10px]">/m</span></div>
+            </div>
+            <div>
+              <div class="text-[10px] text-warm-500 font-medium">Churn Estimado</div>
+              <div class="font-bold text-amber-700">${c.churn}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-warm-500 font-medium">LTV Estimado</div>
+              <div class="font-bold text-purple-700">${c.ltv}</div>
+            </div>
+          </div>
+
+          <!-- DETAILS: NICHE, STATES & MEASURES -->
+          <div class="p-5 space-y-4 flex-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-warm-50 p-2.5 rounded-lg border border-warm-200/80">
+                <div class="text-[10px] font-bold text-warm-500 uppercase tracking-wide flex items-center gap-1">
+                  <i data-lucide="target" class="w-3 h-3 text-warm-600"></i> Nicho Principal
+                </div>
+                <div class="font-semibold text-warm-800 mt-0.5">${c.nicheLabel}</div>
+              </div>
+
+              <div class="bg-warm-50 p-2.5 rounded-lg border border-warm-200/80">
+                <div class="text-[10px] font-bold text-warm-500 uppercase tracking-wide flex items-center gap-1">
+                  <i data-lucide="map-pin" class="w-3 h-3 text-warm-600"></i> Estados Chave
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  ${c.states.map(s => `<span class="px-1.5 py-0.2 text-[10px] font-semibold bg-white text-warm-700 rounded border border-warm-200">${s}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- ANTROPOMETRIA & DIETA INFO -->
+            <div class="text-xs bg-emerald-50/40 p-3 rounded-lg border border-emerald-100/80 space-y-1">
+              <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+                <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Antropometria & Bases de Alimentos
+              </div>
+              <div class="text-warm-700 text-[11px]"><strong class="text-warm-900">Medidas:</strong> ${c.measures}</div>
+              <div class="text-warm-700 text-[11px]"><strong class="text-warm-900">Bases:</strong> ${c.foods}</div>
+            </div>
+
+            <!-- SWOT MATRIX (4 QUADRANTS) -->
+            <div class="space-y-2 pt-2">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-warm-500 flex items-center gap-1">
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Análise SWOT Ultra-Detalhada
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                <!-- Strengths -->
+                <div class="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-lg">
+                  <div class="font-bold text-emerald-900 flex items-center gap-1 mb-1">
+                    <i data-lucide="plus-circle" class="w-3 h-3 text-emerald-600"></i> Forças (Strengths)
+                  </div>
+                  <ul class="list-disc list-inside text-emerald-950 space-y-0.5">
+                    ${c.swot.strengths.map(s => `<li>${s}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <!-- Weaknesses -->
+                <div class="p-2.5 bg-rose-50/70 border border-rose-200 rounded-lg">
+                  <div class="font-bold text-rose-900 flex items-center gap-1 mb-1">
+                    <i data-lucide="minus-circle" class="w-3 h-3 text-rose-600"></i> Fraquezas (Weaknesses)
+                  </div>
+                  <ul class="list-disc list-inside text-rose-950 space-y-0.5">
+                    ${c.swot.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <!-- Opportunities -->
+                <div class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-lg">
+                  <div class="font-bold text-blue-900 flex items-center gap-1 mb-1">
+                    <i data-lucide="lightbulb" class="w-3 h-3 text-blue-600"></i> Oportunidades
+                  </div>
+                  <ul class="list-disc list-inside text-blue-950 space-y-0.5">
+                    ${c.swot.opportunities.map(o => `<li>${o}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <!-- Threats -->
+                <div class="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg">
+                  <div class="font-bold text-amber-900 flex items-center gap-1 mb-1">
+                    <i data-lucide="alert-circle" class="w-3 h-3 text-amber-600"></i> Ameaças (Threats)
+                  </div>
+                  <ul class="list-disc list-inside text-amber-950 space-y-0.5">
+                    ${c.swot.threats.map(t => `<li>${t}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('tableBody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-warm-500">Nenhum dado encontrado</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((c, i) => `
+        <tr class="hover:bg-warm-50 transition">
+          <td class="py-3 px-4 font-bold text-warm-900">
+            ${i + 1}. ${c.name}
+            <span class="block text-[10px] text-warm-500 font-normal">${c.tierLabel}</span>
+          </td>
+          <td class="py-3 px-4 text-warm-600 font-mono text-[11px]">${c.foundation}<br>${c.headquarters}</td>
+          <td class="py-3 px-4 text-warm-700">${c.platform}</td>
+          <td class="py-3 px-4 font-semibold text-warm-900">R$ ${c.monthlyPrice.toFixed(2)}</td>
+          <td class="py-3 px-4 font-bold text-emerald-700">R$ ${c.annualPriceMonthly.toFixed(2)}/m</td>
+          <td class="py-3 px-4">
+            <span class="font-bold text-brand-700">R$ ${c.ticketMedio.toFixed(2)}</span>
+            <span class="block text-[10px] text-purple-700">LTV: ${c.ltv}</span>
+          </td>
+          <td class="py-3 px-4 font-semibold text-amber-700">${c.churn}</td>
+          <td class="py-3 px-4 text-warm-800">${c.nicheLabel}</td>
+          <td class="py-3 px-4 text-warm-600 max-w-xs truncate" title="${c.measures}">${c.measures}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterCompetitors() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const tierFilter = document.getElementById('filterTier').value;
+      const nicheFilter = document.getElementById('filterNiche').value;
+      const priceFilter = document.getElementById('filterPrice').value;
+
+      const filtered = competitors.filter(c => {
+        // Query match
+        const matchesQuery = !query || 
+          c.name.toLowerCase().includes(query) ||
+          c.nicheLabel.toLowerCase().includes(query) ||
+          c.summary.toLowerCase().includes(query) ||
+          c.headquarters.toLowerCase().includes(query) ||
+          c.states.some(s => s.toLowerCase().includes(query)) ||
+          c.measures.toLowerCase().includes(query);
+
+        // Tier filter
+        const matchesTier = tierFilter === 'ALL' || c.tier === tierFilter;
+
+        // Niche filter
+        const matchesNiche = nicheFilter === 'ALL' || c.nicheKey === nicheFilter;
+
+        // Price filter
+        let matchesPrice = true;
+        if (priceFilter === 'LOW') matchesPrice = c.monthlyPrice <= 70;
+        else if (priceFilter === 'MED') matchesPrice = c.monthlyPrice > 70 && c.monthlyPrice <= 110;
+        else if (priceFilter === 'HIGH') matchesPrice = c.monthlyPrice > 110;
+
+        return matchesQuery && matchesTier && matchesNiche && matchesPrice;
+      });
+
+      renderCards(filtered);
+      renderTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterTier').value = 'ALL';
+      document.getElementById('filterNiche').value = 'ALL';
+      document.getElementById('filterPrice').value = 'ALL';
+      filterCompetitors();
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewCards').classList.toggle('hidden', tab !== 'cards');
+      document.getElementById('viewSwotCentral').classList.toggle('hidden', tab !== 'swotCentral');
+      document.getElementById('viewStrategy').classList.toggle('hidden', tab !== 'strategy');
+      document.getElementById('viewPatientApp').classList.toggle('hidden', tab !== 'patientApp');
+      document.getElementById('viewArchitecture').classList.toggle('hidden', tab !== 'architecture');
+      document.getElementById('viewTable').classList.toggle('hidden', tab !== 'table');
+      document.getElementById('viewGaps').classList.toggle('hidden', tab !== 'gaps');
+
+      // Toggle filter section visibility (show only for cards and table)
+      const isFilterable = tab === 'cards' || tab === 'table';
+      document.getElementById('filterSection').classList.toggle('hidden', !isFilterable);
+
+      // Button styles
+      const activeClass = 'bg-brand-700 text-white shadow-sm';
+      const inactiveClass = 'bg-warm-100 text-warm-800 hover:bg-warm-200';
+
+      document.getElementById('btnTabCards').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'cards' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabSwotCentral').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'swotCentral' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabStrategy').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'strategy' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabPatientApp').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'patientApp' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabArchitecture').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'architecture' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabTable').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'table' ? activeClass : inactiveClass}`;
+      document.getElementById('btnTabGaps').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${tab === 'gaps' ? activeClass : inactiveClass}`;
+      
+      lucide.createIcons();
+    }
+
+    // Interactive Demo Functions for Patient App View
+    function updateDemoAdherence() {
+      const c1 = document.getElementById('mealCheck1').checked;
+      const c2 = document.getElementById('mealCheck2').checked;
+      const c3 = document.getElementById('mealCheck3').checked;
+      
+      let count = 0;
+      if (c1) count++;
+      if (c2) count++;
+      if (c3) count++;
+      
+      const pct = Math.round((count / 3) * 100);
+      document.getElementById('adherencePercent').innerText = pct + '%';
+      document.getElementById('checkedCountText').innerText = `${count} de 3 Refeições`;
+      document.getElementById('progressBarFill').style.width = pct + '%';
+    }
+
+    function toggleSwapMenu(mealId) {
+      const menu = document.getElementById(`swapMenu${mealId}`);
+      menu.classList.toggle('hidden');
+    }
+
+    function selectSwap(mealId, foodName) {
+      document.getElementById(`carbItem${mealId}`).innerHTML = `• <strong>${foodName}</strong>`;
+      document.getElementById(`swapMenu${mealId}`).classList.add('hidden');
+    }
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCards(competitors);
+      renderTable(competitors);
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
