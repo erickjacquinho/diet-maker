@@ -1,14 +1,15 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
 
 const push = vi.fn();
+const router = { push, replace: vi.fn() };
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: PATIENT_PROFILE_FIXTURES.patient.id }),
-  useRouter: () => ({ push }),
+  useRouter: () => router,
 }));
 
 vi.mock('next/link', () => ({
@@ -45,11 +46,12 @@ describe('PatientDetailPage current plan', () => {
 
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
     expect(screen.getByText('Plano ativo')).toBeInTheDocument();
-    expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
-    expect(screen.getByText(/C\s*220g/)).toBeInTheDocument();
-    expect(screen.getByText(/G\s*60g/)).toBeInTheDocument();
-    expect(screen.getByText(/2020/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
+    const planSummary = within(screen.getByLabelText('Plano alimentar atual'));
+    expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
+    expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
+    expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
+    expect(planSummary.getByText(/2020/)).toBeInTheDocument();
+    expect(planSummary.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',
     );
