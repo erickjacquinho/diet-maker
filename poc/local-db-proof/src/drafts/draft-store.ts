@@ -38,7 +38,7 @@ function isDraft(value: unknown): value is DietDraft {
         && value.expectedVersion > 0))
     && isRecord(value.payload)
     && typeof value.updatedAt === 'string'
-    && value.updatedAt.length > 0;
+    && Number.isFinite(Date.parse(value.updatedAt));
 }
 
 function validateDraft(draft: DietDraft): void {
@@ -88,10 +88,31 @@ export class IndexedDbDraftStore implements DraftStore {
   async save(draft: DietDraft): Promise<void> {
     try {
       validateDraft(draft);
+      const candidate = structuredClone(draft);
       const database = await this.openDatabase();
       const transaction = database.transaction(STORE_NAME, 'readwrite');
-      transaction.objectStore(STORE_NAME).put(structuredClone(draft));
-      await transactionDone(transaction);
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(candidate.draftId);
+      let writeFailure: unknown;
+      request.onsuccess = () => {
+        try {
+          const current: unknown = request.result;
+          if (current !== undefined && !isDraft(current)) {
+            throw new PocError('DRAFT_FAILED', 'draft-save', 'O draft persistido não possui uma revisão válida.');
+          }
+          // Read and conditional write share one transaction, including across connections.
+          // Equal timestamps retain arrival order; strictly older callbacks are ignored.
+          if (current === undefined || Date.parse(candidate.updatedAt) >= Date.parse(current.updatedAt)) {
+            store.put(candidate);
+          }
+        } catch (cause) {
+          writeFailure = cause;
+          transaction.abort();
+        }
+      };
+      await transactionDone(transaction).catch((cause: unknown) => {
+        throw writeFailure ?? cause;
+      });
     } catch (cause) {
       if (cause instanceof PocError) {
         throw cause;
@@ -128,7 +149,7 @@ export class IndexedDbDraftStore implements DraftStore {
       return results
         .filter((draft) => !context.accountId || draft.accountId === context.accountId)
         .filter((draft) => !context.patientId || draft.patientId === context.patientId)
-        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+        .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))
         .map((draft) => structuredClone(draft));
     } catch (cause) {
       throw new PocError('DRAFT_FAILED', 'draft-list', 'Não foi possível listar os drafts separados.', undefined, { cause });

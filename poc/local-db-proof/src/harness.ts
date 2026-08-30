@@ -43,22 +43,25 @@ async function readOrSeed(repository: DatabaseRepository): Promise<{ seeded: boo
     }
   }
 
+  const queryMs = performance.now() - queryStarted;
   const writeStarted = performance.now();
   await repository.seedFixture(cloneFixture());
   const writeMs = performance.now() - writeStarted;
-  return { seeded: true, queryMs: performance.now() - queryStarted, writeMs };
+  return { seeded: true, queryMs, writeMs };
 }
 
 async function initialize(): Promise<void> {
-  if (activeHandle && activeRepository) {
+  if (activeHandle && activeRepository && !activeHandle.client.closed) {
     setStatus('Base local já inicializada nesta aba.', 'pass');
     return;
   }
 
   const report = createEvidenceReport('browser-persistent');
   const openingStarted = performance.now();
+  let handle: DatabaseHandle | undefined;
   try {
-    const handle = await openDatabase({ mode: 'browser-persistent', lock: new SingleTabLock() });
+    handle = await openDatabase({ mode: 'browser-persistent', lock: new SingleTabLock() });
+    const openingMs = performance.now() - openingStarted;
     const repository = createDatabaseRepository(handle);
     const timings = await readOrSeed(repository);
     activeHandle = handle;
@@ -71,14 +74,24 @@ async function initialize(): Promise<void> {
         ? 'Fixture sintética gravada em armazenamento persistente.'
         : 'Fixture sintética recuperada do armazenamento persistente.',
       timings: {
-        openingMs: performance.now() - openingStarted,
+        openingMs,
         queryMs: timings.queryMs,
         writeMs: timings.writeMs,
       },
     });
     setStatus('Base persistente inicializada; fixture confirmada.', 'pass');
     setReport(report);
-  } catch (error) {
+  } catch (cause) {
+    let error = cause;
+    if (handle) {
+      try {
+        await closeDatabase(handle);
+      } catch (cleanupCause) {
+        activeHandle = handle;
+        activeRepository = undefined;
+        error = new PocError('INITIALIZATION_FAILED', 'initialize-cleanup', 'Não foi possível fechar a instância. Feche esta aba antes de tentar novamente.', undefined, { cause: cleanupCause });
+      }
+    }
     const message = error instanceof Error ? error.message : 'Falha desconhecida ao abrir a base local.';
     recordEvidence(report, {
       scenario: 'US1/persistence-and-reopen',
@@ -94,23 +107,54 @@ async function initialize(): Promise<void> {
 }
 
 async function reopen(): Promise<void> {
-  if (!activeHandle || !activeRepository) {
-    await initialize();
-  }
-  if (!activeHandle) {
-    throw new PocError('INITIALIZATION_FAILED', 'reopen-database', 'A base local ativa não está disponível para reabertura.');
-  }
+  const report = latestReport ?? createEvidenceReport('browser-persistent');
+  const startedAt = performance.now();
+  setStatus('Reabrindo a base local...');
+  let nextHandle: DatabaseHandle | undefined;
+  try {
+    if (!activeHandle || !activeRepository) {
+      await initialize();
+    }
+    if (!activeHandle) {
+      throw new PocError('INITIALIZATION_FAILED', 'reopen-database', 'A base local ativa não está disponível para reabertura.');
+    }
 
-  const dataDir = activeHandle.client.dataDir;
-  if (!dataDir) {
-    throw new PocError('PERSISTENCE_UNCONFIRMED', 'reopen-database', 'A instância atual não expõe um diretório persistente.');
-  }
+    const dataDir = activeHandle.client.dataDir;
+    if (!dataDir) {
+      throw new PocError('PERSISTENCE_UNCONFIRMED', 'reopen-database', 'A instância atual não expõe um diretório persistente.');
+    }
 
-  await closeDatabase(activeHandle);
-  activeHandle = await openDatabase({ mode: 'browser-persistent', dataDir });
-  activeRepository = createDatabaseRepository(activeHandle);
-  const recovered = await activeRepository.readConfirmed('account-alpha');
-  setStatus(`Reabertura confirmada: ${recovered.dietPlans.length} dietas recuperadas.`, 'pass');
+    await closeDatabase(activeHandle);
+    activeHandle = undefined;
+    activeRepository = undefined;
+    nextHandle = await openDatabase({ mode: 'browser-persistent', dataDir });
+    const repository = createDatabaseRepository(nextHandle);
+    const recovered = await repository.readConfirmed('account-alpha');
+    activeHandle = nextHandle;
+    activeRepository = repository;
+    const message = `Reabertura confirmada: ${recovered.dietPlans.length} dietas recuperadas.`;
+    recordEvidence(report, { scenario: 'US1/reopen', status: 'pass', message, timings: { openingMs: performance.now() - startedAt } });
+    setStatus(message, 'pass');
+    setReport(report);
+  } catch (cause) {
+    let error = cause instanceof PocError ? cause : new PocError(
+      'INITIALIZATION_FAILED', 'reopen-database', 'Não foi possível reabrir a base local. Tente novamente.', undefined, { cause },
+    );
+    if (nextHandle) {
+      try {
+        await closeDatabase(nextHandle);
+      } catch (cleanupCause) {
+        activeHandle = nextHandle;
+        activeRepository = undefined;
+        error = new PocError('INITIALIZATION_FAILED', 'reopen-cleanup', 'Não foi possível fechar a instância. Feche esta aba antes de tentar novamente.', undefined, { cause: cleanupCause });
+      }
+    }
+    const message = `[${error.code}] ${error.message}`;
+    recordEvidence(report, { scenario: 'US1/reopen', status: 'fail', message });
+    setStatus(`Falha explícita: ${message}`, 'fail');
+    setReport(report);
+    throw error;
+  }
 }
 
 async function prepareOffline(): Promise<void> {
@@ -180,9 +224,9 @@ export function mountHarness(): HarnessController {
   document.querySelector<HTMLButtonElement>('#run-offline')?.addEventListener('click', () => {
     void runOffline().catch(() => undefined);
   });
-  window.addEventListener('pagehide', () => {
-    void disposeHarness().catch(() => undefined);
-  });
+  // Writes are durable before resolving. Do not start async filesystem work during
+  // page teardown; explicit close/reopen awaits disposal, and page destruction
+  // releases the browser-owned Web Lock.
 
   return {
     initialize,

@@ -1,4 +1,4 @@
-import type { BodyAssessment } from './patientsStore';
+import type { BodyAssessment } from './patientsStoreTypes';
 import type { PatientListHistory, PatientListHistoryInput } from './patientListView';
 import { getDaysUntilEvent, normalizeDateKey } from './patientListDateUtils';
 

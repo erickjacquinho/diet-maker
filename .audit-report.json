@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-28T06:52:29.512Z",
+  "timestamp": "2026-08-30T18:55:23.452Z",
   "summary": {
-    "totalFilesScanned": 147,
-    "compliantFiles": 147,
+    "totalFilesScanned": 146,
+    "compliantFiles": 146,
     "nonCompliantFiles": 0,
     "totalViolations": 0,
     "complianceScorePercentage": 100

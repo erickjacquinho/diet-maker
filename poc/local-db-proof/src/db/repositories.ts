@@ -227,12 +227,12 @@ export class DatabaseRepository implements LocalDatabasePort {
         await tx.delete(accounts).where(eq(accounts.id, sample.accountId));
 
         await tx.insert(accounts).values(records.accounts);
-        await tx.insert(patients).values(records.patients);
-        await tx.insert(recipes).values(records.recipes);
-        await tx.insert(recipeIngredients).values(records.recipeIngredients);
-        await tx.insert(dietPlans).values(records.dietPlans);
-        await tx.insert(dietMeals).values(records.dietMeals);
-        await tx.insert(dietMealItems).values(records.dietMealItems);
+        if (records.patients.length > 0) await tx.insert(patients).values(records.patients);
+        if (records.recipes.length > 0) await tx.insert(recipes).values(records.recipes);
+        if (records.recipeIngredients.length > 0) await tx.insert(recipeIngredients).values(records.recipeIngredients);
+        if (records.dietPlans.length > 0) await tx.insert(dietPlans).values(records.dietPlans);
+        if (records.dietMeals.length > 0) await tx.insert(dietMeals).values(records.dietMeals);
+        if (records.dietMealItems.length > 0) await tx.insert(dietMealItems).values(records.dietMealItems);
       });
     } catch (cause) {
       throw new PocError(

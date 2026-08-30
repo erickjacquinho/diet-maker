@@ -1,4 +1,5 @@
-import type { BodyAssessment, Patient, PatientLastActivity } from './patientsStore';
+import type { BodyAssessment, PatientLastActivity } from './patientsStoreTypes';
+import type { PatientViewModel } from './patientViewModel';
 import {
   PATIENT_LIST_GROUP_IDS,
   type PatientListGroupId,
@@ -44,7 +45,7 @@ export interface PatientListHistory {
 }
 
 export interface PatientListRow {
-  patient: Patient;
+  patient: PatientViewModel;
   group: PatientListGroupId;
   href: string;
   eventStatusLabel: string;
@@ -70,7 +71,7 @@ function getActivityDateKey(activity: PatientLastActivity | null | undefined): s
   return Number.isNaN(parsed.getTime()) ? null : getTodayDateKey(parsed);
 }
 
-export function classifyPatient(patient: Patient, today = getTodayDateKey()): PatientListGroupId {
+export function classifyPatient(patient: PatientViewModel, today = getTodayDateKey()): PatientListGroupId {
   const daysUntilEvent = patient.nextEvent?.date ? getDaysUntilEvent(patient.nextEvent.date, today) : null;
   if (daysUntilEvent === null) return 'no-event';
   if (daysUntilEvent < 0) return 'overdue';
@@ -91,10 +92,10 @@ export function formatLastActivity(activity: PatientLastActivity | null | undefi
 
 export const formatLastActivityLabel = formatLastActivity;
 
-function getPatientHistoryInput(patient: Patient, historyByPatient: Record<string, PatientListHistoryInput>): PatientListHistoryInput {
+function getPatientHistoryInput(patient: PatientViewModel, historyByPatient: Record<string, PatientListHistoryInput>): PatientListHistoryInput {
   const stored = historyByPatient[patient.id] ?? {
-    assessments: patient.bodyAssessments ?? [],
-    hasDiet: Boolean(patient.dietHistory?.length),
+    assessments: [],
+    hasDiet: false,
   };
   return {
     ...stored,
@@ -103,7 +104,7 @@ function getPatientHistoryInput(patient: Patient, historyByPatient: Record<strin
   };
 }
 
-export function buildPatientListRow(patient: Patient, today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListRow {
+export function buildPatientListRow(patient: PatientViewModel, today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListRow {
   const history = buildPatientListHistory(getPatientHistoryInput(patient, historyByPatient));
   return {
     patient,
@@ -134,9 +135,9 @@ function compareRows(left: PatientListRow, right: PatientListRow): number {
   return leftDate.localeCompare(rightDate) || compareNames(left, right);
 }
 
-export function buildPatientListGroups(patients: Patient[], today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListGroup[] {
+export function buildPatientListGroups(patients: PatientViewModel[], today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListGroup[] {
   const grouped = new Map<PatientListGroupId, PatientListRow[]>(PATIENT_LIST_GROUP_IDS.map((id) => [id, []]));
-  patients.forEach((patient) => {
+  patients.filter((patient) => patient.archivedAt == null).forEach((patient) => {
     const row = buildPatientListRow(patient, today, historyByPatient);
     grouped.get(row.group)?.push(row);
   });
@@ -146,14 +147,15 @@ export function buildPatientListGroups(patients: Patient[], today = getTodayDate
 
 export const groupPatientsForListView = buildPatientListGroups;
 
-export function buildPatientListRows(patients: Patient[], today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListRow[] {
+export function buildPatientListRows(patients: PatientViewModel[], today = getTodayDateKey(), historyByPatient: Record<string, PatientListHistoryInput> = {}): PatientListRow[] {
   const groups = buildPatientListGroups(patients, today, historyByPatient);
   const groupById = new Map(groups.map((group) => [group.id, group]));
   return PATIENT_LIST_SORT_ORDER.flatMap((groupId) => groupById.get(groupId)?.rows ?? []);
 }
 
-export function filterPatients(patients: Patient[], searchTerm: string): Patient[] {
+export function filterPatients(patients: PatientViewModel[], searchTerm: string): PatientViewModel[] {
   const query = searchTerm.trim().toLocaleLowerCase('pt-BR');
-  if (!query) return patients;
-  return patients.filter((patient) => [patient.name, patient.objective].some((value) => value.toLocaleLowerCase('pt-BR').includes(query)));
+  const activePatients = patients.filter((patient) => patient.archivedAt == null);
+  if (!query) return activePatients;
+  return activePatients.filter((patient) => [patient.name, patient.objective].some((value) => value.toLocaleLowerCase('pt-BR').includes(query)));
 }

@@ -7,6 +7,4 @@ export * from './IconButton';
 export * from './Avatar';
 export * from './Surface';
 export * from './SelectField';
-export * from './VariationCard';
-export * from './Checkbox';
 export * from '@/components/molecules/MacroSummary';

@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/atoms/Checkbox';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { DataTablePagination } from './data-table/DataTablePagination';
@@ -16,6 +15,50 @@ import type {
   DataTableSortState,
 } from './data-table/types';
 import { alignClass, nextSortState, nodeToLabel, normalizeSelectionSet, sortRows } from './data-table/utils';
+
+type DataTableCheckboxState = boolean | 'indeterminate';
+
+function DataTableCheckbox({
+  checked = false,
+  disabled = false,
+  onCheckedChange,
+  'aria-label': ariaLabel,
+}: {
+  checked?: DataTableCheckboxState;
+  disabled?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  'aria-label': string;
+}) {
+  const isChecked = checked === true;
+  const isIndeterminate = checked === 'indeterminate';
+
+  return (
+    <Button
+      type="button"
+      variant="quiet"
+      size="compact"
+      iconOnly
+      role="checkbox"
+      aria-checked={isIndeterminate ? 'mixed' : isChecked}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={(event) => {
+        event.stopPropagation();
+        onCheckedChange?.(!isChecked);
+      }}
+      className={cn(
+        'flex size-4 items-center justify-center rounded-compact border transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2',
+        isChecked && 'border-primary bg-primary text-on-primary',
+        isIndeterminate && 'border-primary bg-primary-soft text-primary',
+        !isChecked && !isIndeterminate && 'border-border-subtle bg-surface hover:border-border-hover',
+        disabled ? 'pointer-events-none cursor-not-allowed opacity-disabled' : 'cursor-pointer',
+      )}
+    >
+      {isChecked && <Check size={12} className="shrink-0" aria-hidden="true" />}
+      {isIndeterminate && <span className="h-px w-2 rounded-round bg-primary" aria-hidden="true" />}
+    </Button>
+  );
+}
 
 export {
   type DataTableColumnDef,
@@ -106,7 +149,7 @@ function TableHeaderRow<TData>({
     <TableRow className={cn('bg-surface-subtle hover:bg-surface-subtle border-b border-border-divider', className)}>
       {selection && (
         <TableHead className="w-10 px-3 text-center h-9 bg-surface-subtle" scope="col">
-          <Checkbox
+          <DataTableCheckbox
             checked={allSelected ? true : someSelected ? 'indeterminate' : false}
             onCheckedChange={onToggleAll}
             aria-label={
@@ -451,7 +494,7 @@ export function DataTable<TData>({
                       e.stopPropagation();
                     }}
                   >
-                    <Checkbox
+                    <DataTableCheckbox
                       checked={isSelected}
                       disabled={!isSelectable}
                       onCheckedChange={() => handleToggleRow(row, index)}

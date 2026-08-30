@@ -54,7 +54,7 @@ export class SingleTabLock {
         await releasePromise;
         return undefined;
       });
-      const acquired = await acquiredPromise;
+      const acquired = await Promise.race([acquiredPromise, request.then(() => false)]);
       if (!acquired) {
         await request;
         throw new PocError(
@@ -78,12 +78,25 @@ export class SingleTabLock {
     }
 
     let released = false;
+    const onPageHide = (event: PageTransitionEvent): void => {
+      if (!event.persisted) {
+        releaseResolver();
+      }
+    };
+    // Complete the lock callback at document termination without starting async
+    // filesystem work. A cached (resumable) document must retain its lease.
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pagehide', onPageHide);
+    }
     return {
       release: async () => {
         if (released) {
           return;
         }
         released = true;
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('pagehide', onPageHide);
+        }
         releaseResolver();
         await request;
       },

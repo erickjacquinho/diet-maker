@@ -12,31 +12,31 @@ const columns: DataTableColumnDef<PatientListRow>[] = [
   {
     id: 'patient',
     header: 'Paciente',
-    headerClassName: 'w-[26%] text-style-legal font-semibold tracking-label text-text-secondary',
+    headerClassName: 'w-1/4 text-style-legal font-semibold tracking-label text-text-secondary',
     cell: () => null,
   },
   {
     id: 'objective',
     header: 'Objetivo',
-    headerClassName: 'w-[16%] text-style-legal font-semibold tracking-label text-text-secondary',
+    headerClassName: 'w-1/6 text-style-legal font-semibold tracking-label text-text-secondary',
     cell: () => null,
   },
   {
     id: 'body-fat',
     header: 'Evolução de gordura',
-    headerClassName: 'w-[22%] text-style-legal font-semibold tracking-label text-text-secondary',
+    headerClassName: 'w-1/5 text-style-legal font-semibold tracking-label text-text-secondary',
     cell: () => null,
   },
   {
     id: 'next-event',
     header: 'Próximo acompanhamento',
-    headerClassName: 'w-[32%] text-style-legal font-semibold tracking-label text-text-secondary',
+    headerClassName: 'w-1/3 text-style-legal font-semibold tracking-label text-text-secondary',
     cell: () => null,
   },
   {
     id: 'actions',
     header: <span className="sr-only">Abrir perfil</span>,
-    headerClassName: 'w-[4%] text-right',
+    headerClassName: 'w-12 text-right',
     cell: () => null,
   },
 ];

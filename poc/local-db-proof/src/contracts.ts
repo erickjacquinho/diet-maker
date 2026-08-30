@@ -1,7 +1,7 @@
 export const FIXTURE_VERSION = 'fixture-v1';
 export const SUPPORTED_FORMAT_VERSION = '1.0';
 export const INITIAL_SCHEMA_VERSION = '1';
-export const SUPPORTED_SCHEMA_VERSION = '2';
+export const SUPPORTED_SCHEMA_VERSION = '3';
 
 export type DietStatus = 'ACTIVE' | 'SNAPSHOT';
 export type SourceKind = 'TACO' | 'CUSTOM';

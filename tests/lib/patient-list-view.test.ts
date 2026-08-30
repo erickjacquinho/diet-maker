@@ -144,6 +144,13 @@ describe('patient list ordering and filtering', () => {
     expect(filterPatients(patients, 'inexistente')).toEqual([]);
   });
 
+  it('excludes archived patients from active projections', () => {
+    const archived = { ...PATIENT_LIST_FIXTURES.today, archivedAt: '2026-08-20T09:00:00.000Z' };
+
+    expect(filterPatients([archived], '')).toEqual([]);
+    expect(buildPatientListRows([archived], PATIENT_LIST_TODAY)).toEqual([]);
+  });
+
   it('formats overdue, today, future and no-event statuses as text', () => {
     expect(formatEventStatus(PATIENT_LIST_FIXTURES.overdue.nextEvent, PATIENT_LIST_TODAY)).toContain('Atrasado');
     expect(formatEventStatus(PATIENT_LIST_FIXTURES.today.nextEvent, PATIENT_LIST_TODAY)).toBe('Hoje');

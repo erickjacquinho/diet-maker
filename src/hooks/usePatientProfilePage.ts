@@ -1,25 +1,18 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
+import { toPatientInput, toPatientViewModel, type PatientViewModel } from '@/lib/patientViewModel';
 import {
-  getPatientById,
-  updatePatientInStorage,
-  deletePatientFromStorage,
-  deletePatientDietFromStorage,
-  getPatientAssessmentsFromStorage,
-  savePatientAssessmentToStorage,
-  Patient,
   PatientNextEvent,
   BodyAssessment,
-  DEFAULT_OBJECTIVES,
   HistoricalDiet,
-  getPatientDietsFromStorage,
-} from '@/lib/patientsStore';
+} from '@/lib/patientRelatedRecords';
 import {
   buildNextEventSummary,
   selectActivePlan,
   selectLatestAssessment,
-  buildPatientDietHistory,
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
 
@@ -27,7 +20,9 @@ export function usePatientProfilePage() {
   const params = useParams();
   const router = useRouter();
   const patientId = params?.id as string;
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [patient, setPatient] = useState<PatientViewModel | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const [dietHistory, setDietHistory] = useState<HistoricalDiet[]>([]);
   const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
@@ -99,129 +94,89 @@ export function usePatientProfilePage() {
   }, [latestAssessment]);
 
   const handleSaveAssessment = useCallback((assessment: BodyAssessment) => {
-    if (editingAssessment && patient) {
-      const updatedAssessments = savePatientAssessmentToStorage(patient.id, assessment);
-      setBodyAssessments(updatedAssessments);
-      setIsEditAssessmentOpen(false);
-      toast.success('Avaliação física atualizada com sucesso!');
-    }
-  }, [editingAssessment, patient]);
+    void assessment;
+    toast.info('A persistência de avaliações físicas será habilitada na etapa clínica correspondente.');
+  }, []);
 
   const handleSaveNextEvent = useCallback((nextEvent: PatientNextEvent) => {
-    if (!patient) return;
-    const saved = updatePatientInStorage({
-      ...patient,
-      nextEvent,
-    });
-    setPatient(saved);
+    void nextEvent;
     setIsNextEventModalOpen(false);
-    toast.success('Próximo acompanhamento salvo.');
-  }, [patient]);
+    toast.info('A persistência de acompanhamentos será habilitada na etapa clínica correspondente.');
+  }, []);
 
   const handleClearNextEvent = useCallback(() => {
-    if (!patient) return;
-    const saved = updatePatientInStorage({ ...patient, nextEvent: null });
-    setPatient(saved);
     setIsNextEventModalOpen(false);
-    toast.success('Próximo acompanhamento removido.');
-  }, [patient]);
+    toast.info('A persistência de acompanhamentos será habilitada na etapa clínica correspondente.');
+  }, []);
 
-  const [customObjectives, setCustomObjectives] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('diet_maker_custom_objectives');
-        return stored ? JSON.parse(stored) : [];
-      } catch {
-        return [];
-      }
+  const [availableObjectives, setAvailableObjectives] = useState<string[]>([]);
+
+  const handleAddCustomObjective = useCallback(async (newObjective: string) => {
+    try {
+      const application = await getBrowserPatientApplication();
+      const option = await application.addObjectiveOption(newObjective);
+      setAvailableObjectives((previous) => Array.from(new Set([...previous, option.label])));
+      setObjectiveToApply(option.label);
+      toast.success('Novo objetivo cadastrado!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível cadastrar o objetivo.');
+      throw error;
     }
-    return [];
-  });
-
-  const availableObjectives = useMemo(() => {
-    const set = new Set([...DEFAULT_OBJECTIVES, ...customObjectives]);
-    return Array.from(set);
-  }, [customObjectives]);
-
-  const handleAddCustomObjective = useCallback((newObjective: string) => {
-    setCustomObjectives((prev) => {
-      if (prev.includes(newObjective)) return prev;
-      const updated = [...prev, newObjective];
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('diet_maker_custom_objectives', JSON.stringify(updated));
-      }
-      return updated;
-    });
-    toast.success('Novo objetivo cadastrado!');
   }, []);
 
   useEffect(() => {
-    if (patientId) {
-      const p = getPatientById(patientId);
-      if (p) {
-        if (patientId !== p.id) {
-          router.replace(`/pacientes/${p.id}`);
-        }
-        setPatient(p);
-        const storedDiets = buildPatientDietHistory(getPatientDietsFromStorage(p.id));
-        const mergedDiets = [...storedDiets];
-        if (p.dietHistory) {
-          p.dietHistory.forEach((item) => {
-            if (!mergedDiets.some((existing) => existing.id === item.id)) {
-              mergedDiets.push(item);
-            }
-          });
-        }
-        setDietHistory(mergedDiets);
+    let cancelled = false;
+    if (!patientId) return undefined;
+    setIsProfileLoading(true);
+    setProfileError(null);
+    void getBrowserPatientApplication().then(async (application) => {
+      const profile = await application.getPatientProfile(patientId);
+      if (cancelled) return;
+      const view = toPatientViewModel(profile.patient, { initials: profile.initials });
+      setPatient(view);
+      setAvailableObjectives(profile.availableObjectives);
+      // Diets and assessments belong to later SDDs. Keep the read sections
+      // available without consulting legacy test storage or inventing a
+      // second source of truth for these relations.
+      setDietHistory([]);
+      setBodyAssessments([]);
+    }).catch((error: unknown) => {
+      if (cancelled) return;
+      setPatient(null);
+      setProfileError(error instanceof PatientApplicationError ? error.message : 'Não foi possível carregar o perfil do paciente.');
+    }).finally(() => {
+      if (!cancelled) setIsProfileLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [patientId]);
 
-        const loadedAssessments = getPatientAssessmentsFromStorage(p.id);
-        const mergedAssessments = [...loadedAssessments];
-        if (p.bodyAssessments) {
-          p.bodyAssessments.forEach((item) => {
-            if (!mergedAssessments.some((existing) => existing.id === item.id)) {
-              mergedAssessments.push(item);
-            }
-          });
-        }
-        setBodyAssessments(mergedAssessments);
-      }
-    }
-  }, [patientId, router]);
-
-  const handleSavePatient = useCallback((updatedPatient: Patient) => {
-    const saved = updatePatientInStorage(updatedPatient);
-    setPatient(saved);
+  const handleSavePatient = useCallback(async (updatedPatient: PatientViewModel) => {
+    if (!updatedPatient.version) throw new Error('A versão do paciente não está disponível para atualização.');
+    const application = await getBrowserPatientApplication();
+    const saved = await application.updatePatient(updatedPatient.id, updatedPatient.version, toPatientInput(updatedPatient));
+    setPatient(toPatientViewModel(saved, { maritalStatus: updatedPatient.maritalStatus }));
     setIsEditModalOpen(false);
     toast.success('Dados do paciente atualizados!');
   }, []);
 
-  const handleDeletePatient = useCallback(() => {
-    if (!patient) return;
-    deletePatientFromStorage(patient.id);
-    toast.success('Paciente excluído com sucesso!');
+  const handleDeletePatient = useCallback(async () => {
+    if (!patient || !patient.version) return;
+    const application = await getBrowserPatientApplication();
+    await application.archivePatient(patient.id, patient.version);
+    toast.success('Paciente arquivado; histórico preservado.');
     router.push('/pacientes');
   }, [patient, router]);
 
   const handleDeleteDiet = useCallback(() => {
-    if (!dietToDelete || !patientId) return;
-    deletePatientDietFromStorage(patientId, dietToDelete.id);
-
-    setDietHistory((prev) => {
-      const filtered = prev.filter((d) => d.id !== dietToDelete.id);
-      return filtered.map((d, index) => ({
-        ...d,
-        status: index === 0 ? 'Ativa' : 'Histórica',
-      }));
-    });
-
-    setIsDeleteDietModalOpen(false);
-    setDietToDelete(null);
-    toast.success('Prescrição dietética excluída com sucesso!');
-  }, [dietToDelete, patientId]);
+    void dietToDelete;
+    toast.info('Dietas pertencem à etapa clínica correspondente e não podem ser removidas aqui.');
+  }, [dietToDelete]);
 
   return {
     patientId,
     patient,
+    profileError,
+    isProfileLoading,
     dietHistory,
     bodyAssessments,
     activePlan,

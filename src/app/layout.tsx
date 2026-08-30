@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { SidebarNavigationAdapter } from "@/app/navigation/SidebarNavigationAdapter";
 import { AppLayoutShell } from "@/components/templates";
+import { PatientApplicationBootstrap } from "@/app/PatientApplicationBootstrap";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={plusJakartaSans.variable} suppressHydrationWarning>
       <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
         <AppLayoutShell sidebar={<SidebarNavigationAdapter />}>{children}</AppLayoutShell>
+        <PatientApplicationBootstrap />
         <Toaster position="bottom-right" richColors duration={3000} />
       </body>
     </html>

@@ -20,9 +20,9 @@ description: "Task list for the local Account and patient persistence stage"
 
 **Purpose**: Preparar os módulos, fixtures e composição sem alterar ainda o comportamento clínico.
 
-- [ ] T001 [skill: $backend-architect-ddd] [P] Criar os diretórios e pontos de exportação de `src/lib/domain/index.ts`, `src/lib/application/patients/index.ts`, `src/lib/persistence/index.ts` e `src/lib/infrastructure/local-db/index.ts`, mantendo imports unidirecionais e sem React no domínio.
-- [ ] T002 [skill: $tdd] [P] Criar a fixture sintética e o reset controlado em `tests/fixtures/patients/account-patient-fixtures.ts` e `tests/fixtures/patients/reset-local-db.ts`, incluindo duas Contas, pacientes ativos/arquivados, objetivos e registros relacionados somente para preservação.
-- [ ] T003 [skill: $tdd] [P] Criar o contexto de teste reutilizável em `tests/lib/patients/test-context.ts`, conectando a fixture ao adaptador aprovado na etapa 1 e expondo limpeza/reabertura sem ler chaves legadas.
+- [x] T001 [skill: $backend-architect-ddd] [P] Criar os diretórios e pontos de exportação de `src/lib/domain/index.ts`, `src/lib/application/patients/index.ts`, `src/lib/persistence/index.ts` e `src/lib/infrastructure/local-db/index.ts`, mantendo imports unidirecionais e sem React no domínio.
+- [x] T002 [skill: $tdd] [P] Criar a fixture sintética e o reset controlado em `tests/fixtures/patients/account-patient-fixtures.ts` e `tests/fixtures/patients/reset-local-db.ts`, incluindo duas Contas, pacientes ativos/arquivados, objetivos e registros relacionados somente para preservação.
+- [x] T003 [skill: $tdd] [P] Criar o contexto de teste reutilizável em `tests/lib/patients/test-context.ts`, conectando a fixture ao adaptador aprovado na etapa 1 e expondo limpeza/reabertura sem ler chaves legadas.
 
 ---
 
@@ -34,17 +34,17 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for Foundation
 
-- [ ] T004 [skill: $tdd] [P] Escrever primeiro as invariantes de Account, ObjectiveOption e Patient em `tests/lib/patients/domain-invariants.test.ts`, cobrindo normalização, valores numéricos, identidade imutável, versão e estado arquivado.
-- [ ] T005 [skill: $tdd] [P] Escrever primeiro os contratos de escopo, atomicidade e erro em `tests/lib/patients/patient-application.contract.test.ts`, cobrindo paciente inexistente, Conta incorreta, versão obsoleta e falha sem mutação parcial.
-- [ ] T006 [skill: $frontend-architecture-mindset] [P] Escrever primeiro o teste de fronteira arquitetural em `tests/architecture/patient-persistence-boundary.test.ts`, assegurando que rotas/componentes não importem storage físico e que o modelo não contenha arrays canônicos de histórico.
+- [x] T004 [skill: $tdd] [P] Escrever primeiro as invariantes de Account, ObjectiveOption e Patient em `tests/lib/patients/domain-invariants.test.ts`, cobrindo normalização, valores numéricos, identidade imutável, versão e estado arquivado.
+- [x] T005 [skill: $tdd] [P] Escrever primeiro os contratos de escopo, atomicidade e erro em `tests/lib/patients/patient-application.contract.test.ts`, cobrindo paciente inexistente, Conta incorreta, versão obsoleta e falha sem mutação parcial.
+- [x] T006 [skill: $frontend-architecture-mindset] [P] Escrever primeiro o teste de fronteira arquitetural em `tests/architecture/patient-persistence-boundary.test.ts`, assegurando que rotas/componentes não importem storage físico e que o modelo não contenha arrays canônicos de histórico.
 
 ### Implementation for Foundation
 
-- [ ] T007 [skill: $backend-architect-ddd] [P] Definir os tipos de domínio, normalizadores e validadores em `src/lib/domain/account.ts`, `src/lib/domain/objective-option.ts` e `src/lib/domain/patient.ts`, refletindo `data-model.md` sem tipos do adaptador ou React.
-- [ ] T008 [skill: $backend-architect-ddd] [P] Definir erros tipados e portas em `src/lib/application/patients/patient-errors.ts`, `src/lib/persistence/account-context.ts`, `src/lib/persistence/patient-repository.ts`, `src/lib/persistence/objective-catalog-repository.ts`, `src/lib/persistence/patient-profile-reader.ts` e `src/lib/persistence/transaction-runner.ts`, conforme `contracts/patient-application.md`.
-- [ ] T009 [skill: $database-migrations-pro] Implementar o schema/migration mínimo e o executor transacional de Account, ObjectiveOption e Patient em `src/lib/infrastructure/local-db/schema.ts`, `src/lib/infrastructure/local-db/migrations.ts` e `src/lib/infrastructure/local-db/transaction-runner.ts`, usando somente o adaptador aprovado pela etapa 1 e restrições de escopo/versionamento.
-- [ ] T010 [skill: $backend-architect-ddd] Implementar os adaptadores de Account, pacientes e objetivos em `src/lib/infrastructure/local-db/account-context.ts`, `src/lib/infrastructure/local-db/patient-repository.ts` e `src/lib/infrastructure/local-db/objective-catalog-repository.ts`, incluindo relações, filtros ativos e falha fechada em Conta inválida.
-- [ ] T011 [skill: $backend-architect-ddd] Implementar a composição da Conta ativa, o leitor de perfil e o composition root em `src/lib/application/account/get-active-account.ts`, `src/lib/application/patients/patient-profile-reader.ts` e `src/lib/application/composition-root.ts`, deixando explícita a fronteira para leitores futuros de dieta/avaliação/acompanhamento; o caso de uso `getPatientProfile` será implementado na US2.
+- [x] T007 [skill: $backend-architect-ddd] [P] Definir os tipos de domínio, normalizadores e validadores em `src/lib/domain/account.ts`, `src/lib/domain/objective-option.ts` e `src/lib/domain/patient.ts`, refletindo `data-model.md` sem tipos do adaptador ou React.
+- [x] T008 [skill: $backend-architect-ddd] [P] Definir erros tipados e portas em `src/lib/application/patients/patient-errors.ts`, `src/lib/persistence/account-context.ts`, `src/lib/persistence/patient-repository.ts`, `src/lib/persistence/objective-catalog-repository.ts`, `src/lib/persistence/patient-profile-reader.ts` e `src/lib/persistence/transaction-runner.ts`, conforme `contracts/patient-application.md`.
+- [x] T009 [skill: $database-migrations-pro] Implementar o schema/migration mínimo e o executor transacional de Account, ObjectiveOption e Patient em `src/lib/infrastructure/local-db/schema.ts`, `src/lib/infrastructure/local-db/migrations.ts` e `src/lib/infrastructure/local-db/transaction-runner.ts`, usando somente o adaptador aprovado pela etapa 1 e restrições de escopo/versionamento.
+- [x] T010 [skill: $backend-architect-ddd] Implementar os adaptadores de Account, pacientes e objetivos em `src/lib/infrastructure/local-db/account-context.ts`, `src/lib/infrastructure/local-db/patient-repository.ts` e `src/lib/infrastructure/local-db/objective-catalog-repository.ts`, incluindo relações, filtros ativos e falha fechada em Conta inválida.
+- [x] T011 [skill: $backend-architect-ddd] Implementar a composição da Conta ativa, o leitor de perfil e o composition root em `src/lib/application/account/get-active-account.ts`, `src/lib/application/patients/patient-profile-reader.ts` e `src/lib/application/composition-root.ts`, deixando explícita a fronteira para leitores futuros de dieta/avaliação/acompanhamento; o caso de uso `getPatientProfile` será implementado na US2.
 
 **Checkpoint**: domínio, portas, fixture, schema, transação, contexto de Conta e testes de fronteira estão revisáveis; nenhuma rota ainda grava em `localStorage` ou acessa o adaptador diretamente.
 
@@ -58,14 +58,14 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for User Story 1
 
-- [ ] T012 [skill: $tdd] [P] [US1] Escrever primeiro os cenários de inicialização, reabertura e isolamento de Conta em `tests/lib/patients/account-context.integration.test.ts`, cobrindo identidade estável, Conta ausente e tentativa cross-account.
-- [ ] T013 [skill: $webapp-testing] [P] [US1] Escrever primeiro o cenário local sem rede após preparação dos recursos em `tests/app/pacientes/account-offline.test.tsx`, distinguindo recurso não preparado de falha do banco local.
+- [x] T012 [skill: $tdd] [P] [US1] Escrever primeiro os cenários de inicialização, reabertura e isolamento de Conta em `tests/lib/patients/account-context.integration.test.ts`, cobrindo identidade estável, Conta ausente e tentativa cross-account.
+- [x] T013 [skill: $webapp-testing] [P] [US1] Escrever primeiro o cenário local sem rede após preparação dos recursos em `tests/app/pacientes/account-offline.test.tsx`, distinguindo recurso não preparado de falha do banco local.
 
 ### Implementation for User Story 1
 
-- [ ] T014 [skill: $backend-architect-ddd] [US1] Implementar `AccountContext` ativo, carregamento idempotente do perfil local e erro bloqueante em `src/lib/application/account/account-context.ts`, usando o repositório e a transação definidos na Foundation.
-- [ ] T015 [skill: $nextjs-fullstack-master] [US1] Integrar o contexto ativo ao bootstrap da aplicação em `src/lib/application/composition-root.ts` e `src/app/layout.tsx`, bloqueando operações de pacientes quando a Conta não puder ser validada.
-- [ ] T016 [skill: $webapp-testing] [US1] Executar a validação independente de reabertura, isolamento e offline em `tests/lib/patients/account-context.integration.test.ts`, `tests/app/pacientes/account-offline.test.tsx` e `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`, registrando resultados observáveis no relatório da etapa.
+- [x] T014 [skill: $backend-architect-ddd] [US1] Implementar `AccountContext` ativo, carregamento idempotente do perfil local e erro bloqueante em `src/lib/application/account/account-context.ts`, usando o repositório e a transação definidos na Foundation.
+- [x] T015 [skill: $nextjs-fullstack-master] [US1] Integrar o contexto ativo ao bootstrap da aplicação em `src/lib/application/composition-root.ts` e `src/app/layout.tsx`, bloqueando operações de pacientes quando a Conta não puder ser validada.
+- [x] T016 [skill: $webapp-testing] [US1] Executar a validação independente de reabertura, isolamento e offline em `tests/lib/patients/account-context.integration.test.ts`, `tests/app/pacientes/account-offline.test.tsx` e `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`, registrando resultados observáveis no relatório da etapa.
 
 **Checkpoint**: o contexto de Conta é estável, validado e reutilizável; nenhuma operação aceita `accountId` arbitrário da interface.
 
@@ -79,16 +79,16 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for User Story 2
 
-- [ ] T017 [skill: $tdd] [P] [US2] Escrever primeiro os cenários de criação, normalização, listagem, busca, consulta de perfil e erros em `tests/lib/patients/create-list.integration.test.ts`, incluindo nome inválido, valores inválidos e Conta incorreta.
-- [ ] T018 [skill: $webapp-testing] [P] [US2] Atualizar os testes de jornada e estados da rota em `tests/app/pacientes/page.test.tsx` e criar `tests/app/pacientes/patient-profile-read.test.tsx`, cobrindo listagem ativa, loading, empty, filtered empty, retry, não encontrado e navegação por teclado.
+- [x] T017 [skill: $tdd] [P] [US2] Escrever primeiro os cenários de criação, normalização, listagem, busca, consulta de perfil e erros em `tests/lib/patients/create-list.integration.test.ts`, incluindo nome inválido, valores inválidos e Conta incorreta.
+- [x] T018 [skill: $webapp-testing] [P] [US2] Atualizar os testes de jornada e estados da rota em `tests/app/pacientes/page.test.tsx` e criar `tests/app/pacientes/patient-profile-read.test.tsx`, cobrindo listagem ativa, loading, empty, filtered empty, retry, não encontrado e navegação por teclado.
 
 ### Implementation for User Story 2
 
-- [ ] T019 [skill: $backend-architect-ddd] [P] [US2] Implementar os casos de uso `createPatient`, `listActivePatients` e `getPatientProfile` em `src/lib/application/patients/create-patient.ts`, `src/lib/application/patients/list-active-patients.ts` e `src/lib/application/patients/get-patient-profile.ts`, com validação, IDs, escopo e resultados tipados.
-- [ ] T020 [skill: $frontend-architecture-mindset] [US2] Adaptar as projeções puras de listagem em `src/lib/patientListView.ts` e `src/lib/patientListHistoryUtils.ts` para receber `PatientListRow`/leitores relacionados sem usar `Patient.dietHistory`, `Patient.bodyAssessments` ou `lastConsultation` como fontes canônicas.
-- [ ] T021 [skill: $nextjs-fullstack-master] [US2] Criar o orquestrador de estado da lista em `src/hooks/usePatientsPage.ts` e migrar `src/app/pacientes/page.tsx` para carregar casos de uso, apresentar feedback, retry, contagem, busca e criação sem acesso direto a storage.
-- [ ] T022 [skill: $ui-styling] [US2] Adequar `src/components/molecules/CreatePatientModal.tsx` e `src/components/organisms/PatientListTable.tsx` para payload tipado, validação associada ao campo, loading/erro, foco inicial/retorno e navegação acessível, preservando os primitivos `src/components/ui/*`.
-- [ ] T023 [skill: $nextjs-fullstack-master] [US2] Integrar o perfil de leitura em `src/app/pacientes/[id]/page.tsx`, `src/app/pacientes/[id]/PatientProfileModals.tsx` e `src/hooks/usePatientProfilePage.ts`, mantendo estado não encontrado sem controles de mutação e preservando leitores clínicos futuros por portas separadas.
+- [x] T019 [skill: $backend-architect-ddd] [P] [US2] Implementar os casos de uso `createPatient`, `listActivePatients` e `getPatientProfile` em `src/lib/application/patients/create-patient.ts`, `src/lib/application/patients/list-active-patients.ts` e `src/lib/application/patients/get-patient-profile.ts`, com validação, IDs, escopo e resultados tipados.
+- [x] T020 [skill: $frontend-architecture-mindset] [US2] Adaptar as projeções puras de listagem em `src/lib/patientListView.ts` e `src/lib/patientListHistoryUtils.ts` para receber `PatientListRow`/leitores relacionados sem usar `Patient.dietHistory`, `Patient.bodyAssessments` ou `lastConsultation` como fontes canônicas.
+- [x] T021 [skill: $nextjs-fullstack-master] [US2] Criar o orquestrador de estado da lista em `src/hooks/usePatientsPage.ts` e migrar `src/app/pacientes/page.tsx` para carregar casos de uso, apresentar feedback, retry, contagem, busca e criação sem acesso direto a storage.
+- [x] T022 [skill: $ui-styling] [US2] Adequar `src/components/molecules/CreatePatientModal.tsx` e `src/components/organisms/PatientListTable.tsx` para payload tipado, validação associada ao campo, loading/erro, foco inicial/retorno e navegação acessível, preservando os primitivos `src/components/ui/*`.
+- [x] T023 [skill: $nextjs-fullstack-master] [US2] Integrar o perfil de leitura em `src/app/pacientes/[id]/page.tsx`, `src/app/pacientes/[id]/PatientProfileModals.tsx` e `src/hooks/usePatientProfilePage.ts`, mantendo estado não encontrado sem controles de mutação e preservando leitores clínicos futuros por portas separadas.
 
 **Checkpoint**: cadastro, lista, busca e perfil funcionam independentemente sobre a Conta ativa e não leem/gravam chaves legadas.
 
@@ -102,15 +102,15 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for User Story 3
 
-- [ ] T024 [skill: $tdd] [P] [US3] Escrever primeiro os cenários de atualização, cancelamento, descarte, incremento de versão, conflito e preservação de filhos em `tests/lib/patients/update-patient.integration.test.ts`.
-- [ ] T025 [skill: $tdd] [P] [US3] Atualizar o teste de componente em `tests/components/molecules/edit-patient-modal.test.tsx` para dirty state, `Esc`/backdrop, `aria-describedby`, loading, erro recuperável e retorno de foco.
+- [x] T024 [skill: $tdd] [P] [US3] Escrever primeiro os cenários de atualização, cancelamento, descarte, incremento de versão, conflito e preservação de filhos em `tests/lib/patients/update-patient.integration.test.ts`.
+- [x] T025 [skill: $tdd] [P] [US3] Atualizar o teste de componente em `tests/components/molecules/edit-patient-modal.test.tsx` para dirty state, `Esc`/backdrop, `aria-describedby`, loading, erro recuperável e retorno de foco.
 
 ### Implementation for User Story 3
 
-- [ ] T026 [skill: $backend-architect-ddd] [US3] Implementar `updatePatient` com versão esperada, validação e transação em `src/lib/application/patients/update-patient.ts` e `src/lib/infrastructure/local-db/patient-repository.ts`, rejeitando arquivado, inexistente e cross-account sem sobrescrita.
-- [ ] T027 [skill: $nextjs-fullstack-master] [US3] Refatorar `src/hooks/usePatientProfilePage.ts` para chamar o caso de uso de atualização, atualizar projeções após sucesso e traduzir conflito/persistência em feedback sem perder o formulário.
-- [ ] T028 [skill: $ui-styling] [US3] Adequar `src/components/molecules/EditPatientModal.tsx` para manter rascunho isolado, enviar versão, validar campos, desabilitar duplo envio e tratar cancelamento/fechamento conforme o contrato de overlay.
-- [ ] T029 [skill: $frontend-architecture-mindset] [US3] Confirmar que `src/lib/patientProfileSelectors.ts` e as projeções de perfil não recalculam ou reescrevem dietas/avaliações por alteração de cadastro, usando fixtures separadas de registros relacionados.
+- [x] T026 [skill: $backend-architect-ddd] [US3] Implementar `updatePatient` com versão esperada, validação e transação em `src/lib/application/patients/update-patient.ts` e `src/lib/infrastructure/local-db/patient-repository.ts`, rejeitando arquivado, inexistente e cross-account sem sobrescrita.
+- [x] T027 [skill: $nextjs-fullstack-master] [US3] Refatorar `src/hooks/usePatientProfilePage.ts` para chamar o caso de uso de atualização, atualizar projeções após sucesso e traduzir conflito/persistência em feedback sem perder o formulário.
+- [x] T028 [skill: $ui-styling] [US3] Adequar `src/components/molecules/EditPatientModal.tsx` para manter rascunho isolado, enviar versão, validar campos, desabilitar duplo envio e tratar cancelamento/fechamento conforme o contrato de overlay.
+- [x] T029 [skill: $frontend-architecture-mindset] [US3] Confirmar que `src/lib/patientProfileSelectors.ts` e as projeções de perfil não recalculam ou reescrevem dietas/avaliações por alteração de cadastro, usando fixtures separadas de registros relacionados.
 
 **Checkpoint**: edição explícita atualiza somente Patient, conflitos são recuperáveis e nenhum histórico relacionado é regravado.
 
@@ -124,14 +124,14 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for User Story 4
 
-- [ ] T030 [skill: $tdd] [P] [US4] Escrever primeiro os cenários de catálogo, normalização, idempotência, cancelamento, falha e preservação do valor já salvo em `tests/lib/patients/objective-catalog.integration.test.ts`.
-- [ ] T031 [skill: $ui-styling] [P] [US4] Criar o teste de componente do modal em `tests/components/molecules/add-objective-modal.test.tsx`, cobrindo foco, label, campo vazio, cancelamento, envio, loading e erro sem fechar prematuramente.
+- [x] T030 [skill: $tdd] [P] [US4] Escrever primeiro os cenários de catálogo, normalização, idempotência, cancelamento, falha e preservação do valor já salvo em `tests/lib/patients/objective-catalog.integration.test.ts`.
+- [x] T031 [skill: $ui-styling] [P] [US4] Criar o teste de componente do modal em `tests/components/molecules/add-objective-modal.test.tsx`, cobrindo foco, label, campo vazio, cancelamento, envio, loading e erro sem fechar prematuramente.
 
 ### Implementation for User Story 4
 
-- [ ] T032 [skill: $backend-architect-ddd] [US4] Implementar `addObjectiveOption` e a remoção/arquivamento seguro do catálogo em `src/lib/application/patients/add-objective-option.ts` e `src/lib/infrastructure/local-db/objective-catalog-repository.ts`, com chave normalizada por Conta e transação.
-- [ ] T033 [skill: $ui-styling] [US4] Integrar catálogo e seleção ao perfil em `src/hooks/usePatientProfilePage.ts`, `src/components/molecules/AddObjectiveModal.tsx` e `src/components/molecules/EditPatientModal.tsx`, aplicando a opção somente ao rascunho até `updatePatient` confirmar.
-- [ ] T034 [skill: $nextjs-fullstack-master] [US4] Atualizar a projeção de objetivos e estados de erro em `src/app/pacientes/[id]/PatientProfileModals.tsx` e `src/app/pacientes/[id]/page.tsx`, mantendo o modal de edição aberto quando a criação de opção falhar.
+- [x] T032 [skill: $backend-architect-ddd] [US4] Implementar `addObjectiveOption` e a remoção/arquivamento seguro do catálogo em `src/lib/application/patients/add-objective-option.ts` e `src/lib/infrastructure/local-db/objective-catalog-repository.ts`, com chave normalizada por Conta e transação.
+- [x] T033 [skill: $ui-styling] [US4] Integrar catálogo e seleção ao perfil em `src/hooks/usePatientProfilePage.ts`, `src/components/molecules/AddObjectiveModal.tsx` e `src/components/molecules/EditPatientModal.tsx`, aplicando a opção somente ao rascunho até `updatePatient` confirmar.
+- [x] T034 [skill: $nextjs-fullstack-master] [US4] Atualizar a projeção de objetivos e estados de erro em `src/app/pacientes/[id]/PatientProfileModals.tsx` e `src/app/pacientes/[id]/page.tsx`, mantendo o modal de edição aberto quando a criação de opção falhar.
 
 **Checkpoint**: objetivo personalizado é reutilizável e idempotente dentro da Conta, sem duplicar ou mutar pacientes por engano.
 
@@ -145,15 +145,15 @@ description: "Task list for the local Account and patient persistence stage"
 
 ### Tests for User Story 5
 
-- [ ] T035 [skill: $tdd] [P] [US5] Escrever primeiro os cenários de arquivamento, confirmação prolongada, cancelamento, preservação de filhos, bloqueio clínico, conflito, falha e restauração em `tests/lib/patients/archive-restore.integration.test.ts`.
-- [ ] T036 [skill: $webapp-testing] [P] [US5] Criar os testes de interação do perfil em `tests/app/pacientes/archive-patient.test.tsx` e atualizar `tests/app/pacientes/patient-profile-accessibility.test.tsx`, cobrindo copy, foco, teclado, navegação pós-sucesso e ausência de controles em não encontrado.
+- [x] T035 [skill: $tdd] [P] [US5] Escrever primeiro os cenários de arquivamento, confirmação prolongada, cancelamento, preservação de filhos, bloqueio clínico, conflito, falha e restauração em `tests/lib/patients/archive-restore.integration.test.ts`.
+- [x] T036 [skill: $webapp-testing] [P] [US5] Criar os testes de interação do perfil em `tests/app/pacientes/archive-patient.test.tsx` e atualizar `tests/app/pacientes/patient-profile-accessibility.test.tsx`, cobrindo copy, foco, teclado, navegação pós-sucesso e ausência de controles em não encontrado.
 
 ### Implementation for User Story 5
 
-- [ ] T037 [skill: $backend-architect-ddd] [US5] Implementar `archivePatient` e `restorePatient` com versionamento, escopo, preservação de relações e guarda contra mutação clínica em `src/lib/application/patients/archive-patient.ts`, `src/lib/application/patients/restore-patient.ts` e `src/lib/infrastructure/local-db/patient-repository.ts`.
-- [ ] T038 [skill: $nextjs-fullstack-master] [US5] Refatorar `src/hooks/usePatientProfilePage.ts`, `src/app/pacientes/[id]/page.tsx` e `src/app/pacientes/[id]/PatientProfileModals.tsx` para usar arquivamento, invalidar a fronteira de drafts futuros sem implementá-los e navegar somente após sucesso durável.
-- [ ] T039 [skill: $ui-styling] [US5] Alterar `src/components/molecules/DeletePatientModal.tsx` para copy e callback de arquivamento, confirmação prolongada, label acessível e feedback que informe preservação do histórico; manter o primitive Shadcn/Radix limpo.
-- [ ] T040 [skill: $frontend-architecture-mindset] [US5] Ajustar `src/components/organisms/PatientListTable.tsx`, `src/lib/patientListView.ts` e `src/lib/patientProfileSelectors.ts` para excluir arquivados das projeções ativas e evitar ações de edição/novo registro fora do estado permitido.
+- [x] T037 [skill: $backend-architect-ddd] [US5] Implementar `archivePatient` e `restorePatient` com versionamento, escopo, preservação de relações e guarda contra mutação clínica em `src/lib/application/patients/archive-patient.ts`, `src/lib/application/patients/restore-patient.ts` e `src/lib/infrastructure/local-db/patient-repository.ts`.
+- [x] T038 [skill: $nextjs-fullstack-master] [US5] Refatorar `src/hooks/usePatientProfilePage.ts`, `src/app/pacientes/[id]/page.tsx` e `src/app/pacientes/[id]/PatientProfileModals.tsx` para usar arquivamento, invalidar a fronteira de drafts futuros sem implementá-los e navegar somente após sucesso durável.
+- [x] T039 [skill: $ui-styling] [US5] Alterar `src/components/molecules/DeletePatientModal.tsx` para copy e callback de arquivamento, confirmação prolongada, label acessível e feedback que informe preservação do histórico; manter o primitive Shadcn/Radix limpo.
+- [x] T040 [skill: $frontend-architecture-mindset] [US5] Ajustar `src/components/organisms/PatientListTable.tsx`, `src/lib/patientListView.ts` e `src/lib/patientProfileSelectors.ts` para excluir arquivados das projeções ativas e evitar ações de edição/novo registro fora do estado permitido.
 
 **Checkpoint**: o paciente é arquivado, não apagado; filhos permanecem; novas mutações clínicas são bloqueadas; restauração é exercitável por contrato.
 
@@ -163,12 +163,12 @@ description: "Task list for the local Account and patient persistence stage"
 
 **Purpose**: Remover o legado do fluxo, alinhar documentação visual, executar gates e registrar evidência para revisão humana.
 
-- [ ] T041 [skill: $backend-architect-ddd] [P] Retirar os caminhos de persistência de pacientes e objetivos do legado em `src/lib/patientsStore.ts` e `src/hooks/usePatientProfilePage.ts`, mantendo `src/lib/storage.ts` somente para módulos fora desta etapa até sua migração própria e garantindo zero dual-write/fallback no fluxo de pacientes.
-- [ ] T042 [skill: $design-system] [P] Atualizar o perfil de componente alterado em `design-system/components/profiles/molecules/delete-patient-modal.md`, refletindo arquivamento, preservação, `HoldToDeleteButton`/confirmação prolongada e estados acessíveis; manter `design-system/components/registry.json` consistente com exports e consumidores.
-- [ ] T043 [skill: $security-audit] [P] Adicionar a auditoria de ausência de chaves legadas e de imports proibidos em `tests/architecture/patient-persistence-boundary.test.ts` e `tests/lib/patients/legacy-cutover.test.ts`, cobrindo `nutridiet_patients`, `diet_maker_custom_objectives` e acessos correlatos.
-- [ ] T044 [skill: $design-system] [P] Consolidar critérios de acessibilidade, desktop, tokens, overlays, fields, data-display e loading em `tests/design-system/patient-flow-contract.test.ts`, sem alterar `src/components/ui/*`.
-- [ ] T045 [skill: $webapp-testing] Executar `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links`, `npm run audit:atomic-design`, `npm run verify:design-system` e os cenários do `quickstart.md`, medindo lista/perfil/filtragem na fixture de centenas de pacientes contra o limite de 1 segundo e registrando comandos, resultados, tempos e limitações em `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`.
-- [ ] T046 [skill: $speckit-analyze] Executar uma revisão final de rastreabilidade em `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`, mapeando FR/NFR → testes → arquivos, distinguindo proposto, implementado, conforme e itens explicitamente deixados para SDDs posteriores.
+- [x] T041 [skill: $backend-architect-ddd] [P] Retirar os caminhos de persistência de pacientes e objetivos do legado em `src/lib/patientsStore.ts` e `src/hooks/usePatientProfilePage.ts`, mantendo `src/lib/storage.ts` somente para módulos fora desta etapa até sua migração própria e garantindo zero dual-write/fallback no fluxo de pacientes.
+- [x] T042 [skill: $design-system] [P] Atualizar o perfil de componente alterado em `design-system/components/profiles/molecules/delete-patient-modal.md`, refletindo arquivamento, preservação, `HoldToDeleteButton`/confirmação prolongada e estados acessíveis; manter `design-system/components/registry.json` consistente com exports e consumidores.
+- [x] T043 [skill: $security-audit] [P] Adicionar a auditoria de ausência de chaves legadas e de imports proibidos em `tests/architecture/patient-persistence-boundary.test.ts` e `tests/lib/patients/legacy-cutover.test.ts`, cobrindo `nutridiet_patients`, `diet_maker_custom_objectives` e acessos correlatos.
+- [x] T044 [skill: $design-system] [P] Consolidar critérios de acessibilidade, desktop, tokens, overlays, fields, data-display e loading em `tests/design-system/patient-flow-contract.test.ts`, sem alterar `src/components/ui/*`.
+- [x] T045 [skill: $webapp-testing] Executar `npm run type-check`, `npm run lint`, `npm test`, `npm run verify:links`, `npm run audit:atomic-design`, `npm run verify:design-system` e os cenários do `quickstart.md`, medindo lista/perfil/filtragem na fixture de centenas de pacientes contra o limite de 1 segundo e registrando comandos, resultados, tempos e limitações em `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`.
+- [x] T046 [skill: $speckit-analyze] Executar uma revisão final de rastreabilidade em `specs/30-08-26-dieta-db-segunda-etapa/validation-report.md`, mapeando FR/NFR → testes → arquivos, distinguindo proposto, implementado, conforme e itens explicitamente deixados para SDDs posteriores.
 
 ---
 

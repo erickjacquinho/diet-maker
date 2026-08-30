@@ -15,6 +15,13 @@
       "when": 1788078059352,
       "tag": "0001_add_fixture_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788107407353,
+      "tag": "0002_account_patient_scope",
+      "breakpoints": true
     }
   ]
 }

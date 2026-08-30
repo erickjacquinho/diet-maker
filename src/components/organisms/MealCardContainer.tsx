@@ -4,23 +4,23 @@ import React, { useEffect, useState } from 'react';
 import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
+import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 
-export const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-export const MINUTES_OPTIONS = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
+const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+const MINUTES_OPTIONS = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
 
 export const enforceValidTimeFormat = (value: string, fallback = '08:00'): string => {
   const trimmed = value.trim();
@@ -100,6 +100,63 @@ export interface MealCardContainerProps {
   onRemoveVariation?: () => void;
   variationLimitReached?: boolean;
 }
+
+const mealItemColumns: DataTableColumnDef<MealItemRowProps>[] = [
+  {
+    id: 'reorder',
+    header: <span className="sr-only">Reordenar</span>,
+    headerClassName: 'h-8 w-10 px-2 text-center',
+    cell: () => null,
+  },
+  {
+    id: 'name',
+    header: 'Nome',
+    headerClassName: 'h-8 text-left',
+    cell: () => null,
+  },
+  {
+    id: 'food-actions',
+    header: <span className="sr-only">Ações do alimento</span>,
+    headerClassName: 'h-8 w-20 px-2 text-center',
+    cell: () => null,
+  },
+  {
+    id: 'quantity',
+    header: 'Quantidade',
+    headerClassName: 'h-8 w-24 text-center',
+    cell: () => null,
+  },
+  {
+    id: 'protein',
+    header: 'Proteína',
+    headerClassName: 'h-8 w-20 text-right text-macro-protein',
+    cell: () => null,
+  },
+  {
+    id: 'carbs',
+    header: 'Carboidrato',
+    headerClassName: 'h-8 w-24 text-right text-macro-carbohydrate',
+    cell: () => null,
+  },
+  {
+    id: 'fats',
+    header: 'Gorduras',
+    headerClassName: 'h-8 w-20 text-right text-macro-fat',
+    cell: () => null,
+  },
+  {
+    id: 'calories',
+    header: 'Calorias',
+    headerClassName: 'h-8 w-24 text-right text-text-primary',
+    cell: () => null,
+  },
+  {
+    id: 'remove',
+    header: <span className="sr-only">Remover alimento</span>,
+    headerClassName: 'h-8 w-12 px-2 text-center',
+    cell: () => null,
+  },
+];
 
 export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   id,
@@ -374,8 +431,8 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
             aria-label="Ações da refeição"
             className="flex items-center gap-2 shrink-0"
           >
-            <ContextMenu>
-              <ContextMenuTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="secondary"
@@ -383,75 +440,62 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                   iconOnly
                   aria-label="Mais ações da refeição"
                   title="Mais ações da refeição"
-                  onClick={(event) => {
-                    const trigger = event.currentTarget;
-                    const bounds = trigger.getBoundingClientRect();
-
-                    trigger.dispatchEvent(
-                      new MouseEvent('contextmenu', {
-                        bubbles: true,
-                        cancelable: true,
-                        clientX: bounds.left,
-                        clientY: bounds.bottom,
-                      }),
-                    );
-                  }}
                 >
                   <MoreHorizontal size={14} aria-hidden="true" />
                 </Button>
-              </ContextMenuTrigger>
-              <ContextMenuContent
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
                 className="-ml-0.5 mt-1 min-w-48 rounded-control border-border-subtle bg-surface p-1 text-text-primary shadow-floating"
               >
-                <ContextMenuItem
+                <DropdownMenuItem
                   onSelect={onDuplicate}
                   className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <Copy size={14} aria-hidden="true" />
                   <span>Duplicar</span>
-                </ContextMenuItem>
-                <ContextMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onSelect={onCopyMeal}
                   disabled={items.length === 0}
                   className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <ClipboardCopy size={14} aria-hidden="true" />
                   <span>Copiar</span>
-                </ContextMenuItem>
-                <ContextMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onSelect={onPasteMeal}
                   disabled={!canPasteMeal}
                   className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <ClipboardPaste size={14} aria-hidden="true" />
                   <span>Colar</span>
-                </ContextMenuItem>
-                <ContextMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onSelect={() => setIsPasteReplaceAlertOpen(true)}
                   disabled={!canPasteMeal}
                   className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <Replace size={14} aria-hidden="true" />
                   <span>Colar e substituir</span>
-                </ContextMenuItem>
-                <ContextMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onSelect={onScale}
                   disabled={isScaleActionDisabled || scaleDisabled}
                   className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <Percent size={14} aria-hidden="true" />
                   <span>Escalar</span>
-                </ContextMenuItem>
-                <ContextMenuSeparator className="bg-border-divider" />
-                <ContextMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border-divider" />
+                <DropdownMenuItem
                   onSelect={onDeleteMeal}
                   className="gap-2 rounded-control text-style-nav-item text-error focus:bg-error-soft focus:text-error"
                 >
                   <Trash2 size={14} aria-hidden="true" />
                   <span>Excluir da refeição</span>
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div role="group" aria-label="Transferir alimentos da refeição" className="flex items-center gap-1.5">
               <Button
                 onClick={onCopyMeal}
@@ -524,48 +568,24 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
         </div>
 
         {/* Items List - Table View */}
-        <div className="min-h-[48px]">
-          {items.length === 0 ? (
-            <Surface
-              variant="subtle"
-              density="compact"
-              className="p-4 text-center text-text-muted flex flex-col items-center justify-center gap-1 border-dashed border-border-divider"
-            >
-              <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
-              <span className="text-style-caption text-text-muted">Clique em "+ Adicionar Alimento" para incluir itens da tabela TACO.</span>
-            </Surface>
-          ) : (
-            <div className="overflow-hidden rounded-control border border-border-divider bg-surface">
-              <Table>
-                <TableHeader className="bg-surface-subtle">
-                  <TableRow className="hover:bg-surface-subtle border-b border-border-divider">
-                    <TableHead className="w-10 px-2 text-center h-8" aria-label="Reordenar" />
-                    <TableHead className="text-left font-bold text-style-chart-micro tracking-overline text-text-secondary h-8">
-                      Nome
-                    </TableHead>
-                    <TableHead className="w-20 px-2 text-center h-8" aria-label="Ações do alimento" />
-                    <TableHead className="w-24 text-center font-bold text-style-chart-micro tracking-overline text-text-secondary h-8">
-                      Quantidade
-                    </TableHead>
-                    <TableHead className="w-20 text-right font-bold text-style-chart-micro tracking-overline text-macro-protein h-8">
-                      Proteína
-                    </TableHead>
-                    <TableHead className="w-24 text-right font-bold text-style-chart-micro tracking-overline text-macro-carbohydrate h-8">
-                      Carboidrato
-                    </TableHead>
-                    <TableHead className="w-20 text-right font-bold text-style-chart-micro tracking-overline text-macro-fat h-8">
-                      Gorduras
-                    </TableHead>
-                    <TableHead className="w-24 text-right font-bold text-style-chart-micro tracking-overline text-text-primary h-8">
-                      Calorias
-                    </TableHead>
-                    <TableHead className="w-12 px-2 text-center h-8" aria-label="Remover alimento" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item, idx) => (
+        <div className="min-h-12">
+          <DataTable
+            data={items}
+            columns={mealItemColumns}
+            getRowId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
+            caption={`Alimentos da refeição ${title}`}
+            ariaLabel={`Alimentos da refeição ${title}`}
+            emptyMessage={
+              <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
+                <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
+                <span className="text-style-caption">
+                  Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.
+                </span>
+              </span>
+            }
+            className="overflow-hidden rounded-control border border-border-divider bg-surface"
+            renderRow={(item, idx) => (
                     <MealItemRow
-                      key={item.id || idx}
                       index={idx}
                       {...item}
                       isDragging={draggedIndex === idx}
@@ -625,12 +645,8 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                       onDuplicate={() => onDuplicateItem && onDuplicateItem(idx)}
                       onRemove={() => onRemoveItem && onRemoveItem(idx)}
                     />
-                  ))}
-                </TableBody>
-
-              </Table>
-            </div>
-          )}
+            )}
+          />
         </div>
 
         {/* Add Food Button */}

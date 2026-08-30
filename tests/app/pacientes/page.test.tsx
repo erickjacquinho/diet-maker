@@ -1,8 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, beforeEach, it, vi } from 'vitest';
-import type { Patient } from '@/lib/patientsStore';
+import type { PatientViewModel } from '@/lib/patientViewModel';
+import { buildPatientListRows } from '@/lib/patientListView';
 import PatientsListPage from '@/app/pacientes/page';
+import { usePatientsPage } from '@/hooks/usePatientsPage';
 
 const push = vi.fn();
 
@@ -16,8 +18,15 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-const patient: Patient = {
+vi.mock('@/hooks/usePatientsPage', () => ({
+  usePatientsPage: vi.fn(),
+}));
+
+const patient: PatientViewModel = {
   id: 'patient-page-1',
+  accountId: 'account-page',
+  version: 1,
+  archivedAt: null,
   name: 'Ana Lima',
   age: 32,
   gender: 'Feminino',
@@ -34,15 +43,33 @@ const patient: Patient = {
   lastActivity: null,
 };
 
+const mockUsePatientsPage = vi.mocked(usePatientsPage);
+
+function state(overrides: Partial<ReturnType<typeof usePatientsPage>> = {}) {
+  const patients = overrides.patients ?? [patient];
+  const filteredPatients = overrides.filteredPatients ?? patients;
+  return {
+    patients,
+    filteredPatients,
+    rows: overrides.rows ?? buildPatientListRows(filteredPatients, '2026-08-01'),
+    patientHistoryById: {},
+    searchTerm: '',
+    setSearchTerm: vi.fn(),
+    isLoading: false,
+    error: null,
+    retry: vi.fn(),
+    createPatient: vi.fn(),
+    ...overrides,
+  };
+}
+
 describe('PatientsListPage', () => {
   beforeEach(() => {
-    localStorage.clear();
     push.mockClear();
+    mockUsePatientsPage.mockReturnValue(state());
   });
 
   it('keeps search, live count and the new-patient action in the toolbar', async () => {
-    localStorage.setItem('nutridiet_patients', JSON.stringify([patient]));
-
     render(<PatientsListPage />);
 
     expect(await screen.findByRole('table')).toBeInTheDocument();
@@ -55,8 +82,6 @@ describe('PatientsListPage', () => {
   });
 
   it('opens the existing registration dialog from the toolbar', async () => {
-    localStorage.setItem('nutridiet_patients', JSON.stringify([patient]));
-
     render(<PatientsListPage />);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Novo paciente' }));
@@ -68,8 +93,8 @@ describe('PatientsListPage', () => {
   });
 
   it('shows a reset action when search returns no patients', async () => {
-    localStorage.setItem('nutridiet_patients', JSON.stringify([patient]));
-
+    const setSearchTerm = vi.fn();
+    mockUsePatientsPage.mockReturnValue(state({ filteredPatients: [], setSearchTerm }));
     render(<PatientsListPage />);
 
     const search = await screen.findByRole('searchbox', { name: 'Buscar pacientes por nome ou objetivo' });
@@ -78,30 +103,44 @@ describe('PatientsListPage', () => {
     expect(screen.getByText('Nenhum paciente encontrado')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Limpar busca' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Limpar busca' }));
-    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+    expect(setSearchTerm).toHaveBeenCalledWith('');
   });
 
   it('keeps the empty-list guidance available when there are no patients', async () => {
+    mockUsePatientsPage.mockReturnValue(state({ patients: [], filteredPatients: [], rows: [] }));
     render(<PatientsListPage />);
 
     expect(await screen.findByText('Nenhum paciente cadastrado')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cadastrar Primeiro Paciente' })).toBeInTheDocument();
   });
 
-  it('uses the latest recorded activity as a fallback for the diet indicator', async () => {
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([{
-        ...patient,
-        nextEvent: null,
-        lastActivity: { at: '2026-08-03T10:00:00.000Z', type: 'diet' },
-      }]),
-    );
-
+  it('does not infer clinical history from the patient activity projection', async () => {
+    const row = buildPatientListRows([{
+      ...patient,
+      nextEvent: null,
+      lastActivity: { at: '2026-08-03T10:00:00.000Z', type: 'diet' },
+    }], '2026-08-04')[0];
+    mockUsePatientsPage.mockReturnValue(state({
+      patients: [{ ...patient, nextEvent: null, lastActivity: { at: '2026-08-03T10:00:00.000Z', type: 'diet' } }],
+      rows: [row],
+    }));
     render(<PatientsListPage />);
 
     const indicators = await screen.findByTestId('record-indicators');
     expect(indicators.querySelector('[data-indicator="assessment"]')).toHaveClass('invisible', 'pointer-events-none');
-    expect(indicators.querySelector('[data-indicator="diet"]')).toHaveClass('text-text-muted');
+    expect(indicators.querySelector('[data-indicator="diet"]')).toHaveClass('invisible', 'pointer-events-none');
+  });
+
+  it('announces loading and read failures instead of rendering an empty list', () => {
+    mockUsePatientsPage.mockReturnValue(state({ isLoading: true }));
+    const { rerender } = render(<PatientsListPage />);
+    expect(screen.getByText('Carregando pacientes...')).toBeInTheDocument();
+
+    const retry = vi.fn();
+    mockUsePatientsPage.mockReturnValue(state({ error: 'Falha de leitura local.', retry }));
+    rerender(<PatientsListPage />);
+    expect(screen.getByText('Falha de leitura local.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+    expect(retry).toHaveBeenCalledTimes(1);
   });
 });

@@ -37,31 +37,31 @@ const columns: DataTableColumnDef<ConsolidatedConsultation>[] = [
   {
     id: 'date',
     header: 'Data / Consulta',
-    headerClassName: 'px-4 py-3 min-w-[140px]',
+    headerClassName: 'px-4 py-3 min-w-36',
     cell: () => null,
   },
   {
     id: 'record-type',
     header: 'Tipo de Atendimento',
-    headerClassName: 'px-4 py-3 min-w-[150px]',
+    headerClassName: 'px-4 py-3 min-w-36',
     cell: () => null,
   },
   {
     id: 'diet',
     header: 'Prescrição Dietética',
-    headerClassName: 'px-4 py-3 min-w-[260px]',
+    headerClassName: 'px-4 py-3 min-w-64',
     cell: () => null,
   },
   {
     id: 'assessment',
     header: 'Avaliação Antropométrica',
-    headerClassName: 'px-4 py-3 min-w-[200px]',
+    headerClassName: 'px-4 py-3 min-w-48',
     cell: () => null,
   },
   {
     id: 'actions',
     header: 'Ações & Detalhes',
-    headerClassName: 'px-4 py-3 text-right min-w-[170px]',
+    headerClassName: 'px-4 py-3 text-right min-w-40',
     cell: () => null,
   },
 ];
@@ -210,24 +210,19 @@ export function PatientConsultationHistoryTable({
       </div>
 
       {/* Visualização em Tabela */}
-      {filteredConsultations.length === 0 ? (
-        <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
-          <p className={textStyle('body-secondary')}>
-            {totalAll === 0
-              ? 'Nenhum histórico registrado para este paciente até o momento.'
-              : filter === 'assessments'
-              ? 'Nenhuma avaliação física registrada para este paciente.'
-              : 'Nenhuma prescrição dietética registrada para este paciente.'}
-          </p>
-        </div>
-      ) : (
-        <DataTable
+      <DataTable
           data={filteredConsultations}
           columns={columns}
           getRowId={(consultation) => consultation.id}
           caption="Histórico de consultas por data"
           ariaLabel="Histórico de consultas por data"
-          emptyMessage="Nenhum histórico registrado para este paciente até o momento."
+          emptyMessage={
+            totalAll === 0
+              ? 'Nenhum histórico registrado para este paciente até o momento.'
+              : filter === 'assessments'
+                ? 'Nenhuma avaliação física registrada para este paciente.'
+                : 'Nenhuma prescrição dietética registrada para este paciente.'
+          }
           expandedRowId={expandedRowId}
           renderRow={(consultation) => {
             const rowId = consultation.id;
@@ -252,7 +247,6 @@ export function PatientConsultationHistoryTable({
           className="border border-border-subtle rounded-surface overflow-hidden"
           tableClassName="table-fixed"
         />
-      )}
     </section>
   );
 }

@@ -1,12 +1,15 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
   PATIENT_PROFILE_CARB_CYCLING_VARIATIONS,
+  PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_FIXTURES,
 } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const push = vi.fn();
 const replace = vi.fn();
@@ -23,15 +26,17 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+
 describe('PatientDetailPage history with two stacked tables', () => {
   beforeEach(() => {
-    localStorage.clear();
     push.mockClear();
     replace.mockClear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
   it('renders both empty states cleanly with contextual creation links', async () => {
@@ -57,35 +62,37 @@ describe('PatientDetailPage history with two stacked tables', () => {
   });
 
   it('renders two specialized tables when assessments and diets exist', async () => {
-    localStorage.setItem(
-      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'asm-1',
-          date: '04/08/2026',
-          weightKg: 80,
-          bodyFatPercent: 15,
-          muscleMassKg: 35,
-          waistCm: 80,
-          abdomenCm: 82,
-        },
-      ]),
-    );
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'diet-1',
-          name: 'Plano cutting agosto',
-          date: '04/08/2026',
-          status: 'Ativa',
-          simpleTargetKcal: 2020,
-          simpleTargetProtein: 150,
-          simpleTargetCarbs: 220,
-          simpleTargetFats: 60,
-        },
-      ]),
-    );
+    const state = makePatientProfileState({
+      bodyAssessments: [{
+        id: 'asm-1',
+        date: '04/08/2026',
+        weightKg: 80,
+        bodyFatPercent: 15,
+        muscleMassKg: 35,
+        waistCm: 80,
+        abdomenCm: 82,
+      }],
+      latestAssessment: {
+        id: 'asm-1',
+        date: '04/08/2026',
+        weightKg: 80,
+        bodyFatPercent: 15,
+        muscleMassKg: 35,
+        waistCm: 80,
+        abdomenCm: 82,
+      },
+      dietHistory: [{
+        id: 'diet-1',
+        name: 'Plano cutting agosto',
+        date: '04/08/2026',
+        status: 'Ativa',
+        targetKcal: 2020,
+        proteinG: 150,
+        carbsG: 220,
+        fatsG: 60,
+      }],
+    });
+    mockUsePatientProfilePage.mockReturnValue(state);
 
     render(<PatientDetailPage />);
 
@@ -120,53 +127,29 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Ver cardápio completo da dieta Plano cutting agosto/,
     });
     fireEvent.click(verCardapioBtn);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(state.handleOpenReadOnlyDietModal).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Plano cutting agosto',
+    }));
   });
 
   it('renders carb cycling averages and variation details in the diet history', async () => {
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'diet-cycle',
-          patientId: PATIENT_PROFILE_FIXTURES.patient.id,
-          name: 'Plano ciclo agosto',
-          createdAt: '24/08/2026',
-          updatedAt: '24/08/2026',
-          mode: 'carb_cycling',
-          simpleTargetKcal: 0,
-          simpleTargetProtein: 0,
-          simpleTargetCarbs: 0,
-          simpleTargetFats: 0,
-          simpleMeals: [],
-          carbCyclingVariationsCount: 2,
-          carbCyclingVariations: [
-            {
-              id: 'high',
-              name: 'Dia Alto Carbo',
-              type: 'high',
-              assignedDays: ['seg', 'qua', 'sex'],
-              targetKcal: 2300,
-              targetProtein: 180,
-              targetCarbs: 260,
-              targetFats: 55,
-              meals: [],
-            },
-            {
-              id: 'low',
-              name: 'Dia Baixo Carbo',
-              type: 'low',
-              assignedDays: ['ter', 'qui', 'sab', 'dom'],
-              targetKcal: 1950,
-              targetProtein: 180,
-              targetCarbs: 150,
-              targetFats: 55,
-              meals: [],
-            },
-          ],
-        },
-      ]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      dietHistory: [{
+        id: 'diet-cycle',
+        name: 'Plano ciclo agosto',
+        date: '24/08/2026',
+        targetKcal: 2100,
+        proteinG: 180,
+        carbsG: 197,
+        fatsG: 55,
+        status: 'Ativa',
+        mode: 'carb_cycling',
+        carbCyclingVariations: [
+          { ...PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.one[0], id: 'high', name: 'Dia Alto Carbo' },
+          { ...PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.one[0], id: 'low', name: 'Dia Baixo Carbo', type: 'low', targetKcal: 1950, carbsG: 150 },
+        ],
+      }],
+    }));
 
     render(<PatientDetailPage />);
 
@@ -189,42 +172,22 @@ describe('PatientDetailPage history with two stacked tables', () => {
   });
 
   it('keeps the weighted parent summary while displaying four stored variations as rows', async () => {
-    const storedVariations = PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four.map((variation) => ({
-      id: variation.id,
-      name: variation.name,
-      type: variation.type,
-      assignedDays: variation.assignedDays,
-      targetKcal: variation.targetKcal,
-      targetProtein: variation.proteinG,
-      targetCarbs: variation.carbsG,
-      targetFats: variation.fatsG,
-      meals: Array.from({ length: variation.mealsCount }, (_, index) => ({
-        id: `${variation.id}-meal-${index + 1}`,
-        name: `Refeição ${index + 1}`,
-        time: '08:00',
-        items: [],
-      })),
-    }));
+    const storedVariations = PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four;
 
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'diet-cycle-four',
-          patientId: PATIENT_PROFILE_FIXTURES.patient.id,
-          name: 'Plano ciclo quatro variações',
-          createdAt: '24/08/2026',
-          updatedAt: '24/08/2026',
-          mode: 'carb_cycling',
-          simpleTargetKcal: 0,
-          simpleTargetProtein: 0,
-          simpleTargetCarbs: 0,
-          simpleTargetFats: 0,
-          simpleMeals: [],
-          carbCyclingVariations: storedVariations,
-        },
-      ]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      dietHistory: [{
+        id: 'diet-cycle-four',
+        name: 'Plano ciclo quatro variações',
+        date: '24/08/2026',
+        targetKcal: 2100,
+        proteinG: 180,
+        carbsG: 207,
+        fatsG: 62,
+        status: 'Ativa',
+        mode: 'carb_cycling',
+        carbCyclingVariations: storedVariations,
+      }],
+    }));
 
     render(<PatientDetailPage />);
 
@@ -257,21 +220,8 @@ describe('PatientDetailPage history with two stacked tables', () => {
   });
 
   it('opens confirmation modal and deletes a prescription diet from history', async () => {
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([
-        {
-          id: 'diet-1',
-          name: 'Plano cutting agosto',
-          date: '04/08/2026',
-          status: 'Ativa',
-          simpleTargetKcal: 2020,
-          simpleTargetProtein: 150,
-          simpleTargetCarbs: 220,
-          simpleTargetFats: 60,
-        },
-      ]),
-    );
+    const state = makePatientProfileState({ dietHistory: [PATIENT_PROFILE_DIETS[1]] });
+    mockUsePatientProfilePage.mockReturnValue(state);
 
     render(<PatientDetailPage />);
 
@@ -287,25 +237,6 @@ describe('PatientDetailPage history with two stacked tables', () => {
     });
     fireEvent.click(deleteBtn);
 
-    // Modal de confirmação
-    expect(
-      screen.getByRole('dialog', { name: /Confirmar Exclusão de Prescrição/ }),
-    ).toBeInTheDocument();
-
-    // Clica em confirmar exclusão
-    const confirmBtn = screen.getByRole('button', { name: 'Sim, Excluir Prescrição' });
-    vi.useFakeTimers();
-    fireEvent.pointerDown(confirmBtn, { button: 0 });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    vi.useRealTimers();
-
-    // Dieta removida da tabela e estado vazio renderizado
-    await waitFor(() => {
-      expect(
-        screen.getByText('Nenhuma prescrição dietética registrada para este paciente até o momento.'),
-      ).toBeInTheDocument();
-    });
+    expect(state.handleOpenDeleteDietModal).toHaveBeenCalledWith(PATIENT_PROFILE_DIETS[1]);
   });
 });

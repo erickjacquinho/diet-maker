@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 import {
   EditAssessmentModal,
   ReadOnlyDietModal,
@@ -8,12 +9,13 @@ import {
   NextEventModal,
   AddObjectiveModal,
   DeletePatientModal,
-  DeleteDietModal,
+  ConfirmationAlertDialog,
 } from '@/components/molecules';
-import type { Patient, BodyAssessment, HistoricalDiet, PatientNextEvent } from '@/lib/patientsStore';
+import type { PatientViewModel } from '@/lib/patientViewModel';
+import type { BodyAssessment, HistoricalDiet, PatientNextEvent } from '@/lib/patientRelatedRecords';
 
 export interface PatientProfileModalsProps {
-  patient: Patient;
+  patient: PatientViewModel;
   availableObjectives: string[];
   objectiveToApply?: string;
   isEditModalOpen: boolean;
@@ -35,11 +37,11 @@ export interface PatientProfileModalsProps {
   selectedReadOnlyDiet: HistoricalDiet | null;
   isReadOnlyDietModalOpen: boolean;
   setIsReadOnlyDietModalOpen: (open: boolean) => void;
-  handleSavePatient: (p: Patient) => void;
-  handleDeletePatient: () => void;
-  handleSaveNextEvent: (ev: PatientNextEvent) => void;
-  handleClearNextEvent: () => void;
-  handleAddCustomObjective: (obj: string) => void;
+  handleSavePatient: (p: PatientViewModel) => void | Promise<void>;
+  handleDeletePatient: () => void | Promise<void>;
+  handleSaveNextEvent: (ev: PatientNextEvent) => void | Promise<void>;
+  handleClearNextEvent: () => void | Promise<void>;
+  handleAddCustomObjective: (obj: string) => void | Promise<void>;
   handleSaveAssessment: (ass: BodyAssessment) => void;
 }
 
@@ -89,16 +91,24 @@ export function PatientProfileModals({
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         patientName={patient.name}
-        onConfirmDelete={handleDeletePatient}
+        onConfirmArchive={handleDeletePatient}
       />
 
       {dietToDelete && isDeleteDietModalOpen !== undefined && setIsDeleteDietModalOpen && handleDeleteDiet && (
-        <DeleteDietModal
+        <ConfirmationAlertDialog
           open={isDeleteDietModalOpen}
           onOpenChange={setIsDeleteDietModalOpen}
-          dietName={dietToDelete.name}
-          dietDate={dietToDelete.date}
-          onConfirmDelete={handleDeleteDiet}
+          title="Excluir prescrição dietética?"
+          description={
+            <>
+              A prescrição <strong>{dietToDelete.name}</strong>
+              {dietToDelete.date ? ` (${dietToDelete.date})` : ''} e seus cálculos e cardápios associados serão removidos permanentemente.
+            </>
+          }
+          confirmLabel="Excluir prescrição"
+          confirmVariant="destructive"
+          icon={<AlertTriangle className="size-4 shrink-0 text-error" aria-hidden="true" />}
+          onConfirm={handleDeleteDiet}
         />
       )}
 

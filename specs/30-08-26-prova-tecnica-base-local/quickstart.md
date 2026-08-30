@@ -1,6 +1,6 @@
 # Quickstart: Prova técnica e base local
 
-Este documento descreve como executar e validar a PoC depois que o plano for implementado. Ele não contém código de aplicação, migrations completas ou uma suíte de testes.
+Este documento descreve a execução da PoC implementada em `poc/local-db-proof/`. Os resultados e limites de aprovação estão em [poc-report.md](./poc-report.md).
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ A partir da raiz do projeto:
 
 ```text
 cd poc/local-db-proof
-<package-manager> install
-<package-manager> run db:generate
+npm install
+npm run db:generate
 ```
 
 O workspace deve manter suas dependências e migrations isoladas do `package.json` principal até a aprovação do adaptador.
@@ -24,9 +24,11 @@ O workspace deve manter suas dependências e migrations isoladas do `package.jso
 ## Automated validation
 
 ```text
-<package-manager> run type-check
-<package-manager> run test
-<package-manager> run test:browser
+npm run type-check
+npm run test
+npm run test:browser -- --workers=1
+npm run lint
+npm run build
 ```
 
 Resultados esperados:
@@ -38,7 +40,7 @@ Resultados esperados:
 
 ## Browser validation sequence
 
-1. Execute `<package-manager> run dev` dentro de `poc/local-db-proof` e abra a origem indicada no terminal.
+1. Execute `npm run dev` dentro de `poc/local-db-proof` e abra a origem indicada no terminal.
 2. Inicialize a fixture e registre o tempo de abertura, a consulta de leitura e a gravação confirmada.
 3. Feche e reabra a página no mesmo perfil; compare contagens, IDs, relações e snapshots nutricionais.
 4. Abra uma segunda aba na mesma origem. Ela deve ser bloqueada antes de inicializar ou consultar a base. Feche a primeira e confirme que uma nova aba pode abrir.

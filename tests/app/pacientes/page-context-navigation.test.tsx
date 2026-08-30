@@ -5,6 +5,8 @@ import PatientDetailPage from '@/app/pacientes/[id]/page';
 import DietBuilderPage from '@/app/pacientes/[id]/dieta/[dietaId]/page';
 import DedicatedConsultationPage from '@/app/pacientes/[id]/consulta/[date]/page';
 import type { Patient } from '@/lib/patientsStore';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const routeParams: Record<string, string> = {};
 const router = { push: vi.fn(), replace: vi.fn() };
@@ -19,6 +21,12 @@ vi.mock('next/link', () => ({
     <a href={href} {...props}>{children}</a>
   ),
 }));
+
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
 
 const patient: Patient = {
   id: 'patient-context-1',
@@ -42,6 +50,17 @@ describe('contextual header navigation', () => {
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem('nutridiet_patients', JSON.stringify([patient]));
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      patient: {
+        ...makePatientProfileState().patient,
+        id: patient.id,
+        name: patient.name,
+        objective: patient.objective,
+        phone: patient.phone,
+        whatsapp: patient.whatsapp,
+      },
+      patientId: patient.id,
+    }));
     Object.keys(routeParams).forEach((key) => delete routeParams[key]);
   });
 

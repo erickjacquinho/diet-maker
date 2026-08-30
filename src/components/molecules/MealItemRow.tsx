@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GripVertical } from 'lucide-react';
-import { DeleteIconButton, DuplicateIconButton, SubstituteIconButton } from '@/components/atoms';
+import { ArrowLeftRight, CopyPlus, GripVertical } from 'lucide-react';
+import { DeleteIconButton, IconButton } from '@/components/atoms';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-export type DropPosition = 'top' | 'bottom' | null;
+type DropPosition = 'top' | 'bottom' | null;
 
 export interface MealItemRowProps {
   id?: string;
@@ -155,17 +155,21 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
       {/* 3. Ações do alimento */}
       <TableCell className="w-20 px-2 text-center py-2">
         <div className="flex items-center justify-center gap-1 invisible pointer-events-none group-hover/row:visible group-hover/row:pointer-events-auto group-focus-within/row:visible group-focus-within/row:pointer-events-auto">
-          <SubstituteIconButton
+          <IconButton
             size="compact"
+            variant="secondary"
             onClick={onSubstitute}
             title={`Substituir ${name}`}
             aria-label={`Substituir ${name}`}
+            icon={<ArrowLeftRight size={14} className="shrink-0" aria-hidden="true" />}
           />
-          <DuplicateIconButton
+          <IconButton
             size="compact"
+            variant="secondary"
             onClick={onDuplicate}
             title={`Duplicar ${name}`}
             aria-label={`Duplicar ${name}`}
+            icon={<CopyPlus size={14} className="shrink-0" aria-hidden="true" />}
           />
         </div>
       </TableCell>

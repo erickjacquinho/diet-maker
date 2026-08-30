@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { PocError, type OpenDatabaseResult, type PocMode } from '../contracts';
 import { applyMigrations } from './migrations';
 import { schema, type Schema } from './schema';
-import type { LockLease, SingleTabLock } from '../locking/single-tab-lock';
+import { SingleTabLock, type LockLease } from '../locking/single-tab-lock';
 
 const DEFAULT_BROWSER_DATA_DIR = 'idb://nutridiet-local-db-proof-v1';
 
@@ -57,16 +57,18 @@ export async function openDatabase(options: OpenDatabaseOptions = {}): Promise<D
     assertPersistentBrowserStorage(dataDir);
   }
 
-  let client: PGlite;
+  let client: PGlite | undefined;
   let lease: LockLease | undefined;
   try {
-    if (options.lock) {
-      lease = await options.lock.acquire();
+    const lock = options.lock ?? (mode === 'browser-persistent' && isBrowserRuntime() ? new SingleTabLock() : undefined);
+    if (lock) {
+      lease = await lock.acquire();
     }
     client = options.client ?? new PGlite(dataDir);
     await client.waitReady;
     const schemaVersion = await applyMigrations(client);
     const db = drizzle(client, { schema });
+    const openedClient = client;
 
     return {
       mode,
@@ -75,19 +77,30 @@ export async function openDatabase(options: OpenDatabaseOptions = {}): Promise<D
       client,
       db,
       close: async () => {
-        await lease?.release();
-        if (!client.closed) {
-          await client.close();
+        if (!openedClient.closed) {
+          await openedClient.close();
         }
+        await lease?.release();
       },
     };
   } catch (cause) {
+    try {
+      if (client && !client.closed) {
+        await client.close();
+      }
+    } catch (cleanupCause) {
+      throw new PocError(
+        'INITIALIZATION_FAILED',
+        'open-database',
+        'A inicialização falhou e o motor não pôde ser fechado. Feche esta aba antes de tentar novamente.',
+        { mode, dataDir },
+        { cause: new AggregateError([cause, cleanupCause]) },
+      );
+    }
+    await lease?.release();
     if (cause instanceof PocError) {
-      await lease?.release();
       throw cause;
     }
-
-    await lease?.release();
 
     throw new PocError(
       'INITIALIZATION_FAILED',
@@ -100,7 +113,5 @@ export async function openDatabase(options: OpenDatabaseOptions = {}): Promise<D
 }
 
 export async function closeDatabase(handle: DatabaseHandle): Promise<void> {
-  if (!handle.client.closed) {
-    await handle.close();
-  }
+  await handle.close();
 }

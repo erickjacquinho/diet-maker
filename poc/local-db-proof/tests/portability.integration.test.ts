@@ -21,6 +21,43 @@ afterEach(async () => {
 });
 
 describe('logical portability seam', () => {
+  it.each(['no-diets', 'account-only'])('round-trips %s without changing another account', async (shape) => {
+    const handle = await openDatabase({ mode: 'test-memory' });
+    handles.push(handle);
+    const repository = createDatabaseRepository(handle);
+    await repository.seedFixture(cloneFixture());
+    const alphaBefore = await repository.readConfirmed('account-alpha');
+    const betaBefore = await repository.readConfirmed('account-beta');
+    const sample = createPortableSample(betaBefore, 'account-beta');
+    if (shape === 'account-only') {
+      sample.records = {
+        accounts: betaBefore.accounts, patients: [], recipes: [], recipeIngredients: [],
+        dietPlans: [], dietMeals: [], dietMealItems: [],
+      };
+    }
+
+    await importSample(repository, serializeSample(sample));
+    const firstRead = await repository.readConfirmed('account-beta');
+    assertConfirmedFixtureEqual(firstRead, sample.records);
+    await importSample(repository, serializeSample(createPortableSample(firstRead, 'account-beta')));
+    assertConfirmedFixtureEqual(await repository.readConfirmed('account-beta'), sample.records);
+    assertConfirmedFixtureEqual(await repository.readConfirmed('account-alpha'), alphaBefore);
+  });
+
+  it.each(['formatVersion', 'schemaVersion'] as const)('rejects unsupported %s without changing either account', async (field) => {
+    const handle = await openDatabase({ mode: 'test-memory' });
+    handles.push(handle);
+    const repository = createDatabaseRepository(handle);
+    await repository.seedFixture(cloneFixture());
+    const alphaBefore = await repository.readConfirmed('account-alpha');
+    const betaBefore = await repository.readConfirmed('account-beta');
+    const invalid = { ...createPortableSample(alphaBefore, 'account-alpha'), [field]: 'unsupported' };
+
+    await expect(importSample(repository, JSON.stringify(invalid))).rejects.toMatchObject({ code: 'IMPORT_REJECTED' });
+    assertConfirmedFixtureEqual(await repository.readConfirmed('account-alpha'), alphaBefore);
+    assertConfirmedFixtureEqual(await repository.readConfirmed('account-beta'), betaBefore);
+  });
+
   it('round-trips confirmed IDs, relations and nutrition snapshots without drafts', async () => {
     const sourceHandle = await openDatabase({ mode: 'test-memory' });
     handles.push(sourceHandle);

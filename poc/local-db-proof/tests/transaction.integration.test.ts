@@ -51,16 +51,40 @@ const replacementMeals = [{
 }];
 
 describe('confirmed diet transaction seam', () => {
-  it('rolls back the plan, meals and items after an intermediate failure', async () => {
+  it.each(['plan', 'meal', 'item'] as const)('rolls back the entire aggregate after failure at %s', async (failAfter) => {
     const repository = await seededRepository();
     const before = await repository.readConfirmed('account-alpha');
 
-    await expect(repository.saveDiet({ plan: replacementPlan, meals: replacementMeals, failAfter: 'item' })).rejects.toMatchObject({
+    await expect(repository.saveDiet({ plan: replacementPlan, meals: replacementMeals, failAfter })).rejects.toMatchObject({
       code: 'INTEGRITY_VIOLATION',
     });
 
     const after = await repository.readConfirmed('account-alpha');
     assertConfirmedFixtureEqual(after, before);
+  });
+
+  it.each(['patients', 'recipes', 'dietPlans'] as const)('rejects nonexistent account ownership in %s during seed', async (collection) => {
+    const handle = await openDatabase({ mode: 'test-memory' });
+    handles.push(handle);
+    const repository = createDatabaseRepository(handle);
+    const invalid = cloneFixture();
+    invalid[collection][0].accountId = 'missing-account';
+
+    await expect(repository.seedFixture(invalid)).rejects.toMatchObject({ code: 'INTEGRITY_VIOLATION' });
+    await expect(repository.readConfirmed('account-alpha')).rejects.toMatchObject({ code: 'SCOPE_VIOLATION' });
+  });
+
+  it('rejects a cross-account patient relation during seed and rolls back every account', async () => {
+    const handle = await openDatabase({ mode: 'test-memory' });
+    handles.push(handle);
+    const repository = createDatabaseRepository(handle);
+    const invalid = cloneFixture();
+    invalid.dietPlans[0].accountId = 'account-beta';
+
+    await expect(repository.seedFixture(invalid)).rejects.toMatchObject({ code: 'INTEGRITY_VIOLATION' });
+    for (const account of invalid.accounts) {
+      await expect(repository.readConfirmed(account.id)).rejects.toMatchObject({ code: 'SCOPE_VIOLATION' });
+    }
   });
 
   it('rejects a diet whose patient belongs to another account', async () => {

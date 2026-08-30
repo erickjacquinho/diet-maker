@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   check,
   boolean,
+  foreignKey,
   index,
   integer,
   pgTable,
@@ -22,7 +23,7 @@ export const patients = pgTable(
   'patients',
   {
     id: text('id').primaryKey(),
-    accountId: text('account_id').notNull(),
+    accountId: text('account_id').notNull().references(() => accounts.id, { onDelete: 'restrict' }),
     name: text('name').notNull(),
     archived: boolean('archived').notNull().default(false),
     createdAt: text('created_at').notNull(),
@@ -36,7 +37,7 @@ export const patients = pgTable(
 
 export const recipes = pgTable('recipes', {
   id: text('id').primaryKey(),
-  accountId: text('account_id').notNull(),
+  accountId: text('account_id').notNull().references(() => accounts.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   yieldPortions: integer('yield_portions').notNull(),
   createdAt: text('created_at').notNull(),
@@ -60,7 +61,7 @@ export const dietPlans = pgTable(
   'diet_plans',
   {
     id: text('id').primaryKey(),
-    accountId: text('account_id').notNull(),
+    accountId: text('account_id').notNull().references(() => accounts.id, { onDelete: 'restrict' }),
     patientId: text('patient_id').notNull(),
     status: text('status').notNull(),
     version: integer('version').notNull(),
@@ -69,6 +70,11 @@ export const dietPlans = pgTable(
     fixtureMetadata: text('fixture_metadata').notNull().default('{}'),
   },
   (table) => [
+    foreignKey({
+      name: 'diet_plans_account_patient_fk',
+      columns: [table.accountId, table.patientId],
+      foreignColumns: [patients.accountId, patients.id],
+    }).onDelete('restrict'),
     uniqueIndex('diet_plans_one_active_per_patient').on(table.patientId).where(sql`${table.status} = 'ACTIVE'`),
     check('diet_plans_status_check', sql`${table.status} in ('ACTIVE', 'SNAPSHOT')`),
     check('diet_plans_version_positive', sql`${table.version} > 0`),

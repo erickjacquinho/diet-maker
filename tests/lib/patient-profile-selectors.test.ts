@@ -55,6 +55,17 @@ describe('patient profile selectors', () => {
     });
   });
 
+  it('keeps related diet and assessment projections immutable during selection', () => {
+    const diets = structuredClone(PATIENT_PROFILE_DIETS);
+    const assessments = structuredClone(PATIENT_PROFILE_ASSESSMENTS);
+
+    selectActivePlan(diets);
+    selectLatestAssessment(assessments);
+
+    expect(diets).toEqual(PATIENT_PROFILE_DIETS);
+    expect(assessments).toEqual(PATIENT_PROFILE_ASSESSMENTS);
+  });
+
   it('maps carb cycling plans to a weighted weekly history summary', () => {
     const cycle: FullDietPlan = {
       id: 'diet-cycle',

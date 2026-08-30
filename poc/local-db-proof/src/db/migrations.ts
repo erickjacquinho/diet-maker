@@ -2,6 +2,7 @@ import type { PGlite, Transaction } from '@electric-sql/pglite';
 import { INITIAL_SCHEMA_VERSION, PocError, SUPPORTED_SCHEMA_VERSION } from '../contracts';
 import initialMigrationSql from '../../drizzle/0000_initial.sql?raw';
 import metadataMigrationSql from '../../drizzle/0001_add_fixture_metadata.sql?raw';
+import scopeMigrationSql from '../../drizzle/0002_account_patient_scope.sql?raw';
 
 export interface MigrationFile {
   id: string;
@@ -17,8 +18,13 @@ export const migrationFiles: MigrationFile[] = [
   },
   {
     id: '0001_add_fixture_metadata',
-    schemaVersion: SUPPORTED_SCHEMA_VERSION,
+    schemaVersion: '2',
     sql: metadataMigrationSql,
+  },
+  {
+    id: '0002_account_patient_scope',
+    schemaVersion: SUPPORTED_SCHEMA_VERSION,
+    sql: scopeMigrationSql,
   },
 ];
 

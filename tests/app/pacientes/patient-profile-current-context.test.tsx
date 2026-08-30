@@ -6,6 +6,8 @@ import {
   PATIENT_PROFILE_ASSESSMENTS,
   PATIENT_PROFILE_FIXTURES,
 } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const push = vi.fn();
 const router = { push, replace: vi.fn() };
@@ -21,21 +23,23 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+
 describe('PatientDetailPage current context', () => {
   beforeEach(() => {
-    localStorage.clear();
     push.mockClear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
   it('prioritizes patient identity and current indicators over manual targets', async () => {
-    localStorage.setItem(
-      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify(PATIENT_PROFILE_ASSESSMENTS),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      bodyAssessments: PATIENT_PROFILE_ASSESSMENTS,
+      latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
+    }));
 
     render(<PatientDetailPage />);
 

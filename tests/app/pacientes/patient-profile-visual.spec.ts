@@ -5,8 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import {
   PATIENT_PROFILE_ASSESSMENTS,
+  PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_FIXTURES,
 } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const push = vi.fn();
 const router = { push, replace: vi.fn() };
@@ -22,15 +25,17 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+
 describe('PatientDetailPage desktop visual contracts', () => {
   beforeEach(() => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
-    localStorage.clear();
     push.mockClear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
   it('scenario A keeps the current context primary and the plan empty state honest', async () => {
@@ -44,18 +49,18 @@ describe('PatientDetailPage desktop visual contracts', () => {
   });
 
   it('scenario B shows only the compact active plan summary', async () => {
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([{
-        id: 'diet-current',
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      activePlan: {
+        dietId: 'diet-current',
         name: 'Plano cutting agosto',
-        updatedAt: '2026-08-04',
-        simpleTargetKcal: 2020,
-        simpleTargetProtein: 150,
-        simpleTargetCarbs: 220,
-        simpleTargetFats: 60,
-      }]),
-    );
+        date: '04/08/2026',
+        status: 'Ativa',
+        targetKcal: 2020,
+        proteinG: 150,
+        carbsG: 220,
+        fatsG: 60,
+      },
+    }));
 
     render(React.createElement(PatientDetailPage));
 
@@ -73,22 +78,21 @@ describe('PatientDetailPage desktop visual contracts', () => {
   });
 
   it('scenario C keeps the longitudinal history below the current context', async () => {
-    localStorage.setItem(
-      `nutridiet_assessments_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify(PATIENT_PROFILE_ASSESSMENTS),
-    );
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([{
-        id: 'diet-current',
-        name: 'Plano cutting agosto',
-        updatedAt: '2026-08-04',
-        simpleTargetKcal: 2020,
-        simpleTargetProtein: 150,
-        simpleTargetCarbs: 220,
-        simpleTargetFats: 60,
-      }]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      bodyAssessments: PATIENT_PROFILE_ASSESSMENTS,
+      latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
+      dietHistory: [PATIENT_PROFILE_DIETS[1]],
+      activePlan: {
+        dietId: PATIENT_PROFILE_DIETS[1].id,
+        name: PATIENT_PROFILE_DIETS[1].name,
+        date: PATIENT_PROFILE_DIETS[1].date,
+        status: 'Ativa',
+        targetKcal: PATIENT_PROFILE_DIETS[1].targetKcal,
+        proteinG: PATIENT_PROFILE_DIETS[1].proteinG,
+        carbsG: PATIENT_PROFILE_DIETS[1].carbsG,
+        fatsG: PATIENT_PROFILE_DIETS[1].fatsG,
+      },
+    }));
 
     render(React.createElement(PatientDetailPage));
 

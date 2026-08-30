@@ -187,3 +187,14 @@ description: "Task list for the local database technical proof"
 - Cada tarefa tem caminho de arquivo ou resultado documental explícito e uma verificação observável.
 - O runner de navegador deve usar dados sintéticos; não executar a PoC com dados clínicos reais.
 - A implementação posterior deve ser executada exclusivamente por `/speckit-implement`, conforme a constituição do projeto.
+
+## Phase 8: Convergence — Correções da revisão independente
+
+A revisão reproduziu cinco falhas que a suíte original não cobria. As tarefas anteriores registram a primeira execução; esta fase documenta a remediação e substitui sua conclusão prematura de aprovação.
+
+- [x] T036 [skill: $webapp-testing] Corrigir a exclusividade em toda abertura/reabertura e liberação da instância em `poc/local-db-proof/src/db/client.ts`, `src/locking/single-tab-lock.ts` e `src/harness.ts`; acrescentar regressão em `poc/local-db-proof/tests/browser/single-tab.spec.ts` e testes de ciclo de vida por FR-007 / SC-003 (partial).
+- [x] T037 [skill: $webapp-testing] Registrar falhas e limpar referências fechadas durante reabertura em `poc/local-db-proof/src/harness.ts`; testar mensagem nominal, ausência de sucesso falso e recuperação em `poc/local-db-proof/tests/browser/reopen.spec.ts` por US1/AC3 / NFR-002 (partial).
+- [x] T038 [skill: $database-migrations-pro] Adicionar FKs de Account e referência composta de DietPlan para Patient no schema e em uma nova migration versionada sob `poc/local-db-proof/drizzle/`; testar rejeição de seed inválido, preservação da fixture existente e reexecução em `poc/local-db-proof/tests/transaction.integration.test.ts` e `tests/migration.integration.test.ts` por FR-005 / FR-008 (partial).
+- [x] T039 [skill: $backend-architect-ddd] Aceitar coleções vazias na substituição transacional em `poc/local-db-proof/src/db/repositories.ts`; testar round-trip da Conta Beta e de uma Conta sem filhos em `poc/local-db-proof/tests/portability.integration.test.ts` por FR-009 / SC-005 (partial).
+- [x] T040 [skill: $tdd] Preservar o estado mais recente durante autosave em `poc/local-db-proof/src/drafts/draft-store.ts`, comparando a revisão na mesma transação; testar revisão atrasada e concorrência em `poc/local-db-proof/tests/drafts.integration.test.ts` por T018 / data-model: latest ordered state (partial).
+- [x] T041 [skill: general] Corrigir as evidências prematuras em `specs/30-08-26-prova-tecnica-base-local/poc-report.md`, registrar resultados em `implementation-log.md`, executar gates completos e a convergência final por FR-012 / FR-013 / SC-007 (partial).

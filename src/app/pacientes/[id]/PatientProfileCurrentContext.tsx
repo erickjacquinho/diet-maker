@@ -10,7 +10,7 @@ import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { formatDateOnly, normalizeDateToISO } from '@/lib/date-only';
 import type { ActivePlanSummary, NextEventSummary } from '@/lib/patientProfileSelectors';
-import type { BodyAssessment } from '@/lib/patientsStore';
+import type { BodyAssessment } from '@/lib/patientRelatedRecords';
 
 function formatAssessmentDate(dateStr?: string): string {
   if (!dateStr) return '';
@@ -60,12 +60,14 @@ export function PatientProfileCurrentContext({
   activePlan,
   nextEventSummary,
   onOpenNextEvent,
+  readOnly = false,
 }: {
   patientId: string;
   latestAssessment: BodyAssessment | null;
   activePlan: ActivePlanSummary | null;
   nextEventSummary: NextEventSummary | null;
   onOpenNextEvent: () => void;
+  readOnly?: boolean;
 }) {
   const assessmentDateLabel = latestAssessment?.date
     ? formatAssessmentDate(latestAssessment.date)
@@ -153,9 +155,11 @@ export function PatientProfileCurrentContext({
               )}
             </div>
 
-            <Button type="button" variant="secondary" size="compact" onClick={onOpenNextEvent}>
-              {nextEventSummary ? 'Reagendar' : 'Definir acompanhamento'}
-            </Button>
+            {!readOnly && (
+              <Button type="button" variant="secondary" size="compact" onClick={onOpenNextEvent}>
+                {nextEventSummary ? 'Reagendar' : 'Definir acompanhamento'}
+              </Button>
+            )}
           </div>
         </Surface>
 
@@ -196,21 +200,21 @@ export function PatientProfileCurrentContext({
               )}
             </div>
 
-            {activePlan ? (
+            {activePlan && !readOnly ? (
               <Button asChild variant="secondary" size="compact">
                 <Link href={`/pacientes/${patientId}/dieta/${activePlan.dietId}`}>
                   <span>Abrir dieta</span>
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                 </Link>
               </Button>
-            ) : (
+            ) : !readOnly ? (
               <Button asChild variant="secondary" size="compact">
-                <Link href={`/pacientes/${patientId}/dieta/nova`}>
+                <Link href={`/pacientes/${patientId}/dieta/nova`} aria-disabled={readOnly} tabIndex={readOnly ? -1 : undefined}>
                   <span>Criar plano</span>
                   <Utensils className="size-3.5" aria-hidden="true" />
                 </Link>
               </Button>
-            )}
+            ) : null}
           </div>
         </Surface>
       </div>

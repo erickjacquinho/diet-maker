@@ -58,8 +58,8 @@ describe('MealItemRow quantity keyboard navigation', () => {
     const substituteButton = screen.getByRole('button', { name: 'Substituir Arroz' });
     const duplicateButton = screen.getByRole('button', { name: 'Duplicar Arroz' });
 
-    expect(substituteButton).toHaveClass('border-border-subtle');
-    expect(duplicateButton).toHaveClass('border-border-subtle');
+    expect(substituteButton).toHaveClass('border-border-control');
+    expect(duplicateButton).toHaveClass('border-border-control');
     expect(substituteButton.parentElement).toHaveClass('invisible');
     expect(substituteButton.parentElement).toHaveClass('group-hover/row:visible');
     expect(substituteButton.parentElement).toHaveClass('group-focus-within/row:visible');

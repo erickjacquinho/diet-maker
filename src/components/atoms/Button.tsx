@@ -94,6 +94,10 @@ export interface HoldToDeleteButtonProps extends Omit<React.ButtonHTMLAttributes
    */
   onConfirm?: () => void | Promise<void>;
   /**
+   * Callback executado quando a confirmação assíncrona falha.
+   */
+  onError?: (error: unknown) => void;
+  /**
    * Tempo de pressionamento necessário em milissegundos para confirmar a exclusão.
    * @default 1500 (1,5 segundos)
    */
@@ -132,6 +136,7 @@ export interface HoldToDeleteButtonProps extends Omit<React.ButtonHTMLAttributes
  */
 export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
   onConfirm,
+  onError,
   delayMs = 1500,
   variant = 'destructive',
   size = 'standard',
@@ -147,6 +152,7 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
 }) => {
   const [isHolding, setIsHolding] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -158,19 +164,24 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
 
   const handleStartHold = useCallback(
     (e?: React.SyntheticEvent) => {
-      if (disabled || isCompleted) return;
+      if (disabled || isCompleted || isPending) return;
       setIsHolding(true);
       clearTimer();
 
       timerRef.current = setTimeout(() => {
-        setIsCompleted(true);
         setIsHolding(false);
         if (onConfirm) {
-          onConfirm();
+          setIsPending(true);
+          void Promise.resolve(onConfirm())
+            .then(() => setIsCompleted(true))
+            .catch((error: unknown) => onError?.(error))
+            .finally(() => setIsPending(false));
+        } else {
+          setIsCompleted(true);
         }
       }, delayMs);
     },
-    [disabled, isCompleted, clearTimer, delayMs, onConfirm]
+    [disabled, isCompleted, isPending, clearTimer, delayMs, onConfirm, onError]
   );
 
   const handleCancelHold = useCallback(() => {
@@ -205,7 +216,7 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
       type="button"
       variant={variant}
       size={size}
-      disabled={disabled}
+      disabled={disabled || isPending}
       aria-label={defaultAriaLabel}
       title={defaultTitle}
       onPointerDown={(e) => {
@@ -243,10 +254,9 @@ export const HoldToDeleteButton: React.FC<HoldToDeleteButtonProps> = ({
       <span
         aria-hidden="true"
         data-testid="hold-progress-bar"
-        style={isHolding ? { transitionDuration: '800ms' } : undefined}
         className={cn(
           'absolute inset-y-0 left-0 w-0 pointer-events-none rounded-inherit transition-width ease-linear bg-error-soft',
-          isHolding ? 'w-full' : 'duration-fast'
+          isHolding ? 'w-full duration-hold' : 'duration-fast'
         )}
       />
 

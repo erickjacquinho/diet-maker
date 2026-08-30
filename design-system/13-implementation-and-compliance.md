@@ -350,7 +350,7 @@ A auditoria legada foi ampliada de 10 para 17 regras nomeadas (LEG001–LEG017) 
 | LEG002 | `arbitrary-text-style` | `text-[...]`, `leading-[...]`, `tracking-[...]` | `textStyle()` nomeado |
 | LEG003 | `forbidden-radius` | `rounded-lg/xl/2xl/3xl/full` e `rounded-[10/12/16px]` | `rounded-compact/control/surface/round` |
 | LEG004 | `legacy-font-weight` | `font-black`, `font-extrabold` | pesos do text style (400–700) |
-| LEG005 | `legacy-depth-motion` | `transition-all`, `hover:scale-*`, `duration-*` não canônico, `shadow-*` fora das receitas | `duration-fast/standard/slow`, `shadow-floating/overlay/none` |
+| LEG005 | `legacy-depth-motion` | `transition-all`, `hover:scale-*`, `duration-*` não canônico, `shadow-*` fora das receitas | `duration-fast/standard/slow/hold`, `shadow-floating/overlay/none` |
 | LEG006 | `out-of-scope-breakpoint` | `sm:`/`md:` | remoção (código morto; produto inicia em 1024px) |
 | LEG007 | `local-visual-literal` | hex em TSX | camada reference de `tokens.css` |
 | LEG008 | `legacy-alias` | aliases legados (`color-bg-app`, `warmSurface`, …) | alias semantic/system canônico |
