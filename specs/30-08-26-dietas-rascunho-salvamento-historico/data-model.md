@@ -1,6 +1,6 @@
 # Data model: Dietas — rascunho, salvamento e histórico
 
-**Status**: proposto para implementação após validação humana  
+**Status**: implementado conforme o SDD e validado em integração
 **Source**: [spec.md](./spec.md), [research.md](./research.md)
 
 ## Aggregate boundaries

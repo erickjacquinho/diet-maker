@@ -1,6 +1,6 @@
 # Progresso do fluxo SDD
 
-Data: 2026-08-30. Nenhuma implementação executada por este fluxo.
+Data: 2026-08-31. Implementação e validação executadas para este fluxo.
 
 ## Estado atual
 
@@ -18,8 +18,8 @@ Data: 2026-08-30. Nenhuma implementação executada por este fluxo.
 - Estado 7 — concluído: análise cruzada repetida após corrigir cinco achados
   médios; 56/56 requisitos cobertos, zero ambiguidade, zero duplicação e zero
   finding crítico/bloqueador.
-- Estado 8 — ativo: conjunto pronto para validação humana; implementação não
-  iniciada.
+- Estado 8 — concluído: implementação das 58 tarefas, validação direcionada,
+  suíte completa, browser e gates de qualidade aprovados.
 
 ## Artefatos
 
@@ -56,10 +56,11 @@ Métricas finais:
 
 ## Portão de execução
 
-Manter `SPECIFY_FEATURE_DIRECTORY=specs/30-08-26-dietas-rascunho-salvamento-historico`.
+Portão encerrado após a implementação e a validação final. O contexto da
+feature foi `specs/30-08-26-dietas-rascunho-salvamento-historico`.
 O registro `.specify/feature.json` aponta para esse diretório. Após validação
 humana, a execução deve ocorrer exclusivamente por `/speckit-implement`.
 
 O repositório já continha alterações e SDDs anteriores; elas foram preservadas.
-A criação deste conjunto não reexecutou a aplicação nem declara o código
-implementado ou conforme.
+A implementação não introduziu biblioteca reutilizável, avaliações,
+acompanhamento ou backup; essas entregas permanecem nas etapas posteriores.

@@ -12,10 +12,25 @@ import {
 } from '@/lib/mealVariations';
 import { toast } from 'sonner';
 
-const createPastedMealItems = (items: DietItem[], createId: (prefix: string) => string) => items.map((item) => ({
-  ...item,
-  id: createId('item'),
-}));
+const createPastedMealItems = (
+  items: DietItem[],
+  createId: (prefix: string) => string,
+  occupiedIds: Set<string>,
+) => items.map((item) => {
+  let itemId = createId('item');
+  while (occupiedIds.has(itemId)) itemId = createId('item');
+  occupiedIds.add(itemId);
+  return { ...item, id: itemId };
+});
+
+const getOccupiedItemIds = (meals: DietMeal[]): Set<string> => new Set(
+  meals
+    .flatMap((meal) => [
+      ...meal.items.map((item) => item.id),
+      ...(meal.variations || []).flatMap((variation) => variation.items.map((item) => item.id)),
+    ])
+    .filter((id): id is string => Boolean(id))
+);
 
 export function useDietMealActions({
   foodSearchMealIndex,
@@ -310,7 +325,7 @@ export function useDietMealActions({
     (mealId: string) => {
       if (!copiedMealItems || copiedMealItems.length === 0) return;
 
-      const pastedItems = createPastedMealItems(copiedMealItems, createId);
+      const pastedItems = createPastedMealItems(copiedMealItems, createId, getOccupiedItemIds(currentMeals));
 
       updateActiveMeals((prev) =>
         prev.map((meal) => (
@@ -322,7 +337,7 @@ export function useDietMealActions({
 
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
-    [copiedMealItems, createId, resolveActiveId, updateActiveMeals]
+    [copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handlePasteMealAndReplace = useCallback(
@@ -334,7 +349,7 @@ export function useDietMealActions({
 
       const activeVariationId = resolveActiveId(targetMeal);
 
-      const pastedItems = createPastedMealItems(copiedMealItems, createId);
+      const pastedItems = createPastedMealItems(copiedMealItems, createId, getOccupiedItemIds(currentMeals));
       updateActiveMeals((prev) =>
         prev.map((meal) => (
           meal.id === mealId

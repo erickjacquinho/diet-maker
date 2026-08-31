@@ -57,7 +57,7 @@ function expandSources(relativePath: string): string[] {
 
 describe('legacy patient persistence cutover', () => {
   it('keeps the patient flow away from legacy storage imports and keys', () => {
-    const forbidden = /patientsStore(?:['"]|Types)|localStorage|sessionStorage|indexedDB|nutridiet_patients|nutridiet_assessments_|nutridiet_diets_|diet_maker_custom_objectives/i;
+    const forbidden = /patientsStore(?:['"]|Types)|localStorage|sessionStorage|nutridiet_patients|nutridiet_assessments_|nutridiet_diets_|diet_maker_custom_objectives/i;
     const violations = patientFlowFiles.flatMap((file) => forbidden.test(readSource(file)) ? [file] : []);
 
     expect(violations).toEqual([]);

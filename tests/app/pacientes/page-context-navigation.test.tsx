@@ -5,6 +5,8 @@ import PatientDetailPage from '@/app/pacientes/[id]/page';
 import DietBuilderPage from '@/app/pacientes/[id]/dieta/[dietaId]/page';
 import DedicatedConsultationPage from '@/app/pacientes/[id]/consulta/[date]/page';
 import type { Patient } from '@/lib/patientsStore';
+import { createInitialDietPlan } from '@/lib/dietStore';
+import { toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { makePatientProfileState } from './profileState';
 
@@ -46,10 +48,81 @@ const patient: Patient = {
   lastActivity: null,
 };
 
+const canonicalPatient = {
+  id: patient.id,
+  accountId: 'account-context',
+  displayCode: 'P-0001',
+  name: patient.name,
+  age: patient.age,
+  gender: patient.gender,
+  heightCm: patient.heightCm,
+  weightKg: patient.weightKg,
+  maritalStatus: null,
+  phone: null,
+  whatsapp: null,
+  currentObjective: patient.objective,
+  defaultMacroTargets: {
+    proteinG: patient.targetProtein,
+    carbsG: patient.targetCarbs,
+    fatsG: patient.targetFats,
+    kcal: patient.targetKcal,
+  },
+  createdAt: '2026-08-01T00:00:00.000Z',
+  updatedAt: '2026-08-01T00:00:00.000Z',
+  version: 1,
+  archivedAt: null,
+};
+
+const initialDietPlan = createInitialDietPlan(patient.id, {
+  weightKg: patient.weightKg,
+  targetKcal: patient.targetKcal,
+  targetProtein: patient.targetProtein,
+  targetCarbs: patient.targetCarbs,
+  targetFats: patient.targetFats,
+});
+
+const mockPatientApplication = {
+  getPatientProfile: vi.fn().mockResolvedValue({
+    patient: canonicalPatient,
+    initials: patient.initials,
+    availableObjectives: [patient.objective],
+  }),
+};
+
+const mockDietApplication = {
+  openEditor: vi.fn().mockResolvedValue({
+    draft: {
+      draftId: 'draft-context',
+      contextKey: `account-context|${patient.id}|nova`,
+      accountId: 'account-context',
+      patientId: patient.id,
+      routeDietId: 'nova',
+      payloadSchemaVersion: 1,
+      draftRevision: 1,
+      state: 'EDITABLE' as const,
+      payload: toEditableDocument(initialDietPlan),
+      createdAt: '2026-08-01T00:00:00.000Z',
+      updatedAt: '2026-08-01T00:00:00.000Z',
+    },
+    isNew: true,
+  }),
+  listPreviousDietSources: vi.fn().mockResolvedValue([]),
+  autosaveDraft: vi.fn().mockResolvedValue({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T00:00:00.000Z' }),
+  flushDraft: vi.fn().mockResolvedValue({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T00:00:00.000Z' }),
+  saveDietAsActive: vi.fn(),
+  discardDraft: vi.fn(),
+};
+
+vi.mock('@/lib/application/browser-composition', () => ({
+  getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
+  getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
+}));
+
 describe('contextual header navigation', () => {
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem('nutridiet_patients', JSON.stringify([patient]));
+    vi.clearAllMocks();
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
       patient: {
         ...makePatientProfileState().patient,
@@ -91,10 +164,7 @@ describe('contextual header navigation', () => {
     const heading = await screen.findByRole('heading', { level: 1, name: 'Elaboração de Dieta' });
     const header = heading.closest('header');
     expect(header).not.toBeNull();
-    expect(within(header as HTMLElement).getByRole('link', { name: 'Voltar para a ficha de Ana Lima' })).toHaveAttribute(
-      'href',
-      `/pacientes/${patient.id}`,
-    );
+    expect(within(header as HTMLElement).getByRole('button', { name: 'Voltar para a ficha de Ana Lima' })).toBeEnabled();
     expect(within(header as HTMLElement).getByText('Dieta')).toHaveAttribute('aria-current', 'page');
     expect(within(header as HTMLElement).queryByText('nova', { exact: true })).not.toBeInTheDocument();
     expect(within(header as HTMLElement).getByRole('button', { name: 'Salvar Prescrição' })).toBeEnabled();
@@ -116,7 +186,7 @@ describe('contextual header navigation', () => {
     expect(within(header as HTMLElement).queryByRole('link', { name: /Dieta/i })).not.toBeInTheDocument();
   });
 
-  it('keeps consultation actions available when a diet is linked', async () => {
+  it('keeps consultation actions available without reintroducing legacy diet actions', async () => {
     localStorage.setItem(
       `nutridiet_diets_${patient.id}`,
       JSON.stringify([{ id: 'diet-linked', name: 'Plano atual', createdAt: '2026/08/04', simpleMeals: [] }]),
@@ -128,12 +198,10 @@ describe('contextual header navigation', () => {
     const heading = await screen.findByRole('heading', { level: 1, name: 'Registro de Consulta — 2026/08/04' });
     const header = heading.closest('header') as HTMLElement;
     const printButton = within(header).getByRole('button', { name: 'Imprimir Prontuário' });
-    const dietLink = within(header).getByRole('link', { name: 'Abrir no Construtor de Dietas' });
 
     expect(printButton).toBeEnabled();
-    expect(dietLink).toHaveAttribute('href', `/pacientes/${patient.id}/dieta/diet-linked`);
+    expect(within(header).queryByRole('link', { name: 'Abrir no Construtor de Dietas' })).not.toBeInTheDocument();
     fireEvent.click(printButton);
-    fireEvent.click(dietLink);
   });
 
   it('keeps the missing-patient state with a deterministic /pacientes return', async () => {

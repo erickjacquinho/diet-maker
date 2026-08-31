@@ -1,8 +1,8 @@
 # Research: Dietas — rascunho, salvamento e histórico
 
 **Feature**: [spec.md](./spec.md)  
-**Data**: 2026-08-30  
-**Status**: concluída para planejamento; implementação não iniciada
+**Data**: 2026-08-31
+**Status**: concluída; decisões aplicadas e validadas na implementação
 
 ## Decisão 1 — Integrar ao runtime local aprovado
 

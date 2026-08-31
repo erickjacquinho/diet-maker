@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-30
 
-**Status**: Draft — clarificada; aguardando validação humana do conjunto SDD; implementação não iniciada por este SDD.
+**Status**: Implementada e validada; ver [validation-report.md](./validation-report.md) para a evidência final.
 
 **Input**: Criar o SDD da terceira etapa dos documentos de `refs/dieta-db/`, executando o fluxo de especificação até validação humana, sem implementar.
 

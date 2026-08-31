@@ -29,7 +29,7 @@ describe('canonical diet cutover', () => {
   });
 
   it('keeps the food picker limited to TACO and the consultation route read-only for diet data', () => {
-    expect(read('components/molecules/FoodSearchModal.tsx')).not.toMatch(/readyMealsStore|recipesStore|ReadyMealSearchResultsList|RecipeSearchResultsList/);
+    expect(read('components/organisms/foods/FoodSearchModal.tsx')).not.toMatch(/readyMealsStore|recipesStore|ReadyMealSearchResultsList|RecipeSearchResultsList/);
 
     const consultationPage = read('app/pacientes/[id]/consulta/[date]/page.tsx');
     expect(consultationPage).not.toMatch(/ConsultationDietCard|consultation\.diet|Abrir no Construtor de Dietas/);

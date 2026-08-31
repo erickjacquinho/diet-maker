@@ -22,6 +22,7 @@ export default defineConfig({
       '.next',
       'dist',
       'tests/design-system/component-catalog.test.mjs',
+      'tests/browser/**',
     ],
   },
   resolve: {

@@ -159,7 +159,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         />
 
         {saveStatus !== 'clean' && saveStatus !== 'persisted' && (
-          <div role="status" aria-live="polite" className="flex items-center justify-between gap-3 rounded-surface border border-border-subtle bg-surface-muted px-4 py-3 text-sm text-text-secondary">
+          <div role="status" aria-live="polite" className="flex items-center justify-between gap-3 rounded-surface border border-border-subtle bg-surface-muted px-4 py-3 text-style-legal text-text-secondary">
             <span>
               {saveStatus === 'pending' && 'Alterações locais ainda não persistidas; salvar ou navegar fará o flush.'}
               {saveStatus === 'saving' && 'Salvando rascunho local…'}
