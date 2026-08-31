@@ -1,4 +1,4 @@
-import type { DietItem, DietMeal, DietMealVariation } from './dietStore';
+import type { DietItem, DietMeal, DietMealVariation } from './legacy-diet-types';
 
 export const MAX_MEAL_VARIATIONS = 5;
 

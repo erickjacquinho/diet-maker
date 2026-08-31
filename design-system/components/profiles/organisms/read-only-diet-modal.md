@@ -6,15 +6,15 @@
 | --- | --- |
 | Component ID | `organism-read-only-diet-modal` |
 | Nature | `domain` |
-| Lifecycle | `migration-required` |
-| Current layer | `molecule` |
+| Lifecycle | `implemented` |
+| Current layer | `organism` |
 | Target layer | `organism` |
-| Sources | `src/components/molecules/ReadOnlyDietModal.tsx` |
+| Sources | `src/components/organisms/diets/ReadOnlyDietModal.tsx` |
 | Public exports | `ReadOnlyDietModalProps` (type), `ReadOnlyDietModal` (component) |
 
 ## Purpose
 
-Apresentar uma dieta completa para consulta sem affordance de edição.
+Apresentar uma prescrição confirmada em consulta somente leitura, incluindo sua composição e os snapshots nutricionais congelados.
 
 ## Category inheritance
 
@@ -22,23 +22,23 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 ## Specific anatomy
 
-Dialog com header, resumo nutricional, refeições/itens em body rolável e única ação de fechar.
+Dialog com título, descrição, modo e peso de referência; corpo rolável com variações, refeições, opções e itens; cada item exibe quantidade, unidade e nutrientes do snapshot; footer com a única ação de fechamento.
 
 ## Allowed variants
 
-Somente o subconjunto necessário da categoria; o componente não introduz variante visual autônoma.
+Não possui variantes visuais autônomas. A ausência de ciclo mostra somente a composição simples confirmada.
 
 ## Particular states
 
-Read-only é o estado base e nunca usa disabled em valores ou controles de rolagem.
+O estado base é `read-only`. `loading`, `error` e `empty` pertencem ao consumidor que carrega o agregado. Fechar por botão ou Escape devolve o foco ao gatilho pelo primitivo do dialog.
 
 ## Composition
 
-Base declarada: `ui-dialog`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Compõe `ui-dialog`, `Badge`, ações genéricas e ícones Lucide. Não cria draft, não recalcula energia e não possui controles de editar, excluir ou salvar.
 
 ## Content rules
 
-Title único e copy objetiva; body contém a informação completa e footer somente ações.
+Os valores apresentados vêm do `DietPlan` confirmado e de seus snapshots; não devem consultar catálogo vivo nem apresentar alternativas mutuamente exclusivas como total somado.
 
 ## Exceptions
 
@@ -46,17 +46,16 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-A lista canônica de rotas e componentes consumidores é o campo `consumers` de `design-system/components/registry.json`; mudanças devem atualizar registro e perfil no mesmo change set.
+A lista canônica de consumidores é o campo `consumers` de `design-system/components/registry.json`; mudanças devem atualizar registro e perfil no mesmo change set.
 
 ## Acceptance criteria
 
 - identidade, source e exports coincidem com o registro;
-- categoria e traits são herdados sem redefinição local;
-- anatomia e variantes acima são suficientes para reproduzir a família;
-- estados particulares são observáveis e não contradizem a categoria;
+- o dialog mantém nome acessível, foco, região rolável e fechamento por Escape;
+- todos os itens confirmados são exibidos com os snapshots congelados;
+- não há mutação clínica, criação de draft, edição ou exclusão;
 - nenhuma decisão visual fica a cargo do consumidor.
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `organism`; perfil homologado, código ainda requer migração em SDD posterior.
-
+Implementado em `organism`; perfil homologado documentalmente.

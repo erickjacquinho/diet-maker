@@ -34,11 +34,7 @@ Root `MacroProportionBar` renderiza:
 
 ## Typography Tokens Validation
 
-O componente utiliza estritamente a escala tipográfica canônica:
-- **Títulos & Rótulos de Seção**: `text-style-chart-micro` (`font-size: 11px`, `line-height: 14px`, `font-semibold`).
-- **Valores Numéricos Principais**: `text-style-body` (`font-size: 14px`, `font-bold`, `tabular-nums`).
-- **Unidades de Medida (g, kcal)**: `text-style-legal` (`font-size: 12px`, `font-medium`, `text-text-muted`).
-- **Separadores & Subtítulos**: `text-style-chart-micro` (`font-size: 11px`, `font-normal`, `text-text-muted`, `tabular-nums`).
+O componente utiliza estritamente os tokens tipográficos canônicos `text-style-chart-micro`, `text-style-body` e `text-style-legal`, sem redeclarar medidas locais.
 
 ## Allowed variants
 
@@ -47,6 +43,22 @@ O componente utiliza estritamente a escala tipográfica canônica:
 - `showCalories`: `boolean` (inclui a 4ª coluna de Calorias Totais; padrão `true`).
 - `showTotalPct`: `boolean` (exibe `100%` no header; padrão `true`).
 - `title`: `ReactNode | false` (título contextual; padrão `"Distribuição Calórica (% VET)"`).
+
+## Particular states
+
+Estado vazio mostra orientação explícita quando não há metas ou alimentos. Os estados de foco e contraste são herdados dos tokens globais; os percentuais permanecem legíveis sem depender exclusivamente da cor.
+
+## Composition
+
+Compõe superfícies, indicadores semânticos e ícones Lucide. A barra é um único `progressbar` acessível e a grade de detalhes não cria controles interativos aninhados.
+
+## Content rules
+
+Exibe sempre a ordem Proteínas, Carboidratos, Gorduras e Calorias quando habilitadas. Valores usam a precisão de apresentação canônica e não substituem metas manuais por cálculos derivados.
+
+## Exceptions
+
+Nenhuma exceção aprovada.
 
 ## Consumers
 

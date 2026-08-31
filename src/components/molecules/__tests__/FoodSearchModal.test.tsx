@@ -3,8 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { FoodSearchModal } from '../FoodSearchModal';
 import * as tacoStore from '@/lib/tacoStore';
-import * as readyMealsStore from '@/lib/readyMealsStore';
-import * as recipesStore from '@/lib/recipesStore';
+import * as tacoAdapter from '@/lib/application/diets/taco-food-adapter';
+import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 
@@ -38,64 +38,31 @@ describe('FoodSearchModal', () => {
         preparo: 'cozido',
         isFavorite: false,
       },
-    ]);
-
-    vi.spyOn(readyMealsStore, 'getReadyMealsFromStorage').mockReturnValue([
       {
-        id: 'meal-1',
-        name: 'Almoço Completo',
-        suggestedTime: '12:00',
-        kcal: 500,
-        proteinG: 35,
-        carbsG: 50,
+        id: 'custom-1',
+        name: 'Alimento customizado',
+        category: 'Customizados',
+        proteinG: 10,
+        carbsG: 10,
+        fatG: 10,
         fatsG: 10,
-        itemsCount: 3,
-        itemsPreview: 'Arroz, Feijão, Frango',
+        fiberG: 1,
+        source: 'CUSTOM',
+        kcal: 170,
+        preparo: 'inNatura',
+        isFavorite: false,
       },
     ]);
 
-    vi.spyOn(recipesStore, 'getRecipesFromStorage').mockReturnValue([
-      {
-        id: 'rec-1',
-        name: 'Omelete de Forno',
-        category: 'Café da Manhã',
-        servings: 1,
-        instructions: 'Assar por 20 min',
-        createdAt: '2026-08-01',
-        ingredients: [
-          {
-            foodId: 'taco-2',
-            name: 'Ovo',
-            amountGrams: 100,
-            proteinG: 13,
-            carbsG: 1.6,
-            fatsG: 8.9,
-            kcal: 146,
-          },
-        ],
-      },
-    ]);
+    vi.spyOn(tacoAdapter, 'createTacoSnapshot').mockReturnValue({
+      sourceType: 'SYSTEM_TACO',
+      sourceId: 'taco-1',
+      prescribedQuantity: '100',
+    } as unknown as NutritionSnapshot);
   });
 
-  it('renders modal with shadcn button group and always-visible favorites button', () => {
-    render(
-      <FoodSearchModal
-        isOpen={true}
-        onClose={mockClose}
-        mealTitle="Café da Manhã"
-        onAddFood={mockAddFood}
-      />
-    );
-
-    expect(screen.getByText(/Adicionar à Refeição "Café da Manhã"/i)).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /alimentos/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /refeições prontas/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /receitas/i })).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: /filtrar favoritos/i })).toBeInTheDocument();
-  });
-
-  it('switches categories via button group while keeping favorites button always visible', () => {
-    render(
+  function renderModal() {
+    return render(
       <FoodSearchModal
         isOpen={true}
         onClose={mockClose}
@@ -103,62 +70,47 @@ describe('FoodSearchModal', () => {
         onAddFood={mockAddFood}
       />
     );
+  }
 
-    // Initial: Alimentos
-    expect(screen.getByPlaceholderText('Buscar por nome do alimento...')).toBeInTheDocument();
+  it('renders only the TACO source and keeps favorites visible', () => {
+    renderModal();
+
+    expect(screen.getByText(/Adicionar à Refeição "Almoço"/i)).toBeInTheDocument();
     expect(screen.getByText('Arroz branco cozido')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: /filtrar favoritos/i })).toBeInTheDocument();
-
-    // Switch to Refeições Prontas via Button Group
-    fireEvent.click(screen.getByRole('tab', { name: /refeições prontas/i }));
-    expect(screen.getByPlaceholderText('Buscar refeição pronta por nome ou ingrediente...')).toBeInTheDocument();
-    expect(screen.getByText('Almoço Completo')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: /filtrar favoritos/i })).toBeInTheDocument();
-
-    // Switch to Receitas via Button Group
-    fireEvent.click(screen.getByRole('tab', { name: /receitas/i }));
-    expect(screen.getByPlaceholderText('Buscar receita culinária por nome ou ingrediente...')).toBeInTheDocument();
-    expect(screen.getByText('Omelete de Forno')).toBeInTheDocument();
+    expect(screen.queryByText('Alimento customizado')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Refeições Prontas|Receitas/i)).not.toBeInTheDocument();
     expect(screen.getByRole('switch', { name: /filtrar favoritos/i })).toBeInTheDocument();
   });
 
-  it('allows selecting items across categories and adds them with onAddFood', () => {
-    render(
-      <FoodSearchModal
-        isOpen={true}
-        onClose={mockClose}
-        mealTitle="Almoço"
-        onAddFood={mockAddFood}
-      />
-    );
+  it('filters the TACO table by food type', () => {
+    renderModal();
 
-    // Select Food
-    const foodRow = screen.getByText('Arroz branco cozido');
-    fireEvent.click(foodRow);
+    fireEvent.click(screen.getByRole('combobox', { name: 'Tipo de alimento' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Cereais' }));
 
-    // Switch to Ready Meal via Button Group
-    fireEvent.click(screen.getByRole('tab', { name: /refeições prontas/i }));
-    const mealRow = screen.getByText('Almoço Completo');
-    fireEvent.click(mealRow);
+    expect(screen.getByText('Arroz branco cozido')).toBeInTheDocument();
+    expect(screen.queryByText('Alimento customizado')).not.toBeInTheDocument();
+  });
 
-    // Switch to Recipe via Button Group
-    fireEvent.click(screen.getByRole('tab', { name: /receitas/i }));
-    const recipeRow = screen.getByText('Omelete de Forno');
-    fireEvent.click(recipeRow);
+  it('adds selected TACO food with a complete frozen snapshot', () => {
+    renderModal();
 
-    // Verify counter in footer shows 3 items selected
-    expect(screen.getByText('3 itens selecionados')).toBeInTheDocument();
-
-    // Click Add
-    const addButton = screen.getByRole('button', { name: /adicionar \(3\)/i });
-    fireEvent.click(addButton);
+    fireEvent.click(screen.getByText('Arroz branco cozido'));
+    fireEvent.click(screen.getByRole('button', { name: /adicionar \(1\)/i }));
 
     expect(mockAddFood).toHaveBeenCalledTimes(1);
-    const addedItems = mockAddFood.mock.calls[0][0];
-    expect(addedItems).toHaveLength(3);
-    expect(addedItems[0].name).toContain('Arroz branco cozido');
-    expect(addedItems[1].name).toBe('Almoço Completo');
-    expect(addedItems[2].name).toBe('Omelete de Forno (1 porção)');
+    expect(mockAddFood.mock.calls[0][0]).toEqual([
+      expect.objectContaining({
+        foodId: 'taco-1',
+        name: 'Arroz branco cozido (cozido)',
+        snapshot: expect.objectContaining({
+          sourceType: 'SYSTEM_TACO',
+          sourceId: 'taco-1',
+          prescribedQuantity: '100',
+        }),
+      }),
+    ]);
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });

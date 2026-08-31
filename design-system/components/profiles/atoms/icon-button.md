@@ -30,12 +30,12 @@ O `DeleteIconButton` é o componente oficial e canônico para qualquer ação de
 
 - **Variante canônica:** `destructive-outline`
 - **Estado Normal:**
-  - Borda: `border-error-border` (`#E6B8B2` - sutil, semântica de erro)
+  - Borda: `border-error-border` (sutil, semântica de erro)
   - Fundo: `bg-surface`
-  - Ícone: `text-error` (`#B42318` - vermelho semântico)
+  - Ícone: `text-error` (vermelho semântico)
 - **Estado Hover:**
-  - Borda: `hover:border-error` (`#B42318`)
-  - Fundo: `hover:bg-error` (`#B42318` - preenchimento vermelho)
+  - Borda: `hover:border-error`
+  - Fundo: `hover:bg-error` (preenchimento vermelho)
   - Ícone: `hover:text-white` (ícone branco)
 - **Estado Active / Pressed:**
   - `active:bg-error active:text-white`

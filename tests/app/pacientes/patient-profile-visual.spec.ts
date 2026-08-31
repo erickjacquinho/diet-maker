@@ -81,7 +81,7 @@ describe('PatientDetailPage desktop visual contracts', () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
       bodyAssessments: PATIENT_PROFILE_ASSESSMENTS,
       latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
-      dietHistory: [PATIENT_PROFILE_DIETS[1]],
+      confirmedPlans: [PATIENT_PROFILE_DIETS[1]],
       activePlan: {
         dietId: PATIENT_PROFILE_DIETS[1].id,
         name: PATIENT_PROFILE_DIETS[1].name,

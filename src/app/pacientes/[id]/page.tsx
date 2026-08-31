@@ -23,7 +23,7 @@ export default function PatientDetailPage() {
     patient,
     profileError,
     isProfileLoading,
-    dietHistory,
+    confirmedPlans,
     bodyAssessments,
     activePlan,
     latestAssessment,
@@ -32,9 +32,6 @@ export default function PatientDetailPage() {
     availableObjectives,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
-    isDeleteDietModalOpen,
-    setIsDeleteDietModalOpen,
-    dietToDelete,
     isEditModalOpen,
     setIsEditModalOpen,
     isEditAssessmentOpen,
@@ -50,7 +47,6 @@ export default function PatientDetailPage() {
     isReadOnlyDietModalOpen,
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
-    handleOpenDeleteDietModal,
     handleOpenEditAssessment,
     handleOpenCreateAssessment,
     handleSaveAssessment,
@@ -59,7 +55,6 @@ export default function PatientDetailPage() {
     handleAddCustomObjective,
     handleSavePatient,
     handleDeletePatient,
-    handleDeleteDiet,
   } = usePatientProfilePage();
 
   if (isProfileLoading) {
@@ -171,7 +166,7 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {dietHistory.length === 1 ? '1 plano' : `${dietHistory.length} planos`}
+              {confirmedPlans.length === 1 ? '1 plano' : `${confirmedPlans.length} planos`}
             </span>
             {!isPatientArchived && (
               <Link href={`/pacientes/${patientId}/dieta/nova`}>
@@ -183,9 +178,8 @@ export default function PatientDetailPage() {
 
         <PatientDietsTable
           patientId={patientId}
-          diets={dietHistory}
+          diets={confirmedPlans}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
-          onDeleteDiet={handleOpenDeleteDietModal}
         />
       </Surface>
 
@@ -232,10 +226,6 @@ export default function PatientDetailPage() {
         setIsEditModalOpen={setIsEditModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         setIsDeleteModalOpen={setIsDeleteModalOpen}
-        isDeleteDietModalOpen={isDeleteDietModalOpen}
-        setIsDeleteDietModalOpen={setIsDeleteDietModalOpen}
-        dietToDelete={dietToDelete}
-        handleDeleteDiet={handleDeleteDiet}
         isNextEventModalOpen={isNextEventModalOpen}
         setIsNextEventModalOpen={setIsNextEventModalOpen}
         isAddObjectiveModalOpen={isAddObjectiveModalOpen}

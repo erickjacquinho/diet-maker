@@ -12,7 +12,7 @@ import {
   Calendar,
   GripVertical,
 } from 'lucide-react';
-import { CarbCyclingVariation, DAYS_OF_WEEK } from '@/lib/dietStore';
+import { CarbCyclingVariation, DAYS_OF_WEEK } from '@/lib/legacy-diet-types';
 import { cn } from '@/lib/utils';
 
 export interface CarbCyclingVariationPanelProps {

@@ -19,7 +19,6 @@ export interface Patient {
   initials: string;
   nextEvent?: PatientNextEvent | null;
   lastActivity?: PatientLastActivity | null;
-  dietHistory?: HistoricalDiet[];
   bodyAssessments?: BodyAssessment[];
 }
 
@@ -113,20 +112,8 @@ export interface BodyAssessment {
 
 export interface ConsultationRecord {
   date: string;
-  diet?: HistoricalDiet;
   assessment?: BodyAssessment;
   notes?: string;
   prescribedSupplements?: string[];
 }
 
-export interface StoredDietRecord {
-  id?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: unknown;
-}
-
-export interface PatientRecordHistory {
-  assessments: BodyAssessment[];
-  hasDiet: boolean;
-}

@@ -13,14 +13,10 @@ import type {
   PatientNextEventType,
   PatientLastActivity,
   PatientLastActivityType,
-  HistoricalDiet,
-  HistoricalDietMeal,
-  HistoricalDietVariation,
   BodyAssessment,
   ConsultationRecord,
-  StoredDietRecord,
-  PatientRecordHistory,
 } from './patientsStoreTypes';
+import type { HistoricalDiet, HistoricalDietMeal, HistoricalDietVariation } from './patientsStoreTypes';
 
 import { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES } from './patientsStoreTypes';
 
@@ -35,14 +31,11 @@ export type {
   HistoricalDietVariation,
   BodyAssessment,
   ConsultationRecord,
-  StoredDietRecord,
-  PatientRecordHistory,
 };
 export { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES, normalizeDateKey, normalizePairedBodyMeasurements };
 
 const PATIENTS_KEY = 'nutridiet_patients';
 const PATIENT_ASSESSMENTS_KEY_PREFIX = 'nutridiet_assessments_';
-const PATIENT_DIETS_KEY_PREFIX = 'nutridiet_diets_';
 
 export function formatPatientCode(index: number): string {
   return `P-${String(index).padStart(4, '0')}`;
@@ -153,33 +146,6 @@ export function getPatientAssessmentsFromStorage(patientId: string): BodyAssessm
   return Array.isArray(saved) ? saved : [];
 }
 
-export function getPatientDietsFromStorage(patientId: string): StoredDietRecord[] {
-  const saved = getStorageItem<StoredDietRecord[]>(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`, []);
-  return Array.isArray(saved) ? saved : [];
-}
-
-export function getPatientRecordHistory(patientId: string): PatientRecordHistory {
-  const storedAssessments = getPatientAssessmentsFromStorage(patientId);
-  const storedDiets = getPatientDietsFromStorage(patientId);
-  const patient = getPatientById(patientId);
-
-  const mergedAssessments = [...storedAssessments];
-  if (patient?.bodyAssessments) {
-    patient.bodyAssessments.forEach((item) => {
-      if (!mergedAssessments.some((existing) => existing.id === item.id)) {
-        mergedAssessments.push(item);
-      }
-    });
-  }
-
-  const hasDiet = storedDiets.length > 0 || Boolean(patient?.dietHistory?.length);
-
-  return {
-    assessments: mergedAssessments,
-    hasDiet,
-  };
-}
-
 export function savePatientAssessmentToStorage(
   patientId: string,
   assessment: BodyAssessment,
@@ -205,28 +171,6 @@ export function deletePatientFromStorage(id: string): void {
   const updatedList = current.filter((p) => p.id !== id);
   writePatients(updatedList);
   removeStorageItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
-  removeStorageItem(`${PATIENT_DIETS_KEY_PREFIX}${id}`);
-}
-
-export function deletePatientDietFromStorage(patientId: string, dietId: string): void {
-  const currentDiets = getPatientDietsFromStorage(patientId);
-  const updatedDiets = currentDiets.filter((d) => d.id !== dietId);
-  setStorageItem(`${PATIENT_DIETS_KEY_PREFIX}${patientId}`, updatedDiets);
-
-  const patient = getPatientById(patientId);
-  if (patient && patient.dietHistory) {
-    const updatedDietHistory = patient.dietHistory.filter((d) => d.id !== dietId);
-    updatePatientInStorage({
-      ...patient,
-      dietHistory: updatedDietHistory,
-    });
-  }
-
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(
-      new CustomEvent('nutridiet-diet-sync', { detail: { patientId, dietId } }),
-    );
-  }
 }
 
 export function getConsultationRecord(patientId: string, rawDateParam: string): ConsultationRecord {

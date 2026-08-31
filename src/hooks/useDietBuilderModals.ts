@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
-import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/dietStore';
+import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/legacy-diet-types';
 import { updateMealVariationItems } from '@/lib/mealVariations';
-import { cloneMealsWithFreshIds } from '@/lib/dietDuplication';
+import { cloneMealsWithFreshIds } from '@/lib/legacy-diet-copy';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { MealFoodToSubstitute } from '@/components/molecules/SubstituteFoodModal';
 import { toast } from 'sonner';

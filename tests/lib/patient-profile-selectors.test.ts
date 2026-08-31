@@ -12,7 +12,7 @@ import {
   PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_MULTIPLE_ACTIVE_DIETS,
 } from '../fixtures/patient-profile';
-import type { StoredDietRecord } from '@/lib/patientsStore';
+import type { StoredDietRecord } from '@/lib/legacy-diet-types';
 
 describe('patient profile selectors', () => {
   it('selects the latest physical assessment across ISO and pt-BR dates', () => {

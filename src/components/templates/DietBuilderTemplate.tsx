@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MacroTrackerHeader } from '../organisms';
 import { ActionDropdown, DietModeSwitcherProps, PageContextHeader } from '../molecules';
 import { Button } from '@/components/atoms';
+import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import {
   Percent,
   MessageCircle,
@@ -11,6 +12,7 @@ import {
   Save,
   Edit3,
   History,
+  AlertTriangle,
 } from 'lucide-react';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
@@ -43,8 +45,14 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onWhatsAppShare,
   onExportPDF,
   onSaveDiet,
+  onDiscardDraft,
+  canDiscardDraft = true,
+  saveStatus = 'clean',
+  saveError,
+  onRetrySave,
   onBackClick,
 }) => {
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const defaultDietModeProps: DietModeSwitcherProps = {
     mode: 'simple',
     onModeChange: () => {},
@@ -74,12 +82,14 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   const handleScale = onOpenScaleModal || onScaleDiet;
   const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
   const handlePullPrevious = onOpenImportPreviousDietModal || onPullPreviousGoals;
+  const isSaveBusy = saveStatus === 'saving' || saveStatus === 'committing';
 
   const headerActions = (
     <>
       {onSaveDiet && (
         <Button
           onClick={onSaveDiet}
+          disabled={isSaveBusy}
           variant="primary"
           size="compact"
           className="flex items-center gap-1.5"
@@ -91,6 +101,19 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           <span>
             Salvar Prescrição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
           </span>
+        </Button>
+      )}
+
+      {onDiscardDraft && canDiscardDraft && (
+        <Button
+          type="button"
+          onClick={() => setIsDiscardDialogOpen(true)}
+          disabled={isSaveBusy}
+          variant="quiet"
+          size="compact"
+          aria-label="Descartar rascunho local"
+        >
+          Descartar rascunho
         </Button>
       )}
 
@@ -118,6 +141,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
     <div className="flex min-w-0 flex-1 flex-col">
       <main
         aria-label="Elaboração de Dieta"
+        aria-busy={isSaveBusy ? true : undefined}
         className="flex w-full max-w-container-workflow flex-1 flex-col gap-6 py-6 px-8 lg:mx-auto"
       >
         <PageContextHeader
@@ -132,6 +156,19 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           ]}
           actions={headerActions}
         />
+
+        {saveStatus !== 'clean' && saveStatus !== 'persisted' && (
+          <div role="status" aria-live="polite" className="flex items-center justify-between gap-3 rounded-surface border border-border-subtle bg-surface-muted px-4 py-3 text-sm text-text-secondary">
+            <span>
+              {saveStatus === 'pending' && 'Alterações locais ainda não persistidas; salvar ou navegar fará o flush.'}
+              {saveStatus === 'saving' && 'Salvando rascunho local…'}
+              {saveStatus === 'committing' && 'Confirmando prescrição…'}
+              {saveStatus === 'error' && (saveError || 'Não foi possível persistir a edição local. A prescrição clínica não foi alterada.')}
+              {saveStatus === 'cleanup-pending' && 'Prescrição salva; a limpeza do rascunho ficou pendente.'}
+            </span>
+            {saveStatus === 'error' && onRetrySave && <Button type="button" size="compact" variant="secondary" onClick={onRetrySave}>Tentar novamente</Button>}
+          </div>
+        )}
 
         <DietContextSection
           name={resolvedName}
@@ -188,6 +225,22 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
 
         <DietMealsSection mealsData={mealsData} onAddMeal={onAddMeal} />
       </main>
+
+      {onDiscardDraft && (
+        <ConfirmationAlertDialog
+          open={isDiscardDialogOpen}
+          onOpenChange={setIsDiscardDialogOpen}
+          title="Descartar rascunho local?"
+          description="As alterações ainda não confirmadas serão removidas deste dispositivo. Nenhuma prescrição confirmada será apagada."
+          confirmLabel="Descartar rascunho"
+          confirmVariant="destructive"
+          icon={<AlertTriangle className="size-4 shrink-0 text-warning" aria-hidden="true" />}
+          onConfirm={() => {
+            void onDiscardDraft();
+            setIsDiscardDialogOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

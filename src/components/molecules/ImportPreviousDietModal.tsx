@@ -18,18 +18,18 @@ import {
 } from '@/components/molecules/DataTable';
 import { MacroSummary } from './MacroSummary';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { DAYS_OF_WEEK, type CarbCyclingVariation } from '@/lib/dietStore';
+import { DAYS_OF_WEEK, type CarbCyclingVariation } from '@/lib/legacy-diet-types';
 import { textStyle } from '@/design-system';
 import { Calendar, ChevronDown, History, Search, Sparkles, Copy, X, AlertCircle, Utensils } from 'lucide-react';
-import type { PreviousDietSummary } from '@/lib/dietDuplication';
+import type { PreviousDietSummary } from '@/lib/legacy-diet-copy';
 
 export interface ImportPreviousDietModalProps {
   isOpen: boolean;
   onClose: () => void;
   patientName?: string;
   diets: PreviousDietSummary[];
-  onPullMacrosOnly: (selectedDiet: PreviousDietSummary) => void;
-  onPullAllMeals: (selectedDiet: PreviousDietSummary) => void;
+  onPullMacrosOnly: (selectedDiet: PreviousDietSummary) => void | Promise<void>;
+  onPullAllMeals: (selectedDiet: PreviousDietSummary) => void | Promise<void>;
 }
 
 function formatAssignedDays(variation: CarbCyclingVariation) {
@@ -123,6 +123,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [expandedDietId, setExpandedDietId] = useState<string | null>(null);
   const [sortState, setSortState] = useState<DataTableSortState | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -131,6 +132,7 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
       setSelectedId(null);
       setExpandedDietId(null);
       setSortState(null);
+      setIsSubmitting(false);
     }
   }, [isOpen]);
 
@@ -181,16 +183,26 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
     setExpandedDietId((currentId) => (currentId === dietId ? null : dietId));
   }, []);
 
-  const handleMacrosClick = () => {
+  const handleMacrosClick = async () => {
     if (!selectedDiet) return;
-    onPullMacrosOnly(selectedDiet);
-    handleClose();
+    setIsSubmitting(true);
+    try {
+      await onPullMacrosOnly(selectedDiet);
+      handleClose();
+    } catch {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleMealsClick = () => {
+  const handleMealsClick = async () => {
     if (!selectedDiet) return;
-    onPullAllMeals(selectedDiet);
-    handleClose();
+    setIsSubmitting(true);
+    try {
+      await onPullAllMeals(selectedDiet);
+      handleClose();
+    } catch {
+      setIsSubmitting(false);
+    }
   };
 
   const columns: DataTableColumnDef<PreviousDietSummary>[] = useMemo(
@@ -473,7 +485,8 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
               type="button"
               variant="secondary"
               size="standard"
-              disabled={!selectedDiet}
+              disabled={!selectedDiet || isSubmitting}
+              aria-busy={isSubmitting || undefined}
               onClick={handleMacrosClick}
               className="flex items-center gap-2"
               title={!selectedDiet ? 'Selecione uma dieta na tabela' : 'Importar apenas metas nutricionais'}
@@ -485,7 +498,8 @@ export const ImportPreviousDietModal: React.FC<ImportPreviousDietModalProps> = (
               type="button"
               variant="primary"
               size="standard"
-              disabled={!selectedDiet}
+              disabled={!selectedDiet || isSubmitting}
+              aria-busy={isSubmitting || undefined}
               onClick={handleMealsClick}
               className="flex items-center gap-2"
               title={!selectedDiet ? 'Selecione uma dieta na tabela' : 'Duplicar todas as refeições para o novo plano'}

@@ -1,18 +1,17 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
 import {
   EditAssessmentModal,
-  ReadOnlyDietModal,
   EditPatientModal,
   NextEventModal,
   AddObjectiveModal,
   DeletePatientModal,
-  ConfirmationAlertDialog,
 } from '@/components/molecules';
+import { ReadOnlyDietModal } from '@/components/organisms';
 import type { PatientViewModel } from '@/lib/patientViewModel';
-import type { BodyAssessment, HistoricalDiet, PatientNextEvent } from '@/lib/patientRelatedRecords';
+import type { BodyAssessment, PatientNextEvent } from '@/lib/patientRelatedRecords';
+import type { DietPlan } from '@/lib/domain/diets/diet-model';
 
 export interface PatientProfileModalsProps {
   patient: PatientViewModel;
@@ -22,10 +21,6 @@ export interface PatientProfileModalsProps {
   setIsEditModalOpen: (open: boolean) => void;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: (open: boolean) => void;
-  isDeleteDietModalOpen?: boolean;
-  setIsDeleteDietModalOpen?: (open: boolean) => void;
-  dietToDelete?: HistoricalDiet | null;
-  handleDeleteDiet?: () => void;
   isNextEventModalOpen: boolean;
   setIsNextEventModalOpen: (open: boolean) => void;
   isAddObjectiveModalOpen: boolean;
@@ -34,7 +29,7 @@ export interface PatientProfileModalsProps {
   setIsEditAssessmentOpen: (open: boolean) => void;
   editingAssessment: BodyAssessment | null;
   assessmentMode: 'create' | 'edit';
-  selectedReadOnlyDiet: HistoricalDiet | null;
+  selectedReadOnlyDiet: DietPlan | null;
   isReadOnlyDietModalOpen: boolean;
   setIsReadOnlyDietModalOpen: (open: boolean) => void;
   handleSavePatient: (p: PatientViewModel) => void | Promise<void>;
@@ -53,10 +48,6 @@ export function PatientProfileModals({
   setIsEditModalOpen,
   isDeleteModalOpen,
   setIsDeleteModalOpen,
-  isDeleteDietModalOpen,
-  setIsDeleteDietModalOpen,
-  dietToDelete,
-  handleDeleteDiet,
   isNextEventModalOpen,
   setIsNextEventModalOpen,
   isAddObjectiveModalOpen,
@@ -93,24 +84,6 @@ export function PatientProfileModals({
         patientName={patient.name}
         onConfirmArchive={handleDeletePatient}
       />
-
-      {dietToDelete && isDeleteDietModalOpen !== undefined && setIsDeleteDietModalOpen && handleDeleteDiet && (
-        <ConfirmationAlertDialog
-          open={isDeleteDietModalOpen}
-          onOpenChange={setIsDeleteDietModalOpen}
-          title="Excluir prescrição dietética?"
-          description={
-            <>
-              A prescrição <strong>{dietToDelete.name}</strong>
-              {dietToDelete.date ? ` (${dietToDelete.date})` : ''} e seus cálculos e cardápios associados serão removidos permanentemente.
-            </>
-          }
-          confirmLabel="Excluir prescrição"
-          confirmVariant="destructive"
-          icon={<AlertTriangle className="size-4 shrink-0 text-error" aria-hidden="true" />}
-          onConfirm={handleDeleteDiet}
-        />
-      )}
 
       <NextEventModal
         open={isNextEventModalOpen}

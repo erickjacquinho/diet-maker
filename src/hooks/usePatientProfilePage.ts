@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
 import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import { toPatientInput, toPatientViewModel, type PatientViewModel } from '@/lib/patientViewModel';
 import {
@@ -11,10 +11,12 @@ import {
 } from '@/lib/patientRelatedRecords';
 import {
   buildNextEventSummary,
-  selectActivePlan,
+  selectCurrentActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
+import type { DietPlan } from '@/lib/domain/diets/diet-model';
+import { toDietHistoryViews } from '@/lib/application/diets/diet-history-view';
 
 export function usePatientProfilePage() {
   const params = useParams();
@@ -24,13 +26,12 @@ export function usePatientProfilePage() {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
-  const [dietHistory, setDietHistory] = useState<HistoricalDiet[]>([]);
+  const [confirmedPlans, setConfirmedPlans] = useState<HistoricalDiet[]>([]);
+  const [canonicalDietPlans, setCanonicalDietPlans] = useState<Map<string, DietPlan>>(new Map());
   const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
 
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDeleteDietModalOpen, setIsDeleteDietModalOpen] = useState(false);
-  const [dietToDelete, setDietToDelete] = useState<HistoricalDiet | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditAssessmentOpen, setIsEditAssessmentOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
@@ -40,18 +41,13 @@ export function usePatientProfilePage() {
   const [objectiveToApply, setObjectiveToApply] = useState<string | undefined>();
 
   // Read-Only Diet Modal state
-  const [selectedReadOnlyDiet, setSelectedReadOnlyDiet] = useState<HistoricalDiet | null>(null);
+  const [selectedReadOnlyDiet, setSelectedReadOnlyDiet] = useState<DietPlan | null>(null);
   const [isReadOnlyDietModalOpen, setIsReadOnlyDietModalOpen] = useState(false);
 
   const handleOpenReadOnlyDietModal = useCallback((diet: HistoricalDiet) => {
-    setSelectedReadOnlyDiet(diet);
+    setSelectedReadOnlyDiet(canonicalDietPlans.get(diet.id) ?? null);
     setIsReadOnlyDietModalOpen(true);
-  }, []);
-
-  const handleOpenDeleteDietModal = useCallback((diet: HistoricalDiet) => {
-    setDietToDelete(diet);
-    setIsDeleteDietModalOpen(true);
-  }, []);
+  }, [canonicalDietPlans]);
 
   const handleOpenEditAssessment = useCallback((assessment: BodyAssessment) => {
     setEditingAssessment({ ...assessment });
@@ -59,7 +55,7 @@ export function usePatientProfilePage() {
     setIsEditAssessmentOpen(true);
   }, []);
 
-  const activePlan = useMemo(() => selectActivePlan(dietHistory), [dietHistory]);
+  const activePlan = useMemo(() => selectCurrentActivePlan(confirmedPlans), [confirmedPlans]);
   const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
   const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
   const whatsappContact = patient?.whatsapp ?? patient?.phone;
@@ -130,15 +126,18 @@ export function usePatientProfilePage() {
     setIsProfileLoading(true);
     setProfileError(null);
     void getBrowserPatientApplication().then(async (application) => {
-      const profile = await application.getPatientProfile(patientId);
+      const [profile, dietApplication] = await Promise.all([
+        application.getPatientProfile(patientId),
+        getBrowserDietApplication(),
+      ]);
+      const dietSummary = await dietApplication.getPatientDietSummary(patientId);
       if (cancelled) return;
       const view = toPatientViewModel(profile.patient, { initials: profile.initials });
       setPatient(view);
       setAvailableObjectives(profile.availableObjectives);
-      // Diets and assessments belong to later SDDs. Keep the read sections
-      // available without consulting legacy test storage or inventing a
-      // second source of truth for these relations.
-      setDietHistory([]);
+      const rows = [dietSummary.current, ...dietSummary.history].filter((row): row is NonNullable<typeof row> => Boolean(row));
+      setCanonicalDietPlans(new Map(rows.map((row) => [row.id, row.plan])));
+      setConfirmedPlans(toDietHistoryViews(dietSummary));
       setBodyAssessments([]);
     }).catch((error: unknown) => {
       if (cancelled) return;
@@ -167,17 +166,12 @@ export function usePatientProfilePage() {
     router.push('/pacientes');
   }, [patient, router]);
 
-  const handleDeleteDiet = useCallback(() => {
-    void dietToDelete;
-    toast.info('Dietas pertencem à etapa clínica correspondente e não podem ser removidas aqui.');
-  }, [dietToDelete]);
-
   return {
     patientId,
     patient,
     profileError,
     isProfileLoading,
-    dietHistory,
+    confirmedPlans,
     bodyAssessments,
     activePlan,
     latestAssessment,
@@ -186,9 +180,6 @@ export function usePatientProfilePage() {
     availableObjectives,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
-    isDeleteDietModalOpen,
-    setIsDeleteDietModalOpen,
-    dietToDelete,
     isEditModalOpen,
     setIsEditModalOpen,
     isEditAssessmentOpen,
@@ -205,7 +196,6 @@ export function usePatientProfilePage() {
     isReadOnlyDietModalOpen,
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
-    handleOpenDeleteDietModal,
     handleOpenEditAssessment,
     handleOpenCreateAssessment,
     handleSaveAssessment,
@@ -214,7 +204,6 @@ export function usePatientProfilePage() {
     handleAddCustomObjective,
     handleSavePatient,
     handleDeletePatient,
-    handleDeleteDiet,
     router,
   };
 }

@@ -3,9 +3,8 @@ import type {
   HistoricalDiet,
   HistoricalDietVariation,
   PatientNextEvent,
-  StoredDietRecord,
 } from './patientsStore';
-import { calculateWeeklyCycleAverage, type CarbCyclingVariation } from './dietStore';
+import { calculateWeeklyCycleAverage, type CarbCyclingVariation, type StoredDietRecord } from './legacy-diet-types';
 import { normalizeDateToISO } from './date-only';
 
 export interface ActivePlanSummary {
@@ -78,6 +77,22 @@ export function selectActivePlan(diets: HistoricalDiet[]): ActivePlanSummary | n
 function numericRecordValue(record: StoredDietRecord, key: string): number {
   const value = record[key];
   return typeof value === 'number' ? value : Number(value) || 0;
+}
+
+/** Canonical history is already ordered by the reader; never infer current state from display dates. */
+export function selectCurrentActivePlan(diets: HistoricalDiet[]): ActivePlanSummary | null {
+  const active = diets.find((diet) => diet.status === 'Ativa');
+  if (!active) return null;
+  return {
+    dietId: active.id,
+    name: active.name,
+    date: active.date,
+    status: 'Ativa',
+    targetKcal: active.targetKcal,
+    proteinG: active.proteinG,
+    carbsG: active.carbsG,
+    fatsG: active.fatsG,
+  };
 }
 
 function mapHistoricalVariation(variation: CarbCyclingVariation): HistoricalDietVariation {

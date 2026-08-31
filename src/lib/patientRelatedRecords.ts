@@ -8,12 +8,10 @@ import type {
   BodyAssessment,
   HistoricalDiet,
   PatientNextEvent,
-  StoredDietRecord,
 } from './patientsStoreTypes';
 
-export type { BodyAssessment, HistoricalDiet, PatientNextEvent, StoredDietRecord };
+export type { BodyAssessment, HistoricalDiet, PatientNextEvent };
 
 export interface PatientRelatedRecordsReader {
   listAssessments(patientId: string): Promise<BodyAssessment[]>;
-  listDiets(patientId: string): Promise<StoredDietRecord[]>;
 }

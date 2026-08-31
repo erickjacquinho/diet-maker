@@ -6,9 +6,15 @@ import { LocalObjectiveCatalogRepository } from '@/lib/infrastructure/local-db/o
 import { LocalPatientRepository } from '@/lib/infrastructure/local-db/patient-repository';
 import { LocalTransactionRunner } from '@/lib/infrastructure/local-db/transaction-runner';
 import { createPatientProfileReader } from './patients/patient-profile-reader';
+import { createDietApplication } from './diets/diet-application';
+import type { DietApplication } from './diets/diet-ports';
+import { PGliteDietRepository } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
+import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
+import { IndexedDbDietDraftStore } from '@/lib/infrastructure/diet-drafts/indexed-db-diet-draft-store';
 
 export interface BrowserPatientRuntime {
   application: PatientApplication;
+  dietApplication: DietApplication;
   handle: LocalDatabaseHandle;
 }
 
@@ -21,6 +27,8 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
       const objectiveCatalogRepository = new LocalObjectiveCatalogRepository(handle);
       const accountContext = createActiveAccountContext(new LocalAccountContextRepository(handle));
       const patientProfileReader = createPatientProfileReader(patientRepository, objectiveCatalogRepository);
+      const dietRepository = new PGliteDietRepository(handle);
+      const dietReader = createPatientDietReader(dietRepository);
       return {
         handle,
         application: createPatientApplication({
@@ -29,7 +37,9 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
           objectiveCatalogRepository,
           patientProfileReader,
           transactionRunner: new LocalTransactionRunner(),
+          dietDraftStore: new IndexedDbDietDraftStore(),
         }),
+        dietApplication: createDietApplication({ accountContext, patientReader: patientRepository, repository: dietRepository, draftStore: new IndexedDbDietDraftStore(), dietReader }),
       };
     }).catch((error) => {
       runtimePromise = undefined;
@@ -41,6 +51,10 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
 
 export async function getBrowserPatientApplication(): Promise<PatientApplication> {
   return (await getBrowserPatientRuntime()).application;
+}
+
+export async function getBrowserDietApplication(): Promise<DietApplication> {
+  return (await getBrowserPatientRuntime()).dietApplication;
 }
 
 export function resetBrowserPatientRuntimeForTests(): void {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 65,
+    "currentSourceCount": 69,
     "capturedAt": "2026-07-31",
     "legacyAudit": {
       "findings": 0,
@@ -2764,12 +2764,12 @@
       "specStatus": "homologated",
       "exceptions": []
     },
-    {
-      "id": "organism-read-only-diet-modal",
+      {
+        "id": "organism-read-only-diet-modal",
       "name": "ReadOnlyDietModal",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+        "lifecycle": "implemented",
+        "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
@@ -2777,10 +2777,10 @@
         "nutrition-context"
       ],
       "sourceFiles": [
-        {
-          "path": "src/components/molecules/ReadOnlyDietModal.tsx",
-          "role": "implementation",
-          "discoveredLayer": "molecule"
+          {
+            "path": "src/components/organisms/diets/ReadOnlyDietModal.tsx",
+            "role": "implementation",
+            "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2797,6 +2797,32 @@
       ],
       "profile": "design-system/components/profiles/organisms/read-only-diet-modal.md",
       "consumers": [],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-import-previous-diet-modal",
+      "name": "ImportPreviousDietModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": ["async", "read-only", "nutrition-context"],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/diets/ImportPreviousDietModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        { "name": "ImportPreviousDietModalProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ImportPreviousDietModal", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/import-previous-diet-modal.md",
+      "consumers": ["src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
       "exceptions": []

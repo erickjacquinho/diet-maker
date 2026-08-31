@@ -81,7 +81,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
         waistCm: 80,
         abdomenCm: 82,
       },
-      dietHistory: [{
+      confirmedPlans: [{
         id: 'diet-1',
         name: 'Plano cutting agosto',
         date: '04/08/2026',
@@ -134,7 +134,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
 
   it('renders carb cycling averages and variation details in the diet history', async () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
-      dietHistory: [{
+      confirmedPlans: [{
         id: 'diet-cycle',
         name: 'Plano ciclo agosto',
         date: '24/08/2026',
@@ -175,7 +175,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
     const storedVariations = PATIENT_PROFILE_CARB_CYCLING_VARIATIONS.four;
 
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
-      dietHistory: [{
+      confirmedPlans: [{
         id: 'diet-cycle-four',
         name: 'Plano ciclo quatro variações',
         date: '24/08/2026',
@@ -219,8 +219,8 @@ describe('PatientDetailPage history with two stacked tables', () => {
     expect(within(variationTable).getByText('Nenhum dia atribuído')).toBeInTheDocument();
   });
 
-  it('opens confirmation modal and deletes a prescription diet from history', async () => {
-    const state = makePatientProfileState({ dietHistory: [PATIENT_PROFILE_DIETS[1]] });
+  it('keeps historical prescriptions read-only without delete or edit controls', async () => {
+    const state = makePatientProfileState({ confirmedPlans: [{ ...PATIENT_PROFILE_DIETS[1], status: 'Histórica' }] });
     mockUsePatientProfilePage.mockReturnValue(state);
 
     render(<PatientDetailPage />);
@@ -231,12 +231,7 @@ describe('PatientDetailPage history with two stacked tables', () => {
     expect(dietsTable).toBeInTheDocument();
     expect(within(dietsTable).queryByText('Plano cutting agosto')).not.toBeInTheDocument();
 
-    // Clica no botão de excluir ao lado de editar
-    const deleteBtn = screen.getByRole('button', {
-      name: /Excluir prescrição Plano cutting agosto/,
-    });
-    fireEvent.click(deleteBtn);
-
-    expect(state.handleOpenDeleteDietModal).toHaveBeenCalledWith(PATIENT_PROFILE_DIETS[1]);
+    expect(screen.queryByRole('button', { name: /Excluir prescrição/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Editar Plano cutting agosto/ })).not.toBeInTheDocument();
   });
 });

@@ -6,5 +6,7 @@ export * from './PatientListTable';
 export * from './PatientConsultationHistoryTable';
 export * from './patient/PatientAssessmentsTable';
 export * from './patient/PatientDietsTable';
+export * from './diets/ReadOnlyDietModal';
+export * from './diets/ImportPreviousDietModal';
 export * from './PatientProfileHeader';
 

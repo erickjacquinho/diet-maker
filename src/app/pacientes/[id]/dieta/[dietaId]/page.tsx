@@ -9,11 +9,11 @@ import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { SubstituteFoodModal } from '@/components/molecules/SubstituteFoodModal';
-import { ImportPreviousDietModal } from '@/components/molecules/ImportPreviousDietModal';
+import { ImportPreviousDietModal } from '@/components/organisms/diets/ImportPreviousDietModal';
 import { Spinner } from '@/components/ui/spinner';
 
 import { MealCardContainerProps } from '@/components/organisms';
-import { calculateMealsTotal, saveDietToStorage } from '@/lib/dietStore';
+import { calculateMealsTotal } from '@/lib/macroCalculations';
 import { getMealVariationOptions } from '@/lib/mealVariations';
 
 export default function DietBuilderPage() {
@@ -64,6 +64,12 @@ export default function DietBuilderPage() {
     handleRemoveVariation,
     handleReorderVariations,
     handleSaveDiet,
+    saveStatus,
+    saveError,
+    onRetrySave,
+    onDiscardDraft,
+    onBackClick,
+    flushDraft,
     handleAddMeal,
     handleDuplicateMeal,
     handleCopyMeal,
@@ -96,6 +102,11 @@ export default function DietBuilderPage() {
     openWhatsAppModal,
     router,
   } = useDietBuilderPage();
+
+  const handleOpenCycleMatrix = async () => {
+    await flushDraft?.();
+    router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
+  };
 
   const isNewDiet = dietaId === 'nova' || dietPlan?.id === 'nova';
 
@@ -217,16 +228,7 @@ export default function DietBuilderPage() {
           activeVariationId: activeVariationId,
           onSelectVariation: setActiveVariationId,
           onCopyMealsBetweenVariations: () => setIsCopyModalOpen(true),
-          onOpenCycleMatrix: () => {
-            if (dietPlan) {
-              saveDietToStorage({
-                ...dietPlan,
-                id: dietaId,
-                patientId,
-              });
-            }
-            router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
-          },
+          onOpenCycleMatrix: handleOpenCycleMatrix,
           onAddVariation: handleAddVariation,
           onReorderVariations: handleReorderVariations,
         }}
@@ -247,6 +249,11 @@ export default function DietBuilderPage() {
         hasPreviousDiets={hasPreviousDiets}
         onWhatsAppShare={openWhatsAppModal}
         onSaveDiet={handleSaveDiet}
+        saveStatus={saveStatus}
+        saveError={saveError}
+        onRetrySave={onRetrySave}
+        onDiscardDraft={onDiscardDraft}
+        onBackClick={onBackClick}
       />
 
       {/* Modal de Busca de Alimentos */}

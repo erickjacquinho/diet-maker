@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Utensils, Activity, Scale, Printer } from 'lucide-react';
 import { PageContextHeader } from '@/components/molecules';
 import { Card } from '@/components/ui/card';
-import { CreateButton, SecondaryActionButton } from '@/components/atoms';
+import { SecondaryActionButton } from '@/components/atoms';
 import { toast } from 'sonner';
 import {
   getPatientById,
@@ -14,7 +14,6 @@ import {
   Patient,
   ConsultationRecord,
 } from '@/lib/patientsStore';
-import { ConsultationDietCard } from './components/ConsultationDietCard';
 import { ConsultationAssessmentCard } from './components/ConsultationAssessmentCard';
 import { ConsultationNotesCard } from './components/ConsultationNotesCard';
 
@@ -85,27 +84,18 @@ export default function DedicatedConsultationPage() {
               Imprimir Prontuário
             </SecondaryActionButton>
 
-            {consultation.diet && (
-              <Link href={`/pacientes/${patient.id}/dieta/${consultation.diet.id}`}>
-                <CreateButton icon={<Utensils size={14} />}>
-                  Abrir no Construtor de Dietas
-                </CreateButton>
-              </Link>
-            )}
           </>
         )}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          {consultation.diet ? (
-            <ConsultationDietCard patientId={patient.id} diet={consultation.diet} />
-          ) : (
-            <Card className="bg-surface border border-dashed border-border-subtle p-6 rounded-surface text-center flex flex-col gap-2">
-              <Utensils size={24} className="mx-auto text-text-muted/50" />
-              <p className="text-style-legal text-text-muted italic">Nenhuma prescrição dietética foi associada a este dia de consulta.</p>
-            </Card>
-          )}
+          <Card className="bg-surface border border-dashed border-border-subtle p-6 rounded-surface text-center flex flex-col gap-2">
+            <Utensils size={24} className="mx-auto text-text-muted/50" />
+            <p className="text-style-legal text-text-muted italic">
+              As prescrições confirmadas ficam disponíveis no histórico da ficha do paciente.
+            </p>
+          </Card>
 
           {consultation.assessment ? (
             <ConsultationAssessmentCard assessment={consultation.assessment} onEdit={handleOpenEditAssessment} />

@@ -3,7 +3,7 @@
 import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Utensils, Repeat } from 'lucide-react';
-import { CarbCyclingVariation } from '@/lib/dietStore';
+import { CarbCyclingVariation } from '@/lib/legacy-diet-types';
 import { CarbCyclingVariationPanel } from './CarbCyclingVariationPanel';
 import { cn } from '@/lib/utils';
 
