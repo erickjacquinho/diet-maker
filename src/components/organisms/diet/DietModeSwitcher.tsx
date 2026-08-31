@@ -64,27 +64,21 @@ export const DietModeSwitcher: React.FC<DietModeSwitcherProps> = ({
 
         <ToggleGroup
           type="single"
-          role="tablist"
+          role="group"
           value={currentMode}
           onValueChange={(val) => {
             if (val) onModeChange(val as 'simple' | 'carb_cycling');
           }}
-          aria-label="Modelo de dieta"
+          aria-label="Opções de modelo de dieta"
         >
           <ToggleGroupItem
             value="simple"
-            role="tab"
-            data-state={currentMode === 'simple' ? 'active' : 'inactive'}
-            aria-selected={currentMode === 'simple'}
           >
             <Utensils size={14} aria-hidden="true" className="mr-1.5" />
             <span>Dieta Simples</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="carb_cycling"
-            role="tab"
-            data-state={currentMode === 'carb_cycling' ? 'active' : 'inactive'}
-            aria-selected={currentMode === 'carb_cycling'}
           >
             <Repeat size={14} aria-hidden="true" className="mr-1.5" />
             <span>Ciclo de Carboidratos</span>

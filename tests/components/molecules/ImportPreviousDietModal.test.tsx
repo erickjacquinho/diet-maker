@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { ImportPreviousDietModal } from '@/components/molecules/ImportPreviousDietModal';
+import { ImportPreviousDietModal } from '@/components/organisms/diets/ImportPreviousDietModal';
 import type { PreviousDietSummary } from '@/lib/dietDuplication';
 
 const mockDiets: PreviousDietSummary[] = [

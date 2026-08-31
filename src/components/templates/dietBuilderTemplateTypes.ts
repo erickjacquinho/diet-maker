@@ -3,9 +3,9 @@
   MealCardContainerProps,
 } from '../organisms';
 import {
-  DietModeSwitcherProps,
   MacroMetricCardProps,
 } from '../molecules';
+import type { DietModeSwitcherProps } from '../organisms/diet/DietModeSwitcher';
 
 export interface DietBuilderTemplateProps {
   patient?: {

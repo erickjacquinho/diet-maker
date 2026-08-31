@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useDietBuilderPage } from '@/hooks/useDietBuilderPage';
 import { DietBuilderTemplate } from '@/components/templates';
-import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
+import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 import { ScaleDietModal } from '@/components/molecules/ScaleDietModal';
 import { CopyVariationModal } from '@/components/molecules/CopyVariationModal';
 import { AdjustDietGoalsModal } from '@/components/molecules/AdjustDietGoalsModal';
 import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
-import { SubstituteFoodModal } from '@/components/molecules/SubstituteFoodModal';
+import { SubstituteFoodModal } from '@/components/organisms/foods/SubstituteFoodModal';
 import { ImportPreviousDietModal } from '@/components/organisms/diets/ImportPreviousDietModal';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -17,6 +17,7 @@ import { calculateMealsTotal } from '@/lib/macroCalculations';
 import { getMealVariationOptions } from '@/lib/mealVariations';
 
 export default function DietBuilderPage() {
+  const foodSearchTriggerRef = useRef<HTMLButtonElement | null>(null);
   const {
     patientId,
     dietaId,
@@ -143,7 +144,10 @@ export default function DietBuilderPage() {
         variationLimitReached: variationOptions.length >= 5,
         onTitleChange: (newTitle: string) => handleUpdateMealHeader(meal.id, { name: newTitle }),
         onTimeChange: (newTime: string) => handleUpdateMealHeader(meal.id, { time: newTime }),
-        onAddFoodClick: () => setFoodSearchMealIndex(mealIdx),
+        onAddFoodClick: (trigger) => {
+          foodSearchTriggerRef.current = trigger ?? null;
+          setFoodSearchMealIndex(mealIdx);
+        },
         onDuplicate: () => handleDuplicateMeal(meal.id),
         onCopyMeal: () => handleCopyMeal(meal.id),
         onPasteMeal: () => handlePasteMeal(meal.id),
@@ -262,6 +266,7 @@ export default function DietBuilderPage() {
         onClose={() => setFoodSearchMealIndex(null)}
         mealTitle={foodSearchMealIndex !== null && currentMeals[foodSearchMealIndex] ? currentMeals[foodSearchMealIndex].name : 'Refeição'}
         onAddFood={handleAddFoodToMeal}
+        returnFocusRef={foodSearchTriggerRef}
       />
 
       {/* Modal de Ajuste Proporcional / Escala */}

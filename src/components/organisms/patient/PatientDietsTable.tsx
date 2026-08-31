@@ -235,7 +235,7 @@ export function DietTableRow({
     <TableRow
       className={`group h-table-row transition-colors ${
         isActive
-        ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/30'
+        ? 'border-l border-l-primary bg-primary-soft/30 hover:bg-primary-soft/30'
           : 'bg-transparent hover:bg-transparent'
       }`}
     >
@@ -344,16 +344,6 @@ export function PatientDietsTable({
   onOpenReadOnlyDiet,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
-
-  if (diets.length === 0) {
-    return (
-      <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
-        <p className={textStyle('body-secondary')}>
-          Nenhuma prescrição dietética registrada para este paciente até o momento.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <DataTable

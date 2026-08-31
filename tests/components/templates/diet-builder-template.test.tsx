@@ -47,7 +47,7 @@ describe('DietBuilderTemplate top composition', () => {
     const pageHeading = screen.getByRole('heading', { level: 1, name: 'Elaboração de Dieta' });
     const patientName = within(contextCard).getByRole('heading', { name: 'Ana Lima' });
     const modeHeading = within(contextCard).getByRole('heading', { name: 'Modelo de dieta' });
-    const simpleMode = within(contextCard).getByRole('tab', { name: /Dieta Simples/i });
+    const simpleMode = within(contextCard).getByRole('button', { name: /Dieta Simples/i });
     const mealsHeading = screen.getByRole('heading', { name: 'Refeições' });
 
     expect(backLink).toHaveAttribute('href', '/pacientes/patient-1');

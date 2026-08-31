@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button, Surface } from '@/components/atoms';
-import { MacroSummary } from './MacroSummary';
+import { MacroSummary } from '@/components/molecules/MacroSummary';
 import {
   Repeat,
   Copy,
@@ -116,6 +116,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
     <Surface
       variant="default"
       data-testid="carb-cycling-variation-panel"
+      role="group"
       aria-label="Variações do ciclo de carboidratos"
       className={cn(
         'p-4 flex flex-col gap-3.5 border-border-subtle shadow-none animate-in fade-in duration-standard',
@@ -179,7 +180,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
 
       {/* Grid de Variações em Colunas */}
       <div
-        role="tablist"
+        role="group"
         aria-label="Variações do ciclo"
         className="grid grid-cols-3 gap-3"
         onDragOver={(e) => e.preventDefault()}
@@ -195,8 +196,7 @@ export const CarbCyclingVariationPanel: React.FC<CarbCyclingVariationPanelProps>
           return (
             <div
               key={v.id}
-              role="tab"
-              aria-selected={isActive}
+              role="button"
               aria-pressed={isActive}
               tabIndex={0}
               onClick={() => onSelectVariation(v.id)}

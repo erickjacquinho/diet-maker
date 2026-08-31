@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { SubstituteFoodModal, MealFoodToSubstitute } from '@/components/molecules/SubstituteFoodModal';
+import { SubstituteFoodModal, MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 
 const mockFoodToSubstitute: MealFoodToSubstitute = {
   mealId: 'meal-1',

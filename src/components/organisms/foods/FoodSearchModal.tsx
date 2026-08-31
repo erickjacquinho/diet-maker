@@ -10,8 +10,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { SelectField } from '@/components/atoms';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, type FoodItem } from '@/lib/tacoStore';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
-import { MacroSummary } from './MacroSummary';
-import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
+import { MacroSummary } from '@/components/molecules/MacroSummary';
+import { FoodSearchResultsList } from '@/components/molecules/food-search/FoodSearchResultsList';
 import { createTacoSnapshot } from '@/lib/application/diets/taco-food-adapter';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 
@@ -31,6 +31,7 @@ export interface FoodSearchModalProps {
   onClose: () => void;
   mealTitle?: string;
   onAddFood: (foodItem: FoodAddPayload | FoodAddPayload[]) => void;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
@@ -38,6 +39,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   onClose,
   mealTitle = 'Refeição',
   onAddFood,
+  returnFocusRef,
 }) => {
   const [query, setQuery] = useState('');
   const [selectedFoodIds, setSelectedFoodIds] = useState<Set<string>>(new Set());
@@ -155,7 +157,14 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-5xl h-[85vh] max-h-[85vh] min-h-[620px] flex flex-col">
+      <DialogContent
+        className="max-w-5xl h-[85vh] max-h-[85vh] min-h-[620px] flex flex-col"
+        onCloseAutoFocus={(event) => {
+          if (!returnFocusRef?.current) return;
+          event.preventDefault();
+          returnFocusRef.current.focus();
+        }}
+      >
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
             <Utensils size={18} className="text-success" />

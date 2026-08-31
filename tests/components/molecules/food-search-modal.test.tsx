@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
+import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 

@@ -99,7 +99,7 @@ describe('PatientListTable', () => {
       />,
     );
 
-    const row = screen.getByRole('link', { name: 'Abrir perfil de Ana Lima' });
+    const row = screen.getByRole('row', { name: 'Abrir perfil de Ana Lima' });
     expect(row).toHaveAttribute('tabindex', '0');
     fireEvent.keyDown(row, { key: 'Enter' });
     expect(onNavigate).toHaveBeenCalledWith('/pacientes/patient-1');

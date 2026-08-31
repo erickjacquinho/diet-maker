@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { MacroTrackerHeader } from '../organisms';
-import { ActionDropdown, DietModeSwitcherProps, PageContextHeader } from '../molecules';
+import { ActionDropdown, PageContextHeader } from '../molecules';
+import type { DietModeSwitcherProps } from '../organisms/diet/DietModeSwitcher';
 import { Button } from '@/components/atoms';
 import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import {

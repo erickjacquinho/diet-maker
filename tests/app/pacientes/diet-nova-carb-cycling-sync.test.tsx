@@ -103,10 +103,10 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
   it('preserves draft from /dieta/nova when clicking Configurar Ciclo and opens /dieta/nova/ciclo', async () => {
     // 1. Render DietBuilderPage for /dieta/nova
     const { unmount: unmountBuilder } = render(<DietBuilderPage />);
-    await screen.findByRole('tab', { name: /Ciclo de Carboidratos/i });
+    await screen.findByRole('button', { name: /Ciclo de Carboidratos/i });
 
     // Switch to carb cycling mode
-    const cyclingTab = screen.getByRole('tab', { name: /Ciclo de Carboidratos/i });
+    const cyclingTab = screen.getByRole('button', { name: /Ciclo de Carboidratos/i });
     fireEvent.click(cyclingTab);
 
     // Click Configurar Ciclo
@@ -126,10 +126,10 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
 
   it('preserves added variations and edits when switching browser tabs (focus event) or variation tabs in /dieta/nova', async () => {
     render(<DietBuilderPage />);
-    await screen.findByRole('tab', { name: /Ciclo de Carboidratos/i });
+    await screen.findByRole('button', { name: /Ciclo de Carboidratos/i });
 
     // Switch to carb cycling mode
-    const cyclingTab = screen.getByRole('tab', { name: /Ciclo de Carboidratos/i });
+    const cyclingTab = screen.getByRole('button', { name: /Ciclo de Carboidratos/i });
     fireEvent.click(cyclingTab);
 
     // Initial 3 variations are rendered

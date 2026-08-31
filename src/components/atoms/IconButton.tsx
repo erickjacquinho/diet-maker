@@ -21,6 +21,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   title,
   variant = 'quiet',
   size = 'standard',
+  type = 'button',
   ref,
   ...props
 }) => {
@@ -34,6 +35,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       variant={variant}
       size={size}
       iconOnly
+      type={type}
       aria-label={label}
       title={title || ariaLabel}
       className={`shrink-0 cursor-pointer ${className}`}

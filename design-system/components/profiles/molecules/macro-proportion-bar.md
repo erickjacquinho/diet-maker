@@ -18,7 +18,7 @@ Apresentar a barra de proporção multi-segmentada e distribuição calórica pe
 
 ## Category inheritance
 
-Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md) e [data-display](../../categories/data-display.md). Fundamentos globais e ordem canônica normativa prevalecem sobre este perfil.
+Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). A grade inferior compõe a receita de `data-display` sem transformar essa composição em segunda herança. Fundamentos globais e ordem canônica normativa prevalecem sobre este perfil.
 
 ## Specific anatomy
 
@@ -64,7 +64,7 @@ Nenhuma exceção aprovada.
 
 - `MealCardContainer` (`src/components/organisms/MealCardContainer.tsx`)
 - `AdjustDietGoalsModal` (`src/components/molecules/AdjustDietGoalsModal.tsx`)
-- `ReadOnlyDietModal` (`src/components/molecules/ReadOnlyDietModal.tsx`)
+- `ReadOnlyDietModal` (`src/components/organisms/diets/ReadOnlyDietModal.tsx`)
 - `ReadyMealsPage` (`src/app/refeicoes-prontas/page.tsx`)
 
 ## Acceptance criteria

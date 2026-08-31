@@ -14,7 +14,7 @@ import { Button, Badge } from '@/components/atoms';
 import { Search, ArrowLeftRight, X, Star } from 'lucide-react';
 import { searchTacoFoods, getAllFoods, toggleFavoriteFood, FoodItem } from '@/lib/tacoStore';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
-import { FoodSearchResultsList } from './food-search/FoodSearchResultsList';
+import { FoodSearchResultsList } from '@/components/molecules/food-search/FoodSearchResultsList';
 import { cn } from '@/lib/utils';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 

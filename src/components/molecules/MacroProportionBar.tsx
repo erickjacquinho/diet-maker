@@ -8,13 +8,13 @@ import { Flame } from 'lucide-react';
 
 export interface MacroProportionBarProps {
   /** Gramas de proteína (P) */
-  proteinG: number;
+  proteinG: number | null | undefined;
   /** Gramas de carboidrato (C) */
-  carbsG: number;
+  carbsG: number | null | undefined;
   /** Gramas de gorduras (G) */
-  fatsG: number;
+  fatsG: number | null | undefined;
   /** Calorias totais (kcal). Opcional; se omitido, calcula automaticamente via fatores de Atwater. */
-  kcal?: number;
+  kcal?: number | null;
   /** Título exibido no topo da barra. Padrão: "Distribuição Calórica (% VET)" (passar false para ocultar) */
   title?: React.ReactNode | false;
   /** Exibir percentual total (ex: "100%") à direita do título. Padrão: true */
@@ -49,12 +49,18 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
   emptyMessage,
   className = '',
 }) => {
-  const safeP = Math.max(0, Math.round(proteinG * 10) / 10);
-  const safeC = Math.max(0, Math.round(carbsG * 10) / 10);
-  const safeF = Math.max(0, Math.round(fatsG * 10) / 10);
+  const normalizeMacro = (value: number | null | undefined) => {
+    if (value === null || value === undefined || !Number.isFinite(value)) return null;
+    return Math.max(0, Math.round(value * 10) / 10);
+  };
+
+  const safeP = normalizeMacro(proteinG);
+  const safeC = normalizeMacro(carbsG);
+  const safeF = normalizeMacro(fatsG);
+  const hasCompleteMacros = safeP !== null && safeC !== null && safeF !== null;
 
   const distribution = useMemo(() => {
-    const calculated = calculateMacroDistributionPct(safeP, safeC, safeF);
+    const calculated = calculateMacroDistributionPct(safeP ?? 0, safeC ?? 0, safeF ?? 0);
     const percentages = [calculated.proteinPct, calculated.carbsPct, calculated.fatsPct];
     const roundedTotal = percentages.reduce((total, percentage) => total + percentage, 0);
 
@@ -77,9 +83,14 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
     };
   }, [safeP, safeC, safeF]);
 
-  const computedKcal = calculatePresetCalories(safeP, safeC, safeF);
-  const displayKcal = kcal !== undefined && kcal > 0 ? Math.round(kcal) : computedKcal;
-  const hasMacros = distribution.totalKcal > 0;
+  const computedKcal = calculatePresetCalories(safeP ?? 0, safeC ?? 0, safeF ?? 0);
+  const hasProvidedKcal = kcal !== undefined && kcal !== null && Number.isFinite(kcal);
+  const displayKcal = hasProvidedKcal
+    ? Math.max(0, Math.round(kcal as number))
+    : hasCompleteMacros
+      ? computedKcal
+      : null;
+  const hasMacros = hasCompleteMacros && distribution.totalKcal > 0;
 
   // Se houver emptyMessage definida e não houver macros, renderiza o estado vazio amigável
   if (!hasMacros && emptyMessage) {
@@ -201,7 +212,7 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             </div>
             <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-protein tabular-nums leading-none">
               <span className="inline-flex items-center leading-none">
-                {safeP}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+                {safeP === null ? '—' : safeP}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">{safeP === null ? '' : 'g'}</span>
               </span>
               {hasMacros && (
                 <>
@@ -222,7 +233,7 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             </div>
             <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-carbohydrate tabular-nums leading-none">
               <span className="inline-flex items-center leading-none">
-                {safeC}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+                {safeC === null ? '—' : safeC}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">{safeC === null ? '' : 'g'}</span>
               </span>
               {hasMacros && (
                 <>
@@ -243,7 +254,7 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
             </div>
             <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-macro-fat tabular-nums leading-none">
               <span className="inline-flex items-center leading-none">
-                {safeF}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">g</span>
+                {safeF === null ? '—' : safeF}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">{safeF === null ? '' : 'g'}</span>
               </span>
               {hasMacros && (
                 <>
@@ -265,7 +276,7 @@ export const MacroProportionBar: React.FC<MacroProportionBarProps> = ({
               </div>
               <div className="flex items-center justify-center gap-1 flex-wrap text-style-body font-bold text-text-primary tabular-nums leading-none">
                 <span className="inline-flex items-center leading-none">
-                  {displayKcal}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">kcal</span>
+                  {displayKcal === null ? '—' : displayKcal}<span className="text-style-legal text-text-muted font-medium ml-0.5 leading-none">{displayKcal === null ? '' : 'kcal'}</span>
                 </span>
                 <span className="text-text-muted font-normal text-style-chart-micro opacity-subdued leading-none">·</span>
                 <span className="text-style-chart-micro font-normal text-text-muted leading-none">

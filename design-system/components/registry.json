@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 69,
-    "capturedAt": "2026-07-31",
+    "currentSourceCount": 71,
+    "capturedAt": "2026-08-30",
     "legacyAudit": {
       "findings": 0,
       "rules": 17,
@@ -2356,8 +2356,8 @@
       "id": "organism-diet-mode-switcher",
       "name": "DietModeSwitcher",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "selection",
       "traits": [
@@ -2365,9 +2365,9 @@
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/DietModeSwitcher.tsx",
+          "path": "src/components/organisms/diet/DietModeSwitcher.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2383,7 +2383,10 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/diet-mode-switcher.md",
-      "consumers": [],
+      "consumers": [
+        "src/components/organisms/diet/DietContextSection.tsx",
+        "src/components/templates/DietBuilderTemplate.tsx"
+      ],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2431,8 +2434,8 @@
       "id": "organism-food-search-modal",
       "name": "FoodSearchModal",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
@@ -2441,9 +2444,9 @@
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/FoodSearchModal.tsx",
+          "path": "src/components/organisms/foods/FoodSearchModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2536,7 +2539,7 @@
       "consumers": [
         "molecule-adjust-diet-goals-modal",
         "organism-meal-card-container",
-        "molecule-read-only-diet-modal",
+        "organism-read-only-diet-modal",
         "page-refeicoes-prontas"
       ],
       "primitiveBase": "atom-surface",
@@ -2765,7 +2768,7 @@
       "exceptions": []
     },
       {
-        "id": "organism-read-only-diet-modal",
+      "id": "organism-read-only-diet-modal",
       "name": "ReadOnlyDietModal",
       "nature": "domain",
         "lifecycle": "implemented",
@@ -2796,7 +2799,9 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/read-only-diet-modal.md",
-      "consumers": [],
+      "consumers": [
+        "src/app/pacientes/[id]/PatientProfileModals.tsx"
+      ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
       "exceptions": []
@@ -4084,6 +4089,212 @@
       "consumers": [
         "src/app/pacientes/[id]/page.tsx"
       ],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-macro-summary",
+      "name": "MacroSummary",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/MacroSummary.tsx", "role": "compound-family", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "MacroSummaryProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "MacroSummary", "kind": "component", "documentedBy": "profile" },
+        { "name": "MacroNutrientSummary", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/macro-summary.md",
+      "consumers": ["organism-import-previous-diet-modal", "organism-patient-diets-table", "organism-patient-consultation-history-table"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-carb-cycling-variation-panel",
+      "name": "CarbCyclingVariationPanel",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "selection",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/diet/CarbCyclingVariationPanel.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "CarbCyclingVariationPanelProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "CarbCyclingVariationPanel", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/carb-cycling-variation-panel.md",
+      "consumers": ["src/components/organisms/diet/DietContextSection.tsx", "src/components/organisms/diet/DietModeSwitcher.tsx"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-food-search-category-selector",
+      "name": "FoodSearchCategorySelector",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "selection",
+      "traits": [],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/FoodSearchCategorySelector.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "FoodSearchCategory", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "FoodSearchCategorySelectorProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "FoodSearchCategorySelector", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/food-search-category-selector.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-ready-meal-search-results-list",
+      "name": "ReadyMealSearchResultsList",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/ReadyMealSearchResultsList.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "ReadyMealSearchResultsListProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ReadyMealSearchResultsList", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/ready-meal-search-results-list.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-recipe-search-results-list",
+      "name": "RecipeSearchResultsList",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/RecipeSearchResultsList.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "RecipeSearchResultsListProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "RecipeSearchResultsList", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/recipe-search-results-list.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-substitute-food-modal",
+      "name": "SubstituteFoodModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": ["nutrition-context", "async"],
+      "sourceFiles": [{ "path": "src/components/organisms/foods/SubstituteFoodModal.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "MealFoodToSubstitute", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SubstituteFoodModalProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SubstituteFoodModal", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/substitute-food-modal.md",
+      "consumers": ["src/hooks/useDietBuilderModals.ts", "template-diet-builder-template"],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-assessments-table",
+      "name": "PatientAssessmentsTable",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientAssessmentsTable.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientAssessmentsTableProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "AssessmentTableRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "AssessmentTableExpandedRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "PatientAssessmentsTable", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-assessments-table.md",
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-diets-table",
+      "name": "PatientDietsTable",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientDietsTable.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientDietsTableProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DietTableRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "PatientDietsTable", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-diets-table.md",
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-consultation-history-row",
+      "name": "ConsultationHistoryRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/ConsultationHistoryRow.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "ConsultationHistoryRowProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ConsultationHistoryRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "ConsultationHistoryExpandedRow", "kind": "compound-part", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/consultation-history-row.md",
+      "consumers": ["organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-list-table-row",
+      "name": "PatientListTableRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientListTableRow.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientListTableRow", "kind": "compound-part", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-list-table-row.md",
+      "consumers": ["organism-patient-list-table"],
       "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []

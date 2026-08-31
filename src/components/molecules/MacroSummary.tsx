@@ -2,16 +2,21 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface MacroSummaryProps {
-  protein: number | string;
-  carbs: number | string;
-  fats: number | string;
-  kcal?: number | string;
+  protein: number | string | null | undefined;
+  carbs: number | string | null | undefined;
+  fats: number | string | null | undefined;
+  kcal?: number | string | null;
   showKcal?: boolean;
   unit?: string;
   kcalSuffix?: string;
   showLabels?: boolean;
   className?: string;
   'data-testid'?: string;
+}
+
+function formatMacroValue(value: MacroSummaryProps['protein'], unit: string) {
+  if (value === null || value === undefined || value === '') return '—';
+  return `${value}${unit}`;
 }
 
 export const MacroSummary: React.FC<MacroSummaryProps> = ({
@@ -40,8 +45,7 @@ export const MacroSummary: React.FC<MacroSummaryProps> = ({
       {/* Proteína */}
       <span className="font-bold text-macro-protein" title="Proteína">
         {showLabels && 'P '}
-        {protein}
-        {unit}
+        {formatMacroValue(protein, unit)}
       </span>
 
       {/* Separador */}
@@ -52,8 +56,7 @@ export const MacroSummary: React.FC<MacroSummaryProps> = ({
       {/* Carboidratos */}
       <span className="font-bold text-macro-carbohydrate" title="Carboidratos">
         {showLabels && 'C '}
-        {carbs}
-        {unit}
+        {formatMacroValue(carbs, unit)}
       </span>
 
       {/* Separador */}
@@ -64,8 +67,7 @@ export const MacroSummary: React.FC<MacroSummaryProps> = ({
       {/* Gorduras */}
       <span className="font-bold text-macro-fat" title="Gorduras">
         {showLabels && 'G '}
-        {fats}
-        {unit}
+        {formatMacroValue(fats, unit)}
       </span>
 
       {/* Calorias (opcional e controlável) */}

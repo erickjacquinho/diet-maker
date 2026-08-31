@@ -4,7 +4,7 @@ import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/legacy-diet-
 import { updateMealVariationItems } from '@/lib/mealVariations';
 import { cloneMealsWithFreshIds } from '@/lib/legacy-diet-copy';
 import { calculatePresetCalories } from '@/lib/presetUtils';
-import { MealFoodToSubstitute } from '@/components/molecules/SubstituteFoodModal';
+import { MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 import { toast } from 'sonner';
 
 export function useDietBuilderModals({

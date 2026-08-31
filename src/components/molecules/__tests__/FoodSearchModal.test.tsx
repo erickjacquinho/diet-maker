@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
-import { FoodSearchModal } from '../FoodSearchModal';
+import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 import * as tacoStore from '@/lib/tacoStore';
 import * as tacoAdapter from '@/lib/application/diets/taco-food-adapter';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -79,7 +79,7 @@ export interface MealCardContainerProps {
   items: MealItemRowProps[];
   onTitleChange?: (newTitle: string) => void;
   onTimeChange?: (newTime: string) => void;
-  onAddFoodClick?: () => void;
+  onAddFoodClick?: (trigger?: HTMLButtonElement) => void;
   onDuplicate?: () => void;
   onCopyMeal?: () => void;
   onPasteMeal?: () => void;
@@ -191,6 +191,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   variationLimitReached = false,
 }) => {
 
+  const addFoodButtonRef = useRef<HTMLButtonElement>(null);
   const [draftTitle, setDraftTitle] = useState(title);
   const [draftTime, setDraftTime] = useState(time);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
@@ -651,10 +652,11 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
         {/* Add Food Button */}
         <Button
+          ref={addFoodButtonRef}
           type="button"
           variant="secondary"
           size="standard"
-          onClick={onAddFoodClick}
+          onClick={() => onAddFoodClick?.(addFoodButtonRef.current ?? undefined)}
           className="w-full border-dashed border-border-control hover:border-primary/60 hover:bg-surface-hover text-text-primary font-semibold text-style-button-label-compact flex items-center justify-center gap-1.5"
         >
           <Plus size={14} className="text-success" />

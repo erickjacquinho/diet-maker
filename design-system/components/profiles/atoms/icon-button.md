@@ -80,5 +80,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `atom`; perfil homologado documentalmente como padrão canônico e oficial de botões de exclusão por ícone.
+Implementado em `atom`; perfil homologado documentalmente como padrão canônico e oficial de botões de exclusão por ícone. A fonte de tokens e a receita de `atom-button` permanecem as autoridades; este perfil não redefine seus valores.
 

@@ -9,6 +9,7 @@ describe('ReadOnlyDietModal', () => {
     const onClose = vi.fn();
     render(<ReadOnlyDietModal isOpen onClose={onClose} diet={historicalDietFixture} patientName="Ana" />);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Conteúdo da prescrição' })).toHaveClass('min-h-0', 'overflow-y-auto');
     expect(screen.getByText('Prescrição histórica')).toBeInTheDocument();
     expect(screen.getByText('Arroz, tipo 1, cozido')).toBeInTheDocument();
     expect(screen.getByText((content) => content.includes('128') && content.includes('kcal'))).toBeInTheDocument();
