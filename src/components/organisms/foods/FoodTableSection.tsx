@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DataTable, type DataTableSortState } from '@/components/molecules/DataTable';
-import type { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import { useFoodTableColumns } from './useFoodTableColumns';
 
 export interface FoodTableSectionProps {

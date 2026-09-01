@@ -1,4 +1,4 @@
-import type { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 
 export interface CustomFoodFormData {
   name: string;

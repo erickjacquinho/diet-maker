@@ -6,7 +6,7 @@ import { Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/components/molecules/DataTable';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
-import { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import { cn } from '@/lib/utils';
 
 export interface FoodSearchResultsListProps {

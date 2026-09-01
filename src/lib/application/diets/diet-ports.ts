@@ -7,6 +7,7 @@ import type {
   DietVariation,
   DiscardResult,
 } from '@/lib/domain/diets/diet-model';
+import type { LibraryDietSourceReader } from './library-insertion';
 
 export interface DraftContext {
   accountId: string;
@@ -86,6 +87,7 @@ export interface DietApplicationDependencies {
   dietReader: PatientDietReader;
   now?: () => string;
   idFactory?: () => string;
+  librarySourceReader?: LibraryDietSourceReader;
 }
 
 export interface OpenEditorResult {
@@ -106,4 +108,6 @@ export interface DietApplication {
   getPatientDietSummary(patientId: string): Promise<PatientDietSummary>;
   getDietSnapshot(patientId: string, dietId: string): Promise<DietPlan | null>;
   invalidatePatientDrafts(patientId: string): Promise<number>;
+  insertRecipeIntoDietDraft(command: import('./library-insertion').RecipeInsertionCommand): Promise<DietDraft>;
+  insertReadyMealIntoDietDraft(command: import('./library-insertion').ReadyMealInsertionCommand): Promise<DietDraft>;
 }

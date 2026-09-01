@@ -15,13 +15,8 @@ import {
 } from '@/components/ui/dialog';
 import { CreateRecipeModal } from '@/components/molecules/CreateRecipeModal';
 import { RecipeCard } from '@/components/molecules/RecipeCard';
-
-import {
-  Recipe,
-  getRecipesFromStorage,
-  saveRecipeToStorage,
-  deleteRecipeFromStorage,
-} from '@/lib/recipesStore';
+import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
+import { toRecipe, type Recipe } from '@/lib/library-ui-adapter';
 import { toast } from 'sonner';
 
 const CATEGORIES = [
@@ -41,9 +36,24 @@ export default function RecipesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const refreshRecipes = async () => {
+    setIsLoading(true);
+    try {
+      const application = await getBrowserLibraryApplication();
+      setRecipes((await application.listRecipes()).map(toRecipe));
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'As receitas não puderam ser carregadas.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setRecipes(getRecipesFromStorage());
+    void refreshRecipes();
   }, []);
 
   const handleOpenCreateModal = () => {
@@ -56,19 +66,41 @@ export default function RecipesPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveRecipe = (data: { id?: string; name: string; category: string; servings: number; instructions: string; ingredients: Recipe['ingredients'] }) => {
-    saveRecipeToStorage(data);
-    setRecipes(getRecipesFromStorage());
-    setIsModalOpen(false);
-    toast.success(data.id ? 'Receita atualizada com sucesso!' : 'Nova receita cadastrada!');
+  const handleSaveRecipe = async (data: { id?: string; name: string; category: string; servings: number; instructions: string; ingredients: Recipe['ingredients'] }) => {
+    try {
+      const application = await getBrowserLibraryApplication();
+      const input = {
+        name: data.name,
+        category: data.category,
+        instructions: data.instructions,
+        yieldPortions: String(data.servings),
+        ingredients: data.ingredients.map((ingredient) => ({ sourceType: ingredient.foodId.startsWith('taco-') ? 'SYSTEM_TACO' as const : 'ACCOUNT_CUSTOM' as const, sourceId: ingredient.foodId, quantity: String(ingredient.amountGrams), unit: 'g' as const })),
+      };
+      if (data.id) {
+        const current = recipes.find((recipe) => recipe.id === data.id);
+        await application.updateRecipe(data.id, current?.libraryVersion ?? 1, input);
+      } else {
+        await application.createRecipe(input);
+      }
+      await refreshRecipes();
+      setIsModalOpen(false);
+      toast.success(data.id ? 'Receita atualizada com sucesso!' : 'Nova receita cadastrada!');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'A receita não pôde ser salva.');
+    }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!recipeToDelete) return;
-    deleteRecipeFromStorage(recipeToDelete.id);
-    setRecipes(getRecipesFromStorage());
-    setRecipeToDelete(null);
-    toast.success('Receita excluída do catálogo');
+    try {
+      const application = await getBrowserLibraryApplication();
+      await application.deleteRecipe(recipeToDelete.id, recipeToDelete.libraryVersion ?? 1);
+      await refreshRecipes();
+      setRecipeToDelete(null);
+      toast.success('Receita excluída do catálogo');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'A receita não pôde ser excluída.');
+    }
   };
 
   const handleInsertInDiet = (recipeId: string) => {
@@ -135,7 +167,10 @@ export default function RecipesPage() {
       </div>
 
       {/* Grid or Empty State */}
-      {filteredRecipes.length === 0 ? (
+      {errorMessage && <p role="alert" className="text-style-body-secondary text-error">{errorMessage}</p>}
+      {isLoading ? (
+        <div role="status" className="rounded-control border border-border-subtle bg-surface-subtle p-6 text-text-muted">Carregando receitas…</div>
+      ) : filteredRecipes.length === 0 ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-12 text-center max-w-md mx-auto flex flex-col gap-4 my-8">
           <CardContent className="p-0 flex flex-col gap-4">
             <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">

@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SelectField } from '@/components/atoms';
-import { calculateRecipeNutrients, type Recipe, type RecipeIngredient } from '@/lib/recipesStore';
-import { searchTacoFoods, type FoodItem } from '@/lib/tacoStore';
+import { calculateRecipeNutrients, type Recipe, type RecipeIngredient, searchTacoFoods, type FoodItem } from '@/lib/library-ui-adapter';
+import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
+import { listTacoFoodItems, toFoodItem } from '@/lib/library-ui-adapter';
 import { textStyle } from '@/design-system';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
@@ -29,6 +30,7 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [foodQuery, setFoodQuery] = useState('');
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+  const [foodPool, setFoodPool] = useState<FoodItem[]>(() => listTacoFoodItems());
   const formRef = useRef<HTMLFormElement>(null);
 
   useSaveShortcut({
@@ -42,13 +44,20 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
     setFormData(recipe ? { name: recipe.name, category: recipe.category, servings: recipe.servings, instructions: recipe.instructions, ingredients: [...recipe.ingredients] } : { ...EMPTY_FORM, ingredients: [] });
     setFoodQuery('');
     setSearchResults([]);
+    let cancelled = false;
+    void getBrowserLibraryApplication().then((application) => application.listCustomFoods()).then((customFoods) => {
+      if (!cancelled) setFoodPool([...listTacoFoodItems(), ...customFoods.map(toFoodItem)]);
+    }).catch(() => {
+      if (!cancelled) setFoodPool(listTacoFoodItems());
+    });
+    return () => { cancelled = true; };
   }, [open, recipe]);
 
   const summary = useMemo(() => calculateRecipeNutrients(formData.ingredients, formData.servings), [formData.ingredients, formData.servings]);
 
   const handleSearch = (query: string) => {
     setFoodQuery(query);
-    setSearchResults(query.trim().length >= 2 ? searchTacoFoods(query).slice(0, 5) : []);
+    setSearchResults(query.trim().length >= 2 ? searchTacoFoods(query, foodPool).slice(0, 5) : []);
   };
 
   const addIngredient = (food: FoodItem) => {
@@ -62,7 +71,7 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
     setFormData((current) => {
       const ingredients = current.ingredients.map((ingredient, ingredientIndex) => {
         if (ingredientIndex !== index) return ingredient;
-        const reference = searchTacoFoods(ingredient.name)[0];
+        const reference = foodPool.find((food) => food.id === ingredient.foodId) ?? searchTacoFoods(ingredient.name, foodPool)[0];
         const ratio = safeAmount / (reference ? 100 : ingredient.amountGrams || 100);
         return { ...ingredient, amountGrams: safeAmount, proteinG: Math.round((reference?.proteinG ?? ingredient.proteinG) * ratio * 10) / 10, carbsG: Math.round((reference?.carbsG ?? ingredient.carbsG) * ratio * 10) / 10, fatsG: Math.round((reference?.fatsG ?? ingredient.fatsG) * ratio * 10) / 10, kcal: Math.round((reference?.kcal ?? ingredient.kcal) * ratio) };
       });

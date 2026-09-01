@@ -4,6 +4,7 @@ import { createDietDraftCommands } from './diet-draft-commands';
 import { createDietCopyCommands } from './diet-copy-commands';
 import { discardDietDraft } from './discard-diet-draft';
 import { reconcileUnknownSave, saveDietAsActive } from './save-diet-as-active';
+import { insertReadyMealIntoDietDraft, insertRecipeIntoDietDraft } from './library-insertion';
 
 export function createDietApplication(dependencies: DietApplicationDependencies): DietApplication {
   const drafts = createDietDraftCommands(dependencies);
@@ -33,6 +34,14 @@ export function createDietApplication(dependencies: DietApplicationDependencies)
     invalidatePatientDrafts: async (patientId) => {
       const account = await dependencies.accountContext.requireActive();
       return dependencies.draftStore.invalidateByPatient(account.accountId, patientId);
+    },
+    insertRecipeIntoDietDraft: async (command) => {
+      if (!dependencies.librarySourceReader) throw new DietDomainError('PERSISTENCE_UNAVAILABLE', 'A biblioteca não está disponível neste runtime.');
+      return insertRecipeIntoDietDraft({ accountContext: dependencies.accountContext, draftStore: dependencies.draftStore, sourceReader: dependencies.librarySourceReader, idFactory: dependencies.idFactory, now: dependencies.now }, command);
+    },
+    insertReadyMealIntoDietDraft: async (command) => {
+      if (!dependencies.librarySourceReader) throw new DietDomainError('PERSISTENCE_UNAVAILABLE', 'A biblioteca não está disponível neste runtime.');
+      return insertReadyMealIntoDietDraft({ accountContext: dependencies.accountContext, draftStore: dependencies.draftStore, sourceReader: dependencies.librarySourceReader, idFactory: dependencies.idFactory, now: dependencies.now }, command);
     },
   };
 }

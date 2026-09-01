@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/compo
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
-import { type Recipe, calculateRecipeNutrients } from '@/lib/recipesStore';
+import { type Recipe, calculateRecipeNutrients } from '@/lib/library-ui-adapter';
 import { cn } from '@/lib/utils';
 
 export interface RecipeSearchResultsListProps {

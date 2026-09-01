@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
-import * as tacoStore from '@/lib/tacoStore';
 import * as tacoAdapter from '@/lib/application/diets/taco-food-adapter';
+import * as libraryAdapter from '@/lib/library-ui-adapter';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 
 const originalScrollIntoView = Element.prototype.scrollIntoView;
@@ -23,7 +23,7 @@ describe('FoodSearchModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.spyOn(tacoStore, 'getAllFoods').mockReturnValue([
+    vi.spyOn(libraryAdapter, 'listTacoFoodItems').mockReturnValue([
       {
         id: 'taco-1',
         name: 'Arroz branco cozido',
@@ -36,20 +36,6 @@ describe('FoodSearchModal', () => {
         source: 'TACO',
         kcal: 128,
         preparo: 'cozido',
-        isFavorite: false,
-      },
-      {
-        id: 'custom-1',
-        name: 'Alimento customizado',
-        category: 'Customizados',
-        proteinG: 10,
-        carbsG: 10,
-        fatG: 10,
-        fatsG: 10,
-        fiberG: 1,
-        source: 'CUSTOM',
-        kcal: 170,
-        preparo: 'inNatura',
         isFavorite: false,
       },
     ]);

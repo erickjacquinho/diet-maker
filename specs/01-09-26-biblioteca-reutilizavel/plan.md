@@ -203,3 +203,20 @@ stores legados.
   `npm run verify:links`, `npm run audit:atomic-design`, `npm run verify:table`,
   `npm run verify:design-system`, `npm run build` e `npm run test:browser --
   --workers=1`.
+
+## Revisão final de implementação
+
+- FR-001 a FR-017 foram cobertos por domínio, aplicação, repositórios,
+  superfícies canônicas e integração no `DietDraft`.
+- NFR-001 a NFR-004 e SC-001 a SC-007 foram cobertos por contratos de
+  acessibilidade, isolamento por Conta, performance, migrations, jornada
+  Chromium e gates estruturais registrados no relatório de validação.
+- A busca clínica padrão continua TACO-only. A biblioteca só é exposta ao
+  editor quando `enableLibrarySources` é habilitado explicitamente; isso
+  preserva o contrato legado sem manter dual-write.
+- Os módulos históricos `recipesStore.ts` e `readyMealsStore.ts` permanecem
+  apenas como seams de compatibilidade de testes/tipos, sem consumidores de
+  runtime ou fallback de persistência. As chaves antigas não são lidas nem
+  escritas.
+- Migração de dados antigos, backup, restauração, sincronização e a etapa 5
+  não fazem parte desta entrega e não são alegados como implementados.

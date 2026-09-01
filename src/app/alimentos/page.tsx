@@ -39,6 +39,8 @@ export default function FoodsPage() {
     handleConfirmDeleteCustomFood,
     handleDeleteCustomFoodDialogChange,
     resetFilters,
+    isLoading,
+    errorMessage,
   } = useFoodSearchPage();
 
   return (
@@ -62,15 +64,20 @@ export default function FoodsPage() {
         onOpenCreateModal={handleOpenCreateModal}
       />
 
-      <FoodTableSection
-        data={filteredFoods}
-        sorting={sorting}
-        setSorting={setSorting}
-        pageIndex={pageIndex}
-        onPageChange={setPageIndex}
-        onToggleFavorite={handleToggleFavorite}
-        onEditCustomFood={handleOpenEditModal}
-      />
+      {errorMessage && <p role="alert" className="text-style-body-secondary text-error">{errorMessage}</p>}
+      {isLoading ? (
+        <div role="status" className="rounded-control border border-border-subtle bg-surface-subtle p-6 text-text-muted">Carregando biblioteca de alimentos…</div>
+      ) : (
+        <FoodTableSection
+          data={filteredFoods}
+          sorting={sorting}
+          setSorting={setSorting}
+          pageIndex={pageIndex}
+          onPageChange={setPageIndex}
+          onToggleFavorite={handleToggleFavorite}
+          onEditCustomFood={handleOpenEditModal}
+        />
+      )}
 
       <CustomFoodModal
         open={isModalOpen}

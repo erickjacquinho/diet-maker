@@ -27,7 +27,7 @@ describe('diet relational migration', () => {
     await client.query(`INSERT INTO accounts (id, display_name, created_at, updated_at) VALUES ('account-a', 'Conta', '2026-08-30T10:00:00.000Z', '2026-08-30T10:00:00.000Z')`);
     await client.query(`INSERT INTO patients (id, account_id, display_code, name, age, gender, height_cm, weight_kg, current_objective, target_protein, target_carbs, target_fats, target_kcal, created_at, updated_at, version) VALUES ('patient-a', 'account-a', 'P-0001', 'Ana', 32, 'Feminino', 165, 64, 'Manutenção', 120, 180, 55, 1655, '2026-08-30T10:00:00.000Z', '2026-08-30T10:00:00.000Z', 1)`);
 
-    expect(await applyMigrations(client)).toBe('2');
+    expect(await applyMigrations(client)).toBe('3');
     await expect(client.query(`SELECT id, account_id, name, weight_kg FROM patients WHERE id = 'patient-a'`)).resolves.toMatchObject({ rows: [{ id: 'patient-a', account_id: 'account-a', name: 'Ana', weight_kg: 64 }] });
     await expect(client.query(`SELECT table_name FROM information_schema.tables WHERE table_name IN ('diet_plans', 'diet_variations', 'diet_variation_days', 'diet_meals', 'diet_meal_options', 'diet_meal_items', 'diet_item_snapshots') ORDER BY table_name`)).resolves.toMatchObject({ rows: [
       { table_name: 'diet_item_snapshots' }, { table_name: 'diet_meal_items' }, { table_name: 'diet_meal_options' }, { table_name: 'diet_meals' },
@@ -49,8 +49,8 @@ describe('diet relational migration', () => {
 
   it('is idempotent and rolls back a failed subsequent migration', async () => {
     const client = await createClient();
-    expect(await applyMigrations(client)).toBe('2');
-    expect(await applyMigrations(client)).toBe('2');
+    expect(await applyMigrations(client)).toBe('3');
+    expect(await applyMigrations(client)).toBe('3');
     const failingMigration = { id: '9999_diet_test_failure', version: '3', sql: 'CREATE TABLE diet_temporary_failure (id text); SELECT * FROM table_that_does_not_exist;' };
     await expect(applyMigrations(client, [...migrationFiles, failingMigration])).rejects.toThrow();
     await expect(client.query(`SELECT to_regclass('diet_temporary_failure') AS table_name`)).resolves.toMatchObject({ rows: [{ table_name: null }] });

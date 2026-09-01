@@ -11,10 +11,15 @@ import type { DietApplication } from './diets/diet-ports';
 import { PGliteDietRepository } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
 import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
 import { IndexedDbDietDraftStore } from '@/lib/infrastructure/diet-drafts/indexed-db-diet-draft-store';
+import { createLibraryApplication, type LibraryApplication } from './library/library-application';
+import { PGliteFoodCatalogRepository } from '@/lib/infrastructure/local-db/library/pglite-food-catalog-repository';
+import { PGliteRecipeRepository } from '@/lib/infrastructure/local-db/library/recipe-repository';
+import { PGliteReadyMealRepository } from '@/lib/infrastructure/local-db/library/ready-meal-repository';
 
 export interface BrowserPatientRuntime {
   application: PatientApplication;
   dietApplication: DietApplication;
+  libraryApplication: LibraryApplication;
   handle: LocalDatabaseHandle;
 }
 
@@ -29,6 +34,9 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
       const patientProfileReader = createPatientProfileReader(patientRepository, objectiveCatalogRepository);
       const dietRepository = new PGliteDietRepository(handle);
       const dietReader = createPatientDietReader(dietRepository);
+      const foodRepository = new PGliteFoodCatalogRepository(handle);
+      const recipeRepository = new PGliteRecipeRepository(handle, { foodRepository });
+      const readyMealRepository = new PGliteReadyMealRepository(handle, { foodRepository, recipeRepository });
       return {
         handle,
         application: createPatientApplication({
@@ -39,7 +47,8 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
           transactionRunner: new LocalTransactionRunner(),
           dietDraftStore: new IndexedDbDietDraftStore(),
         }),
-        dietApplication: createDietApplication({ accountContext, patientReader: patientRepository, repository: dietRepository, draftStore: new IndexedDbDietDraftStore(), dietReader }),
+        dietApplication: createDietApplication({ accountContext, patientReader: patientRepository, repository: dietRepository, draftStore: new IndexedDbDietDraftStore(), dietReader, librarySourceReader: { getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId), getReadyMeal: (accountId, readyMealId) => readyMealRepository.getById(accountId, readyMealId) } }),
+        libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository }),
       };
     }).catch((error) => {
       runtimePromise = undefined;
@@ -55,6 +64,10 @@ export async function getBrowserPatientApplication(): Promise<PatientApplication
 
 export async function getBrowserDietApplication(): Promise<DietApplication> {
   return (await getBrowserPatientRuntime()).dietApplication;
+}
+
+export async function getBrowserLibraryApplication(): Promise<LibraryApplication> {
+  return (await getBrowserPatientRuntime()).libraryApplication;
 }
 
 export function resetBrowserPatientRuntimeForTests(): void {

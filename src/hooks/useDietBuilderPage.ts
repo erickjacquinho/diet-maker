@@ -205,6 +205,43 @@ export function useDietBuilderPage() {
     onSelectMealVariation: handleSelectMealVariation,
   });
 
+  const { foodSearchMealIndex, setFoodSearchMealIndex } = modals;
+
+  const syncInsertedLibraryDraft = useCallback((updated: Awaited<ReturnType<DietApplication['openEditor']>>['draft']) => {
+    setLoadedDraft(updated);
+    setDietPlan(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
+    currentRevisionRef.current = updated.draftRevision;
+    lastPersistedDocumentRef.current = JSON.stringify(updated.payload);
+  }, [dietaId, patientId, setDietPlan, setLoadedDraft]);
+
+  const insertLibraryIntoSelectedMeal = useCallback(async (kind: 'recipe' | 'readyMeal', sourceId: string) => {
+    if (!dietApplication || !draft || foodSearchMealIndex === null) return;
+    const targetMeal = mealGroups[foodSearchMealIndex];
+    const targetVariation = draft.payload.variations.find((variation) =>
+      dietPlan?.mode === 'carb_cycling' ? variation.id === activeVariationId : variation.position === 0,
+    ) ?? draft.payload.variations[0];
+    if (!targetMeal || !targetVariation) throw new Error('A refeição de destino não está disponível.');
+
+    const expectedRevision = currentRevisionRef.current ?? draft.draftRevision;
+    const updated = kind === 'recipe'
+      ? await dietApplication.insertRecipeIntoDietDraft({ draftId: draft.draftId, expectedRevision, recipeId: sourceId, variationId: targetVariation.id, mealId: targetMeal.id })
+      : await dietApplication.insertReadyMealIntoDietDraft({ draftId: draft.draftId, expectedRevision, readyMealId: sourceId, variationId: targetVariation.id, mealId: targetMeal.id });
+
+    syncInsertedLibraryDraft(updated);
+    setFoodSearchMealIndex(null);
+    toast.success(kind === 'recipe' ? 'Receita inserida no rascunho.' : 'Refeição pronta inserida no rascunho.');
+  }, [activeVariationId, dietApplication, dietPlan?.mode, draft, foodSearchMealIndex, mealGroups, setFoodSearchMealIndex, syncInsertedLibraryDraft]);
+
+  const handleInsertRecipeIntoDietDraft = useCallback(
+    (recipeId: string) => insertLibraryIntoSelectedMeal('recipe', recipeId),
+    [insertLibraryIntoSelectedMeal],
+  );
+
+  const handleInsertReadyMealIntoDietDraft = useCallback(
+    (readyMealId: string) => insertLibraryIntoSelectedMeal('readyMeal', readyMealId),
+    [insertLibraryIntoSelectedMeal],
+  );
+
   const handleModeChange = useCallback((newMode: 'simple' | 'carb_cycling') => {
     setDietPlan((prev) => {
       if (!prev) return prev;
@@ -422,6 +459,8 @@ export function useDietBuilderPage() {
     handleSelectMealVariation,
     ...modals,
     ...mealActions,
+    handleInsertRecipeIntoDietDraft,
+    handleInsertReadyMealIntoDietDraft,
     currentMeals,
     mealGroups,
     targetKcal,

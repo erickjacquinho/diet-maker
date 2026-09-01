@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button, Badge } from '@/components/atoms';
 import { Search, ArrowLeftRight, X, Star } from 'lucide-react';
-import { searchTacoFoods, getAllFoods, toggleFavoriteFood, FoodItem } from '@/lib/tacoStore';
+import { listTacoFoodItems, searchTacoFoods, toggleFavoriteFood, type FoodItem } from '@/lib/library-ui-adapter';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
 import { FoodSearchResultsList } from '@/components/molecules/food-search/FoodSearchResultsList';
 import { cn } from '@/lib/utils';
@@ -51,7 +51,7 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [sortState, setSortState] = useState<DataTableSortState | null>(null);
 
-  const allFoods = useMemo(() => getAllFoods(), [refreshKey]);
+  const allFoods = useMemo(() => listTacoFoodItems(), [refreshKey]);
 
   const searchResults = useMemo(() => {
     let list: FoodItem[];

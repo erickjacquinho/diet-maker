@@ -81,6 +81,8 @@ export default function DietBuilderPage() {
     handleRemoveMeal,
     handleUpdateMealHeader,
     handleAddFoodToMeal,
+    handleInsertRecipeIntoDietDraft,
+    handleInsertReadyMealIntoDietDraft,
     handleUpdateItemGram,
     handleRemoveItem,
     handleReorderItems,
@@ -266,6 +268,9 @@ export default function DietBuilderPage() {
         onClose={() => setFoodSearchMealIndex(null)}
         mealTitle={foodSearchMealIndex !== null && currentMeals[foodSearchMealIndex] ? currentMeals[foodSearchMealIndex].name : 'Refeição'}
         onAddFood={handleAddFoodToMeal}
+        enableLibrarySources
+        onAddRecipe={handleInsertRecipeIntoDietDraft}
+        onAddReadyMeal={handleInsertReadyMealIntoDietDraft}
         returnFocusRef={foodSearchTriggerRef}
       />
 

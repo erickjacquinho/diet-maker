@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Badge, EditIconButton, DeleteIconButton, Surface } from '@/components/atoms';
 import { Users, PlusCircle, Check } from 'lucide-react';
-import { Recipe, calculateRecipeNutrients } from '@/lib/recipesStore';
+import { type Recipe, calculateRecipeNutrients } from '@/lib/library-ui-adapter';
 
 
 

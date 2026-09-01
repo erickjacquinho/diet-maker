@@ -2,7 +2,7 @@ import React from 'react';
 import { DeleteIconButton } from '@/components/atoms';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { RecipeIngredient } from '@/lib/recipesStore';
+import type { RecipeIngredient } from '@/lib/library-ui-adapter';
 
 export interface RecipeIngredientRowProps {
   ingredient: RecipeIngredient;

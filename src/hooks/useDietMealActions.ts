@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { DietMeal, DietItem } from '@/lib/legacy-diet-types';
-import { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import {
   appendMealVariation,
   cloneMealGroupWithFreshIds,
