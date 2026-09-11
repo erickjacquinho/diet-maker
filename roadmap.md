@@ -96,9 +96,14 @@ Calcular matematicamente e sugerir quantidades em gramas para alimentos substitu
 
 Refatorar a escala para uma experiência mais visual, flexível e fácil de entender, com controle claro sobre o que será alterado.
 
+### 10. Limitações dietéticas no cadastro do paciente
+
+Após a conclusão das migrations pendentes, adicionar ao cadastro e à edição do paciente um campo de texto livre para registrar todas as suas limitações dietéticas, incluindo alergias, intolerâncias, restrições e preferências relevantes. Manter essa informação persistida junto ao perfil do paciente para consulta na montagem da dieta.
+
 ## Telas e componentes envolvidos
 
 - **Construtor de dieta** (`/pacientes/[id]/dieta/[dietaId]`): opções completas, salvamento da refeição e edição das substituições.
+- **Cadastro de pacientes** (`/pacientes`): campo de limitações dietéticas no cadastro e na edição do paciente.
 - **Catálogo de alimentos customizados** (`/alimentos`): listagem, busca e formulários de cadastro/edição de alimentos próprios.
 - **Biblioteca de refeições prontas** (`/refeicoes-prontas`): listagem, criação/edição dedicada e inspeção nutricional de refeições salvas.
 - **Biblioteca de receitas** (`/receitas`): listagem, construtor de receitas com cálculo automático por porção e modo de preparo.

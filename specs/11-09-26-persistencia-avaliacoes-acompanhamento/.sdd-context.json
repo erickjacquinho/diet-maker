@@ -1,0 +1,6 @@
+{
+  "task": "Completar o SDD da Etapa 5 de persistência local-first: migrar avaliações físicas, próximos acompanhamentos e registros clínicos já existentes para a fonte canônica PGlite e Drizzle, vinculados por Conta e Paciente, preservando telas, cálculos e fluxos atuais, removendo o armazenamento legado de teste sem migração ou dual-write, sem criar agenda, prontuário ampliado, autenticação online, sincronização ou backup da Etapa 6.",
+  "slug": "persistencia-avaliacoes-acompanhamento",
+  "feature_dir": "specs/11-09-26-persistencia-avaliacoes-acompanhamento",
+  "date": "2026-09-11"
+}

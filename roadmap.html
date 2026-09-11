@@ -742,7 +742,7 @@
                   <div class="panel-kicker">Entrega principal</div>
                   <h2 class="panel-title" id="features-title">Próximas funcionalidades</h2>
                 </div>
-                <span class="panel-count">9 frentes</span>
+                <span class="panel-count">10 frentes</span>
               </header>
 
               <div class="panel-body">
@@ -1122,6 +1122,33 @@
                       </li>
                     </ul>
                   </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-10">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-10" aria-describedby="feature-10-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">10. Limitações dietéticas no cadastro do paciente</span>
+                        <span class="checklist-description" id="feature-10-description">Após a conclusão das migrations pendentes, adicionar ao cadastro e à edição do paciente um campo de texto livre para registrar todas as suas limitações dietéticas, incluindo alergias, intolerâncias, restrições e preferências relevantes.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 10">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-10-field" data-parent="feature-10" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Campo de texto livre no cadastro e na edição para registrar alergias, intolerâncias, restrições e preferências alimentares.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-10-persistence" data-parent="feature-10" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Persistir a informação junto ao perfil do paciente e disponibilizá-la para consulta na montagem da dieta.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
                 </ol>
               </div>
             </section>
@@ -1134,7 +1161,7 @@
                   <div class="panel-kicker">Mapa de impacto</div>
                   <h2 class="panel-title" id="screens-title">Telas e componentes envolvidos</h2>
                 </div>
-                <span class="panel-count">8 itens</span>
+                <span class="panel-count">9 itens</span>
               </header>
               <div class="panel-body">
                 <ul class="checklist">
@@ -1143,6 +1170,13 @@
                       <input type="checkbox" data-id="screen-diet-builder" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
                       <span class="checklist-copy"><span class="checklist-title">Construtor de dieta</span><span class="checklist-description"><code>/pacientes/[id]/dieta/[dietaId]</code> — opções completas, salvamento da refeição e edição das substituições.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-patient-registration" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Cadastro de pacientes</span><span class="checklist-description"><code>/pacientes</code> — campo de limitações dietéticas no cadastro e na edição do paciente.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
