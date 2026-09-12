@@ -20,8 +20,8 @@ Este arquivo é o índice executável dos tokens que podem ser referenciados por
 
 ## Fontes normativas
 
-- [04 — Sistema de cores](../04-color-system.md)
-- [05 — Sistema tipográfico](../05-typography-system.md)
-- [06 — Geometria e layout desktop](../06-geometry-and-desktop-layout.md)
-- [07 — Ícones, movimento e camadas](../07-icons-motion-and-layers.md)
-- [08 — Estados e acessibilidade](../08-states-and-accessibility.md)
+- [04 — Sistema de cores](../../design-system/04-color-system.md)
+- [05 — Sistema tipográfico](../../design-system/05-typography-system.md)
+- [06 — Geometria e layout desktop](../../design-system/06-geometry-and-desktop-layout.md)
+- [07 — Ícones, movimento e camadas](../../design-system/07-icons-motion-and-layers.md)
+- [08 — Estados e acessibilidade](../../design-system/08-states-and-accessibility.md)

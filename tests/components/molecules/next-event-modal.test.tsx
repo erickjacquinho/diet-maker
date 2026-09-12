@@ -110,4 +110,46 @@ describe('NextEventModal', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('keeps the modal open until an asynchronous save is confirmed', async () => {
+    let resolveSave: (() => void) | undefined;
+    const onSave = vi.fn(() => new Promise<void>((resolve) => { resolveSave = resolve; }));
+    const onOpenChange = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={{ date: '2026-09-15', type: 'diet-update', version: 1 }}
+        onOpenChange={onOpenChange}
+        onSave={onSave}
+        onClear={vi.fn()}
+      />,
+    );
+
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+
+    await act(async () => {
+      resolveSave?.();
+    });
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+  });
+
+  it('keeps the confirmed follow-up visible and shows a recoverable error when save fails', async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={{ date: '2026-09-15', type: 'diet-update', version: 1 }}
+        onOpenChange={onOpenChange}
+        onSave={vi.fn().mockRejectedValue(new Error('Conflito de versão.'))}
+        onClear={vi.fn()}
+      />,
+    );
+
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Conflito de versão.');
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(screen.getByRole('heading', { name: 'Reagendar acompanhamento' })).toBeInTheDocument();
+  });
 });

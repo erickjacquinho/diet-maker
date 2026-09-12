@@ -4,6 +4,7 @@ import type { PatientApplicationError } from '@/lib/application/patients/patient
 import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { buildPatientListRows, filterPatients, type PatientListHistoryInput, type PatientListRow } from '@/lib/patientListView';
+import { toLegacyAssessment, toLegacyLastActivity, toLegacyNextEvent } from '@/lib/application/patients/clinical-ui-adapter';
 
 export function usePatientsPage() {
   const [patients, setPatients] = useState<ReturnType<typeof toPatientViewModel>[]>([]);
@@ -18,14 +19,16 @@ export function usePatientsPage() {
     try {
       const application = await getBrowserPatientApplication();
       const summaries = await application.listActivePatients();
-      const views = summaries.map(({ patient, related }) => toPatientViewModel(patient, {
-        initials: summaries.find((summary) => summary.patient.id === patient.id)?.initials,
+      const views = summaries.map(({ patient, initials, clinical }) => toPatientViewModel(patient, {
+        initials,
+        nextEvent: toLegacyNextEvent(clinical?.nextFollowUp ?? null),
+        lastActivity: toLegacyLastActivity(clinical?.lastActivity),
       }));
       setPatients(views);
-      setPatientHistoryById(Object.fromEntries(summaries.map(({ patient, related }) => [patient.id, {
-        assessments: [],
-        hasAssessment: related.assessmentCount > 0,
-        hasDiet: related.dietCount > 0,
+      setPatientHistoryById(Object.fromEntries(summaries.map(({ patient, related, clinical }) => [patient.id, {
+        assessments: clinical ? [clinical.latestAssessment, clinical.previousAssessment].filter((assessment): assessment is NonNullable<typeof assessment> => Boolean(assessment)).map(toLegacyAssessment) : [],
+        hasAssessment: Boolean(clinical?.assessmentCount || related.assessmentCount),
+        hasDiet: clinical?.hasDiet || related.dietCount > 0,
       }])));
     } catch (cause) {
       const message = (cause as PatientApplicationError)?.message || 'Não foi possível carregar os pacientes.';

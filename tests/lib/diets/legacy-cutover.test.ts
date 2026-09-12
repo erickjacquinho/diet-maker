@@ -35,7 +35,8 @@ describe('canonical diet cutover', () => {
     expect(foodPicker).toMatch(/return listTacoFoodItems\(\)/);
 
     const consultationPage = read('app/pacientes/[id]/consulta/[date]/page.tsx');
-    expect(consultationPage).not.toMatch(/ConsultationDietCard|consultation\.diet|Abrir no Construtor de Dietas/);
+    expect(consultationPage).not.toMatch(/Abrir no Construtor de Dietas/);
+    expect(consultationPage).toMatch(/getConsultationView/);
   });
 
   it('does not expose destructive diet APIs from the patient model', () => {

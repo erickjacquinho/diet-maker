@@ -9,6 +9,10 @@ const patientUiFiles = [
   'src/app/pacientes/[id]/PatientProfileModals.tsx',
   'src/hooks/usePatientsPage.ts',
   'src/hooks/usePatientProfilePage.ts',
+  'src/hooks/useAssessmentWorkspacePage.ts',
+  'src/hooks/useAssessmentForm.ts',
+  'src/app/pacientes/[id]/avaliacao/[assessmentId]/page.tsx',
+  'src/app/pacientes/[id]/consulta/[date]/page.tsx',
   'src/components/molecules/CreatePatientModal.tsx',
   'src/components/molecules/EditPatientModal.tsx',
   'src/components/molecules/DeletePatientModal.tsx',
@@ -27,7 +31,7 @@ describe('patient persistence boundary', () => {
   it('keeps patient UI orchestration independent from physical storage and legacy keys', () => {
     const violations = patientUiFiles.flatMap((file) => {
       const source = readIfExists(file);
-      return /patientsStore|localStorage|indexedDB|from ['\"]drizzle-orm|from ['\"]@electric-sql\/pglite/i.test(source) ? [file] : [];
+      return /patientsStore|legacyClinicalStore|getConsultationRecord|nutridiet_(?:assessments_|patients)|localStorage|indexedDB|from ['\"]drizzle-orm|from ['\"]@electric-sql\/pglite/i.test(source) ? [file] : [];
     });
 
     expect(violations).toEqual([]);

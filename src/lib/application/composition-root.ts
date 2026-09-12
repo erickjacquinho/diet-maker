@@ -14,6 +14,9 @@ import { listActivePatients } from './patients/list-active-patients';
 import { restorePatient } from './patients/restore-patient';
 import { updatePatient } from './patients/update-patient';
 import type { DietDraftStore } from './diets/diet-ports';
+import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
+import type { AssessmentInput, BodyAssessment, ConsultationView, NextFollowUp, NextFollowUpInput } from '@/lib/domain/clinical';
+import { createClinicalCommands } from './patients/clinical-commands';
 
 export interface PatientApplicationDependencies {
   accountContext: AccountContext;
@@ -22,6 +25,10 @@ export interface PatientApplicationDependencies {
   patientProfileReader: PatientProfileReader;
   transactionRunner: TransactionRunner;
   dietDraftStore?: DietDraftStore;
+  clinicalRepository?: ClinicalRepository;
+  patientDietReader?: import('./diets/diet-ports').PatientDietReader;
+  now?: () => string;
+  idFactory?: () => string;
 }
 
 export interface ArchivePatientResult {
@@ -40,12 +47,29 @@ export interface PatientApplication {
   archivePatient(patientId: string, expectedVersion: number): Promise<Patient>;
   restorePatient(patientId: string, expectedVersion: number): Promise<Patient>;
   archivePatientAndInvalidate(patientId: string, expectedVersion: number): Promise<ArchivePatientResult>;
+  createAssessment(patientId: string, input: AssessmentInput): Promise<BodyAssessment>;
+  updateAssessment(patientId: string, assessmentId: string, expectedVersion: number, input: AssessmentInput): Promise<BodyAssessment>;
+  getAssessment(patientId: string, assessmentId: string): Promise<BodyAssessment>;
+  listAssessments(patientId: string): Promise<BodyAssessment[]>;
+  getNextFollowUp(patientId: string): Promise<NextFollowUp | null>;
+  setNextFollowUp(patientId: string, expectedVersion: number | null, input: NextFollowUpInput): Promise<NextFollowUp>;
+  clearNextFollowUp(patientId: string, expectedVersion: number): Promise<void>;
+  getConsultationView(patientId: string, date: string): Promise<ConsultationView>;
 }
 
 export function createPatientApplication(dependencies: PatientApplicationDependencies): PatientApplication {
   const patientDeps = { accountContext: dependencies.accountContext, patientRepository: dependencies.patientRepository };
   const objectiveDeps = { accountContext: dependencies.accountContext, objectiveCatalogRepository: dependencies.objectiveCatalogRepository };
   const readerDeps = { accountContext: dependencies.accountContext, patientProfileReader: dependencies.patientProfileReader };
+  const clinicalCommands = createClinicalCommands({
+    accountContext: dependencies.accountContext,
+    patientRepository: dependencies.patientRepository,
+    clinicalRepository: dependencies.clinicalRepository!,
+    transactionRunner: dependencies.transactionRunner,
+    patientDietReader: dependencies.patientDietReader,
+    now: dependencies.now,
+    idFactory: dependencies.idFactory,
+  });
 
   return {
     createPatient: (input) => dependencies.transactionRunner.run(() => createPatient(patientDeps, input)),
@@ -71,5 +95,6 @@ export function createPatientApplication(dependencies: PatientApplicationDepende
       }
     },
     restorePatient: (patientId, expectedVersion) => dependencies.transactionRunner.run(() => restorePatient(patientDeps, patientId, expectedVersion)),
+    ...clinicalCommands,
   };
 }

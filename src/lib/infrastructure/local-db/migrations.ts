@@ -256,9 +256,79 @@ const legacyMigrationFiles: readonly LocalMigration[] = [
   },
 ];
 
+export const clinicalPersistenceMigration: LocalMigration = {
+  id: '0003_clinical_persistence',
+  version: '4',
+  sql: `
+    CREATE TABLE IF NOT EXISTS body_assessments (
+      id text PRIMARY KEY,
+      account_id text NOT NULL,
+      patient_id text NOT NULL,
+      clinical_date text NOT NULL,
+      weight_kg numeric NOT NULL,
+      body_fat_percent numeric NOT NULL,
+      fat_mass_kg numeric NOT NULL,
+      lean_mass_kg numeric NOT NULL,
+      waist_cm numeric NOT NULL,
+      scapula_cm numeric NOT NULL,
+      bust_cm numeric NOT NULL,
+      abdomen_cm numeric NOT NULL,
+      hip_cm numeric NOT NULL,
+      left_proximal_thigh_cm numeric NOT NULL,
+      right_proximal_thigh_cm numeric NOT NULL,
+      neck_cm numeric,
+      left_arm_cm numeric,
+      right_arm_cm numeric,
+      left_distal_thigh_cm numeric,
+      right_distal_thigh_cm numeric,
+      left_calf_cm numeric,
+      right_calf_cm numeric,
+      auto_filled_fields jsonb NOT NULL,
+      calculation_method text NOT NULL CHECK (calculation_method IN ('US_NAVY')),
+      calculation_version text NOT NULL,
+      calculation_input_snapshot jsonb NOT NULL,
+      version integer NOT NULL CHECK (version > 0),
+      created_at text NOT NULL,
+      updated_at text NOT NULL,
+      CONSTRAINT body_assessments_patient_scope_fk FOREIGN KEY (account_id, patient_id) REFERENCES patients(account_id, id) ON DELETE RESTRICT,
+      CONSTRAINT body_assessments_body_fat_range CHECK (body_fat_percent >= 0 AND body_fat_percent <= 100),
+      CONSTRAINT body_assessments_results_non_negative CHECK (fat_mass_kg >= 0 AND lean_mass_kg >= 0),
+      CONSTRAINT body_assessments_required_measurements_positive CHECK (
+        weight_kg > 0 AND waist_cm > 0 AND scapula_cm > 0 AND bust_cm > 0 AND abdomen_cm > 0 AND hip_cm > 0
+        AND left_proximal_thigh_cm > 0 AND right_proximal_thigh_cm > 0
+      ),
+      CONSTRAINT body_assessments_optional_measurements_positive CHECK (
+        (neck_cm IS NULL OR neck_cm > 0) AND
+        (left_arm_cm IS NULL OR left_arm_cm > 0) AND (right_arm_cm IS NULL OR right_arm_cm > 0) AND
+        (left_distal_thigh_cm IS NULL OR left_distal_thigh_cm > 0) AND (right_distal_thigh_cm IS NULL OR right_distal_thigh_cm > 0) AND
+        (left_calf_cm IS NULL OR left_calf_cm > 0) AND (right_calf_cm IS NULL OR right_calf_cm > 0)
+      )
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS body_assessments_scope_identity_idx
+      ON body_assessments(id, account_id, patient_id);
+    CREATE INDEX IF NOT EXISTS body_assessments_patient_date_idx
+      ON body_assessments(account_id, patient_id, clinical_date DESC, created_at DESC, id);
+
+    CREATE TABLE IF NOT EXISTS next_follow_ups (
+      account_id text NOT NULL,
+      patient_id text NOT NULL,
+      due_date text NOT NULL,
+      type text NOT NULL CHECK (type IN ('ASSESSMENT_UPDATE', 'DIET_UPDATE')),
+      version integer NOT NULL CHECK (version > 0),
+      created_at text NOT NULL,
+      updated_at text NOT NULL,
+      PRIMARY KEY (account_id, patient_id),
+      CONSTRAINT next_follow_ups_patient_scope_fk FOREIGN KEY (account_id, patient_id) REFERENCES patients(account_id, id) ON DELETE RESTRICT
+    );
+    CREATE INDEX IF NOT EXISTS next_follow_ups_due_date_idx
+      ON next_follow_ups(account_id, due_date, patient_id);
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
+  clinicalPersistenceMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

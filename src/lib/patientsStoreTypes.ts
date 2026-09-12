@@ -27,6 +27,7 @@ export type PatientNextEventType = 'diet-update' | 'assessment-update';
 export interface PatientNextEvent {
   date: string;
   type: PatientNextEventType;
+  version?: number;
 }
 
 export type PatientLastActivityType = 'diet' | 'assessment';
@@ -86,8 +87,16 @@ export interface HistoricalDiet {
   meals?: HistoricalDietMeal[];
 }
 
+import type { CalculationInputSnapshot } from '@/lib/domain/clinical';
+
 export interface BodyAssessment {
   id: string;
+  accountId?: string;
+  patientId?: string;
+  clinicalDate?: string;
+  version?: number;
+  createdAt?: string;
+  updatedAt?: string;
   date: string;
   weightKg: number;
   bodyFatPercent: number;
@@ -108,6 +117,9 @@ export interface BodyAssessment {
   leftCalfCm?: number;
   rightCalfCm?: number;
   autoFilledFields?: string[];
+  calculationMethod?: 'US_NAVY';
+  calculationVersion?: string;
+  calculationInputSnapshot?: CalculationInputSnapshot;
 }
 
 export interface ConsultationRecord {

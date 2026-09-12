@@ -21,6 +21,7 @@ export default function AssessmentWorkspacePage() {
   const {
     patient,
     draft,
+    isLoading,
     previousAssessment,
     composition,
     ffmi,
@@ -38,6 +39,14 @@ export default function AssessmentWorkspacePage() {
     handleConfirmLeave,
     handleCopySummary,
   } = useAssessmentWorkspacePage(patientId, assessmentId);
+
+  if (isLoading) {
+    return (
+      <div role="status" aria-live="polite" className="container mx-auto py-12 px-4 text-center text-text-secondary">
+        Carregando avaliação…
+      </div>
+    );
+  }
 
   if (!patient || !draft) {
     return (

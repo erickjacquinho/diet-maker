@@ -1,9 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import {
-  BodyAssessment,
-  Patient,
-  normalizePairedBodyMeasurements,
-} from '@/lib/patientsStore';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { normalizePairedMeasurements } from '@/lib/domain/clinical';
+import type { BodyAssessment, Patient as LegacyPatient } from '@/lib/application/patients/clinical-ui-adapter';
 import {
   calculateBodyComposition,
   normalizeBodyFatSex,
@@ -33,12 +30,14 @@ export function useAssessmentForm({
   onOpenChange,
 }: {
   assessment: BodyAssessment | null;
-  patient: Pick<Patient, 'gender' | 'heightCm'> | null;
-  onSave: (assessment: BodyAssessment) => void;
+  patient: Pick<LegacyPatient, 'gender' | 'heightCm'> | null;
+  onSave: (assessment: BodyAssessment) => void | Promise<void>;
   onOpenChange: (open: boolean) => void;
 }) {
   const [draft, setDraft] = useState<BodyAssessment | null>(assessment);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     setDraft(assessment ? { ...assessment } : null);
@@ -86,8 +85,9 @@ export function useAssessmentForm({
     setSubmitError(null);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (savingRef.current) return;
 
     if (!draft || !composition.isValid) {
       setSubmitError(
@@ -96,21 +96,31 @@ export function useAssessmentForm({
       return;
     }
 
-    const normalizedDraft = normalizePairedBodyMeasurements(draft);
+    const normalizedDraft = normalizePairedMeasurements(draft);
 
-    onSave({
-      ...normalizedDraft,
-      bodyFatPercent: composition.bodyFatPercent!,
-      fatMassKg: composition.fatMassKg!,
-      muscleMassKg: composition.leanMassKg!,
-    });
-    onOpenChange(false);
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      await onSave({
+        ...normalizedDraft,
+        bodyFatPercent: composition.bodyFatPercent!,
+        fatMassKg: composition.fatMassKg!,
+        muscleMassKg: composition.leanMassKg!,
+      });
+      onOpenChange(false);
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar a avaliação.');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   return {
     draft,
     composition,
     submitError,
+    isSaving,
     updateNumericField,
     handleSubmit,
   };

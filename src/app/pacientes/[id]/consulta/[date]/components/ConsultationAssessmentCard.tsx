@@ -5,7 +5,7 @@ import { Scale, TrendingDown, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { EditIconButton } from '@/components/atoms';
-import { BodyAssessment } from '@/lib/patientsStore';
+import type { BodyAssessment } from '@/lib/patientsStoreTypes';
 
 export function ConsultationAssessmentCard({
   assessment,

@@ -87,6 +87,14 @@ const mockPatientApplication = {
     initials: patient.initials,
     availableObjectives: [patient.objective],
   }),
+  getConsultationView: vi.fn().mockImplementation(async (_patientId: string, date: string) => ({
+    patient: canonicalPatient,
+    date,
+    assessments: [],
+    diets: [],
+    notesState: 'EMPTY_NOT_PERSISTED' as const,
+    prescribedSupplements: [],
+  })),
 };
 
 const mockDietApplication = {

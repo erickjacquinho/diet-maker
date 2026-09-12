@@ -8,7 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     pool: 'threads',
-    maxWorkers: 4,
+    // PGlite/IndexedDB fixtures share a process-local runtime on Windows;
+    // serial workers keep the full suite deterministic and avoid silent
+    // worker termination when independent integration suites overlap.
+    maxWorkers: 1,
     watch: false,
     testTimeout: 60_000,
     setupFiles: ['./vitest.setup.ts'],
@@ -21,7 +24,6 @@ export default defineConfig({
       '.agents',
       '.next',
       'dist',
-      'tests/design-system/component-catalog.test.mjs',
       'tests/browser/**',
     ],
   },

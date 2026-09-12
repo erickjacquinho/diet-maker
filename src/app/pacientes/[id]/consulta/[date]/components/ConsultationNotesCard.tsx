@@ -3,7 +3,7 @@
 import React from 'react';
 import { ClipboardList, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { ConsultationRecord } from '@/lib/patientsStore';
+import type { ConsultationRecord } from '@/lib/patientsStoreTypes';
 
 export function ConsultationNotesCard({
   consultation,

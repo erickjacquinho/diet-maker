@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
-const featureRoot = 'specs/01-09-26-biblioteca-reutilizavel';
+const featureRoot = [
+  'specs/01-09-26-biblioteca-reutilizavel',
+  'specs/completed/01-09-26-biblioteca-reutilizavel',
+].find((root) => existsSync(`${root}/spec.md`)) ?? 'specs/01-09-26-biblioteca-reutilizavel';
 
 describe('library SDD traceability', () => {
   it('keeps every specification requirement named by an implementation task', () => {

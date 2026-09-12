@@ -37,7 +37,7 @@ export interface PatientProfileModalsProps {
   handleSaveNextEvent: (ev: PatientNextEvent) => void | Promise<void>;
   handleClearNextEvent: () => void | Promise<void>;
   handleAddCustomObjective: (obj: string) => void | Promise<void>;
-  handleSaveAssessment: (ass: BodyAssessment) => void;
+  handleSaveAssessment: (ass: BodyAssessment) => void | Promise<void>;
 }
 
 export function PatientProfileModals({

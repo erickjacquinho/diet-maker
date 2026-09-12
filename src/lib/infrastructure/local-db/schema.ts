@@ -77,6 +77,70 @@ export const patients = pgTable(
   ],
 );
 
+export const bodyAssessments = pgTable(
+  'body_assessments',
+  {
+    id: text('id').primaryKey(),
+    accountId: text('account_id').notNull(),
+    patientId: text('patient_id').notNull(),
+    clinicalDate: text('clinical_date').notNull(),
+    weightKg: numeric('weight_kg').notNull(),
+    bodyFatPercent: numeric('body_fat_percent').notNull(),
+    fatMassKg: numeric('fat_mass_kg').notNull(),
+    leanMassKg: numeric('lean_mass_kg').notNull(),
+    waistCm: numeric('waist_cm').notNull(),
+    scapulaCm: numeric('scapula_cm').notNull(),
+    bustCm: numeric('bust_cm').notNull(),
+    abdomenCm: numeric('abdomen_cm').notNull(),
+    hipCm: numeric('hip_cm').notNull(),
+    leftProximalThighCm: numeric('left_proximal_thigh_cm').notNull(),
+    rightProximalThighCm: numeric('right_proximal_thigh_cm').notNull(),
+    neckCm: numeric('neck_cm'),
+    leftArmCm: numeric('left_arm_cm'),
+    rightArmCm: numeric('right_arm_cm'),
+    leftDistalThighCm: numeric('left_distal_thigh_cm'),
+    rightDistalThighCm: numeric('right_distal_thigh_cm'),
+    leftCalfCm: numeric('left_calf_cm'),
+    rightCalfCm: numeric('right_calf_cm'),
+    autoFilledFields: jsonb('auto_filled_fields').notNull(),
+    calculationMethod: text('calculation_method').notNull(),
+    calculationVersion: text('calculation_version').notNull(),
+    calculationInputSnapshot: jsonb('calculation_input_snapshot').notNull(),
+    version: integer('version').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('body_assessments_scope_identity_idx').on(table.id, table.accountId, table.patientId),
+    index('body_assessments_patient_date_idx').on(table.accountId, table.patientId, table.clinicalDate, table.createdAt, table.id),
+    check('body_assessments_body_fat_range', sql`${table.bodyFatPercent} >= 0 and ${table.bodyFatPercent} <= 100`),
+    check('body_assessments_results_non_negative', sql`${table.fatMassKg} >= 0 and ${table.leanMassKg} >= 0`),
+    check('body_assessments_required_measurements_positive', sql`${table.weightKg} > 0 and ${table.waistCm} > 0 and ${table.scapulaCm} > 0 and ${table.bustCm} > 0 and ${table.abdomenCm} > 0 and ${table.hipCm} > 0 and ${table.leftProximalThighCm} > 0 and ${table.rightProximalThighCm} > 0`),
+    check('body_assessments_optional_measurements_positive', sql`${table.neckCm} IS NULL OR ${table.neckCm} > 0`),
+    check('body_assessments_version_positive', sql`${table.version} > 0`),
+    check('body_assessments_calculation_method_check', sql`${table.calculationMethod} = 'US_NAVY'`),
+  ],
+);
+
+export const nextFollowUps = pgTable(
+  'next_follow_ups',
+  {
+    accountId: text('account_id').notNull(),
+    patientId: text('patient_id').notNull(),
+    dueDate: text('due_date').notNull(),
+    type: text('type').notNull(),
+    version: integer('version').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.accountId, table.patientId] }),
+    index('next_follow_ups_due_date_idx').on(table.accountId, table.dueDate, table.patientId),
+    check('next_follow_ups_type_check', sql`${table.type} in ('ASSESSMENT_UPDATE', 'DIET_UPDATE')`),
+    check('next_follow_ups_version_positive', sql`${table.version} > 0`),
+  ],
+);
+
 export const dietPlans = pgTable(
   'diet_plans',
   {
@@ -275,6 +339,8 @@ export const schema = {
   accounts,
   objectiveOptions,
   patients,
+  bodyAssessments,
+  nextFollowUps,
   dietPlans,
   dietVariations,
   dietVariationDays,

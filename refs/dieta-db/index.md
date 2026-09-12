@@ -89,10 +89,10 @@ cada SDD, sem duplicar o plano detalhado:
 
 Os SDDs das etapas 1–4 já foram criados em `specs/`, executados e validados:
 
-- [Etapa 1 — prova técnica e base local](../../specs/30-08-26-prova-tecnica-base-local/poc-report.md)
-- [Etapa 2 — Conta e pacientes](../../specs/30-08-26-dieta-db-segunda-etapa/validation-report.md)
-- [Etapa 3 — dietas, rascunho, salvamento e histórico](../../specs/30-08-26-dietas-rascunho-salvamento-historico/validation-report.md)
-- [Etapa 4 — biblioteca reutilizável](../../specs/01-09-26-biblioteca-reutilizavel/validation-report.md)
+- [Etapa 1 — prova técnica e base local](../../specs/completed/30-08-26-prova-tecnica-base-local/poc-report.md)
+- [Etapa 2 — Conta e pacientes](../../specs/completed/30-08-26-dieta-db-segunda-etapa/validation-report.md)
+- [Etapa 3 — dietas, rascunho, salvamento e histórico](../../specs/completed/30-08-26-dietas-rascunho-salvamento-historico/validation-report.md)
+- [Etapa 4 — biblioteca reutilizável](../../specs/completed/01-09-26-biblioteca-reutilizavel/validation-report.md)
 
 Os SDDs das etapas 5–6 ainda serão criados. As fases internas da Decisão 04
 pertencem ao SDD de dietas.
