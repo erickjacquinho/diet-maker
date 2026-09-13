@@ -42,6 +42,7 @@ export interface DietDraftStore {
   removeIfRevision(draftId: string, expectedRevision: number): Promise<boolean>;
   invalidateByPatient(accountId: string, patientId: string): Promise<number>;
   listRecoverableByPatient(accountId: string, patientId: string): Promise<DietDraft[]>;
+  listRecoverableByAccount(accountId: string): Promise<DietDraft[]>;
 }
 
 export interface DietHistoryRow {

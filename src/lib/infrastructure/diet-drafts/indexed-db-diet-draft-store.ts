@@ -186,6 +186,15 @@ export class IndexedDbDietDraftStore implements DietDraftStore {
       return (values as DietDraft[]).filter((draft) => draft.state === 'EDITABLE').map(cloneDraft);
     });
   }
+
+  async listRecoverableByAccount(accountId: string): Promise<DietDraft[]> {
+    return this.transaction('readonly', async (store) => {
+      const values = await requestValue(store.getAll());
+      return (values as DietDraft[])
+        .filter((draft) => draft.accountId === accountId && draft.state === 'EDITABLE')
+        .map(cloneDraft);
+    });
+  }
 }
 
 export { contextKey as createDraftContextKey };

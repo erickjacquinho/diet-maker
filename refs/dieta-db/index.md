@@ -87,15 +87,16 @@ cada SDD, sem duplicar o plano detalhado:
 | 5 | Avaliações e acompanhamento existentes | [02](./02-ciclo-de-vida-e-persistencia-do-paciente.md), [03](./03-contrato-de-interacao-da-tela-de-pacientes.md) e [05](./05-arquitetura-backend-e-escopos-de-dados.md) |
 | 6 | Backup manual simples | [11](./11-recuperacao-e-portabilidade-local.md) e [13](./13-protecao-local-e-backup-simples.md) |
 
-Os SDDs das etapas 1–4 já foram criados em `specs/`, executados e validados:
+Os SDDs das etapas 1–5 já foram criados em `specs/`, executados e validados:
 
 - [Etapa 1 — prova técnica e base local](../../specs/completed/30-08-26-prova-tecnica-base-local/poc-report.md)
 - [Etapa 2 — Conta e pacientes](../../specs/completed/30-08-26-dieta-db-segunda-etapa/validation-report.md)
 - [Etapa 3 — dietas, rascunho, salvamento e histórico](../../specs/completed/30-08-26-dietas-rascunho-salvamento-historico/validation-report.md)
 - [Etapa 4 — biblioteca reutilizável](../../specs/completed/01-09-26-biblioteca-reutilizavel/validation-report.md)
+- [Etapa 5 — avaliações e acompanhamento](../../specs/11-09-26-persistencia-avaliacoes-acompanhamento/validation-report.md)
+- [Etapa 6 — backup manual simples](../../specs/12-09-26-backup-manual-simples/validation-report.md)
 
-Os SDDs das etapas 5–6 ainda serão criados. As fases internas da Decisão 04
-pertencem ao SDD de dietas.
+As fases internas da Decisão 04 pertencem ao SDD de dietas.
 
 PGlite + Drizzle foram aprovados no portão técnico da etapa 1 e adotados no
 runtime local das etapas 2–3. Essa aprovação não inclui as entregas futuras de

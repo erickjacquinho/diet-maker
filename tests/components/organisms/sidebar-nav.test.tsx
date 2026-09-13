@@ -54,26 +54,26 @@ describe('SidebarNav preservation contract', () => {
   });
 
   it('preserves brand, profile, quick actions and optional callback safety', () => {
-    const onSave = vi.fn();
-    const onOpen = vi.fn();
+    const onExportBackup = vi.fn();
+    const onRestoreBackup = vi.fn();
     renderSidebar({
       doctorName: 'Dr. Ana',
       doctorRole: 'Nutricionista clínica',
-      onSave,
-      onOpen,
+      onExportBackup,
+      onRestoreBackup,
     });
 
     expect(screen.getByRole('link', { name: /NutriDiet/ })).toHaveAttribute('href', '/pacientes');
     expect(screen.getByText('Dr. Ana')).toBeInTheDocument();
     expect(screen.getByText('Nutricionista clínica')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar Arquivo Local' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir Arquivo .diet' }));
-    expect(onSave).toHaveBeenCalledTimes(1);
-    expect(onOpen).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar backup local' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Restaurar backup local' }));
+    expect(onExportBackup).toHaveBeenCalledTimes(1);
+    expect(onRestoreBackup).toHaveBeenCalledTimes(1);
 
     expect(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Salvar Arquivo Local' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Abrir Arquivo .diet' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Exportar backup local' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Restaurar backup local' }));
     }).not.toThrow();
   });
 

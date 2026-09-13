@@ -1,6 +1,6 @@
 # Decisão 11 — Recuperação e Portabilidade Local
 
-- **Status:** Escopo corrigido conforme orientação do usuário; implementação pendente
+- **Status:** Implementada e validada no SDD de backup manual simples
 - **Data:** 2026-08-30
 - **Escopo:** Backup manual simples dos dados canônicos locais
 
@@ -16,6 +16,9 @@ arquivo. PDF e mensagens de dieta continuam independentes desse fluxo.
 Esta orientação substitui a exigência anterior de backup criptografado. Os
 limites de privacidade estão na
 [Decisão 13](13-protecao-local-e-backup-simples.md).
+
+O contrato executável e as evidências da implementação estão no
+[SDD de backup manual simples](../../specs/12-09-26-backup-manual-simples/validation-report.md).
 
 ## 2. Conteúdo do arquivo
 

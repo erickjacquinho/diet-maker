@@ -16,43 +16,43 @@ describe('SidebarQuickActions', () => {
   it('keeps unavailable expanded actions visible, disabled and described', () => {
     renderActions({});
 
-    const save = screen.getByRole('button', { name: 'Salvar Arquivo Local' });
-    const open = screen.getByRole('button', { name: 'Abrir Arquivo .diet' });
+    const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
 
-    expect(save).toBeDisabled();
-    expect(open).toBeDisabled();
-    expect(save).toHaveAccessibleDescription('A ação Salvar ainda não está disponível nesta tela.');
-    expect(open).toHaveAccessibleDescription('A ação Abrir ainda não está disponível nesta tela.');
+    expect(exportButton).toBeDisabled();
+    expect(restoreButton).toBeDisabled();
+    expect(exportButton).toHaveAccessibleDescription('A ação Exportar backup ainda não está disponível nesta tela.');
+    expect(restoreButton).toHaveAccessibleDescription('A ação Restaurar backup ainda não está disponível nesta tela.');
   });
 
   it('enables and isolates each callback', () => {
-    const onSave = vi.fn();
-    const onOpen = vi.fn();
+    const onExportBackup = vi.fn();
+    const onRestoreBackup = vi.fn();
 
-    renderActions({ onSave });
-    const save = screen.getByRole('button', { name: 'Salvar Arquivo Local' });
-    const open = screen.getByRole('button', { name: 'Abrir Arquivo .diet' });
+    renderActions({ onExportBackup });
+    const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
 
-    expect(save).toBeEnabled();
-    expect(open).toBeDisabled();
-    fireEvent.click(save);
-    fireEvent.click(open);
-    expect(onSave).toHaveBeenCalledTimes(1);
-    expect(onOpen).not.toHaveBeenCalled();
+    expect(exportButton).toBeEnabled();
+    expect(restoreButton).toBeDisabled();
+    fireEvent.click(exportButton);
+    fireEvent.click(restoreButton);
+    expect(onExportBackup).toHaveBeenCalledTimes(1);
+    expect(onRestoreBackup).not.toHaveBeenCalled();
   });
 
   it('preserves action labels and disabled semantics in collapsed mode', () => {
-    const onOpen = vi.fn();
+    const onRestoreBackup = vi.fn();
 
-    renderActions({ isCollapsed: true, onOpen });
+    renderActions({ isCollapsed: true, onRestoreBackup });
 
-    const save = screen.getByRole('button', { name: 'Salvar Arquivo Local' });
-    const open = screen.getByRole('button', { name: 'Abrir Arquivo .diet' });
+    const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
 
-    expect(save).toBeDisabled();
-    expect(open).toBeEnabled();
-    expect(save).toHaveAccessibleDescription('A ação Salvar ainda não está disponível nesta tela.');
-    fireEvent.click(open);
-    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(exportButton).toBeDisabled();
+    expect(restoreButton).toBeEnabled();
+    expect(exportButton).toHaveAccessibleDescription('A ação Exportar backup ainda não está disponível nesta tela.');
+    fireEvent.click(restoreButton);
+    expect(onRestoreBackup).toHaveBeenCalledTimes(1);
   });
 });

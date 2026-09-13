@@ -40,8 +40,10 @@ export interface SidebarNavProps {
   navigationItems: SidebarNavigationItem[];
   doctorName?: string;
   doctorRole?: string;
-  onSave?: () => void;
-  onOpen?: () => void;
+  onExportBackup?: () => void | Promise<void>;
+  onRestoreBackup?: () => void | Promise<void>;
+  isExporting?: boolean;
+  isRestoring?: boolean;
   onOpenAccount?: () => void;
   initialCollapsed?: boolean;
   children?: React.ReactNode;
@@ -51,13 +53,15 @@ function SidebarNavContent({
   doctorName,
   doctorRole,
   pathname,
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  isExporting,
+  isRestoring,
   onOpenAccount,
   navigationItems,
   children,
 }: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
-  Pick<SidebarNavProps, 'pathname' | 'onSave' | 'onOpen' | 'onOpenAccount' | 'children'>) {
+  Pick<SidebarNavProps, 'pathname' | 'onExportBackup' | 'onRestoreBackup' | 'isExporting' | 'isRestoring' | 'onOpenAccount' | 'children'>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -84,8 +88,18 @@ function SidebarNavContent({
                 doctorRole={doctorRole}
                 isCollapsed={isCollapsed}
                 onOpenAccount={onOpenAccount}
+                onExportBackup={onExportBackup}
+                onRestoreBackup={onRestoreBackup}
+                isExporting={isExporting}
+                isRestoring={isRestoring}
               />
-              <SidebarQuickActions onSave={onSave} onOpen={onOpen} isCollapsed={isCollapsed} />
+              <SidebarQuickActions
+                onExportBackup={onExportBackup}
+                onRestoreBackup={onRestoreBackup}
+                isExporting={isExporting}
+                isRestoring={isRestoring}
+                isCollapsed={isCollapsed}
+              />
             </SidebarFooter>
           </>
         )}
@@ -104,8 +118,10 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   navigationItems,
   doctorName = 'Dr. Lucas',
   doctorRole = 'Nutricionista',
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  isExporting,
+  isRestoring,
   onOpenAccount,
   initialCollapsed = false,
   children,
@@ -116,8 +132,10 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
         doctorName={doctorName}
         doctorRole={doctorRole}
         pathname={pathname}
-        onSave={onSave}
-        onOpen={onOpen}
+        onExportBackup={onExportBackup}
+        onRestoreBackup={onRestoreBackup}
+        isExporting={isExporting}
+        isRestoring={isRestoring}
         onOpenAccount={onOpenAccount}
         navigationItems={navigationItems}
       >

@@ -16,11 +16,14 @@ import { PGliteFoodCatalogRepository } from '@/lib/infrastructure/local-db/libra
 import { PGliteRecipeRepository } from '@/lib/infrastructure/local-db/library/recipe-repository';
 import { PGliteReadyMealRepository } from '@/lib/infrastructure/local-db/library/ready-meal-repository';
 import { PGliteClinicalRepository } from '@/lib/infrastructure/local-db/clinical-repository';
+import { PGliteBackupRepository } from '@/lib/infrastructure/local-db/backup-repository';
+import { createBackupApplication, type BackupApplication } from './backup-application';
 
 export interface BrowserPatientRuntime {
   application: PatientApplication;
   dietApplication: DietApplication;
   libraryApplication: LibraryApplication;
+  backupApplication: BackupApplication;
   handle: LocalDatabaseHandle;
 }
 
@@ -35,6 +38,12 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
       const dietRepository = new PGliteDietRepository(handle);
       const dietReader = createPatientDietReader(dietRepository);
       const clinicalRepository = new PGliteClinicalRepository(handle);
+      const draftStore = new IndexedDbDietDraftStore();
+      const backupApplication = createBackupApplication({
+        accountContext,
+        repository: new PGliteBackupRepository(handle),
+        draftStore,
+      });
       const patientProfileReader = createPatientProfileReader(
         patientRepository,
         objectiveCatalogRepository,
@@ -60,12 +69,13 @@ export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime>
           objectiveCatalogRepository,
           patientProfileReader,
           transactionRunner: new LocalTransactionRunner(),
-          dietDraftStore: new IndexedDbDietDraftStore(),
+          dietDraftStore: draftStore,
           clinicalRepository,
           patientDietReader: dietReader,
         }),
-        dietApplication: createDietApplication({ accountContext, patientReader: patientRepository, repository: dietRepository, draftStore: new IndexedDbDietDraftStore(), dietReader, librarySourceReader: { getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId), getReadyMeal: (accountId, readyMealId) => readyMealRepository.getById(accountId, readyMealId) } }),
+        dietApplication: createDietApplication({ accountContext, patientReader: patientRepository, repository: dietRepository, draftStore, dietReader, librarySourceReader: { getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId), getReadyMeal: (accountId, readyMealId) => readyMealRepository.getById(accountId, readyMealId) } }),
         libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository }),
+        backupApplication,
       };
     }).catch((error) => {
       runtimePromise = undefined;

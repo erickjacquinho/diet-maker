@@ -8,7 +8,7 @@ function setup(): { dependencies: DietApplicationDependencies; store: DietDraftS
   const store: DietDraftStore = {
     create: vi.fn(), getByContext: vi.fn(), get: vi.fn(async () => structuredClone(draft)),
     putIfNewer: vi.fn(async (next) => { draft = structuredClone(next); return { status: 'SAVED' as const, revision: next.draftRevision, updatedAt: next.updatedAt }; }),
-    reserveTargetId: vi.fn(), removeIfRevision: vi.fn(), invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn(),
+    reserveTargetId: vi.fn(), removeIfRevision: vi.fn(), invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn(), listRecoverableByAccount: vi.fn(),
   };
   const repository: DietRepository = { getById: vi.fn(async () => structuredClone(activeDietFixture)), listConfirmed: vi.fn(), countConfirmed: vi.fn(), confirmActive: vi.fn() };
   return {

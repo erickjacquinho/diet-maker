@@ -10,7 +10,7 @@ function setup(overrides: Partial<{ draft: DietDraft; confirm: DietRepository['c
   const store: DietDraftStore = {
     create: vi.fn(), getByContext: vi.fn(), get: vi.fn(async () => structuredClone(draft)),
     putIfNewer: vi.fn(), reserveTargetId: (overrides.reserve ?? vi.fn(async (_id, _revision, targetDietId) => { draft = { ...draft, targetDietId }; return structuredClone(draft); })) as DietDraftStore['reserveTargetId'],
-    removeIfRevision: (overrides.remove ?? vi.fn(async () => true)) as DietDraftStore['removeIfRevision'], invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn(),
+    removeIfRevision: (overrides.remove ?? vi.fn(async () => true)) as DietDraftStore['removeIfRevision'], invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn(), listRecoverableByAccount: vi.fn(),
   };
   const repository: DietRepository = {
     getById: vi.fn(async (_accountId, _patientId, id) => id === draft.targetDietId ? { ...activeDietFixture, id } : null),

@@ -1,64 +1,75 @@
 'use client';
 
 import React from 'react';
-import { FolderOpen, Save } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 
 import { Button, IconButton } from '@/components/atoms';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface SidebarQuickActionsProps {
-  onSave?: () => void;
-  onOpen?: () => void;
+  onExportBackup?: () => void | Promise<void>;
+  onRestoreBackup?: () => void | Promise<void>;
+  isExporting?: boolean;
+  isRestoring?: boolean;
   isCollapsed?: boolean;
 }
 
-const saveDisabledReason = 'A ação Salvar ainda não está disponível nesta tela.';
-const openDisabledReason = 'A ação Abrir ainda não está disponível nesta tela.';
+const exportDisabledReason = 'A ação Exportar backup ainda não está disponível nesta tela.';
+const restoreDisabledReason = 'A ação Restaurar backup ainda não está disponível nesta tela.';
 
 export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  isExporting = false,
+  isRestoring = false,
   isCollapsed = false,
 }) => {
+  const exportDisabled = !onExportBackup || isExporting || isRestoring;
+  const restoreDisabled = !onRestoreBackup || isExporting || isRestoring;
+
   if (isCollapsed) {
     return (
       <div className="flex w-full flex-col items-center gap-2">
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <IconButton
-              onClick={onSave}
-              disabled={!onSave}
+              type="button"
+              onClick={onExportBackup}
+              loading={isExporting}
+              disabled={exportDisabled}
               variant="secondary"
               className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
-              aria-label="Salvar Arquivo Local"
-              aria-describedby={!onSave ? 'sidebar-save-unavailable' : undefined}
-              icon={<Save aria-hidden="true" className="size-4" />}
+              aria-label="Exportar backup local"
+              aria-describedby={!onExportBackup ? 'sidebar-export-unavailable' : undefined}
+              icon={<Download aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
-            Salvar Arquivo Local
+            Exportar backup
           </TooltipContent>
         </Tooltip>
 
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <IconButton
-              onClick={onOpen}
-              disabled={!onOpen}
+              type="button"
+              onClick={onRestoreBackup}
+              loading={isRestoring}
+              disabled={restoreDisabled}
               variant="secondary"
               className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
-              aria-label="Abrir Arquivo .diet"
-              aria-describedby={!onOpen ? 'sidebar-open-unavailable' : undefined}
-              icon={<FolderOpen aria-hidden="true" className="size-4" />}
+              aria-label="Restaurar backup local"
+              aria-describedby={!onRestoreBackup ? 'sidebar-restore-unavailable' : undefined}
+              icon={<Upload aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
-            Abrir Arquivo .diet
+            Restaurar backup
           </TooltipContent>
         </Tooltip>
 
-        {!onSave ? <span id="sidebar-save-unavailable" className="sr-only">{saveDisabledReason}</span> : null}
-        {!onOpen ? <span id="sidebar-open-unavailable" className="sr-only">{openDisabledReason}</span> : null}
+        {!onExportBackup ? <span id="sidebar-export-unavailable" className="sr-only">{exportDisabledReason}</span> : null}
+        {!onRestoreBackup ? <span id="sidebar-restore-unavailable" className="sr-only">{restoreDisabledReason}</span> : null}
       </div>
     );
   }
@@ -66,31 +77,35 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
   return (
     <div className="flex w-full items-center gap-2">
       <Button
-        onClick={onSave}
-        disabled={!onSave}
+        type="button"
+        onClick={onExportBackup}
+        loading={isExporting}
+        disabled={exportDisabled}
         variant="secondary"
         size="compact"
-        aria-label="Salvar Arquivo Local"
-        aria-describedby={!onSave ? 'sidebar-save-unavailable' : undefined}
+        aria-label="Exportar backup local"
+        aria-describedby={!onExportBackup ? 'sidebar-export-unavailable' : undefined}
         className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
       >
-        <Save aria-hidden="true" className="size-4" />
-        <span>Salvar</span>
+        <Download aria-hidden="true" className="size-4" />
+        <span>Exportar backup</span>
       </Button>
       <Button
-        onClick={onOpen}
-        disabled={!onOpen}
+        type="button"
+        onClick={onRestoreBackup}
+        loading={isRestoring}
+        disabled={restoreDisabled}
         variant="secondary"
         size="compact"
-        aria-label="Abrir Arquivo .diet"
-        aria-describedby={!onOpen ? 'sidebar-open-unavailable' : undefined}
+        aria-label="Restaurar backup local"
+        aria-describedby={!onRestoreBackup ? 'sidebar-restore-unavailable' : undefined}
         className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
       >
-        <FolderOpen aria-hidden="true" className="size-4" />
-        <span>Abrir</span>
+        <Upload aria-hidden="true" className="size-4" />
+        <span>Restaurar backup</span>
       </Button>
-      {!onSave ? <span id="sidebar-save-unavailable" className="sr-only">{saveDisabledReason}</span> : null}
-      {!onOpen ? <span id="sidebar-open-unavailable" className="sr-only">{openDisabledReason}</span> : null}
+      {!onExportBackup ? <span id="sidebar-export-unavailable" className="sr-only">{exportDisabledReason}</span> : null}
+      {!onRestoreBackup ? <span id="sidebar-restore-unavailable" className="sr-only">{restoreDisabledReason}</span> : null}
     </div>
   );
 };

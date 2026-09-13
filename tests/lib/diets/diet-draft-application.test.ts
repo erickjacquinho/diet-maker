@@ -15,6 +15,7 @@ function createStore(initial: DietDraft | null = null): DietDraftStore {
     removeIfRevision: vi.fn(),
     invalidateByPatient: vi.fn(),
     listRecoverableByPatient: vi.fn(async () => current ? [structuredClone(current)] : []),
+    listRecoverableByAccount: vi.fn(async () => current ? [structuredClone(current)] : []),
   };
 }
 

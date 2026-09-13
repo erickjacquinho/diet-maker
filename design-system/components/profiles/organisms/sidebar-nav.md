@@ -42,7 +42,7 @@ Primitive base: `ui-sidebar`. Compõe somente dependências permitidas pela laye
 
 Labels nomeiam destinos; estado current é programático; collapsed conserva nome completo.
 
-`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSave`, `onOpen`, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
+`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onExportBackup`, `onRestoreBackup`, estados assíncronos de backup, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
 
 ## Exceptions
 

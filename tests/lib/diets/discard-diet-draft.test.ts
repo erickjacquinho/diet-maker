@@ -4,7 +4,7 @@ import type { DietDraftStore, DietRepository } from '@/lib/application/diets/die
 import { simpleDraftFixture } from '../../fixtures/diets';
 
 function setup(remove: DietDraftStore['removeIfRevision'] = vi.fn(async () => true)) {
-  const store: DietDraftStore = { create: vi.fn(), getByContext: vi.fn(), get: vi.fn(async () => structuredClone(simpleDraftFixture)), putIfNewer: vi.fn(), reserveTargetId: vi.fn(), removeIfRevision: remove, invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn() };
+  const store: DietDraftStore = { create: vi.fn(), getByContext: vi.fn(), get: vi.fn(async () => structuredClone(simpleDraftFixture)), putIfNewer: vi.fn(), reserveTargetId: vi.fn(), removeIfRevision: remove, invalidateByPatient: vi.fn(), listRecoverableByPatient: vi.fn(), listRecoverableByAccount: vi.fn() };
   return { store, dependencies: { accountContext: { requireActive: vi.fn(async () => ({ accountId: 'account-a', account: {} as never })), getActive: vi.fn() }, patientReader: { getById: vi.fn(async () => ({ ...simpleDraftFixture, archivedAt: null } as never)) }, repository: {} as DietRepository, draftStore: store, dietReader: {} as never } };
 }
 

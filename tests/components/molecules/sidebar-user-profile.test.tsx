@@ -47,16 +47,16 @@ describe('SidebarUserProfile', () => {
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
-  it('renders dropdown menu with quick actions and account option when onSave and onOpen are provided', async () => {
-    const onSave = vi.fn();
-    const onOpen = vi.fn();
+  it('renders dropdown menu with backup actions and account option when callbacks are provided', async () => {
+    const onExportBackup = vi.fn();
+    const onRestoreBackup = vi.fn();
     const onOpenAccount = vi.fn();
 
     renderProfile({
       doctorName: 'Dr. Alice',
       doctorRole: 'Nutricionista',
-      onSave,
-      onOpen,
+      onExportBackup,
+      onRestoreBackup,
       onOpenAccount,
     });
 
@@ -66,15 +66,15 @@ describe('SidebarUserProfile', () => {
 
     fireEvent.pointerDown(trigger, { button: 0 });
 
-    const saveItem = await screen.findByRole('menuitem', { name: /Salvar Arquivo Local/i });
-    const openItem = screen.getByRole('menuitem', { name: /Abrir Arquivo \.diet/i });
+    const exportItem = await screen.findByRole('menuitem', { name: /Exportar backup/i });
+    const restoreItem = screen.getByRole('menuitem', { name: /Restaurar backup/i });
     const accountItem = screen.getByRole('menuitem', { name: /Configurações da Conta/i });
 
-    expect(saveItem).toBeInTheDocument();
-    expect(openItem).toBeInTheDocument();
+    expect(exportItem).toBeInTheDocument();
+    expect(restoreItem).toBeInTheDocument();
     expect(accountItem).toBeInTheDocument();
 
-    fireEvent.click(saveItem);
-    expect(onSave).toHaveBeenCalledTimes(1);
+    fireEvent.click(exportItem);
+    expect(onExportBackup).toHaveBeenCalledTimes(1);
   });
 });

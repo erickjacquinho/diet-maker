@@ -1,6 +1,6 @@
 # Decisão 13 — Proteção Local e Backup Simples
 
-- **Status:** Corrigido por orientação explícita do usuário; implementação pendente
+- **Status:** Corrigido e implementado no fluxo de backup manual simples
 - **Data:** 2026-08-30
 - **Escopo:** Limites de proteção da V1, sem criptografia e sem senha de backup
 
@@ -53,3 +53,6 @@ proposta atual.
 **Justificativa:** preservar a solução manual e simples solicitada, mantendo
 apenas validações necessárias para não importar dados inválidos nem apagar a
 base por engano.
+
+Os testes e a evidência do fluxo implementado estão no
+[relatório de validação do SDD de backup](../../specs/12-09-26-backup-manual-simples/validation-report.md).

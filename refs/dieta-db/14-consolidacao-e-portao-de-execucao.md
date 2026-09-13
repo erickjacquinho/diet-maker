@@ -1,6 +1,6 @@
 # Decisão 14 — Consolidação e Divisão da Implementação em SDDs
 
-- **Status:** Etapas 1–4 implementadas e validadas; etapas 5–6 pendentes
+- **Status:** Etapas 1–6 implementadas e validadas
 - **Data:** 2026-08-30
 - **Escopo:** Entregas separadas da persistência local, sem ampliar a proposta
 
@@ -24,9 +24,8 @@ existem em `specs/` e possuem evidências de implementação/validação. A Deci
 por fase interna.
 
 A tabela abaixo registra a ordem e a situação das etapas. Os números indicam
-ordem de trabalho, não IDs definitivos de pasta. As etapas 1–4 possuem
-`spec.md`, `plan.md`, `tasks.md` e validação; as etapas 5–6 ainda não foram
-especificadas.
+ordem de trabalho, não IDs definitivos de pasta. As etapas 1–6 possuem
+`spec.md`, `plan.md`, `tasks.md` e validação.
 
 ## 3. Divisão em SDDs
 
@@ -36,8 +35,8 @@ especificadas.
 | 2 | Conta e pacientes | Persistir perfil local e cadastro de pacientes, incluindo edição e arquivamento. Preservar o contrato de restauração sem criar tela administrativa futura. Criar somente contratos/tabelas necessários, sem migrar dados de teste. **Concluída e validada.** | 1 aprovado |
 | 3 | Dietas: rascunho, salvamento e histórico | Entregar o primeiro fluxo vertical completo da Decisão 01 e as fases da Decisão 04, usando TACO e preservando modos/variações já existentes. Validar autosave, vigência, snapshots e cópia. **Implementada e validada.** | 2 |
 | 4 | Biblioteca reutilizável | Persistir alimentos customizados, receitas e refeições prontas e integrá-los à prescrição, sem referências que alterem dietas já salvas. **Concluída e validada no portão.** | 3 |
-| 5 | Avaliações e acompanhamento existentes | Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos, sem criar agenda, prontuário ampliado ou novos fluxos clínicos. **Pendente.** | 3 |
-| 6 | Backup manual simples | Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional. Sem senha, criptografia, automação ou mesclagem. **Pendente.** | 4 e 5 |
+| 5 | Avaliações e acompanhamento existentes | Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos, sem criar agenda, prontuário ampliado ou novos fluxos clínicos. **Concluída e validada.** | 3 |
+| 6 | Backup manual simples | Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional. Sem senha, criptografia, automação ou mesclagem. **Concluída e validada.** | 4 e 5 |
 
 Cada SDD deve ter seus próprios requisitos, plano, tarefas e validação. Os
 testes acompanham a entrega a que pertencem; não há uma feature separada de
