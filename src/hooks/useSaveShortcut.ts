@@ -30,6 +30,8 @@ export interface UseSaveShortcutOptions {
    * Modais costumam usar prioridade 10 ou mais sobre a página (prioridade 0).
    */
   priority?: number;
+  /** Impede uma nova submissão enquanto a confirmação anterior está em andamento. */
+  busy?: boolean;
 }
 
 // Registro global de handlers ativos ordenados por prioridade e tempo de montagem
@@ -82,12 +84,15 @@ export function useSaveShortcut({
   preventDefault = true,
   stopPropagation = true,
   priority = 0,
+  busy = false,
 }: UseSaveShortcutOptions) {
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
 
   const formRefInternal = useRef(formRef);
   formRefInternal.current = formRef;
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
 
   useEffect(() => {
     if (!enabled) return;
@@ -95,10 +100,15 @@ export function useSaveShortcut({
     const handlerId = Symbol('save-shortcut');
 
     const handleSave = () => {
+      if (busyRef.current) return;
       if (formRefInternal.current?.current) {
         formRefInternal.current.current.requestSubmit();
       } else if (onSaveRef.current) {
-        onSaveRef.current();
+        const result = onSaveRef.current();
+        if (result && typeof result.then === 'function') {
+          busyRef.current = true;
+          void result.finally(() => { busyRef.current = false; });
+        }
       }
     };
 

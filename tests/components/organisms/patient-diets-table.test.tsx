@@ -131,7 +131,6 @@ describe('PatientDietsTable', () => {
         patientId="p1"
         diets={mockDiets}
         onOpenReadOnlyDiet={handleOpen}
-        onDeleteDiet={vi.fn()}
       />,
     );
 
@@ -145,7 +144,7 @@ describe('PatientDietsTable', () => {
     expect(viewButton).toHaveAttribute('title', 'Ver cardápio completo da dieta Plano cutting agosto');
     expect(viewButton).not.toHaveTextContent('Ver Cardápio');
     expect(within(simpleRow).getByRole('link', { name: 'Editar Plano cutting agosto no Construtor de Dietas' })).toBeInTheDocument();
-    expect(within(simpleRow).getByRole('button', { name: 'Excluir prescrição Plano cutting agosto' })).toBeInTheDocument();
+    expect(within(simpleRow).queryByRole('button', { name: 'Excluir prescrição Plano cutting agosto' })).not.toBeInTheDocument();
 
     fireEvent.click(viewButton);
     expect(handleOpen).toHaveBeenCalledWith(mockDiets[0]);
@@ -322,19 +321,16 @@ describe('PatientDietsTable', () => {
 
   it('isolates expansion from prescription actions and keeps simple diets without cycle details', () => {
     const handleOpen = vi.fn();
-    const handleDelete = vi.fn();
     const { unmount } = render(
       <PatientDietsTable
         patientId="p1"
         diets={[cycleDiet]}
         onOpenReadOnlyDiet={handleOpen}
-        onDeleteDiet={handleDelete}
       />,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver variações de Plano ciclo agosto' }));
     expect(handleOpen).not.toHaveBeenCalled();
-    expect(handleDelete).not.toHaveBeenCalled();
 
     unmount();
     render(<PatientDietsTable patientId="p1" diets={mockDiets} onOpenReadOnlyDiet={handleOpen} />);
@@ -354,22 +350,8 @@ describe('PatientDietsTable', () => {
     expect(handleOpen).toHaveBeenCalledWith(mockDiets[0]);
   });
 
-  it('triggers onDeleteDiet when delete button is clicked', () => {
-    const handleDelete = vi.fn();
-    render(
-      <PatientDietsTable
-        patientId="p1"
-        diets={mockDiets}
-        onOpenReadOnlyDiet={vi.fn()}
-        onDeleteDiet={handleDelete}
-      />,
-    );
-
-    const deleteButtons = screen.getAllByRole('button', { name: /Excluir prescrição/ });
-    expect(deleteButtons).toHaveLength(2);
-
-    fireEvent.click(deleteButtons[0]);
-    expect(handleDelete).toHaveBeenCalledTimes(1);
-    expect(handleDelete).toHaveBeenCalledWith(mockDiets[0]);
+  it('does not expose destructive actions for any prescription', () => {
+    render(<PatientDietsTable patientId="p1" diets={mockDiets} onOpenReadOnlyDiet={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /Excluir prescrição/ })).not.toBeInTheDocument();
   });
 });

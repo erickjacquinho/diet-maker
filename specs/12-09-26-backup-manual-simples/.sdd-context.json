@@ -1,0 +1,6 @@
+{
+  "task": "Criar o SDD da Fase 6 da migração de persistência: backup manual simples, com exportação dos dados confirmados da Conta para arquivo .nutridiet e restauração por substituição validada e transacional, sem senha, criptografia, automação ou mesclagem. A Fase 6 depende das etapas 4 e 5 concluídas.",
+  "slug": "backup-manual-simples",
+  "feature_dir": "specs/12-09-26-backup-manual-simples",
+  "date": "2026-09-12"
+}

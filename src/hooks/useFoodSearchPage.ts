@@ -1,15 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
-import {
-  getAllFoods,
-  toggleFavoriteFood,
-  addCustomFood,
-  updateCustomFood,
-  deleteCustomFood,
-  scoreFoodItem,
-  FoodItem,
-} from '@/lib/tacoStore';
+import { listTacoFoodItems, toggleFavoriteFood, scoreFoodItem, toFoodItem, type FoodItem } from '@/lib/library-ui-adapter';
+import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
 import { CustomFoodPayload } from '@/components/molecules/CustomFoodModal';
+
+function customFoodInputFromPayload(payload: CustomFoodPayload) {
+  const match = payload.name.match(/^(.*?)(?:\s*\((\d+(?:\.\d+)?)(g|ml|un|unit)\))?$/i);
+  const unit = (match?.[3]?.toLowerCase() === 'un' ? 'unit' : match?.[3]?.toLowerCase() || 'g') as 'g' | 'ml' | 'unit';
+  const foodState = /cozid/i.test(payload.preparo) ? 'COOKED' : /cru|innatura/i.test(payload.preparo) ? 'RAW' : /assad|grelhad|frit/i.test(payload.preparo) ? 'PREPARED' : 'AS_SOLD';
+  return {
+    name: match?.[1]?.trim() || payload.name.trim(), description: '', brand: undefined, measurementBasis: unit === 'ml' ? 'PER_100ML' as const : unit === 'unit' ? 'PER_UNIT' as const : 'PER_100G' as const,
+    foodState: foodState as 'RAW' | 'COOKED' | 'PREPARED' | 'AS_SOLD', servingReference: match?.[2] ? { quantity: match[2], unit } : undefined,
+    referenceNutrients: { protein: String(payload.proteinG), carbs: String(payload.carbsG), fat: String(payload.fatsG), fiber: String(payload.fiberG) },
+  };
+}
 
 export function useFoodSearchPage() {
   const [foods, setFoods] = useState<FoodItem[]>([]);
@@ -25,15 +29,32 @@ export function useFoodSearchPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
+  const [pendingDeleteCustomFoodId, setPendingDeleteCustomFoodId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const refreshFoods = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const application = await getBrowserLibraryApplication();
+      const customFoods = await application.listCustomFoods();
+      setFoods([...listTacoFoodItems(), ...customFoods.map(toFoodItem)]);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'A biblioteca de alimentos não pôde ser carregada.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setFoods(getAllFoods());
-  }, []);
+    void refreshFoods();
+  }, [refreshFoods]);
 
   const handleToggleFavorite = useCallback((id: string) => {
     toggleFavoriteFood(id);
-    setFoods(getAllFoods());
-  }, []);
+    void refreshFoods();
+  }, [refreshFoods]);
 
   const handleOpenCreateModal = useCallback(() => {
     setEditingFoodId(null);
@@ -45,21 +66,49 @@ export function useFoodSearchPage() {
     setIsModalOpen(true);
   }, []);
 
-  const handleSaveCustomFood = useCallback((foodId: string | null, foodPayload: CustomFoodPayload) => {
-    if (foodId) updateCustomFood(foodId, foodPayload);
-    else addCustomFood(foodPayload);
-    setFoods(getAllFoods());
-    setIsModalOpen(false);
-    setEditingFoodId(null);
-  }, []);
-
-  const handleDeleteCustomFood = useCallback((id: string) => {
-    if (confirm('Tem certeza que deseja excluir este alimento customizado?')) {
-      deleteCustomFood(id);
-      setFoods(getAllFoods());
+  const handleSaveCustomFood = useCallback(async (foodId: string | null, foodPayload: CustomFoodPayload) => {
+    try {
+      const application = await getBrowserLibraryApplication();
+      const input = customFoodInputFromPayload(foodPayload);
+      if (foodId) {
+        const current = foods.find((food) => food.id === foodId);
+        await application.updateCustomFood(foodId, current?.libraryVersion ?? 1, input);
+      } else {
+        await application.createCustomFood(input);
+      }
+      await refreshFoods();
       setIsModalOpen(false);
       setEditingFoodId(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'O alimento não pôde ser salvo.');
     }
+  }, [foods, refreshFoods]);
+
+  const handleDeleteCustomFood = useCallback((id: string) => {
+    setPendingDeleteCustomFoodId(id);
+  }, []);
+
+  const handleCancelDeleteCustomFood = useCallback(() => {
+    setPendingDeleteCustomFoodId(null);
+  }, []);
+
+  const handleConfirmDeleteCustomFood = useCallback(async () => {
+    if (pendingDeleteCustomFoodId === null) return;
+    try {
+      const current = foods.find((food) => food.id === pendingDeleteCustomFoodId);
+      const application = await getBrowserLibraryApplication();
+      await application.deleteCustomFood(pendingDeleteCustomFoodId, current?.libraryVersion ?? 1);
+      await refreshFoods();
+      setIsModalOpen(false);
+      setEditingFoodId(null);
+      setPendingDeleteCustomFoodId(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'O alimento não pôde ser excluído.');
+    }
+  }, [foods, pendingDeleteCustomFoodId, refreshFoods]);
+
+  const handleDeleteCustomFoodDialogChange = useCallback((open: boolean) => {
+    if (!open) setPendingDeleteCustomFoodId(null);
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -152,6 +201,12 @@ export function useFoodSearchPage() {
     handleOpenEditModal,
     handleSaveCustomFood,
     handleDeleteCustomFood,
+    isDeleteCustomFoodConfirmationOpen: pendingDeleteCustomFoodId !== null,
+    handleCancelDeleteCustomFood,
+    handleConfirmDeleteCustomFood,
+    handleDeleteCustomFoodDialogChange,
     resetFilters,
+    isLoading,
+    errorMessage,
   };
 }

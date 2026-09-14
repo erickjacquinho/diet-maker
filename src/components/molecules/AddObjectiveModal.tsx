@@ -17,7 +17,7 @@ import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 export interface AddObjectiveModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddObjective: (newObjective: string) => void;
+  onAddObjective: (newObjective: string) => void | Promise<void>;
 }
 
 export function AddObjectiveModal({
@@ -26,6 +26,8 @@ export function AddObjectiveModal({
   onAddObjective,
 }: AddObjectiveModalProps) {
   const [input, setInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   useSaveShortcut({
@@ -35,15 +37,27 @@ export function AddObjectiveModal({
   });
 
   useEffect(() => {
-    if (open) setInput('');
+    if (open) {
+      setInput('');
+      setFormError(null);
+      setIsSubmitting(false);
+    }
   }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed) return;
-    onAddObjective(trimmed);
-    onOpenChange(false);
+    setIsSubmitting(true);
+    setFormError(null);
+    try {
+      await onAddObjective(trimmed);
+      onOpenChange(false);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Não foi possível salvar o objetivo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -73,13 +87,17 @@ export function AddObjectiveModal({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="mt-1"
+              aria-invalid={Boolean(formError)}
+              aria-describedby={formError ? 'objective-description-error' : undefined}
             />
+            {formError && <p id="objective-description-error" role="alert" className="text-style-legal text-error mt-1">{formError}</p>}
           </div>
 
           <div className="flex gap-2 pt-2 border-t border-border-subtle">
             <Button
               type="button"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
               variant="secondary"
               size="compact"
               className="flex-1"
@@ -91,10 +109,11 @@ export function AddObjectiveModal({
               variant="primary"
               size="compact"
               className="flex-1"
+              disabled={isSubmitting}
               aria-keyshortcuts="Control+s Meta+s"
               title="Adicionar Objetivo (Ctrl+S)"
             >
-              Adicionar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+              {isSubmitting ? 'Salvando objetivo…' : <>Adicionar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></>}
             </Button>
           </div>
         </form>

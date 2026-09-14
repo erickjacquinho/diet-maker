@@ -8,7 +8,6 @@ import {
   formatDateKey,
   normalizeDateKey,
 } from '@/lib/patientListView';
-import { getPatientRecordHistory } from '@/lib/patientsStore';
 import {
   PATIENT_LIST_ASSESSMENTS,
   PATIENT_LIST_FIXTURES,
@@ -73,16 +72,6 @@ describe('patient list history projection', () => {
     expect(history.bodyFatLabel).toBe('Sem avaliação');
   });
 
-  it('reads assessment and diet history without mutating the patient entity', () => {
-    const patientId = PATIENT_LIST_FIXTURES.bodyFatHistory.id;
-    localStorage.setItem(`nutridiet_assessments_${patientId}`, JSON.stringify(PATIENT_LIST_ASSESSMENTS[patientId]));
-    localStorage.setItem(`nutridiet_diets_${patientId}`, JSON.stringify([{ id: 'diet-1' }]));
-
-    expect(getPatientRecordHistory(patientId)).toEqual({
-      assessments: PATIENT_LIST_ASSESSMENTS[patientId],
-      hasDiet: true,
-    });
-  });
 });
 
 describe('patient list ordering and filtering', () => {
@@ -142,6 +131,13 @@ describe('patient list ordering and filtering', () => {
     expect(filterPatients(patients, 'hoje')).toHaveLength(1);
     expect(filterPatients(patients, 'cutting')).toHaveLength(1);
     expect(filterPatients(patients, 'inexistente')).toEqual([]);
+  });
+
+  it('excludes archived patients from active projections', () => {
+    const archived = { ...PATIENT_LIST_FIXTURES.today, archivedAt: '2026-08-20T09:00:00.000Z' };
+
+    expect(filterPatients([archived], '')).toEqual([]);
+    expect(buildPatientListRows([archived], PATIENT_LIST_TODAY)).toEqual([]);
   });
 
   it('formats overdue, today, future and no-event statuses as text', () => {

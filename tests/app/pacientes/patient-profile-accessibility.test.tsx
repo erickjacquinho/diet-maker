@@ -2,10 +2,20 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
+import { NextEventModal } from '@/components/molecules/NextEventModal';
 import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import type { PatientViewModel } from '@/lib/patientViewModel';
 
 const push = vi.fn();
-const router = { push, replace: vi.fn() };
+const router = {
+  push,
+  replace: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+};
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: PATIENT_PROFILE_FIXTURES.patient.id }),
@@ -18,14 +28,65 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+const patient = {
+  ...PATIENT_PROFILE_FIXTURES.patient,
+  accountId: 'local-account',
+  version: 1,
+  archivedAt: null,
+} satisfies PatientViewModel;
+
+function profileState() {
+  return {
+    patientId: patient.id,
+    patient,
+    profileError: null,
+    isProfileLoading: false,
+    confirmedPlans: [],
+    bodyAssessments: [],
+    activePlan: null,
+    latestAssessment: null,
+    nextEventSummary: null,
+    whatsappUrl: null,
+    availableObjectives: ['Cutting'],
+    isDeleteModalOpen: false,
+    setIsDeleteModalOpen: vi.fn(),
+    isEditModalOpen: false,
+    setIsEditModalOpen: vi.fn(),
+    isEditAssessmentOpen: false,
+    setIsEditAssessmentOpen: vi.fn(),
+    editingAssessment: null,
+    assessmentMode: 'edit' as const,
+    isNextEventModalOpen: false,
+    setIsNextEventModalOpen: vi.fn(),
+    isAddObjectiveModalOpen: false,
+    setIsAddObjectiveModalOpen: vi.fn(),
+    objectiveToApply: undefined,
+    setObjectiveToApply: vi.fn(),
+    selectedReadOnlyDiet: null,
+    isReadOnlyDietModalOpen: false,
+    setIsReadOnlyDietModalOpen: vi.fn(),
+    handleOpenReadOnlyDietModal: vi.fn(),
+    handleOpenEditAssessment: vi.fn(),
+    handleOpenCreateAssessment: vi.fn(),
+    handleSaveAssessment: vi.fn(),
+    handleSaveNextEvent: vi.fn(),
+    handleClearNextEvent: vi.fn(),
+    handleAddCustomObjective: vi.fn(),
+    handleSavePatient: vi.fn(),
+    handleDeletePatient: vi.fn(),
+    router,
+  } as ReturnType<typeof usePatientProfilePage>;
+}
+
 describe('PatientDetailPage accessibility', () => {
   beforeEach(() => {
-    localStorage.clear();
     push.mockClear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(profileState());
   });
 
   it('exposes current context actions and empty states with accessible names', async () => {
@@ -43,7 +104,7 @@ describe('PatientDetailPage accessibility', () => {
       'bg-surface',
       'text-text-primary',
     );
-    expect(screen.getByRole('button', { name: 'Excluir Paciente' })).toHaveClass(
+    expect(screen.getByRole('button', { name: 'Arquivar Paciente' })).toHaveClass(
       'border-error-border',
       'bg-surface',
       'text-error',
@@ -57,10 +118,7 @@ describe('PatientDetailPage accessibility', () => {
 
 
   it('keeps the follow-up dialog fields labelled and keyboard-addressable', async () => {
-    render(<PatientDetailPage />);
-
-    const openButton = await screen.findByRole('button', { name: 'Definir acompanhamento' });
-    fireEvent.click(openButton);
+    render(<NextEventModal open nextEvent={null} onOpenChange={vi.fn()} onSave={vi.fn()} onClear={vi.fn()} />);
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
@@ -81,5 +139,20 @@ describe('PatientDetailPage accessibility', () => {
     expect(cancelButton.parentElement).not.toHaveClass('space-x-2');
 
     await waitFor(() => expect(document.activeElement).toBeTruthy());
+  });
+
+  it('removes mutation and new-clinical-record controls for an archived patient', () => {
+    mockUsePatientProfilePage.mockReturnValue({
+      ...profileState(),
+      patient: { ...patient, archivedAt: '2026-08-30T10:00:00.000Z' },
+    } as ReturnType<typeof usePatientProfilePage>);
+    render(<PatientDetailPage />);
+
+    expect(screen.getByText(/Este paciente está arquivado/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Editar Cadastro' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Arquivar Paciente' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Definir acompanhamento' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Nova Dieta' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Nova Avaliação' })).not.toBeInTheDocument();
   });
 });

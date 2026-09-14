@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const push = vi.fn();
 const router = { push, replace: vi.fn() };
@@ -18,29 +20,31 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+
 describe('PatientDetailPage current plan', () => {
   beforeEach(() => {
-    localStorage.clear();
     push.mockClear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
   it('shows a compact summary and a details action when a diet is active', async () => {
-    localStorage.setItem(
-      `nutridiet_diets_${PATIENT_PROFILE_FIXTURES.patient.id}`,
-      JSON.stringify([{
-        id: 'diet-current',
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      activePlan: {
+        dietId: 'diet-current',
         name: 'Plano cutting agosto',
-        updatedAt: '2026-08-04',
-        simpleTargetKcal: 2020,
-        simpleTargetProtein: 150,
-        simpleTargetCarbs: 220,
-        simpleTargetFats: 60,
-      }]),
-    );
+        date: '04/08/2026',
+        status: 'Ativa',
+        targetKcal: 2020,
+        proteinG: 150,
+        carbsG: 220,
+        fatsG: 60,
+      },
+    }));
 
     render(<PatientDetailPage />);
 

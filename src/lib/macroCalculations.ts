@@ -1,5 +1,5 @@
 import { calculatePresetCalories } from './presetUtils';
-import type { DietItem, DietMeal, MealTotals } from './dietStore';
+import type { DietItem, DietMeal, MealTotals } from './legacy-diet-types';
 
 export function calculateMealTotals(items: DietItem[]): MealTotals {
   const proteinG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.protein) || 0), 0) * 10) / 10;

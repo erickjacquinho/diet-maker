@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
-import { DietMeal, DietItem } from '@/lib/dietStore';
-import { FoodItem } from '@/lib/tacoStore';
+import { DietMeal, DietItem } from '@/lib/legacy-diet-types';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import {
   appendMealVariation,
   cloneMealGroupWithFreshIds,
@@ -12,10 +12,25 @@ import {
 } from '@/lib/mealVariations';
 import { toast } from 'sonner';
 
-const createPastedMealItems = (items: DietItem[]) => items.map((item, index) => ({
-  ...item,
-  id: `item-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
-}));
+const createPastedMealItems = (
+  items: DietItem[],
+  createId: (prefix: string) => string,
+  occupiedIds: Set<string>,
+) => items.map((item) => {
+  let itemId = createId('item');
+  while (occupiedIds.has(itemId)) itemId = createId('item');
+  occupiedIds.add(itemId);
+  return { ...item, id: itemId };
+});
+
+const getOccupiedItemIds = (meals: DietMeal[]): Set<string> => new Set(
+  meals
+    .flatMap((meal) => [
+      ...meal.items.map((item) => item.id),
+      ...(meal.variations || []).flatMap((variation) => variation.items.map((item) => item.id)),
+    ])
+    .filter((id): id is string => Boolean(id))
+);
 
 export function useDietMealActions({
   foodSearchMealIndex,
@@ -30,6 +45,8 @@ export function useDietMealActions({
   getActiveMealVariationId?: (mealId: string, meal?: DietMeal) => string;
   onSelectMealVariation?: (mealId: string, variationId: string) => void;
 }) {
+  const idSequence = useRef(0);
+  const createId = useCallback((prefix: string) => `${prefix}-${++idSequence.current}`, []);
   const [copiedMealItems, setCopiedMealItems] = useState<DietItem[] | null>(null);
   const lastDeletedItemRef = useRef<{
     mealId: string;
@@ -50,17 +67,19 @@ export function useDietMealActions({
   );
 
   const handleAddMeal = useCallback(() => {
+    const newMealId = createId('meal');
     updateActiveMeals((prev) => [
       ...prev,
       {
-        id: `meal-${Date.now()}`,
+        id: newMealId,
         name: `Refeição ${prev.length + 1}`,
         time: '12:00',
         items: [],
       },
     ]);
     toast.success('Nova refeição adicionada');
-  }, [updateActiveMeals]);
+    return newMealId;
+  }, [createId, updateActiveMeals]);
 
   const handleRemoveMeal = useCallback(
     (mealId: string) => {
@@ -76,7 +95,7 @@ export function useDietMealActions({
           items: variation.items.map((item) => ({ ...item })),
         })),
       };
-      const deletionToken = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const deletionToken = createId('delete-meal');
       lastDeletedMealRef.current = {
         meal: deletedMeal,
         index: mealIndex,
@@ -104,7 +123,7 @@ export function useDietMealActions({
         },
       });
     },
-    [currentMeals, updateActiveMeals]
+    [createId, currentMeals, updateActiveMeals]
   );
 
   const handleUpdateMealHeader = useCallback(
@@ -122,7 +141,7 @@ export function useDietMealActions({
 
       const newItems: DietItem[] = itemsList.map((item, index) => ({
         ...item,
-        id: `item-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
+        id: createId('item'),
         quantityGrams: item.quantityGrams || item.grams || 100,
         protein: item.protein ?? item.proteinG ?? 0,
         carbs: item.carbs ?? item.carbsG ?? 0,
@@ -143,7 +162,7 @@ export function useDietMealActions({
         toast.success(`${newItems.length} alimentos adicionados à refeição`);
       }
     },
-    [foodSearchMealIndex, resolveActiveId, updateActiveMeals]
+    [createId, foodSearchMealIndex, resolveActiveId, updateActiveMeals]
   );
 
   const handleUpdateItemGram = useCallback(
@@ -226,7 +245,7 @@ export function useDietMealActions({
 
       if (!item || !meal) return;
 
-      const deletionToken = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const deletionToken = createId('delete-item');
       lastDeletedItemRef.current = {
         mealId,
         item: { ...item },
@@ -266,7 +285,7 @@ export function useDietMealActions({
         },
       });
     },
-    [currentMeals, resolveActiveId, updateActiveMeals]
+    [createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handleDuplicateMeal = useCallback(
@@ -308,7 +327,7 @@ export function useDietMealActions({
     (mealId: string) => {
       if (!copiedMealItems || copiedMealItems.length === 0) return;
 
-      const pastedItems = createPastedMealItems(copiedMealItems);
+      const pastedItems = createPastedMealItems(copiedMealItems, createId, getOccupiedItemIds(currentMeals));
 
       updateActiveMeals((prev) =>
         prev.map((meal) => (
@@ -320,7 +339,7 @@ export function useDietMealActions({
 
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
-    [copiedMealItems, resolveActiveId, updateActiveMeals]
+    [copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handlePasteMealAndReplace = useCallback(
@@ -332,7 +351,7 @@ export function useDietMealActions({
 
       const activeVariationId = resolveActiveId(targetMeal);
 
-      const pastedItems = createPastedMealItems(copiedMealItems);
+      const pastedItems = createPastedMealItems(copiedMealItems, createId, getOccupiedItemIds(currentMeals));
       updateActiveMeals((prev) =>
         prev.map((meal) => (
           meal.id === mealId
@@ -343,7 +362,7 @@ export function useDietMealActions({
 
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} e substituído${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
-    [copiedMealItems, currentMeals, resolveActiveId, updateActiveMeals]
+    [copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handleDuplicateItem = useCallback(
@@ -363,7 +382,7 @@ export function useDietMealActions({
             const nextItems = [...items];
             nextItems.splice(sourceIndex + 1, 0, {
               ...sourceItem,
-              id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              id: createId('item'),
             });
             return nextItems;
           });
@@ -374,7 +393,7 @@ export function useDietMealActions({
         toast.success(`"${duplicatedItemName}" duplicado na refeição`);
       }
     },
-    [resolveActiveId, updateActiveMeals]
+    [createId, resolveActiveId, updateActiveMeals]
   );
 
   const handleReorderItems = useCallback(

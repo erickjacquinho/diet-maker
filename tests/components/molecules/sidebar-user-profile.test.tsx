@@ -22,7 +22,8 @@ describe('SidebarUserProfile', () => {
       name: 'Abrir menu de conta de Dr. Alice',
     });
 
-    fireEvent.click(accountButton);
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Configurações' }));
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
@@ -42,22 +43,24 @@ describe('SidebarUserProfile', () => {
       name: 'Abrir menu de conta de Dr. Alice',
     });
 
-    fireEvent.keyDown(accountButton, { key: 'Enter' });
-    fireEvent.click(accountButton);
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Configurações' }));
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
-  it('renders dropdown menu with quick actions and account option when onSave and onOpen are provided', async () => {
-    const onSave = vi.fn();
-    const onOpen = vi.fn();
+  it('renders dropdown menu with backup actions and account option when callbacks are provided', async () => {
+    const onExportBackup = vi.fn();
+    const onRestoreBackup = vi.fn();
     const onOpenAccount = vi.fn();
+    const onSignOut = vi.fn();
 
     renderProfile({
       doctorName: 'Dr. Alice',
       doctorRole: 'Nutricionista',
-      onSave,
-      onOpen,
+      onExportBackup,
+      onRestoreBackup,
       onOpenAccount,
+      onSignOut,
     });
 
     const trigger = screen.getByRole('button', {
@@ -66,15 +69,19 @@ describe('SidebarUserProfile', () => {
 
     fireEvent.pointerDown(trigger, { button: 0 });
 
-    const saveItem = await screen.findByRole('menuitem', { name: /Salvar Arquivo Local/i });
-    const openItem = screen.getByRole('menuitem', { name: /Abrir Arquivo \.diet/i });
-    const accountItem = screen.getByRole('menuitem', { name: /Configurações da Conta/i });
+    const exportItem = await screen.findByRole('menuitem', { name: /Exportar backup/i });
+    const restoreItem = screen.getByRole('menuitem', { name: /Importar backup/i });
+    const overviewItem = screen.getByRole('menuitem', { name: 'Visão geral' });
+    const accountItem = screen.getByRole('menuitem', { name: 'Configurações' });
+    const signOutItem = screen.getByRole('menuitem', { name: 'Sair' });
 
-    expect(saveItem).toBeInTheDocument();
-    expect(openItem).toBeInTheDocument();
+    expect(exportItem).toBeInTheDocument();
+    expect(restoreItem).toBeInTheDocument();
+    expect(overviewItem).toBeInTheDocument();
     expect(accountItem).toBeInTheDocument();
+    expect(signOutItem).toBeInTheDocument();
 
-    fireEvent.click(saveItem);
-    expect(onSave).toHaveBeenCalledTimes(1);
+    fireEvent.click(exportItem);
+    expect(onExportBackup).toHaveBeenCalledTimes(1);
   });
 });

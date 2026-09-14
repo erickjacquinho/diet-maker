@@ -46,9 +46,9 @@ export function ConsultationHistoryRow({
 
   return (
     <TableRow
-      className={`border-l-4 transition-colors ${
+      className={`border-l transition-colors ${
         isActive
-          ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/50'
+          ? 'border-l-primary bg-primary-soft/30 hover:bg-primary-soft/50'
           : 'border-l-transparent hover:bg-surface-hover'
       }`}
     >

@@ -3,9 +3,9 @@
   MealCardContainerProps,
 } from '../organisms';
 import {
-  DietModeSwitcherProps,
   MacroMetricCardProps,
 } from '../molecules';
+import type { DietModeSwitcherProps } from '../organisms/diet/DietModeSwitcher';
 
 export interface DietBuilderTemplateProps {
   patient?: {
@@ -51,6 +51,11 @@ export interface DietBuilderTemplateProps {
   onWhatsAppShare?: () => void;
   onExportPDF?: () => void;
   onSaveDiet?: () => void;
+  onDiscardDraft?: () => void | Promise<void>;
+  canDiscardDraft?: boolean;
+  saveStatus?: 'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending';
+  saveError?: string;
+  onRetrySave?: () => void;
   onBackClick?: () => void;
   carbCyclingVariations?: any[];
   activeVariationId?: string;

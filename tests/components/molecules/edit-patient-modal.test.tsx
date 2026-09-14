@@ -55,7 +55,7 @@ describe('EditPatientModal', () => {
     expect(objectiveListbox).toHaveClass('z-modal');
   });
 
-  it('submits and saves patient when Ctrl+S is pressed', () => {
+  it('submits and saves patient when Ctrl+S is pressed', async () => {
     const onSave = vi.fn();
     const onOpenChange = vi.fn();
 
@@ -79,8 +79,8 @@ describe('EditPatientModal', () => {
 
     window.dispatchEvent(event);
 
-    expect(onSave).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
   });
 
   it('updates marital status and saves correctly on form submission', async () => {
@@ -109,12 +109,80 @@ describe('EditPatientModal', () => {
     const submitBtn = screen.getByRole('button', { name: /Salvar Alterações/i });
     fireEvent.click(submitBtn);
 
-    expect(onSave).toHaveBeenCalledWith(
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
         name: PATIENT_PROFILE_FIXTURES.patient.name,
         maritalStatus: 'Comprometido(a)',
       }),
+    ));
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+  });
+
+  it('keeps the dirty draft open when the persistence operation fails', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Falha recuperável'));
+    const onOpenChange = vi.fn();
+
+    render(
+      <EditPatientModal
+        open
+        patient={PATIENT_PROFILE_FIXTURES.patient}
+        objectives={[]}
+        onOpenChange={onOpenChange}
+        onSave={onSave}
+        onRequestAddObjective={vi.fn()}
+      />,
     );
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+
+    const name = screen.getByRole('textbox', { name: 'Nome Completo do Paciente' });
+    fireEvent.change(name, { target: { value: 'Nome em conflito' } });
+    fireEvent.click(screen.getByRole('button', { name: /Salvar Alterações/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Falha recuperável');
+    expect(name).toHaveValue('Nome em conflito');
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
+
+  it('asks before discarding dirty values through the cancel action', async () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <EditPatientModal
+        open
+        patient={PATIENT_PROFILE_FIXTURES.patient}
+        objectives={[]}
+        onOpenChange={onOpenChange}
+        onSave={vi.fn()}
+        onRequestAddObjective={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome Completo do Paciente' }), { target: { value: 'Rascunho' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Descartar alterações?' })).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Não' }));
+    expect(screen.getByRole('textbox', { name: 'Nome Completo do Paciente' })).toHaveValue('Rascunho');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('connects invalid name feedback with aria-describedby', async () => {
+    render(
+      <EditPatientModal
+        open
+        patient={PATIENT_PROFILE_FIXTURES.patient}
+        objectives={[]}
+        onOpenChange={vi.fn()}
+        onSave={vi.fn()}
+        onRequestAddObjective={vi.fn()}
+      />,
+    );
+
+    const name = screen.getByRole('textbox', { name: 'Nome Completo do Paciente' });
+    fireEvent.change(name, { target: { value: '   ' } });
+    fireEvent.click(screen.getByRole('button', { name: /Salvar Alterações/i }));
+
+    await waitFor(() => expect(name).toHaveAttribute('aria-describedby', 'edit-patient-name-error'));
+    expect(screen.getByText('Informe o nome completo.')).toBeInTheDocument();
   });
 });

@@ -7,16 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SecondaryActionButton, SelectField } from '@/components/atoms';
-import { DEFAULT_OBJECTIVES, DEFAULT_MARITAL_STATUSES, type Patient } from '@/lib/patientsStore';
+import { DEFAULT_OBJECTIVE_LABELS } from '@/lib/domain/objective-option';
+import { DEFAULT_MARITAL_STATUS_LABELS } from '@/lib/domain/patient';
+import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
+import type { PatientViewModel } from '@/lib/patientViewModel';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface EditPatientModalProps {
   open: boolean;
-  patient: Patient | null;
+  patient: PatientViewModel | null;
   objectives: string[];
   onOpenChange: (open: boolean) => void;
-  onSave: (patient: Patient) => void;
+  onSave: (patient: PatientViewModel) => void | Promise<void>;
   onRequestAddObjective: () => void;
   objectiveToApply?: string;
 }
@@ -30,8 +33,11 @@ export function EditPatientModal({
   onRequestAddObjective,
   objectiveToApply,
 }: EditPatientModalProps) {
-  const [draft, setDraft] = useState<Patient | null>(patient);
+  const [draft, setDraft] = useState<PatientViewModel | null>(patient);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   useSaveShortcut({
@@ -42,7 +48,7 @@ export function EditPatientModal({
 
   useEffect(() => {
     if (open && patient) {
-      setDraft({
+        setDraft({
         ...patient,
         maritalStatus: patient.maritalStatus || 'Solteiro(a)',
         whatsapp: formatWhatsappContact(patient.whatsapp) || undefined,
@@ -70,14 +76,26 @@ export function EditPatientModal({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!draft || !draft.name.trim()) return;
-    onSave({
+    if (!draft || !draft.name.trim()) {
+      setFieldErrors({ name: 'Informe o nome completo.' });
+      return;
+    }
+    setIsSubmitting(true);
+    setFormError(null);
+    setFieldErrors({});
+    void Promise.resolve(onSave({
       ...draft,
       name: draft.name.trim(),
       maritalStatus: draft.maritalStatus || 'Solteiro(a)',
       whatsapp: formatWhatsappContact(draft.whatsapp) || undefined,
+    })).then(() => {
+      onOpenChange(false);
+    }).catch((error: unknown) => {
+      if (error instanceof PatientApplicationError) setFieldErrors(error.fieldErrors ?? {});
+      setFormError(error instanceof Error ? error.message : 'Não foi possível salvar as alterações.');
+    }).finally(() => {
+      setIsSubmitting(false);
     });
-    onOpenChange(false);
   };
 
   const confirmDiscard = () => {
@@ -105,7 +123,8 @@ export function EditPatientModal({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="edit-patient-name" className={textStyle('field-label')}>Nome Completo do Paciente</label>
-                  <Input id="edit-patient-name" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className="mt-1" />
+                  <Input id="edit-patient-name" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className="mt-1" aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? 'edit-patient-name-error' : undefined} />
+                  {fieldErrors.name && <p id="edit-patient-name-error" className="text-style-legal text-error mt-1" role="alert">{fieldErrors.name}</p>}
                 </div>
                 <div>
                   <label htmlFor="edit-patient-whatsapp" className={textStyle('field-label')}>WhatsApp</label>
@@ -137,7 +156,7 @@ export function EditPatientModal({
                     value={draft.maritalStatus || 'Solteiro(a)'}
                     onValueChange={(value) => setDraft({ ...draft, maritalStatus: value })}
                     layer="modal"
-                    options={Array.from(new Set([...DEFAULT_MARITAL_STATUSES, draft.maritalStatus].filter(Boolean))).map((status) => ({
+                    options={Array.from(new Set([...DEFAULT_MARITAL_STATUS_LABELS, draft.maritalStatus].filter(Boolean))).map((status) => ({
                       value: status as string,
                       label: status as string,
                     }))}
@@ -169,7 +188,7 @@ export function EditPatientModal({
                       onValueChange={(value) => setDraft({ ...draft, objective: value })}
                       placeholder="Selecione o objetivo"
                       layer="modal"
-                      options={Array.from(new Set([...DEFAULT_OBJECTIVES, ...objectives, draft.objective].filter(Boolean))).map((obj) => ({
+                      options={Array.from(new Set([...DEFAULT_OBJECTIVE_LABELS, ...objectives, draft.objective].filter(Boolean))).map((obj) => ({
                         value: obj as string,
                         label: obj as string,
                       }))}
@@ -179,16 +198,18 @@ export function EditPatientModal({
                 </div>
               </div>
               <DialogFooter className="flex gap-2 pt-2">
-                <Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} className="flex-1">Cancelar</Button>
+                {formError && <p className="text-style-legal text-error flex-1" role="alert">{formError}</p>}
+                <Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} disabled={isSubmitting} className="flex-1">Cancelar</Button>
                 <Button
                   type="submit"
                   variant="primary"
                   size="compact"
                   className="flex-1"
+                  disabled={isSubmitting}
                   aria-keyshortcuts="Control+s Meta+s"
                   title="Salvar Alterações (Ctrl+S)"
                 >
-                  Salvar Alterações <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+                  {isSubmitting ? 'Salvando…' : <>Salvar Alterações <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></>}
                 </Button>
               </DialogFooter>
             </form>

@@ -31,43 +31,43 @@ const columns: DataTableColumnDef<BodyAssessment>[] = [
   {
     id: 'date',
     header: 'Data / Consulta',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-[130px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-32',
     cell: () => null,
   },
   {
     id: 'weight',
     header: 'Peso (kg)',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[100px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-24',
     cell: () => null,
   },
   {
     id: 'bodyFat',
     header: '% Gordura (BF)',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[120px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-28',
     cell: () => null,
   },
   {
     id: 'muscleMass',
     header: 'Massa Magra',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[110px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-28',
     cell: () => null,
   },
   {
     id: 'waist',
     header: 'Cintura',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-[100px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-center min-w-24',
     cell: () => null,
   },
   {
     id: 'evolution',
     header: 'Evolução',
-    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-[130px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 min-w-32',
     cell: () => null,
   },
   {
     id: 'actions',
     header: 'Ações & Detalhes',
-    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-[150px]',
+    headerClassName: 'whitespace-nowrap px-4 py-3 text-right min-w-36',
     cell: () => null,
   },
 ];
@@ -295,16 +295,6 @@ export function PatientAssessmentsTable({
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
   };
-
-  if (assessments.length === 0) {
-    return (
-      <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
-        <p className={textStyle('body-secondary')}>
-          Nenhuma avaliação física registrada para este paciente até o momento.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <DataTable

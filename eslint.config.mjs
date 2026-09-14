@@ -55,6 +55,7 @@ export default [
       "out/**",
       "build/**",
       "dist/**",
+      "**/dist/**",
       "coverage/**",
       "**/*.min.js",
     ],

@@ -1,0 +1,6 @@
+{
+  "task": "Etapa 4 da persistência local: implementar a Biblioteca reutilizável com alimentos customizados, receitas e refeições prontas no banco relacional canônico por Conta. A TACO permanece dataset somente leitura. Substituir os stores legados em localStorage sem migração e sem dual-write. Persistir versões, status ACTIVE/ARCHIVED, snapshots nutricionais e escopo accountId; integrar seleção de receitas/refeições ao DietDraft sem alterar dietas já salvas. Criar o SDD e seus artefatos de planejamento; não implementar código nesta etapa.",
+  "slug": "biblioteca-reutilizavel",
+  "feature_dir": "specs/01-09-26-biblioteca-reutilizavel",
+  "date": "2026-09-01"
+}

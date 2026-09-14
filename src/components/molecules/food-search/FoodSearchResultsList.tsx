@@ -6,7 +6,7 @@ import { Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/components/molecules/DataTable';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
-import { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import { cn } from '@/lib/utils';
 
 export interface FoodSearchResultsListProps {
@@ -73,7 +73,7 @@ export function FoodSearchResultsList({
                   e.stopPropagation();
                   onToggleFavorite?.(food.id);
                 }}
-                className="size-8 shrink-0 whitespace-nowrap p-1 rounded-compact text-text-muted hover:text-warning hover:bg-warning-soft"
+                className="size-8 shrink-0 whitespace-nowrap p-1 rounded-compact text-text-muted hover:bg-transparent hover:text-warning"
               >
                 <Star
                   size={14}

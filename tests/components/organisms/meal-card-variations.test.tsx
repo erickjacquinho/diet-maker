@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MealCardContainer } from '@/components/organisms/MealCardContainer';
 
@@ -19,14 +19,16 @@ const renderMealCard = (overrides: Partial<React.ComponentProps<typeof MealCardC
   );
 
 describe('MealCardContainer meal variations', () => {
-  it('keeps the single-option card unchanged while exposing the add action', () => {
+  it('keeps the single-option card unchanged while exposing the add action in the menu', async () => {
     const onAddVariation = vi.fn();
     renderMealCard({ onAddVariation });
 
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Adicionar variação' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), { button: 0 });
+    const menu = await screen.findByRole('menu');
+    fireEvent.click(within(menu).getByRole('menuitem', { name: 'Nova Variação' }));
     expect(onAddVariation).toHaveBeenCalledTimes(1);
   });
 
@@ -49,7 +51,7 @@ describe('MealCardContainer meal variations', () => {
     expect(onVariationChange).toHaveBeenCalledWith('meal-breakfast::variation-1');
   });
 
-  it('communicates the five-option limit and prevents another addition', () => {
+  it('communicates the five-option limit and prevents another addition', async () => {
     const onAddVariation = vi.fn();
     renderMealCard({
       variationOptions: Array.from({ length: 5 }, (_, index) => ({
@@ -61,17 +63,19 @@ describe('MealCardContainer meal variations', () => {
       variationLimitReached: true,
     });
 
-    const addButton = screen.getByRole('button', { name: 'Adicionar variação' });
-    expect(addButton).toBeDisabled();
+    expect(screen.getAllByRole('tab')).toHaveLength(5);
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), { button: 0 });
+    const menu = await screen.findByRole('menu');
+    const addButton = within(menu).getByRole('menuitem', { name: 'Nova Variação' });
+    expect(addButton).toHaveAttribute('data-disabled');
     expect(addButton).toHaveAttribute('aria-describedby', 'meal-breakfast-variation-limit');
     expect(screen.getByText(/Limite de 5 variações atingido/)).toBeInTheDocument();
-    expect(screen.getAllByRole('tab')).toHaveLength(5);
 
     fireEvent.click(addButton);
     expect(onAddVariation).not.toHaveBeenCalled();
   });
 
-  it('deletes the active option using its generated label', () => {
+  it('places variation actions at the end of the menu using the generated label', async () => {
     const onRemoveVariation = vi.fn();
     renderMealCard({
       variationOptions: [
@@ -82,9 +86,16 @@ describe('MealCardContainer meal variations', () => {
       onRemoveVariation,
     });
 
-    const deleteButton = screen.getByRole('button', { name: 'Excluir Variação 2' });
-    expect(deleteButton).toHaveAttribute('title', 'Excluir Variação 2');
-    fireEvent.click(deleteButton);
+    expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), { button: 0 });
+    const menu = await screen.findByRole('menu');
+    const separators = within(menu).getAllByRole('separator');
+    const deleteItem = within(menu).getByRole('menuitem', { name: 'Excluir Variação' });
+
+    expect(separators).toHaveLength(1);
+    expect(separators[0].compareDocumentPosition(deleteItem) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(deleteItem).toHaveClass('text-text-secondary', 'focus:bg-surface-hover', 'focus:text-text-primary');
+    fireEvent.click(deleteItem);
     expect(onRemoveVariation).toHaveBeenCalledTimes(1);
   });
 });

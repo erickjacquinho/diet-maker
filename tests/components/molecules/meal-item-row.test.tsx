@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MealItemRow } from '@/components/molecules/MealItemRow';
 
 const renderMealRows = () =>
@@ -58,10 +58,37 @@ describe('MealItemRow quantity keyboard navigation', () => {
     const substituteButton = screen.getByRole('button', { name: 'Substituir Arroz' });
     const duplicateButton = screen.getByRole('button', { name: 'Duplicar Arroz' });
 
-    expect(substituteButton).toHaveClass('border-border-subtle');
-    expect(duplicateButton).toHaveClass('border-border-subtle');
+    expect(substituteButton).toHaveClass('border-border-control');
+    expect(duplicateButton).toHaveClass('border-border-control');
     expect(substituteButton.parentElement).toHaveClass('invisible');
     expect(substituteButton.parentElement).toHaveClass('group-hover/row:visible');
     expect(substituteButton.parentElement).toHaveClass('group-focus-within/row:visible');
+  });
+
+  it('clears pointer focus after an action so the row returns to hover-only visibility', () => {
+    const onSubstitute = vi.fn();
+
+    render(
+      <table>
+        <tbody>
+          <MealItemRow
+            name="Arroz"
+            kcal={130}
+            protein={2.5}
+            carbs={28}
+            fats={0.2}
+            quantityGrams={100}
+            onSubstitute={onSubstitute}
+          />
+        </tbody>
+      </table>,
+    );
+
+    const substituteButton = screen.getByRole('button', { name: 'Substituir Arroz' });
+    substituteButton.focus();
+    fireEvent.click(substituteButton, { detail: 1 });
+
+    expect(onSubstitute).toHaveBeenCalledOnce();
+    expect(document.activeElement).not.toBe(substituteButton);
   });
 });

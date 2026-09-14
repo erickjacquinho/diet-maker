@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EditIconButton } from '@/components/atoms';
 import type { DataTableColumnDef } from '@/components/molecules/DataTable';
-import type { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 
 export function useFoodTableColumns({
   onToggleFavorite,

@@ -632,13 +632,117 @@
               </p>
             </section>
 
+            <section class="panel" aria-labelledby="sdd-title">
+              <header class="panel-header">
+                <div>
+                  <div class="panel-kicker">Dieta DB · Persistência local</div>
+                  <h2 class="panel-title" id="sdd-title">Etapas de implementação dos SDDs</h2>
+                </div>
+                <span class="panel-count">6 etapas</span>
+              </header>
+
+              <div class="panel-body">
+                <ol class="checklist" id="sdd-list">
+                  <li class="checklist-item feature-item" data-group="sdd-1">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-1" aria-describedby="sdd-1-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">1. Prova técnica e base local</span>
+                        <span class="checklist-description" id="sdd-1-description">Validar PGlite + Drizzle como adaptador local antes de integrar os módulos clínicos.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 1">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-1-poc" data-parent="sdd-1" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Comprovar persistência/reabertura, transações atômicas, migration simples, drafts separados e bloqueio da segunda aba.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-1-report" data-parent="sdd-1" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Registrar resultados e limitações; só fixar o adaptador se o portão técnico for aprovado.</span></span></label></li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="sdd-2">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-2" aria-describedby="sdd-2-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">2. Conta e pacientes</span>
+                        <span class="checklist-description" id="sdd-2-description">Persistir o perfil local e o cadastro de pacientes, incluindo edição e arquivamento.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 2">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-2-model" data-parent="sdd-2" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Criar apenas os contratos e tabelas necessários, mantendo Conta + Paciente como escopo dos dados clínicos.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-2-dependency" data-parent="sdd-2" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Iniciar somente após a aprovação do SDD 1; não migrar os dados legados de teste.</span></span></label></li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="sdd-3">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-3" aria-describedby="sdd-3-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">3. Dietas: rascunho, salvamento e histórico</span>
+                        <span class="checklist-description" id="sdd-3-description">Entregar o primeiro fluxo vertical: Paciente → Nova dieta → Puxar informações → Adicionar alimentos → Salvar → Histórico.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 3">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-3-draft" data-parent="sdd-3" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Separar DietDraft/autosave em IndexedDB do banco canônico e garantir que somente Salvar confirme a dieta.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-3-history" data-parent="sdd-3" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Validar vigência única por paciente, snapshots, versionamento, cópia e histórico somente leitura.</span></span></label></li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="sdd-4">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-4" aria-describedby="sdd-4-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">4. Biblioteca reutilizável</span>
+                        <span class="checklist-description" id="sdd-4-description">Persistir alimentos customizados, receitas e refeições prontas e integrá-los à prescrição.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 4">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-4-catalog" data-parent="sdd-4" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Implementar catálogo, receitas e refeições prontas pertencentes à Conta, com repositórios tipados.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-4-snapshots" data-parent="sdd-4" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Preservar snapshots nutricionais para que alterações na biblioteca não modifiquem dietas já salvas.</span></span></label></li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="sdd-5">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-5" aria-describedby="sdd-5-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">5. Avaliações e acompanhamento existentes</span>
+                        <span class="checklist-description" id="sdd-5-description">Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 5">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-5-records" data-parent="sdd-5" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Persistir os registros no escopo Conta + Paciente, sem criar agenda, prontuário ampliado ou novos fluxos clínicos.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-5-validation" data-parent="sdd-5" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Validar edição, salvamento explícito e preservação do histórico sem fallback para o armazenamento legado.</span></span></label></li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="sdd-6">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="sdd-6" aria-describedby="sdd-6-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">6. Backup manual simples</span>
+                        <span class="checklist-description" id="sdd-6-description">Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes do SDD 6">
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-6-export" data-parent="sdd-6" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Exportar o arquivo mestre <code>.nutridiet</code> em JSON, incluindo arquivados e snapshots, sem drafts.</span></span></label></li>
+                      <li><label class="checklist-label"><input type="checkbox" data-id="sdd-6-restore" data-parent="sdd-6" /><span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span><span class="checklist-copy"><span class="checklist-description">Validar versão e conteúdo antes da substituição; sem senha, criptografia, automação ou mesclagem.</span></span></label></li>
+                    </ul>
+                  </li>
+                </ol>
+              </div>
+            </section>
+
             <section class="panel" aria-labelledby="features-title">
               <header class="panel-header">
                 <div>
                   <div class="panel-kicker">Entrega principal</div>
                   <h2 class="panel-title" id="features-title">Próximas funcionalidades</h2>
                 </div>
-                <span class="panel-count">5 frentes</span>
+                <span class="panel-count">10 frentes</span>
               </header>
 
               <div class="panel-body">
@@ -652,36 +756,45 @@
                         </svg>
                       </span>
                       <span class="checklist-copy">
-                        <span class="checklist-title">1. Refeições prontas no modal de alimentos</span>
-                        <span class="checklist-description" id="feature-1-description">Adicionar uma área separada para refeições prontas dentro do modal de seleção de alimentos.</span>
+                        <span class="checklist-title">1. Arquitetura de persistência local (Alimentos, Refeições e Receitas)</span>
+                        <span class="checklist-description" id="feature-1-description">Definir e implementar a arquitetura de armazenamento local (IndexedDB via store/repositório dedicado) para o catálogo próprio do nutricionista.</span>
                       </span>
                     </label>
                     <ul class="subtasks" aria-label="Detalhes da funcionalidade 1">
                       <li>
                         <label class="checklist-label">
-                          <input type="checkbox" data-id="feature-1-foods" data-parent="feature-1" />
+                          <input type="checkbox" data-id="feature-1-schemas" data-parent="feature-1" />
                           <span class="checkmark" aria-hidden="true">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
                           </span>
-                          <span class="checklist-copy"><span class="checklist-description">Carregar alimentos.</span></span>
+                          <span class="checklist-copy"><span class="checklist-description">Modelagem de dados e esquemas tipados (alimentos customizados com tabela nutricional, refeições prontas e receitas com rendimento).</span></span>
                         </label>
                       </li>
                       <li>
                         <label class="checklist-label">
-                          <input type="checkbox" data-id="feature-1-amounts" data-parent="feature-1" />
+                          <input type="checkbox" data-id="feature-1-stores" data-parent="feature-1" />
                           <span class="checkmark" aria-hidden="true">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
                           </span>
-                          <span class="checklist-copy"><span class="checklist-description">Carregar quantidades em gramas.</span></span>
+                          <span class="checklist-copy"><span class="checklist-description">Camada de repositórios/stores locais (IndexedDB) com operações CRUD desacopladas da interface.</span></span>
                         </label>
                       </li>
                       <li>
                         <label class="checklist-label">
-                          <input type="checkbox" data-id="feature-1-substitutions" data-parent="feature-1" />
+                          <input type="checkbox" data-id="feature-1-migrations" data-parent="feature-1" />
                           <span class="checkmark" aria-hidden="true">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
                           </span>
-                          <span class="checklist-copy"><span class="checklist-description">Carregar substituições ou opções já configuradas.</span></span>
+                          <span class="checklist-copy"><span class="checklist-description">Versionamento de schema, migrações locais e rotinas de exportação/importação (backup e restauração).</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-1-search" data-parent="feature-1" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Camada de indexação e busca unificada de alta performance (base TACO/IBGE, alimentos próprios e receitas).</span></span>
                         </label>
                       </li>
                     </ul>
@@ -690,45 +803,351 @@
                   <li class="checklist-item feature-item" data-group="feature-2">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="feature-2" aria-describedby="feature-2-description" />
-                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checkmark" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m5 12 4 4L19 6" />
+                        </svg>
+                      </span>
                       <span class="checklist-copy">
-                        <span class="checklist-title">2. Salvar refeição ou receita durante a montagem</span>
-                        <span class="checklist-description" id="feature-2-description">Adicionar no card da refeição uma ação para salvar a refeição atual como uma nova refeição pronta ou receita, podendo reutilizá-la em outras dietas.</span>
+                        <span class="checklist-title">2. UI e Workflow do Catálogo de Alimentos Customizados</span>
+                        <span class="checklist-description" id="feature-2-description">Interface completa para cadastro, consulta e gerenciamento dos alimentos próprios do nutricionista.</span>
                       </span>
                     </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 2">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-2-list" data-parent="feature-2" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Listagem e busca (<code>/alimentos</code>) com filtros de categoria e ordenação por macronutrientes.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-2-form" data-parent="feature-2" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Formulário de cadastro/edição com porção base, tabela nutricional (P, C, G, Kcal, fibras e sódio) e validações em tempo real.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-2-actions" data-parent="feature-2" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Ações de gerenciamento: editar, duplicar e excluir alimentos personalizados.</span></span>
+                        </label>
+                      </li>
+                    </ul>
                   </li>
 
                   <li class="checklist-item feature-item" data-group="feature-3">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="feature-3" aria-describedby="feature-3-description" />
-                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checkmark" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m5 12 4 4L19 6" />
+                        </svg>
+                      </span>
                       <span class="checklist-copy">
-                        <span class="checklist-title">3. Opções completas de refeição</span>
-                        <span class="checklist-description" id="feature-3-description">Permitir criar opções completas para uma refeição, com todos os alimentos e quantidades editáveis pelo nutricionista. O paciente deverá poder escolher uma opção completa, sem precisar misturar substituições entre opções.</span>
+                        <span class="checklist-title">3. UI e Workflow da Biblioteca de Refeições Prontas</span>
+                        <span class="checklist-description" id="feature-3-description">Interface dedicada para criar, gerenciar e inspecionar refeições prontas com totalizadores nutricionais.</span>
                       </span>
                     </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 3">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-3-list" data-parent="feature-3" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Biblioteca de refeições (<code>/refeicoes</code>) com busca, filtros por tipo de refeição e cards com resumo de macros (kcal, P, C, G).</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-3-builder" data-parent="feature-3" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Workflow de criação e edição dedicada de refeição pronta com composição de alimentos, gramagens e opções.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-3-totals" data-parent="feature-3" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Cálculo instantâneo do balanço calórico e distribuição consolidada de macros da refeição.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-3-actions" data-parent="feature-3" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Ações de gerenciamento: duplicar para criar variações, editar componentes e excluir.</span></span>
+                        </label>
+                      </li>
+                    </ul>
                   </li>
 
                   <li class="checklist-item feature-item" data-group="feature-4">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="feature-4" aria-describedby="feature-4-description" />
-                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checkmark" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m5 12 4 4L19 6" />
+                        </svg>
+                      </span>
                       <span class="checklist-copy">
-                        <span class="checklist-title">4. Substituições equivalentes por macro</span>
-                        <span class="checklist-description" id="feature-4-description">Permitir selecionar um macro de referência — proteína, carboidrato, gordura ou kcal — e gerar quantidades proporcionais em gramas para os alimentos substitutos. O nutricionista poderá revisar e alterar todos os alimentos e quantidades antes de confirmar a opção.</span>
+                        <span class="checklist-title">4. UI e Workflow da Biblioteca de Receitas</span>
+                        <span class="checklist-description" id="feature-4-description">Interface para elaboração e gestão de receitas com cálculo nutricional automático por porção e rendimento.</span>
                       </span>
                     </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 4">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-4-list" data-parent="feature-4" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Biblioteca de receitas (<code>/receitas</code>) com filtros por categoria, busca por ingredientes, tempo e rendimento.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-4-ingredients" data-parent="feature-4" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Construtor de receita com inserção de ingredientes em gramas (base oficial + customizados).</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-4-calc" data-parent="feature-4" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Cálculo automático em tempo real da tabela nutricional consolidada (total da receita e fracionada por porção).</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-4-prep" data-parent="feature-4" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Editor estruturado para modo de preparo, tempo de execução e observações nutricionais.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-4-actions" data-parent="feature-4" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Ações de gerenciamento: editar ingredientes, ajustar rendimento, duplicar e excluir receitas.</span></span>
+                        </label>
+                      </li>
+                    </ul>
                   </li>
 
                   <li class="checklist-item feature-item" data-group="feature-5">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="feature-5" aria-describedby="feature-5-description" />
-                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checkmark" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m5 12 4 4L19 6" />
+                        </svg>
+                      </span>
                       <span class="checklist-copy">
-                        <span class="checklist-title">5. Refatoração da escala</span>
-                        <span class="checklist-description" id="feature-5-description">Refatorar a escala para uma experiência mais visual, flexível e fácil de entender, com controle claro sobre o que será alterado.</span>
+                        <span class="checklist-title">5. Refeições prontas no modal de alimentos</span>
+                        <span class="checklist-description" id="feature-5-description">Adicionar uma área separada para refeições prontas dentro do modal de seleção de alimentos.</span>
                       </span>
                     </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 5">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-5-foods" data-parent="feature-5" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Carregar todos os alimentos e quantidades em gramas na refeição em 1 clique.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-5-options" data-parent="feature-5" />
+                          <span class="checkmark" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                          </span>
+                          <span class="checklist-copy"><span class="checklist-description">Carregar substituições e opções completas já configuradas na refeição pronta.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-6">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-6" aria-describedby="feature-6-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">6. Salvar refeição ou receita durante a montagem</span>
+                        <span class="checklist-description" id="feature-6-description">Adicionar no card da refeição uma ação para salvar a refeição atual como uma nova refeição pronta ou receita, podendo reutilizá-la em outras dietas.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 6">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-6-action" data-parent="feature-6" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Ação de atalho no menu de opções do card da refeição.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-6-modal" data-parent="feature-6" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Modal rápido para definir nome, categoria, rendimento e salvar diretamente no catálogo local.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-7">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-7" aria-describedby="feature-7-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">7. Opções completas de refeição</span>
+                        <span class="checklist-description" id="feature-7-description">Permitir criar opções completas para uma refeição, com todos os alimentos e quantidades editáveis pelo nutricionista. O paciente deverá poder escolher uma opção completa, sem precisar misturar substituições entre opções.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 7">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-7-alternatives" data-parent="feature-7" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Criação de opções alternativas completas (Ex: Opção 1 - Café Tradicional, Opção 2 - Shake Rápido).</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-7-patient-view" data-parent="feature-7" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Visualização clara para o paciente escolher uma opção integral sem misturar substituições pontuais.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-7-totals" data-parent="feature-7" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Totalizadores nutricionais independentes e comparativos por opção.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-8">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-8" aria-describedby="feature-8-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">8. Substituições equivalentes por macro</span>
+                        <span class="checklist-description" id="feature-8-description">Calcular matematicamente e sugerir quantidades em gramas para alimentos substitutos com base em um macronutriente-alvo (ou valor calórico), garantindo equivalência nutricional com controle visual completo.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 8">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-8-reference" data-parent="feature-8" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Seleção da referência e macro-alvo (Proteína, Carboidrato, Gordura ou Kcal total) a ser equiparado.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-8-rule-of-three" data-parent="feature-8" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Cálculo proporcional automatizado em gramas via regra de três para equiparar o macro-alvo no substituto.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-8-delta" data-parent="feature-8" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Painel comparativo de deltas: exibição em tempo real do impacto colateral nos outros macros e calorias.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-8-calibration" data-parent="feature-8" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Calibração e ajuste fino: travar valores, arredondar gramagens para valores práticos e ajustar manualmente.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-9">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-9" aria-describedby="feature-9-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">9. Refatoração da escala</span>
+                        <span class="checklist-description" id="feature-9-description">Refatorar a escala para uma experiência mais visual, flexível e fácil de entender, com controle claro sobre o que será alterado.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 9">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-9-visual" data-parent="feature-9" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Interface visual intuitiva para ajuste proporcional de calorias e distribuição de macros.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-9-granularity" data-parent="feature-9" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Controle granular e transparente sobre quais refeições e alimentos são afetados pelo ajuste.</span></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="checklist-item feature-item" data-group="feature-10">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="feature-10" aria-describedby="feature-10-description" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy">
+                        <span class="checklist-title">10. Limitações dietéticas no cadastro do paciente</span>
+                        <span class="checklist-description" id="feature-10-description">Após a conclusão das migrations pendentes, adicionar ao cadastro e à edição do paciente um campo de texto livre para registrar todas as suas limitações dietéticas, incluindo alergias, intolerâncias, restrições e preferências relevantes.</span>
+                      </span>
+                    </label>
+                    <ul class="subtasks" aria-label="Detalhes da funcionalidade 10">
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-10-field" data-parent="feature-10" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Campo de texto livre no cadastro e na edição para registrar alergias, intolerâncias, restrições e preferências alimentares.</span></span>
+                        </label>
+                      </li>
+                      <li>
+                        <label class="checklist-label">
+                          <input type="checkbox" data-id="feature-10-persistence" data-parent="feature-10" />
+                          <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                          <span class="checklist-copy"><span class="checklist-description">Persistir a informação junto ao perfil do paciente e disponibilizá-la para consulta na montagem da dieta.</span></span>
+                        </label>
+                      </li>
+                    </ul>
                   </li>
                 </ol>
               </div>
@@ -742,7 +1161,7 @@
                   <div class="panel-kicker">Mapa de impacto</div>
                   <h2 class="panel-title" id="screens-title">Telas e componentes envolvidos</h2>
                 </div>
-                <span class="panel-count">6 itens</span>
+                <span class="panel-count">9 itens</span>
               </header>
               <div class="panel-body">
                 <ul class="checklist">
@@ -750,42 +1169,56 @@
                     <label class="checklist-label">
                       <input type="checkbox" data-id="screen-diet-builder" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Construtor de dieta</span><span class="checklist-description">`/pacientes/[id]/dieta/[dietaId]` — opções completas, salvamento da refeição e edição das substituições.</span></span>
+                      <span class="checklist-copy"><span class="checklist-title">Construtor de dieta</span><span class="checklist-description"><code>/pacientes/[id]/dieta/[dietaId]</code> — opções completas, salvamento da refeição e edição das substituições.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
                     <label class="checklist-label">
-                      <input type="checkbox" data-id="screen-food-modal" />
+                      <input type="checkbox" data-id="screen-patient-registration" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Modal de seleção de alimentos</span><span class="checklist-description">`FoodSearchModal` — grupo separado para refeições prontas.</span></span>
+                      <span class="checklist-copy"><span class="checklist-title">Cadastro de pacientes</span><span class="checklist-description"><code>/pacientes</code> — campo de limitações dietéticas no cadastro e na edição do paciente.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
                     <label class="checklist-label">
-                      <input type="checkbox" data-id="screen-save-modal" />
+                      <input type="checkbox" data-id="screen-custom-foods" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Modal de salvar refeição/receita</span><span class="checklist-description">Nome e tipo do conteúdo salvo.</span></span>
-                    </label>
-                  </li>
-                  <li class="checklist-item">
-                    <label class="checklist-label">
-                      <input type="checkbox" data-id="screen-equivalent-modal" />
-                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Modal de opções e substituições equivalentes</span><span class="checklist-description">Seleção do macro de referência e calibração em gramas.</span></span>
+                      <span class="checklist-copy"><span class="checklist-title">Catálogo de alimentos customizados</span><span class="checklist-description"><code>/alimentos</code> — listagem, busca e formulários de cadastro/edição de alimentos próprios.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="screen-meals-library" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de refeições prontas</span><span class="checklist-description">`/refeicoes-prontas` — visualizar e reutilizar refeições salvas.</span></span>
+                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de refeições prontas</span><span class="checklist-description"><code>/refeicoes</code> — listagem, criação/edição dedicada e inspeção nutricional de refeições salvas.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
                     <label class="checklist-label">
                       <input type="checkbox" data-id="screen-recipes-library" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
-                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de receitas</span><span class="checklist-description">`/receitas` — salvar e reutilizar receitas criadas durante a dieta.</span></span>
+                      <span class="checklist-copy"><span class="checklist-title">Biblioteca de receitas</span><span class="checklist-description"><code>/receitas</code> — listagem, construtor de receitas com cálculo automático por porção e modo de preparo.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-food-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de seleção de alimentos</span><span class="checklist-description"><code>FoodSearchModal</code> — grupos separados para base oficial, alimentos customizados, receitas e refeições prontas.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-save-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de salvar refeição/receita</span><span class="checklist-description">Nome, categoria e tipo do conteúdo salvo a partir do construtor de dieta.</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="screen-equivalent-modal" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Modal de opções e substituições equivalentes</span><span class="checklist-description">Seleção do macro de referência, regra de três proporcional, painel de deltas e calibração em gramas.</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">
@@ -805,7 +1238,7 @@
                   <div class="panel-kicker">Depois da primeira entrega</div>
                   <h2 class="panel-title" id="future-title">Etapas futuras</h2>
                 </div>
-                <span class="panel-count">2 itens</span>
+                <span class="panel-count">3 itens</span>
               </header>
               <div class="panel-body">
                 <ul class="checklist">
@@ -814,6 +1247,13 @@
                       <input type="checkbox" data-id="future-autosave" />
                       <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
                       <span class="checklist-copy"><span class="checklist-title">Autosave e recuperação de rascunho</span></span>
+                    </label>
+                  </li>
+                  <li class="checklist-item">
+                    <label class="checklist-label">
+                      <input type="checkbox" data-id="future-cloud-sync" />
+                      <span class="checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+                      <span class="checklist-copy"><span class="checklist-title">Sincronização em nuvem e backup dos dados locais</span></span>
                     </label>
                   </li>
                   <li class="checklist-item">

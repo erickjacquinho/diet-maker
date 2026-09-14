@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 65,
-    "capturedAt": "2026-07-31",
+    "currentSourceCount": 73,
+    "capturedAt": "2026-08-30",
     "legacyAudit": {
       "findings": 0,
       "rules": 17,
@@ -65,7 +65,7 @@
         { "name": "CardDescription", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "empty"] },
         { "name": "CardContent", "role": "structural-slot", "requiresRootContext": true, "states": ["default", "empty"] }
       ],
-      "consumers": ["src/app/alimentos/page.tsx", "src/app/design-system/page.tsx", "src/app/pacientes/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes-prontas/page.tsx"]
+      "consumers": ["src/app/alimentos/page.tsx", "src/app/design-system/page.tsx", "src/app/pacientes/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes/page.tsx"]
     },
     {
       "id": "ui-dialog",
@@ -127,7 +127,7 @@
       "parts": [
         { "name": "Input", "role": "visual-root", "requiresRootContext": false, "states": ["default", "hover", "focus-visible", "disabled", "error", "read-only"] }
       ],
-      "consumers": ["atom-input", "molecule-meal-item-row", "molecule-date-picker-field", "molecule-taco-search-input", "organism-food-search-modal", "molecule-edit-assessment-modal", "src/app/alimentos/page.tsx", "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx", "src/app/pacientes/[id]/page.tsx", "src/app/pacientes/page.tsx", "src/app/presets/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes-prontas/page.tsx", "src/components/molecules/AutoKcalSection.tsx", "src/components/organisms/MealCardContainer.tsx"]
+      "consumers": ["atom-input", "molecule-meal-item-row", "molecule-date-picker-field", "molecule-taco-search-input", "organism-food-search-modal", "molecule-edit-assessment-modal", "src/app/alimentos/page.tsx", "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx", "src/app/pacientes/[id]/page.tsx", "src/app/pacientes/page.tsx", "src/app/presets/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes/page.tsx", "src/components/molecules/AutoKcalSection.tsx", "src/components/organisms/MealCardContainer.tsx"]
     },
     {
       "id": "ui-popover",
@@ -901,7 +901,7 @@
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -956,7 +956,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx",
+        "src/app/refeicoes/page.tsx",
         "template-diet-builder-template"
       ],
       "primitiveBase": null,
@@ -1063,7 +1063,7 @@
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
         "src/app/receitas/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -1149,7 +1149,88 @@
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
         "src/app/receitas/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "ui-alert-dialog",
+      "name": "AlertDialog",
+      "nature": "ui-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "ui",
+      "targetLayer": "ui",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/ui/alert-dialog.tsx",
+          "role": "compound-family",
+          "discoveredLayer": "ui"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "AlertDialog",
+          "kind": "component",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogPortal",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogOverlay",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogTrigger",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogContent",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogHeader",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogFooter",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogTitle",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogDescription",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogAction",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        },
+        {
+          "name": "AlertDialogCancel",
+          "kind": "compound-part",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/ui/alert-dialog.md",
+      "consumers": [
+        "molecule-confirmation-alert-dialog"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -1297,7 +1378,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx",
+        "src/app/refeicoes/page.tsx",
         "ui-textarea"
       ],
       "primitiveBase": null,
@@ -2265,7 +2346,7 @@
       "profile": "design-system/components/profiles/molecules/auto-kcal-section.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -2275,8 +2356,8 @@
       "id": "organism-diet-mode-switcher",
       "name": "DietModeSwitcher",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "selection",
       "traits": [
@@ -2284,9 +2365,9 @@
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/DietModeSwitcher.tsx",
+          "path": "src/components/organisms/diet/DietModeSwitcher.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2302,7 +2383,10 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/diet-mode-switcher.md",
-      "consumers": [],
+      "consumers": [
+        "src/components/organisms/diet/DietContextSection.tsx",
+        "src/components/templates/DietBuilderTemplate.tsx"
+      ],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2350,8 +2434,8 @@
       "id": "organism-food-search-modal",
       "name": "FoodSearchModal",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
@@ -2360,9 +2444,9 @@
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/FoodSearchModal.tsx",
+          "path": "src/components/organisms/foods/FoodSearchModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2455,8 +2539,8 @@
       "consumers": [
         "molecule-adjust-diet-goals-modal",
         "organism-meal-card-container",
-        "molecule-read-only-diet-modal",
-        "page-refeicoes-prontas"
+        "organism-read-only-diet-modal",
+        "page-refeicoes"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
@@ -2518,7 +2602,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
@@ -2683,12 +2767,12 @@
       "specStatus": "homologated",
       "exceptions": []
     },
-    {
+      {
       "id": "organism-read-only-diet-modal",
       "name": "ReadOnlyDietModal",
       "nature": "domain",
-      "lifecycle": "migration-required",
-      "currentLayer": "molecule",
+        "lifecycle": "implemented",
+        "currentLayer": "organism",
       "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
@@ -2696,10 +2780,10 @@
         "nutrition-context"
       ],
       "sourceFiles": [
-        {
-          "path": "src/components/molecules/ReadOnlyDietModal.tsx",
-          "role": "implementation",
-          "discoveredLayer": "molecule"
+          {
+            "path": "src/components/organisms/diets/ReadOnlyDietModal.tsx",
+            "role": "implementation",
+            "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -2715,7 +2799,35 @@
         }
       ],
       "profile": "design-system/components/profiles/organisms/read-only-diet-modal.md",
-      "consumers": [],
+      "consumers": [
+        "src/app/pacientes/[id]/PatientProfileModals.tsx"
+      ],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-import-previous-diet-modal",
+      "name": "ImportPreviousDietModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": ["async", "read-only", "nutrition-context"],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/diets/ImportPreviousDietModal.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        { "name": "ImportPreviousDietModalProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ImportPreviousDietModal", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/import-previous-diet-modal.md",
+      "consumers": ["src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
       "exceptions": []
@@ -3582,6 +3694,44 @@
       "exceptions": []
     },
     {
+      "id": "molecule-confirmation-alert-dialog",
+      "name": "ConfirmationAlertDialog",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/ConfirmationAlertDialog.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ConfirmationAlertDialogProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "ConfirmationAlertDialog",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/molecules/confirmation-alert-dialog.md",
+      "consumers": [
+        "src/app/alimentos/page.tsx",
+        "src/app/pacientes/[id]/avaliacao/[assessmentId]/page.tsx",
+        "organism-meal-card-container"
+      ],
+      "primitiveBase": "ui-alert-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
       "id": "molecule-create-patient-modal",
       "name": "CreatePatientModal",
       "nature": "domain",
@@ -3706,21 +3856,21 @@
       "exceptions": []
     },
     {
-      "id": "molecule-create-recipe-modal",
+      "id": "organism-create-recipe-modal",
       "name": "CreateRecipeModal",
       "nature": "domain",
       "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
         "nutrition-context"
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/CreateRecipeModal.tsx",
+          "path": "src/components/organisms/CreateRecipeModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -3735,7 +3885,7 @@
           "documentedBy": "profile"
         }
       ],
-      "profile": "design-system/components/profiles/molecules/create-recipe-modal.md",
+      "profile": "design-system/components/profiles/organisms/create-recipe-modal.md",
       "consumers": [
         "src/app/receitas/page.tsx"
       ],
@@ -3744,21 +3894,21 @@
       "exceptions": []
     },
     {
-      "id": "molecule-create-ready-meal-modal",
+      "id": "organism-create-ready-meal-modal",
       "name": "CreateReadyMealModal",
       "nature": "domain",
       "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
         "nutrition-context"
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/CreateReadyMealModal.tsx",
+          "path": "src/components/organisms/CreateReadyMealModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -3778,9 +3928,9 @@
           "documentedBy": "profile"
         }
       ],
-      "profile": "design-system/components/profiles/molecules/create-ready-meal-modal.md",
+      "profile": "design-system/components/profiles/organisms/create-ready-meal-modal.md",
       "consumers": [
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
@@ -3940,6 +4090,253 @@
         "src/app/pacientes/[id]/page.tsx"
       ],
       "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-macro-summary",
+      "name": "MacroSummary",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "nutrition-domain",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/MacroSummary.tsx", "role": "compound-family", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "MacroSummaryProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "MacroSummary", "kind": "component", "documentedBy": "profile" },
+        { "name": "MacroNutrientSummary", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/macro-summary.md",
+      "consumers": ["organism-import-previous-diet-modal", "organism-patient-diets-table", "organism-patient-consultation-history-table"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-carb-cycling-variation-panel",
+      "name": "CarbCyclingVariationPanel",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "selection",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/diet/CarbCyclingVariationPanel.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "CarbCyclingVariationPanelProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "CarbCyclingVariationPanel", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/carb-cycling-variation-panel.md",
+      "consumers": ["src/components/organisms/diet/DietContextSection.tsx", "src/components/organisms/diet/DietModeSwitcher.tsx"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-food-search-category-selector",
+      "name": "FoodSearchCategorySelector",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "selection",
+      "traits": [],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/FoodSearchCategorySelector.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "FoodSearchCategory", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "FoodSearchCategorySelectorProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "FoodSearchCategorySelector", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/food-search-category-selector.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-ready-meal-search-results-list",
+      "name": "ReadyMealSearchResultsList",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/ReadyMealSearchResultsList.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "ReadyMealSearchResultsListProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ReadyMealSearchResultsList", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/ready-meal-search-results-list.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-recipe-search-results-list",
+      "name": "RecipeSearchResultsList",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/molecules/food-search/RecipeSearchResultsList.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "RecipeSearchResultsListProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "RecipeSearchResultsList", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/recipe-search-results-list.md",
+      "consumers": ["organism-food-search-modal", "organism-substitute-food-modal"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-substitute-food-modal",
+      "name": "SubstituteFoodModal",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "overlays",
+      "traits": ["nutrition-context", "async"],
+      "sourceFiles": [{ "path": "src/components/organisms/foods/SubstituteFoodModal.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "MealFoodToSubstitute", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SubstituteFoodModalProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SubstituteFoodModal", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/substitute-food-modal.md",
+      "consumers": ["src/hooks/useDietBuilderModals.ts", "template-diet-builder-template"],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-assessments-table",
+      "name": "PatientAssessmentsTable",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientAssessmentsTable.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientAssessmentsTableProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "AssessmentTableRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "AssessmentTableExpandedRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "PatientAssessmentsTable", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-assessments-table.md",
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-diets-table",
+      "name": "PatientDietsTable",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientDietsTable.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientDietsTableProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "DietTableRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "PatientDietsTable", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-diets-table.md",
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-consultation-history-row",
+      "name": "ConsultationHistoryRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": ["nutrition-context"],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/ConsultationHistoryRow.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "ConsultationHistoryRowProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ConsultationHistoryRow", "kind": "compound-part", "documentedBy": "profile" },
+        { "name": "ConsultationHistoryExpandedRow", "kind": "compound-part", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/consultation-history-row.md",
+      "consumers": ["organism-patient-consultation-history-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-patient-list-table-row",
+      "name": "PatientListTableRow",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [{ "path": "src/components/organisms/patient/PatientListTableRow.tsx", "role": "compound-family", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "PatientListTableRow", "kind": "compound-part", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/patient-list-table-row.md",
+      "consumers": ["organism-patient-list-table"],
+      "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-profile-create-dialog",
+      "name": "ProfileCreateDialog",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": ["async"],
+      "sourceFiles": [{ "path": "src/components/molecules/profile-create-dialog.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "ProfileCreateDialogProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileCreateDialog", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/profile-create-dialog.md",
+      "consumers": ["organism-profile-onboarding"],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-profile-onboarding",
+      "name": "ProfileOnboarding",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "actions",
+      "traits": ["async"],
+      "sourceFiles": [{ "path": "src/components/organisms/profile-onboarding.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "ProfileOnboardingSnapshot", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileOnboardingProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileOnboarding", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/profile-onboarding.md",
+      "consumers": ["src/app/Home/page.tsx"],
+      "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
     }

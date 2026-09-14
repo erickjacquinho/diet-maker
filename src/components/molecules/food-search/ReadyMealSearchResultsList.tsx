@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/compo
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
-import type { ReadyMeal } from '@/lib/readyMealsStore';
+import type { ReadyMeal } from '@/lib/library-ui-adapter';
 import { cn } from '@/lib/utils';
 
 export interface ReadyMealSearchResultsListProps {
@@ -135,22 +135,6 @@ export function ReadyMealSearchResultsList({
     []
   );
 
-  if (searchResults.length === 0) {
-    return (
-      <div className="flex-1 min-h-table-modal max-h-table-modal flex flex-col items-center justify-center p-8 text-center text-text-muted gap-2 border border-dashed border-border-divider rounded-control my-2 bg-surface-subtle">
-        <div className="w-10 h-10 rounded-surface bg-surface border border-border-subtle flex items-center justify-center text-text-muted mb-1">
-          <UtensilsCrossed size={20} />
-        </div>
-        <span className="font-semibold text-text-secondary">Nenhuma refeição pronta encontrada</span>
-        <span className="text-style-caption max-w-sm">
-          {query
-            ? `Nenhuma refeição pronta corresponde a "${query}".`
-            : 'Você ainda não cadastrou nenhum bloco de refeição pronta. Cadastre blocos na página "Refeições Prontas" para reutilizá-los aqui.'}
-        </span>
-      </div>
-    );
-  }
-
   return (
     <div className="my-2 flex-1 min-h-table-modal max-h-table-modal flex flex-col bg-surface overflow-hidden">
       <TooltipProvider delayDuration={200}>
@@ -159,7 +143,19 @@ export function ReadyMealSearchResultsList({
           columns={columns}
           getRowId={(meal) => meal.id}
           caption="Lista de blocos de refeições prontas reutilizáveis"
-          emptyMessage="Nenhuma refeição pronta encontrada."
+          emptyMessage={
+            <>
+              <span className="inline-flex items-center gap-2 font-semibold text-text-secondary">
+                <UtensilsCrossed size={16} aria-hidden="true" />
+                <span>Nenhuma refeição pronta encontrada</span>
+              </span>
+              <span className="ml-2 text-style-caption text-text-muted">
+                {query
+                  ? `Nenhuma refeição pronta corresponde a "${query}".`
+                  : 'Você ainda não cadastrou nenhum bloco de refeição pronta. Cadastre blocos na página "Refeições Prontas" para reutilizá-los aqui.'}
+              </span>
+            </>
+          }
           sort={sort}
           selection={{
             mode,

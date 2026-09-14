@@ -14,15 +14,15 @@ import {
 } from '@/components/ui/dialog';
 import { SelectField, HoldToDeleteButton } from '@/components/atoms';
 import { DatePickerField } from './DatePickerField';
-import type { PatientNextEvent, PatientNextEventType } from '@/lib/patientsStore';
+import type { PatientNextEvent, PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface NextEventModalProps {
   open: boolean;
   nextEvent: PatientNextEvent | null;
   onOpenChange: (open: boolean) => void;
-  onSave: (event: PatientNextEvent) => void;
-  onClear: () => void;
+  onSave: (event: PatientNextEvent) => void | Promise<void>;
+  onClear: () => void | Promise<void>;
 }
 
 export function NextEventModal({
@@ -38,12 +38,16 @@ export function NextEventModal({
   });
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const savingRef = useRef(false);
 
   useSaveShortcut({
     formRef,
     enabled: open && !isRemoveConfirmOpen && !isDiscardConfirmOpen,
     priority: 10,
+    busy: isSaving,
   });
 
   useEffect(() => {
@@ -51,6 +55,9 @@ export function NextEventModal({
       setDraft(nextEvent ? { ...nextEvent } : { date: '', type: 'assessment-update' });
       setIsRemoveConfirmOpen(false);
       setIsDiscardConfirmOpen(false);
+      setSubmitError(null);
+      savingRef.current = false;
+      setIsSaving(false);
     }
   }, [open, nextEvent]);
 
@@ -67,11 +74,25 @@ export function NextEventModal({
     onOpenChange(nextOpen);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!draft.date) return;
-    onSave(draft);
-    onOpenChange(false);
+    if (savingRef.current) return;
+    if (!draft.date) {
+      setSubmitError('Informe a data do acompanhamento.');
+      return;
+    }
+    savingRef.current = true;
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      await onSave(draft);
+      onOpenChange(false);
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o acompanhamento.');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   const confirmDiscard = () => {
@@ -81,9 +102,33 @@ export function NextEventModal({
   };
 
   const confirmRemove = () => {
-    setIsRemoveConfirmOpen(false);
-    onClear();
-    onOpenChange(false);
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = onClear();
+      if (result && typeof result.then === 'function') {
+        void result.then(() => {
+          setIsRemoveConfirmOpen(false);
+          onOpenChange(false);
+        }).catch((error: unknown) => {
+          setSubmitError(error instanceof Error ? error.message : 'Não foi possível remover o acompanhamento.');
+        }).finally(() => {
+          savingRef.current = false;
+          setIsSaving(false);
+        });
+      } else {
+        setIsRemoveConfirmOpen(false);
+        onOpenChange(false);
+        savingRef.current = false;
+        setIsSaving(false);
+      }
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível remover o acompanhamento.');
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -139,6 +184,8 @@ export function NextEventModal({
               />
             </div>
 
+            {submitError && <p role="alert" className={textStyle('validation-error')}>{submitError}</p>}
+
             <DialogFooter className="items-center gap-2 pt-2 border-t border-border-subtle">
               {nextEvent && (
                 <Button
@@ -147,11 +194,12 @@ export function NextEventModal({
                   size="standard"
                   onClick={() => setIsRemoveConfirmOpen(true)}
                   className="mr-auto"
+                  disabled={isSaving}
                 >
                   Remover data
                 </Button>
               )}
-              <Button type="button" variant="secondary" size="standard" onClick={() => requestClose(false)}>
+              <Button type="button" variant="secondary" size="standard" onClick={() => requestClose(false)} disabled={isSaving}>
                 Cancelar
               </Button>
               <Button
@@ -160,6 +208,7 @@ export function NextEventModal({
                 size="standard"
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar (Ctrl+S)"
+                disabled={isSaving}
               >
                 Salvar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>

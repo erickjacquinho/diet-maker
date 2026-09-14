@@ -1,7 +1,6 @@
 import React from 'react';
-import { Pencil, Trash2, ArrowLeftRight, CopyPlus } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button, ButtonProps } from './Button';
-import { cn } from '@/lib/utils';
 
 export type IconButtonProps = Omit<ButtonProps, 'iconOnly'> & {
   'aria-label'?: string;
@@ -22,6 +21,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   title,
   variant = 'quiet',
   size = 'standard',
+  type = 'button',
   ref,
   ...props
 }) => {
@@ -35,6 +35,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       variant={variant}
       size={size}
       iconOnly
+      type={type}
       aria-label={label}
       title={title || ariaLabel}
       className={`shrink-0 cursor-pointer ${className}`}
@@ -90,55 +91,5 @@ export const DeleteIconButton: React.FC<ExplicitIconButtonProps> = ({
     {...props}
   >
     <Trash2 size={14} className="shrink-0" />
-  </IconButton>
-);
-
-/**
- * SubstituteIconButton - Muted outlined icon-only component for Substitute/Replace food actions.
- */
-export const SubstituteIconButton: React.FC<ExplicitIconButtonProps> = ({
-  className = '',
-  title = 'Substituir alimento',
-  variant = 'secondary',
-  ref,
-  ...props
-}) => (
-  <IconButton
-    ref={ref}
-    variant={variant}
-    title={title}
-    aria-label={title}
-    className={cn(
-      'border-border-subtle bg-surface text-text-muted hover:border-button-secondary-border-hover hover:bg-button-secondary-hover hover:text-text-primary',
-      className
-    )}
-    {...props}
-  >
-    <ArrowLeftRight size={14} className="shrink-0" />
-  </IconButton>
-);
-
-/**
- * DuplicateIconButton - Muted outlined icon-only component for duplicating food rows.
- */
-export const DuplicateIconButton: React.FC<ExplicitIconButtonProps> = ({
-  className = '',
-  title = 'Duplicar alimento',
-  variant = 'secondary',
-  ref,
-  ...props
-}) => (
-  <IconButton
-    ref={ref}
-    variant={variant}
-    title={title}
-    aria-label={title}
-    className={cn(
-      'border-border-subtle bg-surface text-text-muted hover:border-button-secondary-border-hover hover:bg-button-secondary-hover hover:text-text-primary',
-      className
-    )}
-    {...props}
-  >
-    <CopyPlus size={14} className="shrink-0" />
   </IconButton>
 );

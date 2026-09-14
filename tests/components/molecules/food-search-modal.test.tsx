@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { FoodSearchModal } from '@/components/molecules/FoodSearchModal';
+import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 
@@ -89,6 +89,13 @@ describe('FoodSearchModal component', () => {
     expect(addedPayloads[0]).toHaveProperty('quantityGrams', 100);
     expect(addedPayloads[1]).toHaveProperty('quantityGrams', 100);
     expect(onClose).toHaveBeenCalled();
+    expect(addedPayloads[0]).toMatchObject({ snapshot: { sourceType: 'SYSTEM_TACO', referenceQuantity: '100', referenceUnit: 'g' } });
+  });
+
+  it('does not expose custom, ready-meal or recipe sources in the diet picker', () => {
+    render(<FoodSearchModal isOpen onClose={vi.fn()} onAddFood={vi.fn()} />);
+    expect(screen.queryByRole('tab', { name: /receitas|refeições prontas/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/tabela TACO/i)).toBeInTheDocument();
   });
 
   it('keeps the results area height when the search has no matches', () => {

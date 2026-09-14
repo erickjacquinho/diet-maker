@@ -1,0 +1,6 @@
+{
+  "task": "Criar o SDD da Etapa 5 de Dieta DB: migrar para o banco relacional local canônico a persistência das avaliações dos pacientes, próximos acompanhamentos e demais registros clínicos já existentes no produto, mantendo o escopo por Conta e Paciente, os fluxos e a interface atuais e o funcionamento local-first. Substituir por módulo o armazenamento legado de teste, sem dual-write nem migrador de dados legados. Não criar agenda, prontuário ampliado, novos fluxos clínicos, autenticação, nuvem, sincronização ou backup. A etapa depende da base local, Conta, pacientes e dietas já validadas. Produzir somente os artefatos Spec Kit prontos para validação humana, sem implementar.",
+  "slug": "persistencia-avaliacoes-acompanhamento",
+  "feature_dir": "specs/01-09-26-persistencia-avaliacoes-acompanhamento",
+  "date": "2026-09-01"
+}

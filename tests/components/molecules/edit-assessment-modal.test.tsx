@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { EditAssessmentModal } from '@/components/molecules/EditAssessmentModal';
 import type { BodyAssessment, Patient } from '@/lib/patientsStore';
@@ -135,5 +135,27 @@ describe('EditAssessmentModal', () => {
       muscleMassKg: 65.23,
       abdomenCm: 90,
     }));
+  });
+
+  it('keeps the modal open and preserves the draft when the canonical save fails', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Conflito de versão.'));
+    const onOpenChange = vi.fn();
+    render(
+      <EditAssessmentModal
+        open
+        patient={patient}
+        assessment={makeAssessment()}
+        onOpenChange={onOpenChange}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/Peso atual/i), { target: { value: '81' } });
+    fireEvent.click(screen.getByRole('button', { name: /Salvar avaliação/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Conflito de versão.');
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(screen.getByLabelText(/Peso atual/i)).toHaveValue(81);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
   });
 });

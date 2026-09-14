@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import DedicatedCarbCyclingPage from '@/app/pacientes/[id]/dieta/[dietaId]/ciclo/page';
 import * as dietStore from '@/lib/dietStore';
 import * as patientsStore from '@/lib/patientsStore';
+import { toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 
 const mockPush = vi.fn();
 
@@ -12,6 +13,26 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+}));
+
+const canonicalPatient = {
+  id: 'pat-1', accountId: 'account-a', displayCode: 'P-0001', name: 'Maria Silva', age: 28,
+  gender: 'Feminino', heightCm: 165, weightKg: 65, maritalStatus: null, phone: null, whatsapp: null,
+  currentObjective: 'Hipertrofia', defaultMacroTargets: { proteinG: 130, carbsG: 250, fatsG: 50, kcal: 2000 },
+  createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z', version: 1, archivedAt: null,
+};
+
+const mockPatientApplication = {
+  getPatientProfile: vi.fn().mockResolvedValue({ patient: canonicalPatient, initials: 'MS', availableObjectives: ['Hipertrofia'] }),
+};
+const mockDietApplication = {
+  openEditor: vi.fn(), flushDraft: vi.fn().mockResolvedValue({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T00:00:00.000Z' }),
+  saveDietAsActive: vi.fn().mockResolvedValue({ status: 'COMMITTED', draftId: 'draft-cycle', planId: 'diet-1', version: 1, message: 'Prescrição confirmada.' }),
+};
+
+vi.mock('@/lib/application/browser-composition', () => ({
+  getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
+  getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
 }));
 
 const mockPatient = {
@@ -72,14 +93,17 @@ const mockDietPlan = {
 describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(patientsStore, 'getPatientById').mockReturnValue(mockPatient);
-    vi.spyOn(dietStore, 'getDietFromStorage').mockReturnValue(mockDietPlan);
+    mockPatientApplication.getPatientProfile.mockResolvedValue({ patient: canonicalPatient, initials: 'MS', availableObjectives: ['Hipertrofia'] });
+    mockDietApplication.openEditor.mockResolvedValue({
+      draft: { draftId: 'draft-cycle', contextKey: 'account-a|pat-1|diet-1', accountId: 'account-a', patientId: 'pat-1', routeDietId: 'diet-1', payloadSchemaVersion: 1, draftRevision: 1, state: 'EDITABLE', baseDietId: 'diet-1', baseDietVersion: 1, payload: toEditableDocument(mockDietPlan), createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z' },
+      isNew: false,
+    });
   });
 
-  it('renders dedicated page header, breadcrumbs, variations and actions', () => {
+  it('renders dedicated page header, breadcrumbs, variations and actions', async () => {
     render(<DedicatedCarbCyclingPage />);
 
-    expect(screen.getByText('Configuração do Ciclo de Carboidratos')).toBeInTheDocument();
+    expect(await screen.findByText('Configuração do Ciclo de Carboidratos')).toBeInTheDocument();
     expect(screen.getByText('Variações do Ciclo')).toBeInTheDocument();
     expect(screen.getAllByText('Maria Silva').length).toBeGreaterThan(0);
     expect(screen.getByDisplayValue('Dia Alto Carbo')).toBeInTheDocument();
@@ -90,10 +114,10 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     expect(screen.getByText('Proteína')).toBeInTheDocument();
   });
 
-  it('allows adding a new variation and saving back to the diet page', () => {
-    const saveSpy = vi.spyOn(dietStore, 'saveDietToStorage').mockImplementation((d) => d);
+  it('allows adding a new variation and saving back to the diet page', async () => {
 
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     // Add new variation
     fireEvent.click(screen.getByRole('button', { name: /Adicionar Nova Variação ao Ciclo/i }));
@@ -101,14 +125,14 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
 
     // Save and navigate back
     fireEvent.click(screen.getByRole('button', { name: /Salvar Configurações/i }));
-    expect(saveSpy).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(mockDietApplication.flushDraft).toHaveBeenCalledTimes(1));
     expect(mockPush).toHaveBeenCalledWith('/pacientes/pat-1/dieta/diet-1');
   });
 
-  it('allows selecting all days for a variation with the Todos button', () => {
-    const saveSpy = vi.spyOn(dietStore, 'saveDietToStorage').mockImplementation((d) => d);
+  it('allows selecting all days for a variation with the Todos button', async () => {
 
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     const allTodosButtons = screen.getAllByRole('button', { name: /Todos/i });
     expect(allTodosButtons.length).toBe(2);
@@ -118,14 +142,14 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
 
     // Click Save
     fireEvent.click(screen.getByRole('button', { name: /Salvar Configurações/i }));
-    expect(saveSpy).toHaveBeenCalledTimes(1);
-    const savedPlan = saveSpy.mock.calls[0][0];
-    expect(savedPlan.carbCyclingVariations[0].assignedDays).toEqual([
-      'seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'
+    await vi.waitFor(() => expect(mockDietApplication.flushDraft).toHaveBeenCalledTimes(1));
+    const savedDocument = mockDietApplication.flushDraft.mock.calls[0][1];
+    expect(savedDocument.variations[0].assignedDays).toEqual([
+      'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'
     ]);
   });
 
-  it('restricts saving and disables save button when not all 7 days are distributed', () => {
+  it('restricts saving and disables save button when not all 7 days are distributed', async () => {
     const incompletePlan = {
       ...mockDietPlan,
       carbCyclingVariations: [
@@ -143,21 +167,24 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
       ],
     } as dietStore.FullDietPlan;
 
-    vi.spyOn(dietStore, 'getDietFromStorage').mockReturnValue(incompletePlan);
-    const saveSpy = vi.spyOn(dietStore, 'saveDietToStorage');
+    mockDietApplication.openEditor.mockResolvedValueOnce({
+      draft: { draftId: 'draft-incomplete', contextKey: 'account-a|pat-1|diet-1', accountId: 'account-a', patientId: 'pat-1', routeDietId: 'diet-1', payloadSchemaVersion: 1, draftRevision: 1, state: 'EDITABLE', payload: toEditableDocument(incompletePlan), createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z' }, isNew: false,
+    });
 
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     const saveButton = screen.getByRole('button', { name: /Salvar Configurações/i });
     expect(saveButton).toBeDisabled();
     expect(screen.getByText(/2\/7 dias distribuídos/i)).toBeInTheDocument();
 
     fireEvent.click(saveButton);
-    expect(saveSpy).not.toHaveBeenCalled();
+    expect(mockDietApplication.flushDraft).not.toHaveBeenCalled();
   });
 
-  it('navigates directly when Cancelar is clicked without unsaved changes', () => {
+  it('navigates directly when Cancelar is clicked without unsaved changes', async () => {
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     const cancelButton = screen.getByRole('button', { name: /Cancelar/i });
     fireEvent.click(cancelButton);
@@ -166,8 +193,9 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     expect(screen.queryByText(/Descartar alterações\?/i)).not.toBeInTheDocument();
   });
 
-  it('opens guardrail alert modal when trying to exit with unsaved changes', () => {
+  it('opens guardrail alert modal when trying to exit with unsaved changes', async () => {
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     // Modify a variation name
     const nameInput = screen.getAllByRole('textbox')[0];
@@ -194,8 +222,9 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     expect(mockPush).toHaveBeenCalledWith('/pacientes/pat-1/dieta/diet-1');
   });
 
-  it('triggers guardrail when clicking header back button with unsaved changes', () => {
+  it('triggers guardrail when clicking header back button with unsaved changes', async () => {
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     // Add a variation
     const addButton = screen.getByRole('button', { name: /Adicionar Nova Variação ao Ciclo/i });
@@ -208,8 +237,9 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     expect(screen.getByText(/Descartar alterações\?/i)).toBeInTheDocument();
   });
 
-  it('handles copy and paste between variation cards correctly', () => {
+  it('handles copy and paste between variation cards correctly', async () => {
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     const copyButtons = screen.getAllByRole('button', { name: /Copiar valores/i });
     const pasteButtons = screen.getAllByRole('button', { name: /Colar valores/i });
@@ -236,8 +266,9 @@ describe('Dedicated Carb Cycling Page (/pacientes/[id]/dieta/[dietaId]/ciclo)', 
     expect(carbInputs.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('limits macro inputs to at most 4 characters', () => {
+  it('limits macro inputs to at most 4 characters', async () => {
     render(<DedicatedCarbCyclingPage />);
+    await screen.findByText('Configuração do Ciclo de Carboidratos');
 
     const protInput = screen.getAllByDisplayValue('130')[0]; // Dia Alto Carbo protein input
     fireEvent.change(protInput, { target: { value: '12345' } });

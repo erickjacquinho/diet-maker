@@ -1,7 +1,7 @@
 'use client';
 
 import { calculatePresetCalories } from './presetUtils';
-import { getStorageItem, setStorageItem } from './storage';
+import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 
 export interface RecipeIngredient {
   foodId: string;
@@ -63,7 +63,7 @@ export function calculateRecipeNutrients(ingredients: RecipeIngredient[], servin
 }
 
 export function getRecipesFromStorage(): Recipe[] {
-  return getStorageItem<Recipe[]>(RECIPES_KEY, []);
+  return getEphemeralItem<Recipe[]>(RECIPES_KEY, []);
 }
 
 export function saveRecipeToStorage(recipe: Omit<Recipe, 'id' | 'createdAt'> & { id?: string }): Recipe {
@@ -82,12 +82,12 @@ export function saveRecipeToStorage(recipe: Omit<Recipe, 'id' | 'createdAt'> & {
     ? current.map((r) => (r.id === id ? recipeToSave : r))
     : [recipeToSave, ...current];
 
-  setStorageItem(RECIPES_KEY, updatedList);
+  setEphemeralItem(RECIPES_KEY, updatedList);
   return recipeToSave;
 }
 
 export function deleteRecipeFromStorage(id: string): void {
   const current = getRecipesFromStorage();
   const updatedList = current.filter((r) => r.id !== id);
-  setStorageItem(RECIPES_KEY, updatedList);
+  setEphemeralItem(RECIPES_KEY, updatedList);
 }

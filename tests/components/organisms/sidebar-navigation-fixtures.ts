@@ -11,7 +11,7 @@ export const sidebarProductionRoutes: SidebarRouteItem[] = [
   { kind: 'route', href: '/presets', label: 'Presets de Dietas', icon: Sparkles, match: 'prefix' },
   {
     kind: 'route',
-    href: '/refeicoes-prontas',
+    href: '/refeicoes',
     label: 'Refeições Prontas',
     icon: UtensilsCrossed,
     match: 'prefix',

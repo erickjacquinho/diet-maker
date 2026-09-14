@@ -1,6 +1,6 @@
 # Decisão 14 — Consolidação e Divisão da Implementação em SDDs
 
-- **Status:** Escopo documental ajustado; SDDs de persistência ainda não criados
+- **Status:** Etapas 1–6 implementadas e validadas
 - **Data:** 2026-08-30
 - **Escopo:** Entregas separadas da persistência local, sem ampliar a proposta
 
@@ -18,24 +18,25 @@
 
 ## 2. Situação das etapas
 
-As Decisões 04 e 10 já definiam fases técnicas, mas não havia SDDs separados
-para esta arquitetura em `specs/`. A Decisão 04 detalha o fluxo de dietas; ela
-não representa seis features nem exige um SDD por fase interna.
+As Decisões 04 e 10 já definiam fases técnicas. Os SDDs das etapas 1–3 agora
+existem em `specs/` e possuem evidências de implementação/validação. A Decisão
+04 detalha o fluxo de dietas; ela não representa seis features nem exige um SDD
+por fase interna.
 
-A tabela abaixo organiza os próximos SDDs. Os números indicam ordem de
-trabalho, não IDs definitivos de pasta. Esta revisão não cria `spec.md`,
-`plan.md` ou `tasks.md`, nem marca implementação como concluída.
+A tabela abaixo registra a ordem e a situação das etapas. Os números indicam
+ordem de trabalho, não IDs definitivos de pasta. As etapas 1–6 possuem
+`spec.md`, `plan.md`, `tasks.md` e validação.
 
 ## 3. Divisão em SDDs
 
 | Ordem | SDD | Entrega e limite | Dependência |
 | --- | --- | --- | --- |
-| 1 | Prova técnica e base local | Validar PGlite + Drizzle, persistência, transações, migration simples, separação de drafts e bloqueio da segunda aba. Registrar resultado e fixar o adaptador somente se aprovado. Sem integrar todos os módulos. | Nenhuma |
-| 2 | Conta e pacientes | Persistir perfil local e cadastro de pacientes, incluindo edição e arquivamento. Preservar o contrato de restauração sem criar tela administrativa futura. Criar somente contratos/tabelas necessários, sem migrar dados de teste. | 1 aprovado |
-| 3 | Dietas: rascunho, salvamento e histórico | Entregar o primeiro fluxo vertical completo da Decisão 01 e as fases da Decisão 04, usando TACO e preservando modos/variações já existentes. Validar autosave, vigência, snapshots e cópia. | 2 |
-| 4 | Biblioteca reutilizável | Persistir alimentos customizados, receitas e refeições prontas e integrá-los à prescrição, sem referências que alterem dietas já salvas. | 3 |
-| 5 | Avaliações e acompanhamento existentes | Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos, sem criar agenda, prontuário ampliado ou novos fluxos clínicos. | 3 |
-| 6 | Backup manual simples | Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional. Sem senha, criptografia, automação ou mesclagem. | 4 e 5 |
+| 1 | Prova técnica e base local | Validar PGlite + Drizzle, persistência, transações, migration simples, separação de drafts e bloqueio da segunda aba. Registrar resultado e fixar o adaptador somente se aprovado. Sem integrar todos os módulos. **Concluída e aprovada no portão técnico.** | Nenhuma |
+| 2 | Conta e pacientes | Persistir perfil local e cadastro de pacientes, incluindo edição e arquivamento. Preservar o contrato de restauração sem criar tela administrativa futura. Criar somente contratos/tabelas necessários, sem migrar dados de teste. **Concluída e validada.** | 1 aprovado |
+| 3 | Dietas: rascunho, salvamento e histórico | Entregar o primeiro fluxo vertical completo da Decisão 01 e as fases da Decisão 04, usando TACO e preservando modos/variações já existentes. Validar autosave, vigência, snapshots e cópia. **Implementada e validada.** | 2 |
+| 4 | Biblioteca reutilizável | Persistir alimentos customizados, receitas e refeições prontas e integrá-los à prescrição, sem referências que alterem dietas já salvas. **Concluída e validada no portão.** | 3 |
+| 5 | Avaliações e acompanhamento existentes | Migrar a persistência das avaliações, próximos acompanhamentos e demais registros já previstos, sem criar agenda, prontuário ampliado ou novos fluxos clínicos. **Concluída e validada.** | 3 |
+| 6 | Backup manual simples | Exportar todos os dados confirmados da Conta e restaurá-los por substituição validada e transacional. Sem senha, criptografia, automação ou mesclagem. **Concluída e validada.** | 4 e 5 |
 
 Cada SDD deve ter seus próprios requisitos, plano, tarefas e validação. Os
 testes acompanham a entrega a que pertencem; não há uma feature separada de

@@ -1,83 +1,44 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Users } from 'lucide-react';
+import { AlertTriangle, Search, Users } from 'lucide-react';
 import { PatientListTable } from '@/components/organisms';
 import { CreateButton } from '@/components/atoms/Button';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePatientModal, type CreatePatientFormData } from '@/components/molecules/CreatePatientModal';
-import {
-  getPatientRecordHistory,
-  getPatientsFromStorage,
-  savePatientToStorage,
-  Patient,
-} from '@/lib/patientsStore';
-import { buildPatientListRows, filterPatients } from '@/lib/patientListView';
-import type { PatientListHistoryInput } from '@/lib/patientListView';
 import { calculatePresetCalories } from '@/lib/presetUtils';
-import { formatWhatsappContact } from '@/lib/whatsapp';
+import { usePatientsPage } from '@/hooks/usePatientsPage';
 
 export default function PatientsListPage() {
   const router = useRouter();
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [patientHistoryById, setPatientHistoryById] = useState<Record<string, PatientListHistoryInput>>({});
+  const { patients, filteredPatients, rows: patientRows, searchTerm, setSearchTerm, isLoading, error, retry, createPatient } = usePatientsPage();
 
-  const loadPatients = useCallback(() => {
-    const loadedPatients = getPatientsFromStorage();
-    setPatients(loadedPatients);
-    setPatientHistoryById(
-      Object.fromEntries(
-        loadedPatients.map((patient) => {
-          const recordHistory = getPatientRecordHistory(patient.id);
-          return [patient.id, {
-            assessments: recordHistory.assessments,
-            hasAssessment: recordHistory.assessments.length > 0 || patient.lastActivity?.type === 'assessment',
-            hasDiet: recordHistory.hasDiet || patient.lastActivity?.type === 'diet',
-          }];
-        }),
-      ),
-    );
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadPatients();
-  }, [loadPatients]);
-
-  const handleCreatePatient = (formData: CreatePatientFormData) => {
-    const calculatedKcal = calculatePresetCalories(
-      Number(formData.targetProtein),
-      Number(formData.targetCarbs),
-      Number(formData.targetFats)
-    );
-
-    savePatientToStorage({
-      name: formData.name.trim(),
+  const handleCreatePatient = async (formData: CreatePatientFormData) => {
+    const targetProtein = Number(formData.targetProtein);
+    const targetCarbs = Number(formData.targetCarbs);
+    const targetFats = Number(formData.targetFats);
+    await createPatient({
+      name: formData.name,
       age: Number(formData.age),
       gender: formData.gender,
       heightCm: Number(formData.heightCm),
       weightKg: Number(formData.weightKg),
-      targetKcal: calculatedKcal,
-      targetProtein: Number(formData.targetProtein),
-      targetCarbs: Number(formData.targetCarbs),
-      targetFats: Number(formData.targetFats),
-      objective: formData.objective.trim(),
-      whatsapp: formatWhatsappContact(formData.whatsapp) || undefined,
+      phone: null,
+      whatsapp: formData.whatsapp,
+      currentObjective: formData.objective,
+      defaultMacroTargets: {
+        proteinG: targetProtein,
+        carbsG: targetCarbs,
+        fatsG: targetFats,
+        kcal: calculatePresetCalories(targetProtein, targetCarbs, targetFats),
+      },
     });
-
-    loadPatients();
     setIsModalOpen(false);
   };
-
-
-  const filteredPatients = filterPatients(patients, searchTerm);
-  const patientRows = buildPatientListRows(filteredPatients, undefined, patientHistoryById);
   const countLabel = filteredPatients.length === patients.length
     ? `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`
     : `${filteredPatients.length} de ${patients.length} pacientes`;
@@ -126,6 +87,19 @@ export default function PatientsListPage() {
         <div role="status" className="py-16 text-center text-style-body-small text-text-muted">
           Carregando pacientes...
         </div>
+      ) : error ? (
+        <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
+          <CardContent className="p-12 text-center flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-surface bg-error-soft border border-error-border flex items-center justify-center mx-auto text-error">
+              <AlertTriangle size={24} aria-hidden="true" />
+            </div>
+            <div>
+              <h3 className="font-bold text-style-body text-text-primary">Não foi possível carregar pacientes</h3>
+              <p className="text-style-legal text-text-muted mt-1 leading-relaxed">{error}</p>
+            </div>
+            <Button type="button" variant="secondary" size="compact" onClick={() => void retry()}>Tentar novamente</Button>
+          </CardContent>
+        </Card>
       ) : patients.length === 0 ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
           <CardContent className="p-12 text-center flex flex-col gap-4">

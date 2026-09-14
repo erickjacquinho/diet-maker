@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { BodyAssessment, Patient } from '@/lib/patientsStore';
+import type { BodyAssessment, Patient } from '@/lib/application/patients/clinical-ui-adapter';
 import { Surface } from '@/components/atoms';
 import { MetricBox } from './MetricBox';
 import { useAssessmentForm } from '@/hooks/useAssessmentForm';
@@ -25,7 +25,7 @@ export interface EditAssessmentModalProps {
   assessment: BodyAssessment | null;
   mode?: 'create' | 'edit';
   onOpenChange: (open: boolean) => void;
-  onSave: (assessment: BodyAssessment) => void;
+  onSave: (assessment: BodyAssessment) => void | Promise<void>;
 }
 
 export function EditAssessmentModal({
@@ -38,19 +38,20 @@ export function EditAssessmentModal({
 }: EditAssessmentModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
-  useSaveShortcut({
-    formRef,
-    enabled: open,
-    priority: 10,
-  });
-
-  const { draft, composition, submitError, updateNumericField, handleSubmit } =
+  const { draft, composition, submitError, isSaving, updateNumericField, handleSubmit } =
     useAssessmentForm({
       assessment,
       patient,
       onSave,
       onOpenChange,
     });
+
+  useSaveShortcut({
+    formRef,
+    enabled: open,
+    priority: 10,
+    busy: isSaving,
+  });
 
   const modalTitle = mode === 'create' ? 'Nova Avaliação Física' : 'Editar Avaliação Física';
 
@@ -126,6 +127,7 @@ export function EditAssessmentModal({
                 onClick={() => onOpenChange(false)}
                 variant="secondary"
                 size="compact"
+                disabled={isSaving}
               >
                 Cancelar
               </Button>
@@ -135,6 +137,7 @@ export function EditAssessmentModal({
                 size="compact"
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar avaliação (Ctrl+S)"
+                disabled={isSaving}
               >
                 Salvar avaliação <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>

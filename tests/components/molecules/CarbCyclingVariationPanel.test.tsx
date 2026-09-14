@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { CarbCyclingVariationPanel } from '@/components/molecules/CarbCyclingVariationPanel';
+import { CarbCyclingVariationPanel } from '@/components/organisms/diet/CarbCyclingVariationPanel';
 import { CarbCyclingVariation } from '@/lib/dietStore';
 
 const mockVariations: CarbCyclingVariation[] = [
@@ -119,7 +119,7 @@ describe('CarbCyclingVariationPanel molecule', () => {
       />
     );
 
-    const tabs = screen.getAllByRole('tab');
+    const tabs = screen.getAllByRole('button', { name: /^Dia/ });
     const handles = screen.getAllByTitle(/Arrastar para reordenar/i);
     const firstHandle = handles[0];
     const thirdItem = tabs[2];
@@ -158,7 +158,7 @@ describe('CarbCyclingVariationPanel molecule', () => {
       />
     );
 
-    const tabs = screen.getAllByRole('tab');
+    const tabs = screen.getAllByRole('button', { name: /^Dia/ });
     const firstItem = tabs[0];
     const handles = screen.getAllByTitle(/Arrastar para reordenar/i);
     const firstHandle = handles[0];
@@ -186,7 +186,7 @@ describe('CarbCyclingVariationPanel molecule', () => {
       />
     );
 
-    const tabs = screen.getAllByRole('tab');
+    const tabs = screen.getAllByRole('button', { name: /^Dia/ });
     const firstItem = tabs[0];
 
     fireEvent.keyDown(firstItem, { key: 'ArrowDown', altKey: true });

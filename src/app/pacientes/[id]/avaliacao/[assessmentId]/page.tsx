@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, AlertTriangle, Calendar, User, Ruler } from 'lucide-react';
 import { PageContextHeader } from '@/components/molecules';
+import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import { AssessmentContinuousFields } from '@/components/molecules/assessment/AssessmentContinuousFields';
 import { AssessmentSummaryPanel } from '@/components/organisms/assessment/AssessmentSummaryPanel';
 import { Surface, SecondaryActionButton } from '@/components/atoms';
@@ -20,6 +21,7 @@ export default function AssessmentWorkspacePage() {
   const {
     patient,
     draft,
+    isLoading,
     previousAssessment,
     composition,
     ffmi,
@@ -28,12 +30,23 @@ export default function AssessmentWorkspacePage() {
     isSaving,
     isCopied,
     submitError,
+    isLeaveConfirmationOpen,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCancelLeaveConfirmation,
+    handleConfirmLeave,
     handleCopySummary,
   } = useAssessmentWorkspacePage(patientId, assessmentId);
+
+  if (isLoading) {
+    return (
+      <div role="status" aria-live="polite" className="container mx-auto py-12 px-4 text-center text-text-secondary">
+        Carregando avaliação…
+      </div>
+    );
+  }
 
   if (!patient || !draft) {
     return (
@@ -137,6 +150,18 @@ export default function AssessmentWorkspacePage() {
           />
         </div>
       </div>
+
+      <ConfirmationAlertDialog
+        open={isLeaveConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelLeaveConfirmation();
+        }}
+        title="Sair sem salvar?"
+        description="Você possui alterações não salvas na avaliação. Deseja sair mesmo assim?"
+        confirmLabel="Sair"
+        onConfirm={handleConfirmLeave}
+        cancelLabel="Continuar editando"
+      />
     </div>
   );
 }

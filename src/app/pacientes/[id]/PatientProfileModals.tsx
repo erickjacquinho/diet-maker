@@ -3,27 +3,24 @@
 import React from 'react';
 import {
   EditAssessmentModal,
-  ReadOnlyDietModal,
   EditPatientModal,
   NextEventModal,
   AddObjectiveModal,
   DeletePatientModal,
-  DeleteDietModal,
 } from '@/components/molecules';
-import type { Patient, BodyAssessment, HistoricalDiet, PatientNextEvent } from '@/lib/patientsStore';
+import { ReadOnlyDietModal } from '@/components/organisms';
+import type { PatientViewModel } from '@/lib/patientViewModel';
+import type { BodyAssessment, PatientNextEvent } from '@/lib/patientRelatedRecords';
+import type { DietPlan } from '@/lib/domain/diets/diet-model';
 
 export interface PatientProfileModalsProps {
-  patient: Patient;
+  patient: PatientViewModel;
   availableObjectives: string[];
   objectiveToApply?: string;
   isEditModalOpen: boolean;
   setIsEditModalOpen: (open: boolean) => void;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: (open: boolean) => void;
-  isDeleteDietModalOpen?: boolean;
-  setIsDeleteDietModalOpen?: (open: boolean) => void;
-  dietToDelete?: HistoricalDiet | null;
-  handleDeleteDiet?: () => void;
   isNextEventModalOpen: boolean;
   setIsNextEventModalOpen: (open: boolean) => void;
   isAddObjectiveModalOpen: boolean;
@@ -32,15 +29,15 @@ export interface PatientProfileModalsProps {
   setIsEditAssessmentOpen: (open: boolean) => void;
   editingAssessment: BodyAssessment | null;
   assessmentMode: 'create' | 'edit';
-  selectedReadOnlyDiet: HistoricalDiet | null;
+  selectedReadOnlyDiet: DietPlan | null;
   isReadOnlyDietModalOpen: boolean;
   setIsReadOnlyDietModalOpen: (open: boolean) => void;
-  handleSavePatient: (p: Patient) => void;
-  handleDeletePatient: () => void;
-  handleSaveNextEvent: (ev: PatientNextEvent) => void;
-  handleClearNextEvent: () => void;
-  handleAddCustomObjective: (obj: string) => void;
-  handleSaveAssessment: (ass: BodyAssessment) => void;
+  handleSavePatient: (p: PatientViewModel) => void | Promise<void>;
+  handleDeletePatient: () => void | Promise<void>;
+  handleSaveNextEvent: (ev: PatientNextEvent) => void | Promise<void>;
+  handleClearNextEvent: () => void | Promise<void>;
+  handleAddCustomObjective: (obj: string) => void | Promise<void>;
+  handleSaveAssessment: (ass: BodyAssessment) => void | Promise<void>;
 }
 
 export function PatientProfileModals({
@@ -51,10 +48,6 @@ export function PatientProfileModals({
   setIsEditModalOpen,
   isDeleteModalOpen,
   setIsDeleteModalOpen,
-  isDeleteDietModalOpen,
-  setIsDeleteDietModalOpen,
-  dietToDelete,
-  handleDeleteDiet,
   isNextEventModalOpen,
   setIsNextEventModalOpen,
   isAddObjectiveModalOpen,
@@ -89,18 +82,8 @@ export function PatientProfileModals({
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         patientName={patient.name}
-        onConfirmDelete={handleDeletePatient}
+        onConfirmArchive={handleDeletePatient}
       />
-
-      {dietToDelete && isDeleteDietModalOpen !== undefined && setIsDeleteDietModalOpen && handleDeleteDiet && (
-        <DeleteDietModal
-          open={isDeleteDietModalOpen}
-          onOpenChange={setIsDeleteDietModalOpen}
-          dietName={dietToDelete.name}
-          dietDate={dietToDelete.date}
-          onConfirmDelete={handleDeleteDiet}
-        />
-      )}
 
       <NextEventModal
         open={isNextEventModalOpen}

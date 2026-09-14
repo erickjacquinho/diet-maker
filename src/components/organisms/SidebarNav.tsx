@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { Button } from '@/components/atoms';
 import { SidebarBrand } from '@/components/molecules/SidebarBrand';
 import { SidebarNavItem } from '@/components/molecules/SidebarNavItem';
 import { SidebarQuickActions } from '@/components/molecules/SidebarQuickActions';
@@ -40,9 +41,15 @@ export interface SidebarNavProps {
   navigationItems: SidebarNavigationItem[];
   doctorName?: string;
   doctorRole?: string;
-  onSave?: () => void;
-  onOpen?: () => void;
+  onExportBackup?: () => void | Promise<void>;
+  onRestoreBackup?: () => void | Promise<void>;
+  isExporting?: boolean;
+  isRestoring?: boolean;
+  profileSyncState?: 'unbound' | 'syncing' | 'synced' | 'paused';
+  onRetryProfileSync?: () => void | Promise<void>;
+  isRetryingProfileSync?: boolean;
   onOpenAccount?: () => void;
+  onSignOut?: () => void | Promise<void>;
   initialCollapsed?: boolean;
   children?: React.ReactNode;
 }
@@ -51,13 +58,19 @@ function SidebarNavContent({
   doctorName,
   doctorRole,
   pathname,
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  isExporting,
+  isRestoring,
+  profileSyncState,
+  onRetryProfileSync,
+  isRetryingProfileSync,
   onOpenAccount,
+  onSignOut,
   navigationItems,
   children,
 }: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
-  Pick<SidebarNavProps, 'pathname' | 'onSave' | 'onOpen' | 'onOpenAccount' | 'children'>) {
+  Pick<SidebarNavProps, 'pathname' | 'onExportBackup' | 'onRestoreBackup' | 'isExporting' | 'isRestoring' | 'profileSyncState' | 'onRetryProfileSync' | 'isRetryingProfileSync' | 'onOpenAccount' | 'onSignOut' | 'children'>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -79,13 +92,46 @@ function SidebarNavContent({
             </SidebarContent>
 
             <SidebarFooter>
+              {profileSyncState ? (
+                <div
+                  aria-live="polite"
+                  className={`mx-2 mb-2 rounded-control border p-2 text-style-legal ${profileSyncState === 'paused' ? 'border-warning-border bg-warning-soft text-warning' : 'border-border-subtle bg-surface-subtle text-text-muted'}`}
+                  data-profile-sync-state={profileSyncState}
+                  role="status"
+                >
+                  {profileSyncState === 'paused'
+                    ? 'Sincronização pausada — reautorize o arquivo para continuar.'
+                    : profileSyncState === 'syncing'
+                      ? 'Sincronizando o profile…'
+                      : profileSyncState === 'synced'
+                        ? 'Profile sincronizado no arquivo.'
+                        : 'Arquivo do profile não associado.'}
+                  {profileSyncState === 'paused' && onRetryProfileSync ? (
+                    <Button
+                      className="mt-2 w-full"
+                      disabled={isRetryingProfileSync}
+                      loading={isRetryingProfileSync}
+                      onClick={onRetryProfileSync}
+                      size="compact"
+                      type="button"
+                      variant="secondary"
+                    >
+                      Reautorizar arquivo
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
               <SidebarUserProfile
                 doctorName={doctorName}
                 doctorRole={doctorRole}
                 isCollapsed={isCollapsed}
                 onOpenAccount={onOpenAccount}
+                onExportBackup={onExportBackup}
+                onRestoreBackup={onRestoreBackup}
+                isExporting={isExporting}
+                isRestoring={isRestoring}
+                onSignOut={onSignOut}
               />
-              <SidebarQuickActions onSave={onSave} onOpen={onOpen} isCollapsed={isCollapsed} />
             </SidebarFooter>
           </>
         )}
@@ -104,9 +150,15 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   navigationItems,
   doctorName = 'Dr. Lucas',
   doctorRole = 'Nutricionista',
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  isExporting,
+  isRestoring,
+  profileSyncState,
+  onRetryProfileSync,
+  isRetryingProfileSync,
   onOpenAccount,
+  onSignOut,
   initialCollapsed = false,
   children,
 }) => {
@@ -116,9 +168,15 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
         doctorName={doctorName}
         doctorRole={doctorRole}
         pathname={pathname}
-        onSave={onSave}
-        onOpen={onOpen}
+        onExportBackup={onExportBackup}
+        onRestoreBackup={onRestoreBackup}
+        isExporting={isExporting}
+        isRestoring={isRestoring}
+        profileSyncState={profileSyncState}
+        onRetryProfileSync={onRetryProfileSync}
+        isRetryingProfileSync={isRetryingProfileSync}
         onOpenAccount={onOpenAccount}
+        onSignOut={onSignOut}
         navigationItems={navigationItems}
       >
         {children}

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
 import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
+import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { makePatientProfileState } from './profileState';
 
 const push = vi.fn();
 const router = { push, replace: vi.fn() };
@@ -18,13 +20,21 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('@/hooks/usePatientProfilePage', () => ({
+  usePatientProfilePage: vi.fn(),
+}));
+
+const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
+
 describe('PatientDetailPage WhatsApp action', () => {
   beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([{ ...PATIENT_PROFILE_FIXTURES.patient, whatsapp: '(11) 99999-9999' }]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      patient: {
+        ...makePatientProfileState().patient,
+        whatsapp: '(11) 99999-9999',
+      },
+      whatsappUrl: 'https://web.whatsapp.com/send?phone=5511999999999',
+    }));
   });
 
   afterEach(() => {
@@ -35,10 +45,6 @@ describe('PatientDetailPage WhatsApp action', () => {
     const open = vi.spyOn(window, 'open').mockReturnValue({} as Window);
 
     render(<PatientDetailPage />);
-
-    fireEvent.click(await screen.findByRole('button', { name: 'Editar Cadastro' }));
-    expect(await screen.findByRole('textbox', { name: 'WhatsApp' })).toHaveValue('(11) 99999-9999');
-    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
 
     const button = await screen.findByRole('button', { name: 'Abrir conversa no WhatsApp' });
     expect(button).not.toBeDisabled();
@@ -53,10 +59,7 @@ describe('PatientDetailPage WhatsApp action', () => {
   });
 
   it('disables the action when the patient has no WhatsApp contact', async () => {
-    localStorage.setItem(
-      'nutridiet_patients',
-      JSON.stringify([PATIENT_PROFILE_FIXTURES.patient]),
-    );
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
 
     render(<PatientDetailPage />);
 

@@ -30,18 +30,21 @@ const renderMealCard = (
   );
 
 const openMealActions = async () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Mais ações da refeição' }));
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), {
+    button: 0,
+    ctrlKey: false,
+  });
   return screen.findByRole('menu');
 };
 
-describe('MealCardContainer context menu', () => {
-  it('opens from the three-dot button and keeps the existing meal buttons', async () => {
-    renderMealCard({ canPasteMeal: true });
+describe('MealCardContainer actions menu', () => {
+  it('opens from the three-dot button and keeps secondary actions in the menu', async () => {
+    renderMealCard({ canPasteMeal: true, onAddVariation: vi.fn() });
 
-    expect(screen.getByRole('button', { name: 'Copiar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Colar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Duplicar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Escalar' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Copiar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Colar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Duplicar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
 
     const menu = await openMealActions();
@@ -54,32 +57,17 @@ describe('MealCardContainer context menu', () => {
     expect(menu).toHaveClass('rounded-control', 'border-border-subtle', 'bg-surface', 'shadow-floating');
     expect(pasteAndReplaceItem).toHaveClass('text-style-nav-item', 'text-text-primary', 'transition-colors', 'duration-fast', 'focus:bg-surface-hover');
     expect(within(menu).getByRole('menuitem', { name: 'Escalar' })).toBeInTheDocument();
-    expect(within(menu).getByRole('menuitem', { name: 'Excluir da refeição' })).toBeInTheDocument();
+    expect(within(menu).getByRole('menuitem', { name: 'Nova Variação' })).toBeInTheDocument();
+    expect(within(menu).queryByRole('menuitem', { name: 'Excluir da refeição' })).not.toBeInTheDocument();
   });
 
-  it('anchors the menu below the trigger with semantic spacing', async () => {
+  it('opens the canonical dropdown below the trigger with semantic spacing', async () => {
     renderMealCard();
-    const trigger = screen.getByRole('button', { name: 'Mais ações da refeição' });
-    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
-      x: 120,
-      y: 40,
-      left: 120,
-      top: 40,
-      right: 152,
-      bottom: 72,
-      width: 32,
-      height: 32,
-      toJSON: () => ({}),
-    });
-
-    const dispatchEvent = vi.spyOn(trigger, 'dispatchEvent');
     const menu = await openMealActions();
-    const contextMenuEvent = dispatchEvent.mock.calls
-      .map(([event]) => event)
-      .find((event) => event.type === 'contextmenu') as MouseEvent;
-
-    expect(contextMenuEvent.clientX).toBe(120);
-    expect(contextMenuEvent.clientY).toBe(72);
+    expect(document.querySelector('[aria-label="Mais ações da refeição"]')).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     expect(menu).toHaveClass('-ml-0.5', 'mt-1');
   });
 
@@ -87,7 +75,7 @@ describe('MealCardContainer context menu', () => {
     ['Duplicar', 'onDuplicate'],
     ['Copiar', 'onCopyMeal'],
     ['Colar', 'onPasteMeal'],
-    ['Excluir da refeição', 'onDeleteMeal'],
+    ['Nova Variação', 'onAddVariation'],
   ] as const)('calls the %s action from the menu', async (label, propName) => {
     const onAction = vi.fn();
 
@@ -117,7 +105,10 @@ describe('MealCardContainer context menu', () => {
     fireEvent.click(within(alert).getByRole('button', { name: 'Cancelar' }));
     expect(onPasteMealAndReplace).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Mais ações da refeição' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), {
+      button: 0,
+      ctrlKey: false,
+    });
     const reopenedMenu = await screen.findByRole('menu');
     fireEvent.click(within(reopenedMenu).getByRole('menuitem', { name: 'Colar e substituir' }));
     const reopenedAlert = await screen.findByRole('alertdialog');
@@ -133,6 +124,7 @@ describe('MealCardContainer context menu', () => {
       scaleDisabled: true,
     });
 
+    expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
     const menu = await openMealActions();
 
     expect(within(menu).getByRole('menuitem', { name: 'Copiar' })).toHaveAttribute('data-disabled');
@@ -140,14 +132,12 @@ describe('MealCardContainer context menu', () => {
     expect(within(menu).getByRole('menuitem', { name: 'Colar e substituir' })).toHaveAttribute('data-disabled');
     expect(within(menu).getByRole('menuitem', { name: 'Escalar' })).toHaveAttribute('data-disabled');
     expect(within(menu).getByRole('menuitem', { name: 'Duplicar' })).not.toHaveAttribute('data-disabled');
-    expect(within(menu).getByRole('menuitem', { name: 'Excluir da refeição' })).not.toHaveAttribute('data-disabled');
+    expect(within(menu).queryByRole('menuitem', { name: 'Excluir da refeição' })).not.toBeInTheDocument();
   });
 
   it('keeps scaling disabled even when a scale callback is provided', async () => {
     const onScale = vi.fn();
     renderMealCard({ onScale, scaleDisabled: false });
-
-    expect(screen.getByRole('button', { name: 'Escalar' })).toBeDisabled();
 
     const menu = await openMealActions();
     const scaleItem = within(menu).getByRole('menuitem', { name: 'Escalar' });
@@ -157,7 +147,7 @@ describe('MealCardContainer context menu', () => {
     expect(onScale).not.toHaveBeenCalled();
   });
 
-  it('dismisses through the native context-menu Escape interaction', async () => {
+  it('dismisses through the native dropdown Escape interaction', async () => {
     renderMealCard();
     const menu = await openMealActions();
 

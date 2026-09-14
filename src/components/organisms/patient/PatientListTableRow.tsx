@@ -133,6 +133,7 @@ export function PatientListTableRow({
   };
 
   const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, href: string) => {
+    if ((event.target as HTMLElement).closest('a')) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     onNavigate?.(href);
@@ -155,18 +156,16 @@ export function PatientListTableRow({
   return (
     <TableRow
       tabIndex={0}
-      role="link"
       aria-label={`Abrir perfil de ${row.patient.name}`}
-      className="group min-h-table-row cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="group min-h-table-row cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-inset"
       onClick={(event) => handleRowClick(event, row.href)}
       onKeyDown={(event) => handleRowKeyDown(event, row.href)}
     >
       <TableCell className="relative px-4 py-3 align-middle">
         <Link
           href={row.href}
-          tabIndex={-1}
           aria-label={`Ver perfil de ${row.patient.name}`}
-          className="flex min-w-0 items-center gap-3 text-text-primary focus-visible:outline-none"
+          className="flex min-w-0 items-center gap-3 text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           <RecordIndicators row={row} />
           <span className="flex min-w-0 flex-col gap-1">
@@ -177,7 +176,7 @@ export function PatientListTableRow({
               {row.patient.name}
             </span>
             <span
-              className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted min-h-[1rem] truncate whitespace-nowrap"
+              className="flex items-center gap-1.5 text-style-legal font-medium text-text-muted truncate whitespace-nowrap"
               title={patientMeta || undefined}
             >
               <GenderIcon gender={row.patient.gender} />

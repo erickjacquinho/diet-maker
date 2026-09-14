@@ -1,14 +1,11 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import {
-  getPatientById,
-  getPatientAssessmentsFromStorage,
-  savePatientAssessmentToStorage,
-  normalizePairedBodyMeasurements,
-  Patient,
-  BodyAssessment,
-} from '@/lib/patientsStore';
+import type { PatientViewModel } from '@/lib/patientViewModel';
+import { toPatientViewModel } from '@/lib/patientViewModel';
+import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import { ClinicalApplicationError } from '@/lib/domain/clinical';
+import { toAssessmentInput, toLegacyAssessment, type BodyAssessment } from '@/lib/application/patients/clinical-ui-adapter';
 import { calculateBodyComposition, normalizeBodyFatSex } from '@/lib/bodyFat';
 import { useSaveShortcut } from './useSaveShortcut';
 import type { NumericAssessmentField } from './useAssessmentForm';
@@ -24,65 +21,73 @@ export interface AssessmentDeltas {
 
 export function useAssessmentWorkspacePage(patientId: string, assessmentId: string) {
   const router = useRouter();
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [patient, setPatient] = useState<PatientViewModel | null>(null);
   const [draft, setDraft] = useState<BodyAssessment | null>(null);
   const [previousAssessment, setPreviousAssessment] = useState<BodyAssessment | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isLeaveConfirmationOpen, setIsLeaveConfirmationOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const savingRef = useRef(false);
 
   const isNew = assessmentId === 'nova';
 
   useEffect(() => {
-    if (!patientId) return;
+    let cancelled = false;
+    if (!patientId) return undefined;
+    setIsLoading(true);
+    setSubmitError(null);
+    void getBrowserPatientApplication().then(async (application) => {
+      const profile = await application.getPatientProfile(patientId);
+      const canonicalAssessments = profile.clinical?.assessments ?? await application.listAssessments(patientId);
+      const assessments = canonicalAssessments.map(toLegacyAssessment);
+      const sorted = [...assessments].sort((left, right) => (right.clinicalDate ?? right.date).localeCompare(left.clinicalDate ?? left.date) || left.id.localeCompare(right.id));
+      if (cancelled) return;
+      setPatient(toPatientViewModel(profile.patient, { initials: profile.initials }));
 
-    const foundPatient = getPatientById(patientId);
-    setPatient(foundPatient);
-
-    const assessments = getPatientAssessmentsFromStorage(patientId);
-    const sorted = [...assessments].sort((a, b) => b.date.localeCompare(a.date));
-
-    if (isNew) {
-      const latest = sorted[0] ?? null;
-      setPreviousAssessment(latest);
-
-      const todayStr = new Date().toLocaleDateString('pt-BR');
-      setDraft({
-        id: `asm-${Date.now()}`,
-        date: todayStr,
-        weightKg: Number.NaN,
-        bodyFatPercent: Number.NaN,
-        muscleMassKg: Number.NaN,
-        fatMassKg: Number.NaN,
-        waistCm: Number.NaN,
-        neckCm: Number.NaN,
-        scapulaCm: Number.NaN,
-        bustCm: Number.NaN,
-        leftArmCm: Number.NaN,
-        rightArmCm: Number.NaN,
-        abdomenCm: Number.NaN,
-        hipCm: Number.NaN,
-        leftProximalThighCm: Number.NaN,
-        rightProximalThighCm: Number.NaN,
-        leftDistalThighCm: Number.NaN,
-        rightDistalThighCm: Number.NaN,
-        leftCalfCm: Number.NaN,
-        rightCalfCm: Number.NaN,
-      });
-      setIsDirty(false);
-    } else {
-      const existing = assessments.find((item) => item.id === assessmentId) ?? null;
-      setDraft(existing ? { ...existing } : null);
-      setIsDirty(false);
-
-      if (existing) {
-        const olderAssessments = sorted.filter(
-          (item) => item.id !== existing.id && item.date <= existing.date
-        );
-        setPreviousAssessment(olderAssessments[0] ?? null);
+      if (isNew) {
+        setPreviousAssessment(sorted[0] ?? null);
+        setDraft({
+          id: `draft-${patientId}`,
+          patientId,
+          date: new Date().toLocaleDateString('pt-BR'),
+          weightKg: Number.NaN,
+          bodyFatPercent: Number.NaN,
+          muscleMassKg: Number.NaN,
+          fatMassKg: Number.NaN,
+          waistCm: Number.NaN,
+          neckCm: Number.NaN,
+          scapulaCm: Number.NaN,
+          bustCm: Number.NaN,
+          leftArmCm: Number.NaN,
+          rightArmCm: Number.NaN,
+          abdomenCm: Number.NaN,
+          hipCm: Number.NaN,
+          leftProximalThighCm: Number.NaN,
+          rightProximalThighCm: Number.NaN,
+          leftDistalThighCm: Number.NaN,
+          rightDistalThighCm: Number.NaN,
+          leftCalfCm: Number.NaN,
+          rightCalfCm: Number.NaN,
+        });
+      } else {
+        const existing = assessments.find((item) => item.id === assessmentId) ?? null;
+        if (!existing) throw new ClinicalApplicationError('CLINICAL_ASSESSMENT_NOT_FOUND', 'Avaliação não encontrada neste paciente.');
+        setDraft({ ...existing });
+        setPreviousAssessment(sorted.find((item) => item.id !== existing.id && (item.clinicalDate ?? item.date) <= (existing.clinicalDate ?? existing.date)) ?? null);
       }
-    }
+      setIsDirty(false);
+    }).catch((error: unknown) => {
+      if (cancelled) return;
+      setPatient(null);
+      setDraft(null);
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível carregar a avaliação.');
+    }).finally(() => {
+      if (!cancelled) setIsLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [patientId, assessmentId, isNew]);
 
   const bodyFatSex = useMemo(
@@ -218,8 +223,9 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     setIsDirty(true);
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!draft || !patient) return;
+    if (savingRef.current) return;
 
     // 1. Validação dos 7 Campos Obrigatórios:
     // peso, escapula, torax, cintura, barriga (abdomen), quadril, coxa proximal
@@ -244,105 +250,56 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       return;
     }
 
-    // 2. Preenchimento Automático dos Campos Opcionais com base na última avaliação
-    const autoFilledFields: string[] = [];
-    const completedDraft: BodyAssessment = { ...draft };
-
-    const optionalFields: Array<keyof BodyAssessment> = [
-      'neckCm',
-      'leftArmCm',
-      'rightArmCm',
-      'leftDistalThighCm',
-      'rightDistalThighCm',
-      'leftCalfCm',
-      'rightCalfCm',
-    ];
-
-    if (previousAssessment) {
-      for (const field of optionalFields) {
-        const curVal = completedDraft[field];
-        const isCurEmpty = curVal === undefined || Number.isNaN(curVal) || curVal === null || curVal === 0;
-        const prevVal = previousAssessment[field];
-        const hasPrev = prevVal !== undefined && Number.isFinite(prevVal) && Number(prevVal) > 0;
-
-        if (isCurEmpty && hasPrev) {
-          (completedDraft[field] as number) = Number(prevVal);
-          autoFilledFields.push(field as string);
-        }
-      }
-    }
-
-    if (autoFilledFields.length > 0) {
-      completedDraft.autoFilledFields = autoFilledFields;
-    }
-
-    // 3. Validação da Composição Corporal final
-    const sex = normalizeBodyFatSex(patient.gender);
-    const effectiveNeck =
-      completedDraft.neckCm && !Number.isNaN(completedDraft.neckCm) && completedDraft.neckCm > 0
-        ? completedDraft.neckCm
-        : previousAssessment?.neckCm && Number.isFinite(previousAssessment.neckCm) && previousAssessment.neckCm > 0
-        ? previousAssessment.neckCm
-        : sex === 'female'
-        ? 34
-        : 38;
-
-    const finalComposition = sex
-      ? calculateBodyComposition({
-          sex,
-          heightCm: patient.heightCm,
-          neckCm: effectiveNeck,
-          waistCm: completedDraft.waistCm,
-          abdomenCm: completedDraft.abdomenCm ?? Number.NaN,
-          hipCm: completedDraft.hipCm ?? Number.NaN,
-          weightKg: completedDraft.weightKg,
-        })
-      : composition;
-
-    if (!finalComposition.isValid) {
-      const errorMsg =
-        finalComposition.error ?? 'As medidas informadas não permitem calcular a composição corporal.';
-      setSubmitError(errorMsg);
-      toast.error(errorMsg);
-      return;
-    }
-
+    savingRef.current = true;
     setIsSaving(true);
-    const normalizedDraft = normalizePairedBodyMeasurements(completedDraft);
-
-    const savedRecord: BodyAssessment = {
-      ...normalizedDraft,
-      bodyFatPercent: finalComposition.bodyFatPercent!,
-      fatMassKg: finalComposition.fatMassKg!,
-      muscleMassKg: finalComposition.leanMassKg!,
-    };
-
-    savePatientAssessmentToStorage(patient.id, savedRecord);
-    setIsDirty(false);
-    toast.success(
-      isNew
-        ? autoFilledFields.length > 0
-          ? `Avaliação física criada! (${autoFilledFields.length} medidas opcionais replicadas da anterior)`
-          : 'Avaliação física criada com sucesso!'
-        : 'Avaliação física salva com sucesso!'
-    );
-    router.push(`/pacientes/${patient.id}`);
-  }, [draft, patient, composition, previousAssessment, isNew, router]);
-
-  const handleCancel = useCallback(() => {
-    if (isDirty) {
-      const confirmLeave = window.confirm(
-        'Você possui alterações não salvas na avaliação. Deseja sair mesmo assim?'
-      );
-      if (!confirmLeave) return;
+    setSubmitError(null);
+    try {
+      const application = await getBrowserPatientApplication();
+      const input = toAssessmentInput(draft);
+      const saved = isNew
+        ? await application.createAssessment(patient.id, input)
+        : await application.updateAssessment(patient.id, draft.id, draft.version ?? 0, input);
+      setDraft(toLegacyAssessment(saved));
+      setIsDirty(false);
+      toast.success(isNew ? 'Avaliação física criada com sucesso!' : 'Avaliação física salva com sucesso!');
+      router.push(`/pacientes/${patient.id}`);
+    } catch (error: unknown) {
+      const message = error instanceof ClinicalApplicationError || error instanceof Error
+        ? error.message
+        : 'Não foi possível salvar a avaliação.';
+      setSubmitError(message);
+      toast.error(message);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
+  }, [draft, patient, composition, isNew, router, isSaving]);
 
+  const navigateBack = useCallback(() => {
     if (patient) {
       router.push(`/pacientes/${patient.id}`);
     } else {
       router.push('/pacientes');
     }
-  }, [isDirty, patient, router]);
+  }, [patient, router]);
+
+  const handleCancel = useCallback(() => {
+    if (isDirty) {
+      setIsLeaveConfirmationOpen(true);
+      return;
+    }
+
+    navigateBack();
+  }, [isDirty, navigateBack]);
+
+  const handleCancelLeaveConfirmation = useCallback(() => {
+    setIsLeaveConfirmationOpen(false);
+  }, []);
+
+  const handleConfirmLeave = useCallback(() => {
+    setIsLeaveConfirmationOpen(false);
+    navigateBack();
+  }, [navigateBack]);
 
   const handleCopySummary = useCallback(() => {
     if (!draft || !patient || !composition.isValid) return;
@@ -377,6 +334,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   useSaveShortcut({
     onSave: handleSave,
     priority: 0,
+    busy: isSaving,
   });
 
   // BeforeUnload guard for browser tab close/refresh
@@ -394,6 +352,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
 
   return {
     patient,
+    isLoading,
     draft,
     previousAssessment,
     composition,
@@ -405,11 +364,14 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     isSaving,
     isDirty,
     isCopied,
+    isLeaveConfirmationOpen,
     submitError,
     updateNumericField,
     updateDateField,
     handleSave,
     handleCancel,
+    handleCancelLeaveConfirmation,
+    handleConfirmLeave,
     handleCopySummary,
   };
 }

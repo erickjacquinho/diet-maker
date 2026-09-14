@@ -33,7 +33,6 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
     >
       <ToggleGroup
         type="single"
-        role="tablist"
         value={activeCategory}
         onValueChange={(value) => {
           if (value) onCategoryChange(value as FoodSearchCategory);
@@ -43,17 +42,14 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
       >
         <ToggleGroupItem
           value="foods"
-          role="tab"
-          data-state={activeCategory === 'foods' ? 'active' : 'inactive'}
-          aria-selected={activeCategory === 'foods'}
           className={cn(
             'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'foods'
               ? 'bg-surface text-text-primary border-border-subtle font-bold'
               : 'text-text-secondary hover:text-text-primary'
           )}
-        >
-          <Utensils size={15} aria-hidden="true" className={activeCategory === 'foods' ? 'text-success' : 'text-text-muted'} />
+          >
+          <Utensils size={15} aria-hidden="true" className={activeCategory === 'foods' ? 'text-primary' : 'text-text-muted'} />
           <span>Alimentos</span>
           {typeof counts?.foods === 'number' && (
             <Badge
@@ -61,7 +57,7 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
               className={cn(
                 'ml-1 px-1.5 py-0 text-style-chart-micro font-semibold pointer-events-none',
                 activeCategory === 'foods'
-                  ? 'bg-success-soft text-text-primary border-border-divider'
+                  ? 'bg-primary-soft text-primary border-primary-border'
                   : 'bg-surface text-text-muted border-border-subtle'
               )}
             >
@@ -72,9 +68,6 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
 
         <ToggleGroupItem
           value="meals"
-          role="tab"
-          data-state={activeCategory === 'meals' ? 'active' : 'inactive'}
-          aria-selected={activeCategory === 'meals'}
           className={cn(
             'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'meals'
@@ -90,7 +83,7 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
               className={cn(
                 'ml-1 px-1.5 py-0 text-style-chart-micro font-semibold pointer-events-none',
                 activeCategory === 'meals'
-                  ? 'bg-primary-soft text-text-primary border-border-divider'
+                  ? 'bg-primary-soft text-primary border-primary-border'
                   : 'bg-surface text-text-muted border-border-subtle'
               )}
             >
@@ -101,9 +94,6 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
 
         <ToggleGroupItem
           value="recipes"
-          role="tab"
-          data-state={activeCategory === 'recipes' ? 'active' : 'inactive'}
-          aria-selected={activeCategory === 'recipes'}
           className={cn(
             'flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 text-style-legal font-medium transition-colors duration-fast',
             activeCategory === 'recipes'
@@ -111,7 +101,7 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
               : 'text-text-secondary hover:text-text-primary'
           )}
         >
-          <BookOpen size={15} aria-hidden="true" className={activeCategory === 'recipes' ? 'text-macro-carbohydrate' : 'text-text-muted'} />
+          <BookOpen size={15} aria-hidden="true" className={activeCategory === 'recipes' ? 'text-primary' : 'text-text-muted'} />
           <span>Receitas</span>
           {typeof counts?.recipes === 'number' && (
             <Badge
@@ -119,7 +109,7 @@ export const FoodSearchCategorySelector: React.FC<FoodSearchCategorySelectorProp
               className={cn(
                 'ml-1 px-1.5 py-0 text-style-chart-micro font-semibold pointer-events-none',
                 activeCategory === 'recipes'
-                  ? 'bg-warning-soft text-text-primary border-border-divider'
+                  ? 'bg-primary-soft text-primary border-primary-border'
                   : 'bg-surface text-text-muted border-border-subtle'
               )}
             >

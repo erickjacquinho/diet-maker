@@ -1,0 +1,31 @@
+{
+  "appId": "nutridiet-local-pro",
+  "formatVersion": 1,
+  "schemaVersion": "5",
+  "exportedAt": "2026-09-12T12:00:00.000Z",
+  "account": [
+    {
+      "id": "fixture-empty-account",
+      "displayName": "Perfil Vazio",
+      "phone": null,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-12T12:00:00.000Z"
+    }
+  ],
+  "objectiveOptions": [],
+  "patients": [],
+  "bodyAssessments": [],
+  "nextFollowUps": [],
+  "dietPlans": [],
+  "dietVariations": [],
+  "dietVariationDays": [],
+  "dietMeals": [],
+  "dietMealOptions": [],
+  "dietMealItems": [],
+  "dietItemSnapshots": [],
+  "foodCatalogItems": [],
+  "recipes": [],
+  "recipeIngredients": [],
+  "readyMeals": [],
+  "readyMealItems": []
+}

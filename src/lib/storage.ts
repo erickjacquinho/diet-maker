@@ -1,30 +1,25 @@
 /**
- * Safe local storage utility with SSR support and error handling.
+ * Compatibility facade for old in-memory adapters.
+ *
+ * Domain persistence is owned by the active `.nutridiet` file session. This
+ * module intentionally has no browser storage backing and is kept only so
+ * legacy helpers can be retired without breaking imports in older consumers.
  */
 
-export function getStorageItem<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') {
-    return fallback;
-  }
+import { canWriteEphemeralItem, getEphemeralItem, removeEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 
+export function getStorageItem<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(key);
-    if (raw === null) {
-      return fallback;
-    }
-    return JSON.parse(raw) as T;
+    return getEphemeralItem(key, fallback);
   } catch {
     return fallback;
   }
 }
 
 export function setStorageItem<T>(key: string, value: T): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    if (!canWriteEphemeralItem()) return false;
+    setEphemeralItem(key, value);
     return true;
   } catch {
     return false;
@@ -32,13 +27,5 @@ export function setStorageItem<T>(key: string, value: T): boolean {
 }
 
 export function removeStorageItem(key: string): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  try {
-    localStorage.removeItem(key);
-  } catch {
-    // Ignore storage removal errors
-  }
+  removeEphemeralItem(key);
 }

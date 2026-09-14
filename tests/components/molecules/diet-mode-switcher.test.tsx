@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { DietModeSwitcher, DietModeSwitcherProps } from '@/components/molecules/DietModeSwitcher';
+import { DietModeSwitcher, DietModeSwitcherProps } from '@/components/organisms/diet/DietModeSwitcher';
 
 const variations: DietModeSwitcherProps['variations'] = [
   {
@@ -53,17 +53,17 @@ describe('DietModeSwitcher', () => {
     render(<DietModeSwitcher {...makeProps()} />);
 
     expect(screen.getByRole('group', { name: 'Modelo de dieta' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Dieta Simples' })).toHaveAttribute('data-state', 'active');
+    expect(screen.getByRole('button', { name: 'Dieta Simples' })).toHaveAttribute('data-state', 'on');
     expect(screen.queryByText('Número de variações')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Copiar Refeições/ })).not.toBeInTheDocument();
   });
 
-  it('calls onModeChange when switching tabs', () => {
+  it('calls onModeChange when switching modes', () => {
     const onModeChange = vi.fn();
     render(<DietModeSwitcher {...makeProps({ onModeChange })} />);
 
-    const simpleMode = screen.getByRole('tab', { name: 'Dieta Simples' });
-    const carbCyclingMode = screen.getByRole('tab', { name: 'Ciclo de Carboidratos' });
+    const simpleMode = screen.getByRole('button', { name: 'Dieta Simples' });
+    const carbCyclingMode = screen.getByRole('button', { name: 'Ciclo de Carboidratos' });
 
     fireEvent.click(carbCyclingMode);
     expect(onModeChange).toHaveBeenCalledWith('carb_cycling');
@@ -89,13 +89,13 @@ describe('DietModeSwitcher', () => {
     );
 
     const group = screen.getByRole('group', { name: 'Modelo de dieta' });
-    expect(within(group).getByRole('tab', { name: 'Ciclo de Carboidratos' })).toHaveAttribute('data-state', 'active');
+    expect(within(group).getByRole('button', { name: 'Ciclo de Carboidratos' })).toHaveAttribute('data-state', 'on');
     expect(within(group).getByText('Variações do Ciclo')).toBeInTheDocument();
     expect(within(group).getByRole('button', { name: /Configurar Ciclo/i })).toBeInTheDocument();
     expect(within(group).getByRole('button', { name: /Copiar Refeições/i })).toBeInTheDocument();
-    expect(within(group).getByRole('tab', { name: /Dia Alto Carbo/i })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(group).getByRole('button', { name: /^Dia Alto Carbo/i })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(within(group).getByRole('tab', { name: /Dia Baixo Carbo/i }));
+    fireEvent.click(within(group).getByRole('button', { name: /^Dia Baixo Carbo/i }));
     fireEvent.click(within(group).getByRole('button', { name: /Copiar Refeições/i }));
     fireEvent.click(within(group).getByRole('button', { name: /Configurar Ciclo/i }));
 

@@ -37,17 +37,19 @@ import {
   DayOfWeek,
   DAYS_OF_WEEK,
   calculateWeeklyCycleAverage,
-  getDietFromStorage,
-  saveDietToStorage,
   FullDietPlan,
-  createInitialDietPlan,
-} from '@/lib/dietStore';
-import { getPatientById, Patient } from '@/lib/patientsStore';
+} from '@/lib/legacy-diet-types';
+import type { Patient } from '@/lib/patientsStore';
 import { calculatePresetCalories } from '@/lib/presetUtils';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
+import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import type { DietApplication } from '@/lib/application/diets/diet-ports';
+import type { DietDraft } from '@/lib/domain/diets/diet-model';
+import { fromEditableDocument, toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
+import { toPatientViewModel } from '@/lib/patientViewModel';
 
 interface EditableVariationItem {
   id: string;
@@ -68,11 +70,13 @@ export default function DedicatedCarbCyclingPage() {
   const params = useParams();
   const router = useRouter();
 
-  const patientId = (params?.id as string) || 'pat-1';
+  const patientId = params?.id as string;
   const dietaId = (params?.dietaId as string) || 'nova';
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [dietPlan, setDietPlan] = useState<FullDietPlan | null>(null);
+  const [dietApplication, setDietApplication] = useState<DietApplication | null>(null);
+  const [draft, setDraft] = useState<DietDraft | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [unitMode, setUnitMode] = useState<'grams' | 'g_per_kg'>('grams');
@@ -99,63 +103,42 @@ export default function DedicatedCarbCyclingPage() {
 
   const weight = patient?.weightKg && patient.weightKg > 0 ? patient.weightKg : 70;
 
-  // Carregar Paciente e Dieta
   useEffect(() => {
-    const p = getPatientById(patientId);
-    setPatient(p);
+    if (!patientId) return;
+    let cancelled = false;
+    void getBrowserPatientApplication().then((application) => application.getPatientProfile(patientId)).then((profile) => {
+      if (!cancelled) setPatient(toPatientViewModel(profile.patient));
+    }).catch(() => { if (!cancelled) setPatient(null); });
+    void getBrowserDietApplication().then((application) => { if (!cancelled) setDietApplication(application); }).catch(() => { if (!cancelled) setDietApplication(null); });
+    return () => { cancelled = true; };
+  }, [patientId]);
 
-    let plan = getDietFromStorage(patientId, dietaId);
-    if (!plan) {
-      plan = createInitialDietPlan(patientId, {
-        weightKg: p?.weightKg,
-        targetKcal: p?.targetKcal,
-        targetProtein: p?.targetProtein,
-        targetCarbs: p?.targetCarbs,
-        targetFats: p?.targetFats,
-      });
-      plan.id = dietaId;
-    }
-    plan.patientId = patientId;
-
-    setDietPlan(plan);
-
-    // Mapear variações para itens editáveis
-    const initialItems: EditableVariationItem[] = (plan.carbCyclingVariations || []).map((v, index) => {
-      const prot = v.targetProtein;
-      const carb = v.targetCarbs;
-      const fat = v.targetFats;
-      const kcal = v.targetKcal || calculatePresetCalories(prot, carb, fat);
-
-      return {
-        id: v.id || `var-${Date.now()}-${index}`,
-        name: v.name,
-        assignedDays: v.assignedDays ? [...v.assignedDays] : [],
-        proteinG: prot,
-        carbsG: carb,
-        fatsG: fat,
-        proteinGPerKg: v.gPerKg?.protein ?? Number((prot / weight).toFixed(1)),
-        carbsGPerKg: v.gPerKg?.carbs ?? Number((carb / weight).toFixed(1)),
-        fatsGPerKg: v.gPerKg?.fats ?? Number((fat / weight).toFixed(1)),
-        kcal,
-      };
-    });
-
-    setItems(initialItems);
-    setInitialStateHash(
-      JSON.stringify({
-        unitMode: 'grams',
-        items: initialItems.map((it) => ({
-          id: it.id,
-          name: it.name,
-          assignedDays: it.assignedDays,
-          proteinG: it.proteinG,
-          carbsG: it.carbsG,
-          fatsG: it.fatsG,
-        })),
-      })
-    );
-    setIsLoading(false);
-  }, [patientId, dietaId, weight]);
+  useEffect(() => {
+    if (!patient || !dietApplication || !patientId) return;
+    let cancelled = false;
+    void dietApplication.openEditor(patientId, dietaId).then(({ draft: loadedDraft }) => {
+      if (cancelled) return;
+      setDraft(loadedDraft);
+      const plan = fromEditableDocument(loadedDraft.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, loadedDraft.createdAt, loadedDraft.updatedAt);
+      setDietPlan(plan);
+      const initialItems: EditableVariationItem[] = plan.carbCyclingVariations.map((variation, index) => ({
+        id: variation.id || `var-${index + 1}`,
+        name: variation.name,
+        assignedDays: variation.assignedDays ? [...variation.assignedDays] : [],
+        proteinG: variation.targetProtein,
+        carbsG: variation.targetCarbs,
+        fatsG: variation.targetFats,
+        proteinGPerKg: variation.gPerKg?.protein ?? Number((variation.targetProtein / weight).toFixed(1)),
+        carbsGPerKg: variation.gPerKg?.carbs ?? Number((variation.targetCarbs / weight).toFixed(1)),
+        fatsGPerKg: variation.gPerKg?.fats ?? Number((variation.targetFats / weight).toFixed(1)),
+        kcal: variation.targetKcal || calculatePresetCalories(variation.targetProtein, variation.targetCarbs, variation.targetFats),
+      }));
+      setItems(initialItems);
+      setInitialStateHash(JSON.stringify({ unitMode: 'grams', items: initialItems.map(({ id, name, assignedDays, proteinG, carbsG, fatsG }) => ({ id, name, assignedDays, proteinG, carbsG, fatsG })) }));
+      setIsLoading(false);
+    }).catch(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
+  }, [dietApplication, dietaId, patient, patientId, weight]);
 
   // Checagem se o formulário foi modificado em relação ao estado inicial
   const isDirty = useMemo(() => {
@@ -311,7 +294,7 @@ export default function DedicatedCarbCyclingPage() {
     const kcal = calculatePresetCalories(defaultProt, defaultCarb, defaultFat);
 
     const newItem: EditableVariationItem = {
-      id: `var-custom-${Date.now()}`,
+      id: `var-custom-${nextIdx}`,
       name: `Variação ${nextIdx}`,
       assignedDays: [],
       proteinG: defaultProt,
@@ -366,7 +349,7 @@ export default function DedicatedCarbCyclingPage() {
 
     const newItem: EditableVariationItem = {
       ...source,
-      id: `var-${Date.now()}`,
+      id: `var-copy-${items.length + 1}`,
       name: `${source.name} (Cópia)`,
       assignedDays: [],
     };
@@ -505,8 +488,8 @@ export default function DedicatedCarbCyclingPage() {
     },
   ], [weeklyAverage]);
 
-  const handleSave = () => {
-    if (!dietPlan) return;
+  const handleSave = async () => {
+    if (!dietPlan || !dietApplication || !draft) return;
 
     if (!all7DaysAssigned) {
       const missingCount = 7 - assignedDaysSet.size;
@@ -547,18 +530,21 @@ export default function DedicatedCarbCyclingPage() {
       carbCyclingVariations: updatedVariations,
     };
 
-    setInitialStateHash('');
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem('nutridiet_cycle_configured', 'true');
+    const result = await dietApplication.flushDraft(draft.draftId, toEditableDocument(updatedPlan));
+    if (result.status !== 'SAVED') {
+      toast.error('Não foi possível persistir o ciclo no rascunho local.');
+      return;
     }
-    saveDietToStorage(updatedPlan);
-    toast.success('Ciclo de carboidratos configurado com sucesso!');
+    setDraft((current) => current ? { ...current, payload: toEditableDocument(updatedPlan), draftRevision: result.revision } : current);
+    setInitialStateHash('');
+    toast.success('Ciclo de carboidratos persistido no rascunho local!');
     router.push(`/pacientes/${patientId}/dieta/${dietaId}`);
   };
 
   useSaveShortcut({
     onSave: handleSave,
     priority: 0,
+    busy: isLoading,
   });
 
   if (isLoading || !patient || !dietPlan) {

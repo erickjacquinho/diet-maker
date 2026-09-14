@@ -21,7 +21,9 @@ export default function PatientDetailPage() {
   const {
     patientId,
     patient,
-    dietHistory,
+    profileError,
+    isProfileLoading,
+    confirmedPlans,
     bodyAssessments,
     activePlan,
     latestAssessment,
@@ -30,9 +32,6 @@ export default function PatientDetailPage() {
     availableObjectives,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
-    isDeleteDietModalOpen,
-    setIsDeleteDietModalOpen,
-    dietToDelete,
     isEditModalOpen,
     setIsEditModalOpen,
     isEditAssessmentOpen,
@@ -48,7 +47,6 @@ export default function PatientDetailPage() {
     isReadOnlyDietModalOpen,
     setIsReadOnlyDietModalOpen,
     handleOpenReadOnlyDietModal,
-    handleOpenDeleteDietModal,
     handleOpenEditAssessment,
     handleOpenCreateAssessment,
     handleSaveAssessment,
@@ -57,21 +55,34 @@ export default function PatientDetailPage() {
     handleAddCustomObjective,
     handleSavePatient,
     handleDeletePatient,
-    handleDeleteDiet,
   } = usePatientProfilePage();
+
+  if (isProfileLoading) {
+    return (
+      <div className="container mx-auto py-12 px-4 text-center" role="status" aria-live="polite">
+        <p className="text-text-secondary">Carregando perfil do paciente...</p>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (
       <div className="container mx-auto py-12 px-4 text-center">
         <AlertTriangle className="size-12 text-warning mx-auto mb-4" />
-        <h2 className="text-style-section-title font-bold text-text-primary mb-2">Paciente Não Encontrado</h2>
-        <p className="text-text-secondary mb-6">O paciente solicitado não existe ou foi removido.</p>
+        <h2 className="text-style-section-title font-bold text-text-primary mb-2">
+          {profileError ? 'Não foi possível carregar o paciente' : 'Paciente Não Encontrado'}
+        </h2>
+        <p className="text-text-secondary mb-6">
+          {profileError ?? 'O paciente solicitado não existe ou não pertence à Conta ativa.'}
+        </p>
         <Link href="/pacientes">
           <SecondaryActionButton icon={<ArrowLeft size={14} />}>Voltar para Pacientes</SecondaryActionButton>
         </Link>
       </div>
     );
   }
+
+  const isPatientArchived = Boolean(patient.archivedAt);
 
   return (
     <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
@@ -109,15 +120,27 @@ export default function PatientDetailPage() {
               <MessageCircle className="size-4 text-success shrink-0" aria-hidden="true" />
               <span>WhatsApp</span>
             </Button>
-            <EditIconButton size="compact" onClick={() => setIsEditModalOpen(true)} title="Editar Cadastro" />
-            <DeleteIconButton
-              size="compact"
-              onClick={() => setIsDeleteModalOpen(true)}
-              title="Excluir Paciente"
-            />
+            {!isPatientArchived && (
+              <>
+                <EditIconButton size="compact" onClick={() => setIsEditModalOpen(true)} title="Editar Cadastro" />
+                <DeleteIconButton
+                  size="compact"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  title="Arquivar Paciente"
+                />
+              </>
+            )}
           </PatientProfileHeader.Actions>
         </PatientProfileHeader>
       </Surface>
+
+      {isPatientArchived && (
+        <Surface className="border-warning-border bg-warning-soft p-4" role="status">
+          <p className="text-style-body-small font-medium text-warning-foreground">
+            Este paciente está arquivado. O histórico permanece disponível para consulta, mas novas operações clínicas estão bloqueadas.
+          </p>
+        </Surface>
+      )}
 
       <PatientProfileCurrentContext
         patientId={patientId}
@@ -125,6 +148,7 @@ export default function PatientDetailPage() {
         activePlan={activePlan}
         nextEventSummary={nextEventSummary}
         onOpenNextEvent={() => setIsNextEventModalOpen(true)}
+        readOnly={isPatientArchived}
       />
 
       {/* 1. Histórico de Prescrições & Planos Alimentares */}
@@ -142,19 +166,20 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {dietHistory.length === 1 ? '1 plano' : `${dietHistory.length} planos`}
+              {confirmedPlans.length === 1 ? '1 plano' : `${confirmedPlans.length} planos`}
             </span>
-            <Link href={`/pacientes/${patientId}/dieta/nova`}>
-              <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
-            </Link>
+            {!isPatientArchived && (
+              <Link href={`/pacientes/${patientId}/dieta/nova`}>
+                <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
+              </Link>
+            )}
           </div>
         </div>
 
         <PatientDietsTable
           patientId={patientId}
-          diets={dietHistory}
+          diets={confirmedPlans}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
-          onDeleteDiet={handleOpenDeleteDietModal}
         />
       </Surface>
 
@@ -175,11 +200,13 @@ export default function PatientDetailPage() {
             <span className={textStyle('caption')}>
               {bodyAssessments.length === 1 ? '1 avaliação' : `${bodyAssessments.length} avaliações`}
             </span>
-            <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
-              <CreateButton icon={<Scale size={14} />}>
-                Nova Avaliação
-              </CreateButton>
-            </Link>
+            {!isPatientArchived && (
+              <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
+                <CreateButton icon={<Scale size={14} />}>
+                  Nova Avaliação
+                </CreateButton>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -199,10 +226,6 @@ export default function PatientDetailPage() {
         setIsEditModalOpen={setIsEditModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         setIsDeleteModalOpen={setIsDeleteModalOpen}
-        isDeleteDietModalOpen={isDeleteDietModalOpen}
-        setIsDeleteDietModalOpen={setIsDeleteDietModalOpen}
-        dietToDelete={dietToDelete}
-        handleDeleteDiet={handleDeleteDiet}
         isNextEventModalOpen={isNextEventModalOpen}
         setIsNextEventModalOpen={setIsNextEventModalOpen}
         isAddObjectiveModalOpen={isAddObjectiveModalOpen}

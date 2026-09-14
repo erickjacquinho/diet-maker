@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SelectField } from '@/components/atoms';
-import { DEFAULT_OBJECTIVES } from '@/lib/patientsStore';
+import { DEFAULT_OBJECTIVE_LABELS } from '@/lib/domain/objective-option';
+import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 import { textStyle } from '@/design-system';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
@@ -31,7 +32,7 @@ export interface CreatePatientFormData {
 export interface CreatePatientModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: CreatePatientFormData) => void;
+  onSave: (data: CreatePatientFormData) => void | Promise<void>;
 }
 
 const INITIAL_FORM: CreatePatientFormData = {
@@ -49,6 +50,9 @@ const INITIAL_FORM: CreatePatientFormData = {
 
 export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatientModalProps) {
   const [formData, setFormData] = useState<CreatePatientFormData>({ ...INITIAL_FORM });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   useSaveShortcut({
@@ -62,12 +66,25 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
     setFormData((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!formData.name.trim()) return;
-    onSave({ ...formData, name: formData.name.trim(), whatsapp: formatWhatsappContact(formData.whatsapp) });
-    reset();
-    onOpenChange(false);
+    if (!formData.name.trim()) {
+      setFieldErrors({ name: 'Informe o nome completo.' });
+      return;
+    }
+    setIsSubmitting(true);
+    setFormError(null);
+    setFieldErrors({});
+    try {
+      await onSave({ ...formData, name: formData.name.trim(), whatsapp: formatWhatsappContact(formData.whatsapp) });
+      reset();
+      onOpenChange(false);
+    } catch (error) {
+      if (error instanceof PatientApplicationError) setFieldErrors(error.fieldErrors ?? {});
+      setFormError(error instanceof Error ? error.message : 'Não foi possível salvar o paciente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,7 +97,8 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div>
             <label htmlFor="new-patient-name" className={`${textStyle('field-label')} block mb-1`}>Nome Completo</label>
-            <Input id="new-patient-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Carlos Eduardo Silva" />
+            <Input id="new-patient-name" required value={formData.name} onChange={(event) => update('name', event.target.value)} placeholder="Ex: Carlos Eduardo Silva" aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? 'new-patient-name-error' : undefined} />
+            {fieldErrors.name && <p id="new-patient-name-error" className="text-style-legal text-error mt-1" role="alert">{fieldErrors.name}</p>}
           </div>
 
           <div>
@@ -102,7 +120,7 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
               onValueChange={(value) => update('objective', value)}
               placeholder="Selecione o objetivo"
               layer="modal"
-              options={DEFAULT_OBJECTIVES.map((objective) => ({ value: objective, label: objective }))}
+              options={DEFAULT_OBJECTIVE_LABELS.map((objective) => ({ value: objective, label: objective }))}
             />
 
             <SelectField
@@ -120,16 +138,18 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
+            {formError && <p className="text-style-legal text-error flex-1" role="alert">{formError}</p>}
+            <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="flex-1">Cancelar</Button>
             <Button
               type="submit"
               variant="primary"
               size="compact"
               className="flex-1"
+              disabled={isSubmitting}
               aria-keyshortcuts="Control+s Meta+s"
               title="Salvar Paciente (Ctrl+S)"
             >
-              Salvar Paciente <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+              {isSubmitting ? 'Salvando…' : <>Salvar Paciente <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></>}
             </Button>
           </div>
         </form>

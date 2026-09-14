@@ -14,20 +14,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EditIconButton, DeleteIconButton, Badge } from '@/components/atoms';
+import { EditIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
-import type { HistoricalDiet, HistoricalDietVariation } from '@/lib/patientsStore';
-import { DAYS_OF_WEEK } from '@/lib/dietStore';
+import type { HistoricalDiet } from '@/lib/patientRelatedRecords';
+import type { HistoricalDietVariation } from '@/lib/patientsStoreTypes';
+import type { DietHistoryRow } from '@/lib/application/diets/diet-ports';
+import { toHistoricalDietView } from '@/lib/application/diets/diet-history-view';
+
+type DietTableData = HistoricalDiet | DietHistoryRow;
+
+function toTableView(diet: DietTableData): HistoricalDiet {
+  return 'plan' in diet ? toHistoricalDietView(diet) : diet;
+}
 
 export interface PatientDietsTableProps {
   patientId: string;
-  diets: HistoricalDiet[];
+  diets: DietTableData[];
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
-  onDeleteDiet?: (diet: HistoricalDiet) => void;
 }
 
-const columns: DataTableColumnDef<HistoricalDiet>[] = [
+const columns: DataTableColumnDef<DietTableData>[] = [
   {
     id: 'date',
     header: 'Data de Prescrição',
@@ -72,10 +79,12 @@ function formatDietType(diet: HistoricalDiet): string {
 
 function formatAssignedDays(days: string[] = []): string {
   const uniqueDays = Array.from(new Set(days));
-  const orderedKnownDays = DAYS_OF_WEEK
-    .filter((day) => uniqueDays.includes(day.id))
-    .map((day) => day.shortLabel);
-  const unknownDays = uniqueDays.filter((dayId) => !DAYS_OF_WEEK.some((day) => day.id === dayId));
+  const dayOrder = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+  const dayLabels: Record<string, string> = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb', dom: 'Dom' };
+  const orderedKnownDays = dayOrder
+    .filter((day) => uniqueDays.includes(day))
+    .map((day) => dayLabels[day]);
+  const unknownDays = uniqueDays.filter((dayId) => !dayOrder.includes(dayId));
 
   return [...orderedKnownDays, ...unknownDays].join(', ');
 }
@@ -211,14 +220,12 @@ export function DietTableRow({
   isExpanded,
   onToggleExpand,
   onOpenReadOnlyDiet,
-  onDeleteDiet,
 }: {
   patientId: string;
   diet: HistoricalDiet;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
-  onDeleteDiet?: (diet: HistoricalDiet) => void;
 }) {
   const isActive = diet.status === 'Ativa';
   const isCarbCycling = diet.mode === 'carb_cycling';
@@ -228,7 +235,7 @@ export function DietTableRow({
     <TableRow
       className={`group h-table-row transition-colors ${
         isActive
-        ? 'border-l-4 border-l-primary bg-primary-soft/30 hover:bg-primary-soft/30'
+        ? 'border-l border-l-primary bg-primary-soft/30 hover:bg-primary-soft/30'
           : 'bg-transparent hover:bg-transparent'
       }`}
     >
@@ -316,20 +323,14 @@ export function DietTableRow({
           >
             <Eye size={13} aria-hidden="true" />
           </Button>
-          <Link
-            href={`/pacientes/${patientId}/dieta/${diet.id}`}
-            title={`Editar ${diet.name} no Construtor de Dietas`}
-            aria-label={`Editar ${diet.name} no Construtor de Dietas`}
-          >
-            <EditIconButton title="Editar no Construtor de Dietas" size="compact" />
-          </Link>
-          {onDeleteDiet && (
-            <DeleteIconButton
-              title={`Excluir prescrição ${diet.name}`}
-              aria-label={`Excluir prescrição ${diet.name}`}
-              size="compact"
-              onClick={() => onDeleteDiet(diet)}
-            />
+          {isActive && (
+            <Link
+              href={`/pacientes/${patientId}/dieta/${diet.id}`}
+              title={`Editar ${diet.name} no Construtor de Dietas`}
+              aria-label={`Editar ${diet.name} no Construtor de Dietas`}
+            >
+              <EditIconButton title="Editar no Construtor de Dietas" size="compact" />
+            </Link>
           )}
         </div>
       </TableCell>
@@ -341,19 +342,8 @@ export function PatientDietsTable({
   patientId,
   diets = [],
   onOpenReadOnlyDiet,
-  onDeleteDiet,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
-
-  if (diets.length === 0) {
-    return (
-      <div className="rounded-surface border border-dashed border-border-subtle bg-surface-subtle p-8 text-center">
-        <p className={textStyle('body-secondary')}>
-          Nenhuma prescrição dietética registrada para este paciente até o momento.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <DataTable
@@ -366,19 +356,18 @@ export function PatientDietsTable({
       renderRow={(diet) => (
         <DietTableRow
           patientId={patientId}
-          diet={diet}
+          diet={toTableView(diet)}
           isExpanded={expandedDietId === diet.id}
           onToggleExpand={() =>
             setExpandedDietId((currentId) => (currentId === diet.id ? null : diet.id))
           }
           onOpenReadOnlyDiet={onOpenReadOnlyDiet}
-          onDeleteDiet={onDeleteDiet}
         />
       )}
       expandedRowId={expandedDietId}
       renderExpandedRow={(diet) =>
-        diet.mode === 'carb_cycling' ? (
-          <DietCycleDetails diet={diet} />
+        diet.mode === 'CARB_CYCLING' || diet.mode === 'carb_cycling' ? (
+          <DietCycleDetails diet={'plan' in diet ? toHistoricalDietView(diet) : diet} />
         ) : null
       }
       tableClassName="table-fixed"

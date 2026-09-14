@@ -1,0 +1,6 @@
+{
+  "task": "Crie o $sdd da terceira etapa do SDD dos documentos de refs/dieta-db/: Dietas — rascunho, salvamento e histórico. Executar o fluxo SDD completo até validação humana, sem implementar, respeitando as decisões consolidadas em refs/dieta-db e as entregas das etapas anteriores.",
+  "slug": "dietas-rascunho-salvamento-historico",
+  "feature_dir": "specs/30-08-26-dietas-rascunho-salvamento-historico",
+  "date": "2026-08-30"
+}

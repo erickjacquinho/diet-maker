@@ -1,0 +1,54 @@
+{
+  "appId": "nutridiet-local-pro",
+  "formatVersion": 1,
+  "schemaVersion": "5",
+  "exportedAt": "2026-09-12T12:00:00.000Z",
+  "account": [
+    {
+      "id": "fixture-jacques-account",
+      "displayName": "Jacques Regiani",
+      "phone": "+55 11 99999-0000",
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-12T12:00:00.000Z"
+    }
+  ],
+  "objectiveOptions": [],
+  "patients": [
+    {
+      "id": "fixture-jacques-patient",
+      "accountId": "fixture-jacques-account",
+      "displayCode": "P-0001",
+      "name": "Paciente de Jacques",
+      "age": 35,
+      "gender": "Não informado",
+      "heightCm": 170,
+      "weightKg": 70,
+      "maritalStatus": null,
+      "phone": null,
+      "whatsapp": null,
+      "currentObjective": "Manutenção",
+      "targetProtein": 100,
+      "targetCarbs": 200,
+      "targetFats": 60,
+      "targetKcal": 1740,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-12T12:00:00.000Z",
+      "version": 1,
+      "archivedAt": null
+    }
+  ],
+  "bodyAssessments": [],
+  "nextFollowUps": [],
+  "dietPlans": [],
+  "dietVariations": [],
+  "dietVariationDays": [],
+  "dietMeals": [],
+  "dietMealOptions": [],
+  "dietMealItems": [],
+  "dietItemSnapshots": [],
+  "foodCatalogItems": [],
+  "recipes": [],
+  "recipeIngredients": [],
+  "readyMeals": [],
+  "readyMealItems": []
+}

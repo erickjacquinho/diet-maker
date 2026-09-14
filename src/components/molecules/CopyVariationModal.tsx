@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button, SelectField } from '@/components/atoms';
 import { Copy } from 'lucide-react';
-import { CarbCyclingVariation } from '@/lib/dietStore';
+import { CarbCyclingVariation } from '@/lib/legacy-diet-types';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 interface CopyVariationModalProps {

@@ -3,7 +3,8 @@
 import React from 'react';
 import { Surface } from '@/components/atoms';
 import { PatientProfileHeader } from '../PatientProfileHeader';
-import { DietModeSwitcher, DietModeSwitcherProps, CarbCyclingVariationPanel } from '../../molecules';
+import { CarbCyclingVariationPanel } from './CarbCyclingVariationPanel';
+import { DietModeSwitcher, type DietModeSwitcherProps } from './DietModeSwitcher';
 
 export interface DietContextSectionProps {
   name: string;

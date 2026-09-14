@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const resolver = resolve(process.cwd(), '.agents/skills/proj-table-adequation-v2/scripts/resolve-table-contract.mjs');
 const auditor = resolve(process.cwd(), '.agents/skills/proj-table-adequation-v2/scripts/audit-table-conformance.mjs');
-const target = 'src/components/molecules/ImportPreviousDietModal.tsx';
+const target = 'src/components/organisms/diets/ImportPreviousDietModal.tsx';
 
 function run(script: string, args: string[]) {
   return JSON.parse(execFileSync(process.execPath, [script, ...args, '--json'], { encoding: 'utf8' }));

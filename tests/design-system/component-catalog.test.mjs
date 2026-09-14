@@ -255,8 +255,8 @@ describe('canonical visual categories', () => {
     const proposed = registry.components.filter((component) => component.lifecycle === 'proposed');
     const currentSources = current.flatMap((component) => component.sourceFiles.map(({ path }) => path));
 
-    expect(currentSources).toHaveLength(66);
-    expect(new Set(currentSources).size).toBe(66);
+    expect(currentSources).toHaveLength(82);
+    expect(new Set(currentSources).size).toBe(82);
     expect(proposed.map(({ id }) => id).sort()).toEqual(
       ['atom-skeleton', 'atom-spinner', 'molecule-form-field', 'ui-textarea'].sort(),
     );
@@ -300,34 +300,14 @@ describe('canonical visual categories', () => {
         lifecycle,
       }));
 
-    expect(migrations).toEqual([
-      {
-        id: 'organism-diet-mode-switcher',
-        currentLayer: 'molecule',
-        targetLayer: 'organism',
-        lifecycle: 'migration-required',
-      },
-      {
-        id: 'organism-food-search-modal',
-        currentLayer: 'molecule',
-        targetLayer: 'organism',
-        lifecycle: 'migration-required',
-      },
-      {
-        id: 'organism-read-only-diet-modal',
-        currentLayer: 'molecule',
-        targetLayer: 'organism',
-        lifecycle: 'migration-required',
-      },
-      ...registry.components
+    expect(migrations).toEqual(registry.components
         .filter((component) => component.lifecycle === 'proposed')
         .map(({ id, currentLayer, targetLayer, lifecycle }) => ({
           id,
           currentLayer,
           targetLayer,
           lifecycle,
-        })),
-    ]);
+        })));
   });
 
   it('keeps every canonical profile thin and aligned to its registry entry', async () => {
@@ -335,7 +315,7 @@ describe('canonical visual categories', () => {
       await readFile(path.resolve('design-system/components/registry.json'), 'utf8'),
     );
 
-    expect(registry.components).toHaveLength(70);
+    expect(registry.components).toHaveLength(86);
     for (const component of registry.components) {
       const markdown = await readFile(path.resolve(component.profile), 'utf8');
       expect(markdown, component.id).toContain(`| Component ID | \`${component.id}\` |`);

@@ -6,10 +6,10 @@
 | --- | --- |
 | Component ID | `organism-diet-mode-switcher` |
 | Nature | `domain` |
-| Lifecycle | `migration-required` |
-| Current layer | `molecule` |
+| Lifecycle | `implemented` |
+| Current layer | `organism` |
 | Target layer | `organism` |
-| Sources | `src/components/molecules/DietModeSwitcher.tsx` |
+| Sources | `src/components/organisms/diet/DietModeSwitcher.tsx` |
 | Public exports | `DietModeSwitcherProps` (type), `DietModeSwitcher` (component) |
 
 ## Purpose
@@ -34,7 +34,7 @@ A mudança de modo só conclui após confirmação quando descartaria edição; 
 
 ## Composition
 
-Sem primitive base; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Compõe o controle de seleção existente e a confirmação de descarte quando aplicável. Compound parts pertencem a esta família e não recebem perfil independente. A implementação em organism pode coordenar a seção, mas não importa camada superior nem duplica o primitivo.
 
 ## Content rules
 
@@ -58,5 +58,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `organism`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `organism`; fonte, consumers e dependências foram reconciliados no mesmo change set.
 

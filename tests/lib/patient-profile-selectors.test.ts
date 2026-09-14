@@ -12,7 +12,7 @@ import {
   PATIENT_PROFILE_DIETS,
   PATIENT_PROFILE_MULTIPLE_ACTIVE_DIETS,
 } from '../fixtures/patient-profile';
-import type { StoredDietRecord } from '@/lib/patientsStore';
+import type { StoredDietRecord } from '@/lib/legacy-diet-types';
 
 describe('patient profile selectors', () => {
   it('selects the latest physical assessment across ISO and pt-BR dates', () => {
@@ -53,6 +53,17 @@ describe('patient profile selectors', () => {
       date: '12/08/2026',
       label: 'Atualização de dieta',
     });
+  });
+
+  it('keeps related diet and assessment projections immutable during selection', () => {
+    const diets = structuredClone(PATIENT_PROFILE_DIETS);
+    const assessments = structuredClone(PATIENT_PROFILE_ASSESSMENTS);
+
+    selectActivePlan(diets);
+    selectLatestAssessment(assessments);
+
+    expect(diets).toEqual(PATIENT_PROFILE_DIETS);
+    expect(assessments).toEqual(PATIENT_PROFILE_ASSESSMENTS);
   });
 
   it('maps carb cycling plans to a weighted weekly history summary', () => {

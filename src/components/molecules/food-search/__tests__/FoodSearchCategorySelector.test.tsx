@@ -24,7 +24,7 @@ describe('FoodSearchCategorySelector', () => {
     expect(screen.getByText('12')).toBeInTheDocument();
   });
 
-  it('indicates the active category tab', () => {
+  it('indicates the active category option', () => {
     render(
       <FoodSearchCategorySelector
         activeCategory="meals"
@@ -32,13 +32,13 @@ describe('FoodSearchCategorySelector', () => {
       />
     );
 
-    const mealsTab = screen.getByRole('tab', { name: /refeições prontas/i });
-    expect(mealsTab).toHaveAttribute('data-state', 'active');
-    expect(mealsTab).toHaveAttribute('aria-selected', 'true');
+    const mealsTab = screen.getByRole('button', { name: /refeições prontas/i });
+    expect(mealsTab).toHaveAttribute('data-state', 'on');
+    expect(mealsTab).toHaveAttribute('aria-pressed', 'true');
 
-    const foodsTab = screen.getByRole('tab', { name: /alimentos/i });
-    expect(foodsTab).toHaveAttribute('data-state', 'inactive');
-    expect(foodsTab).toHaveAttribute('aria-selected', 'false');
+    const foodsTab = screen.getByRole('button', { name: /alimentos/i });
+    expect(foodsTab).toHaveAttribute('data-state', 'off');
+    expect(foodsTab).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('calls onCategoryChange when a different category is clicked', () => {
@@ -50,7 +50,7 @@ describe('FoodSearchCategorySelector', () => {
       />
     );
 
-    const recipesTab = screen.getByRole('tab', { name: /receitas/i });
+    const recipesTab = screen.getByRole('button', { name: /receitas/i });
     fireEvent.click(recipesTab);
 
     expect(handleChange).toHaveBeenCalledWith('recipes');

@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { ChevronsUpDown, FolderOpen, Save, User } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronsUpDown, FileInput, FileOutput, LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import { Avatar, Button, IconButton } from '@/components/atoms';
 import {
   DropdownMenu,
@@ -9,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -19,8 +19,11 @@ export interface SidebarUserProfileProps {
   doctorRole?: string;
   isCollapsed?: boolean;
   onOpenAccount?: () => void;
-  onSave?: () => void;
-  onOpen?: () => void;
+  onExportBackup?: () => void | Promise<void>;
+  onRestoreBackup?: () => void | Promise<void>;
+  onSignOut?: () => void | Promise<void>;
+  isExporting?: boolean;
+  isRestoring?: boolean;
 }
 
 export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
@@ -28,12 +31,15 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   doctorRole = 'Nutricionista',
   isCollapsed = false,
   onOpenAccount,
-  onSave,
-  onOpen,
+  onExportBackup,
+  onRestoreBackup,
+  onSignOut,
+  isExporting = false,
+  isRestoring = false,
 }) => {
   const accountLabel = `Abrir menu de conta de ${doctorName}`;
-  const hasDropdown = Boolean(onSave || onOpen);
-  const hasAction = Boolean(onOpenAccount || onSave || onOpen);
+  const hasDropdown = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
+  const hasAction = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
 
   if (isCollapsed) {
     if (!hasAction) {
@@ -83,29 +89,34 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {onSave ? (
-              <DropdownMenuItem onClick={onSave} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <Save className="size-4 text-text-muted" aria-hidden="true" />
-                <span>Salvar Arquivo Local</span>
-                <DropdownMenuShortcut>Ctrl+S</DropdownMenuShortcut>
+            <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <Link href="/pacientes">
+                <LayoutDashboard className="size-4 text-text-muted" aria-hidden="true" />
+                <span>Visão geral</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <Settings className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Configurações</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {onExportBackup ? (
+              <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onExportBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
+                <FileOutput className="size-4 text-text-muted" aria-hidden="true" />
+                <span>Exportar backup</span>
               </DropdownMenuItem>
             ) : null}
-            {onOpen ? (
-              <DropdownMenuItem onClick={onOpen} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <FolderOpen className="size-4 text-text-muted" aria-hidden="true" />
-                <span>Abrir Arquivo .diet</span>
-                <DropdownMenuShortcut>Ctrl+O</DropdownMenuShortcut>
+            {onRestoreBackup ? (
+              <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onRestoreBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
+                <FileInput className="size-4 text-text-muted" aria-hidden="true" />
+                <span>Importar backup</span>
               </DropdownMenuItem>
             ) : null}
-            {onOpenAccount ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                  <User className="size-4 text-text-muted" aria-hidden="true" />
-                  <span>Configurações da Conta</span>
-                </DropdownMenuItem>
-              </>
-            ) : null}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onSignOut} className="flex cursor-pointer items-center gap-2 text-style-legal text-error">
+              <LogOut className="size-4" aria-hidden="true" />
+              <span>Sair</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -175,29 +186,34 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {onSave ? (
-            <DropdownMenuItem onClick={onSave} className="flex cursor-pointer items-center gap-2 text-style-legal">
-              <Save className="size-4 text-text-muted" aria-hidden="true" />
-              <span>Salvar Arquivo Local</span>
-              <DropdownMenuShortcut>Ctrl+S</DropdownMenuShortcut>
+          <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-2 text-style-legal">
+            <Link href="/pacientes">
+              <LayoutDashboard className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Visão geral</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+            <Settings className="size-4 text-text-muted" aria-hidden="true" />
+            <span>Configurações</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {onExportBackup ? (
+            <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onExportBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <FileOutput className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Exportar backup</span>
             </DropdownMenuItem>
           ) : null}
-          {onOpen ? (
-            <DropdownMenuItem onClick={onOpen} className="flex cursor-pointer items-center gap-2 text-style-legal">
-              <FolderOpen className="size-4 text-text-muted" aria-hidden="true" />
-              <span>Abrir Arquivo .diet</span>
-              <DropdownMenuShortcut>Ctrl+O</DropdownMenuShortcut>
+          {onRestoreBackup ? (
+            <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onRestoreBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <FileInput className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Importar backup</span>
             </DropdownMenuItem>
           ) : null}
-          {onOpenAccount ? (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <User className="size-4 text-text-muted" aria-hidden="true" />
-                <span>Configurações da Conta</span>
-              </DropdownMenuItem>
-            </>
-          ) : null}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={onSignOut} className="flex cursor-pointer items-center gap-2 text-style-legal text-error">
+            <LogOut className="size-4" aria-hidden="true" />
+            <span>Sair</span>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );

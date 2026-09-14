@@ -5,8 +5,6 @@ import {
   getPatientsFromStorage,
   formatPatientCode,
   deletePatientFromStorage,
-  deletePatientDietFromStorage,
-  getPatientDietsFromStorage,
 } from '../patientsStore';
 
 describe('patientsStore NanoID and Code formatting', () => {
@@ -77,7 +75,7 @@ describe('patientsStore NanoID and Code formatting', () => {
     expect(foundByLegacy?.name).toBe('Maria Oliveira');
   });
 
-  it('deletes patient along with assessments and diets in cascade', () => {
+  it('deletes patient along with assessments in cascade', () => {
     const created = savePatientToStorage({
       name: 'Carlos Santos',
       age: 28,
@@ -92,41 +90,9 @@ describe('patientsStore NanoID and Code formatting', () => {
     });
 
     localStorage.setItem(`nutridiet_assessments_${created.id}`, JSON.stringify([{ id: 'ass-1' }]));
-    localStorage.setItem(`nutridiet_diets_${created.id}`, JSON.stringify([{ id: 'diet-1' }]));
-
     deletePatientFromStorage(created.id);
 
     expect(getPatientById(created.id)).toBeNull();
     expect(localStorage.getItem(`nutridiet_assessments_${created.id}`)).toBeNull();
-    expect(localStorage.getItem(`nutridiet_diets_${created.id}`)).toBeNull();
-  });
-
-  it('deletes a single diet from patient diets storage and patient dietHistory', () => {
-    const created = savePatientToStorage({
-      name: 'Luciana Lima',
-      age: 32,
-      gender: 'Feminino',
-      heightCm: 165,
-      weightKg: 60,
-      targetKcal: 1800,
-      targetProtein: 120,
-      targetCarbs: 200,
-      targetFats: 50,
-      objective: 'Emagrecimento',
-    });
-
-    localStorage.setItem(
-      `nutridiet_diets_${created.id}`,
-      JSON.stringify([
-        { id: 'diet-1', name: 'Dieta 1' },
-        { id: 'diet-2', name: 'Dieta 2' },
-      ]),
-    );
-
-    deletePatientDietFromStorage(created.id, 'diet-1');
-
-    const remainingDiets = getPatientDietsFromStorage(created.id);
-    expect(remainingDiets).toHaveLength(1);
-    expect(remainingDiets[0].id).toBe('diet-2');
   });
 });

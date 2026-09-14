@@ -6,10 +6,10 @@
 | --- | --- |
 | Component ID | `organism-food-search-modal` |
 | Nature | `domain` |
-| Lifecycle | `migration-required` |
-| Current layer | `molecule` |
+| Lifecycle | `implemented` |
+| Current layer | `organism` |
 | Target layer | `organism` |
-| Sources | `src/components/molecules/FoodSearchModal.tsx` |
+| Sources | `src/components/organisms/foods/FoodSearchModal.tsx` |
 | Public exports | `FoodSearchModalProps` (type), `FoodSearchModal` (component) |
 
 ## Purpose
@@ -58,5 +58,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`, especificado para `organism`; perfil homologado, código ainda requer migração em SDD posterior.
+Implementado em `organism`; fonte e consumidor de rota reconciliados no registry.
 

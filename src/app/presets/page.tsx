@@ -1,17 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Sparkles, Search } from 'lucide-react';
 import { CreateButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePresetModal, type CreatePresetData } from '@/components/molecules/CreatePresetModal';
 import { PresetCard } from './PresetCard';
-import {
-  type DietPreset,
-  getPresetsFromStorage,
-  savePresetToStorage,
-} from '@/lib/presetsStore';
+import type { DietPreset } from '@/lib/domain/diet-preset';
 
 export default function PresetsPage() {
   const [presets, setPresets] = useState<DietPreset[]>([]);
@@ -19,13 +15,12 @@ export default function PresetsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    setPresets(getPresetsFromStorage());
-  }, []);
-
   const handleCreatePreset = (formData: CreatePresetData) => {
-    savePresetToStorage(formData);
-    setPresets(getPresetsFromStorage());
+    const created: DietPreset = {
+      ...formData,
+      id: `preset-${Date.now()}`,
+    };
+    setPresets((current) => [created, ...current]);
     setIsModalOpen(false);
   };
 

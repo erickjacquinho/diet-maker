@@ -3,7 +3,7 @@
 import React from 'react';
 import { ClipboardList, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { ConsultationRecord } from '@/lib/patientsStore';
+import type { ConsultationRecord } from '@/lib/patientsStoreTypes';
 
 export function ConsultationNotesCard({
   consultation,
@@ -58,9 +58,7 @@ export function ConsultationNotesCard({
           </div>
           <div className="flex justify-between py-1.5 border-b border-border-subtle/60">
             <span className="text-text-muted font-medium">Status do Plano</span>
-            <span className={`font-bold ${consultation.diet?.status === 'Ativa' ? 'text-primary' : 'text-text-secondary'}`}>
-              {consultation.diet?.status || 'N/A'}
-            </span>
+            <span className="font-bold text-text-secondary">N/A</span>
           </div>
           <div className="flex justify-between py-1.5">
             <span className="text-text-muted font-medium">Data do Registro</span>
