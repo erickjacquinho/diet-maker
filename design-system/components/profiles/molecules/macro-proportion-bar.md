@@ -65,7 +65,7 @@ Nenhuma exceção aprovada.
 - `MealCardContainer` (`src/components/organisms/MealCardContainer.tsx`)
 - `AdjustDietGoalsModal` (`src/components/molecules/AdjustDietGoalsModal.tsx`)
 - `ReadOnlyDietModal` (`src/components/organisms/diets/ReadOnlyDietModal.tsx`)
-- `ReadyMealsPage` (`src/app/refeicoes-prontas/page.tsx`)
+- `ReadyMealsPage` (`src/app/refeicoes/page.tsx`)
 
 ## Acceptance criteria
 

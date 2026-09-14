@@ -32,6 +32,8 @@ export type BackupRepositoryFailurePoint = 'after-delete' | 'after-insert';
 export interface PGliteBackupRepositoryOptions {
   now?: () => string;
   failAt?: BackupRepositoryFailurePoint;
+  readFavorites?: () => string[];
+  writeFavorites?: (favorites: string[]) => void;
 }
 
 function repositoryFailure(message: string, cause?: unknown): BackupRepositoryError {
@@ -41,10 +43,14 @@ function repositoryFailure(message: string, cause?: unknown): BackupRepositoryEr
 export class PGliteBackupRepository implements BackupRepository {
   private readonly now: () => string;
   private readonly failAt?: BackupRepositoryFailurePoint;
+  private readonly readFavorites: () => string[];
+  private readonly writeFavorites: (favorites: string[]) => void;
 
   constructor(private readonly handle: LocalDatabaseHandle, options: PGliteBackupRepositoryOptions = {}) {
     this.now = options.now ?? (() => new Date().toISOString());
     this.failAt = options.failAt;
+    this.readFavorites = options.readFavorites ?? (() => []);
+    this.writeFavorites = options.writeFavorites ?? (() => {});
   }
 
   async readAccountSnapshot(accountId: string): Promise<BackupEnvelope> {
@@ -75,6 +81,7 @@ export class PGliteBackupRepository implements BackupRepository {
           formatVersion: BACKUP_FORMAT_VERSION,
           schemaVersion: BACKUP_SCHEMA_VERSION,
           exportedAt: this.now(),
+          favorites: [...this.readFavorites()],
           account: accountRows,
           objectiveOptions: objectiveRows,
           patients: patientRows,
@@ -158,10 +165,10 @@ export class PGliteBackupRepository implements BackupRepository {
 
         if (this.failAt === 'after-insert') throw repositoryFailure('Falha simulada após inserir o backup.');
       });
+      this.writeFavorites([...snapshot.favorites]);
     } catch (cause) {
       if (cause instanceof BackupRepositoryError) throw cause;
       throw repositoryFailure('A base local não pôde ser substituída e foi preservada.', cause);
     }
   }
 }
-

@@ -5,6 +5,7 @@ import {
   BACKUP_ROW_KEYS,
   BACKUP_SCHEMA_VERSION,
   BACKUP_TABLE_NAMES,
+  LEGACY_BACKUP_SCHEMA_VERSION,
 } from '@/lib/infrastructure/local-db/logical-export-schema';
 import type {
   AccountRow,
@@ -31,7 +32,7 @@ import type { AccountContext } from '@/lib/persistence/account-context';
 import type { DietDraftStore } from './diets/diet-ports';
 
 export interface BackupValidationContext {
-  accountId: string;
+  accountId?: string;
   schemaVersion?: string;
 }
 
@@ -87,8 +88,8 @@ function assertExactKeys(record: UnknownRecord, expected: readonly string[], tab
   }
 }
 
-function assertFields(record: UnknownRecord, tableName: string, fields: Record<string, (value: unknown) => boolean>): void {
-  assertExactKeys(record, BACKUP_ROW_KEYS[tableName as keyof typeof BACKUP_ROW_KEYS], tableName);
+function assertFields(record: UnknownRecord, tableName: string, fields: Record<string, (value: unknown) => boolean>, expectedKeys?: readonly string[]): void {
+  assertExactKeys(record, expectedKeys ?? BACKUP_ROW_KEYS[tableName as keyof typeof BACKUP_ROW_KEYS], tableName);
   for (const [field, predicate] of Object.entries(fields)) {
     if (!predicate(record[field])) fail('BACKUP_FORMAT_INVALID', `O campo ${tableName}.${field} possui tipo inválido.`);
   }
@@ -110,13 +111,17 @@ function nullableNumericStringFields(...names: string[]): Record<string, (value:
   return Object.fromEntries(names.map((name) => [name, (value: unknown) => isNullable(value, (candidate) => isString(candidate) && candidate.trim() !== '' && Number.isFinite(Number(candidate)))]));
 }
 
-function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown): UnknownRecord {
+function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown, schemaVersion: string): UnknownRecord {
   if (!isRecord(value)) fail('BACKUP_FORMAT_INVALID', `O registro ${tableName} deve ser um objeto.`);
 
   const fields: Record<string, (candidate: unknown) => boolean> = {};
   switch (tableName) {
     case 'account':
-      Object.assign(fields, stringFields('id', 'displayName', 'createdAt', 'updatedAt'));
+      if (schemaVersion === LEGACY_BACKUP_SCHEMA_VERSION) {
+        Object.assign(fields, stringFields('id', 'displayName', 'createdAt', 'updatedAt'));
+      } else {
+        Object.assign(fields, stringFields('id', 'displayName', 'createdAt', 'updatedAt'), nullableStringFields('phone'));
+      }
       break;
     case 'objectiveOptions':
       Object.assign(fields, stringFields('id', 'accountId', 'label', 'normalizedLabel', 'origin', 'createdAt', 'updatedAt'), nullableStringFields('archivedAt'));
@@ -167,13 +172,16 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'readyMealId', 'accountId', 'sourceType', 'sourceId', 'sourceVersion'), nullableNumericStringFields('quantity', 'recipePortions'), nullableStringFields('unit'), { position: isNumber, itemSnapshot: isJsonValue });
       break;
   }
-  assertFields(value, tableName, fields);
+  const expectedKeys = tableName === 'account' && schemaVersion === LEGACY_BACKUP_SCHEMA_VERSION && !Object.prototype.hasOwnProperty.call(value, 'phone')
+    ? ['id', 'displayName', 'createdAt', 'updatedAt']
+    : undefined;
+  assertFields(value, tableName, fields, expectedKeys);
   return value;
 }
 
-function rows<T>(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown): T[] {
+function rows<T>(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown, schemaVersion: string): T[] {
   if (!Array.isArray(value)) fail('BACKUP_FORMAT_INVALID', `A coleção ${tableName} deve ser um array.`);
-  return value.map((row) => validateRowShape(tableName, row)) as T[];
+  return value.map((row) => validateRowShape(tableName, row, schemaVersion)) as T[];
 }
 
 function ensureUnique<T>(rowsToCheck: readonly T[], key: (row: T) => string, tableName: string): void {
@@ -199,9 +207,12 @@ function assertAccountScope(row: { accountId?: string }, tableName: string, acco
   if (row.accountId !== undefined && row.accountId !== accountId) fail('BACKUP_RELATION_INVALID', `O registro ${tableName} pertence a outra Conta.`);
 }
 
-function validateRelations(envelope: BackupEnvelope, accountId: string): void {
+function validateRelations(envelope: BackupEnvelope, expectedAccountId?: string): void {
   const account = envelope.account[0];
-  if (envelope.account.length !== 1 || !account || account.id !== accountId) fail('BACKUP_APP_MISMATCH', 'O arquivo não identifica a Conta local ativa.');
+  if (envelope.account.length !== 1 || !account) fail('BACKUP_APP_MISMATCH', 'O arquivo não identifica uma Conta válida.');
+  const accountId = expectedAccountId ?? account.id;
+  if (!account.id || !account.displayName.trim()) fail('BACKUP_FORMAT_INVALID', 'O arquivo não contém um profile identificável.');
+  if (expectedAccountId && account.id !== expectedAccountId) fail('BACKUP_APP_MISMATCH', 'O arquivo não identifica a Conta local ativa.');
 
   envelope.objectiveOptions.forEach((row) => assertAccountScope(row, 'objectiveOptions', accountId));
   envelope.patients.forEach((row) => assertAccountScope(row, 'patients', accountId));
@@ -288,42 +299,49 @@ function validateRelations(envelope: BackupEnvelope, accountId: string): void {
   }
 }
 
-export function validateBackupEnvelope(input: unknown, context: BackupValidationContext): BackupEnvelope {
+export function validateBackupEnvelope(input: unknown, context: BackupValidationContext = {}): BackupEnvelope {
   if (!isRecord(input)) fail('BACKUP_FORMAT_INVALID', 'O backup deve ser um objeto JSON.');
-  assertExactKeys(input, BACKUP_ENVELOPE_KEYS, 'envelope');
+  const hasFavorites = Object.prototype.hasOwnProperty.call(input, 'favorites');
+  assertExactKeys(input, hasFavorites ? BACKUP_ENVELOPE_KEYS : BACKUP_ENVELOPE_KEYS.filter((key) => key !== 'favorites'), 'envelope');
   if (input.appId !== BACKUP_APP_ID) fail('BACKUP_APP_MISMATCH', 'O arquivo não pertence a esta aplicação.');
   if (input.formatVersion !== BACKUP_FORMAT_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do formato de backup não é suportada.');
-  if (input.schemaVersion !== (context.schemaVersion ?? BACKUP_SCHEMA_VERSION) || input.schemaVersion !== BACKUP_SCHEMA_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema do backup não é suportada.');
+  if (input.schemaVersion !== BACKUP_SCHEMA_VERSION && input.schemaVersion !== LEGACY_BACKUP_SCHEMA_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema do backup não é suportada.');
+  if (context.schemaVersion && context.schemaVersion !== BACKUP_SCHEMA_VERSION && context.schemaVersion !== LEGACY_BACKUP_SCHEMA_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema da sessão não é suportada.');
   if (!isString(input.exportedAt) || Number.isNaN(Date.parse(input.exportedAt))) fail('BACKUP_FORMAT_INVALID', 'A data de exportação do backup é inválida.');
+  const favorites = hasFavorites ? input.favorites : [];
+  if (!Array.isArray(favorites) || favorites.some((favorite) => !isString(favorite) || favorite.length === 0)) {
+    fail('BACKUP_FORMAT_INVALID', 'A coleção favorites deve conter IDs de alimentos válidos.');
+  }
 
   const envelope: BackupEnvelope = {
     appId: BACKUP_APP_ID,
     formatVersion: BACKUP_FORMAT_VERSION,
     schemaVersion: BACKUP_SCHEMA_VERSION,
     exportedAt: input.exportedAt,
-    account: rows<AccountRow>('account', input.account),
-    objectiveOptions: rows<ObjectiveOptionRow>('objectiveOptions', input.objectiveOptions),
-    patients: rows<PatientRow>('patients', input.patients),
-    bodyAssessments: rows<BodyAssessmentRow>('bodyAssessments', input.bodyAssessments),
-    nextFollowUps: rows<NextFollowUpRow>('nextFollowUps', input.nextFollowUps),
-    dietPlans: rows<DietPlanRow>('dietPlans', input.dietPlans),
-    dietVariations: rows<DietVariationRow>('dietVariations', input.dietVariations),
-    dietVariationDays: rows<DietVariationDayRow>('dietVariationDays', input.dietVariationDays),
-    dietMeals: rows<DietMealRow>('dietMeals', input.dietMeals),
-    dietMealOptions: rows<DietMealOptionRow>('dietMealOptions', input.dietMealOptions),
-    dietMealItems: rows<DietMealItemRow>('dietMealItems', input.dietMealItems),
-    dietItemSnapshots: rows<DietItemSnapshotRow>('dietItemSnapshots', input.dietItemSnapshots),
-    foodCatalogItems: rows<FoodCatalogItemRow>('foodCatalogItems', input.foodCatalogItems),
-    recipes: rows<RecipeRow>('recipes', input.recipes),
-    recipeIngredients: rows<RecipeIngredientRow>('recipeIngredients', input.recipeIngredients),
-    readyMeals: rows<ReadyMealRow>('readyMeals', input.readyMeals),
-    readyMealItems: rows<ReadyMealItemRow>('readyMealItems', input.readyMealItems),
+    favorites,
+    account: rows<AccountRow>('account', input.account, input.schemaVersion).map((row) => ({ ...row, phone: row.phone ?? null })),
+    objectiveOptions: rows<ObjectiveOptionRow>('objectiveOptions', input.objectiveOptions, input.schemaVersion),
+    patients: rows<PatientRow>('patients', input.patients, input.schemaVersion),
+    bodyAssessments: rows<BodyAssessmentRow>('bodyAssessments', input.bodyAssessments, input.schemaVersion),
+    nextFollowUps: rows<NextFollowUpRow>('nextFollowUps', input.nextFollowUps, input.schemaVersion),
+    dietPlans: rows<DietPlanRow>('dietPlans', input.dietPlans, input.schemaVersion),
+    dietVariations: rows<DietVariationRow>('dietVariations', input.dietVariations, input.schemaVersion),
+    dietVariationDays: rows<DietVariationDayRow>('dietVariationDays', input.dietVariationDays, input.schemaVersion),
+    dietMeals: rows<DietMealRow>('dietMeals', input.dietMeals, input.schemaVersion),
+    dietMealOptions: rows<DietMealOptionRow>('dietMealOptions', input.dietMealOptions, input.schemaVersion),
+    dietMealItems: rows<DietMealItemRow>('dietMealItems', input.dietMealItems, input.schemaVersion),
+    dietItemSnapshots: rows<DietItemSnapshotRow>('dietItemSnapshots', input.dietItemSnapshots, input.schemaVersion),
+    foodCatalogItems: rows<FoodCatalogItemRow>('foodCatalogItems', input.foodCatalogItems, input.schemaVersion),
+    recipes: rows<RecipeRow>('recipes', input.recipes, input.schemaVersion),
+    recipeIngredients: rows<RecipeIngredientRow>('recipeIngredients', input.recipeIngredients, input.schemaVersion),
+    readyMeals: rows<ReadyMealRow>('readyMeals', input.readyMeals, input.schemaVersion),
+    readyMealItems: rows<ReadyMealItemRow>('readyMealItems', input.readyMealItems, input.schemaVersion),
   };
   validateRelations(envelope, context.accountId);
   return envelope;
 }
 
-export function parseBackupEnvelope(serialized: string, context: BackupValidationContext): BackupEnvelope {
+export function parseBackupEnvelope(serialized: string, context: BackupValidationContext = {}): BackupEnvelope {
   if (!isString(serialized) || serialized.trim() === '') fail('BACKUP_FORMAT_INVALID', 'O arquivo de backup está vazio.');
   let parsed: unknown;
   try {
@@ -364,7 +382,7 @@ function exportFileName(exportedAt: string): string {
 }
 
 export function createBackupApplication(dependencies: BackupApplicationDependencies): BackupApplication {
-  const getValidationContext = async (): Promise<BackupValidationContext> => {
+  const getValidationContext = async (): Promise<{ accountId: string; schemaVersion: string }> => {
     const active = await dependencies.accountContext.requireActive();
     return { accountId: active.accountId, schemaVersion: BACKUP_SCHEMA_VERSION };
   };
@@ -389,12 +407,12 @@ export function createBackupApplication(dependencies: BackupApplicationDependenc
       const context = await getValidationContext();
       const envelope = parseBackupEnvelope(serialized, context);
       const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
-      if (drafts.length > 0) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Resolva, salve ou descarte os rascunhos pendentes antes de restaurar o backup.');
-      if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A restauração foi cancelada; a base local não foi alterada.');
+      if (drafts.length > 0) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Resolva, salve ou descarte os rascunhos pendentes antes de importar o backup.');
+      if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
       try {
         await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
       } catch (cause) {
-        throw appErrorFromCause('BACKUP_RESTORE_FAILED', 'A restauração falhou; a base anterior foi preservada.', cause);
+        throw appErrorFromCause('BACKUP_RESTORE_FAILED', 'A importação falhou; a base anterior foi preservada.', cause);
       }
     },
   };

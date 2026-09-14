@@ -31,4 +31,21 @@ describe('ConfirmationAlertDialog', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Excluir' }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
+
+  it('supports a modal layer for confirmations opened above another dialog', () => {
+    render(
+      <ConfirmationAlertDialog
+        open
+        onOpenChange={vi.fn()}
+        title="Descartar alterações?"
+        description="As alterações serão perdidas."
+        confirmLabel="Descartar"
+        overlayLayer="modal"
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    expect(document.body.querySelector('[data-state="open"].z-modal')).toBeInTheDocument();
+    expect(document.body.querySelector('[data-state="open"].z-overlay')).not.toBeInTheDocument();
+  });
 });

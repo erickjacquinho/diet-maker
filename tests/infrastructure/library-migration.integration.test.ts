@@ -23,7 +23,7 @@ describe('reusable library migration', () => {
   it('creates account-scoped library tables and accepts every snapshot source', async () => {
     const client = createClient();
     await client.waitReady;
-    expect(await applyMigrations(client)).toBe('4');
+    expect(await applyMigrations(client)).toBe('5');
     const tables = await client.query<{ table_name: string }>(
       'SELECT table_name FROM information_schema.tables ' +
       'WHERE table_name IN (\'food_catalog_items\', \'recipes\', \'recipe_ingredients\', \'ready_meals\', \'ready_meal_items\') ' +
@@ -58,11 +58,11 @@ describe('reusable library migration', () => {
   it('is idempotent and rolls back a failed follow-up migration', async () => {
     const client = createClient();
     await client.waitReady;
-    await expect(applyMigrations(client)).resolves.toBe('4');
-    await expect(applyMigrations(client)).resolves.toBe('4');
+    await expect(applyMigrations(client)).resolves.toBe('5');
+    await expect(applyMigrations(client)).resolves.toBe('5');
     await expect(applyMigrations(client, [
       ...migrationFiles,
-      { id: 'library-failure', version: '5', sql: 'CREATE TABLE library_temporary_failure (id text); SELECT * FROM no_library_table;' },
+      { id: 'library-failure', version: '6', sql: 'CREATE TABLE library_temporary_failure (id text); SELECT * FROM no_library_table;' },
     ])).rejects.toThrow();
     await expect(client.query('SELECT to_regclass(\'library_temporary_failure\') AS table_name')).resolves.toMatchObject({ rows: [{ table_name: null }] });
   });

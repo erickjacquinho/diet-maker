@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 71,
+    "currentSourceCount": 73,
     "capturedAt": "2026-08-30",
     "legacyAudit": {
       "findings": 0,
@@ -65,7 +65,7 @@
         { "name": "CardDescription", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "empty"] },
         { "name": "CardContent", "role": "structural-slot", "requiresRootContext": true, "states": ["default", "empty"] }
       ],
-      "consumers": ["src/app/alimentos/page.tsx", "src/app/design-system/page.tsx", "src/app/pacientes/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes-prontas/page.tsx"]
+      "consumers": ["src/app/alimentos/page.tsx", "src/app/design-system/page.tsx", "src/app/pacientes/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes/page.tsx"]
     },
     {
       "id": "ui-dialog",
@@ -127,7 +127,7 @@
       "parts": [
         { "name": "Input", "role": "visual-root", "requiresRootContext": false, "states": ["default", "hover", "focus-visible", "disabled", "error", "read-only"] }
       ],
-      "consumers": ["atom-input", "molecule-meal-item-row", "molecule-date-picker-field", "molecule-taco-search-input", "organism-food-search-modal", "molecule-edit-assessment-modal", "src/app/alimentos/page.tsx", "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx", "src/app/pacientes/[id]/page.tsx", "src/app/pacientes/page.tsx", "src/app/presets/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes-prontas/page.tsx", "src/components/molecules/AutoKcalSection.tsx", "src/components/organisms/MealCardContainer.tsx"]
+      "consumers": ["atom-input", "molecule-meal-item-row", "molecule-date-picker-field", "molecule-taco-search-input", "organism-food-search-modal", "molecule-edit-assessment-modal", "src/app/alimentos/page.tsx", "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx", "src/app/pacientes/[id]/page.tsx", "src/app/pacientes/page.tsx", "src/app/presets/page.tsx", "src/app/receitas/page.tsx", "src/app/refeicoes/page.tsx", "src/components/molecules/AutoKcalSection.tsx", "src/components/organisms/MealCardContainer.tsx"]
     },
     {
       "id": "ui-popover",
@@ -901,7 +901,7 @@
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -956,7 +956,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx",
+        "src/app/refeicoes/page.tsx",
         "template-diet-builder-template"
       ],
       "primitiveBase": null,
@@ -1063,7 +1063,7 @@
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
         "src/app/receitas/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -1149,7 +1149,7 @@
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
         "src/app/receitas/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -1378,7 +1378,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx",
+        "src/app/refeicoes/page.tsx",
         "ui-textarea"
       ],
       "primitiveBase": null,
@@ -2346,7 +2346,7 @@
       "profile": "design-system/components/profiles/molecules/auto-kcal-section.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -2540,7 +2540,7 @@
         "molecule-adjust-diet-goals-modal",
         "organism-meal-card-container",
         "organism-read-only-diet-modal",
-        "page-refeicoes-prontas"
+        "page-refeicoes"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
@@ -2602,7 +2602,7 @@
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
@@ -3930,7 +3930,7 @@
       ],
       "profile": "design-system/components/profiles/molecules/create-ready-meal-modal.md",
       "consumers": [
-        "src/app/refeicoes-prontas/page.tsx"
+        "src/app/refeicoes/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
@@ -4296,6 +4296,47 @@
       "profile": "design-system/components/profiles/organisms/patient-list-table-row.md",
       "consumers": ["organism-patient-list-table"],
       "primitiveBase": "molecule-data-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-profile-create-dialog",
+      "name": "ProfileCreateDialog",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "overlays",
+      "traits": ["async"],
+      "sourceFiles": [{ "path": "src/components/molecules/profile-create-dialog.tsx", "role": "implementation", "discoveredLayer": "molecule" }],
+      "publicExports": [
+        { "name": "ProfileCreateDialogProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileCreateDialog", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/profile-create-dialog.md",
+      "consumers": ["organism-profile-onboarding"],
+      "primitiveBase": "ui-dialog",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-profile-onboarding",
+      "name": "ProfileOnboarding",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "actions",
+      "traits": ["async"],
+      "sourceFiles": [{ "path": "src/components/organisms/profile-onboarding.tsx", "role": "implementation", "discoveredLayer": "organism" }],
+      "publicExports": [
+        { "name": "ProfileOnboardingSnapshot", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileOnboardingProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "ProfileOnboarding", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/organisms/profile-onboarding.md",
+      "consumers": ["src/app/Home/page.tsx"],
+      "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
     }

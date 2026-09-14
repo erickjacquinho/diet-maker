@@ -3,8 +3,8 @@
 import { createTacoSnapshot, listTacoFoods } from '@/lib/application/diets/taco-food-adapter';
 import { createDecimalString, type EnergySource, type NutritionSnapshot } from './domain/diets/diet-model';
 import { scaleNutrition } from './domain/diets/nutrition';
-import type { FoodCatalogItem as DomainFoodCatalogItem, ReadyMeal as DomainReadyMeal, Recipe as DomainRecipe, ReadyMealItemInput } from './domain/library/library-model';
-import { getStorageItem, setStorageItem } from './storage';
+import type { FoodCatalogItem as DomainFoodCatalogItem, LibraryStatus, ReadyMeal as DomainReadyMeal, Recipe as DomainRecipe, ReadyMealItemInput } from './domain/library/library-model';
+import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 
 export interface FoodItem {
   id: string;
@@ -44,6 +44,7 @@ export interface Recipe {
   ingredients: RecipeIngredient[];
   createdAt: string;
   libraryVersion?: number;
+  status?: LibraryStatus;
 }
 
 export interface RecipeNutrientsSummary {
@@ -67,14 +68,27 @@ export interface ReadyMeal {
   fatsG: number;
   itemsCount: number;
   itemsPreview: string;
+  itemsDetails?: Array<{
+    id: string;
+    name: string;
+    proteinG: number;
+    carbsG: number;
+    fatsG: number;
+    kcal: number;
+  }>;
   libraryVersion?: number;
   items?: ReadyMealItemInput[];
+  status?: LibraryStatus;
 }
 
 const FAVORITES_KEY = 'nutridiet_favorite_foods';
 
 export function getFavoritesFromStorage(): string[] {
-  return getStorageItem<string[]>(FAVORITES_KEY, []);
+  return getEphemeralItem<string[]>(FAVORITES_KEY, []);
+}
+
+export function setFavoritesFromStorage(favorites: string[]): void {
+  setEphemeralItem(FAVORITES_KEY, favorites);
 }
 
 export function toggleFavoriteFood(foodId: string): string[] {
@@ -82,7 +96,7 @@ export function toggleFavoriteFood(foodId: string): string[] {
   if (favorites.has(foodId)) favorites.delete(foodId);
   else favorites.add(foodId);
   const next = [...favorites];
-  setStorageItem(FAVORITES_KEY, next);
+  setFavoritesFromStorage(next);
   return next;
 }
 
@@ -136,7 +150,7 @@ export function toRecipe(recipe: DomainRecipe): Recipe {
   return {
     id: recipe.id, name: recipe.name, category: recipe.category, prepTimeMinutes: recipe.prepTimeMinutes, servings: Number(recipe.yieldPortions), instructions: recipe.instructions,
     ingredients: recipe.ingredients.map((ingredient) => ({ foodId: ingredient.sourceId, name: ingredient.ingredientSnapshot.displayName, amountGrams: Number(ingredient.quantity), proteinG: Number(ingredient.ingredientSnapshot.prescribedNutrients.protein), carbsG: Number(ingredient.ingredientSnapshot.prescribedNutrients.carbs), fatsG: Number(ingredient.ingredientSnapshot.prescribedNutrients.fat), kcal: Number(ingredient.ingredientSnapshot.prescribedNutrients.energyKcal ?? 0) })),
-    createdAt: recipe.createdAt, libraryVersion: recipe.version,
+    createdAt: recipe.createdAt, libraryVersion: recipe.version, status: recipe.status,
   };
 }
 
@@ -155,7 +169,16 @@ export function toReadyMeal(meal: DomainReadyMeal): ReadyMeal {
     fatsG: Number(fatsG.toFixed(1)),
     itemsCount: meal.items.length,
     itemsPreview: meal.items.map((item) => item.itemSnapshot.displayName).join(', ') || meal.description,
+    itemsDetails: meal.items.map((item) => ({
+      id: item.id,
+      name: item.itemSnapshot.displayName,
+      proteinG: Number(item.itemSnapshot.prescribedNutrients.protein),
+      carbsG: Number(item.itemSnapshot.prescribedNutrients.carbs),
+      fatsG: Number(item.itemSnapshot.prescribedNutrients.fat),
+      kcal: Number(item.itemSnapshot.prescribedNutrients.energyKcal ?? 0),
+    })),
     libraryVersion: meal.version,
+    status: meal.status,
     items: meal.items.map((item): ReadyMealItemInput => ({
       sourceType: item.sourceType,
       sourceId: item.sourceId,

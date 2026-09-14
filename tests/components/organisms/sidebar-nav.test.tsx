@@ -27,7 +27,7 @@ describe('SidebarNav preservation contract', () => {
     ).toEqual([
       '/pacientes',
       '/presets',
-      '/refeicoes-prontas',
+      '/refeicoes',
       '/receitas',
       '/alimentos',
       '/design-system',
@@ -53,7 +53,7 @@ describe('SidebarNav preservation contract', () => {
     expect(screen.queryByRole('link', { current: 'page' })).toBeNull();
   });
 
-  it('preserves brand, profile, quick actions and optional callback safety', () => {
+  it('preserves brand, profile, account actions and optional callback safety', () => {
     const onExportBackup = vi.fn();
     const onRestoreBackup = vi.fn();
     renderSidebar({
@@ -66,14 +66,18 @@ describe('SidebarNav preservation contract', () => {
     expect(screen.getByRole('link', { name: /NutriDiet/ })).toHaveAttribute('href', '/pacientes');
     expect(screen.getByText('Dr. Ana')).toBeInTheDocument();
     expect(screen.getByText('Nutricionista clínica')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Exportar backup local' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Restaurar backup local' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Dr. Ana' }), { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Exportar backup' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Dr. Ana' }), { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Importar backup' }));
     expect(onExportBackup).toHaveBeenCalledTimes(1);
     expect(onRestoreBackup).toHaveBeenCalledTimes(1);
 
     expect(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Exportar backup local' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Restaurar backup local' }));
+      fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Dr. Ana' }), { button: 0 });
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Exportar backup' }));
+      fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Dr. Ana' }), { button: 0 });
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Importar backup' }));
     }).not.toThrow();
   });
 
@@ -87,6 +91,15 @@ describe('SidebarNav preservation contract', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expandir Menu' }));
     expect(document.querySelector('[data-sidebar="sidebar"]')).toHaveAttribute('data-state', 'expanded');
     expect(screen.getByRole('button', { name: 'Recolher Menu' })).toBeInTheDocument();
+  });
+
+  it('announces a paused profile save and exposes explicit reauthorization', () => {
+    const onRetryProfileSync = vi.fn(async () => undefined);
+    renderSidebar({ profileSyncState: 'paused', onRetryProfileSync });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Sincronização pausada');
+    fireEvent.click(screen.getByRole('button', { name: 'Reautorizar arquivo' }));
+    expect(onRetryProfileSync).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the public compound component parts available', () => {

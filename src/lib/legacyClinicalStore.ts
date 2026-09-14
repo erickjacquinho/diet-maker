@@ -6,7 +6,7 @@ import {
   normalizePairedBodyMeasurements,
   getConsultationRecordHelper,
 } from './consultationStorageUtils';
-import { getStorageItem, setStorageItem, removeStorageItem } from './storage';
+import { getEphemeralItem, setEphemeralItem, removeEphemeralItem } from './ephemeral-storage';
 import type {
   Patient,
   PatientNextEvent,
@@ -63,11 +63,11 @@ function normalizePatient(patient: Patient, index: number = 0): Patient {
 }
 
 function writePatients(patients: Patient[]): void {
-  setStorageItem(PATIENTS_KEY, patients);
+  setEphemeralItem(PATIENTS_KEY, patients);
 }
 
 export function getPatientsFromStorage(): Patient[] {
-  const saved = getStorageItem<Patient[]>(PATIENTS_KEY, []);
+  const saved = getEphemeralItem<Patient[]>(PATIENTS_KEY, []);
   return saved.map((p, idx) => normalizePatient(p, idx));
 }
 
@@ -142,7 +142,7 @@ export function recordPatientActivity(
 }
 
 export function getPatientAssessmentsFromStorage(patientId: string): BodyAssessment[] {
-  const saved = getStorageItem<BodyAssessment[]>(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`, []);
+  const saved = getEphemeralItem<BodyAssessment[]>(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`, []);
   return Array.isArray(saved) ? saved : [];
 }
 
@@ -161,7 +161,7 @@ export function savePatientAssessmentToStorage(
     updated.unshift(normalizedAssessment);
   }
 
-  setStorageItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`, updated);
+  setEphemeralItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${patientId}`, updated);
   recordPatientActivity(patientId, 'assessment');
   return updated;
 }
@@ -170,7 +170,7 @@ export function deletePatientFromStorage(id: string): void {
   const current = getPatientsFromStorage();
   const updatedList = current.filter((p) => p.id !== id);
   writePatients(updatedList);
-  removeStorageItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
+  removeEphemeralItem(`${PATIENT_ASSESSMENTS_KEY_PREFIX}${id}`);
 }
 
 export function getConsultationRecord(patientId: string, rawDateParam: string): ConsultationRecord {

@@ -20,10 +20,6 @@ export function DietMealsSection({ mealsData = [], onAddMeal }: DietMealsSection
           </h2>
           <p className="text-style-legal text-text-muted">Organize as refeições e alimentos prescritos para o paciente.</p>
         </div>
-        <Button onClick={onAddMeal} variant="secondary" size="compact" className="flex items-center gap-1.5 self-auto">
-          <Plus size={14} aria-hidden="true" />
-          <span>Nova Refeição</span>
-        </Button>
       </div>
 
       {mealsData.length === 0 ? (
@@ -37,12 +33,24 @@ export function DietMealsSection({ mealsData = [], onAddMeal }: DietMealsSection
               Use “Nova Refeição” para começar a prescrição e adicionar alimentos diretamente da base TACO.
             </p>
           </div>
+          {onAddMeal && (
+            <Button onClick={onAddMeal} variant="secondary" size="compact" className="flex items-center gap-1.5">
+              <Plus size={14} aria-hidden="true" />
+              <span>Nova Refeição</span>
+            </Button>
+          )}
         </Surface>
       ) : (
         <div className="flex flex-col gap-6">
           {mealsData.map((meal, index) => (
             <MealCardContainer key={meal.id || index} {...meal} />
           ))}
+          {onAddMeal && (
+            <Button onClick={onAddMeal} variant="secondary" size="compact" className="flex w-48 items-center justify-center gap-1.5 self-center">
+              <Plus size={14} aria-hidden="true" />
+              <span>Nova Refeição</span>
+            </Button>
+          )}
         </div>
       )}
     </section>

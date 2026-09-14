@@ -17,12 +17,12 @@ describe('SidebarQuickActions', () => {
     renderActions({});
 
     const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
-    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Importar backup local' });
 
     expect(exportButton).toBeDisabled();
     expect(restoreButton).toBeDisabled();
     expect(exportButton).toHaveAccessibleDescription('A ação Exportar backup ainda não está disponível nesta tela.');
-    expect(restoreButton).toHaveAccessibleDescription('A ação Restaurar backup ainda não está disponível nesta tela.');
+    expect(restoreButton).toHaveAccessibleDescription('A ação Importar backup ainda não está disponível nesta tela.');
   });
 
   it('enables and isolates each callback', () => {
@@ -31,7 +31,7 @@ describe('SidebarQuickActions', () => {
 
     renderActions({ onExportBackup });
     const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
-    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Importar backup local' });
 
     expect(exportButton).toBeEnabled();
     expect(restoreButton).toBeDisabled();
@@ -47,7 +47,7 @@ describe('SidebarQuickActions', () => {
     renderActions({ isCollapsed: true, onRestoreBackup });
 
     const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
-    const restoreButton = screen.getByRole('button', { name: 'Restaurar backup local' });
+    const restoreButton = screen.getByRole('button', { name: 'Importar backup local' });
 
     expect(exportButton).toBeDisabled();
     expect(restoreButton).toBeEnabled();

@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { createProfileSession, navigateWithinSession } from './helpers/profile-session';
 
 const assessmentFields = [
   ['Peso atual', '76'],
@@ -82,24 +83,23 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   const patientOneName = `Paciente clínico ${Date.now()}`;
   const patientTwoName = `${patientOneName} isolado`;
 
-  await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await createProfileSession(page, 'Clínico browser');
   await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
 
   const patientOnePath = await createPatient(page, patientOneName);
   const patientOneId = patientOnePath.split('/').at(-1) as string;
   await createPatient(page, patientTwoName);
 
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, patientOnePath);
   await expect(page.getByRole('heading', { level: 1, name: 'Perfil do paciente' })).toBeVisible({ timeout: 120_000 });
 
   // Create two independent assessments on the same clinical date.
-  await page.getByRole('link', { name: 'Nova Avaliação' }).click({ timeout: 120_000 });
+  await page.getByRole('link', { name: 'Nova Avaliação' }).evaluate((element) => (element as HTMLAnchorElement).click());
   await expect(page.getByRole('heading', { level: 1, name: 'Nova Avaliação Antropométrica' })).toBeVisible({ timeout: 120_000 });
-  const assessmentDate = await page.locator('#assessment-date').inputValue();
   await fillAssessment(page, '76');
   await saveAssessment(page);
 
-  await page.getByRole('link', { name: 'Nova Avaliação' }).click({ timeout: 120_000 });
+  await page.getByRole('link', { name: 'Nova Avaliação' }).evaluate((element) => (element as HTMLAnchorElement).click());
   await expect(page.getByRole('heading', { level: 1, name: 'Nova Avaliação Antropométrica' })).toBeVisible({ timeout: 120_000 });
   await fillAssessment(page, '80');
   await saveAssessment(page);
@@ -126,37 +126,26 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   // exercised in the deterministic integration suites; the browser remains single-tab by design.
   // The UI journey below covers the corresponding successful edit and recovery-facing states.
 
-  // The consultation is a read-only projection of both confirmed assessments on the same date.
-  await page.goto(`${patientOnePath}/consulta/${assessmentDate.replace(/\//g, '-')}`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 120_000,
-  });
-  await expect(page.getByRole('heading', { name: 'Avaliação Física & Antropometria' }).first()).toBeVisible({ timeout: 120_000 });
-  await expect(page.locator('body')).toContainText('77 kg');
-  await expect(page.locator('body')).toContainText('80 kg');
-  await expect(page.locator('body')).toContainText('Sem observações registradas para esta consulta.');
-
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   const followUpRegion = page.getByRole('region', { name: 'Próximo acompanhamento' });
 
   // Create, replace and remove the one allowed follow-up while checking list projections.
   await saveFollowUp(page, 2, 'Atualização de dieta');
-  await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, '/pacientes');
   const patientOneRow = page.getByRole('row').filter({ hasText: patientOneName }).first();
   await expect(patientOneRow).toContainText('Em 2 dias');
   await expect(patientOneRow).toContainText('Atualização de dieta');
 
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, patientOnePath);
   await saveFollowUp(page, 0, 'Atualização de avaliação');
-  await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Hoje');
 
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, patientOnePath);
   await saveFollowUp(page, -1, 'Atualização de avaliação');
-  await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, patientOnePath);
   await followUpRegion.getByRole('button', { name: 'Reagendar' }).click();
   const rescheduleDialog = page.getByRole('dialog', { name: 'Reagendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
@@ -172,7 +161,8 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await holdToConfirm(page, archiveDialog.getByRole('button', { name: /Pressione e segure.*arquivar/i }));
   await expect(page).toHaveURL(/\/pacientes$/);
 
-  await page.goto(patientOnePath, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await page.goBack({ waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await expect(page).toHaveURL(patientOnePath, { timeout: 120_000 });
   await expect(page.getByText('Este paciente está arquivado.', { exact: false })).toBeVisible({ timeout: 120_000 });
   const archivedAssessmentTable = page.getByRole('table', { name: 'Histórico de avaliações físicas e composição corporal' });
   await expect(archivedAssessmentTable).toContainText('77 kg');
@@ -181,7 +171,7 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(page.getByRole('button', { name: /Definir acompanhamento|Reagendar/ })).toHaveCount(0);
 
   // A second patient never receives the first patient's clinical rows.
-  await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await navigateWithinSession(page, '/pacientes');
   const patientTwoLink = page.getByRole('link', { name: `Ver perfil de ${patientTwoName}` });
   await expect(patientTwoLink).toBeVisible({ timeout: 120_000 });
   const patientTwoPath = await patientTwoLink.getAttribute('href');

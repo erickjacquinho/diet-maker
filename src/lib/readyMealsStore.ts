@@ -1,6 +1,6 @@
 'use client';
 
-import { getStorageItem, setStorageItem } from './storage';
+import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 import { calculatePresetCalories } from './presetUtils';
 
 export interface ReadyMeal {
@@ -18,7 +18,7 @@ export interface ReadyMeal {
 const MEALS_KEY = 'nutridiet_ready_meals';
 
 export function getReadyMealsFromStorage(): ReadyMeal[] {
-  return getStorageItem<ReadyMeal[]>(MEALS_KEY, []);
+  return getEphemeralItem<ReadyMeal[]>(MEALS_KEY, []);
 }
 
 export function saveReadyMealToStorage(meal: Omit<ReadyMeal, 'id' | 'kcal'> & { id?: string; kcal?: number }): ReadyMeal {
@@ -43,12 +43,12 @@ export function saveReadyMealToStorage(meal: Omit<ReadyMeal, 'id' | 'kcal'> & { 
     ? current.map((m) => (m.id === id ? mealToSave : m))
     : [mealToSave, ...current];
 
-  setStorageItem(MEALS_KEY, updated);
+  setEphemeralItem(MEALS_KEY, updated);
   return mealToSave;
 }
 
 export function deleteReadyMealFromStorage(id: string): void {
   const current = getReadyMealsFromStorage();
   const updated = current.filter((m) => m.id !== id);
-  setStorageItem(MEALS_KEY, updated);
+  setEphemeralItem(MEALS_KEY, updated);
 }

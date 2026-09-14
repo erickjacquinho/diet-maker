@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Utensils, Search, BookOpen } from 'lucide-react';
+import { Utensils, Search, BookOpen, Archive } from 'lucide-react';
 import { CreateButton, Button, HoldToDeleteButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,31 +30,38 @@ const CATEGORIES = [
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [archivedRecipeCount, setArchivedRecipeCount] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [insertedId, setInsertedId] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
-  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+  const [recipePendingAction, setRecipePendingAction] = useState<{ recipe: Recipe; action: 'restore' | 'delete' } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const refreshRecipes = async () => {
+  const refreshRecipes = async (includeArchived = showArchived): Promise<number | null> => {
     setIsLoading(true);
     try {
       const application = await getBrowserLibraryApplication();
-      setRecipes((await application.listRecipes()).map(toRecipe));
+      const allRecipes = (await application.listRecipes({ includeArchived: true })).map(toRecipe);
+      const nextRecipes = allRecipes
+        .filter((recipe) => includeArchived ? recipe.status === 'ARCHIVED' : recipe.status !== 'ARCHIVED');
+      setRecipes(nextRecipes);
+      setArchivedRecipeCount(allRecipes.filter((recipe) => recipe.status === 'ARCHIVED').length);
       setErrorMessage(null);
+      return nextRecipes.length;
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'As receitas não puderam ser carregadas.');
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    void refreshRecipes();
-  }, []);
+    void refreshRecipes(showArchived);
+  }, [showArchived]);
 
   const handleOpenCreateModal = () => {
     setEditingRecipe(null);
@@ -82,7 +89,7 @@ export default function RecipesPage() {
       } else {
         await application.createRecipe(input);
       }
-      await refreshRecipes();
+      await refreshRecipes(showArchived);
       setIsModalOpen(false);
       toast.success(data.id ? 'Receita atualizada com sucesso!' : 'Nova receita cadastrada!');
     } catch (error) {
@@ -90,24 +97,62 @@ export default function RecipesPage() {
     }
   };
 
-  const handleConfirmDelete = async () => {
-    if (!recipeToDelete) return;
+  const handleConfirmRecipeAction = async () => {
+    if (!recipePendingAction) return;
+    const { recipe, action } = recipePendingAction;
     try {
       const application = await getBrowserLibraryApplication();
-      await application.deleteRecipe(recipeToDelete.id, recipeToDelete.libraryVersion ?? 1);
-      await refreshRecipes();
-      setRecipeToDelete(null);
-      toast.success('Receita excluída do catálogo');
+      if (action === 'restore') {
+        await application.restoreRecipe(recipe.id, recipe.libraryVersion ?? 1);
+        toast.success('Receita restaurada.');
+      } else {
+        await application.deleteRecipe(recipe.id, recipe.libraryVersion ?? 1);
+        setRecipePendingAction(null);
+        await refreshRecipes(showArchived);
+        toast.success('Receita excluída do catálogo', {
+          duration: 6000,
+          action: {
+            label: 'Desfazer',
+            onClick: () => {
+              void (async () => {
+                try {
+                  const restoredRecipe = await application.createRecipe({
+                    name: recipe.name,
+                    category: recipe.category,
+                    instructions: recipe.instructions,
+                    prepTimeMinutes: recipe.prepTimeMinutes,
+                    yieldPortions: String(recipe.servings),
+                    ingredients: recipe.ingredients.map((ingredient) => ({
+                      sourceType: ingredient.foodId.startsWith('taco-') ? 'SYSTEM_TACO' as const : 'ACCOUNT_CUSTOM' as const,
+                      sourceId: ingredient.foodId,
+                      quantity: String(ingredient.amountGrams),
+                      unit: 'g' as const,
+                    })),
+                  });
+                  if (recipe.status === 'ARCHIVED') {
+                    await application.archiveRecipe(restoredRecipe.id, restoredRecipe.version);
+                  }
+                  await refreshRecipes(showArchived);
+                  toast.success('Receita restaurada.');
+                } catch (error) {
+                  setErrorMessage(error instanceof Error ? error.message : 'A receita não pôde ser restaurada.');
+                }
+              })();
+            },
+          },
+        });
+        return;
+      }
+      const remainingRecipes = await refreshRecipes(showArchived);
+      if (action === 'restore' && showArchived && remainingRecipes === 0) {
+        setShowArchived(false);
+      }
+      setRecipePendingAction(null);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'A receita não pôde ser excluída.');
     }
   };
 
-  const handleInsertInDiet = (recipeId: string) => {
-    setInsertedId(recipeId);
-    toast.success('Porção da receita pronta para inserção na prescrição!');
-    setTimeout(() => setInsertedId(null), 2500);
-  };
   const filteredRecipes = useMemo(() => {
     return recipes.filter((r) => {
       const matchesSearch =
@@ -133,9 +178,23 @@ export default function RecipesPage() {
             Catálogo de receitas preparadas com cálculo automático de macronutrientes por porção.
           </p>
         </div>
-        <CreateButton onClick={handleOpenCreateModal}>
-          Criar Nova Receita
-        </CreateButton>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="standard"
+            aria-pressed={showArchived}
+            disabled={!showArchived && archivedRecipeCount === 0}
+            onClick={() => setShowArchived((current) => !current)}
+            className="gap-1.5"
+          >
+            <Archive size={14} aria-hidden="true" />
+            <span>{showArchived ? 'Ver ativas' : 'Arquivados'}</span>
+          </Button>
+          <CreateButton onClick={handleOpenCreateModal}>
+            Criar Nova Receita
+          </CreateButton>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
@@ -177,14 +236,20 @@ export default function RecipesPage() {
               <BookOpen size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-style-body text-text-primary">Nenhuma receita encontrada</h3>
+              <h3 className="font-bold text-style-body text-text-primary">
+                {showArchived ? 'Nenhuma receita arquivada' : 'Nenhuma receita encontrada'}
+              </h3>
               <p className="text-style-legal text-text-muted mt-1 leading-relaxed">
-                Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.
+                {showArchived
+                  ? 'Não há receitas arquivadas neste catálogo.'
+                  : 'Crie receitas culinárias personalizadas agrupando alimentos da TACO e calculando as calorias por porção.'}
               </p>
             </div>
-            <CreateButton onClick={handleOpenCreateModal}>
-              Criar Primeira Receita
-            </CreateButton>
+            {!showArchived && (
+              <CreateButton onClick={handleOpenCreateModal}>
+                Criar Primeira Receita
+              </CreateButton>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -193,10 +258,9 @@ export default function RecipesPage() {
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              isInserted={insertedId === recipe.id}
-              onInsert={() => handleInsertInDiet(recipe.id)}
-              onEdit={() => handleOpenEditModal(recipe)}
-              onDelete={() => setRecipeToDelete(recipe)}
+              onEdit={showArchived ? undefined : () => handleOpenEditModal(recipe)}
+              onRestore={showArchived ? () => setRecipePendingAction({ recipe, action: 'restore' }) : undefined}
+              onDelete={() => setRecipePendingAction({ recipe, action: 'delete' })}
             />
           ))}
         </div>
@@ -209,21 +273,29 @@ export default function RecipesPage() {
         onSave={handleSaveRecipe}
       />
 
-      <Dialog open={!!recipeToDelete} onOpenChange={(open) => !open && setRecipeToDelete(null)}>
+      <Dialog open={!!recipePendingAction} onOpenChange={(open) => !open && setRecipePendingAction(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Excluir Receita</DialogTitle>
+            <DialogTitle>{recipePendingAction?.action === 'restore' ? 'Restaurar Receita' : 'Excluir Receita'}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir a receita &quot;{recipeToDelete?.name}&quot;? Esta ação não pode ser desfeita.
+              {recipePendingAction?.action === 'restore'
+                ? `A receita "${recipePendingAction.recipe.name}" voltará a aparecer nas receitas ativas.`
+                : `Tem certeza que deseja excluir a receita "${recipePendingAction?.recipe.name}"? Esta ação não pode ser desfeita.`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setRecipeToDelete(null)}>
+            <Button variant="secondary" onClick={() => setRecipePendingAction(null)}>
               Cancelar
             </Button>
-            <HoldToDeleteButton onConfirm={handleConfirmDelete} size="compact">
-              Excluir Receita
-            </HoldToDeleteButton>
+            {recipePendingAction?.action === 'restore' ? (
+              <Button variant="primary" onClick={handleConfirmRecipeAction}>
+                Restaurar Receita
+              </Button>
+            ) : (
+              <HoldToDeleteButton onConfirm={handleConfirmRecipeAction} size="compact">
+                Excluir Receita
+              </HoldToDeleteButton>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -67,16 +67,18 @@ export function useDietMealActions({
   );
 
   const handleAddMeal = useCallback(() => {
+    const newMealId = createId('meal');
     updateActiveMeals((prev) => [
       ...prev,
       {
-        id: createId('meal'),
+        id: newMealId,
         name: `Refeição ${prev.length + 1}`,
         time: '12:00',
         items: [],
       },
     ]);
     toast.success('Nova refeição adicionada');
+    return newMealId;
   }, [createId, updateActiveMeals]);
 
   const handleRemoveMeal = useCallback(

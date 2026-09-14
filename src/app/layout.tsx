@@ -5,8 +5,7 @@ import "@fontsource/plus-jakarta-sans/600.css";
 import "@fontsource/plus-jakarta-sans/700.css";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { SidebarNavigationAdapter } from "@/app/navigation/SidebarNavigationAdapter";
-import { AppLayoutShell } from "@/components/templates";
+import { SessionAwareAppShell } from "@/app/SessionAwareAppShell";
 import { PatientApplicationBootstrap } from "@/app/PatientApplicationBootstrap";
 
 export const metadata: Metadata = {
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
-        <AppLayoutShell sidebar={<SidebarNavigationAdapter />}>{children}</AppLayoutShell>
+        <SessionAwareAppShell>{children}</SessionAwareAppShell>
         <PatientApplicationBootstrap />
         <Toaster position="bottom-right" richColors duration={3000} />
       </body>

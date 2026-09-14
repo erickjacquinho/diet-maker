@@ -4,6 +4,15 @@ import type {
   AccountContextRepository,
   AccountContextSnapshot,
 } from '@/lib/persistence/account-context';
+import type { Account } from '@/lib/domain/account';
+
+export function createExplicitAccountContext(account: Account): AccountContext {
+  const snapshot: AccountContextSnapshot = { accountId: account.id, account };
+  return {
+    getActive: async () => snapshot,
+    requireActive: async () => snapshot,
+  };
+}
 
 export function createActiveAccountContext(repository: AccountContextRepository): AccountContext {
   let active: AccountContextSnapshot | null = null;

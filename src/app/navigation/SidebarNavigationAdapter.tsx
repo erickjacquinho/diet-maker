@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -16,9 +16,17 @@ import {
 } from '@/components/ui/dialog';
 import { BackupApplicationError } from '@/lib/application/backup-application';
 import { getBrowserPatientRuntime } from '@/lib/application/browser-composition';
+import * as browserComposition from '@/lib/application/browser-composition';
 import { SIDEBAR_NAVIGATION_ITEMS } from './sidebar-navigation-config';
 
 export type SidebarNavigationAdapterProps = Omit<SidebarNavProps, 'pathname' | 'navigationItems'>;
+
+const EMPTY_PROFILE_SNAPSHOT = { status: 'empty' as const, syncState: 'unbound' as const, account: null, accountId: null, runtime: null, fileName: null, hydration: 'ready' as const, resumeFileName: null, error: null };
+const EMPTY_PROFILE_SESSION = {
+  getSnapshot: () => EMPTY_PROFILE_SNAPSHOT,
+  subscribe: (_listener: () => void) => () => undefined,
+  sync: async () => undefined,
+};
 
 type ExportState = 'idle' | 'loading' | 'error';
 type RestoreState = 'idle' | 'choosing-file' | 'validating' | 'confirmation' | 'pending-edits' | 'restoring' | 'success' | 'error' | 'cancelled';
@@ -35,13 +43,13 @@ function getBackupErrorMessage(error: unknown): string {
       case 'BACKUP_RELATION_INVALID':
         return 'O backup contém relações de dados inválidas e não foi aplicado.';
       case 'BACKUP_PENDING_EDITS':
-        return 'Salve ou descarte os rascunhos pendentes antes de restaurar.';
+        return 'Salve ou descarte os rascunhos pendentes antes de importar.';
       case 'BACKUP_CANCELLED':
-        return 'A restauração foi cancelada; a base local não foi alterada.';
+        return 'A importação foi cancelada; a base local não foi alterada.';
       case 'BACKUP_EXPORT_FAILED':
         return 'O backup não pôde ser exportado. A base local permanece utilizável.';
       case 'BACKUP_RESTORE_FAILED':
-        return 'A restauração falhou; a base anterior foi preservada.';
+        return 'A importação falhou; a base anterior foi preservada.';
     }
   }
   return 'Não foi possível concluir a operação de backup. A base local permanece preservada.';
@@ -49,16 +57,42 @@ function getBackupErrorMessage(error: unknown): string {
 
 export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> = (props) => {
   const pathname = usePathname() ?? '';
+  let getProfileSession: typeof browserComposition.getBrowserProfileSession | undefined;
+  try {
+    getProfileSession = browserComposition.getBrowserProfileSession;
+  } catch {
+    // Older test adapters may only provide the backup application seam.
+  }
+  const hasProfileSession = typeof getProfileSession === 'function';
+  const profileSession = getProfileSession?.() ?? EMPTY_PROFILE_SESSION;
+  const profileSnapshot = useSyncExternalStore(profileSession.subscribe, profileSession.getSnapshot, profileSession.getSnapshot);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [exportState, setExportState] = useState<ExportState>('idle');
   const [restoreState, setRestoreState] = useState<RestoreState>('idle');
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
   const [restoreContent, setRestoreContent] = useState<string>();
   const [restoreFileName, setRestoreFileName] = useState<string>();
   const [feedback, setFeedback] = useState<{ kind: 'status' | 'error'; message: string }>();
 
   const isExporting = exportState === 'loading';
   const isRestoring = restoreState === 'validating' || restoreState === 'restoring';
+
+  const handleRetryProfileSync = async (): Promise<void> => {
+    if (isRetryingProfileSync) return;
+    setIsRetryingProfileSync(true);
+    setFeedback(undefined);
+    try {
+      await profileSession.sync();
+      setFeedback({ kind: 'status', message: 'Profile sincronizado no arquivo.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'A sincronização continua pausada.';
+      setFeedback({ kind: 'error', message });
+      toast.error(message);
+    } finally {
+      setIsRetryingProfileSync(false);
+    }
+  };
 
   const handleExportBackup = async (): Promise<void> => {
     setExportState('loading');
@@ -102,7 +136,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     event.target.value = '';
     if (!file) {
       setRestoreState('cancelled');
-      setFeedback({ kind: 'status', message: 'A restauração foi cancelada; a base local não foi alterada.' });
+      setFeedback({ kind: 'status', message: 'A importação foi cancelada; a base local não foi alterada.' });
       return;
     }
 
@@ -130,7 +164,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     setRestoreContent(undefined);
     setRestoreFileName(undefined);
     setRestoreState('cancelled');
-    setFeedback({ kind: 'status', message: 'A restauração foi cancelada; a base local não foi alterada.' });
+    setFeedback({ kind: 'status', message: 'A importação foi cancelada; a base local não foi alterada.' });
   };
 
   const confirmRestore = async (): Promise<void> => {
@@ -142,14 +176,14 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
       await runtime.backupApplication.restoreBackup(restoreContent, { confirmed: true });
       setRestoreState('success');
       setRestoreDialogOpen(false);
-      const message = 'Backup restaurado. A aplicação será recarregada.';
+      const message = 'Backup importado. A aplicação será recarregada.';
       setFeedback({ kind: 'status', message });
       toast.success(message);
       window.location.reload();
     } catch (error) {
       if (error instanceof BackupApplicationError && error.code === 'BACKUP_PENDING_EDITS') {
         setRestoreState('pending-edits');
-        toast.error('Salve ou descarte os rascunhos pendentes antes de restaurar.');
+        toast.error('Salve ou descarte os rascunhos pendentes antes de importar.');
         return;
       }
       setRestoreState('error');
@@ -165,6 +199,10 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         {...props}
         pathname={pathname}
         navigationItems={SIDEBAR_NAVIGATION_ITEMS}
+        doctorName={profileSnapshot.account?.displayName ?? 'Profile ativo'}
+        profileSyncState={hasProfileSession ? profileSnapshot.syncState : undefined}
+        onRetryProfileSync={hasProfileSession ? handleRetryProfileSync : undefined}
+        isRetryingProfileSync={hasProfileSession ? isRetryingProfileSync : undefined}
         onExportBackup={handleExportBackup}
         onRestoreBackup={handleChooseRestoreFile}
         isExporting={isExporting}
@@ -198,16 +236,16 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
       >
         <DialogContent data-backup-restore-state={restoreState}>
           <DialogHeader>
-            <DialogTitle>Restaurar backup</DialogTitle>
+            <DialogTitle>Importar backup</DialogTitle>
             <DialogDescription>
-              Confirme a substituição da base local pelo arquivo selecionado.
+              Confirme a importação do arquivo selecionado. A base local atual será substituída.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-3 text-style-body text-text-primary">
             <p className="break-words">Arquivo: {restoreFileName ?? 'backup selecionado'}</p>
             <p>Todos os dados atuais da Conta local serão substituídos. Não haverá mesclagem.</p>
-            <p>Rascunhos ou edições pendentes precisam ser salvos ou descartados antes da restauração.</p>
+            <p>Rascunhos ou edições pendentes precisam ser salvos ou descartados antes da importação.</p>
             <p>O arquivo não possui senha nem criptografia. Guarde-o em local seguro.</p>
             {restoreState === 'pending-edits' ? (
               <p role="alert" className="rounded-control border border-error-border bg-error-soft p-3 text-style-body text-error">
@@ -226,7 +264,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
               loading={restoreState === 'restoring'}
               onClick={confirmRestore}
             >
-              Restaurar backup
+              Importar backup
             </Button>
           </DialogFooter>
         </DialogContent>

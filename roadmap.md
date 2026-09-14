@@ -36,7 +36,7 @@ Interface completa para gestão dos alimentos criados pelo nutricionista:
 
 Interface dedicada para criar, gerenciar e inspecionar refeições prontas:
 
-- **Biblioteca de refeições** (`/refeicoes-prontas`):
+- **Biblioteca de refeições** (`/refeicoes`):
   - Listagem com visualização do resumo de macronutrientes (kcal, P, C, G) e total de itens;
   - Filtros por tipo de refeição (café da manhã, almoço, lanche, jantar, etc.) e busca textual.
 - **Workflow de criação e edição de refeição pronta**:
@@ -105,7 +105,7 @@ Após a conclusão das migrations pendentes, adicionar ao cadastro e à edição
 - **Construtor de dieta** (`/pacientes/[id]/dieta/[dietaId]`): opções completas, salvamento da refeição e edição das substituições.
 - **Cadastro de pacientes** (`/pacientes`): campo de limitações dietéticas no cadastro e na edição do paciente.
 - **Catálogo de alimentos customizados** (`/alimentos`): listagem, busca e formulários de cadastro/edição de alimentos próprios.
-- **Biblioteca de refeições prontas** (`/refeicoes-prontas`): listagem, criação/edição dedicada e inspeção nutricional de refeições salvas.
+- **Biblioteca de refeições prontas** (`/refeicoes`): listagem, criação/edição dedicada e inspeção nutricional de refeições salvas.
 - **Biblioteca de receitas** (`/receitas`): listagem, construtor de receitas com cálculo automático por porção e modo de preparo.
 - **Modal de seleção de alimentos** (`FoodSearchModal`): grupos separados para base oficial, alimentos customizados, receitas e refeições prontas.
 - **Modal de salvar refeição/receita**: nome, categoria e tipo do conteúdo salvo a partir do construtor de dieta.

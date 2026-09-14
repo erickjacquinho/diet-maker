@@ -140,6 +140,7 @@
   --cmp-data-table-row-height-food: 60px;
   --cmp-hold-to-delete-progress-duration: 1500ms;
   --cmp-meal-title-input-width: 350px;
+  --cmp-profile-onboarding-max-width: 600px;
   --cmp-card-padding-default: var(--ref-space-4);
   --cmp-card-background-hover: var(--sys-color-surface-hover);
   --cmp-card-details-surface: var(--sys-color-surface-soft);

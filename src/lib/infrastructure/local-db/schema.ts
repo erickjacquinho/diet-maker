@@ -16,6 +16,7 @@ import {
 export const accounts = pgTable('accounts', {
   id: text('id').primaryKey(),
   displayName: text('display_name').notNull(),
+  phone: text('phone'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });

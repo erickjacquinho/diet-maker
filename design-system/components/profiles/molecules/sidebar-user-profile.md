@@ -36,7 +36,7 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 The molecule owns identity fallback rendering and receives doctor metadata and collapse state by props. It does not depend on the `SidebarNav` organism; the organism supplies only product data and presentation state.
 
-`onOpenAccount` is optional. When present, expanded and collapsed identity render a keyboard-operable Button/IconButton with the account name; when absent, the profile is informational and has no button role, action cursor or action hover.
+`onOpenAccount` and `onSignOut` are optional callbacks for account actions. When account actions or backup actions are supplied, expanded and collapsed identity render a keyboard-operable Button/IconButton with a dropdown containing `Visão geral`, `Configurações`, `Sair` and the available backup commands. Without any callback, the profile is informational and has no button role, action cursor or action hover.
 
 Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 

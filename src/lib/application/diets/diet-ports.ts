@@ -89,6 +89,7 @@ export interface DietApplicationDependencies {
   now?: () => string;
   idFactory?: () => string;
   librarySourceReader?: LibraryDietSourceReader;
+  confirmedOperation?: import('../composition-root').ConfirmedOperationCoordinator;
 }
 
 export interface OpenEditorResult {

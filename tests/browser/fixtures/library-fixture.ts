@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test';
 import { legacyLibraryKeys } from '../../fixtures/library-fixtures';
+import { createProfileSession } from '../helpers/profile-session';
 
 export const test = base.extend({
   page: async ({ page }, use) => {
@@ -7,6 +8,7 @@ export const test = base.extend({
     await page.addInitScript((keys) => {
       for (const key of keys) window.localStorage.removeItem(key);
     }, legacyLibraryKeys);
+    await createProfileSession(page, 'Biblioteca browser');
     await use(page);
   },
 });

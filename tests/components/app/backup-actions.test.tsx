@@ -52,7 +52,8 @@ describe('SidebarNavigationAdapter backup actions', () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
     render(<SidebarNavigationAdapter />);
-    fireEvent.click(screen.getByRole('button', { name: 'Exportar backup local' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' }), { button: 0 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Exportar backup' }));
 
     await waitFor(() => expect(mocks.exportBackup).toHaveBeenCalledTimes(1));
     expect(createObjectURL).toHaveBeenCalledTimes(1);
@@ -65,7 +66,8 @@ describe('SidebarNavigationAdapter backup actions', () => {
     mocks.validateBackup.mockResolvedValue({});
     render(<SidebarNavigationAdapter />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Restaurar backup local' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' }), { button: 0 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Importar backup' }));
     fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
       target: { files: [createFile('{"valid":true}')] },
     });
@@ -89,19 +91,22 @@ describe('SidebarNavigationAdapter backup actions', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     render(<SidebarNavigationAdapter />);
 
-    const exportButton = screen.getByRole('button', { name: 'Exportar backup local' });
-    exportButton.focus();
-    expect(document.activeElement).toBe(exportButton);
-    fireEvent.keyDown(exportButton, { key: 'Enter' });
-    fireEvent.click(exportButton);
+    const accountButton = screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' });
+    accountButton.focus();
+    expect(document.activeElement).toBe(accountButton);
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    const exportItem = await screen.findByRole('menuitem', { name: 'Exportar backup' });
+    fireEvent.click(exportItem);
 
-    await waitFor(() => expect(exportButton).toBeDisabled());
-    expect(exportButton).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('button', { name: 'Restaurar backup local' })).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' })).toBeInTheDocument());
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    const pendingMenu = await screen.findByRole('menu');
+    expect(within(pendingMenu).getByRole('menuitem', { name: 'Exportar backup' })).toHaveAttribute('data-disabled');
+    expect(within(pendingMenu).getByRole('menuitem', { name: 'Importar backup' })).toHaveAttribute('data-disabled');
     expect(log).not.toHaveBeenCalled();
 
     finishExport();
-    await waitFor(() => expect(exportButton).toBeEnabled());
+    await waitFor(() => expect(within(pendingMenu).getByRole('menuitem', { name: 'Exportar backup' })).not.toHaveAttribute('data-disabled'));
   });
 
   it('announces invalid files without opening the confirmation dialog', async () => {
@@ -132,7 +137,7 @@ describe('SidebarNavigationAdapter backup actions', () => {
     });
     await screen.findByRole('dialog');
 
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Restaurar backup' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Importar backup' }));
 
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Existem rascunhos pendentes.'));
     expect(screen.getByRole('dialog')).toHaveAttribute('data-backup-restore-state', 'pending-edits');

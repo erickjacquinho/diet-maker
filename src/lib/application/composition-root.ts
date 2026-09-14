@@ -27,8 +27,24 @@ export interface PatientApplicationDependencies {
   dietDraftStore?: DietDraftStore;
   clinicalRepository?: ClinicalRepository;
   patientDietReader?: import('./diets/diet-ports').PatientDietReader;
+  confirmedOperation?: ConfirmedOperationCoordinator;
   now?: () => string;
   idFactory?: () => string;
+}
+
+/** Coordinates an explicit domain mutation with the durable profile save. */
+export interface ConfirmedOperationCoordinator {
+  run<T>(operation: () => Promise<T>): Promise<T>;
+}
+
+export function createConfirmedOperationCoordinator(sync: () => Promise<void>): ConfirmedOperationCoordinator {
+  return {
+    async run<T>(operation: () => Promise<T>) {
+      const result = await operation();
+      await sync();
+      return result;
+    },
+  };
 }
 
 export interface ArchivePatientResult {
@@ -58,6 +74,9 @@ export interface PatientApplication {
 }
 
 export function createPatientApplication(dependencies: PatientApplicationDependencies): PatientApplication {
+  const runConfirmed = <T>(operation: () => Promise<T>): Promise<T> => (
+    dependencies.confirmedOperation ? dependencies.confirmedOperation.run(operation) : operation()
+  );
   const patientDeps = { accountContext: dependencies.accountContext, patientRepository: dependencies.patientRepository };
   const objectiveDeps = { accountContext: dependencies.accountContext, objectiveCatalogRepository: dependencies.objectiveCatalogRepository };
   const readerDeps = { accountContext: dependencies.accountContext, patientProfileReader: dependencies.patientProfileReader };
@@ -72,29 +91,36 @@ export function createPatientApplication(dependencies: PatientApplicationDepende
   });
 
   return {
-    createPatient: (input) => dependencies.transactionRunner.run(() => createPatient(patientDeps, input)),
+    createPatient: (input) => runConfirmed(() => dependencies.transactionRunner.run(() => createPatient(patientDeps, input))),
     listActivePatients: (query) => listActivePatients(readerDeps, query),
     getPatientProfile: (patientId) => getPatientProfile(readerDeps, patientId),
-    updatePatient: (patientId, expectedVersion, input) => dependencies.transactionRunner.run(() => updatePatient(patientDeps, patientId, expectedVersion, input)),
-    addObjectiveOption: (label) => dependencies.transactionRunner.run(() => addObjectiveOption(objectiveDeps, label)),
-    archiveObjectiveOption: (objectiveId) => dependencies.transactionRunner.run(() => archiveObjectiveOption(objectiveDeps, objectiveId)),
-    archivePatient: async (patientId, expectedVersion) => {
+    updatePatient: (patientId, expectedVersion, input) => runConfirmed(() => dependencies.transactionRunner.run(() => updatePatient(patientDeps, patientId, expectedVersion, input))),
+    addObjectiveOption: (label) => runConfirmed(() => dependencies.transactionRunner.run(() => addObjectiveOption(objectiveDeps, label))),
+    archiveObjectiveOption: (objectiveId) => runConfirmed(() => dependencies.transactionRunner.run(() => archiveObjectiveOption(objectiveDeps, objectiveId))),
+    archivePatient: (patientId, expectedVersion) => runConfirmed(async () => {
       const patient = await dependencies.transactionRunner.run(() => archivePatient(patientDeps, patientId, expectedVersion));
       if (!dependencies.dietDraftStore) return patient;
       await dependencies.dietDraftStore.invalidateByPatient(patient.accountId, patient.id);
       return patient;
-    },
-    archivePatientAndInvalidate: async (patientId, expectedVersion) => {
+    }),
+    archivePatientAndInvalidate: (patientId, expectedVersion) => runConfirmed(async () => {
       const patient = await dependencies.transactionRunner.run(() => archivePatient(patientDeps, patientId, expectedVersion));
-      if (!dependencies.dietDraftStore) return { patient, status: 'ARCHIVED_AND_DRAFTS_INVALIDATED', invalidatedDrafts: 0 };
+      if (!dependencies.dietDraftStore) return { patient, status: 'ARCHIVED_AND_DRAFTS_INVALIDATED', invalidatedDrafts: 0 as const };
       try {
         const invalidatedDrafts = await dependencies.dietDraftStore.invalidateByPatient(patient.accountId, patient.id);
-        return { patient, status: 'ARCHIVED_AND_DRAFTS_INVALIDATED', invalidatedDrafts };
+        return { patient, status: 'ARCHIVED_AND_DRAFTS_INVALIDATED' as const, invalidatedDrafts };
       } catch {
-        return { patient, status: 'ARCHIVED_CLEANUP_PENDING', invalidatedDrafts: 0 };
+        return { patient, status: 'ARCHIVED_CLEANUP_PENDING' as const, invalidatedDrafts: 0 };
       }
-    },
-    restorePatient: (patientId, expectedVersion) => dependencies.transactionRunner.run(() => restorePatient(patientDeps, patientId, expectedVersion)),
-    ...clinicalCommands,
+    }),
+    restorePatient: (patientId, expectedVersion) => runConfirmed(() => dependencies.transactionRunner.run(() => restorePatient(patientDeps, patientId, expectedVersion))),
+    createAssessment: (patientId, input) => runConfirmed(() => clinicalCommands.createAssessment(patientId, input)),
+    updateAssessment: (patientId, assessmentId, expectedVersion, input) => runConfirmed(() => clinicalCommands.updateAssessment(patientId, assessmentId, expectedVersion, input)),
+    getAssessment: clinicalCommands.getAssessment,
+    listAssessments: clinicalCommands.listAssessments,
+    getNextFollowUp: clinicalCommands.getNextFollowUp,
+    setNextFollowUp: (patientId, expectedVersion, input) => runConfirmed(() => clinicalCommands.setNextFollowUp(patientId, expectedVersion, input)),
+    clearNextFollowUp: (patientId, expectedVersion) => runConfirmed(() => clinicalCommands.clearNextFollowUp(patientId, expectedVersion)),
+    getConsultationView: clinicalCommands.getConsultationView,
   };
 }

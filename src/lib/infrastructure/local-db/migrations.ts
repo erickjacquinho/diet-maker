@@ -325,10 +325,19 @@ export const clinicalPersistenceMigration: LocalMigration = {
   `,
 };
 
+export const accountProfileMigration: LocalMigration = {
+  id: '0004_account_phone',
+  version: '5',
+  sql: `
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS phone text;
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
   clinicalPersistenceMigration,
+  accountProfileMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

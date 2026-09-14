@@ -6,6 +6,7 @@ export const BACKUP_FIXTURE_ACCOUNT_ID = 'local-account';
 export type BackupFixture = Omit<BackupEnvelope, 'appId' | 'formatVersion' | 'schemaVersion' | 'exportedAt'>;
 
 export const backupFixture: BackupFixture = {
+  favorites: [],
   account: [
     {
       id: BACKUP_FIXTURE_ACCOUNT_ID,

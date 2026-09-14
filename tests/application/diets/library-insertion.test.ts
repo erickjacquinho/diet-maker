@@ -43,7 +43,34 @@ describe('library insertion into diet drafts', () => {
       accountContext: { requireActive: vi.fn().mockResolvedValue({ accountId: 'account-a', account: {} }), getActive: vi.fn() },
       draftStore: store,
       sourceReader: { getRecipe: vi.fn(), getReadyMeal: vi.fn().mockResolvedValue({ id: 'meal-template', accountId: 'account-a', name: 'Template', description: '', status: 'ARCHIVED', version: 1, createdAt: '', updatedAt: '', archivedAt: '2026-09-01', items: [] }) },
-    }, { draftId: 'draft-a', expectedRevision: 3, readyMealId: 'meal-template', variationId: 'variation-a', mealId: 'meal-a' })).rejects.toMatchObject({ code: 'CONTEXT_MISSING' });
+    }, { draftId: 'draft-a', expectedRevision: 3, readyMealId: 'meal-template', variationId: 'variation-a', mealId: 'meal-a', optionId: 'option-a' })).rejects.toMatchObject({ code: 'CONTEXT_MISSING' });
     expect(draft.payload.variations[0].meals[0].options).toHaveLength(0);
+  });
+
+  it('loads ready-meal name/time and appends items to the existing option', async () => {
+    const draft = draftFixture();
+    draft.payload.variations[0].meals[0].options = [{ id: 'option-a', position: 0, label: 'Principal', countsTowardTotals: true, items: [{ id: 'existing', position: 0, role: 'PRIMARY', name: 'Arroz existente', snapshot }] }];
+    const result = await insertReadyMealIntoDietDraft({
+      accountContext: { requireActive: vi.fn().mockResolvedValue({ accountId: 'account-a', account: {} }), getActive: vi.fn() },
+      draftStore: storeFor(draft),
+      sourceReader: {
+        getRecipe: vi.fn(),
+        getReadyMeal: vi.fn().mockResolvedValue({
+          id: 'meal-template', accountId: 'account-a', name: 'Almoço pronto', description: '', suggestedTime: '12:30', status: 'ACTIVE', version: 3,
+          createdAt: '', updatedAt: '', archivedAt: null,
+          items: [{ id: 'meal-item', readyMealId: 'meal-template', accountId: 'account-a', position: 0, sourceType: 'FOOD', sourceId: 'taco-1', sourceVersion: 'TACO-4.0', quantity: '100', unit: 'g', itemSnapshot: snapshot }],
+        }),
+      },
+      idFactory: (() => { let index = 0; return () => `new-${index++}`; })(),
+    }, { draftId: 'draft-a', expectedRevision: 3, readyMealId: 'meal-template', variationId: 'variation-a', mealId: 'meal-a', optionId: 'option-a' });
+
+    const options = result.payload.variations[0].meals[0].options;
+    expect(options).toHaveLength(1);
+    expect(result.payload.variations[0].meals[0]).toMatchObject({ name: 'Almoço pronto', time: '12:30' });
+    expect(options[0].items.map((item) => item.name)).toEqual(['Arroz existente', 'Arroz']);
+    expect(options[0].items[1].snapshot).toMatchObject({
+      sourceType: 'SYSTEM_TACO',
+      compositionSnapshot: { readyMealSource: { sourceType: 'READY_MEAL', sourceId: 'meal-template', sourceVersion: 3 } },
+    });
   });
 });

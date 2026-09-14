@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Badge, EditIconButton, DeleteIconButton, Surface } from '@/components/atoms';
-import { Users, PlusCircle, Check } from 'lucide-react';
+import { Button, Badge, EditIconButton, DeleteIconButton, IconButton, Surface } from '@/components/atoms';
+import { Users, PlusCircle, Check, ArchiveRestore } from 'lucide-react';
 import { type Recipe, calculateRecipeNutrients } from '@/lib/library-ui-adapter';
 
 
@@ -10,6 +10,7 @@ export interface RecipeCardProps {
   isInserted?: boolean;
   onInsert?: () => void;
   onEdit?: () => void;
+  onRestore?: () => void;
   onDelete?: () => void;
 }
 
@@ -18,6 +19,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   isInserted = false,
   onInsert,
   onEdit,
+  onRestore,
   onDelete,
 }) => {
   const summary = calculateRecipeNutrients(recipe.ingredients, recipe.servings);
@@ -86,8 +88,17 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
             </Button>
           )}
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {onEdit && <EditIconButton title="Editar Receita" onClick={onEdit} />}
+            {onRestore && (
+              <IconButton
+                variant="secondary"
+                title="Restaurar Receita"
+                aria-label="Restaurar Receita"
+                icon={<ArchiveRestore size={14} aria-hidden="true" />}
+                onClick={onRestore}
+              />
+            )}
             {onDelete && <DeleteIconButton title="Excluir Receita" onClick={onDelete} />}
           </div>
 

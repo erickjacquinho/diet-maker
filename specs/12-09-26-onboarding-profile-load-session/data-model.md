@@ -17,15 +17,22 @@ Não existem campos `host`, `origin`, `port`, `browser`, caminho do arquivo ou t
 
 ## ActiveSession
 
-Objeto exclusivamente em memória:
+Profile e dados são exclusivamente em memória; a associação do arquivo possui uma referência técnica separada e não clínica:
 
 - `status`: `empty | busy | active | paused`;
 - `profile` e `accountId`;
 - runtime/repositórios PGlite `memory://`;
 - handle e nome do arquivo, se associado;
-- `syncState`: `unbound | syncing | synced | paused` e último erro/status.
+- `syncState`: `unbound | syncing | synced | paused` e último erro/status;
+- `hydration`: `pending | ready`;
+- `resumeFileName`: nome apresentado quando o handle precisa de autorização novamente.
 
-`active` e `paused` liberam a interface. `busy` bloqueia ações concorrentes. `empty` redireciona para `/Home`. Nada dessa estrutura é serializado ou recuperado do host.
+`active` e `paused` liberam a interface. `busy` bloqueia ações concorrentes. `empty` redireciona para `/Home`. Profile, runtime, dados, syncState e drafts não são serializados ou recuperados do host.
+
+O `FileSystemFileHandle` não entra no modelo nem no envelope. O adaptador browser-only
+pode persistir o handle e o nome do arquivo no IndexedDB da mesma origem; isso não
+persiste profile, dados confirmados, drafts ou runtime e não funciona como fallback
+de conteúdo.
 
 ## NutriDietSave
 
@@ -41,7 +48,8 @@ empty ── carregar + validar + importar ─▶ active/synced ou active/paused
 active ── confirmar ──▶ syncing ──▶ synced
 active ── falha de escrita ──▶ paused
 paused ── reautorizar/selecionar + escrever ──▶ synced
-qualquer estado ── reload/fechar/nova origem ──▶ empty
+active/paused ── reload/fechar na mesma origem ──▶ restoring ──▶ active/paused ou empty
+qualquer estado ── nova origem ──▶ empty
 ```
 
 Cancelar ou falhar o primeiro save não libera uma sessão parcial. Falhar depois de uma sessão já carregada preserva o trabalho em memória e mostra `paused`.

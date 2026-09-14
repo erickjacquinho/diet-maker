@@ -17,7 +17,7 @@ import { ReadyMealSearchResultsList } from '@/components/molecules/food-search/R
 import { createTacoSnapshot } from '@/lib/application/diets/taco-food-adapter';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
-import { createLibraryFoodSnapshot, listTacoFoodItems, searchTacoFoods, toggleFavoriteFood, toFoodItem, toReadyMeal, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
+import { createLibraryFoodSnapshot, getFavoritesFromStorage, listTacoFoodItems, searchTacoFoods, toggleFavoriteFood, toFoodItem, toReadyMeal, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
 
 type FoodAddPayload = {
   foodId?: string;
@@ -51,6 +51,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   onAddRecipe,
   onAddReadyMeal,
 }) => {
+  const showLibrarySources = enableLibrarySources && Boolean(onAddRecipe || onAddReadyMeal);
   const [query, setQuery] = useState('');
   const [selectedFoodIds, setSelectedFoodIds] = useState<Set<string>>(new Set());
   const [onlyFavorites, setOnlyFavorites] = useState(false);
@@ -123,7 +124,10 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   // O modo legado aceita exclusivamente registros da tabela TACO; o editor pode habilitar a biblioteca explicitamente.
   const allFoods = useMemo<FoodItem[]>(() => {
-    if (enableLibrarySources) return libraryFoods;
+    if (enableLibrarySources) {
+      const favoriteIds = new Set(getFavoritesFromStorage());
+      return libraryFoods.map((food) => ({ ...food, isFavorite: favoriteIds.has(food.id) }));
+    }
     return listTacoFoodItems();
   }, [enableLibrarySources, isOpen, libraryFoods, favoriteVersion]);
 
@@ -273,7 +277,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        {enableLibrarySources && (
+        {showLibrarySources && (
           <FoodSearchCategorySelector
             activeCategory={activeCategory}
             onCategoryChange={(category) => {

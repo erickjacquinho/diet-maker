@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useDietBuilderPage } from '@/hooks/useDietBuilderPage';
 import { DietBuilderTemplate } from '@/components/templates';
 import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
@@ -18,6 +18,7 @@ import { getMealVariationOptions } from '@/lib/mealVariations';
 
 export default function DietBuilderPage() {
   const foodSearchTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const pendingMealScrollIdRef = useRef<string | null>(null);
   const {
     patientId,
     dietaId,
@@ -105,6 +106,30 @@ export default function DietBuilderPage() {
     openWhatsAppModal,
     router,
   } = useDietBuilderPage();
+
+  useEffect(() => {
+    const pendingMealId = pendingMealScrollIdRef.current;
+    if (!pendingMealId || !currentMeals.some((meal) => meal.id === pendingMealId)) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      pendingMealScrollIdRef.current = null;
+      document.getElementById(`meal-card-${pendingMealId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [currentMeals]);
+
+  const handleAddMealAndOpenFoodSearch = () => {
+    const newMealId = handleAddMeal();
+    if (!newMealId) return;
+
+    pendingMealScrollIdRef.current = newMealId;
+    setFoodSearchMealIndex(mealGroups.length);
+  };
 
   const handleOpenCycleMatrix = async () => {
     await flushDraft?.();
@@ -246,7 +271,7 @@ export default function DietBuilderPage() {
           metrics: macroMetrics,
         }}
         mealsData={mealsData}
-        onAddMeal={handleAddMeal}
+        onAddMeal={handleAddMealAndOpenFoodSearch}
         onScaleDiet={() => setIsScaleModalOpen(true)}
         scaleDisabled={isNewDiet}
         onOpenAdjustGoalsModal={openAdjustGoalsModal}

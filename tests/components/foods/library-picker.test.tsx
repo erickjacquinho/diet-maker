@@ -70,4 +70,24 @@ describe('library picker in the diet editor', () => {
     await waitFor(() => expect(onAddRecipe).toHaveBeenCalledWith('recipe-picker'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('refreshes the favorite state for foods loaded into the diet picker', async () => {
+    render(
+      <FoodSearchModal
+        isOpen
+        onClose={vi.fn()}
+        onAddFood={vi.fn()}
+        enableLibrarySources
+        onAddRecipe={vi.fn()}
+        onAddReadyMeal={vi.fn()}
+      />,
+    );
+
+    const table = await screen.findByRole('table', { name: 'Lista de resultados de alimentos da base TACO' });
+    const favoriteButton = within(table).getAllByRole('button', { name: /^Favoritar / })[0];
+
+    fireEvent.click(favoriteButton);
+
+    expect(within(table).getByRole('button', { name: /^Remover .* dos favoritos$/ })).toBeInTheDocument();
+  });
 });

@@ -23,7 +23,7 @@ Adotar o **Mapa de Arquitetura de Telas e Navegação Rasa (Flat UX)** com as se
    - Inclui autocompletar TACO (<100ms), cálculo de metas g/kg em tempo real (tolerância ±5%), escala de porções (`+%`), exportador PDF/WhatsApp e salvamento `.diet`.
 4. **`/presets` (Biblioteca de Presets de Dietas)**:
    - Tela dedicada no menu principal com biblioteca centralizada de protocolos inteiros (ex: *Low Carb 1800kcal*, *Bulking 3000kcal*) prontos para cópia/duplicação para qualquer paciente.
-5. **`/refeicoes-prontas` (Biblioteca de Refeições Prontas)**:
+5. **`/refeicoes` (Biblioteca de Refeições Prontas)**:
    - Tela dedicada no menu principal com biblioteca global de blocos de refeição (ex: *Café Pós-Treino 450kcal*) para inserção com 1 clique nas dietas dos pacientes.
 6. **`/alimentos` (Planilha de Alimentos / Tabela TACO)**:
    - Tabela de alta performance com consulta de ~600+ itens da base TACO.

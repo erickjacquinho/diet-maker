@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { DietDomainError } from '@/lib/domain/diets/diet-errors';
 import type { DietDraftStore } from './diet-ports';
-import type { DietDraft } from '@/lib/domain/diets/diet-model';
+import type { DietDraft, JsonValue } from '@/lib/domain/diets/diet-model';
 import type { AccountContext } from '@/lib/persistence/account-context';
 import type { ReadyMeal, Recipe } from '@/lib/domain/library/library-model';
 import type { DietItem, DietEditableDocument, NutritionSnapshot } from '@/lib/domain/diets/diet-model';
@@ -35,6 +35,7 @@ export interface ReadyMealInsertionCommand {
   readyMealId: string;
   variationId: string;
   mealId: string;
+  optionId?: string;
 }
 
 function recipeSnapshot(recipe: Recipe): NutritionSnapshot {
@@ -46,6 +47,21 @@ function recipeSnapshot(recipe: Recipe): NutritionSnapshot {
     prescribedQuantity: createDecimalString('1'), prescribedUnit: 'unit', prescribedNutrients: scaleNutrition(referenceNutrients, '1', '1'),
     energySource: energy.source, calculationVersion: 'recipe-decimal-v1', conversionSnapshot: { schemaVersion: 1, conversions: [] },
     compositionSnapshot: { schemaVersion: 1, source: 'RECIPE', sourceVersion: recipe.version, ingredientCount: recipe.ingredients.length },
+  };
+}
+
+function withReadyMealProvenance(snapshot: NutritionSnapshot, readyMeal: ReadyMeal): NutritionSnapshot {
+  const composition = snapshot.compositionSnapshot !== null
+    && typeof snapshot.compositionSnapshot === 'object'
+    && !Array.isArray(snapshot.compositionSnapshot)
+    ? snapshot.compositionSnapshot as { [key: string]: JsonValue }
+    : {};
+  return {
+    ...snapshot,
+    compositionSnapshot: {
+      ...composition,
+      readyMealSource: { sourceType: 'READY_MEAL', sourceId: readyMeal.id, sourceVersion: readyMeal.version },
+    },
   };
 }
 
@@ -74,6 +90,25 @@ function appendOption(document: DietEditableDocument, variationId: string, mealI
   return { ...document, variations };
 }
 
+function appendItems(document: DietEditableDocument, variationId: string, mealId: string, optionId: string | undefined, items: DietItem[], name: string, suggestedTime?: string): DietEditableDocument {
+  let foundOption = false;
+  const variations = document.variations.map((variation) => variation.id !== variationId ? variation : {
+    ...variation,
+    meals: variation.meals.map((meal) => meal.id !== mealId ? meal : {
+      ...meal,
+      name,
+      time: suggestedTime ?? meal.time,
+      options: meal.options.map((option) => {
+        if (option.id !== (optionId ?? meal.options[0]?.id)) return option;
+        foundOption = true;
+        return { ...option, items: [...option.items, ...items.map((item, index) => ({ ...item, position: option.items.length + index }))] };
+      }),
+    }),
+  });
+  if (!foundOption) throw new DietDomainError('INVALID_DIET', 'A variação da refeição de destino não foi encontrada no rascunho.');
+  return { ...document, variations };
+}
+
 async function persist(dependencies: LibraryInsertionDependencies, draft: DietDraft, payload: DietEditableDocument): Promise<DietDraft> {
   const saved = await dependencies.draftStore.putIfNewer({ ...draft, payload: structuredClone(payload), draftRevision: draft.draftRevision + 1, updatedAt: (dependencies.now ?? (() => new Date().toISOString()))() }, draft.draftRevision);
   if (saved.status !== 'SAVED') throw new DietDomainError(saved.status === 'INVALIDATED' ? 'ARCHIVED_PATIENT' : 'VERSION_CONFLICT', 'O rascunho mudou antes da inserção da biblioteca.');
@@ -97,7 +132,10 @@ export async function insertReadyMealIntoDietDraft(dependencies: LibraryInsertio
   const readyMeal = await dependencies.sourceReader.getReadyMeal(draft.accountId, command.readyMealId);
   if (!readyMeal || readyMeal.status !== 'ACTIVE') throw new DietDomainError('CONTEXT_MISSING', 'A refeição pronta não está ativa ou não pertence à Conta atual.');
   const makeId = dependencies.idFactory ?? (() => nanoid(12));
-  const items: DietItem[] = readyMeal.items.map((item, position) => ({ id: makeId(), position, role: 'PRIMARY', name: item.itemSnapshot.displayName, snapshot: structuredClone(item.itemSnapshot) }));
-  const payload = appendOption(draft.payload, command.variationId, command.mealId, readyMeal.name, items, makeId);
+  const items: DietItem[] = readyMeal.items.map((item, position) => ({
+    id: makeId(), position, role: 'PRIMARY', name: item.itemSnapshot.displayName,
+    snapshot: withReadyMealProvenance(item.itemSnapshot, readyMeal),
+  }));
+  const payload = appendItems(draft.payload, command.variationId, command.mealId, command.optionId, items, readyMeal.name, readyMeal.suggestedTime);
   return persist(dependencies, draft, payload);
 }

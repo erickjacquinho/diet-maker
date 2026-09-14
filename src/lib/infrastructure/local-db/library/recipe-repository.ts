@@ -9,6 +9,7 @@ import { calculateEnergyFromNutrition, divideNutrition, normalizeDecimal, scaleN
 import { validateRecipeInput, validatePositiveDecimal } from '@/lib/domain/library/library-validation';
 import type { LocalDatabaseHandle } from '../client';
 import { recipeIngredients, recipes, readyMealItems } from '../schema';
+import { findClinicalSnapshotReferences } from './clinical-snapshot-references';
 
 type RecipeRow = typeof recipes.$inferSelect;
 type RecipeIngredientRow = typeof recipeIngredients.$inferSelect;
@@ -176,8 +177,11 @@ export class PGliteRecipeRepository implements RecipeRepository {
 
   async deleteIfUnreferenced(accountId: string, recipeId: string, expectedVersion: number): Promise<boolean> {
     await this.requireVersion(accountId, recipeId, expectedVersion);
-    const references = await this.handle.db.select({ id: readyMealItems.id }).from(readyMealItems).where(and(eq(readyMealItems.accountId, accountId), eq(readyMealItems.sourceType, 'RECIPE'), eq(readyMealItems.sourceId, recipeId)));
-    if (references.length) throw createLibraryError('LIBRARY_DEPENDENCY_EXISTS', 'A receita está sendo usada por uma refeição pronta.');
+    const [readyMealReferences, clinicalReferences] = await Promise.all([
+      this.handle.db.select({ id: readyMealItems.id }).from(readyMealItems).where(and(eq(readyMealItems.accountId, accountId), eq(readyMealItems.sourceType, 'RECIPE'), eq(readyMealItems.sourceId, recipeId))),
+      findClinicalSnapshotReferences(this.handle, accountId, 'RECIPE', recipeId),
+    ]);
+    if (readyMealReferences.length || clinicalReferences.length) throw createLibraryError('LIBRARY_DEPENDENCY_EXISTS', 'A receita está sendo usada por uma refeição pronta ou dieta confirmada.');
     await this.handle.db.delete(recipes).where(and(eq(recipes.id, recipeId), eq(recipes.accountId, accountId), eq(recipes.version, expectedVersion)));
     return (await this.getById(accountId, recipeId)) === null;
   }

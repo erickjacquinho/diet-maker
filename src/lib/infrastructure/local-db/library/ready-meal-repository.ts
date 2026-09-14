@@ -10,6 +10,7 @@ import { calculateEnergyFromNutrition, normalizeDecimal, scaleNutrition } from '
 import { validateReadyMealInput } from '@/lib/domain/library/library-validation';
 import type { LocalDatabaseHandle } from '../client';
 import { readyMealItems, readyMeals } from '../schema';
+import { findClinicalSnapshotReferences } from './clinical-snapshot-references';
 
 type ReadyMealRow = typeof readyMeals.$inferSelect;
 type ReadyMealItemRow = typeof readyMealItems.$inferSelect;
@@ -144,6 +145,8 @@ export class PGliteReadyMealRepository implements ReadyMealRepository {
 
   async deleteIfUnreferenced(accountId: string, readyMealId: string, expectedVersion: number): Promise<boolean> {
     await this.requireVersion(accountId, readyMealId, expectedVersion);
+    const clinicalReferences = await findClinicalSnapshotReferences(this.handle, accountId, 'READY_MEAL', readyMealId);
+    if (clinicalReferences.length) throw createLibraryError('LIBRARY_DEPENDENCY_EXISTS', 'A refeição pronta está sendo usada por uma dieta confirmada.');
     await this.handle.db.delete(readyMeals).where(and(eq(readyMeals.id, readyMealId), eq(readyMeals.accountId, accountId), eq(readyMeals.version, expectedVersion)));
     return (await this.getById(accountId, readyMealId)) === null;
   }

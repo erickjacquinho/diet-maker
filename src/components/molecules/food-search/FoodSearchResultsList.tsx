@@ -73,7 +73,7 @@ export function FoodSearchResultsList({
                   e.stopPropagation();
                   onToggleFavorite?.(food.id);
                 }}
-                className="size-8 shrink-0 whitespace-nowrap p-1 rounded-compact text-text-muted hover:text-warning hover:bg-warning-soft"
+                className="size-8 shrink-0 whitespace-nowrap p-1 rounded-compact text-text-muted hover:bg-transparent hover:text-warning"
               >
                 <Star
                   size={14}

@@ -4,7 +4,7 @@ Category ID: `overlays`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-overlays`  
 Allowed traits: `async`, `read-only`, `nutrition-context`, `destructive`  
-Current consumers: `ui-dialog`, `ui-dropdown-menu`, `ui-popover`, `ui-sheet`, `ui-tooltip`, `organism-food-search-modal`, `organism-read-only-diet-modal`
+Current consumers: `ui-dialog`, `ui-dropdown-menu`, `ui-popover`, `ui-sheet`, `ui-tooltip`, `organism-food-search-modal`, `organism-read-only-diet-modal`, `molecule-profile-create-dialog`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 

@@ -220,6 +220,9 @@ describe('DataTable contract', () => {
     const row1Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Alfa' });
     const row2Checkbox = screen.getByRole('checkbox', { name: 'Selecionar Beta' });
 
+    expect(row1Checkbox).toHaveClass('size-8');
+    expect(row1Checkbox.firstElementChild).toHaveClass('size-4');
+
     // Initial state: 1 selected out of 2 => indeterminate/mixed
     expect(masterCheckbox).toHaveAttribute('aria-checked', 'mixed');
     expect(row1Checkbox).toHaveAttribute('aria-checked', 'true');

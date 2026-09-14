@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Download, Upload } from 'lucide-react';
+import { FileInput, FileOutput } from 'lucide-react';
 
 import { Button, IconButton } from '@/components/atoms';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,7 +15,7 @@ export interface SidebarQuickActionsProps {
 }
 
 const exportDisabledReason = 'A ação Exportar backup ainda não está disponível nesta tela.';
-const restoreDisabledReason = 'A ação Restaurar backup ainda não está disponível nesta tela.';
+const restoreDisabledReason = 'A ação Importar backup ainda não está disponível nesta tela.';
 
 export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
   onExportBackup,
@@ -41,7 +41,7 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
               className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
               aria-label="Exportar backup local"
               aria-describedby={!onExportBackup ? 'sidebar-export-unavailable' : undefined}
-              icon={<Download aria-hidden="true" className="size-4" />}
+              icon={<FileOutput aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
@@ -58,13 +58,13 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
               disabled={restoreDisabled}
               variant="secondary"
               className="h-control-compact w-control-compact rounded-control border border-border-subtle text-text-primary hover:bg-surface-hover"
-              aria-label="Restaurar backup local"
+              aria-label="Importar backup local"
               aria-describedby={!onRestoreBackup ? 'sidebar-restore-unavailable' : undefined}
-              icon={<Upload aria-hidden="true" className="size-4" />}
+              icon={<FileInput aria-hidden="true" className="size-4" />}
             />
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={12} className="text-style-legal font-semibold">
-            Restaurar backup
+            Importar backup
           </TooltipContent>
         </Tooltip>
 
@@ -87,7 +87,7 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
         aria-describedby={!onExportBackup ? 'sidebar-export-unavailable' : undefined}
         className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
       >
-        <Download aria-hidden="true" className="size-4" />
+        <FileOutput aria-hidden="true" className="size-4" />
         <span>Exportar backup</span>
       </Button>
       <Button
@@ -97,12 +97,12 @@ export const SidebarQuickActions: React.FC<SidebarQuickActionsProps> = ({
         disabled={restoreDisabled}
         variant="secondary"
         size="compact"
-        aria-label="Restaurar backup local"
+        aria-label="Importar backup local"
         aria-describedby={!onRestoreBackup ? 'sidebar-restore-unavailable' : undefined}
         className="h-control-compact flex-1 items-center justify-center gap-2 rounded-control text-style-button-label-compact"
       >
-        <Upload aria-hidden="true" className="size-4" />
-        <span>Restaurar backup</span>
+        <FileInput aria-hidden="true" className="size-4" />
+        <span>Importar backup</span>
       </Button>
       {!onExportBackup ? <span id="sidebar-export-unavailable" className="sr-only">{exportDisabledReason}</span> : null}
       {!onRestoreBackup ? <span id="sidebar-restore-unavailable" className="sr-only">{restoreDisabledReason}</span> : null}

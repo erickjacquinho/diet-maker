@@ -22,7 +22,8 @@ describe('SidebarUserProfile', () => {
       name: 'Abrir menu de conta de Dr. Alice',
     });
 
-    fireEvent.click(accountButton);
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Configurações' }));
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
@@ -42,8 +43,8 @@ describe('SidebarUserProfile', () => {
       name: 'Abrir menu de conta de Dr. Alice',
     });
 
-    fireEvent.keyDown(accountButton, { key: 'Enter' });
-    fireEvent.click(accountButton);
+    fireEvent.pointerDown(accountButton, { button: 0 });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Configurações' }));
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
@@ -51,6 +52,7 @@ describe('SidebarUserProfile', () => {
     const onExportBackup = vi.fn();
     const onRestoreBackup = vi.fn();
     const onOpenAccount = vi.fn();
+    const onSignOut = vi.fn();
 
     renderProfile({
       doctorName: 'Dr. Alice',
@@ -58,6 +60,7 @@ describe('SidebarUserProfile', () => {
       onExportBackup,
       onRestoreBackup,
       onOpenAccount,
+      onSignOut,
     });
 
     const trigger = screen.getByRole('button', {
@@ -67,12 +70,16 @@ describe('SidebarUserProfile', () => {
     fireEvent.pointerDown(trigger, { button: 0 });
 
     const exportItem = await screen.findByRole('menuitem', { name: /Exportar backup/i });
-    const restoreItem = screen.getByRole('menuitem', { name: /Restaurar backup/i });
-    const accountItem = screen.getByRole('menuitem', { name: /Configurações da Conta/i });
+    const restoreItem = screen.getByRole('menuitem', { name: /Importar backup/i });
+    const overviewItem = screen.getByRole('menuitem', { name: 'Visão geral' });
+    const accountItem = screen.getByRole('menuitem', { name: 'Configurações' });
+    const signOutItem = screen.getByRole('menuitem', { name: 'Sair' });
 
     expect(exportItem).toBeInTheDocument();
     expect(restoreItem).toBeInTheDocument();
+    expect(overviewItem).toBeInTheDocument();
     expect(accountItem).toBeInTheDocument();
+    expect(signOutItem).toBeInTheDocument();
 
     fireEvent.click(exportItem);
     expect(onExportBackup).toHaveBeenCalledTimes(1);

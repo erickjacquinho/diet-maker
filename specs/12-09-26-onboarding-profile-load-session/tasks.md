@@ -6,17 +6,17 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 [skill: $frontend-architecture-mindset] [P] Inventariar os usos de persistência de domínio em `src/lib/storage.ts`, `src/lib/*Store.ts`, `src/lib/library-ui-adapter.ts`, `src/lib/infrastructure/local-db/client.ts` e `src/lib/application/browser-composition.ts`, separando fontes ativas de código legado.
-- [ ] T002 [skill: $tdd] [P] Criar fixtures determinísticos vazio, válido com `Jacques Regiani` e inválido em `tests/fixtures/nutridiet/` para os testes de restore e cross-origin.
+- [x] T001 [skill: $frontend-architecture-mindset] [P] Inventariar os usos de persistência de domínio em `src/lib/storage.ts`, `src/lib/*Store.ts`, `src/lib/library-ui-adapter.ts`, `src/lib/infrastructure/local-db/client.ts` e `src/lib/application/browser-composition.ts`, separando fontes ativas de código legado.
+- [x] T002 [skill: $tdd] [P] Criar fixtures determinísticos vazio, válido com `Jacques Regiani` e inválido em `tests/fixtures/nutridiet/` para os testes de restore e cross-origin.
 
 ## Phase 2: Foundation (bloqueia todas as histórias)
 
-- [ ] T003 [skill: $tdd] [P] Criar testes de runtime memory-only e boundary de host em `tests/lib/infrastructure/local-db/client.test.ts` e `tests/architecture/host-persistence-boundary.test.ts`, cobrindo ausência de `idb://`, IndexedDB, localStorage, sessionStorage, cookies e auto-create de conta.
-- [ ] T004 [skill: $tdd] [P] Criar testes de validação/importação atômica em `tests/lib/infrastructure/backup-roundtrip.test.ts`, cobrindo envelope, versões, IDs, relações, preservação de sessão e consulta posterior pelo `accountId`.
-- [ ] T005 [skill: $tdd] [P] Criar testes da sessão e da porta de arquivo em `tests/lib/application/profile-session.test.ts`, cobrindo `empty`, `busy`, `active`, `paused`, cancelamento, permissão e falha de escrita.
-- [ ] T006 [skill: $backend-patterns] Implementar a base da sessão em `src/lib/infrastructure/local-db/client.ts`, `src/lib/application/browser-composition.ts`, `src/lib/infrastructure/local-db/account-context.ts` e `src/lib/infrastructure/diet-drafts/in-memory-diet-draft-store.ts`: PGlite `memory://`, conta explícita e drafts sem host storage.
-- [ ] T007 [skill: $database-migrations-pro] Atualizar telefone opcional, migração, envelope e compatibilidade em `src/lib/domain/account.ts`, `src/lib/infrastructure/local-db/schema.ts`, `src/lib/infrastructure/local-db/migrations.ts`, `src/lib/infrastructure/local-db/logical-export-schema.ts` e `src/lib/infrastructure/local-db/backup-repository.ts`: schema 4 entra como telefone `null`, schema 5 é escrito e versões futuras são rejeitadas.
-- [ ] T008 [skill: $frontend-architecture-mindset] Implementar o núcleo mínimo em `src/lib/persistence/save-file.ts`, `src/lib/infrastructure/file-system-access/browser-save-file.ts` e `src/lib/application/profile-session.ts`, concentrando seleção, leitura, escrita, comandos de sessão e status sem expor APIs de browser a SSR/domínio.
+- [x] T003 [skill: $tdd] [P] Criar testes de runtime memory-only e boundary de host em `tests/lib/infrastructure/local-db/client.test.ts` e `tests/architecture/host-persistence-boundary.test.ts`, cobrindo ausência de `idb://`, IndexedDB, localStorage, sessionStorage, cookies e auto-create de conta.
+- [x] T004 [skill: $tdd] [P] Criar testes de validação/importação atômica em `tests/lib/infrastructure/backup-roundtrip.test.ts`, cobrindo envelope, versões, IDs, relações, preservação de sessão e consulta posterior pelo `accountId`.
+- [x] T005 [skill: $tdd] [P] Criar testes da sessão e da porta de arquivo em `tests/lib/application/profile-session.test.ts`, cobrindo `empty`, `busy`, `active`, `paused`, cancelamento, permissão e falha de escrita.
+- [x] T006 [skill: $backend-patterns] Implementar a base da sessão em `src/lib/infrastructure/local-db/client.ts`, `src/lib/application/browser-composition.ts`, `src/lib/infrastructure/local-db/account-context.ts` e `src/lib/infrastructure/diet-drafts/in-memory-diet-draft-store.ts`: PGlite `memory://`, conta explícita e drafts sem host storage.
+- [x] T007 [skill: $database-migrations-pro] Atualizar telefone opcional, migração, envelope e compatibilidade em `src/lib/domain/account.ts`, `src/lib/infrastructure/local-db/schema.ts`, `src/lib/infrastructure/local-db/migrations.ts`, `src/lib/infrastructure/local-db/logical-export-schema.ts` e `src/lib/infrastructure/local-db/backup-repository.ts`: schema 4 entra como telefone `null`, schema 5 é escrito e versões futuras são rejeitadas.
+- [x] T008 [skill: $frontend-architecture-mindset] Implementar o núcleo mínimo em `src/lib/persistence/save-file.ts`, `src/lib/infrastructure/file-system-access/browser-save-file.ts` e `src/lib/application/profile-session.ts`, concentrando seleção, leitura, escrita, comandos de sessão e status sem expor APIs de browser a SSR/domínio.
 
 **Checkpoint**: runtime, envelope, porta de arquivo e sessão estão prontos; nenhuma rota clínica é liberada ainda.
 
@@ -26,8 +26,8 @@
 
 **Independent Test**: abrir `/pacientes` sem sessão e verificar `/Home` sem conteúdo/sidebar; ativar uma sessão fake e navegar entre duas rotas sem reinicializar runtime.
 
-- [ ] T009 [skill: $tdd] [P] [US1] Criar testes do gate e da reutilização SPA em `tests/app/session-aware-app-shell.test.tsx` e `tests/browser/profile-session-gate.spec.ts`.
-- [ ] T010 [skill: $nextjs-fullstack-master] [US1] Implementar o gate único em `src/app/SessionAwareAppShell.tsx`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/Home/page.tsx` e `src/app/PatientApplicationBootstrap.tsx`, mantendo `/Home` público, todas as outras rotas protegidas e o runtime inativo antes da sessão.
+- [x] T009 [skill: $tdd] [P] [US1] Criar testes do gate e da reutilização SPA em `tests/app/session-aware-app-shell.test.tsx` e `tests/browser/profile-session-gate.spec.ts`.
+- [x] T010 [skill: $nextjs-fullstack-master] [US1] Implementar o gate único em `src/app/SessionAwareAppShell.tsx`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/Home/page.tsx` e `src/app/PatientApplicationBootstrap.tsx`, mantendo `/Home` público, todas as outras rotas protegidas e o runtime inativo antes da sessão.
 
 **Checkpoint**: nenhum conteúdo interno aparece sem sessão e a navegação da mesma aba mantém o runtime.
 
@@ -37,8 +37,8 @@
 
 **Independent Test**: criar um profile, cancelar/invalidar o seletor sem sessão parcial e, em caso de sucesso, reabrir o arquivo para confirmar profile e telefone.
 
-- [ ] T011 [skill: $tdd] [P] [US2] Criar testes de UI e comando de criação em `tests/components/organisms/profile-onboarding.test.tsx` e `tests/lib/application/profile-session.test.ts`, cobrindo campos exatos, nome obrigatório, loading, duplo submit, cancelamento e primeiro envelope.
-- [ ] T012 [skill: $ui-styling] [US2] Implementar `src/components/molecules/profile-create-dialog.tsx`, `src/components/organisms/profile-onboarding.tsx` e o comando de criação em `src/lib/application/profile-session.ts`, usando tokens/estados canônicos, `showSaveFilePicker`, primeira escrita e navegação após sucesso.
+- [x] T011 [skill: $tdd] [P] [US2] Criar testes de UI e comando de criação em `tests/components/organisms/profile-onboarding.test.tsx` e `tests/lib/application/profile-session.test.ts`, cobrindo campos exatos, nome obrigatório, loading, duplo submit, cancelamento e primeiro envelope.
+- [x] T012 [skill: $ui-styling] [US2] Implementar `src/components/molecules/profile-create-dialog.tsx`, `src/components/organisms/profile-onboarding.tsx` e o comando de criação em `src/lib/application/profile-session.ts`, usando tokens/estados canônicos, `showSaveFilePicker`, primeira escrita e navegação após sucesso.
 
 ## Phase 5: User Story 3 — Carregar profile existente (P1)
 
@@ -46,23 +46,24 @@
 
 **Independent Test**: carregar o fixture com Jacques Regiani em outra porta/origem e confirmar o paciente; arquivo inválido/cancelado mantém a sessão anterior.
 
-- [ ] T013 [skill: $webapp-testing] [US3] Criar teste unitário e browser de load em `tests/lib/application/profile-session.test.ts`, `tests/lib/infrastructure/backup-roundtrip.test.ts` e `tests/browser/profile-save-load.spec.ts`, incluindo cross-origin/porta, Jacques Regiani, arquivo inválido, cancelamento e sessão preservada.
-- [ ] T014 [skill: $backend-patterns] [US3] Implementar load atômico, associação do `accountId` e consulta pós-restore em `src/lib/application/profile-session.ts`, `src/lib/infrastructure/local-db/backup-repository.ts` e `src/lib/application/browser-composition.ts`; conectar Carregar e `showOpenFilePicker` em `src/app/Home/page.tsx` e `src/components/organisms/profile-onboarding.tsx`.
+- [x] T013 [skill: $webapp-testing] [US3] Criar teste unitário e browser de load em `tests/lib/application/profile-session.test.ts`, `tests/lib/infrastructure/backup-roundtrip.test.ts` e `tests/browser/profile-save-load.spec.ts`, incluindo cross-origin/porta, Jacques Regiani, arquivo inválido, cancelamento e sessão preservada.
+- [x] T014 [skill: $backend-patterns] [US3] Implementar load atômico, associação do `accountId` e consulta pós-restore em `src/lib/application/profile-session.ts`, `src/lib/infrastructure/local-db/backup-repository.ts` e `src/lib/application/browser-composition.ts`; conectar Carregar e `showOpenFilePicker` em `src/app/Home/page.tsx` e `src/components/organisms/profile-onboarding.tsx`.
 
-## Phase 6: User Story 4 — Sincronizar sem persistência de host (P1)
+## Phase 6: User Story 4 — Sincronizar sem persistência de dados clínicos no host (P1)
 
 **Goal**: cada confirmação escreve o envelope completo no arquivo e falhas ficam visíveis sem fallback.
 
 **Independent Test**: confirmar alteração, reabrir arquivo e verificar mudança; provocar falha de permissão e verificar sessão em memória `paused`, sem storage alternativo.
 
-- [ ] T015 [skill: $tdd] [US4] Criar testes de sincronização e ausência de host em `tests/lib/application/profile-session.test.ts`, `tests/architecture/host-persistence-boundary.test.ts` e `tests/browser/profile-save-load.spec.ts`, cobrindo commit → export → write, reload/origem nova e permissão revogada.
-- [ ] T016 [skill: $backend-patterns] [US4] Implementar o coordenador único de confirmação em `src/lib/application/composition-root.ts` e `src/lib/application/profile-session.ts`, conectando pacientes, clínica, dietas e biblioteca ao fluxo commit → export → write sem sincronizar drafts/keystrokes.
-- [ ] T017 [skill: $frontend-architecture-mindset] [US4] Remover as fontes de domínio em host de `src/app/presets/page.tsx`, `src/lib/recipesStore.ts`, `src/lib/readyMealsStore.ts`, `src/lib/presetsStore.ts`, `src/lib/tacoStore.ts`, `src/lib/library-ui-adapter.ts` e `src/lib/storage.ts`, e mostrar status `synced/paused` em `src/app/navigation/SidebarNavigationAdapter.tsx`.
+- [x] T015 [skill: $tdd] [US4] Criar testes de sincronização e ausência de persistência clínica no host em `tests/lib/application/profile-session.test.ts`, `tests/architecture/host-persistence-boundary.test.ts` e `tests/browser/profile-save-load.spec.ts`, cobrindo commit → export → write, retomada na mesma origem, origem nova e permissão revogada.
+- [x] T016 [skill: $backend-patterns] [US4] Implementar o coordenador único de confirmação em `src/lib/application/composition-root.ts` e `src/lib/application/profile-session.ts`, conectando pacientes, clínica, dietas e biblioteca ao fluxo commit → export → write sem sincronizar drafts/keystrokes.
+- [x] T017 [skill: $frontend-architecture-mindset] [US4] Remover as fontes de domínio em host de `src/app/presets/page.tsx`, `src/lib/recipesStore.ts`, `src/lib/readyMealsStore.ts`, `src/lib/presetsStore.ts`, `src/lib/tacoStore.ts`, `src/lib/library-ui-adapter.ts` e `src/lib/storage.ts`, e mostrar status `synced/paused` em `src/app/navigation/SidebarNavigationAdapter.tsx`.
 
 ## Phase 7: Polish e validação
 
-- [ ] T018 [skill: $design-system] [P] Revisar onboarding, gate e status contra `design-system/README.md`, `.agents/rules/` e os perfis/categorias canônicos, verificando teclado, foco, `aria-live`, erro, loading e desktop 1024px+ em `tests/app/session-aware-app-shell.test.tsx` e `tests/components/organisms/profile-onboarding.test.tsx`.
-- [ ] T019 [skill: $webapp-testing] Executar `quickstart.md`, `npm run lint`, `npm run test` e `npm run test:browser`; registrar evidências e atualizar `specs/12-09-26-onboarding-profile-load-session/quickstart.md` sem declarar conformidade sem resultados.
+- [x] T018 [skill: $design-system] [P] Revisar onboarding, gate e status contra `design-system/README.md`, `.agents/rules/` e os perfis/categorias canônicos, verificando teclado, foco, `aria-live`, erro, loading e desktop 1024px+ em `tests/app/session-aware-app-shell.test.tsx` e `tests/components/organisms/profile-onboarding.test.tsx`.
+- [x] T019 [skill: $webapp-testing] Executar `quickstart.md`, `npm run lint`, `npm run test` e `npm run test:browser`; registrar evidências e atualizar `specs/12-09-26-onboarding-profile-load-session/quickstart.md` sem declarar conformidade sem resultados.
+- [x] T020 [skill: $simple] [US1] Persistir somente o handle/nome do arquivo ativo no adaptador browser, hidratar a sessão antes do gate em F5/reabertura na mesma origem, oferecer retomada quando houver nova solicitação de permissão e remover referências de arquivo inexistentes.
 
 ## Dependências e paralelismo
 

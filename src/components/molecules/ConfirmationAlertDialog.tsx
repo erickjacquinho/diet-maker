@@ -29,6 +29,7 @@ export interface ConfirmationAlertDialogProps {
   cancelSize?: ButtonProps['size'];
   icon?: ReactNode;
   className?: string;
+  overlayLayer?: 'overlay' | 'modal';
 }
 
 export function ConfirmationAlertDialog({
@@ -45,10 +46,11 @@ export function ConfirmationAlertDialog({
   cancelSize = 'compact',
   icon = <AlertTriangle className="size-4 shrink-0 text-warning" aria-hidden="true" />,
   className,
+  overlayLayer = 'overlay',
 }: ConfirmationAlertDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className={cn('max-w-sm', className)}>
+      <AlertDialogContent overlayLayer={overlayLayer} className={cn('max-w-sm', className)}>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-text-primary">
             {icon}

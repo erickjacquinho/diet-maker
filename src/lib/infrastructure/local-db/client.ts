@@ -2,10 +2,9 @@ import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 import { applyMigrations } from './migrations';
 import { schema, type LocalDbSchema } from './schema';
-import { SingleTabLock, type LockLease } from './single-tab-lock';
 
 export type LocalDatabase = ReturnType<typeof drizzle<LocalDbSchema>>;
-export type LocalDatabaseMode = 'browser-persistent' | 'test-memory';
+export type LocalDatabaseMode = 'memory' | 'test-memory';
 
 export interface LocalDatabaseHandle {
   readonly db: LocalDatabase;
@@ -19,35 +18,29 @@ export interface OpenLocalDatabaseOptions {
   mode?: LocalDatabaseMode;
   dataDir?: string;
   client?: PGlite;
-  lock?: Pick<SingleTabLock, 'acquire'>;
 }
 
-const DEFAULT_BROWSER_DATA_DIR = 'idb://nutridiet-local-db-v1';
+function createMemoryDataDir(): string {
+  return `memory://nutridiet-session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 function isBrowserRuntime(): boolean {
   return typeof window !== 'undefined';
 }
 
-function assertBrowserPersistence(dataDir: string): void {
-  if (!isBrowserRuntime()) return;
-  if (typeof indexedDB === 'undefined') {
-    throw new Error('IndexedDB não está disponível; a persistência local não pode ser comprovada.');
-  }
-  if (!dataDir.startsWith('idb://')) {
-    throw new Error('A persistência no navegador exige o filesystem IndexedDB.');
+function assertMemoryDataDir(dataDir: string): void {
+  if (!dataDir.startsWith('memory://')) {
+    throw new Error('O runtime de uma sessão exige um filesystem PGlite memory://.');
   }
 }
 
 export async function openLocalDatabase(options: OpenLocalDatabaseOptions = {}): Promise<LocalDatabaseHandle> {
-  const mode = options.mode ?? (isBrowserRuntime() ? 'browser-persistent' : 'test-memory');
-  const dataDir = options.dataDir ?? (mode === 'browser-persistent' ? DEFAULT_BROWSER_DATA_DIR : 'memory://nutridiet-test');
-  if (mode === 'browser-persistent') assertBrowserPersistence(dataDir);
+  const mode = options.mode ?? (isBrowserRuntime() ? 'memory' : 'test-memory');
+  const dataDir = options.dataDir ?? (mode === 'memory' ? createMemoryDataDir() : 'memory://nutridiet-test');
+  assertMemoryDataDir(dataDir);
 
   let client: PGlite | undefined = options.client;
-  let lease: LockLease | undefined;
   try {
-    const lock = options.lock ?? (mode === 'browser-persistent' && isBrowserRuntime() ? new SingleTabLock() : undefined);
-    if (lock) lease = await lock.acquire();
     client = client ?? new PGlite(dataDir);
     await client.waitReady;
     const openedClient = client;
@@ -60,12 +53,10 @@ export async function openLocalDatabase(options: OpenLocalDatabaseOptions = {}):
       schemaVersion,
       close: async () => {
         if (!openedClient.closed) await openedClient.close();
-        await lease?.release();
       },
     };
   } catch (cause) {
     if (client && !client.closed) await client.close();
-    await lease?.release();
     throw new Error('A base relacional local não pôde ser inicializada.', { cause: cause as Error });
   }
 }

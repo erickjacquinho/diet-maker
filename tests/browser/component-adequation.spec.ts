@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 import { componentAdequationFixtures } from '../fixtures/component-adequation';
+import { createProfileSession, navigateWithinSession } from './helpers/profile-session';
 
 const pageTimeout = 120_000;
 
@@ -50,7 +51,12 @@ const catalogFamilies = [
 ] as const;
 
 async function visit(page: Page, route: string, marker: Locator) {
-  await page.goto(route, { waitUntil: 'load', timeout: pageTimeout });
+  const inAppLink = page.locator(`a[href="${route}"]`).first();
+  if (await inAppLink.count() || route === '/design-system') {
+    await navigateWithinSession(page, route);
+  } else {
+    await page.goto(route, { waitUntil: 'load', timeout: pageTimeout });
+  }
   // O modo de desenvolvimento mantém conexões do HMR abertas; a espera é
   // limitada e o marcador funcional continua sendo a condição de prontidão.
   await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
@@ -95,6 +101,7 @@ async function goToNewDiet(page: Page, profileHref: string) {
 
 test('valida o catálogo das famílias e as condições desktop do design system', async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await createProfileSession(page, 'Adequação design system');
 
   for (const viewport of [{ width: 1024, height: 900 }, { width: 1440, height: 900 } satisfies Viewport]) {
     await page.setViewportSize(viewport);
@@ -136,6 +143,7 @@ test('valida o catálogo das famílias e as condições desktop do design system
 test('preserva semântica, foco e estados vazios no histórico de pacientes', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await createProfileSession(page, 'Adequação histórico');
   await visit(page, '/pacientes', page.getByRole('heading', { level: 1, name: 'Pacientes' }));
 
   await expect(page.getByText('Nenhum paciente cadastrado', { exact: true })).toBeVisible({ timeout: pageTimeout });
@@ -169,6 +177,7 @@ test('preserva semântica, foco e estados vazios no histórico de pacientes', as
 test('valida ciclos, busca, substituição, somente leitura e importação', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await createProfileSession(page, 'Adequação dietas');
   await visit(page, '/pacientes', page.getByRole('heading', { level: 1, name: 'Pacientes' }));
 
   const { name, profileHref } = await createSyntheticPatient(page);

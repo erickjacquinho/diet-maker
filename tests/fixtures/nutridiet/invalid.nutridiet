@@ -1,0 +1,23 @@
+{
+  "appId": "other-application",
+  "formatVersion": 1,
+  "schemaVersion": "5",
+  "exportedAt": "2026-09-12T12:00:00.000Z",
+  "account": [],
+  "objectiveOptions": [],
+  "patients": [],
+  "bodyAssessments": [],
+  "nextFollowUps": [],
+  "dietPlans": [],
+  "dietVariations": [],
+  "dietVariationDays": [],
+  "dietMeals": [],
+  "dietMealOptions": [],
+  "dietMealItems": [],
+  "dietItemSnapshots": [],
+  "foodCatalogItems": [],
+  "recipes": [],
+  "recipeIngredients": [],
+  "readyMeals": [],
+  "readyMealItems": []
+}

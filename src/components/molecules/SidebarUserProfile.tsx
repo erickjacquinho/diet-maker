@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { ChevronsUpDown, Download, Upload, User } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronsUpDown, FileInput, FileOutput, LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import { Avatar, Button, IconButton } from '@/components/atoms';
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ export interface SidebarUserProfileProps {
   onOpenAccount?: () => void;
   onExportBackup?: () => void | Promise<void>;
   onRestoreBackup?: () => void | Promise<void>;
+  onSignOut?: () => void | Promise<void>;
   isExporting?: boolean;
   isRestoring?: boolean;
 }
@@ -31,12 +33,13 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   onOpenAccount,
   onExportBackup,
   onRestoreBackup,
+  onSignOut,
   isExporting = false,
   isRestoring = false,
 }) => {
   const accountLabel = `Abrir menu de conta de ${doctorName}`;
-  const hasDropdown = Boolean(onExportBackup || onRestoreBackup);
-  const hasAction = Boolean(onOpenAccount || onExportBackup || onRestoreBackup);
+  const hasDropdown = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
+  const hasAction = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
 
   if (isCollapsed) {
     if (!hasAction) {
@@ -86,27 +89,34 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <Link href="/pacientes">
+                <LayoutDashboard className="size-4 text-text-muted" aria-hidden="true" />
+                <span>Visão geral</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+              <Settings className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Configurações</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             {onExportBackup ? (
               <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onExportBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <Download className="size-4 text-text-muted" aria-hidden="true" />
+                <FileOutput className="size-4 text-text-muted" aria-hidden="true" />
                 <span>Exportar backup</span>
               </DropdownMenuItem>
             ) : null}
             {onRestoreBackup ? (
               <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onRestoreBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <Upload className="size-4 text-text-muted" aria-hidden="true" />
-                <span>Restaurar backup</span>
+                <FileInput className="size-4 text-text-muted" aria-hidden="true" />
+                <span>Importar backup</span>
               </DropdownMenuItem>
             ) : null}
-            {onOpenAccount ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                  <User className="size-4 text-text-muted" aria-hidden="true" />
-                  <span>Configurações da Conta</span>
-                </DropdownMenuItem>
-              </>
-            ) : null}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onSignOut} className="flex cursor-pointer items-center gap-2 text-style-legal text-error">
+              <LogOut className="size-4" aria-hidden="true" />
+              <span>Sair</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -176,27 +186,34 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-2 text-style-legal">
+            <Link href="/pacientes">
+              <LayoutDashboard className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Visão geral</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+            <Settings className="size-4 text-text-muted" aria-hidden="true" />
+            <span>Configurações</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           {onExportBackup ? (
             <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onExportBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
-              <Download className="size-4 text-text-muted" aria-hidden="true" />
+              <FileOutput className="size-4 text-text-muted" aria-hidden="true" />
               <span>Exportar backup</span>
             </DropdownMenuItem>
           ) : null}
           {onRestoreBackup ? (
             <DropdownMenuItem disabled={isExporting || isRestoring} onClick={onRestoreBackup} className="flex cursor-pointer items-center gap-2 text-style-legal">
-              <Upload className="size-4 text-text-muted" aria-hidden="true" />
-              <span>Restaurar backup</span>
+              <FileInput className="size-4 text-text-muted" aria-hidden="true" />
+              <span>Importar backup</span>
             </DropdownMenuItem>
           ) : null}
-          {onOpenAccount ? (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
-                <User className="size-4 text-text-muted" aria-hidden="true" />
-                <span>Configurações da Conta</span>
-              </DropdownMenuItem>
-            </>
-          ) : null}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={onSignOut} className="flex cursor-pointer items-center gap-2 text-style-legal text-error">
+            <LogOut className="size-4" aria-hidden="true" />
+            <span>Sair</span>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );

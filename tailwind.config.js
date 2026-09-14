@@ -63,7 +63,7 @@ module.exports = {
         },
       },
       spacing: { sidebar: 'var(--cmp-sidebar-width-expanded)', 'sidebar-collapsed': 'var(--cmp-sidebar-width-collapsed)' },
-      maxWidth: { 'container-page': '1440px', 'container-workflow': '1200px', 'container-form': '960px', 'container-reading': '720px' },
+      maxWidth: { 'container-page': '1440px', 'container-workflow': '1200px', 'container-form': '960px', 'container-reading': '720px', 'profile-onboarding': 'var(--cmp-profile-onboarding-max-width)' },
       maxHeight: {
         dialog: 'var(--cmp-dialog-max-height)',
         'table-compact': 'var(--cmp-data-table-max-height-compact)',

@@ -23,7 +23,7 @@ describe('reusable library accessibility contract', () => {
 
   it('keeps validation feedback in an assertive, actionable region', () => {
     render(<CreateReadyMealModal open onOpenChange={vi.fn()} onSave={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText('Nome do Bloco de Refeição'), { target: { value: 'Bloco sem itens' } });
+    fireEvent.change(screen.getByLabelText('Nome da Refeição'), { target: { value: 'Bloco sem itens' } });
     fireEvent.click(screen.getByRole('button', { name: /Salvar Refeição/ }));
     expect(screen.getByRole('alert')).toHaveTextContent('Adicione pelo menos um alimento');
   });

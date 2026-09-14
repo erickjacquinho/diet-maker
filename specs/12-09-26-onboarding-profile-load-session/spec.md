@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Criar um onboarding de load/create profile antes de entrar na interface do app. Ao abrir qualquer pagina do app, verificar se existe uma sessão com save ativo e reutilizá-la. Criar /Home sem sidebar com os fluxos Criar profile e Carregar profile. Criar profile com nome e telefone lado a lado e botão de salvar com loading. Carregar profile abre o buscador para selecionar o profile existente no computador. Depois de criado ou carregado, liberar as páginas do app. Não manter qualquer salvamento rastreado a host, origem, porta ou navegador; o arquivo .nutridiet mantido no HD ou Google Drive é a única persistência durável."
+**Input**: User description: "Criar um onboarding de load/create profile antes de entrar na interface do app. Ao abrir qualquer pagina do app, verificar se existe uma sessão com save ativo e reutilizá-la. Criar /Home sem sidebar com os fluxos Criar profile e Carregar profile. Criar profile com nome e telefone lado a lado e botão de salvar com loading. Carregar profile abre o buscador para selecionar o profile existente no computador. Depois de criado ou carregado, liberar as páginas do app. Não manter dados clínicos rastreados no host, origem, porta ou navegador; o arquivo `.nutridiet` mantido no HD ou Google Drive é a persistência durável do conteúdo, e a referência técnica do arquivo pode ser retomada na mesma origem."
 
 ## Clarifications
 
@@ -15,6 +15,10 @@
 - Q: Ao concluir Criar profile, o sistema deve baixar automaticamente um primeiro arquivo `.nutridiet` ou apenas ativar a sessão e deixar o profissional usar Exportar backup depois? → A: O profissional escolhe onde salvar o primeiro arquivo `.nutridiet`.
 - Q: Como o app deve sincronizar automaticamente cada alteração confirmada com o save escolhido: escrever no arquivo local autorizado pelo navegador, integrar diretamente com o Google Drive, ou gerar uma nova cópia para o profissional substituir? → A: Escrever no arquivo local escolhido e autorizado pelo profissional, incluindo uma pasta do Google Drive sincronizada no computador.
 - Q: Em que momento uma alteração deve ser escrita automaticamente no arquivo associado: após cada operação explícita de salvar/confirmar, a cada alteração de campo com debounce, ou em outro intervalo definido? → A: Após cada operação explícita concluída de salvar/confirmar.
+
+### Session 2026-09-13
+
+- Q: Ao recarregar a página ou fechar e reabrir a aba, o NutriDiet deve voltar ao onboarding ou tentar retomar o último save? → A: Persistir somente a referência permissionada ao arquivo (File System Access handle) no IndexedDB do navegador e carregar automaticamente o arquivo na mesma origem quando o handle ainda estiver disponível. Dados clínicos, profile e drafts continuam fora do armazenamento do host; se a permissão exigir gesto ou o arquivo não existir, mostrar uma ação explícita para reabrir/selecionar o save.
 
 ## User Scenarios & Testing
 
@@ -61,17 +65,17 @@ Como nutricionista que já possui um save, quero selecioná-lo do computador, pa
 3. **Given** o arquivo é inválido, incompatível ou pertence a outra aplicação, **When** o profissional tenta carregá-lo, **Then** o sistema apresenta uma mensagem de erro, não cria uma sessão parcial e permanece em `/Home`.
 4. **Given** o profissional cancela o seletor de arquivos, **When** o seletor é fechado, **Then** nenhum dado é alterado e os dois fluxos de entrada continuam disponíveis.
 
-### User Story 4 - Trabalhar sem persistência vinculada ao host (Priority: P1)
+### User Story 4 - Trabalhar sem persistência de dados vinculada ao host (Priority: P1)
 
 Como nutricionista, quero que os dados clínicos só sejam persistidos pelo arquivo `.nutridiet` que controlo, para que `localhost:3000`, `localhost:3001`, a Vercel e outros hosts não mantenham bases independentes ou rastros clínicos.
 
 **Why this priority**: É a restrição arquitetural central para garantir soberania e portabilidade do save.
 
-**Independent Test**: Criar ou carregar um profile, navegar e editar dados durante a sessão, recarregar ou abrir outra origem e verificar que a sessão não é recuperada automaticamente; carregar o mesmo arquivo exportado e verificar a recuperação integral dos dados.
+**Independent Test**: Criar ou carregar um profile, navegar e editar dados durante a sessão, recarregar na mesma origem e verificar a retomada pelo arquivo associado; abrir outra origem e verificar que a sessão não é recuperada automaticamente; carregar o mesmo arquivo exportado e verificar a recuperação integral dos dados.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma sessão ativa em uma origem, **When** o profissional abre outra origem ou recarrega a página, **Then** o sistema não recupera automaticamente dados clínicos de armazenamento do host e exige um profile/save ativo.
+1. **Given** uma sessão ativa em uma origem, **When** o profissional recarrega a página ou fecha e reabre a aba na mesma origem, **Then** o sistema tenta recuperar somente o handle do arquivo associado e recarrega os dados a partir do `.nutridiet`; ao abrir outra origem, não recupera dados clínicos do host e exige um profile/save ativo.
 2. **Given** o profissional exportou um `.nutridiet`, **When** carrega esse mesmo arquivo em outra origem, **Then** os dados confirmados do arquivo ficam disponíveis independentemente da porta ou host.
 3. **Given** o profissional usa o app durante uma sessão ativa, **When** navega entre páginas internas, **Then** os dados da sessão permanecem disponíveis sem exigir novo carregamento a cada rota.
 4. **Given** o profissional conclui uma operação explícita de salvar/confirmar, **When** a operação termina com sucesso, **Then** o save associado é atualizado automaticamente com o estado confirmado.
@@ -87,7 +91,7 @@ Como nutricionista, quero que os dados clínicos só sejam persistidos pelo arqu
 - O profissional tenta criar profile sem nome.
 - O usuário inicia uma operação de criação/carregamento e tenta clicar novamente antes da conclusão.
 - O navegador não permite o seletor ou a operação de arquivo; o sistema deve exibir erro acionável sem criar sessão parcial.
-- O profissional recarrega a página ou fecha a aba antes de exportar o arquivo; a sessão em memória pode ser perdida e o sistema deve voltar a exigir carregamento.
+- O profissional recarrega a página ou fecha e reabre a aba; a sessão em memória é recriada a partir do arquivo associado quando o handle permissionado puder ser recuperado, caso contrário o sistema deve informar a necessidade de reabrir o save.
 - O profissional alterna entre `localhost:3000`, `localhost:3001`, Vercel preview e Vercel production; nenhuma dessas origens deve ser fonte automática de dados clínicos.
 - O profissional nega a permissão de escrita, move, renomeia ou remove o arquivo associado ao save durante a sessão.
 - O arquivo é alterado externamente enquanto o app mantém uma sessão ativa.
@@ -113,15 +117,16 @@ Como nutricionista, quero que os dados clínicos só sejam persistidos pelo arqu
 - **FR-014**: O sistema MUST liberar o acesso às páginas internas somente depois que o carregamento do profile for concluído com sucesso.
 - **FR-015**: O sistema MUST rejeitar arquivos inválidos, incompatíveis ou incompletos sem criar uma sessão parcial e MUST informar o motivo de forma acionável.
 - **FR-016**: O sistema MUST preserve a sessão anterior quando uma operação de carregamento falhar ou for cancelada.
-- **FR-017**: O sistema MUST NOT persistir dados clínicos, profile ou drafts em armazenamento vinculado ao host, origem, porta, navegador ou servidor; a única persistência durável MUST ser o arquivo `.nutridiet` escolhido pelo profissional.
+- **FR-017**: O sistema MUST NOT persistir dados clínicos, profile ou drafts em armazenamento vinculado ao host, origem, porta, navegador ou servidor; PODE persistir somente uma referência permissionada ao arquivo ativo para retomada na mesma origem, enquanto a única persistência durável dos dados MUST ser o arquivo `.nutridiet` escolhido pelo profissional.
 - **FR-018**: O sistema MUST keep data loaded in the active session available while the same tab navigates through internal routes.
-- **FR-019**: Ao recarregar a página, fechar a aba ou iniciar uma nova sessão sem arquivo carregado, o sistema MUST exigir novo onboarding em `/Home`.
+- **FR-019**: Ao recarregar a página ou fechar e reabrir a aba na mesma origem, o sistema MUST tentar recuperar o handle do último arquivo ativo e carregar o `.nutridiet` automaticamente; se o handle, o arquivo ou a permissão não estiverem disponíveis, MUST exibir `/Home` com uma ação para reabrir o save. Uma nova origem MUST iniciar sem sessão clínica e exigir o onboarding.
 - **FR-020**: O sistema MUST preserve the existing clinical pages and operations after a profile is created or loaded, without requiring an online database or synchronization service.
 - **FR-021**: O sistema MUST provide accessible labels, keyboard operation, visible focus, loading feedback and error feedback for all onboarding controls.
 - **FR-022**: O sistema MUST ensure that a real backup containing at least one patient can be loaded in a different origin and that the patient is visible after loading.
 - **FR-023**: O sistema MUST associate the active session with the selected local `.nutridiet` file after the professional grants write permission and MUST write the complete confirmed state to that file after every explicit successful save/confirmation operation, without creating a host-based clinical database.
 - **FR-024**: If write permission is denied, revoked, or the selected file becomes unavailable, the system MUST preserve the active in-memory session, visibly identify that synchronization is paused, and MUST NOT silently fall back to browser or server storage.
 - **FR-025**: If write permission is denied, revoked, or the selected file becomes unavailable, the system MUST preserve the active in-memory session, visibly identify that synchronization is paused, and MUST NOT silently fall back to browser or server storage.
+- **FR-026**: Após criação ou carregamento bem-sucedido, o sistema MUST guardar a referência do arquivo ativo no armazenamento de handles do navegador e MUST limpar ou invalidar a referência quando o arquivo não puder mais ser encontrado; a referência nunca pode conter o envelope clínico.
 
 ### Key Entities
 
@@ -138,19 +143,19 @@ Como nutricionista, quero que os dados clínicos só sejam persistidos pelo arqu
 - **SC-002**: Um profissional consegue criar um profile com nome e telefone e chegar à primeira página interna em até 2 minutos.
 - **SC-003**: Um arquivo `.nutridiet` válido contendo pelo menos um paciente é carregado com sucesso em outra porta/origem, e o paciente fica visível em até 10 segundos após a confirmação, em pelo menos 95% das tentativas.
 - **SC-004**: Após a criação ou carregamento bem-sucedido, 100% das rotas internas principais reutilizam o mesmo profile ativo durante a navegação da aba.
-- **SC-005**: Em 100% dos testes de troca de porta, host ou recarregamento sem novo carregamento de arquivo, nenhum dado clínico é recuperado automaticamente do host.
+- **SC-005**: Em 100% dos testes de troca de porta/host/origem, nenhum dado clínico é recuperado automaticamente do host; em recarregamentos e reaberturas na mesma origem, o arquivo associado é retomado automaticamente quando o navegador disponibilizar o handle e a permissão.
 - **SC-006**: Arquivos inválidos ou cancelamentos não deixam sessões parciais nem alteram a sessão anterior em 100% dos cenários testados.
 - **SC-007**: O onboarding atende aos critérios de acessibilidade aplicáveis do produto, incluindo navegação por teclado, rótulos compreensíveis, foco visível e feedback de loading/erro.
 - **SC-008**: Após cada operação explícita de salvar/confirmar concluída com sucesso, o arquivo associado reflete o estado confirmado sem exigir um segundo comando manual do profissional.
 
 ## Assumptions
 
-- A sessão ativa dura somente enquanto o runtime estiver vivo na mesma aba; não haverá prazo de expiração adicional nem renovação persistida.
-- A navegação interna é uma navegação da aplicação; uma atualização completa, fechamento da aba ou nova origem começa sem sessão.
+- A sessão clínica ativa dura somente enquanto o runtime estiver vivo na aba; não haverá prazo de expiração adicional nem renovação de dados clínicos persistida.
+- A navegação interna é uma navegação da aplicação; uma atualização completa ou reabertura na mesma origem tenta reconstruir o runtime pelo arquivo associado, enquanto uma nova origem começa sem sessão.
 - Ao criar um profile, o profissional escolhe o local do primeiro arquivo `.nutridiet`.
 - O arquivo pode estar em uma pasta sincronizada do Google Drive ou no HD; integração direta com a API do Google Drive está fora deste escopo.
 - O carregamento de um arquivo substitui o contexto da sessão sem mesclagem, preservando as regras existentes de restauração.
-- O arquivo selecionado para sincronização permanece associado somente à sessão atual; não será armazenado em cookies, localStorage, IndexedDB ou servidor.
+- O arquivo selecionado para sincronização permanece associado à sessão atual e pode ter somente seu handle permissionado lembrado no IndexedDB da mesma origem; o conteúdo, profile, dados clínicos e drafts não são armazenados ali, nem em cookies, localStorage ou servidor.
 - A sincronização automática ocorre após cada operação explícita de salvar/confirmar; alterações intermediárias de campos e rascunhos não são gravadas no arquivo até serem confirmadas.
 - O telefone é opcional salvo validação futura do produto; não serão criados campos adicionais no onboarding.
 - O termo "alert" significa um diálogo modal acessível, consistente com os componentes já existentes no produto.

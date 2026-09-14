@@ -259,7 +259,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   };
 
   return (
-    <Surface variant="default" density="highlight" className="flex flex-col justify-between gap-4">
+    <Surface id={id ? `meal-card-${id}` : undefined} variant="default" density="highlight" className="flex flex-col justify-between gap-4">
       <Tabs
         value={selectedVariationId}
         onValueChange={hasVariationTabs ? onVariationChange : undefined}
@@ -487,84 +487,42 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                   <Percent size={14} aria-hidden="true" />
                   <span>Escalar</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border-divider" />
-                <DropdownMenuItem
-                  onSelect={onDeleteMeal}
-                  className="gap-2 rounded-control text-style-nav-item text-error focus:bg-error-soft focus:text-error"
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  <span>Excluir da refeição</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div role="group" aria-label="Transferir alimentos da refeição" className="flex items-center gap-1.5">
-              <Button
-                onClick={onCopyMeal}
-                disabled={items.length === 0}
-                variant="secondary"
-                size="compact"
-                className="flex items-center gap-1 text-style-legal"
-              >
-                <ClipboardCopy size={12} />
-                <span>Copiar</span>
-              </Button>
-              <Button
-                onClick={onPasteMeal}
-                disabled={!canPasteMeal}
-                variant="secondary"
-                size="compact"
-                className="flex items-center gap-1 text-style-legal"
-              >
-                <ClipboardPaste size={12} />
-                <span>Colar</span>
-              </Button>
-            </div>
-            <div role="separator" aria-orientation="vertical" className="h-5 w-px bg-border-divider" />
-            <div className="flex items-center gap-1.5">
-              {hasVariationTabs && onRemoveVariation && (
-                <DeleteIconButton
-                  size="compact"
-                  onClick={onRemoveVariation}
-                  title={`Excluir ${activeVariationLabel}`}
-                  aria-label={`Excluir ${activeVariationLabel}`}
-                />
-              )}
-              {onAddVariation && (
-                <div className="flex items-center">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="compact"
-                    onClick={onAddVariation}
+                {(onAddVariation || (hasVariationTabs && onRemoveVariation)) && (
+                  <DropdownMenuSeparator className="bg-border-divider" />
+                )}
+                {onAddVariation && (
+                  <DropdownMenuItem
+                    onSelect={onAddVariation}
                     disabled={variationLimitReached}
                     aria-describedby={variationLimitReached ? variationLimitMessageId : undefined}
-                    title={variationLimitReached ? 'Limite de 5 variações atingido' : 'Adicionar variação'}
-                    className="flex items-center gap-1 text-style-legal"
+                    className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                   >
-                    <Plus size={12} aria-hidden="true" />
-                    <span>Adicionar variação</span>
-                  </Button>
-                  {variationLimitReached && (
-                    <span id={variationLimitMessageId} className="sr-only">
-                      Limite de 5 variações atingido. Remova uma opção antes de adicionar outra.
-                    </span>
-                  )}
-                </div>
-              )}
-              <Button onClick={onDuplicate} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
-                <Copy size={12} />
-                <span>Duplicar</span>
-              </Button>
-              <Button onClick={onScale} disabled={isScaleActionDisabled || scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1 text-style-legal">
-                <Percent size={12} />
-                <span>Escalar</span>
-              </Button>
-              <DeleteIconButton
-                size="compact"
-                onClick={onDeleteMeal}
-                title="Excluir refeição"
-              />
-            </div>
+                    <Plus size={14} aria-hidden="true" />
+                    <span>Nova Variação</span>
+                  </DropdownMenuItem>
+                )}
+                {onAddVariation && variationLimitReached && (
+                  <span id={variationLimitMessageId} className="sr-only">
+                    Limite de 5 variações atingido. Remova uma opção antes de adicionar outra.
+                  </span>
+                )}
+                {hasVariationTabs && onRemoveVariation && (
+                  <DropdownMenuItem
+                    onSelect={onRemoveVariation}
+                    className="gap-2 rounded-control text-style-nav-item text-text-secondary focus:bg-surface-hover focus:text-text-primary"
+                  >
+                    <Trash2 size={14} aria-hidden="true" />
+                    <span>Excluir Variação</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div role="separator" aria-orientation="vertical" className="h-5 w-px bg-border-divider" />
+            <DeleteIconButton
+              size="compact"
+              onClick={onDeleteMeal}
+              title="Excluir refeição"
+            />
           </div>
         </div>
 

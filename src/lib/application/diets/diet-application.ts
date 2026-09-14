@@ -9,6 +9,9 @@ import { insertReadyMealIntoDietDraft, insertRecipeIntoDietDraft } from './libra
 export function createDietApplication(dependencies: DietApplicationDependencies): DietApplication {
   const drafts = createDietDraftCommands(dependencies);
   const copies = createDietCopyCommands(dependencies);
+  const runConfirmed = <T>(operation: () => Promise<T>): Promise<T> => (
+    dependencies.confirmedOperation ? dependencies.confirmedOperation.run(operation) : operation()
+  );
   return {
     openEditor: drafts.openEditor,
     autosaveDraft: drafts.autosaveDraft,
@@ -17,7 +20,7 @@ export function createDietApplication(dependencies: DietApplicationDependencies)
     listPreviousDietSources: copies.listPreviousDietSources,
     pullTargets: copies.pullTargets,
     pullCompleteDiet: copies.pullCompleteDiet,
-    saveDietAsActive: (draftId, expectedRevision) => saveDietAsActive(dependencies, draftId, expectedRevision),
+    saveDietAsActive: (draftId, expectedRevision) => runConfirmed(() => saveDietAsActive(dependencies, draftId, expectedRevision)),
     reconcileUnknownSave: (draftId) => reconcileUnknownSave(dependencies, draftId),
     async getPatientDietSummary(patientId) {
       const account = await dependencies.accountContext.requireActive();

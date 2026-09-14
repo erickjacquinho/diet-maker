@@ -27,7 +27,7 @@ describe('SidebarNavigationAdapter boundary', () => {
     ).toEqual([
       '/pacientes',
       '/presets',
-      '/refeicoes-prontas',
+      '/refeicoes',
       '/receitas',
       '/alimentos',
       '/design-system',

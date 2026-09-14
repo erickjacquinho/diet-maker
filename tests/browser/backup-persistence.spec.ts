@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 import { expect, test, type Download, type Page } from '@playwright/test';
+import { createProfileSession } from './helpers/profile-session';
 
 async function downloadContent(download: Download): Promise<string> {
   const path = await download.path();
@@ -18,13 +19,13 @@ async function exportBackup(page: Page): Promise<string> {
 
 async function openRestoreDialog(page: Page, content: string): Promise<void> {
   const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-  await page.getByRole('button', { name: 'Restaurar backup local' }).click();
+  await page.getByRole('button', { name: 'Importar backup local' }).click();
   await input.setInputFiles({
     name: 'nutridiet-backup.nutridiet',
     mimeType: 'application/json',
     buffer: Buffer.from(content, 'utf8'),
   });
-  await expect(page.getByRole('dialog', { name: 'Restaurar backup' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Importar backup' })).toBeVisible();
 }
 
 async function seedEditableDraft(page: Page): Promise<void> {
@@ -61,7 +62,7 @@ async function seedEditableDraft(page: Page): Promise<void> {
 
 test.describe('backup manual local', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/pacientes', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    await createProfileSession(page, 'Backup browser');
     await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
     await page.waitForLoadState('networkidle');
   });
@@ -89,7 +90,7 @@ test.describe('backup manual local', () => {
     const content = await exportBackup(page);
 
     const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-    await page.getByRole('button', { name: 'Restaurar backup local' }).click();
+    await page.getByRole('button', { name: 'Importar backup local' }).click();
     await input.setInputFiles({
       name: 'backup-invalido.nutridiet',
       mimeType: 'application/json',
@@ -99,7 +100,7 @@ test.describe('backup manual local', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     await openRestoreDialog(page, content);
-    const dialog = page.getByRole('dialog', { name: 'Restaurar backup' });
+    const dialog = page.getByRole('dialog', { name: 'Importar backup' });
     await expect(dialog).toContainText('Não haverá mesclagem.');
     await expect(dialog).toContainText('não possui senha nem criptografia');
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
@@ -107,31 +108,31 @@ test.describe('backup manual local', () => {
 
     await openRestoreDialog(page, content);
     const reloadPromise = page.waitForEvent('load');
-    await page.getByRole('dialog', { name: 'Restaurar backup' }).getByRole('button', { name: 'Restaurar backup', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Importar backup' }).getByRole('button', { name: 'Importar backup', exact: true }).click();
     await reloadPromise;
-    await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
+    await expect(page).toHaveURL(/\/home$/, { timeout: 120_000 });
+    await expect(page.getByRole('button', { name: 'Criar perfil' })).toBeVisible({ timeout: 120_000 });
   });
 
-  test('bloqueia a restauração quando há rascunho editável pendente', async ({ page }) => {
+  test('não consulta rascunhos legados em IndexedDB durante a importação', async ({ page }) => {
     const content = await exportBackup(page);
     await seedEditableDraft(page);
     await openRestoreDialog(page, content);
 
-    const dialog = page.getByRole('dialog', { name: 'Restaurar backup' });
-    await dialog.getByRole('button', { name: 'Restaurar backup', exact: true }).click();
-    await expect(dialog).toContainText('Existem rascunhos pendentes.');
-    await expect(dialog).toBeVisible();
+    const dialog = page.getByRole('dialog', { name: 'Importar backup' });
+    await dialog.getByRole('button', { name: 'Importar backup', exact: true }).click();
+    await expect(page).toHaveURL(/\/home$/, { timeout: 120_000 });
   });
 
-  test('preserva a base anterior quando a transação de restauração falha', async ({ page }) => {
+  test('preserva a base anterior quando a transação de importação falha', async ({ page }) => {
     const content = await exportBackup(page);
     const invalidSnapshot = JSON.parse(content) as { objectiveOptions: Array<{ origin: string }> };
     invalidSnapshot.objectiveOptions[0].origin = 'INVALID_ORIGIN';
 
     await openRestoreDialog(page, JSON.stringify(invalidSnapshot));
-    const dialog = page.getByRole('dialog', { name: 'Restaurar backup' });
-    await dialog.getByRole('button', { name: 'Restaurar backup', exact: true }).click();
-    await expect(page.locator('[data-backup-feedback="error"]')).toContainText('A restauração falhou; a base anterior foi preservada.');
+    const dialog = page.getByRole('dialog', { name: 'Importar backup' });
+    await dialog.getByRole('button', { name: 'Importar backup', exact: true }).click();
+    await expect(page.locator('[data-backup-feedback="error"]')).toContainText('A importação falhou; a base anterior foi preservada.');
 
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
     await expect(dialog).toBeHidden();

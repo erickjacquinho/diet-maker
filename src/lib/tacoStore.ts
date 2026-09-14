@@ -1,7 +1,7 @@
 'use client';
 
 import tacoData from '@/data/taco_database.json';
-import { getStorageItem, setStorageItem } from './storage';
+import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 
 export interface FoodItem {
   id: string;
@@ -22,7 +22,7 @@ export interface FoodItem {
 const FAVORITES_KEY = 'nutridiet_favorite_foods';
 
 export function getFavoritesFromStorage(): string[] {
-  return getStorageItem<string[]>(FAVORITES_KEY, []);
+  return getEphemeralItem<string[]>(FAVORITES_KEY, []);
 }
 
 export function getAllFoods(): FoodItem[] {
@@ -43,7 +43,7 @@ export function toggleFavoriteFood(foodId: string): string[] {
     favorites.add(foodId);
   }
   const result = Array.from(favorites);
-  setStorageItem(FAVORITES_KEY, result);
+  setEphemeralItem(FAVORITES_KEY, result);
   return result;
 }
 

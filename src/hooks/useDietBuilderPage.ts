@@ -220,17 +220,20 @@ export function useDietBuilderPage() {
     const targetVariation = draft.payload.variations.find((variation) =>
       dietPlan?.mode === 'carb_cycling' ? variation.id === activeVariationId : variation.position === 0,
     ) ?? draft.payload.variations[0];
-    if (!targetMeal || !targetVariation) throw new Error('A refeição de destino não está disponível.');
+    const targetOptions = targetVariation?.meals.find((meal) => meal.id === targetMeal?.id)?.options;
+    const activeMealOptionId = targetMeal && getActiveMealVariationId(targetMeal.id, targetMeal);
+    const targetOption = targetOptions?.find((option) => option.id === activeMealOptionId) ?? targetOptions?.[0];
+    if (!targetMeal || !targetVariation || !targetOption) throw new Error('A refeição de destino não está disponível.');
 
     const expectedRevision = currentRevisionRef.current ?? draft.draftRevision;
     const updated = kind === 'recipe'
       ? await dietApplication.insertRecipeIntoDietDraft({ draftId: draft.draftId, expectedRevision, recipeId: sourceId, variationId: targetVariation.id, mealId: targetMeal.id })
-      : await dietApplication.insertReadyMealIntoDietDraft({ draftId: draft.draftId, expectedRevision, readyMealId: sourceId, variationId: targetVariation.id, mealId: targetMeal.id });
+      : await dietApplication.insertReadyMealIntoDietDraft({ draftId: draft.draftId, expectedRevision, readyMealId: sourceId, variationId: targetVariation.id, mealId: targetMeal.id, optionId: targetOption.id });
 
     syncInsertedLibraryDraft(updated);
     setFoodSearchMealIndex(null);
     toast.success(kind === 'recipe' ? 'Receita inserida no rascunho.' : 'Refeição pronta inserida no rascunho.');
-  }, [activeVariationId, dietApplication, dietPlan?.mode, draft, foodSearchMealIndex, mealGroups, setFoodSearchMealIndex, syncInsertedLibraryDraft]);
+  }, [activeVariationId, dietApplication, dietPlan?.mode, draft, foodSearchMealIndex, getActiveMealVariationId, mealGroups, setFoodSearchMealIndex, syncInsertedLibraryDraft]);
 
   const handleInsertRecipeIntoDietDraft = useCallback(
     (recipeId: string) => insertLibraryIntoSelectedMeal('recipe', recipeId),

@@ -40,7 +40,7 @@
 
 - [x] CHK019 — O fluxo de recuperação para arquivo inválido, incompatível, incompleto ou cancelado está especificado? [Scenario Coverage, Spec §User Story 3, Edge Cases, FR-012–FR-016]
 - [x] CHK020 — O comportamento diante de permissão negada, revogada, arquivo movido ou arquivo indisponível está especificado? [Recovery Coverage, Spec §Edge Cases, FR-025]
-- [x] CHK021 — A especificação cobre reload, fechamento de aba, troca de porta, host, preview e production sem recuperação automática? [Scenario Coverage, Spec §User Story 4, Edge Cases, SC-005]
+- [x] CHK021 — A especificação cobre retomada na mesma origem após reload/fechamento e isolamento sem recuperação clínica em troca de porta, host, preview e production? [Scenario Coverage, Spec §User Story 4, Edge Cases, SC-005]
 - [x] CHK022 — O caso de save válido sem pacientes e de save com pacientes arquivados/históricos está coberto? [Edge Case Coverage, Spec §Edge Cases, FR-013]
 
 ## Non-Functional Requirements

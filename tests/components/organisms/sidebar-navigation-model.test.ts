@@ -39,7 +39,7 @@ describe('sidebar navigation model', () => {
     expect(sidebarProductionRoutes.map((item) => item.href)).toEqual([
       '/pacientes',
       '/presets',
-      '/refeicoes-prontas',
+      '/refeicoes',
       '/receitas',
       '/alimentos',
       '/design-system',

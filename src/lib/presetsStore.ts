@@ -1,31 +1,14 @@
 'use client';
 
-import { getStorageItem, setStorageItem } from './storage';
-import type { MacroMode } from './presetUtils';
+import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
+import type { DietPreset } from './domain/diet-preset';
 
-export interface DietPreset {
-  id: string;
-  title: string;
-  category: string;
-  targetKcal: number;
-  proteinG: number;
-  carbsG: number;
-  fatsG: number;
-  proteinMode?: MacroMode;
-  proteinValue?: number;
-  carbsMode?: MacroMode;
-  carbsValue?: number;
-  fatsMode?: MacroMode;
-  fatsValue?: number;
-  referenceWeight?: number;
-  mealsCount: number;
-  description: string;
-}
+export type { DietPreset } from './domain/diet-preset';
 
 const PRESETS_KEY = 'nutridiet_presets';
 
 export function getPresetsFromStorage(): DietPreset[] {
-  return getStorageItem<DietPreset[]>(PRESETS_KEY, []);
+  return getEphemeralItem<DietPreset[]>(PRESETS_KEY, []);
 }
 
 export function savePresetToStorage(preset: Omit<DietPreset, 'id'> & { id?: string }): DietPreset {
@@ -43,12 +26,12 @@ export function savePresetToStorage(preset: Omit<DietPreset, 'id'> & { id?: stri
     ? current.map((p) => (p.id === id ? presetToSave : p))
     : [presetToSave, ...current];
 
-  setStorageItem(PRESETS_KEY, updated);
+  setEphemeralItem(PRESETS_KEY, updated);
   return presetToSave;
 }
 
 export function deletePresetFromStorage(id: string): void {
   const current = getPresetsFromStorage();
   const updated = current.filter((p) => p.id !== id);
-  setStorageItem(PRESETS_KEY, updated);
+  setEphemeralItem(PRESETS_KEY, updated);
 }

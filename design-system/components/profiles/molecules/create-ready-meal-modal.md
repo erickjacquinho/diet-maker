@@ -46,7 +46,7 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-A lista canônica de consumidores é o campo `consumers` do registro; atualmente `src/app/refeicoes-prontas/page.tsx`.
+A lista canônica de consumidores é o campo `consumers` do registro; atualmente `src/app/refeicoes/page.tsx`.
 
 ## Acceptance criteria
 

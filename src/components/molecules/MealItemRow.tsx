@@ -24,6 +24,7 @@ export interface MealItemRowProps {
   carbs: number;
   fats: number;
   quantityGrams: number;
+  quantityUnit?: string;
   onQuantityChange?: (newGrams: number) => void;
   onSubstitute?: () => void;
   onDuplicate?: () => void;
@@ -47,6 +48,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   carbs,
   fats,
   quantityGrams,
+  quantityUnit = 'g',
   onQuantityChange,
   onSubstitute,
   onDuplicate,
@@ -91,6 +93,11 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
     event.preventDefault();
     nextInput.focus();
+  };
+
+  const handleActionClick = (event: React.MouseEvent<HTMLButtonElement>, action?: () => void) => {
+    if (event.detail > 0) event.currentTarget.blur();
+    action?.();
   };
 
   return (
@@ -158,7 +165,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           <IconButton
             size="compact"
             variant="secondary"
-            onClick={onSubstitute}
+            onClick={(event) => handleActionClick(event, onSubstitute)}
             title={`Substituir ${name}`}
             aria-label={`Substituir ${name}`}
             icon={<ArrowLeftRight size={14} className="shrink-0" aria-hidden="true" />}
@@ -166,7 +173,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
           <IconButton
             size="compact"
             variant="secondary"
-            onClick={onDuplicate}
+            onClick={(event) => handleActionClick(event, onDuplicate)}
             title={`Duplicar ${name}`}
             aria-label={`Duplicar ${name}`}
             icon={<CopyPlus size={14} className="shrink-0" aria-hidden="true" />}
@@ -195,10 +202,10 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
               if (e.key === 'Escape') setTempGrams(quantityGrams);
             }}
             className="w-full h-7 pl-2 pr-5 text-center text-style-field-value font-bold bg-surface border-border-subtle hover:border-border-hover focus:border-primary"
-            aria-label={`Quantidade em gramas para ${name}`}
+            aria-label={`Quantidade em ${quantityUnit} para ${name}`}
           />
           <span className="absolute right-2 text-style-chart-micro font-bold text-text-muted pointer-events-none select-none">
-            g
+            {quantityUnit}
           </span>
         </div>
       </TableCell>

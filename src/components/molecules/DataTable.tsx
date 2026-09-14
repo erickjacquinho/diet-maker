@@ -47,15 +47,22 @@ function DataTableCheckbox({
         onCheckedChange?.(!isChecked);
       }}
       className={cn(
-        'flex size-4 items-center justify-center rounded-compact border transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2',
-        isChecked && 'border-primary bg-primary text-on-primary',
-        isIndeterminate && 'border-primary bg-primary-soft text-primary',
-        !isChecked && !isIndeterminate && 'border-border-subtle bg-surface hover:border-border-hover',
+        'group flex size-8 items-center justify-center rounded-compact border-transparent bg-transparent p-0 transition-colors duration-fast hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         disabled ? 'pointer-events-none cursor-not-allowed opacity-disabled' : 'cursor-pointer',
       )}
     >
-      {isChecked && <Check size={12} className="shrink-0" aria-hidden="true" />}
-      {isIndeterminate && <span className="h-px w-2 rounded-round bg-primary" aria-hidden="true" />}
+      <span
+        aria-hidden="true"
+        className={cn(
+          'flex size-4 items-center justify-center rounded-compact border transition-colors duration-fast',
+          isChecked && 'border-primary bg-primary text-on-primary',
+          isIndeterminate && 'border-primary bg-primary-soft text-primary',
+          !isChecked && !isIndeterminate && 'border-border-subtle bg-surface group-hover:border-border-hover',
+        )}
+      >
+        {isChecked && <Check size={12} className="shrink-0" aria-hidden="true" />}
+        {isIndeterminate && <span className="h-px w-2 rounded-round bg-primary" aria-hidden="true" />}
+      </span>
     </Button>
   );
 }

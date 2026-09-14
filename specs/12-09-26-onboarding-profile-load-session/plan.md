@@ -14,7 +14,7 @@ O caminho mínimo reutiliza os repositórios e o envelope existentes: acrescenta
 
 **Dependencies**: PGlite 0.5.8, Drizzle ORM, Radix/shadcn existentes e `nanoid`
 
-**Storage**: PGlite `memory://` por aba; arquivo `.nutridiet` escolhido pelo profissional. Nenhum profile, dado de domínio, draft ou handle será salvo em IndexedDB, localStorage, sessionStorage, cookie, servidor ou metadado de host.
+**Storage**: PGlite `memory://` por aba; arquivo `.nutridiet` escolhido pelo profissional. O conteúdo clínico continua fora do host; somente o handle permissionado do arquivo ativo e seu nome podem ser salvos no IndexedDB/localStorage da mesma origem para retomada após F5/reabertura.
 
 **Testing**: Vitest para domínio, envelope, sessão e sincronização; Playwright para guard, onboarding e load entre portas/origens.
 
@@ -22,7 +22,7 @@ O caminho mínimo reutiliza os repositórios e o envelope existentes: acrescenta
 
 **Performance**: `/Home` interativa em até 2s após assets; paciente de arquivo válido visível em até 10s; confirmação só fica sincronizada depois da escrita terminar.
 
-**Scope constraints**: uma sessão por aba, sem concorrência entre abas, sem API direta do Google Drive. Uma pasta do Google Drive sincronizada localmente é tratada como pasta do computador. Reload, fechamento ou nova origem começam sem sessão.
+**Scope constraints**: uma sessão por aba, sem concorrência entre abas, sem API direta do Google Drive. Uma pasta do Google Drive sincronizada localmente é tratada como pasta do computador. Reload/fechamento na mesma origem tentam retomar pelo handle; nova origem começa sem sessão.
 
 ## Constitution Check
 
@@ -37,8 +37,8 @@ O caminho mínimo reutiliza os repositórios e o envelope existentes: acrescenta
 ## Arquitetura mínima
 
 1. `openLocalDatabase` e `browser-composition` passam a criar somente PGlite `memory://`; o contexto de conta não cria mais `local-account` automaticamente.
-2. `src/lib/application/profile-session.ts` concentra estado e comandos de criar/carregar/sincronizar. O objeto de sessão guarda profile, runtime, handle, nome do arquivo e status; handle/status não entram no save.
-3. `src/lib/persistence/save-file.ts` define uma única porta (`chooseExisting`, `chooseNew`, `read`, `requestWritePermission`, `write`); `src/lib/infrastructure/file-system-access/browser-save-file.ts` é seu adaptador browser-only.
+2. `src/lib/application/profile-session.ts` concentra estado e comandos de criar/carregar/sincronizar/restaurar. O objeto de sessão guarda profile, runtime, handle, nome do arquivo, hidratação e status; handle/status não entram no save.
+3. `src/lib/persistence/save-file.ts` define uma única porta (`chooseExisting`, `chooseNew`, `read`, `requestWritePermission`, `write` e associação opcional do arquivo ativo); `src/lib/infrastructure/file-system-access/browser-save-file.ts` é seu adaptador browser-only e persiste somente o handle no IndexedDB.
 4. `src/app/SessionAwareAppShell.tsx` é o único gate: `/Home` não usa sidebar; qualquer outra rota só mostra o shell quando houver sessão `active` ou `paused`.
 5. `src/components/organisms/profile-onboarding.tsx` e `src/components/molecules/profile-create-dialog.tsx` implementam a UI; a página `/Home` apenas conecta os comandos.
 6. Um callback/coordenador em `src/lib/application/composition-root.ts` sincroniza após comandos confirmados de paciente, clínica, dieta e biblioteca. Drafts continuam em memória.
@@ -77,7 +77,7 @@ tests/
 └── browser/profile-save-load.spec.ts
 ```
 
-**Decision**: não criar backend, middleware de autenticação, rota API, banco remoto, integração Drive, múltiplos providers ou novas camadas de domínio. A aplicação existente continua responsável pelas páginas clínicas; somente o ciclo de vida do runtime e do save muda.
+**Decision**: não criar backend, middleware de autenticação, rota API, banco remoto, integração Drive, múltiplos providers ou novas camadas de domínio. A aplicação existente continua responsável pelas páginas clínicas; somente o ciclo de vida do runtime, a associação permissionada do arquivo e do save mudam.
 
 ## Documentos relacionados
 

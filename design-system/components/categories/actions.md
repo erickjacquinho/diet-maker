@@ -4,7 +4,7 @@ Category ID: `actions`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-actions`  
 Allowed traits: `icon-only`, `destructive`, `async`, `collapsible`  
-Current consumers: `ui-button`, `atom-button`, `atom-icon-button`, `molecule-sidebar-quick-actions`
+Current consumers: `ui-button`, `atom-button`, `atom-icon-button`, `molecule-sidebar-quick-actions`, `organism-profile-onboarding`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 

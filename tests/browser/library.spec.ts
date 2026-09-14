@@ -1,5 +1,6 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './fixtures/library-fixture';
+import { navigateWithinSession } from './helpers/profile-session';
 
 const legacyKeys = ['nutridiet_custom_foods', 'nutridiet_recipes', 'nutridiet_ready_meals'];
 
@@ -9,15 +10,15 @@ async function expectLegacyLibraryEmpty(page: Page) {
 }
 
 test('mantém as superfícies da biblioteca sem as chaves legadas', async ({ page }) => {
-  for (const route of ['/alimentos', '/receitas', '/refeicoes-prontas']) {
-    await page.goto(route, { waitUntil: 'load' });
+  for (const route of ['/alimentos', '/receitas', '/refeicoes']) {
+    await navigateWithinSession(page, route);
     await expect(page.locator('body')).toBeVisible();
     await expectLegacyLibraryEmpty(page);
   }
 });
 
-test('cria, recarrega e encontra um alimento customizado no banco local', async ({ page }) => {
-  await page.goto('/alimentos', { waitUntil: 'load' });
+test('cria e encontra um alimento customizado na sessão, mas reload retorna ao onboarding', async ({ page }) => {
+  await navigateWithinSession(page, '/alimentos');
   await expect(page.getByRole('heading', { name: 'Base de Alimentos TACO' })).toBeVisible({ timeout: 120_000 });
 
   await page.getByRole('button', { name: 'Novo Alimento Customizado' }).click();
@@ -37,7 +38,6 @@ test('cria, recarrega e encontra um alimento customizado no banco local', async 
   await expectLegacyLibraryEmpty(page);
 
   await page.reload({ waitUntil: 'load' });
-  await expect(page.getByRole('heading', { name: 'Base de Alimentos TACO' })).toBeVisible({ timeout: 120_000 });
-  await page.getByRole('button', { name: 'Customizados' }).click();
-  await expect(page.getByText('Whey local de browser')).toBeVisible();
+  await expect(page).toHaveURL(/\/home$/, { timeout: 120_000 });
+  await expect(page.getByRole('button', { name: 'Criar perfil' })).toBeVisible({ timeout: 120_000 });
 });

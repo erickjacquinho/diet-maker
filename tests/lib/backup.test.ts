@@ -14,10 +14,27 @@ function expectBackupError(action: () => unknown, code: BackupApplicationError['
 
 const localAccount = { accountId: 'local-account', schemaVersion: '4' } as const;
 
+function normalizeLegacyEnvelope(envelope: ReturnType<typeof createBackupEnvelope>) {
+  return {
+    ...envelope,
+    schemaVersion: '5',
+    account: envelope.account.map((account) => ({ ...account, phone: account.phone ?? null })),
+  };
+}
+
 describe('backup envelope validation', () => {
   it('accepts a complete snapshot and preserves all logical tables', () => {
     const envelope = createBackupEnvelope();
-    expect(parseBackupEnvelope(JSON.stringify(envelope), localAccount)).toEqual(envelope);
+    expect(parseBackupEnvelope(JSON.stringify(envelope), localAccount)).toEqual(normalizeLegacyEnvelope(envelope));
+  });
+
+  it('keeps favorites and accepts older envelopes without them', () => {
+    const envelope = createBackupEnvelope({ favorites: ['taco-arroz-cozido', 'food-custom'] });
+    expect(parseBackupEnvelope(JSON.stringify(envelope), localAccount).favorites).toEqual(envelope.favorites);
+
+    const { favorites: _favorites, ...legacyEnvelope } = envelope;
+    expect(parseBackupEnvelope(JSON.stringify(legacyEnvelope), localAccount).favorites).toEqual([]);
+    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...envelope, favorites: [42] }), localAccount), 'BACKUP_FORMAT_INVALID');
   });
 
   it('accepts valid empty collections without creating domain defaults', () => {
@@ -43,7 +60,7 @@ describe('backup envelope validation', () => {
       }],
     });
 
-    expect(parseBackupEnvelope(JSON.stringify(envelope), localAccount)).toEqual(envelope);
+    expect(parseBackupEnvelope(JSON.stringify(envelope), localAccount)).toEqual(normalizeLegacyEnvelope(envelope));
   });
 
   it('rejects malformed JSON, non-object JSON and incomplete envelopes', () => {
@@ -59,7 +76,7 @@ describe('backup envelope validation', () => {
     expectBackupError(() => parseBackupEnvelope(JSON.stringify(createBackupEnvelope({})), { ...localAccount, accountId: 'other-account' }), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), appId: 'other-app' }), localAccount), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), formatVersion: 2 }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
-    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '5' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
+    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '6' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
   });
 
   it('rejects unknown envelope and row keys in format version one', () => {

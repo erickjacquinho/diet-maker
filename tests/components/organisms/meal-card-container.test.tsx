@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MealCardContainer } from '@/components/organisms/MealCardContainer';
 
@@ -46,34 +46,32 @@ describe('MealCardContainer meal header fields', () => {
     expect(screen.queryByRole('button', { name: /editar nome e horário/i })).not.toBeInTheDocument();
   });
 
-  it('places all meal actions in the header', () => {
+  it('keeps secondary meal actions behind the menu', () => {
     const { container } = renderMealCard();
     const actionGroup = screen.getByRole('group', { name: 'Ações da refeição' });
-    const transferGroup = screen.getByRole('group', { name: 'Transferir alimentos da refeição' });
 
     expect(actionGroup).toHaveClass('shrink-0');
     expect(actionGroup.parentElement).toHaveClass('border-b');
-    expect(transferGroup).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Copiar' })).toBeDisabled();
-    const pasteButton = screen.getByRole('button', { name: 'Colar' });
-
-    expect(pasteButton).toBeDisabled();
-    expect(pasteButton).toHaveClass('border-border-control');
-    expect(screen.getByRole('button', { name: 'Duplicar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Escalar' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Transferir alimentos da refeição' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Copiar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Colar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Duplicar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mais ações da refeição' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
     expect(screen.getByRole('separator')).toHaveAttribute('aria-orientation', 'vertical');
     expect(container.querySelector('[class~="pt-3"][class~="border-t"]')).not.toBeInTheDocument();
   });
 
-  it('enables paste with the secondary variant when a meal is copied', () => {
+  it('enables paste from the menu when a meal is copied', async () => {
     const onPasteMeal = vi.fn();
     renderMealCard({ canPasteMeal: true, onPasteMeal });
 
-    const pasteButton = screen.getByRole('button', { name: 'Colar' });
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mais ações da refeição' }), { button: 0 });
+    const menu = await screen.findByRole('menu');
+    const pasteButton = within(menu).getByRole('menuitem', { name: 'Colar' });
 
     expect(pasteButton).toBeEnabled();
-    expect(pasteButton).toHaveClass('border-border-control');
 
     fireEvent.click(pasteButton);
     expect(onPasteMeal).toHaveBeenCalledTimes(1);

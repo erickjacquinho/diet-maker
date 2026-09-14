@@ -7,6 +7,7 @@ import { calculateEnergyFromNutrition, normalizeDecimal, normalizeNutrition, LIB
 import { validateCustomFoodInput } from '@/lib/domain/library/library-validation';
 import type { LocalDatabaseHandle } from '../client';
 import { foodCatalogItems, readyMealItems, recipeIngredients } from '../schema';
+import { findClinicalSnapshotReferences } from './clinical-snapshot-references';
 import { mapFoodCatalogRow } from './library-row-mappers';
 
 export interface FoodCatalogRepositoryOptions {
@@ -123,12 +124,13 @@ export class PGliteFoodCatalogRepository implements FoodCatalogRepository {
 
   async deleteIfUnreferenced(accountId: string, foodId: string, expectedVersion: number): Promise<boolean> {
     await this.requireVersion(accountId, foodId, expectedVersion);
-    const [recipeReferences, readyMealReferences] = await Promise.all([
+    const [recipeReferences, readyMealReferences, clinicalReferences] = await Promise.all([
       this.handle.db.select({ id: recipeIngredients.id }).from(recipeIngredients).where(and(eq(recipeIngredients.accountId, accountId), eq(recipeIngredients.sourceType, 'ACCOUNT_CUSTOM'), eq(recipeIngredients.sourceId, foodId))),
       this.handle.db.select({ id: readyMealItems.id }).from(readyMealItems).where(and(eq(readyMealItems.accountId, accountId), eq(readyMealItems.sourceType, 'FOOD'), eq(readyMealItems.sourceId, foodId))),
+      findClinicalSnapshotReferences(this.handle, accountId, 'ACCOUNT_CUSTOM', foodId),
     ]);
-    if (recipeReferences.length || readyMealReferences.length) {
-      throw createLibraryError('LIBRARY_DEPENDENCY_EXISTS', 'O alimento está sendo usado por uma receita ou refeição pronta.');
+    if (recipeReferences.length || readyMealReferences.length || clinicalReferences.length) {
+      throw createLibraryError('LIBRARY_DEPENDENCY_EXISTS', 'O alimento está sendo usado por uma receita, refeição pronta ou dieta confirmada.');
     }
     await this.handle.db.delete(foodCatalogItems).where(and(eq(foodCatalogItems.id, foodId), eq(foodCatalogItems.accountId, accountId), eq(foodCatalogItems.version, expectedVersion)));
     return (await this.getById(accountId, foodId)) === null;

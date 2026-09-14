@@ -5,7 +5,7 @@ import { Copy, Utensils, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import type { DietPreset } from '@/lib/presetsStore';
+import type { DietPreset } from '@/lib/domain/diet-preset';
 
 export type { DietPreset };
 

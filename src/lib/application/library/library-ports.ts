@@ -6,4 +6,5 @@ export interface LibraryApplicationDependencies {
   foodRepository: FoodCatalogRepository;
   recipeRepository: RecipeRepository;
   readyMealRepository: ReadyMealRepository;
+  confirmedOperation?: import('../composition-root').ConfirmedOperationCoordinator;
 }
