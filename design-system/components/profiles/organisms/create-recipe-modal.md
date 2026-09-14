@@ -4,12 +4,12 @@
 
 | Field | Value |
 | --- | --- |
-| Component ID | `molecule-create-recipe-modal` |
+| Component ID | `organism-create-recipe-modal` |
 | Nature | `domain` |
 | Lifecycle | `implemented` |
-| Current layer | `molecule` |
-| Target layer | `molecule` |
-| Sources | `src/components/molecules/CreateRecipeModal.tsx` |
+| Current layer | `organism` |
+| Target layer | `organism` |
+| Sources | `src/components/organisms/CreateRecipeModal.tsx` |
 | Public exports | `CreateRecipeModalProps` (type), `CreateRecipeModal` (component) |
 
 ## Purpose
@@ -57,4 +57,4 @@ A lista canônica de consumidores é o campo `consumers` do registro; atualmente
 
 ## Implementation status
 
-Implementado em `molecule` e homologado documentalmente no catálogo.
+Implementado em `organism` e homologado documentalmente no catálogo.

@@ -31,7 +31,8 @@ describe('canonical diet cutover', () => {
   it('keeps the default food picker limited to TACO and the consultation route read-only for diet data', () => {
     const foodPicker = read('components/organisms/foods/FoodSearchModal.tsx');
     expect(foodPicker).toMatch(/enableLibrarySources = false/);
-    expect(foodPicker).toMatch(/if \(enableLibrarySources\) return libraryFoods/);
+    expect(foodPicker).toMatch(/if \(enableLibrarySources\) \{/);
+    expect(foodPicker).toMatch(/return libraryFoods\.map/);
     expect(foodPicker).toMatch(/return listTacoFoodItems\(\)/);
 
     const consultationPage = read('app/pacientes/[id]/consulta/[date]/page.tsx');

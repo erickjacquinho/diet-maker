@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { CreateRecipeModal } from '@/components/molecules/CreateRecipeModal';
+import { CreateRecipeModal } from '@/components/organisms/CreateRecipeModal';
 
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 

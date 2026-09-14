@@ -3856,21 +3856,21 @@
       "exceptions": []
     },
     {
-      "id": "molecule-create-recipe-modal",
+      "id": "organism-create-recipe-modal",
       "name": "CreateRecipeModal",
       "nature": "domain",
       "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
         "nutrition-context"
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/CreateRecipeModal.tsx",
+          "path": "src/components/organisms/CreateRecipeModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -3885,7 +3885,7 @@
           "documentedBy": "profile"
         }
       ],
-      "profile": "design-system/components/profiles/molecules/create-recipe-modal.md",
+      "profile": "design-system/components/profiles/organisms/create-recipe-modal.md",
       "consumers": [
         "src/app/receitas/page.tsx"
       ],
@@ -3894,21 +3894,21 @@
       "exceptions": []
     },
     {
-      "id": "molecule-create-ready-meal-modal",
+      "id": "organism-create-ready-meal-modal",
       "name": "CreateReadyMealModal",
       "nature": "domain",
       "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
       "primaryCategory": "overlays",
       "traits": [
         "nutrition-context"
       ],
       "sourceFiles": [
         {
-          "path": "src/components/molecules/CreateReadyMealModal.tsx",
+          "path": "src/components/organisms/CreateReadyMealModal.tsx",
           "role": "implementation",
-          "discoveredLayer": "molecule"
+          "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
@@ -3928,7 +3928,7 @@
           "documentedBy": "profile"
         }
       ],
-      "profile": "design-system/components/profiles/molecules/create-ready-meal-modal.md",
+      "profile": "design-system/components/profiles/organisms/create-ready-meal-modal.md",
       "consumers": [
         "src/app/refeicoes/page.tsx"
       ],

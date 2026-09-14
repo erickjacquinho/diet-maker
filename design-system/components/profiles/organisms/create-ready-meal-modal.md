@@ -4,12 +4,12 @@
 
 | Field | Value |
 | --- | --- |
-| Component ID | `molecule-create-ready-meal-modal` |
+| Component ID | `organism-create-ready-meal-modal` |
 | Nature | `domain` |
 | Lifecycle | `implemented` |
-| Current layer | `molecule` |
-| Target layer | `molecule` |
-| Sources | `src/components/molecules/CreateReadyMealModal.tsx` |
+| Current layer | `organism` |
+| Target layer | `organism` |
+| Sources | `src/components/organisms/CreateReadyMealModal.tsx` |
 | Public exports | `ReadyMealFormData`, `CreateReadyMealModalProps` (types), `CreateReadyMealModal` (component) |
 
 ## Purpose
@@ -56,4 +56,4 @@ A lista canônica de consumidores é o campo `consumers` do registro; atualmente
 
 ## Implementation status
 
-Implementado em `molecule` e homologado documentalmente no catálogo.
+Implementado em `organism` e homologado documentalmente no catálogo.

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { CreateReadyMealModal } from '@/components/molecules/CreateReadyMealModal';
+import { CreateReadyMealModal } from '@/components/organisms/CreateReadyMealModal';
 
 const getBrowserLibraryApplication = vi.hoisted(() => vi.fn().mockResolvedValue({
   listCustomFoods: vi.fn().mockResolvedValue([]),

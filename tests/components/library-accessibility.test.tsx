@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { FoodSearchCategorySelector } from '@/components/molecules/food-search/FoodSearchCategorySelector';
-import { CreateReadyMealModal } from '@/components/molecules/CreateReadyMealModal';
+import { CreateReadyMealModal } from '@/components/organisms/CreateReadyMealModal';
 
 describe('reusable library accessibility contract', () => {
   it('provides named keyboard controls for source selection', () => {

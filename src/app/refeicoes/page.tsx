@@ -6,7 +6,7 @@ import { Badge, Button, CreateButton, DeleteIconButton, EditIconButton, IconButt
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/molecules/CreateReadyMealModal';
+import { CreateReadyMealModal, type ReadyMealFormData } from '@/components/organisms/CreateReadyMealModal';
 import { MacroSummary } from '@/components/molecules';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
 import { toReadyMeal, type ReadyMeal } from '@/lib/library-ui-adapter';

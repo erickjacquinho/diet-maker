@@ -13,7 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { CreateRecipeModal } from '@/components/molecules/CreateRecipeModal';
+import { CreateRecipeModal } from '@/components/organisms/CreateRecipeModal';
 import { RecipeCard } from '@/components/molecules/RecipeCard';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
 import { toRecipe, type Recipe } from '@/lib/library-ui-adapter';

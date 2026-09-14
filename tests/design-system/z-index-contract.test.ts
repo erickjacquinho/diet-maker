@@ -80,7 +80,7 @@ describe('z-index layer inventory contract', () => {
       'src/components/ui/tooltip.tsx',
       'src/components/ui/calendar.tsx',
       'src/components/molecules/DatePickerField.tsx',
-      'src/components/molecules/CreateRecipeModal.tsx',
+      'src/components/organisms/CreateRecipeModal.tsx',
       'src/components/organisms/PatientListTable.tsx',
       'src/app/refeicoes/page.tsx',
       'src/app/receitas/page.tsx',
