@@ -63,7 +63,7 @@ export function AssessmentContinuousFields({
   if (mode === 'simplified') {
     return (
       <div className={`flex flex-col gap-4 ${className}`}>
-        <Surface variant="boxed" className="flex flex-col gap-3.5 p-5">
+        <Surface variant="default" className="flex flex-col gap-4 p-5">
           <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
             <Scale className="size-4 text-success" aria-hidden="true" />
             <span className={textStyle('caption-strong')}>Medidas essenciais</span>
