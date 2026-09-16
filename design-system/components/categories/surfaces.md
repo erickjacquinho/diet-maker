@@ -42,6 +42,7 @@ Título `card-title`; descrição `body-secondary`; corpo `body`; metadado `meta
 | --- | --- | --- |
 | root | background/border | `surface` / `border-subtle` |
 | subtle surface | background/border | `surface-subtle` / `border-divider` |
+| boxed surface | background/border | `surface-subtle` / `border-subtle` |
 | interactive hover | background/border | `surface-hover` / `border-hover` |
 | title | text | `text-primary` |
 | description | text | `text-secondary` |
@@ -51,7 +52,7 @@ Título `card-title`; descrição `body-secondary`; corpo `body`; metadado `meta
 
 ## Allowed variants
 
-Card `standard`, `compact`, `highlight`; surface `default` ou `subtle`; separator horizontal/vertical; ScrollArea vertical ou bidirecional quando o conteúdo exigir. `interactive-surface` somente quando toda a superfície possui uma ação primária.
+Card `standard`, `compact`, `highlight`; surface `default`, `subtle` ou `boxed`; separator horizontal/vertical; ScrollArea vertical ou bidirecional quando o conteúdo exigir. `interactive-surface` somente quando toda a superfície possui uma ação primária.
 
 ## State matrix
 

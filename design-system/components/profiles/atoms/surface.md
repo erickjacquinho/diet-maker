@@ -26,7 +26,7 @@ Root `Surface` compõe o primitivo `ui-card` e renderiza os filhos fornecidos pe
 
 ## Allowed variants
 
-- `variant`: `default` ou `subtle`.
+- `variant`: `default`, `subtle` ou `boxed`.
 - `density`: `compact`, `standard` ou `highlight`.
 - Elevação em fluxo: `shadow-none`; superfícies flutuantes pertencem a overlays próprios.
 - `inline` não é variante de `Surface`; consumidores sem caixa própria permanecem layout-only ou usam exceção documentada.

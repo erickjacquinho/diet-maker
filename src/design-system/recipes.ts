@@ -75,6 +75,7 @@ const surface = cva("rounded-surface border text-text-primary shadow-none", {
     variant: {
       default: "border-border-subtle bg-surface",
       subtle: "border-border-divider bg-surface-subtle",
+      boxed: "border-border-subtle bg-surface-subtle",
     },
     density: {
       compact: "p-3",
