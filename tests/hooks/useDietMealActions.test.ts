@@ -144,6 +144,58 @@ describe('useDietMealActions item deletion undo', () => {
     expect(result.current.meals[0].items.map((item) => item.id)).toEqual(['item-3', 'item-1', 'item-2']);
   });
 
+  it('recalculates the item macros immediately when its quantity changes', () => {
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState(mealsFixture);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleUpdateItemGram('meal-1', 'item-1', 200);
+    });
+
+    expect(result.current.meals[0].items[0]).toMatchObject({
+      quantityGrams: 200,
+      grams: 200,
+      kcal: 260,
+      protein: 4,
+      carbs: 56,
+      fats: 0,
+    });
+  });
+
+  it('reorders meals by their stable IDs and ignores incomplete orders', () => {
+    const secondMeal = { ...mealsFixture[0], id: 'meal-2', name: 'Jantar' };
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState([mealsFixture[0], secondMeal]);
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+
+      return { meals, actions };
+    });
+
+    act(() => {
+      result.current.actions.handleReorderMeals(['meal-2', 'meal-1']);
+    });
+
+    expect(result.current.meals.map((meal) => meal.id)).toEqual(['meal-2', 'meal-1']);
+
+    act(() => {
+      result.current.actions.handleReorderMeals(['meal-2']);
+    });
+
+    expect(result.current.meals.map((meal) => meal.id)).toEqual(['meal-2', 'meal-1']);
+  });
+
   it('adds a variation from the active option and selects the appended copy', () => {
     const sourceMeal: DietMeal = {
       ...mealsFixture[0],

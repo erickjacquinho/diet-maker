@@ -415,6 +415,26 @@ export function useDietMealActions({
     [resolveActiveId, updateActiveMeals]
   );
 
+  const handleReorderMeals = useCallback(
+    (mealIds: string[]) => {
+      const currentIds = currentMeals.map((meal) => meal.id);
+      const currentIdSet = new Set(currentIds);
+      if (
+        mealIds.length !== currentIds.length ||
+        new Set(mealIds).size !== currentIds.length ||
+        mealIds.some((mealId) => !currentIdSet.has(mealId))
+      ) return;
+      if (mealIds.every((mealId, index) => mealId === currentIds[index])) return;
+
+      updateActiveMeals((prev) => {
+        const mealsById = new Map(prev.map((meal) => [meal.id, meal]));
+        if (prev.length !== mealIds.length || mealIds.some((mealId) => !mealsById.has(mealId))) return prev;
+        return mealIds.map((mealId) => mealsById.get(mealId) as DietMeal);
+      });
+    },
+    [currentMeals, updateActiveMeals]
+  );
+
   const handleAddMealVariation = useCallback(
     (mealId: string) => {
       const sourceMeal = currentMeals.find((meal) => meal.id === mealId);
@@ -463,6 +483,7 @@ export function useDietMealActions({
     handleSubstituteFood,
     handleRemoveItem,
     handleReorderItems,
+    handleReorderMeals,
     handleAddMealVariation,
     handleRemoveMealVariation,
   };

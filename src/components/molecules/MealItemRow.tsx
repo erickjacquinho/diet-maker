@@ -12,8 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-
-type DropPosition = 'top' | 'bottom' | null;
+import type { SortableItemProps } from './SortableList';
 
 export interface MealItemRowProps {
   id?: string;
@@ -29,19 +28,10 @@ export interface MealItemRowProps {
   onSubstitute?: () => void;
   onDuplicate?: () => void;
   onRemove?: () => void;
-  isDragging?: boolean;
-  isDragOver?: boolean;
-  dragOverPosition?: DropPosition;
-  onDragStart?: (index: number) => void;
-  onDragEnd?: () => void;
-  onDragOver?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
-  onDragLeave?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
-  onDrop?: (e: React.DragEvent<HTMLTableRowElement>, index: number) => void;
-  isReorderingActive?: boolean;
+  sortableProps?: SortableItemProps;
 }
 
 export const MealItemRow: React.FC<MealItemRowProps> = ({
-  index = 0,
   name,
   kcal,
   protein,
@@ -53,14 +43,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
   onSubstitute,
   onDuplicate,
   onRemove,
-  isDragging = false,
-  isDragOver = false,
-  dragOverPosition = null,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDragLeave,
-  onDrop,
+  sortableProps,
 }) => {
 
   const [tempGrams, setTempGrams] = useState<number | string>(quantityGrams);
@@ -74,6 +57,23 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
     setTempGrams(val);
     if (onQuantityChange && val !== quantityGrams) {
       onQuantityChange(val);
+    }
+  };
+
+  const handleQuantityInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.currentTarget.value;
+
+    if (rawValue === '') {
+      setTempGrams('');
+      return;
+    }
+
+    const nextGrams = Number(rawValue);
+    if (!Number.isFinite(nextGrams)) return;
+
+    setTempGrams(nextGrams);
+    if (nextGrams >= 1 && nextGrams !== quantityGrams) {
+      onQuantityChange?.(nextGrams);
     }
   };
 
@@ -102,46 +102,29 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
 
   return (
     <TableRow
-      onDragOver={(e) => {
-        e.preventDefault();
-        onDragOver?.(e, index);
-      }}
-      onDragEnter={(e) => {
-        e.preventDefault();
-      }}
-      onDragLeave={(e) => {
-        onDragLeave?.(e, index);
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDrop?.(e, index);
-      }}
+      ref={sortableProps?.ref as React.Ref<HTMLTableRowElement> | undefined}
+      onPointerDown={sortableProps?.onPointerDown as React.PointerEventHandler<HTMLTableRowElement> | undefined}
+      onKeyDown={sortableProps?.onKeyDown as React.KeyboardEventHandler<HTMLTableRowElement> | undefined}
+      tabIndex={sortableProps?.tabIndex}
+      data-testid={sortableProps?.['data-testid']}
+      data-sortable-id={sortableProps?.['data-sortable-id']}
+      aria-label={sortableProps?.['aria-label']}
+      aria-posinset={sortableProps?.['aria-posinset']}
+      aria-setsize={sortableProps?.['aria-setsize']}
+      aria-keyshortcuts={sortableProps?.['aria-keyshortcuts']}
       className={cn(
         'group/row border-b border-border-divider transition-colors duration-fast select-none hover:bg-surface-hover',
-        isDragging && 'opacity-disabled bg-surface-subtle border-dashed border-border-divider',
-        isDragOver && dragOverPosition === 'top' && 'border-t-2 border-t-primary bg-primary-soft/15 ring-1 ring-primary/20',
-        isDragOver && dragOverPosition === 'bottom' && 'border-b-2 border-b-primary bg-primary-soft/15 ring-1 ring-primary/20'
+        sortableProps?.className
       )}
     >
       {/* 1. Drag handle */}
       <TableCell className="w-10 px-2 text-center py-2">
         <div
-          draggable
-          onDragStart={(e) => {
-            e.stopPropagation();
-            if (e.dataTransfer) {
-              e.dataTransfer.setData('text/plain', String(index));
-              e.dataTransfer.effectAllowed = 'move';
-            }
-            onDragStart?.(index);
-          }}
-          onDragEnd={onDragEnd}
           className={cn(
-            'p-1 -m-1 rounded-control transition-colors duration-fast inline-flex items-center justify-center cursor-grab active:cursor-grabbing',
-            isDragOver ? 'text-primary bg-primary-soft' : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+            'p-1 -m-1 rounded-control transition-colors duration-fast inline-flex items-center justify-center text-text-muted',
+            'group-hover/row:text-text-primary group-focus-within/row:text-primary'
           )}
-          title="Arrastar para reordenar"
-          aria-label={`Reordenar ${name}`}
+          aria-hidden="true"
         >
           <GripVertical size={14} className="shrink-0" />
         </div>
@@ -191,10 +174,7 @@ export const MealItemRow: React.FC<MealItemRowProps> = ({
             size="compact"
             data-meal-quantity-input="true"
             value={tempGrams}
-            onChange={(e) => {
-              const val = e.target.value === '' ? ('' as unknown as number) : Number(e.target.value);
-              setTempGrams(val);
-            }}
+            onChange={handleQuantityInputChange}
             onBlur={handleSaveGrams}
             onKeyDown={(e) => {
               handleQuantityKeyDown(e);

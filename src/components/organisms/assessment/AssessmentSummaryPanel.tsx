@@ -143,7 +143,7 @@ export function AssessmentSummaryPanel({
 
         {/* Grade 2x2 usando o organismo canônico de métricas */}
         <MetricBoxGroup
-          className="grid-cols-2 gap-2.5 divide-x-0 overflow-visible rounded-none border-0 bg-transparent"
+          className="grid-cols-2 gap-2.5 divide-x-0 !overflow-visible rounded-none border-0 bg-transparent"
           items={[
             {
               label: (

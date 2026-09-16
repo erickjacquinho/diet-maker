@@ -28,6 +28,16 @@ import type { DietApplication } from '@/lib/application/diets/diet-ports';
 import { fromCanonicalPlan, fromEditableDocument, toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 
+function showSaveErrorToast(message: string, retry: () => void | Promise<void>) {
+  toast.error(message, {
+    duration: Infinity,
+    action: {
+      label: 'Tentar novamente',
+      onClick: () => { void retry(); },
+    },
+  });
+}
+
 export function useDietBuilderPage() {
   const params = useParams();
   const router = useRouter();
@@ -44,7 +54,6 @@ export function useDietBuilderPage() {
   const lastPersistedDocumentRef = useRef<string | null>(null);
   const currentRevisionRef = useRef<number | null>(null);
   const [saveStatus, setSaveStatus] = useState<'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending'>('clean');
-  const [saveError, setSaveError] = useState<string | undefined>();
 
   useEffect(() => {
     if (!patientId) return;
@@ -103,32 +112,6 @@ export function useDietBuilderPage() {
     currentRevisionRef.current = draft.draftRevision;
     lastPersistedDocumentRef.current = JSON.stringify(toEditableDocument(dietPlan));
   }, [draft?.draftId]);
-
-  useEffect(() => {
-    if (!dietApplication || !draft || !dietPlan || lastPersistedDocumentRef.current === null) return;
-    const document = toEditableDocument(dietPlan);
-    const serialized = JSON.stringify(document);
-    if (serialized === lastPersistedDocumentRef.current) return;
-    setSaveStatus('pending');
-    const timer = window.setTimeout(() => {
-      const expectedRevision = currentRevisionRef.current ?? draft.draftRevision;
-      setSaveStatus('saving');
-      void dietApplication.autosaveDraft(draft.draftId, expectedRevision, document).then((result) => {
-        if (result.status === 'SAVED') {
-          currentRevisionRef.current = result.revision;
-          lastPersistedDocumentRef.current = serialized;
-          setLoadedDraft((current) => current ? { ...current, payload: document, draftRevision: result.revision } : current);
-          setSaveStatus('persisted');
-          return;
-        }
-        if (result.status !== 'SUPERSEDED') setSaveStatus('error');
-      }).catch((error: unknown) => {
-        setSaveError(error instanceof Error ? error.message : 'Não foi possível persistir a edição local.');
-        setSaveStatus('error');
-      });
-    }, 350);
-    return () => window.clearTimeout(timer);
-  }, [dietApplication, dietPlan, draft, setLoadedDraft]);
 
   // Calculations hook
   const {
@@ -248,7 +231,12 @@ export function useDietBuilderPage() {
   const handleModeChange = useCallback((newMode: 'simple' | 'carb_cycling') => {
     setDietPlan((prev) => {
       if (!prev) return prev;
-      if (newMode !== 'carb_cycling' || prev.carbCyclingVariations.length > 0) return { ...prev, mode: newMode };
+      if (newMode !== 'carb_cycling' || prev.carbCyclingVariations.length > 0) {
+        if (newMode === 'carb_cycling' && prev.mode !== 'carb_cycling') {
+          setActiveVariationId(prev.carbCyclingVariations[0]?.id || 'var-high');
+        }
+        return { ...prev, mode: newMode };
+      }
       const weight = patient?.weightKg || 70;
       const protein = prev.simpleTargetProtein || Math.round(weight * 2);
       const carbs = prev.simpleTargetCarbs || Math.round(weight * 2.5);
@@ -261,6 +249,7 @@ export function useDietBuilderPage() {
           inputMode: 'grams', gPerKg: { protein: Number((protein / weight).toFixed(1)), carbs: Number((targetCarbs / weight).toFixed(1)), fats: Number((fat / weight).toFixed(1)) }, meals: [],
         };
       };
+      setActiveVariationId('var-high');
       return {
         ...prev,
         mode: newMode,
@@ -272,7 +261,7 @@ export function useDietBuilderPage() {
         ],
       };
     });
-  }, [patient?.weightKg, setDietPlan]);
+  }, [patient?.weightKg, setActiveVariationId, setDietPlan]);
 
   const handleVariationsCountChange = useCallback((newCount: 2 | 3) => {
     setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariationsCount: newCount } : prev));
@@ -402,12 +391,12 @@ export function useDietBuilderPage() {
     if (!dietApplication || !draft || !dietPlan || saveInFlightRef.current) return;
     saveInFlightRef.current = true;
     setSaveStatus('saving');
-    setSaveError(undefined);
     try {
       const flushed = await flushCurrentDraft();
       if (!flushed || flushed.status !== 'SAVED') {
+        const message = 'A edição mudou durante o salvamento. Recarregue o draft antes de confirmar.';
         setSaveStatus('error');
-        setSaveError('A edição mudou durante o salvamento. Recarregue o draft antes de confirmar.');
+        showSaveErrorToast(message, handleSaveDiet);
         return;
       }
       setSaveStatus('committing');
@@ -419,14 +408,45 @@ export function useDietBuilderPage() {
         return;
       }
       setSaveStatus('error');
-      setSaveError(outcome.message);
+      showSaveErrorToast(outcome.message, handleSaveDiet);
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Não foi possível confirmar a prescrição.';
       setSaveStatus('error');
-      setSaveError(error instanceof Error ? error.message : 'Não foi possível confirmar a prescrição.');
+      showSaveErrorToast(message, handleSaveDiet);
     } finally {
       saveInFlightRef.current = false;
     }
   }, [dietApplication, dietPlan, draft, flushCurrentDraft, patientId, router]);
+
+  useEffect(() => {
+    if (!dietApplication || !draft || !dietPlan || lastPersistedDocumentRef.current === null) return;
+    const document = toEditableDocument(dietPlan);
+    const serialized = JSON.stringify(document);
+    if (serialized === lastPersistedDocumentRef.current) return;
+    setSaveStatus('pending');
+    const timer = window.setTimeout(() => {
+      const expectedRevision = currentRevisionRef.current ?? draft.draftRevision;
+      setSaveStatus('saving');
+      void dietApplication.autosaveDraft(draft.draftId, expectedRevision, document).then((result) => {
+        if (result.status === 'SAVED') {
+          currentRevisionRef.current = result.revision;
+          lastPersistedDocumentRef.current = serialized;
+          setLoadedDraft((current) => current ? { ...current, payload: document, draftRevision: result.revision } : current);
+          setSaveStatus('persisted');
+          return;
+        }
+        if (result.status !== 'SUPERSEDED') {
+          setSaveStatus('error');
+          showSaveErrorToast('O rascunho local foi invalidado e não pôde ser salvo.', handleSaveDiet);
+        }
+      }).catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : 'Não foi possível persistir a edição local.';
+        setSaveStatus('error');
+        showSaveErrorToast(message, handleSaveDiet);
+      });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [dietApplication, dietPlan, draft, handleSaveDiet, setLoadedDraft]);
 
   const handleDiscardDraft = useCallback(async () => {
     if (!dietApplication || !draft) return;
@@ -487,8 +507,6 @@ export function useDietBuilderPage() {
     onBackClick: handleBackClick,
     flushDraft: flushCurrentDraft,
     saveStatus,
-    saveError,
-    onRetrySave: handleSaveDiet,
     router,
   };
 }

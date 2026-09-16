@@ -1,39 +1,53 @@
-import React from 'react';
-import { render, screen, fireEvent, createEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { createEvent, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { MealCardContainer } from '../MealCardContainer';
 
-const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
-
-beforeAll(() => {
-  Element.prototype.getBoundingClientRect = vi.fn().mockReturnValue({
-    top: 100,
-    bottom: 140,
-    height: 40,
-    left: 0,
-    right: 500,
-    width: 500,
-    x: 0,
-    y: 100,
-    toJSON: () => {},
+function pointerDownAt(element: HTMLElement, pointerId: number, clientX: number, clientY: number) {
+  const event = createEvent.pointerDown(element);
+  Object.defineProperties(event, {
+    button: { value: 0 },
+    clientX: { value: clientX },
+    clientY: { value: clientY },
+    pointerId: { value: pointerId },
   });
-});
+  fireEvent(element, event);
+}
 
-afterAll(() => {
-  Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-});
+function pointerMoveAt(target: Document, pointerId: number, clientX: number, clientY: number) {
+  const event = createEvent.pointerMove(target);
+  Object.defineProperties(event, {
+    clientX: { value: clientX },
+    clientY: { value: clientY },
+    pointerId: { value: pointerId },
+  });
+  fireEvent(target, event);
+}
+
+function pointerUpAt(target: Document, pointerId: number, clientX: number, clientY: number) {
+  const event = createEvent.pointerUp(target);
+  Object.defineProperties(event, {
+    clientX: { value: clientX },
+    clientY: { value: clientY },
+    pointerId: { value: pointerId },
+  });
+  fireEvent(target, event);
+}
+
+function rowRect(top: number, height = 40) {
+  return { top, height, bottom: top + height, left: 0, width: 500, right: 500, x: 0, y: top } as DOMRect;
+}
 
 describe('MealCardContainer', () => {
-  const mockReorder = vi.fn();
-  const mockRemoveItem = vi.fn();
-
   const sampleItems = [
     { id: 'it-1', name: 'Arroz Integral', kcal: 130, protein: 3, carbs: 28, fats: 1, quantityGrams: 100 },
     { id: 'it-2', name: 'Feijão Preto', kcal: 90, protein: 6, carbs: 14, fats: 0.5, quantityGrams: 100 },
     { id: 'it-3', name: 'Frango Grelhado', kcal: 200, protein: 35, carbs: 0, fats: 4, quantityGrams: 150 },
   ];
 
-  it('renders items with hover-only delete button and handles precise drag-and-drop indicator & reordering', () => {
+  it('renders item actions and reorders the whole row with SortableList', () => {
+    const onReorderItems = vi.fn();
+    const onRemoveItem = vi.fn();
+
     render(
       <MealCardContainer
         title="Almoço"
@@ -43,66 +57,51 @@ describe('MealCardContainer', () => {
         carbsG={42}
         fatsG={5.5}
         items={sampleItems}
-        onReorderItems={mockReorder}
-        onRemoveItem={mockRemoveItem}
+        onReorderItems={onReorderItems}
+        onRemoveItem={onRemoveItem}
       />
     );
 
     expect(screen.getByText('Arroz Integral')).toBeInTheDocument();
     expect(screen.getByText('Feijão Preto')).toBeInTheDocument();
     expect(screen.getByText('Frango Grelhado')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /remover/i })).toHaveLength(3);
 
-    // Verify delete button is present within a hover-only invisible wrapper
-    const deleteButtons = screen.getAllByRole('button', { name: /remover/i });
-    expect(deleteButtons).toHaveLength(3);
-    expect(deleteButtons[0].parentElement).toHaveClass('invisible');
-    expect(deleteButtons[0].parentElement).toHaveClass('group-hover/row:visible');
+    const firstRow = screen.getByTestId('sortable-item-it-1');
+    const secondRow = screen.getByTestId('sortable-item-it-2');
+    const thirdRow = screen.getByTestId('sortable-item-it-3');
+    vi.spyOn(firstRow, 'getBoundingClientRect').mockReturnValue(rowRect(0));
+    vi.spyOn(secondRow, 'getBoundingClientRect').mockReturnValue(rowRect(80));
+    vi.spyOn(thirdRow, 'getBoundingClientRect').mockReturnValue(rowRect(160));
 
-    // Drag handle elements
-    const arrozDragHandle = screen.getByLabelText('Reordenar Arroz Integral');
-    const feijaoDragHandle = screen.getByLabelText('Reordenar Feijão Preto');
-    expect(arrozDragHandle).toBeInTheDocument();
-    expect(feijaoDragHandle).toBeInTheDocument();
+    pointerDownAt(firstRow, 1, 24, 24);
+    pointerMoveAt(document, 1, 24, 130);
+    const preview = screen.getByTestId('sortable-drag-preview');
+    expect(preview).toBeInTheDocument();
+    expect(preview).toHaveStyle({ width: '500px', height: '40px' });
+    expect(screen.getByTestId('sortable-placeholder')).toBeInTheDocument();
 
-    const mockDataTransfer = {
-      setData: vi.fn(),
-      getData: vi.fn().mockReturnValue('0'),
-      effectAllowed: '',
-      dropEffect: '',
-    };
+    pointerUpAt(document, 1, 24, 130);
+    expect(onReorderItems).toHaveBeenCalledWith(0, 1);
+  });
 
-    // Drag first item (Arroz, index 0)
-    fireEvent.dragStart(arrozDragHandle, { dataTransfer: mockDataTransfer });
-    expect(mockDataTransfer.setData).toHaveBeenCalledWith('text/plain', '0');
+  it('supports keyboard reorder on the table row', () => {
+    const onReorderItems = vi.fn();
 
-    const rows = screen.getAllByRole('row');
-    // Row 0 is header, Row 1 is Arroz (0), Row 2 is Feijão (1), Row 3 is Frango (2)
-    const feijaoRow = rows[2];
+    render(
+      <MealCardContainer
+        title="Almoço"
+        time="12:00"
+        kcal={420}
+        proteinG={44}
+        carbsG={42}
+        fatsG={5.5}
+        items={sampleItems}
+        onReorderItems={onReorderItems}
+      />
+    );
 
-    // 1. Drag over upper half of Feijão (clientY = 110, top half)
-    const topDragOver = createEvent.dragOver(feijaoRow);
-    Object.defineProperty(topDragOver, 'clientY', { value: 110 });
-    Object.defineProperty(topDragOver, 'dataTransfer', { value: mockDataTransfer });
-    fireEvent(feijaoRow, topDragOver);
-
-    expect(feijaoRow).toHaveClass('border-t-2');
-    expect(feijaoRow).toHaveClass('border-t-primary');
-
-    // 2. Drag over lower half of Feijão (clientY = 135, bottom half)
-    const bottomDragOver = createEvent.dragOver(feijaoRow);
-    Object.defineProperty(bottomDragOver, 'clientY', { value: 135 });
-    Object.defineProperty(bottomDragOver, 'dataTransfer', { value: mockDataTransfer });
-    fireEvent(feijaoRow, bottomDragOver);
-
-    expect(feijaoRow).toHaveClass('border-b-2');
-    expect(feijaoRow).toHaveClass('border-b-primary');
-
-    // 3. Drop on bottom half of Feijão (inserts after index 1 -> target index becomes 1)
-    const dropEvent = createEvent.drop(feijaoRow);
-    Object.defineProperty(dropEvent, 'clientY', { value: 135 });
-    Object.defineProperty(dropEvent, 'dataTransfer', { value: mockDataTransfer });
-    fireEvent(feijaoRow, dropEvent);
-
-    expect(mockReorder).toHaveBeenCalledWith(0, 1);
+    fireEvent.keyDown(screen.getByTestId('sortable-item-it-1'), { key: 'ArrowDown' });
+    expect(onReorderItems).toHaveBeenCalledWith(0, 1);
   });
 });

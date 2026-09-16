@@ -14,7 +14,7 @@ describe("Surface atom", () => {
     const surface = screen.getByTestId("surface");
     expect(surface).toHaveTextContent("Conteúdo");
     expect(surface).toHaveAttribute("aria-label", "Resumo");
-    expect(surface).toHaveClass("bg-surface", "rounded-surface", "shadow-none", "p-4");
+    expect(surface).toHaveClass("bg-surface", "border-border-control", "rounded-surface", "shadow-none", "p-4");
   });
 
   it("supports named variants and canonical density without domain props", () => {

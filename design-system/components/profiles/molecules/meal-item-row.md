@@ -22,19 +22,19 @@ Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). Tr
 
 ## Specific anatomy
 
-Root `MealItemRow` e exports visuais registrados: `MealItemRow`. Base declarada: `atom-surface`; inputs e actions continuam componentes próprios.
+Root `MealItemRow` e exports visuais registrados: `MealItemRow`. A linha é renderizada dentro de uma tabela e recebe opcionalmente as props de interação de `molecule-sortable-list`; inputs e actions continuam componentes próprios.
 
 ## Allowed variants
 
-Read-only ou editable-actions; estrutura do row não muda.
+Read-only ou editable-actions; quando usado em uma lista ordenável, a linha inteira recebe foco e interação de ponteiro/teclado sem alterar a estrutura tabular.
 
 ## Particular states
 
-Quantidade ausente é dado incompleto, não zero; remoção pending bloqueia apenas a action do row.
+Quantidade ausente é dado incompleto, não zero; valores numéricos válidos digitados recalculam os macros imediatamente, enquanto o vazio permanece local até a normalização. Remoção pending bloqueia apenas a action do row. Durante a ordenação, preview e placeholder pertencem a `SortableList`, enquanto a linha mantém seus dados e ações.
 
 ## Composition
 
-Base declarada: `atom-surface`. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Compõe `ui-table`, `SortableList`, inputs e actions. `MealItemRow` permanece responsável pela célula e callbacks do alimento; a molécula genérica controla posição, preview, placeholder e anúncio. Controles interativos aninhados continuam focáveis e operáveis sem iniciar movimento quando não há deslocamento.
 
 ## Content rules
 
@@ -54,6 +54,7 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 - categoria e traits são herdados sem redefinição local;
 - anatomia e variantes acima são suficientes para reproduzir a família;
 - estados particulares são observáveis e não contradizem a categoria;
+- a linha pode ser reordenada por ponteiro e pelas setas do teclado através de `SortableList`;
 - nenhuma decisão visual fica a cargo do consumidor.
 
 ## Implementation status

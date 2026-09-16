@@ -73,7 +73,7 @@ const card = cva("rounded-surface border border-border-subtle bg-surface text-te
 const surface = cva("rounded-surface border text-text-primary shadow-none", {
   variants: {
     variant: {
-      default: "border-border-subtle bg-surface",
+      default: "border-border-control bg-surface",
       subtle: "border-border-divider bg-surface-subtle",
       boxed: "border-border-subtle bg-surface-subtle",
     },

@@ -3,6 +3,7 @@ import type { DietHistoryRow } from './diet-ports';
 import type { DietPlan, DietVariation } from '@/lib/domain/diets/diet-model';
 import type { HistoricalDiet, HistoricalDietVariation } from '@/lib/patientsStoreTypes';
 import { calculateDocumentSnapshotTotals } from './diet-snapshot-consumers';
+import { toPresentation } from '@/lib/domain/diets/nutrition';
 
 const DAY_LABELS: Record<string, string> = {
   MON: 'Seg',
@@ -35,6 +36,19 @@ function variationType(variation: DietVariation): HistoricalDietVariation['type'
 
 type DietValues = Pick<HistoricalDiet, 'targetKcal' | 'proteinG' | 'carbsG' | 'fatsG'>;
 
+function presentationNumber(value: number, decimalPlaces: 0 | 1): number {
+  return Number(toPresentation(String(value), decimalPlaces));
+}
+
+function normalizeDietValues(values: DietValues): DietValues {
+  return {
+    targetKcal: presentationNumber(values.targetKcal, 0),
+    proteinG: presentationNumber(values.proteinG, 1),
+    carbsG: presentationNumber(values.carbsG, 1),
+    fatsG: presentationNumber(values.fatsG, 1),
+  };
+}
+
 function prescribedValues(plan: DietPlan, variation: DietVariation): DietValues {
   const totals = calculateDocumentSnapshotTotals(plan, variation.id);
   return {
@@ -55,14 +69,14 @@ function targetValues(variation: DietVariation): DietValues {
 }
 
 function mapVariation(plan: DietPlan, variation: DietVariation): HistoricalDietVariation {
-  const values = prescribedValues(plan, variation);
+  const values = normalizeDietValues(prescribedValues(plan, variation));
   return {
     id: variation.id,
     name: variation.name,
     type: variationType(variation),
     assignedDays: variation.assignedDays.map((day) => DAY_LABELS[day] ?? day),
     ...values,
-    dietTargets: targetValues(variation),
+    dietTargets: normalizeDietValues(targetValues(variation)),
     mealsCount: variation.meals.length,
   };
 }
@@ -74,7 +88,7 @@ function summaryDietValues(
   const variations = plan.variations;
   if (variations.length === 0) return { targetKcal: 0, proteinG: 0, carbsG: 0, fatsG: 0 };
   if (plan.mode === 'SIMPLE') {
-    return getValues(variations[0]);
+    return normalizeDietValues(getValues(variations[0]));
   }
 
   const assigned = variations.reduce((sum, variation) => sum + variation.assignedDays.length, 0);
@@ -90,12 +104,12 @@ function summaryDietValues(
     };
   }, { targetKcal: new Decimal(0), proteinG: new Decimal(0), carbsG: new Decimal(0), fatsG: new Decimal(0) });
 
-  return {
+  return normalizeDietValues({
     targetKcal: weighted.targetKcal.div(divisor).toNumber(),
     proteinG: weighted.proteinG.div(divisor).toNumber(),
     carbsG: weighted.carbsG.div(divisor).toNumber(),
     fatsG: weighted.fatsG.div(divisor).toNumber(),
-  };
+  });
 }
 
 export function toHistoricalDietView(row: DietHistoryRow): HistoricalDiet {

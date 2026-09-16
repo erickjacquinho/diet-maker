@@ -137,9 +137,9 @@ export default function AssessmentWorkspacePage() {
               }}
               className="flex flex-col gap-4"
             >
-              <div className="flex items-center justify-between gap-4">
-                <h2 id="assessment-type-title" className={textStyle('card-title')}>tipo de avaliação</h2>
-                <TabsList aria-labelledby="assessment-type-title">
+              <div className="flex items-center justify-start gap-3">
+                <h2 id="assessment-type-title" className={`${textStyle('card-title')} shrink-0`}>tipo de avaliação</h2>
+                <TabsList aria-labelledby="assessment-type-title" className="h-control-compact shrink-0">
                   <TabsTrigger value="complete">completa</TabsTrigger>
                   <TabsTrigger value="simplified">simplificada</TabsTrigger>
                 </TabsList>

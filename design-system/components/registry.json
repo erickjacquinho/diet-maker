@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 73,
+    "currentSourceCount": 74,
     "capturedAt": "2026-08-30",
     "legacyAudit": {
       "findings": 0,
@@ -2642,6 +2642,37 @@
         "organism-patient-consultation-history-table"
       ],
       "primitiveBase": "ui-table",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "molecule-sortable-list",
+      "name": "SortableList",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "molecule",
+      "targetLayer": "molecule",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/molecules/SortableList.tsx",
+          "role": "implementation",
+          "discoveredLayer": "molecule"
+        }
+      ],
+      "publicExports": [
+        { "name": "SortableItemRenderContext", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortableItemProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortableContainerProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortablePlaceholderRenderContext", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortableReorderMeta", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortableListProps", "kind": "type", "documentedBy": "non-visual" },
+        { "name": "SortableList", "kind": "component", "documentedBy": "profile" }
+      ],
+      "profile": "design-system/components/profiles/molecules/sortable-list.md",
+      "consumers": ["organism-diet-meals-section", "organism-meal-card-container"],
+      "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
     },
