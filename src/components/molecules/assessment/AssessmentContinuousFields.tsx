@@ -107,8 +107,8 @@ export function AssessmentContinuousFields({
       </LimbSectionCard>
 
       {/* Seção 3: Circunferências Centrais / US Navy */}
-      <Surface variant="boxed" className="flex flex-col gap-3.5 p-5">
-        <div className="flex items-center justify-between border-b border-border-subtle pb-2.5">
+      <Surface variant="default" className="flex flex-col gap-4 p-5">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-3">
           <div className="flex items-center gap-2">
             <Ruler className="size-4 text-success" aria-hidden="true" />
             <span className={textStyle('caption-strong')}>Circunferências Centrais</span>
