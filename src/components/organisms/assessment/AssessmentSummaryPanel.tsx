@@ -2,6 +2,7 @@ import React from 'react';
 import { Zap, TrendingDown, TrendingUp, Minus, Save, X, Scale, Copy, Check } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Surface, Badge, ProgressBar } from '@/components/atoms';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { Button } from '@/components/ui/button';
 import {
   classifyBodyFat,
@@ -140,54 +141,66 @@ export function AssessmentSummaryPanel({
           </div>
         </div>
 
-        {/* Grade 2x2 Rigorosamente Simétrica com Altura e Padding Padronizados */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* 1. Body Fat (BF%) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-style-legal font-bold tracking-label text-text-muted">Body Fat</span>
-              {bfBadge && (
-                <Badge variant={bfBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
-                  {bfBadge.label}
-                </Badge>
-              )}
-            </div>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.bodyFatPercent === null ? '—' : `${composition.bodyFatPercent} %`}
-            </span>
-          </div>
-
-          {/* 2. Massa Magra (FFM) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <span className="text-style-legal font-bold tracking-label text-text-muted">Massa Magra (FFM)</span>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.leanMassKg === null ? '—' : `${composition.leanMassKg} kg`}
-            </span>
-          </div>
-
-          {/* 3. Massa Gorda (FM) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <span className="text-style-legal font-bold tracking-label text-text-muted">Massa Gorda (FM)</span>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.fatMassKg === null ? '—' : `${composition.fatMassKg} kg`}
-            </span>
-          </div>
-
-          {/* 4. FFMI (Índice de Massa Livre de Gordura) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-style-legal font-bold tracking-label text-text-muted">FFMI</span>
-              {ffmiBadge && (
-                <Badge variant={ffmiBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
-                  {ffmiBadge.label}
-                </Badge>
-              )}
-            </div>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {ffmi === null ? '—' : `${ffmi} kg/m²`}
-            </span>
-          </div>
-        </div>
+        {/* Grade 2x2 usando o organismo canônico de métricas */}
+        <MetricBoxGroup
+          className="grid-cols-2 gap-2.5 divide-x-0 overflow-visible rounded-none border-0 bg-transparent"
+          items={[
+            {
+              label: (
+                <span className="flex w-full items-center justify-between gap-1">
+                  <span>Body Fat</span>
+                  {bfBadge && (
+                    <Badge variant={bfBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
+                      {bfBadge.label}
+                    </Badge>
+                  )}
+                </span>
+              ),
+              value: composition.bodyFatPercent ?? '—',
+              unit: composition.bodyFatPercent === null ? undefined : '%',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: 'Massa Magra (FFM)',
+              value: composition.leanMassKg ?? '—',
+              unit: composition.leanMassKg === null ? undefined : 'kg',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: 'Massa Gorda (FM)',
+              value: composition.fatMassKg ?? '—',
+              unit: composition.fatMassKg === null ? undefined : 'kg',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: (
+                <span className="flex w-full items-center justify-between gap-1">
+                  <span>FFMI</span>
+                  {ffmiBadge && (
+                    <Badge variant={ffmiBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
+                      {ffmiBadge.label}
+                    </Badge>
+                  )}
+                </span>
+              ),
+              value: ffmi ?? '—',
+              unit: ffmi === null ? undefined : 'kg/m²',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+          ]}
+        />
 
         {/* Barra de Distribuição de Massa Corporal */}
         {leanPct !== null && fatPct !== null && (
