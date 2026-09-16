@@ -17,7 +17,7 @@ const localAccount = { accountId: 'local-account', schemaVersion: '4' } as const
 function normalizeLegacyEnvelope(envelope: ReturnType<typeof createBackupEnvelope>) {
   return {
     ...envelope,
-    schemaVersion: '5',
+    schemaVersion: '6',
     account: envelope.account.map((account) => ({ ...account, phone: account.phone ?? null })),
   };
 }
@@ -76,7 +76,7 @@ describe('backup envelope validation', () => {
     expectBackupError(() => parseBackupEnvelope(JSON.stringify(createBackupEnvelope({})), { ...localAccount, accountId: 'other-account' }), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), appId: 'other-app' }), localAccount), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), formatVersion: 2 }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
-    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '6' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
+    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '7' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
   });
 
   it('rejects unknown envelope and row keys in format version one', () => {

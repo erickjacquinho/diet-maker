@@ -1,8 +1,9 @@
-import type {
-  AssessmentInput,
-  BodyAssessment as ClinicalBodyAssessment,
-  NextFollowUp,
-  NextFollowUpInput,
+import {
+  getAssessmentType,
+  type AssessmentInput,
+  type BodyAssessment as ClinicalBodyAssessment,
+  type NextFollowUp,
+  type NextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { BodyAssessment, PatientLastActivity, PatientNextEvent } from '@/lib/patientsStoreTypes';
 
@@ -27,6 +28,8 @@ export function toLegacyAssessment(assessment: ClinicalBodyAssessment): BodyAsse
     createdAt: assessment.createdAt,
     updatedAt: assessment.updatedAt,
     date: dateToLegacy(assessment.clinicalDate),
+    assessmentType: getAssessmentType(assessment),
+    heightCm: assessment.calculationInputSnapshot.heightCm,
     weightKg: assessment.weightKg,
     bodyFatPercent: assessment.bodyFatPercent,
     fatMassKg: assessment.fatMassKg,
@@ -56,6 +59,8 @@ export function toAssessmentInput(assessment: BodyAssessment): AssessmentInput {
   return {
     clinicalDate: assessment.clinicalDate,
     date: assessment.date,
+    assessmentType: getAssessmentType(assessment),
+    heightCm: numeric(assessment.heightCm),
     weightKg: numeric(assessment.weightKg),
     waistCm: numeric(assessment.waistCm),
     scapulaCm: numeric(assessment.scapulaCm),

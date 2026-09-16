@@ -9,6 +9,7 @@ import {
 } from '@/lib/clinicalClassifications';
 import type { AssessmentDeltas } from '@/hooks/useAssessmentWorkspacePage';
 import type { BodyCompositionResult } from '@/lib/bodyFat';
+import type { AssessmentType } from '@/lib/domain/clinical';
 
 export interface AssessmentSummaryPanelProps {
   composition: BodyCompositionResult;
@@ -16,6 +17,7 @@ export interface AssessmentSummaryPanelProps {
   bmi?: number | null;
   waistToHipRatio?: number | null;
   deltas: AssessmentDeltas;
+  assessmentType?: AssessmentType;
   patientGender?: string | null;
   isSaving?: boolean;
   submitError?: string | null;
@@ -84,6 +86,7 @@ export function AssessmentSummaryPanel({
   composition,
   ffmi = null,
   deltas,
+  assessmentType = 'complete',
   patientGender,
   isSaving = false,
   submitError,
@@ -95,6 +98,7 @@ export function AssessmentSummaryPanel({
 }: AssessmentSummaryPanelProps) {
   const bfBadge = classifyBodyFat(composition.bodyFatPercent, patientGender);
   const ffmiBadge = classifyFfmi(ffmi, patientGender);
+  const isSimplified = assessmentType === 'simplified';
 
   const leanPct =
     composition.bodyFatPercent !== null
@@ -107,9 +111,21 @@ export function AssessmentSummaryPanel({
 
   return (
     <aside
-      aria-label="Painel de resumo da composição corporal e performance"
+      aria-label={isSimplified ? 'Painel de resumo da avaliação simplificada' : 'Painel de resumo da composição corporal e performance'}
       className={`flex flex-col gap-4 sticky top-6 ${className}`}
     >
+      {isSimplified ? (
+        <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-3">
+          <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
+            <Scale className="size-4 text-text-muted" aria-hidden="true" />
+            <h3 className={textStyle('card-title')}>Avaliação simplificada</h3>
+          </div>
+          <p className="text-style-caption text-text-secondary">
+            Registro de peso e medidas selecionadas. A composição corporal fica disponível na avaliação completa.
+          </p>
+        </Surface>
+      ) : (
+        <>
       {/* Bloco 1: Composição Corporal de Alta Performance (Grid 2x2 Bento) */}
       <Surface variant="default" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-border-subtle pb-3">
@@ -206,6 +222,8 @@ export function AssessmentSummaryPanel({
           </p>
         )}
       </Surface>
+        </>
+      )}
 
       {/* Bloco 3: Feedback de Erro & Ações */}
       {submitError && (

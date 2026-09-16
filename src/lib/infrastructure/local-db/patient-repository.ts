@@ -2,6 +2,7 @@ import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { Patient, PatientInput } from '@/lib/domain/patient';
 import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
+import { getAgeFromBirthDate } from '@/lib/date-only';
 import type { LocalDatabaseHandle } from './client';
 import { patients } from './schema';
 
@@ -17,8 +18,11 @@ function toPatient(row: PatientRow): Patient {
     accountId: row.accountId,
     displayCode: row.displayCode,
     name: row.name,
-    age: row.age,
+    age: getAgeFromBirthDate(row.birthDate),
     gender: row.gender,
+    birthDate: row.birthDate,
+    isPregnant: row.isPregnant,
+    pregnancyDueDate: row.pregnancyDueDate,
     heightCm: row.heightCm,
     weightKg: row.weightKg,
     maritalStatus: row.maritalStatus,
@@ -41,18 +45,21 @@ function toPatient(row: PatientRow): Patient {
 function valuesForInput(input: PatientInput) {
   return {
     name: input.name,
-    age: input.age,
-    gender: input.gender,
-    heightCm: input.heightCm,
-    weightKg: input.weightKg,
+    age: input.age ?? null,
+    gender: input.gender ?? '',
+    birthDate: input.birthDate ?? null,
+    isPregnant: input.isPregnant ?? false,
+    pregnancyDueDate: input.pregnancyDueDate ?? null,
+    heightCm: input.heightCm ?? null,
+    weightKg: input.weightKg ?? null,
     maritalStatus: input.maritalStatus ?? null,
     phone: input.phone ?? null,
     whatsapp: input.whatsapp ?? null,
-    currentObjective: input.currentObjective,
-    targetProtein: input.defaultMacroTargets.proteinG,
-    targetCarbs: input.defaultMacroTargets.carbsG,
-    targetFats: input.defaultMacroTargets.fatsG,
-    targetKcal: input.defaultMacroTargets.kcal,
+    currentObjective: input.currentObjective ?? null,
+    targetProtein: input.defaultMacroTargets?.proteinG ?? null,
+    targetCarbs: input.defaultMacroTargets?.carbsG ?? null,
+    targetFats: input.defaultMacroTargets?.fatsG ?? null,
+    targetKcal: input.defaultMacroTargets?.kcal ?? null,
   };
 }
 

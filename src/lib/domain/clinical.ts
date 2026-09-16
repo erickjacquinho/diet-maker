@@ -39,7 +39,8 @@ export class ClinicalApplicationError extends Error {
 
 export type FollowUpType = 'ASSESSMENT_UPDATE' | 'DIET_UPDATE';
 export type FollowUpStatus = 'OVERDUE' | 'TODAY' | 'UPCOMING';
-export type CalculationMethod = 'US_NAVY';
+export type AssessmentType = 'complete' | 'simplified';
+export type CalculationMethod = 'US_NAVY' | 'NONE';
 
 export interface CalculationInputSnapshot {
   sex: BodyFatSex;
@@ -50,6 +51,17 @@ export interface CalculationInputSnapshot {
   hipCm: number;
   weightKg: number;
 }
+
+export interface SimplifiedAssessmentSnapshot {
+  assessmentType: 'simplified';
+  heightCm: number;
+  weightKg: number;
+  waistCm?: number;
+  abdomenCm?: number;
+  hipCm?: number;
+}
+
+export type AssessmentInputSnapshot = CalculationInputSnapshot | SimplifiedAssessmentSnapshot;
 
 export type AssessmentMeasurementKey =
   | 'weightKg'
@@ -73,17 +85,18 @@ export interface BodyAssessment {
   accountId: string;
   patientId: string;
   clinicalDate: string;
+  assessmentType?: AssessmentType;
   weightKg: number;
-  bodyFatPercent: number;
-  fatMassKg: number;
-  leanMassKg: number;
-  waistCm: number;
-  scapulaCm: number;
-  bustCm: number;
-  abdomenCm: number;
-  hipCm: number;
-  leftProximalThighCm: number;
-  rightProximalThighCm: number;
+  bodyFatPercent?: number;
+  fatMassKg?: number;
+  leanMassKg?: number;
+  waistCm?: number;
+  scapulaCm?: number;
+  bustCm?: number;
+  abdomenCm?: number;
+  hipCm?: number;
+  leftProximalThighCm?: number;
+  rightProximalThighCm?: number;
   neckCm?: number;
   leftArmCm?: number;
   rightArmCm?: number;
@@ -94,14 +107,22 @@ export interface BodyAssessment {
   autoFilledFields: string[];
   calculationMethod: CalculationMethod;
   calculationVersion: string;
-  calculationInputSnapshot: CalculationInputSnapshot;
+  calculationInputSnapshot: AssessmentInputSnapshot;
   version: number;
   createdAt: string;
   updatedAt: string;
 }
 
+export function getAssessmentType(assessment: {
+  assessmentType?: AssessmentType;
+  calculationMethod?: CalculationMethod;
+}): AssessmentType {
+  return assessment.assessmentType ?? (assessment.calculationMethod === 'NONE' ? 'simplified' : 'complete');
+}
+
 export type AssessmentInput = Partial<Pick<BodyAssessment,
   | 'clinicalDate'
+  | 'assessmentType'
   | 'weightKg'
   | 'waistCm'
   | 'scapulaCm'
@@ -118,6 +139,7 @@ export type AssessmentInput = Partial<Pick<BodyAssessment,
   | 'leftCalfCm'
   | 'rightCalfCm'
 >> & {
+  heightCm?: number;
   /** Compatibility with the existing form, which calls the field `date`. */
   date?: string;
 };
@@ -159,7 +181,7 @@ export interface ClinicalPatientContext {
   id: string;
   accountId: string;
   gender: string;
-  heightCm: number;
+  heightCm: number | null;
   archivedAt: string | null;
 }
 
@@ -291,6 +313,48 @@ export function buildBodyAssessment(input: AssessmentInput, options: BuildAssess
   const clinicalDate = normalizeClinicalDate(input.clinicalDate ?? input.date);
   if (!clinicalDate) error('Informe uma data clínica válida.', { clinicalDate: 'Use o formato DD/MM/AAAA ou AAAA-MM-DD.' });
 
+  const now = options.now ?? (() => new Date().toISOString());
+  const timestamp = options.updatedAt ?? now();
+  const createdAt = options.createdAt ?? timestamp;
+
+  if (input.assessmentType === 'simplified') {
+    const fieldErrors: Record<string, string> = {};
+    if (!isPositive(input.weightKg)) fieldErrors.weightKg = 'Informe um peso maior que zero.';
+    if (!isPositive(input.heightCm)) fieldErrors.heightCm = 'Informe uma altura maior que zero.';
+    for (const field of ['waistCm', 'abdomenCm', 'hipCm'] as const) {
+      if (input[field] !== undefined && !isPositive(input[field])) {
+        fieldErrors[field] = 'Informe um valor maior que zero ou deixe o campo vazio.';
+      }
+    }
+    if (Object.keys(fieldErrors).length > 0) error('Preencha os campos obrigatórios da avaliação simplificada.', fieldErrors);
+
+    return {
+      id: options.id,
+      accountId: options.accountId,
+      patientId: options.patientId,
+      clinicalDate,
+      assessmentType: 'simplified',
+      weightKg: input.weightKg!,
+      waistCm: input.waistCm,
+      abdomenCm: input.abdomenCm,
+      hipCm: input.hipCm,
+      autoFilledFields: [],
+      calculationMethod: 'NONE',
+      calculationVersion: options.calculationVersion ?? 'simplified-v1',
+      calculationInputSnapshot: {
+        assessmentType: 'simplified',
+        heightCm: input.heightCm!,
+        weightKg: input.weightKg!,
+        waistCm: input.waistCm,
+        abdomenCm: input.abdomenCm,
+        hipCm: input.hipCm,
+      },
+      version: options.version ?? 1,
+      createdAt,
+      updatedAt: timestamp,
+    };
+  }
+
   const filled = autoFillInput(input, options.previousAssessment);
   const completed = filled.input;
   const fieldErrors: Record<string, string> = {};
@@ -303,6 +367,9 @@ export function buildBodyAssessment(input: AssessmentInput, options: BuildAssess
 
   const sex = normalizeBodyFatSex(options.patient.gender);
   if (!sex) error('O gênero do paciente deve ser Masculino ou Feminino.', { gender: 'Gênero inválido para a equação US Navy.' });
+  if (!isPositive(options.patient.heightCm)) {
+    error('Cadastre a altura do paciente antes de registrar uma avaliação.', { heightCm: 'Informe uma altura maior que zero.' });
+  }
 
   const neckCm = isPositive(completed.neckCm)
     ? completed.neckCm
@@ -320,9 +387,6 @@ export function buildBodyAssessment(input: AssessmentInput, options: BuildAssess
     error(calculation.error ?? 'A composição corporal informada é inválida.');
   }
 
-  const now = options.now ?? (() => new Date().toISOString());
-  const timestamp = options.updatedAt ?? now();
-  const createdAt = options.createdAt ?? timestamp;
   const autoFilledFields = filled.autoFilledFields;
   const normalized = normalizePairedMeasurements(completed);
 
@@ -331,6 +395,7 @@ export function buildBodyAssessment(input: AssessmentInput, options: BuildAssess
     accountId: options.accountId,
     patientId: options.patientId,
     clinicalDate,
+    assessmentType: 'complete',
     weightKg: normalized.weightKg!,
     bodyFatPercent: calculation.bodyFatPercent,
     fatMassKg: calculation.fatMassKg,

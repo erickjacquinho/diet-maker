@@ -19,6 +19,7 @@ module.exports = {
         'style-metric-hero': ['28px', '34px'], 'style-chart-micro': ['10px', '14px'],
       },
       colors: {
+        warm: { 50: 'var(--ref-color-warm-50)' },
         canvas: 'var(--sys-color-canvas)', surface: 'var(--sys-color-surface)',
         'surface-subtle': 'var(--sys-color-surface-subtle)', 'surface-soft': 'var(--sys-color-surface-soft)', 'surface-hover': 'var(--sys-color-surface-hover)',
         'text-primary': 'var(--sys-color-text-primary)', 'text-secondary': 'var(--sys-color-text-secondary)', 'text-muted': 'var(--sys-color-text-muted)',

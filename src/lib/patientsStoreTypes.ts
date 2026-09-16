@@ -12,6 +12,9 @@ export interface Patient {
   targetCarbs: number;
   targetFats: number;
   objective: string;
+  birthDate?: string;
+  isPregnant?: boolean;
+  pregnancyDueDate?: string;
   maritalStatus?: string;
   phone?: string;
   whatsapp?: string;
@@ -61,6 +64,13 @@ export interface HistoricalDietMeal {
 
 export type HistoricalDietVariationType = 'high' | 'medium' | 'low' | 'zero' | 'custom';
 
+export interface HistoricalDietTargets {
+  targetKcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatsG: number;
+}
+
 export interface HistoricalDietVariation {
   id: string;
   name: string;
@@ -71,6 +81,7 @@ export interface HistoricalDietVariation {
   carbsG: number;
   fatsG: number;
   mealsCount: number;
+  dietTargets?: HistoricalDietTargets;
 }
 
 export interface HistoricalDiet {
@@ -84,10 +95,15 @@ export interface HistoricalDiet {
   status: 'Ativa' | 'Histórica';
   mode?: 'simple' | 'carb_cycling';
   carbCyclingVariations?: HistoricalDietVariation[];
+  dietTargets?: HistoricalDietTargets;
   meals?: HistoricalDietMeal[];
 }
 
-import type { CalculationInputSnapshot } from '@/lib/domain/clinical';
+import type {
+  AssessmentInputSnapshot,
+  AssessmentType,
+  CalculationMethod,
+} from '@/lib/domain/clinical';
 
 export interface BodyAssessment {
   id: string;
@@ -98,11 +114,13 @@ export interface BodyAssessment {
   createdAt?: string;
   updatedAt?: string;
   date: string;
+  assessmentType?: AssessmentType;
+  heightCm?: number;
   weightKg: number;
-  bodyFatPercent: number;
+  bodyFatPercent?: number;
   fatMassKg?: number;
-  muscleMassKg: number;
-  waistCm: number;
+  muscleMassKg?: number;
+  waistCm?: number;
   neckCm?: number;
   scapulaCm?: number;
   bustCm?: number;
@@ -117,9 +135,9 @@ export interface BodyAssessment {
   leftCalfCm?: number;
   rightCalfCm?: number;
   autoFilledFields?: string[];
-  calculationMethod?: 'US_NAVY';
+  calculationMethod?: CalculationMethod;
   calculationVersion?: string;
-  calculationInputSnapshot?: CalculationInputSnapshot;
+  calculationInputSnapshot?: AssessmentInputSnapshot;
 }
 
 export interface ConsultationRecord {

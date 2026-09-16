@@ -157,7 +157,7 @@ export function PatientListTableRow({
     <TableRow
       tabIndex={0}
       aria-label={`Abrir perfil de ${row.patient.name}`}
-      className="group min-h-table-row cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-inset"
+      className="group min-h-table-row cursor-pointer hover:bg-surface-subtle hover:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-inset"
       onClick={(event) => handleRowClick(event, row.href)}
       onKeyDown={(event) => handleRowKeyDown(event, row.href)}
     >

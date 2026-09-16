@@ -15,7 +15,7 @@ afterAll(() => {
 });
 
 describe('EditPatientModal', () => {
-  it('keeps all three select popups on the semantic modal layer', async () => {
+  it('keeps the gender popup on the semantic modal layer and hides derived or unrelated fields', async () => {
     render(
       <EditPatientModal
         open
@@ -29,30 +29,19 @@ describe('EditPatientModal', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Editar Dados do Paciente' });
     const comboboxes = within(dialog).getAllByRole('combobox');
-    expect(comboboxes).toHaveLength(3);
+    expect(comboboxes).toHaveLength(1);
+    expect(within(dialog).queryByText('Estado Civil')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Idade')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Altura (cm)')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Peso (kg)')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Objetivo Clínico / Esportivo')).not.toBeInTheDocument();
 
-    // 1. Gênero
     fireEvent.click(comboboxes[0]);
     const genderListbox = await screen.findByRole('listbox');
     expect(genderListbox).toHaveClass('z-modal');
 
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
-
-    // 2. Estado Civil
-    fireEvent.click(comboboxes[1]);
-    const maritalStatusListbox = await screen.findByRole('listbox');
-    expect(maritalStatusListbox).toHaveClass('z-modal');
-    expect(within(maritalStatusListbox).getByRole('option', { name: 'Solteiro(a)' })).toBeInTheDocument();
-    expect(within(maritalStatusListbox).getByRole('option', { name: 'Comprometido(a)' })).toBeInTheDocument();
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
-
-    // 3. Objetivo
-    fireEvent.click(comboboxes[2]);
-    const objectiveListbox = await screen.findByRole('listbox');
-    expect(objectiveListbox).toHaveClass('z-modal');
   });
 
   it('submits and saves patient when Ctrl+S is pressed', async () => {
@@ -83,7 +72,7 @@ describe('EditPatientModal', () => {
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
   });
 
-  it('updates marital status and saves correctly on form submission', async () => {
+  it('preserves existing non-editable profile data while saving editable values', async () => {
     const onSave = vi.fn();
     const onOpenChange = vi.fn();
 
@@ -98,21 +87,16 @@ describe('EditPatientModal', () => {
       />,
     );
 
-    const dialog = screen.getByRole('dialog', { name: 'Editar Dados do Paciente' });
-    const comboboxes = within(dialog).getAllByRole('combobox');
-    
-    // Select Estado Civil -> Comprometido(a)
-    fireEvent.click(comboboxes[1]);
-    const option = await screen.findByRole('option', { name: 'Comprometido(a)' });
-    fireEvent.click(option);
-
     const submitBtn = screen.getByRole('button', { name: /Salvar Alterações/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
         name: PATIENT_PROFILE_FIXTURES.patient.name,
-        maritalStatus: 'Comprometido(a)',
+        age: PATIENT_PROFILE_FIXTURES.patient.age,
+        heightCm: PATIENT_PROFILE_FIXTURES.patient.heightCm,
+        weightKg: PATIENT_PROFILE_FIXTURES.patient.weightKg,
+        objective: PATIENT_PROFILE_FIXTURES.patient.objective,
       }),
     ));
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));

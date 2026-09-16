@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreatePatientModal, type CreatePatientFormData } from '@/components/molecules/CreatePatientModal';
-import { calculatePresetCalories } from '@/lib/presetUtils';
 import { usePatientsPage } from '@/hooks/usePatientsPage';
 
 export default function PatientsListPage() {
@@ -18,24 +17,20 @@ export default function PatientsListPage() {
   const { patients, filteredPatients, rows: patientRows, searchTerm, setSearchTerm, isLoading, error, retry, createPatient } = usePatientsPage();
 
   const handleCreatePatient = async (formData: CreatePatientFormData) => {
-    const targetProtein = Number(formData.targetProtein);
-    const targetCarbs = Number(formData.targetCarbs);
-    const targetFats = Number(formData.targetFats);
     await createPatient({
       name: formData.name,
-      age: Number(formData.age),
       gender: formData.gender,
-      heightCm: Number(formData.heightCm),
-      weightKg: Number(formData.weightKg),
+      birthDate: formData.birthDate || null,
+      isPregnant: formData.isPregnant,
+      pregnancyDueDate: formData.pregnancyDueDate || null,
+      age: null,
+      heightCm: null,
+      weightKg: null,
+      maritalStatus: null,
       phone: null,
+      currentObjective: null,
+      defaultMacroTargets: { proteinG: null, carbsG: null, fatsG: null, kcal: null },
       whatsapp: formData.whatsapp,
-      currentObjective: formData.objective,
-      defaultMacroTargets: {
-        proteinG: targetProtein,
-        carbsG: targetCarbs,
-        fatsG: targetFats,
-        kcal: calculatePresetCalories(targetProtein, targetCarbs, targetFats),
-      },
     });
     setIsModalOpen(false);
   };

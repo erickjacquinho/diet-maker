@@ -105,7 +105,7 @@ export function ConsultationHistoryRow({
             <div className={`flex items-center gap-1.5 ${textStyle('table-number')}`}>
               <span>{primaryAssessment.weightKg} kg</span>
               <span className="font-normal text-text-muted">•</span>
-              <span>{primaryAssessment.bodyFatPercent}% BF</span>
+              <span>{primaryAssessment.bodyFatPercent === undefined ? '—' : `${primaryAssessment.bodyFatPercent}% BF`}</span>
             </div>
             {assessmentsCount > 1 && (
               <span className={`text-text-muted font-medium bg-surface-subtle px-1.5 py-0.5 rounded-control ${textStyle('legal')}`}>
@@ -230,9 +230,9 @@ export function ConsultationHistoryExpandedRow({
 
                   <div className="grid grid-cols-4 gap-2 pt-1 text-center">
                     <MetricBox size="compact" label="Peso" value={`${assessment.weightKg} kg`} />
-                    <MetricBox size="compact" label="% Gordura" value={`${assessment.bodyFatPercent}%`} />
-                    <MetricBox size="compact" label="Massa Magra" value={`${assessment.muscleMassKg} kg`} />
-                    <MetricBox size="compact" label="Cintura" value={`${assessment.waistCm} cm`} />
+                    <MetricBox size="compact" label="% Gordura" value={assessment.bodyFatPercent === undefined ? '—' : `${assessment.bodyFatPercent}%`} />
+                    <MetricBox size="compact" label="Massa Magra" value={assessment.muscleMassKg === undefined ? '—' : `${assessment.muscleMassKg} kg`} />
+                    <MetricBox size="compact" label="Cintura" value={assessment.waistCm === undefined ? '—' : `${assessment.waistCm} cm`} />
                   </div>
 
                   {/* Circunferências / Perímetros adicionais */}

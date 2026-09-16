@@ -333,11 +333,78 @@ export const accountProfileMigration: LocalMigration = {
   `,
 };
 
+export const patientPersonalDataMigration: LocalMigration = {
+  id: '0005_patient_personal_data',
+  version: '6',
+  sql: `
+    ALTER TABLE patients ALTER COLUMN age DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN height_cm DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN weight_kg DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN current_objective DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN target_protein DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN target_carbs DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN target_fats DROP NOT NULL;
+    ALTER TABLE patients ALTER COLUMN target_kcal DROP NOT NULL;
+    ALTER TABLE patients ADD COLUMN IF NOT EXISTS birth_date text;
+    ALTER TABLE patients ADD COLUMN IF NOT EXISTS is_pregnant boolean NOT NULL DEFAULT false;
+    ALTER TABLE patients ADD COLUMN IF NOT EXISTS pregnancy_due_date text;
+  `,
+};
+
+export const simplifiedAssessmentMigration: LocalMigration = {
+  id: '0006_simplified_assessment',
+  // Keep the backup/session schema version stable; this only relaxes assessment nullability.
+  version: '6',
+  sql: `
+    ALTER TABLE body_assessments ALTER COLUMN body_fat_percent DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN fat_mass_kg DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN lean_mass_kg DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN waist_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN scapula_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN bust_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN abdomen_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN hip_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN left_proximal_thigh_cm DROP NOT NULL;
+    ALTER TABLE body_assessments ALTER COLUMN right_proximal_thigh_cm DROP NOT NULL;
+
+    ALTER TABLE body_assessments DROP CONSTRAINT IF EXISTS body_assessments_body_fat_range;
+    ALTER TABLE body_assessments DROP CONSTRAINT IF EXISTS body_assessments_results_non_negative;
+    ALTER TABLE body_assessments DROP CONSTRAINT IF EXISTS body_assessments_required_measurements_positive;
+    ALTER TABLE body_assessments DROP CONSTRAINT IF EXISTS body_assessments_optional_measurements_positive;
+    ALTER TABLE body_assessments DROP CONSTRAINT IF EXISTS body_assessments_calculation_method_check;
+
+    ALTER TABLE body_assessments ADD CONSTRAINT body_assessments_body_fat_range CHECK (
+      calculation_method = 'NONE' OR (body_fat_percent >= 0 AND body_fat_percent <= 100)
+    );
+    ALTER TABLE body_assessments ADD CONSTRAINT body_assessments_results_non_negative CHECK (
+      calculation_method = 'NONE' OR (fat_mass_kg >= 0 AND lean_mass_kg >= 0)
+    );
+    ALTER TABLE body_assessments ADD CONSTRAINT body_assessments_required_measurements_positive CHECK (
+      calculation_method = 'NONE' OR (
+        weight_kg > 0 AND waist_cm > 0 AND scapula_cm > 0 AND bust_cm > 0 AND abdomen_cm > 0 AND hip_cm > 0
+        AND left_proximal_thigh_cm > 0 AND right_proximal_thigh_cm > 0
+      )
+    );
+    ALTER TABLE body_assessments ADD CONSTRAINT body_assessments_optional_measurements_positive CHECK (
+      (neck_cm IS NULL OR neck_cm > 0) AND
+      (left_arm_cm IS NULL OR left_arm_cm > 0) AND (right_arm_cm IS NULL OR right_arm_cm > 0) AND
+      (left_distal_thigh_cm IS NULL OR left_distal_thigh_cm > 0) AND (right_distal_thigh_cm IS NULL OR right_distal_thigh_cm > 0) AND
+      (left_calf_cm IS NULL OR left_calf_cm > 0) AND (right_calf_cm IS NULL OR right_calf_cm > 0) AND
+      (waist_cm IS NULL OR waist_cm > 0) AND (abdomen_cm IS NULL OR abdomen_cm > 0) AND (hip_cm IS NULL OR hip_cm > 0)
+    );
+    ALTER TABLE body_assessments ADD CONSTRAINT body_assessments_calculation_method_check CHECK (
+      calculation_method IN ('US_NAVY', 'NONE')
+    );
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
   clinicalPersistenceMigration,
   accountProfileMigration,
+  patientPersonalDataMigration,
+  simplifiedAssessmentMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

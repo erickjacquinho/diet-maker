@@ -22,6 +22,12 @@ describe('PatientDietsTable', () => {
       carbsG: 220,
       fatsG: 60,
       status: 'Ativa',
+      dietTargets: {
+        targetKcal: 1990,
+        proteinG: 110,
+        carbsG: 320,
+        fatsG: 30,
+      },
     },
     {
       id: 'diet-2',
@@ -92,12 +98,29 @@ describe('PatientDietsTable', () => {
     expect(screen.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(screen.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(screen.getByText(/G\s*60g/)).toBeInTheDocument();
+    expect(within(rows[1]).getByRole('img', { name: 'Meta da dieta' })).toHaveClass('text-text-muted');
 
     expect(within(rows[2]).getByText('Simples')).toBeInTheDocument();
     expect(rows[2]).not.toHaveTextContent('Dieta Manutenção Julho');
     expect(within(rows[2]).getByText('Histórico')).toBeInTheDocument();
     expect(rows[2]).toHaveClass('hover:bg-transparent');
     expect(screen.getByText('2400 kcal')).toBeInTheDocument();
+  });
+
+  it('shows the diet target in the neutral locate icon tooltip', async () => {
+    render(<PatientDietsTable patientId="p1" diets={[mockDiets[0]]} onOpenReadOnlyDiet={vi.fn()} />);
+
+    const targetIcon = screen.getByRole('img', { name: 'Meta da dieta' });
+    expect(targetIcon).toHaveClass('text-text-muted');
+
+    fireEvent.focus(targetIcon);
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('Meta da dieta');
+    expect(within(tooltip).getByText(/P\s*110g/)).toHaveClass('text-macro-protein');
+    expect(within(tooltip).getByText(/C\s*320g/)).toHaveClass('text-macro-carbohydrate');
+    expect(within(tooltip).getByText(/G\s*30g/)).toHaveClass('text-macro-fat');
+    expect(tooltip).toHaveTextContent('1990 kcal');
   });
 
   it('renders the weighted cycle summary and mode label', () => {

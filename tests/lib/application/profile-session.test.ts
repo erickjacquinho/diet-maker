@@ -169,6 +169,20 @@ describe('profile session', () => {
     expect(session.getSnapshot()).toMatchObject({ status: 'paused', syncState: 'paused', account: { displayName: 'Jacques Regiani' } });
   });
 
+  it('loads a legacy save and rewrites the current schema on the next sync', async () => {
+    const legacy = createBackupEnvelope();
+    const file: FakeFile = { name: 'legacy.nutridiet', content: JSON.stringify(legacy) };
+    const filePort = createFilePort(file);
+    const { session } = createSession(filePort);
+
+    await session.loadProfile();
+    expect(JSON.parse(file.content).schemaVersion).toBe('4');
+
+    await session.sync();
+
+    expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '6', account: [{ phone: null }] });
+  });
+
   it('marks an active session paused and preserves it when synchronization write fails', async () => {
     const file: FakeFile = { name: 'write-fails.nutridiet', content: '' };
     const filePort = createFilePort(file);

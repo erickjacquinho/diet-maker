@@ -71,7 +71,7 @@ export function PatientProfileHeaderBadge({ children, className }: { children?: 
   const ctx = usePatientProfileHeaderContext();
   return (
     <span className={cn(`px-2 py-0.5 rounded-control bg-surface-subtle border border-border-subtle ${textStyle('caption-strong')}`, className)}>
-      {children ?? ctx.objective ?? 'Acompanhamento'}
+      {children ?? (ctx.objective?.trim() || 'sem objetivo')}
     </span>
   );
 }
@@ -83,9 +83,9 @@ export function PatientProfileHeaderMeta({ age, heightCm, weightKg, className }:
   const displayWeight = weightKg ?? ctx.weightKg;
 
   const parts = [];
-  if (displayAge !== undefined) parts.push(`${displayAge} anos`);
-  if (displayHeight !== undefined) parts.push(`${displayHeight} cm`);
-  if (displayWeight !== undefined) parts.push(`${displayWeight} kg`);
+  if (displayAge !== undefined && displayAge > 0) parts.push(`${displayAge} anos`);
+  if (displayHeight !== undefined && displayHeight > 0) parts.push(`${displayHeight} cm`);
+  if (displayWeight !== undefined && displayWeight > 0) parts.push(`${displayWeight} kg`);
 
   if (parts.length === 0) return null;
 

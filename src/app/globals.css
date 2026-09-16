@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 @layer base {
+  main#main-content { scrollbar-gutter: stable; }
   *, ::before, ::after { border-color: var(--sys-color-border-subtle); }
   body {
     margin: 0;

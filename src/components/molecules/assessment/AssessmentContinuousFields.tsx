@@ -3,6 +3,7 @@ import { Scale, Ruler } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Surface, Badge } from '@/components/atoms';
 import type { BodyAssessment } from '@/lib/patientsStore';
+import type { AssessmentType } from '@/lib/domain/clinical';
 import type { NumericAssessmentField } from '@/hooks/useAssessmentForm';
 import { AssessmentMeasurementField } from './AssessmentMeasurementField';
 import { LimbSectionCard } from './LimbSectionCard';
@@ -23,6 +24,7 @@ export interface AssessmentContinuousFieldsProps {
   draft: BodyAssessment;
   previousAssessment?: BodyAssessment | null;
   updateNumericField: (field: NumericAssessmentField, value: string) => void;
+  mode?: AssessmentType;
   className?: string;
 }
 
@@ -30,10 +32,13 @@ export function AssessmentContinuousFields({
   draft,
   previousAssessment,
   updateNumericField,
+  mode = 'complete',
   className = '',
 }: AssessmentContinuousFieldsProps) {
   const isRequiredField = (name: NumericAssessmentField) => {
-    return REQUIRED_ASSESSMENT_FIELDS.has(name);
+    return mode === 'simplified'
+      ? name === 'weightKg' || name === 'heightCm'
+      : REQUIRED_ASSESSMENT_FIELDS.has(name);
   };
 
   const isFieldAutoFilled = (name: NumericAssessmentField) => {
@@ -47,13 +52,38 @@ export function AssessmentContinuousFields({
       label={label}
       unit={unit}
       value={draft[name]}
-      previousValue={previousAssessment ? previousAssessment[name] : undefined}
+      previousValue={mode === 'complete' && previousAssessment ? previousAssessment[name] : undefined}
       isRequired={isRequiredField(name)}
       isAutoFilled={isFieldAutoFilled(name)}
       onChange={(value) => updateNumericField(name, value)}
       className={fieldClassName}
     />
   );
+
+  if (mode === 'simplified') {
+    return (
+      <div className={`flex flex-col gap-4 ${className}`}>
+        <Surface variant="subtle" className="flex flex-col gap-3.5 p-5 rounded-surface border border-border-subtle">
+          <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
+            <Scale className="size-4 text-success" aria-hidden="true" />
+            <span className={textStyle('caption-strong')}>Medidas essenciais</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 items-start">
+            {field('weightKg', 'Peso atual', 'kg')}
+            {field('heightCm', 'Altura', 'cm')}
+          </div>
+          <div className="flex flex-col gap-3 border-t border-border-subtle pt-3">
+            <span className={textStyle('caption-strong')}>Medidas opcionais</span>
+            <div className="grid grid-cols-3 gap-3 items-start">
+              {field('waistCm', 'Cintura', 'cm')}
+              {field('abdomenCm', 'Barriga', 'cm')}
+              {field('hipCm', 'Quadril', 'cm')}
+            </div>
+          </div>
+        </Surface>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>

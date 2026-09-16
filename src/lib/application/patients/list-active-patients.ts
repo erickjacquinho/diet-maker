@@ -9,5 +9,5 @@ export async function listActivePatients(
   const summaries = await dependencies.patientProfileReader.listActiveSummaries(account.accountId);
   const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');
   if (!normalizedQuery) return summaries;
-  return summaries.filter(({ patient }) => [patient.name, patient.currentObjective].some((value) => value.toLocaleLowerCase('pt-BR').includes(normalizedQuery)));
+  return summaries.filter(({ patient }) => [patient.name, patient.currentObjective ?? ''].some((value) => value.toLocaleLowerCase('pt-BR').includes(normalizedQuery)));
 }

@@ -57,6 +57,31 @@ export function formatDateOnly(value?: string): string {
   return date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : '';
 }
 
+export function getAgeFromBirthDate(value?: string | null, today = new Date()): number | null {
+  const birthDate = parseDateOnly(value?.trim());
+  if (!birthDate || !isValidDate(today)) return null;
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayHasPassed = today.getMonth() > birthDate.getMonth()
+    || (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+  if (!birthdayHasPassed) age -= 1;
+
+  return age >= 0 ? age : null;
+}
+
+export function formatAgeFromBirthDate(value?: string | null, today = new Date()): string {
+  const birthDate = parseDateOnly(value?.trim());
+  if (!birthDate || !isValidDate(today)) return '';
+
+  const totalMonths = (today.getFullYear() - birthDate.getFullYear()) * 12
+    + today.getMonth() - birthDate.getMonth()
+    - (today.getDate() < birthDate.getDate() ? 1 : 0);
+
+  if (totalMonths < 0) return '';
+
+  return `${Math.floor(totalMonths / 12)}a ${totalMonths % 12}m`;
+}
+
 /**
  * Normalizes any valid ISO or PT-BR date string to standard YYYY-MM-DD key.
  */

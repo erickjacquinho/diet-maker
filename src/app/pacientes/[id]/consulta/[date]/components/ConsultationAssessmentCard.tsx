@@ -41,9 +41,9 @@ export function ConsultationAssessmentCard({
         <MetricBoxGroup
           items={[
             { size: 'standard', label: 'Peso Corporal', value: `${assessment.weightKg} kg` },
-            { size: 'standard', label: '% Gordura (BF)', value: `${assessment.bodyFatPercent}%` },
-            { size: 'standard', label: 'Massa Magra', value: `${assessment.muscleMassKg} kg` },
-            { size: 'standard', label: 'Cintura', value: `${assessment.waistCm} cm` },
+            { size: 'standard', label: '% Gordura (BF)', value: assessment.bodyFatPercent === undefined ? '—' : `${assessment.bodyFatPercent}%` },
+            { size: 'standard', label: 'Massa Magra', value: assessment.muscleMassKg === undefined ? '—' : `${assessment.muscleMassKg} kg` },
+            { size: 'standard', label: 'Cintura', value: assessment.waistCm === undefined ? '—' : `${assessment.waistCm} cm` },
           ]}
         />
 

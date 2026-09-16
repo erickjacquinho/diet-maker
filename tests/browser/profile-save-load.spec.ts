@@ -33,7 +33,7 @@ async function installFileSystemFakes(page: import('@playwright/test').Page, ope
   }, { openContent });
 }
 
-test('creates a profile and writes schema 5 before entering the internal app', async ({ page }) => {
+test('creates a profile and writes schema 6 before entering the internal app', async ({ page }) => {
   await installFileSystemFakes(page, '');
   await page.goto('/Home');
   await page.waitForLoadState('networkidle');
@@ -45,7 +45,7 @@ test('creates a profile and writes schema 5 before entering the internal app', a
 
   await expect(page).toHaveURL(/\/pacientes$/, { timeout: 60_000 });
   const written = await page.evaluate(() => JSON.parse((window as unknown as { __nutridietLastWrite: string }).__nutridietLastWrite));
-  expect(written.schemaVersion).toBe('5');
+  expect(written.schemaVersion).toBe('6');
   expect(written.favorites).toEqual([]);
   expect(written.account[0]).toMatchObject({ displayName: 'Jacques Regiani', phone: '(11) 99999-0000' });
 });

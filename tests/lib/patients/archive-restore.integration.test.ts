@@ -36,10 +36,11 @@ const input = {
   name: 'Paciente com histórico',
   age: 40,
   gender: 'Masculino',
+  birthDate: '1986-03-20',
   heightCm: 178,
   weightKg: 84,
   phone: null,
-  whatsapp: null,
+  whatsapp: '11999990000',
   currentObjective: 'Cutting',
   defaultMacroTargets: { proteinG: 170, carbsG: 180, fatsG: 70, kcal: 2030 },
 };

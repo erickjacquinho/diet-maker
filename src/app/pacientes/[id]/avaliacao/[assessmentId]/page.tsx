@@ -10,6 +10,7 @@ import { AssessmentContinuousFields } from '@/components/molecules/assessment/As
 import { AssessmentSummaryPanel } from '@/components/organisms/assessment/AssessmentSummaryPanel';
 import { Surface, SecondaryActionButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { textStyle } from '@/design-system';
 import { useAssessmentWorkspacePage } from '@/hooks/useAssessmentWorkspacePage';
 
@@ -31,7 +32,9 @@ export default function AssessmentWorkspacePage() {
     isCopied,
     submitError,
     isLeaveConfirmationOpen,
+    assessmentType,
     updateNumericField,
+    updateAssessmentType,
     updateDateField,
     handleSave,
     handleCancel,
@@ -127,11 +130,38 @@ export default function AssessmentWorkspacePage() {
               handleSave();
             }}
           >
-            <AssessmentContinuousFields
-              draft={draft}
-              previousAssessment={previousAssessment}
-              updateNumericField={updateNumericField}
-            />
+            <Tabs
+              value={assessmentType}
+              onValueChange={(value) => {
+                if (value === 'complete' || value === 'simplified') updateAssessmentType(value);
+              }}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <h2 id="assessment-type-title" className={textStyle('card-title')}>tipo de avaliação</h2>
+                <TabsList aria-labelledby="assessment-type-title">
+                  <TabsTrigger value="complete">completa</TabsTrigger>
+                  <TabsTrigger value="simplified">simplificada</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="complete" className="mt-0">
+                <AssessmentContinuousFields
+                  draft={draft}
+                  previousAssessment={previousAssessment}
+                  updateNumericField={updateNumericField}
+                  mode="complete"
+                />
+              </TabsContent>
+
+              <TabsContent value="simplified" className="mt-0">
+                <AssessmentContinuousFields
+                  draft={draft}
+                  updateNumericField={updateNumericField}
+                  mode="simplified"
+                />
+              </TabsContent>
+            </Tabs>
           </form>
         </div>
 
@@ -140,6 +170,7 @@ export default function AssessmentWorkspacePage() {
             composition={composition}
             ffmi={ffmi}
             deltas={deltas}
+            assessmentType={assessmentType}
             patientGender={patient.gender}
             isSaving={isSaving}
             isCopied={isCopied}

@@ -63,12 +63,18 @@ recarregar o runtime e as consultas antes de permitir novas edições.
 ## Compatibility policy
 
 - `formatVersion` desconhecido é rejeitado.
-- `schemaVersion` não suportado é rejeitado; não há conversor universal nesta
-  fase.
-- Campos desconhecidos no envelope ou nas linhas são rejeitados no
-  `formatVersion = 1`; eles nunca são executados nem ignorados silenciosamente.
-  Uma versão futura poderá definir sua própria política sem alterar o contrato
-  desta versão.
+- Mudanças de dados de uma feature incrementam `schemaVersion`; o
+  `formatVersion` só muda quando o envelope/protocolo muda.
+- `schemaVersion` atual e versões anteriores com migração registrada são
+  aceitos. Cada migração é pura, determinística e aplicada em cadeia antes da
+  validação final do schema atual.
+- Campos/tabelas introduzidos por uma versão nova recebem defaults explícitos
+  na migração (por exemplo, uma coleção nova começa vazia). O arquivo de
+  origem não é alterado; o próximo export gera o envelope atualizado.
+- `schemaVersion` futuro ou sem uma migração conhecida é rejeitado.
+- Campos desconhecidos no envelope ou nas linhas são rejeitados depois da
+  migração no `formatVersion = 1`; eles nunca são executados nem ignorados
+  silenciosamente.
 
 ## Privacy contract
 

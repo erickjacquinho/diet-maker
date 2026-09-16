@@ -36,6 +36,9 @@ O cabeçalho lógico contém identificador da aplicação, `formatVersion`,
 normalizada definida no SDD do backup. Não é um dump físico do motor nem um
 arquivo SQL executável.
 
+Mudanças de dados de uma feature incrementam `schemaVersion`; o
+`formatVersion` só muda quando o envelope/protocolo muda.
+
 `DietDraft` e outros estados temporários do editor não integram o arquivo.
 Exportar não transforma rascunho em prescrição salva.
 
@@ -56,7 +59,10 @@ concluído. Não há pedido de senha.
 1. O usuário seleciona o arquivo.
 2. Antes de modificar a base, a aplicação valida JSON, identificador, versões
    suportadas, tipos, IDs, relações, uma única Conta e unicidade da dieta
-   vigente. Não executa SQL ou código contido no arquivo.
+   vigente. Versões de schema anteriores que possuam uma migração registrada
+   são convertidas em memória, em sequência, para o schema atual; a migração é
+   pura e não reescreve o arquivo selecionado. Não executa SQL ou código
+   contido no arquivo.
 3. Informa que a restauração **substitui toda a base atual, sem mesclar**, e
    solicita confirmação explícita.
 4. A restauração só começa sem rascunhos ou edições pendentes: o usuário deve
@@ -73,7 +79,9 @@ mistura. A inicialização relê a base; não reutiliza formulários anteriores.
 
 Não implementar troca entre gerações de bases, preservação de drafts
 incompatíveis, mesclagem, conversores universais ou coordenação entre abas.
-Compatibilidade de futuras versões segue a Decisão 10.
+Cada mudança de schema deve adicionar uma migração explícita e determinística;
+versões futuras sem uma etapa conhecida continuam sendo rejeitadas. O próximo
+save/export do perfil já carregado grava o envelope no schema atual.
 
 ## 5. Limites
 

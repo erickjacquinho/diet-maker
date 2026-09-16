@@ -10,7 +10,7 @@ Representa o arquivo mestre `.nutridiet` completo.
 | --- | --- | --- |
 | `appId` | string | Deve ser `nutridiet-local-pro`. |
 | `formatVersion` | integer | Deve ser `1` para o primeiro formato publicado. |
-| `schemaVersion` | string | Deve ser compatível com o schema local suportado; primeira entrega: `4`. |
+| `schemaVersion` | string | O export usa o schema atual (`5`); versões anteriores só entram por uma migração registrada. |
 | `exportedAt` | ISO-8601 string | Obrigatório e válido; registra o instante do snapshot. |
 | `account` | `AccountRow[]` | Deve conter exatamente uma linha com a identidade da Conta local ativa. |
 | `objectiveOptions` | `ObjectiveOptionRow[]` | Todas as opções da Conta, ativas e arquivadas. |
@@ -31,6 +31,13 @@ Representa o arquivo mestre `.nutridiet` completo.
 | `readyMealItems` | `ReadyMealItemRow[]` | Itens e snapshots das refeições prontas exportadas. |
 
 Os tipos `*Row` correspondem aos campos persistidos das tabelas canônicas atuais, preservando números, strings, nulos e objetos JSON sem converter o conteúdo em modelos de apresentação. A definição concreta deve reutilizar os tipos inferidos do schema e não manter uma segunda lista manual de campos quando o contrato de código permitir.
+
+## Schema migrations
+
+O importador aplica migrações puras e determinísticas em cadeia antes da
+validação final. Uma mudança aditiva deve preencher seus campos ausentes com
+defaults explícitos (por exemplo, uma nova coleção começa como `[]`). O arquivo
+de origem permanece inalterado; o próximo save/export grava o schema atual.
 
 ## Scope and ownership invariants
 
