@@ -10,7 +10,7 @@ export interface LimbSectionCardProps {
 
 export function LimbSectionCard({ title, subtitle, children }: LimbSectionCardProps) {
   return (
-    <Surface variant="subtle" className="flex flex-col gap-3 p-4 rounded-surface border border-border-subtle">
+    <Surface variant="default" className="flex flex-col gap-3 p-4 rounded-control border border-border-subtle bg-surface-subtle">
       <div className="flex items-center justify-between border-b border-border-subtle pb-2">
         <span className={textStyle('caption-strong')}>{title}</span>
         <span className={textStyle('helper')}>{subtitle}</span>

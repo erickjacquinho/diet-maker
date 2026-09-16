@@ -116,7 +116,7 @@ export function AssessmentSummaryPanel({
       className={`flex flex-col gap-4 sticky top-6 ${className}`}
     >
       {isSimplified ? (
-        <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-3">
+        <Surface variant="default" className="p-5 rounded-control border border-border-subtle bg-surface-subtle flex flex-col gap-3">
           <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
             <Scale className="size-4 text-text-muted" aria-hidden="true" />
             <h3 className={textStyle('card-title')}>Avaliação simplificada</h3>
@@ -215,7 +215,7 @@ export function AssessmentSummaryPanel({
       </Surface>
 
       {/* Bloco 2: Recomposição Corporal vs. Avaliação Anterior */}
-      <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-3">
+      <Surface variant="default" className="p-5 rounded-control border border-border-subtle bg-surface-subtle flex flex-col gap-3">
         <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
           <Scale className="size-4 text-text-muted" aria-hidden="true" />
           <h4 className={textStyle('caption-strong')}>Recomposição Corporal</h4>

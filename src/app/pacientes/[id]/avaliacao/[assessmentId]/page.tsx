@@ -86,7 +86,7 @@ export default function AssessmentWorkspacePage() {
       />
 
       {/* Barra de Contexto do Paciente & Data */}
-      <Surface variant="subtle" density="compact" className="px-5 py-2.5 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4">
+      <Surface variant="default" density="compact" className="px-5 py-2.5 rounded-control border border-border-subtle bg-surface-subtle flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" aria-hidden="true" />
