@@ -36,6 +36,47 @@ arquivo associado recebe checkpoints consolidados em momentos explícitos.
 Não haverá salvamento por temporizador, a cada tecla, em `beforeunload`, em
 segundo plano na nuvem ou em múltiplos arquivos/pastas.
 
+## Otimização das telas
+
+O crescimento da Conta não pode fazer a lista de pacientes nem o perfil
+individual carregar todos os históricos em memória.
+
+### Lista de pacientes
+
+- A consulta retorna os pacientes da página atual e os campos já exibidos pela
+  interface.
+- Contagens, última dieta, atividade recente e as duas avaliações mais recentes
+  são calculadas em lote no banco, sem uma consulta por paciente.
+- Nenhuma dieta completa, refeição, alimento ou snapshot nutricional é hidratado
+  para montar a lista.
+- Busca, ordenação, filtros e paginação devem ocorrer no banco quando o volume
+  ultrapassar a página visível.
+
+### Perfil individual do paciente
+
+- Dietas e avaliações usam a mesma experiência da `DataTable` da lista de
+  alimentos, mas com paginação real no banco. Cada consulta traz no máximo 25
+  registros e uma contagem separada para os controles de página.
+- A paginação da interface não pode receber previamente o histórico inteiro e
+  apenas aplicar `slice`; isso reduziria a renderização sem reduzir consulta e
+  memória.
+- Cada dieta confirmada mantém um resumo derivado com calorias, macronutrientes,
+  metas, refeições, dias do ciclo, estado e datas necessárias para a tabela.
+- O resumo é atualizado na mesma transação que confirma a dieta. A tela não
+  recalcula todo o cardápio nem percorre snapshots de alimentos para listar o
+  histórico.
+- Refeições, alimentos, alternativas e snapshots completos são carregados
+  somente quando o usuário abre o cardápio de uma dieta.
+- Alterar cadastro, avaliação ou acompanhamento atualiza apenas o bloco afetado;
+  não recarrega o histórico de dietas.
+
+### Limite de custo
+
+Abrir uma tela deve depender do tamanho da página solicitada, e não da quantidade
+total de pacientes, dietas, avaliações, refeições ou itens cadastrados. O custo
+que ainda cresce com toda a Conta fica restrito ao checkpoint do `.nutridiet`,
+executado somente nos gatilhos definidos neste documento.
+
 ## Gatilhos de checkpoint
 
 Um checkpoint ocorre somente quando a sessão está `dirty`:
@@ -94,4 +135,8 @@ Uma verificação de integração deve provar que:
 - reabertura usa a base local persistente sem importar por cima um arquivo mais
   antigo;
 - o round-trip manual do `.nutridiet` continua válido.
-
+- a lista de pacientes não hidrata históricos completos nem executa consultas
+  por paciente;
+- o perfil busca no máximo 25 resumos por página e abre o conteúdo completo de
+  uma dieta somente sob demanda;
+- o resumo persistido mantém equivalência com os cálculos nutricionais atuais.
