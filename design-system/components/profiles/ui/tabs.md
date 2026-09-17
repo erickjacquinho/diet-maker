@@ -62,5 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `ui`; perfil homologado documentalmente. Homologação não declara a estilização atual conforme.
+Implementado em `ui`; perfil homologado documentalmente e receita visual alinhada à categoria `selection`.
 

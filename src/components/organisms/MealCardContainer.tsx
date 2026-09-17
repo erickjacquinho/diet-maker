@@ -265,7 +265,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
         onValueChange={hasVariationTabs ? onVariationChange : undefined}
         activationMode="manual"
       >
-      <TabsContent value={selectedVariationId} asChild forceMount className="mt-0">
+      <TabsContent value={selectedVariationId} asChild forceMount>
       <div className="flex flex-col gap-4 flex-1">
         {/* Meal Header */}
         <div className="flex items-center justify-between pb-3 border-b border-border-subtle gap-2 flex-wrap">
@@ -414,7 +414,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
               </Popover>
             </div>
             {hasVariationTabs && (
-              <TabsList aria-label="Variações da refeição" className="h-control-compact shrink-0">
+              <TabsList aria-label="Variações da refeição">
                 {variationOptions.map((option) => (
                   <TabsTrigger
                     key={option.id}
@@ -625,7 +625,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           onClick={() => onAddFoodClick?.(addFoodButtonRef.current ?? undefined)}
           className="w-full border-dashed border-border-control hover:border-primary/60 hover:bg-surface-hover text-text-primary font-semibold text-style-button-label-compact flex items-center justify-center gap-1.5"
         >
-          <Plus size={14} className="text-success" />
+          <Plus size={14} className="text-primary" />
           <span>Adicionar Alimento</span>
         </Button>
 

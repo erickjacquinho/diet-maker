@@ -10,7 +10,7 @@ import { AssessmentContinuousFields } from '@/components/molecules/assessment/As
 import { AssessmentSummaryPanel } from '@/components/organisms/assessment/AssessmentSummaryPanel';
 import { Surface, SecondaryActionButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { textStyle } from '@/design-system';
 import { useAssessmentWorkspacePage } from '@/hooks/useAssessmentWorkspacePage';
 
@@ -86,7 +86,7 @@ export default function AssessmentWorkspacePage() {
       />
 
       {/* Barra de Contexto do Paciente & Data */}
-      <Surface variant="boxed" density="compact" className="px-5 flex flex-wrap items-center justify-between gap-4">
+      <Surface variant="default" density="highlight" className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" aria-hidden="true" />
@@ -130,38 +130,37 @@ export default function AssessmentWorkspacePage() {
               handleSave();
             }}
           >
-            <Tabs
-              value={assessmentType}
-              onValueChange={(value) => {
-                if (value === 'complete' || value === 'simplified') updateAssessmentType(value);
-              }}
-              className="flex flex-col gap-4"
-            >
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-start gap-3">
                 <h2 id="assessment-type-title" className={`${textStyle('card-title')} shrink-0`}>tipo de avaliação</h2>
-                <TabsList aria-labelledby="assessment-type-title" className="h-control-compact shrink-0">
-                  <TabsTrigger value="complete">completa</TabsTrigger>
-                  <TabsTrigger value="simplified">simplificada</TabsTrigger>
-                </TabsList>
+                <ToggleGroup
+                  type="single"
+                  value={assessmentType}
+                  onValueChange={(value) => {
+                    if (value === 'complete' || value === 'simplified') updateAssessmentType(value);
+                  }}
+                  aria-labelledby="assessment-type-title"
+                >
+                  <ToggleGroupItem value="complete">completa</ToggleGroupItem>
+                  <ToggleGroupItem value="simplified">simplificada</ToggleGroupItem>
+                </ToggleGroup>
               </div>
 
-              <TabsContent value="complete" className="mt-0">
+              {assessmentType === 'simplified' ? (
+                <AssessmentContinuousFields
+                  draft={draft}
+                  updateNumericField={updateNumericField}
+                  mode="simplified"
+                />
+              ) : (
                 <AssessmentContinuousFields
                   draft={draft}
                   previousAssessment={previousAssessment}
                   updateNumericField={updateNumericField}
                   mode="complete"
                 />
-              </TabsContent>
-
-              <TabsContent value="simplified" className="mt-0">
-                <AssessmentContinuousFields
-                  draft={draft}
-                  updateNumericField={updateNumericField}
-                  mode="simplified"
-                />
-              </TabsContent>
-            </Tabs>
+              )}
+            </div>
           </form>
         </div>
 

@@ -269,7 +269,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
       >
         <DialogHeader className="border-b border-border-subtle pb-3 shrink-0">
           <DialogTitle className="font-bold text-style-body text-text-primary flex items-center gap-2">
-            <Utensils size={18} className="text-success" />
+            <Utensils size={18} className="text-primary" />
             <span>Adicionar à Refeição &quot;{mealTitle}&quot;</span>
           </DialogTitle>
           <DialogDescription className="text-style-legal text-text-muted">
