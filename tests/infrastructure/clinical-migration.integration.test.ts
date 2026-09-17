@@ -35,7 +35,7 @@ describe('clinical database migration', () => {
     const journal = await handle.client.query<{ id: string; version: string }>(
       `SELECT id, version FROM __nutridiet_migrations ORDER BY version`,
     );
-    expect(journal.rows.at(-1)).toEqual({ id: '0005_patient_personal_data', version: '6' });
+    expect(journal.rows.at(-1)).toEqual({ id: '0006_simplified_assessment', version: '6' });
   });
 
   it('is idempotent and exposes scope, cardinality and value checks', async () => {

@@ -2,10 +2,15 @@
 
 ## Identity
 
-- Component ID: `molecule-sortable-list`
-- Layer: molecule
-- Nature: product-generic
-- Source: `src/components/molecules/SortableList.tsx`
+| Field | Value |
+| --- | --- |
+| Component ID | `molecule-sortable-list` |
+| Nature | `product-generic` |
+| Lifecycle | `implemented` |
+| Current layer | `molecule` |
+| Target layer | `molecule` |
+| Sources | `src/components/molecules/SortableList.tsx` |
+| Public exports | `SortableItemRenderContext`, `SortableItemProps`, `SortableContainerProps`, `SortablePlaceholderRenderContext`, `SortableReorderMeta`, `SortableListProps` (types), `SortableList` (component) |
 
 ## Purpose
 

@@ -116,10 +116,14 @@ describe('AssessmentSummaryPanel', () => {
       />
     );
 
-    expect(screen.getByText('9.5 %')).toBeInTheDocument();
-    expect(screen.getByText('7.6 kg')).toBeInTheDocument();
-    expect(screen.getByText('72.4 kg')).toBeInTheDocument();
-    expect(screen.getByText('23.8 kg/m²')).toBeInTheDocument();
+    const expectMetric = (value: string, unit: string) => {
+      expect(screen.getByText((_, element) => element?.textContent === `${value}${unit}`)).toBeInTheDocument();
+    };
+
+    expectMetric('9.5', '%');
+    expectMetric('7.6', 'kg');
+    expectMetric('72.4', 'kg');
+    expectMetric('23.8', 'kg/m²');
 
     // Athletic & High Performance Badges
     expect(screen.getByText('Shredded')).toBeInTheDocument();

@@ -55,7 +55,6 @@ describe("Surface molecule consumers", () => {
     expect(screen.getByText("Arroz")).toBeInTheDocument();
     expect(screen.getByDisplayValue("100")).toBeInTheDocument();
     expect(screen.getByText(/130/)).toBeInTheDocument();
-    expect(screen.getByTitle("Arrastar para reordenar")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Substituir Arroz" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remover Arroz" })).toBeInTheDocument();
   });

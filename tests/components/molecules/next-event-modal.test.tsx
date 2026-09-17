@@ -27,7 +27,7 @@ describe('NextEventModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Definir próximo acompanhamento' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Data' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toBeInTheDocument();
     expect(screen.getByRole('combobox')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Salvar/i })).toBeInTheDocument();

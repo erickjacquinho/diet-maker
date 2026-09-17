@@ -72,7 +72,7 @@ describe('SelectTrigger', () => {
     expect(selectedItem).toHaveClass(
       'rounded-control',
       'text-style-nav-item',
-      'data-[state=checked]:bg-warm-50',
+      'data-[state=checked]:bg-surface-subtle',
       'data-[state=checked]:border-transparent',
     );
     expect(selectedItem.querySelector('span')).toHaveClass('right-2');

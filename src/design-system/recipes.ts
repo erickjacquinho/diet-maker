@@ -33,7 +33,7 @@ const button = cva(`inline-flex items-center justify-center gap-2 rounded-contro
   defaultVariants: { variant: "primary", size: "standard", iconOnly: false, state: "default" },
 });
 
-const input = cva(`w-full rounded-control border border-input bg-surface px-3 text-style-field-value text-text-primary placeholder:text-text-muted focus:placeholder:text-transparent ${focus} ${motion} disabled:opacity-disabled`, {
+const input = cva(`w-full rounded-control border border-input bg-surface px-3 text-style-field-value text-text-primary placeholder:text-text-muted focus:placeholder:text-transparent aria-invalid:border-error-border ${focus} ${motion} disabled:opacity-disabled`, {
   variants: {
     size: { compact: "h-control-compact", standard: "h-control-standard" },
     state: { default: "", error: "border-error-border aria-invalid:border-error-border", "read-only": "bg-surface-subtle", disabled: "bg-disabled-soft" },
