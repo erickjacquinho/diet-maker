@@ -66,16 +66,8 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
     const patientProfileReader = createPatientProfileReader(
       patientRepository,
       objectiveCatalogRepository,
-      (accountId, patientId) => dietReader.getPatientDietSummary(accountId, patientId).then((summary) => {
-        const plans = [summary.current?.plan, ...summary.history.map((row) => row.plan)].filter((plan): plan is NonNullable<typeof plan> => Boolean(plan));
-        const latest = [...plans].sort((left, right) => right.activatedAt.localeCompare(left.activatedAt) || right.updatedAt.localeCompare(left.updatedAt) || left.id.localeCompare(right.id))[0];
-        return {
-          dietCount: summary.confirmedCount,
-          assessmentCount: 0,
-          lastActivity: latest ? { eventDate: latest.activatedAt.slice(0, 10), confirmedAt: latest.updatedAt, type: 'diet' as const, sourceId: latest.id } : null,
-        };
-      }),
-      { clinicalRepository },
+      (accountId, patientId) => dietRepository.listPatientSummaries(accountId, [patientId]).then((summaries) => summaries[patientId]),
+      { clinicalRepository, listRelatedCounts: (accountId, patientIds) => dietRepository.listPatientSummaries(accountId, patientIds) },
     );
     const foodRepository = new PGliteFoodCatalogRepository(handle);
     const recipeRepository = new PGliteRecipeRepository(handle, { foodRepository });
@@ -102,6 +94,7 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
         repository: dietRepository,
         draftStore,
         dietReader,
+        historyViewReader: dietRepository,
         confirmedOperation,
         librarySourceReader: {
           getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId),

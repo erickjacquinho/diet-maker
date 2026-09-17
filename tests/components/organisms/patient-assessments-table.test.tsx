@@ -71,4 +71,15 @@ describe('PatientAssessmentsTable', () => {
     expect(screen.getByText('102 cm')).toBeInTheDocument(); // Tórax
     expect(screen.getByText('37 / 37.5 cm')).toBeInTheDocument(); // Braço
   });
+
+  it('mounts at most 25 assessment rows and keeps the remainder accessible by pagination', () => {
+    const assessments = Array.from({ length: 26 }, (_, index) => ({
+      ...mockAssessments[0], id: `asm-${index}`, date: `${String(index + 1).padStart(2, '0')}/09/2026`,
+    }));
+    render(<PatientAssessmentsTable patientId="p1" assessments={assessments} />);
+    expect(screen.getByText('01/09/2026')).toBeInTheDocument();
+    expect(screen.queryByText('26/09/2026')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(screen.getByText('26/09/2026')).toBeInTheDocument();
+  });
 });

@@ -125,9 +125,7 @@ function isNullableValue(predicate: (candidate: unknown) => boolean): (value: un
 }
 
 function assertExactKeys(record: UnknownRecord, expected: readonly string[], tableName: string): void {
-  const actual = Object.keys(record).sort();
-  const required = [...expected].sort();
-  if (actual.length !== required.length || actual.some((key, index) => key !== required[index])) {
+  if (Object.keys(record).length !== expected.length || expected.some((key) => !Object.prototype.hasOwnProperty.call(record, key))) {
     fail('BACKUP_FORMAT_INVALID', `O registro ${tableName} possui campos desconhecidos ou incompletos.`);
   }
 }

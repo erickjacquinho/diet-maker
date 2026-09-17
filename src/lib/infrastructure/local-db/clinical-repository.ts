@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, getTableColumns, inArray, lte, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type {
   AssessmentPersistenceInput,
@@ -218,6 +218,26 @@ export class PGliteClinicalRepository implements ClinicalRepository {
       return result;
     } catch (cause) {
       throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'O histórico clínico dos pacientes não pôde ser carregado.', { cause });
+    }
+  }
+
+  async listAssessmentSummaries(accountId: string, patientIds: readonly string[]): Promise<Record<string, { assessments: BodyAssessment[]; count: number }>> {
+    const result: Record<string, { assessments: BodyAssessment[]; count: number }> = Object.fromEntries(patientIds.map((id) => [id, { assessments: [], count: 0 }]));
+    if (!patientIds.length) return result;
+    try {
+      const ranked = this.handle.db.select({
+        ...getTableColumns(bodyAssessments),
+        count: sql<number>`count(*) OVER (PARTITION BY ${bodyAssessments.patientId})::int`.as('assessment_count'),
+        rank: sql<number>`row_number() OVER (PARTITION BY ${bodyAssessments.patientId} ORDER BY ${bodyAssessments.clinicalDate} DESC, ${bodyAssessments.createdAt} DESC, ${bodyAssessments.id} ASC)`.as('assessment_rank'),
+      }).from(bodyAssessments).where(and(eq(bodyAssessments.accountId, accountId), inArray(bodyAssessments.patientId, [...patientIds]))).as('ranked_assessments');
+      const rows = await this.handle.db.select().from(ranked).where(lte(ranked.rank, 2)).orderBy(asc(ranked.patientId), asc(ranked.rank));
+      for (const row of rows) {
+        result[row.patientId].assessments.push(toAssessment(row));
+        result[row.patientId].count = Number(row.count);
+      }
+      return result;
+    } catch (cause) {
+      throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'Os resumos clínicos não puderam ser carregados.', { cause });
     }
   }
 

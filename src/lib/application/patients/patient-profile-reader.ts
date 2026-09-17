@@ -18,6 +18,7 @@ interface RelatedCounts {
 
 interface ClinicalReaderOptions {
   clinicalRepository?: ClinicalRepository;
+  listRelatedCounts?: (accountId: string, patientIds: readonly string[]) => Promise<Record<string, RelatedCounts>>;
 }
 
 function buildClinicalSummary(
@@ -33,7 +34,7 @@ function buildClinicalSummary(
     .filter((activity): activity is PatientActivity => activity !== null)
     .sort((left, right) => right.eventDate.localeCompare(left.eventDate) || right.confirmedAt.localeCompare(left.confirmedAt) || left.type.localeCompare(right.type) || left.sourceId.localeCompare(right.sourceId))[0] ?? null;
   return {
-    assessmentCount: assessments.length,
+    assessmentCount: Math.max(assessments.length, related.assessmentCount),
     latestAssessment,
     previousAssessment,
     nextFollowUp,
@@ -99,6 +100,19 @@ export function createPatientProfileReader(
       const patients = await patientRepository.listActive(accountId);
       if (!options.clinicalRepository) return Promise.all(patients.map((patient) => toSummary(accountId, patient)));
       const patientIds = patients.map((patient) => patient.id);
+      if (options.listRelatedCounts && options.clinicalRepository.listAssessmentSummaries) {
+        const [assessmentMap, followUpMap, relatedMap] = await Promise.all([
+          options.clinicalRepository.listAssessmentSummaries(accountId, patientIds),
+          options.clinicalRepository.listNextFollowUps(accountId, patientIds),
+          options.listRelatedCounts(accountId, patientIds),
+        ]);
+        return Promise.all(patients.map((patient) => {
+          const assessment = assessmentMap[patient.id];
+          const related = { ...relatedMap[patient.id], assessmentCount: assessment.count };
+          const clinical = buildClinicalSummary(assessment.assessments, followUpMap[patient.id] ?? null, related);
+          return toSummary(accountId, patient, clinical, related);
+        }));
+      }
       const [assessmentMap, followUpMap, relatedValues] = await Promise.all([
         options.clinicalRepository.listAssessmentsByPatients(accountId, patientIds),
         options.clinicalRepository.listNextFollowUps(accountId, patientIds),

@@ -90,6 +90,7 @@ export interface DietApplicationDependencies {
   idFactory?: () => string;
   librarySourceReader?: LibraryDietSourceReader;
   confirmedOperation?: import('../composition-root').ConfirmedOperationCoordinator;
+  historyViewReader?: { listHistoryViews(accountId: string, patientId: string): Promise<import('@/lib/patientsStoreTypes').HistoricalDiet[]> };
 }
 
 export interface OpenEditorResult {
@@ -108,6 +109,7 @@ export interface DietApplication {
   saveDietAsActive(draftId: string, expectedRevision: number): Promise<import('@/lib/domain/diets/diet-model').SaveOutcome>;
   reconcileUnknownSave(draftId: string): Promise<{ status: 'COMMITTED' | 'NOT_COMMITTED' | 'REVIEW_REQUIRED'; planId?: string; version?: number }>;
   getPatientDietSummary(patientId: string): Promise<PatientDietSummary>;
+  listDietHistoryViews(patientId: string): Promise<import('@/lib/patientsStoreTypes').HistoricalDiet[]>;
   getDietSnapshot(patientId: string, dietId: string): Promise<DietPlan | null>;
   invalidatePatientDrafts(patientId: string): Promise<number>;
   insertRecipeIntoDietDraft(command: import('./library-insertion').RecipeInsertionCommand): Promise<DietDraft>;

@@ -372,11 +372,14 @@ export function PatientDietsTable({
   onOpenReadOnlyDiet,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
+  const [pageIndex, setPageIndex] = React.useState(0);
+  React.useEffect(() => { setPageIndex(0); }, [diets]);
 
   return (
     <TooltipProvider delayDuration={200}>
       <DataTable
         data={diets}
+        pagination={diets.length > 25 ? { pageIndex, pageSize: 25, onPageChange: setPageIndex } : undefined}
         columns={columns}
         getRowId={(diet) => diet.id}
         caption="Histórico de prescrições dietéticas e planos alimentares"

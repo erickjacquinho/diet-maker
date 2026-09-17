@@ -9,6 +9,7 @@ export interface ClinicalRepository {
   getAssessment(accountId: string, patientId: string, assessmentId: string): Promise<BodyAssessment | null>;
   listAssessments(accountId: string, patientId: string): Promise<BodyAssessment[]>;
   listAssessmentsByPatients(accountId: string, patientIds: readonly string[]): Promise<Record<string, BodyAssessment[]>>;
+  listAssessmentSummaries?(accountId: string, patientIds: readonly string[]): Promise<Record<string, { assessments: BodyAssessment[]; count: number }>>;
   createAssessment(accountId: string, patientId: string, assessment: BodyAssessment | AssessmentPersistenceInput): Promise<BodyAssessment>;
   updateAssessment(accountId: string, patientId: string, assessmentId: string, expectedVersion: number, assessment: BodyAssessment | AssessmentPersistenceInput): Promise<BodyAssessment>;
   getNextFollowUp(accountId: string, patientId: string): Promise<NextFollowUp | null>;

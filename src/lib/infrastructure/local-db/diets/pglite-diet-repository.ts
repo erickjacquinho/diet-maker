@@ -1,10 +1,14 @@
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { LocalDatabaseHandle } from '../client';
 import { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationDays, dietVariations, patients } from '../schema';
 import type { ConfirmActiveCommand, DietRepository } from '@/lib/application/diets/diet-ports';
 import { DietDomainError } from '@/lib/domain/diets/diet-errors';
-import type { ConfirmActiveResult, DietPlan } from '@/lib/domain/diets/diet-model';
+import type { ConfirmActiveResult, DietDayCode, DietPlan, DietVariationKind } from '@/lib/domain/diets/diet-model';
 import { mapDietAggregate, type DietAggregateRows } from './diet-row-mappers';
+import { toProjectedHistoricalDietView, type DietHistoryVariation } from '@/lib/application/diets/diet-history-view';
+import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
+import type { PatientActivity } from '@/lib/persistence/patient-profile-reader';
+import { createDecimalString } from '@/lib/domain/diets/diet-model';
 
 type FailureLevel = 'plan' | 'variation' | 'day' | 'meal' | 'option' | 'item' | 'snapshot';
 
@@ -51,8 +55,67 @@ export class PGliteDietRepository implements DietRepository {
   }
 
   async countConfirmed(accountId: string, patientId: string): Promise<number> {
-    const rows = await this.handle.db.select({ id: dietPlans.id }).from(dietPlans).where(and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId)));
-    return rows.length;
+    const rows = await this.handle.db.select({ count: count() }).from(dietPlans).where(and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId)));
+    return Number(rows[0].count);
+  }
+
+  async listPatientSummaries(accountId: string, patientIds: readonly string[]): Promise<Record<string, { dietCount: number; assessmentCount: number; lastActivity: PatientActivity | null }>> {
+    const result: Record<string, { dietCount: number; assessmentCount: number; lastActivity: PatientActivity | null }> = Object.fromEntries(patientIds.map((id) => [id, { dietCount: 0, assessmentCount: 0, lastActivity: null }]));
+    if (!patientIds.length) return result;
+    const ranked = this.handle.db.select({
+      patientId: dietPlans.patientId, id: dietPlans.id, activatedAt: dietPlans.activatedAt, updatedAt: dietPlans.updatedAt,
+      count: sql<number>`count(*) OVER (PARTITION BY ${dietPlans.patientId})::int`.as('diet_count'),
+      rank: sql<number>`row_number() OVER (PARTITION BY ${dietPlans.patientId} ORDER BY ${dietPlans.activatedAt} DESC, ${dietPlans.updatedAt} DESC, ${dietPlans.id} ASC)`.as('diet_rank'),
+    }).from(dietPlans).where(and(eq(dietPlans.accountId, accountId), inArray(dietPlans.patientId, [...patientIds]))).as('ranked_diets');
+    const rows = await this.handle.db.select().from(ranked).where(eq(ranked.rank, 1));
+    for (const row of rows) result[row.patientId] = {
+      dietCount: Number(row.count), assessmentCount: 0,
+      lastActivity: { eventDate: row.activatedAt.slice(0, 10), confirmedAt: row.updatedAt, type: 'diet', sourceId: row.id },
+    };
+    return result;
+  }
+
+  async listHistoryViews(accountId: string, patientId: string): Promise<HistoricalDiet[]> {
+    const plans = await this.handle.db.select().from(dietPlans).where(and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId))).orderBy(desc(dietPlans.activatedAt));
+    if (!plans.length) return [];
+    const ids = plans.map((plan) => plan.id);
+    const [variations, days] = await Promise.all([
+      this.handle.db.select({
+        variation: dietVariations,
+        mealsCount: sql<number>`count(DISTINCT ${dietMeals.id})::int`,
+        protein: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedProtein}), 0)::text`,
+        carbs: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedCarbs}), 0)::text`,
+        fat: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedFat}), 0)::text`,
+        energy: sql<string>`coalesce(sum(coalesce(${dietItemSnapshots.prescribedEnergyKcal}, ${dietItemSnapshots.prescribedProtein} * 4 + ${dietItemSnapshots.prescribedCarbs} * 4 + ${dietItemSnapshots.prescribedFat} * 9)), 0)::text`,
+      }).from(dietVariations)
+        .leftJoin(dietMeals, eq(dietMeals.variationId, dietVariations.id))
+        .leftJoin(dietMealOptions, and(eq(dietMealOptions.dietMealId, dietMeals.id), eq(dietMealOptions.countsTowardTotals, true)))
+        .leftJoin(dietMealItems, and(eq(dietMealItems.dietMealOptionId, dietMealOptions.id), eq(dietMealItems.role, 'PRIMARY')))
+        .leftJoin(dietItemSnapshots, eq(dietItemSnapshots.dietMealItemId, dietMealItems.id))
+        .where(inArray(dietVariations.dietPlanId, ids)).groupBy(dietVariations.id).orderBy(asc(dietVariations.position)),
+      this.handle.db.select().from(dietVariationDays).where(inArray(dietVariationDays.dietPlanId, ids)).orderBy(asc(dietVariationDays.position)),
+    ]);
+    const daysByVariation = new Map<string, DietDayCode[]>();
+    for (const day of days) {
+      const assigned = daysByVariation.get(day.variationId) ?? [];
+      assigned.push(day.dayCode as DietDayCode);
+      daysByVariation.set(day.variationId, assigned);
+    }
+    const byPlan = new Map<string, DietHistoryVariation[]>();
+    for (const { variation, mealsCount, protein, carbs, fat, energy } of variations) {
+      const values = byPlan.get(variation.dietPlanId) ?? [];
+      values.push({
+        id: variation.id, name: variation.name, kind: variation.kind as DietVariationKind,
+        assignedDays: daysByVariation.get(variation.id) ?? [], mealsCount: Number(mealsCount),
+        targets: { protein: createDecimalString(variation.targetProtein), carbs: createDecimalString(variation.targetCarbs), fat: createDecimalString(variation.targetFat), energyKcal: createDecimalString(variation.targetKcal) },
+        prescribed: { proteinG: Number(protein), carbsG: Number(carbs), fatsG: Number(fat), targetKcal: Number(energy) },
+      });
+      byPlan.set(variation.dietPlanId, values);
+    }
+    return plans.map((plan) => toProjectedHistoricalDietView({
+      id: plan.id, name: plan.name, activatedAt: plan.activatedAt, mode: plan.mode as DietPlan['mode'], status: plan.status as DietPlan['status'],
+      variations: byPlan.get(plan.id) ?? [],
+    })).sort((left, right) => Number(right.status === 'Ativa') - Number(left.status === 'Ativa'));
   }
 
   async confirmActive(command: ConfirmActiveCommand): Promise<ConfirmActiveResult> {

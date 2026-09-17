@@ -5,6 +5,7 @@ import { createDietCopyCommands } from './diet-copy-commands';
 import { discardDietDraft } from './discard-diet-draft';
 import { reconcileUnknownSave, saveDietAsActive } from './save-diet-as-active';
 import { insertReadyMealIntoDietDraft, insertRecipeIntoDietDraft } from './library-insertion';
+import { toDietHistoryViews } from './diet-history-view';
 
 export function createDietApplication(dependencies: DietApplicationDependencies): DietApplication {
   const drafts = createDietDraftCommands(dependencies);
@@ -29,6 +30,13 @@ export function createDietApplication(dependencies: DietApplicationDependencies)
       const summary = await dependencies.dietReader.getPatientDietSummary(account.accountId, patientId);
       const recoverable = (await dependencies.draftStore.listRecoverableByPatient(account.accountId, patientId))[0] ?? null;
       return { ...summary, recoverableDraft: recoverable };
+    },
+    async listDietHistoryViews(patientId) {
+      const account = await dependencies.accountContext.requireActive();
+      const patient = await dependencies.patientReader.getById(account.accountId, patientId);
+      if (!patient) throw new DietDomainError('PATIENT_NOT_FOUND', 'Paciente não encontrado nesta Conta.');
+      if (dependencies.historyViewReader) return dependencies.historyViewReader.listHistoryViews(account.accountId, patientId);
+      return toDietHistoryViews(await dependencies.dietReader.getPatientDietSummary(account.accountId, patientId));
     },
     getDietSnapshot: async (patientId, dietId) => {
       const account = await dependencies.accountContext.requireActive();

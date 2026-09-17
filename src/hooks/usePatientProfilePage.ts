@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
@@ -21,7 +21,6 @@ import {
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
 import type { DietPlan } from '@/lib/domain/diets/diet-model';
-import { toDietHistoryViews } from '@/lib/application/diets/diet-history-view';
 
 export function usePatientProfilePage() {
   const params = useParams();
@@ -32,7 +31,6 @@ export function usePatientProfilePage() {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const [confirmedPlans, setConfirmedPlans] = useState<HistoricalDiet[]>([]);
-  const [canonicalDietPlans, setCanonicalDietPlans] = useState<Map<string, DietPlan>>(new Map());
   const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
 
   // Modals state
@@ -49,10 +47,20 @@ export function usePatientProfilePage() {
   const [selectedReadOnlyDiet, setSelectedReadOnlyDiet] = useState<DietPlan | null>(null);
   const [isReadOnlyDietModalOpen, setIsReadOnlyDietModalOpen] = useState(false);
 
-  const handleOpenReadOnlyDietModal = useCallback((diet: HistoricalDiet) => {
-    setSelectedReadOnlyDiet(canonicalDietPlans.get(diet.id) ?? null);
-    setIsReadOnlyDietModalOpen(true);
-  }, [canonicalDietPlans]);
+  const dietRequest = useRef(0);
+  const handleOpenReadOnlyDietModal = useCallback(async (diet: HistoricalDiet) => {
+    const request = ++dietRequest.current;
+    try {
+      const application = await getBrowserDietApplication();
+      const plan = await application.getDietSnapshot(patientId, diet.id);
+      if (request !== dietRequest.current) return;
+      if (!plan) throw new Error('A dieta não foi encontrada.');
+      setSelectedReadOnlyDiet(plan);
+      setIsReadOnlyDietModalOpen(true);
+    } catch (error) {
+      if (request === dietRequest.current) toast.error(error instanceof Error ? error.message : 'Não foi possível abrir o cardápio.');
+    }
+  }, [patientId]);
 
   const handleOpenEditAssessment = useCallback((assessment: BodyAssessment) => {
     setEditingAssessment({ ...assessment });
@@ -60,16 +68,18 @@ export function usePatientProfilePage() {
     setIsEditAssessmentOpen(true);
   }, []);
 
-  const loadProfile = useCallback(async () => {
-    setIsProfileLoading(true);
+  const profileRequest = useRef(0);
+  const loadProfile = useCallback(async (includeDiets = true) => {
+    const request = ++profileRequest.current;
+    if (includeDiets) setIsProfileLoading(true);
     setProfileError(null);
     try {
       const application = await getBrowserPatientApplication();
-      const [profile, dietApplication] = await Promise.all([
+      const [profile, dietHistory] = await Promise.all([
         application.getPatientProfile(patientId),
-        getBrowserDietApplication(),
+        includeDiets ? getBrowserDietApplication().then((diets) => diets.listDietHistoryViews(patientId)) : Promise.resolve(null),
       ]);
-      const dietSummary = await dietApplication.getPatientDietSummary(patientId);
+      if (request !== profileRequest.current) return;
       const assessments = (profile.clinical?.assessments ?? []).map(toLegacyAssessment);
       const view = toPatientViewModel(profile.patient, {
         initials: profile.initials,
@@ -79,16 +89,19 @@ export function usePatientProfilePage() {
       });
       setPatient(view);
       setAvailableObjectives(profile.availableObjectives);
-      const rows = [dietSummary.current, ...dietSummary.history].filter((row): row is NonNullable<typeof row> => Boolean(row));
-      setCanonicalDietPlans(new Map(rows.map((row) => [row.id, row.plan])));
-      setConfirmedPlans(toDietHistoryViews(dietSummary));
+      if (dietHistory) setConfirmedPlans(dietHistory);
       setBodyAssessments(assessments);
     } catch (error: unknown) {
-      setPatient(null);
+      if (request !== profileRequest.current) return;
+      if (includeDiets) setPatient(null);
       setProfileError(error instanceof PatientApplicationError ? error.message : 'Não foi possível carregar o perfil do paciente.');
+      if (!includeDiets) {
+        toast.error('Os dados foram salvos, mas não foi possível atualizar o perfil. Reabra a tela.');
+        return;
+      }
       throw error;
     } finally {
-      setIsProfileLoading(false);
+      if (request === profileRequest.current) setIsProfileLoading(false);
     }
   }, [patientId]);
 
@@ -136,7 +149,7 @@ export function usePatientProfilePage() {
     }
     setIsEditAssessmentOpen(false);
     toast.success(assessmentMode === 'create' ? 'Avaliação física criada com sucesso!' : 'Avaliação física atualizada com sucesso!');
-    await loadProfile();
+    await loadProfile(false);
   }, [assessmentMode, loadProfile, patientId]);
 
   const handleSaveNextEvent = useCallback(async (nextEvent: PatientNextEvent) => {
@@ -144,7 +157,7 @@ export function usePatientProfilePage() {
     const current = await application.getNextFollowUp(patientId);
     await application.setNextFollowUp(patientId, current?.version ?? null, toNextFollowUpInput(nextEvent));
     toast.success('Próximo acompanhamento salvo.');
-    await loadProfile();
+    await loadProfile(false);
   }, [loadProfile, patientId]);
 
   const handleClearNextEvent = useCallback(async () => {
@@ -153,7 +166,7 @@ export function usePatientProfilePage() {
     if (!current) return;
     await application.clearNextFollowUp(patientId, current.version);
     toast.success('Próximo acompanhamento removido.');
-    await loadProfile();
+    await loadProfile(false);
   }, [loadProfile, patientId]);
 
   const [availableObjectives, setAvailableObjectives] = useState<string[]>([]);
@@ -177,7 +190,7 @@ export function usePatientProfilePage() {
     void loadProfile().catch(() => {
       if (cancelled) return;
     });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; profileRequest.current += 1; dietRequest.current += 1; };
   }, [loadProfile, patientId]);
 
   const handleSavePatient = useCallback(async (updatedPatient: PatientViewModel) => {
@@ -186,7 +199,7 @@ export function usePatientProfilePage() {
     await application.updatePatient(updatedPatient.id, updatedPatient.version, toPatientInput(updatedPatient));
     setIsEditModalOpen(false);
     toast.success('Dados do paciente atualizados!');
-    await loadProfile();
+    await loadProfile(false);
   }, [loadProfile]);
 
   const handleDeletePatient = useCallback(async () => {

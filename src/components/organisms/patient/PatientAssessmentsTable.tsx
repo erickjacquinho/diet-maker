@@ -291,6 +291,8 @@ export function PatientAssessmentsTable({
   assessments = [],
 }: PatientAssessmentsTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  React.useEffect(() => { setPageIndex(0); }, [assessments]);
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
@@ -299,6 +301,7 @@ export function PatientAssessmentsTable({
   return (
     <DataTable
       data={assessments}
+      pagination={assessments.length > 25 ? { pageIndex, pageSize: 25, onPageChange: setPageIndex } : undefined}
       columns={columns}
       getRowId={(assessment) => assessment.id}
       caption="Histórico de avaliações físicas e composição corporal"

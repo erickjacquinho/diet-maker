@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 import type { Account } from '@/lib/domain/account';
 import { normalizeAccountDisplayName } from '@/lib/domain/account';
 import { BackupApplicationError, parseBackupEnvelope, validateBackupEnvelope } from './backup-application';
-import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { BACKUP_SCHEMA_VERSION, type BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
 import type { SaveFile, SaveFilePermission, SaveFilePort } from '@/lib/persistence/save-file';
 
 export type ProfileSessionStatus = 'empty' | 'busy' | 'active' | 'paused';
@@ -209,8 +209,8 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
 
   const writeSnapshot = async (runtime: TRuntime, file: SaveFile): Promise<void> => {
     const exported = await dependencies.exportSnapshot(runtime);
-    const normalized = validateBackupEnvelope(exported);
-    await dependencies.filePort.write(file, JSON.stringify(normalized));
+    const snapshot = exported.schemaVersion === BACKUP_SCHEMA_VERSION ? exported : validateBackupEnvelope(exported);
+    await dependencies.filePort.write(file, JSON.stringify(snapshot));
   };
 
   const requestPermission = async (file: SaveFile): Promise<SaveFilePermission> => {

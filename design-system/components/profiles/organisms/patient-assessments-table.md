@@ -26,7 +26,7 @@ Herda [data-display](../../categories/data-display.md). Trait autorizado: `nutri
 
 ## Allowed variants
 
-Somente ordenação, expansão e seleção já oferecidas pelo contrato do consumidor.
+Somente ordenação, expansão, seleção e paginação já oferecidas pelo contrato do consumidor.
 
 ## Particular states
 

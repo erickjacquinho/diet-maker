@@ -377,4 +377,14 @@ describe('PatientDietsTable', () => {
     render(<PatientDietsTable patientId="p1" diets={mockDiets} onOpenReadOnlyDiet={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /Excluir prescrição/ })).not.toBeInTheDocument();
   });
+
+  it('mounts at most 25 history rows and keeps the remaining diets accessible by pagination', () => {
+    const diets = Array.from({ length: 26 }, (_, index) => ({
+      ...mockDiets[1], id: `diet-${index}`, name: `Dieta ${index + 1}`,
+    }));
+    render(<PatientDietsTable patientId="p1" diets={diets} onOpenReadOnlyDiet={vi.fn()} />);
+    expect(screen.getAllByRole('button', { name: /Ver cardápio completo da dieta/ })).toHaveLength(25);
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(screen.getAllByRole('button', { name: /Ver cardápio completo da dieta/ })).toHaveLength(1);
+  });
 });
