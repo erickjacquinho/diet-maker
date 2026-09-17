@@ -3,8 +3,9 @@
 ## Objetivo
 
 Manter formulários e edições rápidos, sem serializar e regravar todo o arquivo
-`.nutridiet` a cada mudança. O navegador conserva a base de trabalho local e o
-arquivo associado recebe checkpoints consolidados em momentos explícitos.
+`.nutridiet` a cada mudança. O arquivo é o save principal e autoritativo do
+perfil. O navegador conserva uma área de trabalho local e o arquivo associado
+recebe checkpoints consolidados em momentos explícitos.
 
 ## Alternativas consideradas
 
@@ -14,24 +15,27 @@ arquivo associado recebe checkpoints consolidados em momentos explícitos.
 2. **Usar o banco local como única fonte e exportar o arquivo somente sob
    demanda.** É a opção mais barata, mas não preserva o arquivo associado como
    save portátil principal do fluxo escolhido.
-3. **Banco local persistente com checkpoints diferidos.** Mantém a edição no
-   navegador, agrupa mudanças por um marcador `dirty` e regrava o arquivo apenas
-   em Salvar, `Ctrl+S`, troca de tela ou sincronização manual. Esta é a decisão
-   aprovada.
+3. **Arquivo principal com área de trabalho local e checkpoints diferidos.**
+   Mantém a edição no navegador, agrupa mudanças por um marcador `dirty` e
+   regrava o arquivo principal apenas em Salvar, `Ctrl+S`, troca de tela ou
+   sincronização manual. Esta é a decisão aprovada.
 
 ## Arquitetura aprovada
 
-- O PGlite deixa de usar `memory://` no runtime do navegador e passa a persistir
-  uma única Conta local no armazenamento do navegador.
+- O `.nutridiet` é a fonte principal e autoritativa dos dados confirmados do
+  perfil. Um checkpoint só está concluído depois que a substituição do arquivo
+  termina com sucesso.
+- O PGlite deixa de usar `memory://` no runtime do navegador e passa a manter
+  uma única área de trabalho local no armazenamento do navegador.
 - Campos ainda em edição permanecem no estado do formulário ou no
   `DietDraftStore`; digitação não altera o arquivo `.nutridiet`.
-- Casos de uso confirmados gravam somente as linhas afetadas no PGlite e marcam
-  a sessão como `dirty`.
+- Casos de uso gravam somente as linhas afetadas na área de trabalho PGlite e
+  marcam a sessão como `dirty`; esses dados permanecem pendentes até o próximo
+  checkpoint do arquivo principal.
 - O checkpoint exporta uma visão consistente dos dados confirmados e substitui
   o conteúdo do arquivo associado uma única vez.
-- O `.nutridiet` continua sendo o save portátil associado ao perfil. O banco
-  local é a cópia de trabalho persistente e permite recuperar alterações e
-  drafts no mesmo navegador.
+- O banco local é cache, área de trabalho e recuperação de alterações pendentes
+  no mesmo navegador. Ele não substitui o `.nutridiet` como save principal.
 
 Não haverá salvamento por temporizador, a cada tecla, em `beforeunload`, em
 segundo plano na nuvem ou em múltiplos arquivos/pastas.
@@ -95,11 +99,12 @@ gatilho gera outro checkpoint; nenhum loop automático é criado.
 
 ## Inicialização e recuperação
 
-Ao reabrir a aplicação, a sessão tenta primeiro a base persistente do navegador.
-O arquivo lembrado fornece a associação para checkpoints e portabilidade, sem
-substituir uma base local mais recente. Selecionar ou restaurar outro
-`.nutridiet` continua validando o envelope e substituindo a base inteira em uma
-transação.
+Ao reabrir a aplicação, a sessão carrega o `.nutridiet` associado como último
+save concluído. Se a área de trabalho do navegador tiver mudanças pendentes do
+mesmo perfil e da mesma revisão do arquivo, elas são recuperadas como `dirty` e
+continuam aguardando checkpoint; não passam a ser tratadas como já salvas.
+Selecionar ou restaurar outro `.nutridiet` continua validando o envelope e
+substituindo a área de trabalho inteira em uma transação.
 
 Se o navegador for encerrado com um formulário não confirmado, somente o draft
 que já foi persistido localmente poderá ser recuperado. A aplicação não tenta
@@ -108,9 +113,10 @@ garante sua conclusão.
 
 ## Falhas
 
-- Falha ao gravar o arquivo não desfaz uma transação local já confirmada.
+- Falha ao gravar o arquivo preserva a alteração na área de trabalho, mas ela
+  continua pendente e ainda não integra o save principal.
 - A sessão fica `paused/dirty`, mostra o erro existente de sincronização e
-  permite nova tentativa.
+  permite nova tentativa sem reconstruir a alteração.
 - Um checkpoint só muda para `synced/clean` se nenhuma mutação posterior tiver
   ocorrido desde o início da exportação.
 - Criar um perfil ainda exige a primeira gravação válida do arquivo antes de
@@ -132,8 +138,8 @@ Uma verificação de integração deve provar que:
 - digitação e autosave de draft não escrevem o arquivo;
 - Salvar e mudança de rota exportam quando `dirty` e não exportam quando clean;
 - falha mantém a base local, a sessão `dirty/paused` e permite retry;
-- reabertura usa a base local persistente sem importar por cima um arquivo mais
-  antigo;
+- reabertura parte do arquivo principal e recupera separadamente mudanças locais
+  pendentes compatíveis, mantendo a sessão `dirty`;
 - o round-trip manual do `.nutridiet` continua válido.
 - a lista de pacientes não hidrata históricos completos nem executa consultas
   por paciente;
