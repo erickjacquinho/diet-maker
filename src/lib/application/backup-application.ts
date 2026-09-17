@@ -50,6 +50,46 @@ export class BackupApplicationError extends Error {
 
 type UnknownRecord = Record<string, unknown>;
 
+export interface BackupMigrationStep {
+  readonly from: string;
+  readonly to: string;
+  readonly migrate: (input: UnknownRecord) => UnknownRecord;
+}
+
+/**
+ * Pure, ordered migrations for the logical save envelope.
+ *
+ * Add one step for every new schema version (for example, 5 -> 6 for a new
+ * photos collection). Older files are never mutated; the current validator
+ * runs only after the whole chain has produced the current shape.
+ */
+export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
+  {
+    from: '4',
+    to: '5',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '5',
+      account: Array.isArray(input.account)
+        ? input.account.map((row) => (isRecord(row) && !Object.prototype.hasOwnProperty.call(row, 'phone') ? { ...row, phone: null } : row))
+      : input.account,
+    }),
+  },
+  {
+    from: '5',
+    to: '6',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '6',
+      patients: Array.isArray(input.patients)
+        ? input.patients.map((row) => (isRecord(row)
+          ? { birthDate: null, isPregnant: false, pregnancyDueDate: null, ...row }
+          : row))
+        : input.patients,
+    }),
+  },
+];
+
 function fail(code: BackupErrorCode, message: string, cause?: unknown): never {
   throw new BackupApplicationError(code, message, { cause });
 }
@@ -78,6 +118,10 @@ function isJsonValue(value: unknown): boolean {
 
 function isNullable(value: unknown, predicate: (candidate: unknown) => boolean): boolean {
   return value === null || predicate(value);
+}
+
+function isNullableValue(predicate: (candidate: unknown) => boolean): (value: unknown) => boolean {
+  return (value) => isNullable(value, predicate);
 }
 
 function assertExactKeys(record: UnknownRecord, expected: readonly string[], tableName: string): void {
@@ -127,10 +171,20 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'label', 'normalizedLabel', 'origin', 'createdAt', 'updatedAt'), nullableStringFields('archivedAt'));
       break;
     case 'patients':
-      Object.assign(fields, stringFields('id', 'accountId', 'displayCode', 'name', 'gender', 'currentObjective', 'createdAt', 'updatedAt'), { age: isNumber, heightCm: isNumber, weightKg: isNumber, targetProtein: isNumber, targetCarbs: isNumber, targetFats: isNumber, targetKcal: isNumber, version: isNumber }, nullableStringFields('maritalStatus', 'phone', 'whatsapp', 'archivedAt'));
+      Object.assign(fields, stringFields('id', 'accountId', 'displayCode', 'name', 'gender', 'createdAt', 'updatedAt'), nullableStringFields('birthDate', 'pregnancyDueDate', 'maritalStatus', 'phone', 'whatsapp', 'currentObjective', 'archivedAt'), {
+        age: isNullableValue(isNumber),
+        isPregnant: isBoolean,
+        heightCm: isNullableValue(isNumber),
+        weightKg: isNullableValue(isNumber),
+        targetProtein: isNullableValue(isNumber),
+        targetCarbs: isNullableValue(isNumber),
+        targetFats: isNullableValue(isNumber),
+        targetKcal: isNullableValue(isNumber),
+        version: isNumber,
+      });
       break;
     case 'bodyAssessments':
-      Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg', 'bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm'), nullableNumericStringFields('neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
+      Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg'), nullableNumericStringFields('bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
       break;
     case 'nextFollowUps':
       Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'createdAt', 'updatedAt'), { version: isNumber });
@@ -299,14 +353,50 @@ function validateRelations(envelope: BackupEnvelope, expectedAccountId?: string)
   }
 }
 
-export function validateBackupEnvelope(input: unknown, context: BackupValidationContext = {}): BackupEnvelope {
-  if (!isRecord(input)) fail('BACKUP_FORMAT_INVALID', 'O backup deve ser um objeto JSON.');
+function migrateBackupInput(input: UnknownRecord): UnknownRecord & { schemaVersion: string } {
+  if (!Object.prototype.hasOwnProperty.call(input, 'schemaVersion')) {
+    fail('BACKUP_FORMAT_INVALID', 'O backup não informa a versão do schema.');
+  }
+
+  let current = input;
+  const visited = new Set<string>();
+  while (current.schemaVersion !== BACKUP_SCHEMA_VERSION) {
+    const from = current.schemaVersion;
+    if (!isString(from) || visited.has(from)) {
+      fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema do backup não é suportada.');
+    }
+    visited.add(from);
+    const step = BACKUP_MIGRATIONS.find((candidate) => candidate.from === from);
+    if (!step) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema do backup não é suportada.');
+
+    let migrated: UnknownRecord;
+    try {
+      migrated = step.migrate(current);
+    } catch (cause) {
+      if (cause instanceof BackupApplicationError) throw cause;
+      fail('BACKUP_FORMAT_INVALID', 'O backup legado não pôde ser migrado.', cause);
+    }
+    if (!isRecord(migrated) || migrated.schemaVersion !== step.to || step.to === from) {
+      fail('BACKUP_VERSION_UNSUPPORTED', 'A migração do schema do backup é inválida.');
+    }
+    current = migrated;
+  }
+  return current as UnknownRecord & { schemaVersion: string };
+}
+
+export function validateBackupEnvelope(rawInput: unknown, context: BackupValidationContext = {}): BackupEnvelope {
+  if (!isRecord(rawInput)) fail('BACKUP_FORMAT_INVALID', 'O backup deve ser um objeto JSON.');
+  for (const field of ['appId', 'formatVersion', 'schemaVersion', 'exportedAt']) {
+    if (!Object.prototype.hasOwnProperty.call(rawInput, field)) fail('BACKUP_FORMAT_INVALID', 'O backup possui cabeçalho incompleto.');
+  }
+  if (rawInput.appId !== BACKUP_APP_ID) fail('BACKUP_APP_MISMATCH', 'O arquivo não pertence a esta aplicação.');
+  if (rawInput.formatVersion !== BACKUP_FORMAT_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do formato de backup não é suportada.');
+  const input = migrateBackupInput(rawInput);
   const hasFavorites = Object.prototype.hasOwnProperty.call(input, 'favorites');
   assertExactKeys(input, hasFavorites ? BACKUP_ENVELOPE_KEYS : BACKUP_ENVELOPE_KEYS.filter((key) => key !== 'favorites'), 'envelope');
-  if (input.appId !== BACKUP_APP_ID) fail('BACKUP_APP_MISMATCH', 'O arquivo não pertence a esta aplicação.');
-  if (input.formatVersion !== BACKUP_FORMAT_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do formato de backup não é suportada.');
-  if (input.schemaVersion !== BACKUP_SCHEMA_VERSION && input.schemaVersion !== LEGACY_BACKUP_SCHEMA_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema do backup não é suportada.');
-  if (context.schemaVersion && context.schemaVersion !== BACKUP_SCHEMA_VERSION && context.schemaVersion !== LEGACY_BACKUP_SCHEMA_VERSION) fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema da sessão não é suportada.');
+  if (context.schemaVersion && context.schemaVersion !== BACKUP_SCHEMA_VERSION && !BACKUP_MIGRATIONS.some((step) => step.from === context.schemaVersion)) {
+    fail('BACKUP_VERSION_UNSUPPORTED', 'A versão do schema da sessão não é suportada.');
+  }
   if (!isString(input.exportedAt) || Number.isNaN(Date.parse(input.exportedAt))) fail('BACKUP_FORMAT_INVALID', 'A data de exportação do backup é inválida.');
   const favorites = hasFavorites ? input.favorites : [];
   if (!Array.isArray(favorites) || favorites.some((favorite) => !isString(favorite) || favorite.length === 0)) {

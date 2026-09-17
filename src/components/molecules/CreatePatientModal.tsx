@@ -1,16 +1,11 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SelectField } from '@/components/atoms';
-import { DEFAULT_OBJECTIVE_LABELS } from '@/lib/domain/objective-option';
+import { DatePickerField } from './DatePickerField';
 import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 import { textStyle } from '@/design-system';
@@ -18,15 +13,11 @@ import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
 export interface CreatePatientFormData {
   name: string;
-  age: number;
-  gender: string;
-  heightCm: number;
-  weightKg: number;
-  targetProtein: number;
-  targetCarbs: number;
-  targetFats: number;
   whatsapp: string;
-  objective: string;
+  birthDate: string;
+  gender: string;
+  isPregnant: boolean;
+  pregnancyDueDate: string;
 }
 
 export interface CreatePatientModalProps {
@@ -37,15 +28,11 @@ export interface CreatePatientModalProps {
 
 const INITIAL_FORM: CreatePatientFormData = {
   name: '',
-  age: 30,
-  gender: 'Masculino',
-  heightCm: 175,
-  weightKg: 75,
-  targetProtein: 150,
-  targetCarbs: 220,
-  targetFats: 60,
   whatsapp: '',
-  objective: 'Recomposição Corporal',
+  birthDate: '',
+  gender: '',
+  isPregnant: false,
+  pregnancyDueDate: '',
 };
 
 export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatientModalProps) {
@@ -55,28 +42,44 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
-  useSaveShortcut({
-    formRef,
-    enabled: open,
-    priority: 10,
-  });
+  useSaveShortcut({ formRef, enabled: open, priority: 10 });
 
   const reset = () => setFormData({ ...INITIAL_FORM });
   const update = <K extends keyof CreatePatientFormData>(key: K, value: CreatePatientFormData[K]) => {
     setFormData((current) => ({ ...current, [key]: value }));
   };
 
+  const handleGenderChange = (gender: string) => {
+    setFormData((current) => ({
+      ...current,
+      gender,
+      isPregnant: gender === 'Feminino' ? current.isPregnant : false,
+      pregnancyDueDate: gender === 'Feminino' ? current.pregnancyDueDate : '',
+    }));
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!formData.name.trim()) {
-      setFieldErrors({ name: 'Informe o nome completo.' });
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors.name = 'Informe o nome completo.';
+    if (!formData.whatsapp.trim()) errors.whatsapp = 'Informe o telefone/WhatsApp.';
+    if (!formData.gender) errors.gender = 'Selecione o gênero.';
+    if (!formData.birthDate) errors.birthDate = 'Informe a data de nascimento.';
+    if (formData.isPregnant && !formData.pregnancyDueDate) errors.pregnancyDueDate = 'Informe a data prevista do parto.';
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
+
     setIsSubmitting(true);
     setFormError(null);
     setFieldErrors({});
     try {
-      await onSave({ ...formData, name: formData.name.trim(), whatsapp: formatWhatsappContact(formData.whatsapp) });
+      await onSave({
+        ...formData,
+        name: formData.name.trim(),
+        whatsapp: formatWhatsappContact(formData.whatsapp),
+      });
       reset();
       onOpenChange(false);
     } catch (error) {
@@ -86,6 +89,8 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
       setIsSubmitting(false);
     }
   };
+
+  const isFemale = formData.gender === 'Feminino';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,33 +108,29 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
 
           <div>
             <label htmlFor="new-patient-whatsapp" className={`${textStyle('field-label')} block mb-1`}>WhatsApp</label>
-            <Input id="new-patient-whatsapp" type="tel" inputMode="numeric" autoComplete="tel" value={formData.whatsapp} onChange={(event) => update('whatsapp', formatWhatsappContact(event.target.value))} placeholder="(11) 99999-9999" />
+            <Input id="new-patient-whatsapp" type="tel" inputMode="numeric" autoComplete="tel" required value={formData.whatsapp} onChange={(event) => update('whatsapp', formatWhatsappContact(event.target.value))} placeholder="(11) 99999-9999" aria-invalid={Boolean(fieldErrors.whatsapp)} aria-describedby={fieldErrors.whatsapp ? 'new-patient-whatsapp-error' : undefined} />
+            {fieldErrors.whatsapp && <p id="new-patient-whatsapp-error" className="text-style-legal text-error mt-1" role="alert">{fieldErrors.whatsapp}</p>}
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div><label className={`${textStyle('field-label')} block mb-1`}>Idade</label><Input type="number" value={formData.age} onChange={(event) => update('age', Number(event.target.value))} /></div>
-            <div><label className={`${textStyle('field-label')} block mb-1`}>Altura (cm)</label><Input type="number" value={formData.heightCm} onChange={(event) => update('heightCm', Number(event.target.value))} /></div>
-            <div><label className={`${textStyle('field-label')} block mb-1`}>Peso (kg)</label><Input type="number" step="any" value={formData.weightKg} onChange={(event) => update('weightKg', Number(event.target.value))} /></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <SelectField
-              id="new-patient-objective"
-              label="Objetivo Clínico / Esportivo"
-              value={formData.objective}
-              onValueChange={(value) => update('objective', value)}
-              placeholder="Selecione o objetivo"
-              layer="modal"
-              options={DEFAULT_OBJECTIVE_LABELS.map((objective) => ({ value: objective, label: objective }))}
+          <div className="grid grid-cols-2 gap-3">
+            <DatePickerField
+              id="new-patient-birth-date"
+              label="Data de nascimento"
+              value={formData.birthDate}
+              onValueChange={(value) => update('birthDate', value)}
+              required
+              error={fieldErrors.birthDate}
             />
-
             <SelectField
               id="new-patient-gender"
               label="Gênero"
               value={formData.gender}
-              onValueChange={(value) => update('gender', value)}
+              onValueChange={handleGenderChange}
               placeholder="Selecione o gênero"
               layer="modal"
+              required
+              state={fieldErrors.gender ? 'error' : 'default'}
+              errorMessage={fieldErrors.gender}
               options={[
                 { value: 'Masculino', label: 'Masculino' },
                 { value: 'Feminino', label: 'Feminino' },
@@ -137,18 +138,56 @@ export function CreatePatientModal({ open, onOpenChange, onSave }: CreatePatient
             />
           </div>
 
+          {isFemale && (
+            <div className="grid grid-cols-2 items-start gap-3">
+              <fieldset className="flex flex-col gap-2">
+                <legend className={textStyle('field-label')}>Grávida?</legend>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-style-body-small text-text-primary">
+                    <Input
+                      type="radio"
+                      name="new-patient-pregnancy"
+                      value="no"
+                      checked={!formData.isPregnant}
+                      onChange={() => update('isPregnant', false)}
+                      className="size-4 appearance-auto accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                    />
+                    <span>Não</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-style-body-small text-text-primary">
+                    <Input
+                      type="radio"
+                      name="new-patient-pregnancy"
+                      value="yes"
+                      checked={formData.isPregnant}
+                      onChange={() => update('isPregnant', true)}
+                      className="size-4 appearance-auto accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                    />
+                    <span>Sim</span>
+                  </label>
+                </div>
+              </fieldset>
+              <div
+                className={formData.isPregnant ? undefined : 'invisible'}
+                aria-hidden={!formData.isPregnant}
+              >
+                <DatePickerField
+                  id="new-patient-pregnancy-due-date"
+                  label="Data prevista do parto"
+                  value={formData.pregnancyDueDate}
+                  onValueChange={(value) => update('pregnancyDueDate', value)}
+                  required={formData.isPregnant}
+                  disabled={!formData.isPregnant}
+                  error={formData.isPregnant ? fieldErrors.pregnancyDueDate : undefined}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-2 pt-2">
             {formError && <p className="text-style-legal text-error flex-1" role="alert">{formError}</p>}
             <Button type="button" variant="secondary" size="compact" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="flex-1">Cancelar</Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="compact"
-              className="flex-1"
-              disabled={isSubmitting}
-              aria-keyshortcuts="Control+s Meta+s"
-              title="Salvar Paciente (Ctrl+S)"
-            >
+            <Button type="submit" variant="primary" size="compact" className="flex-1" disabled={isSubmitting} aria-keyshortcuts="Control+s Meta+s" title="Salvar Paciente (Ctrl+S)">
               {isSubmitting ? 'Salvando…' : <>Salvar Paciente <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></>}
             </Button>
           </div>

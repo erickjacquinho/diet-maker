@@ -35,6 +35,7 @@ const patientInput = {
   name: '  Ana Lima ',
   age: 32,
   gender: 'Feminino',
+  birthDate: '1994-06-12',
   heightCm: 165,
   weightKg: 62,
   phone: null,
@@ -46,7 +47,7 @@ const patientInput = {
 describe('local relational patient adapter', () => {
   it('applies migrations idempotently and creates a stable account with default objectives', async () => {
     const application = await createApplication();
-    expect(await applyMigrations(handle!.client)).toBe('5');
+    expect(await applyMigrations(handle!.client)).toBe('6');
     const account = await application.listActivePatients();
     expect(account).toEqual([]);
     const profile = await application.addObjectiveOption('Preparação para Maratona');

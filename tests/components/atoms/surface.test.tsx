@@ -14,17 +14,23 @@ describe("Surface atom", () => {
     const surface = screen.getByTestId("surface");
     expect(surface).toHaveTextContent("Conteúdo");
     expect(surface).toHaveAttribute("aria-label", "Resumo");
-    expect(surface).toHaveClass("bg-surface", "rounded-surface", "shadow-none", "p-4");
+    expect(surface).toHaveClass("bg-surface", "border-border-control", "rounded-surface", "shadow-none", "p-4");
   });
 
   it("supports named variants and canonical density without domain props", () => {
     render(
-      <Surface data-testid="subtle" variant="subtle" density="highlight">
-        Subtle
-      </Surface>,
+      <>
+        <Surface data-testid="subtle" variant="subtle" density="highlight">
+          Subtle
+        </Surface>
+        <Surface data-testid="boxed" variant="boxed">
+          Boxed
+        </Surface>
+      </>,
     );
 
     expect(screen.getByTestId("subtle")).toHaveClass("bg-surface-subtle", "p-5", "shadow-none");
+    expect(screen.getByTestId("boxed")).toHaveClass("bg-surface-subtle", "border-border-subtle", "shadow-none");
     expect(screen.getByTestId("subtle")).not.toHaveAttribute("tone");
   });
 

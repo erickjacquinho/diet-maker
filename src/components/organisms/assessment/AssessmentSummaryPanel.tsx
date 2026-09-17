@@ -2,6 +2,7 @@ import React from 'react';
 import { Zap, TrendingDown, TrendingUp, Minus, Save, X, Scale, Copy, Check } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Surface, Badge, ProgressBar } from '@/components/atoms';
+import { MetricBoxGroup } from '@/components/organisms/MetricBoxGroup';
 import { Button } from '@/components/ui/button';
 import {
   classifyBodyFat,
@@ -9,6 +10,7 @@ import {
 } from '@/lib/clinicalClassifications';
 import type { AssessmentDeltas } from '@/hooks/useAssessmentWorkspacePage';
 import type { BodyCompositionResult } from '@/lib/bodyFat';
+import type { AssessmentType } from '@/lib/domain/clinical';
 
 export interface AssessmentSummaryPanelProps {
   composition: BodyCompositionResult;
@@ -16,6 +18,7 @@ export interface AssessmentSummaryPanelProps {
   bmi?: number | null;
   waistToHipRatio?: number | null;
   deltas: AssessmentDeltas;
+  assessmentType?: AssessmentType;
   patientGender?: string | null;
   isSaving?: boolean;
   submitError?: string | null;
@@ -84,6 +87,7 @@ export function AssessmentSummaryPanel({
   composition,
   ffmi = null,
   deltas,
+  assessmentType = 'complete',
   patientGender,
   isSaving = false,
   submitError,
@@ -95,6 +99,7 @@ export function AssessmentSummaryPanel({
 }: AssessmentSummaryPanelProps) {
   const bfBadge = classifyBodyFat(composition.bodyFatPercent, patientGender);
   const ffmiBadge = classifyFfmi(ffmi, patientGender);
+  const isSimplified = assessmentType === 'simplified';
 
   const leanPct =
     composition.bodyFatPercent !== null
@@ -107,13 +112,25 @@ export function AssessmentSummaryPanel({
 
   return (
     <aside
-      aria-label="Painel de resumo da composição corporal e performance"
+      aria-label={isSimplified ? 'Painel de resumo da avaliação simplificada' : 'Painel de resumo da composição corporal e performance'}
       className={`flex flex-col gap-4 sticky top-6 ${className}`}
     >
+      {isSimplified ? (
+        <Surface variant="boxed" density="highlight" className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
+            <Scale className="size-4 text-text-muted" aria-hidden="true" />
+            <h3 className={textStyle('card-title')}>Avaliação simplificada</h3>
+          </div>
+          <p className="text-style-caption text-text-secondary">
+            Registro de peso e medidas selecionadas. A composição corporal fica disponível na avaliação completa.
+          </p>
+        </Surface>
+      ) : (
+        <>
       {/* Bloco 1: Composição Corporal de Alta Performance (Grid 2x2 Bento) */}
-      <Surface variant="default" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-4">
+      <Surface variant="default" density="highlight" className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-control bg-primary-soft text-primary">
               <Zap className="size-4" aria-hidden="true" />
             </div>
@@ -124,54 +141,66 @@ export function AssessmentSummaryPanel({
           </div>
         </div>
 
-        {/* Grade 2x2 Rigorosamente Simétrica com Altura e Padding Padronizados */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* 1. Body Fat (BF%) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-style-legal font-bold tracking-label text-text-muted">Body Fat</span>
-              {bfBadge && (
-                <Badge variant={bfBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
-                  {bfBadge.label}
-                </Badge>
-              )}
-            </div>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.bodyFatPercent === null ? '—' : `${composition.bodyFatPercent} %`}
-            </span>
-          </div>
-
-          {/* 2. Massa Magra (FFM) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <span className="text-style-legal font-bold tracking-label text-text-muted">Massa Magra (FFM)</span>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.leanMassKg === null ? '—' : `${composition.leanMassKg} kg`}
-            </span>
-          </div>
-
-          {/* 3. Massa Gorda (FM) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <span className="text-style-legal font-bold tracking-label text-text-muted">Massa Gorda (FM)</span>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {composition.fatMassKg === null ? '—' : `${composition.fatMassKg} kg`}
-            </span>
-          </div>
-
-          {/* 4. FFMI (Índice de Massa Livre de Gordura) */}
-          <div className="flex flex-col justify-between p-3 rounded-control border border-border-subtle bg-surface-subtle h-[68px]">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-style-legal font-bold tracking-label text-text-muted">FFMI</span>
-              {ffmiBadge && (
-                <Badge variant={ffmiBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
-                  {ffmiBadge.label}
-                </Badge>
-              )}
-            </div>
-            <span className="font-bold font-mono tabular-nums text-style-body-small text-text-primary">
-              {ffmi === null ? '—' : `${ffmi} kg/m²`}
-            </span>
-          </div>
-        </div>
+        {/* Grade 2x2 usando o organismo canônico de métricas */}
+        <MetricBoxGroup
+          className="grid-cols-2 gap-2.5 divide-x-0 !overflow-visible rounded-none border-0 bg-transparent"
+          items={[
+            {
+              label: (
+                <span className="flex w-full items-center justify-between gap-1">
+                  <span>Body Fat</span>
+                  {bfBadge && (
+                    <Badge variant={bfBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={bfBadge.description}>
+                      {bfBadge.label}
+                    </Badge>
+                  )}
+                </span>
+              ),
+              value: composition.bodyFatPercent ?? '—',
+              unit: composition.bodyFatPercent === null ? undefined : '%',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: 'Massa Magra (FFM)',
+              value: composition.leanMassKg ?? '—',
+              unit: composition.leanMassKg === null ? undefined : 'kg',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: 'Massa Gorda (FM)',
+              value: composition.fatMassKg ?? '—',
+              unit: composition.fatMassKg === null ? undefined : 'kg',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+            {
+              label: (
+                <span className="flex w-full items-center justify-between gap-1">
+                  <span>FFMI</span>
+                  {ffmiBadge && (
+                    <Badge variant={ffmiBadge.tone} className="text-style-chart-micro h-4 px-1.5 py-0 font-medium" title={ffmiBadge.description}>
+                      {ffmiBadge.label}
+                    </Badge>
+                  )}
+                </span>
+              ),
+              value: ffmi ?? '—',
+              unit: ffmi === null ? undefined : 'kg/m²',
+              size: 'standard',
+              layout: 'stack',
+              surface: 'boxed',
+              className: 'h-[68px] rounded-control [&>div:first-child]:w-full [&>div:first-child]:items-start',
+            },
+          ]}
+        />
 
         {/* Barra de Distribuição de Massa Corporal */}
         {leanPct !== null && fatPct !== null && (
@@ -186,8 +215,8 @@ export function AssessmentSummaryPanel({
       </Surface>
 
       {/* Bloco 2: Recomposição Corporal vs. Avaliação Anterior */}
-      <Surface variant="subtle" className="p-5 rounded-surface border border-border-subtle flex flex-col gap-3">
-        <div className="flex items-center gap-2 border-b border-border-subtle pb-2.5">
+      <Surface variant="boxed" density="highlight" className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
           <Scale className="size-4 text-text-muted" aria-hidden="true" />
           <h4 className={textStyle('caption-strong')}>Recomposição Corporal</h4>
         </div>
@@ -206,6 +235,8 @@ export function AssessmentSummaryPanel({
           </p>
         )}
       </Surface>
+        </>
+      )}
 
       {/* Bloco 3: Feedback de Erro & Ações */}
       {submitError && (

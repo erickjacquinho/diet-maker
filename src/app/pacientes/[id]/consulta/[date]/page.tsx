@@ -95,9 +95,10 @@ export default function DedicatedConsultationPage() {
     );
   }
 
-  const heightM = patient.heightCm / 100;
-  const currentWeight = consultation.assessments[0]?.weightKg || patient.weightKg;
-  const bmi = (currentWeight / (heightM * heightM)).toFixed(1);
+  const currentWeight = consultation.assessments[0]?.weightKg ?? patient.weightKg;
+  const bmi = patient.heightCm !== null && currentWeight !== null
+    ? (currentWeight / ((patient.heightCm / 100) ** 2)).toFixed(1)
+    : '—';
   const consultationDateLabel = consultation.date.replace(/-/g, '/');
 
   return (

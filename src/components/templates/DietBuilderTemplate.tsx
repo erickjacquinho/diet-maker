@@ -35,6 +35,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   macroMetrics,
   mealsData = [],
   onAddMeal,
+  onReorderMeals,
   onScaleDiet,
   onOpenScaleModal,
   scaleDisabled = false,
@@ -49,8 +50,6 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onDiscardDraft,
   canDiscardDraft = true,
   saveStatus = 'clean',
-  saveError,
-  onRetrySave,
   onBackClick,
 }) => {
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
@@ -158,19 +157,6 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           actions={headerActions}
         />
 
-        {saveStatus !== 'clean' && saveStatus !== 'persisted' && (
-          <div role="status" aria-live="polite" className="flex items-center justify-between gap-3 rounded-surface border border-border-subtle bg-surface-muted px-4 py-3 text-style-legal text-text-secondary">
-            <span>
-              {saveStatus === 'pending' && 'Alterações locais ainda não persistidas; salvar ou navegar fará o flush.'}
-              {saveStatus === 'saving' && 'Salvando rascunho local…'}
-              {saveStatus === 'committing' && 'Confirmando prescrição…'}
-              {saveStatus === 'error' && (saveError || 'Não foi possível persistir a edição local. A prescrição clínica não foi alterada.')}
-              {saveStatus === 'cleanup-pending' && 'Prescrição salva; a limpeza do rascunho ficou pendente.'}
-            </span>
-            {saveStatus === 'error' && onRetrySave && <Button type="button" size="compact" variant="secondary" onClick={onRetrySave}>Tentar novamente</Button>}
-          </div>
-        )}
-
         <DietContextSection
           name={resolvedName}
           initials={resolvedInitials}
@@ -224,7 +210,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           />
         </section>
 
-        <DietMealsSection mealsData={mealsData} onAddMeal={onAddMeal} />
+        <DietMealsSection mealsData={mealsData} onAddMeal={onAddMeal} onReorderMeals={onReorderMeals} />
       </main>
 
       {onDiscardDraft && (

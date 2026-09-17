@@ -10,6 +10,7 @@ import { AssessmentContinuousFields } from '@/components/molecules/assessment/As
 import { AssessmentSummaryPanel } from '@/components/organisms/assessment/AssessmentSummaryPanel';
 import { Surface, SecondaryActionButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { textStyle } from '@/design-system';
 import { useAssessmentWorkspacePage } from '@/hooks/useAssessmentWorkspacePage';
 
@@ -31,7 +32,9 @@ export default function AssessmentWorkspacePage() {
     isCopied,
     submitError,
     isLeaveConfirmationOpen,
+    assessmentType,
     updateNumericField,
+    updateAssessmentType,
     updateDateField,
     handleSave,
     handleCancel,
@@ -83,7 +86,7 @@ export default function AssessmentWorkspacePage() {
       />
 
       {/* Barra de Contexto do Paciente & Data */}
-      <Surface variant="subtle" density="compact" className="px-5 py-2.5 rounded-surface border border-border-subtle flex flex-wrap items-center justify-between gap-4">
+      <Surface variant="default" density="highlight" className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" aria-hidden="true" />
@@ -127,11 +130,37 @@ export default function AssessmentWorkspacePage() {
               handleSave();
             }}
           >
-            <AssessmentContinuousFields
-              draft={draft}
-              previousAssessment={previousAssessment}
-              updateNumericField={updateNumericField}
-            />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-start gap-3">
+                <h2 id="assessment-type-title" className={`${textStyle('card-title')} shrink-0`}>tipo de avaliação</h2>
+                <ToggleGroup
+                  type="single"
+                  value={assessmentType}
+                  onValueChange={(value) => {
+                    if (value === 'complete' || value === 'simplified') updateAssessmentType(value);
+                  }}
+                  aria-labelledby="assessment-type-title"
+                >
+                  <ToggleGroupItem value="complete">completa</ToggleGroupItem>
+                  <ToggleGroupItem value="simplified">simplificada</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              {assessmentType === 'simplified' ? (
+                <AssessmentContinuousFields
+                  draft={draft}
+                  updateNumericField={updateNumericField}
+                  mode="simplified"
+                />
+              ) : (
+                <AssessmentContinuousFields
+                  draft={draft}
+                  previousAssessment={previousAssessment}
+                  updateNumericField={updateNumericField}
+                  mode="complete"
+                />
+              )}
+            </div>
           </form>
         </div>
 
@@ -140,6 +169,7 @@ export default function AssessmentWorkspacePage() {
             composition={composition}
             ffmi={ffmi}
             deltas={deltas}
+            assessmentType={assessmentType}
             patientGender={patient.gender}
             isSaving={isSaving}
             isCopied={isCopied}

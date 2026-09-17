@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import DedicatedCarbCyclingPage from '@/app/pacientes/[id]/dieta/[dietaId]/ciclo/page';
 import DietBuilderPage from '@/app/pacientes/[id]/dieta/[dietaId]/page';
@@ -9,6 +9,7 @@ import { fromEditableDocument, toEditableDocument } from '@/lib/application/diet
 
 const mockPush = vi.fn();
 let storedDiets: FullDietPlan[] = [];
+let initialMode: FullDietPlan['mode'] = 'carb_cycling';
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: 'pat-1', dietaId: 'nova' }),
@@ -29,12 +30,13 @@ const mockPatientApplication = {
 const mockDietApplication = {
   openEditor: vi.fn().mockImplementation(async (patientId: string, routeDietId: string) => {
     const stored = storedDiets.find((diet) => diet.patientId === patientId && diet.id === routeDietId) ?? null;
-    const plan = stored ?? { ...createInitialDietPlan(patientId, { weightKg: 65 }), id: routeDietId, mode: 'carb_cycling' as const };
+    const plan = stored ?? { ...createInitialDietPlan(patientId, { weightKg: 65 }), id: routeDietId, mode: initialMode };
     return {
       draft: { draftId: `draft-${routeDietId}`, contextKey: `account-a|${patientId}|${routeDietId}`, accountId: 'account-a', patientId, routeDietId, payloadSchemaVersion: 1, draftRevision: 1, state: 'EDITABLE' as const, payload: toEditableDocument(plan), createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z' },
       isNew: !stored,
     };
   }),
+  autosaveDraft: vi.fn().mockResolvedValue({ status: 'SAVED' as const, revision: 2, updatedAt: '2026-08-30T00:00:00.000Z' }),
   flushDraft: vi.fn().mockImplementation(async (_draftId: string, document: ReturnType<typeof toEditableDocument>) => {
     const plan = fromEditableDocument(document, 'pat-1', 'nova', '2026-08-01T00:00:00.000Z', '2026-08-30T00:00:00.000Z');
     const existingIndex = storedDiets.findIndex((diet) => diet.id === plan.id);
@@ -48,6 +50,11 @@ const mockDietApplication = {
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
   getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
+  getBrowserLibraryApplication: () => Promise.resolve({
+    listCustomFoods: vi.fn().mockResolvedValue([]),
+    listRecipes: vi.fn().mockResolvedValue([]),
+    listReadyMeals: vi.fn().mockResolvedValue([]),
+  }),
 }));
 
 const mockPatient = {
@@ -70,6 +77,7 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     storedDiets = [];
+    initialMode = 'carb_cycling';
     vi.spyOn(patientsStore, 'getPatientById').mockReturnValue(mockPatient);
   });
 
@@ -162,5 +170,40 @@ describe('Bidirectional Sync between /dieta/nova/ciclo and /dieta/nova', () => {
 
     // Variação 4 must still be preserved
     expect(screen.getByText('Variação 4')).toBeInTheDocument();
+  });
+
+  it('creates a meal without opening the food picker, which remains optional', async () => {
+    render(<DietBuilderPage />);
+    await screen.findByRole('button', { name: /Ciclo de Carboidratos/i });
+
+    fireEvent.click(screen.getByRole('button', { name: /Ciclo de Carboidratos/i }));
+    fireEvent.click(screen.getByText('Dia Médio Carbo'));
+
+    const mealsRegion = screen.getByRole('region', { name: 'Refeições' });
+    fireEvent.click(within(mealsRegion).getByRole('button', { name: 'Nova Refeição' }));
+
+    expect(await within(mealsRegion).findByDisplayValue('Refeição 1')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fireEvent.click(within(mealsRegion).getByRole('button', { name: 'Adicionar Alimento' }));
+    expect(await screen.findByText('Adicionar à Refeição "Refeição 1"')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar' }));
+    fireEvent.click(screen.getByText('Dia Alto Carbo'));
+    expect(within(screen.getByRole('region', { name: 'Refeições' })).getByText('Nenhuma Refeição Cadastrada')).toBeInTheDocument();
+  });
+
+  it('creates a meal after switching a simple diet to carb cycling', async () => {
+    initialMode = 'simple';
+    render(<DietBuilderPage />);
+    await screen.findByRole('button', { name: /Ciclo de Carboidratos/i });
+
+    fireEvent.click(screen.getByRole('button', { name: /Ciclo de Carboidratos/i }));
+
+    const mealsRegion = screen.getByRole('region', { name: 'Refeições' });
+    fireEvent.click(within(mealsRegion).getByRole('button', { name: 'Nova Refeição' }));
+
+    expect(await within(mealsRegion).findByDisplayValue('Refeição 1')).toBeInTheDocument();
+    fireEvent.click(within(mealsRegion).getByRole('button', { name: 'Nova Refeição' }));
+    expect(await within(mealsRegion).findByDisplayValue('Refeição 2')).toBeInTheDocument();
   });
 });

@@ -69,7 +69,13 @@ describe('SelectTrigger', () => {
       'shadow-floating',
     );
     expect(selectedItem).toHaveClass('pr-8', 'pl-2');
-    expect(selectedItem).toHaveClass('rounded-control', 'text-style-nav-item', 'data-[state=checked]:bg-primary-soft');
+    expect(selectedItem).toHaveClass(
+      'rounded-control',
+      'text-style-nav-item',
+      'data-[state=checked]:bg-surface-subtle',
+      'data-[state=checked]:border-transparent',
+    );
     expect(selectedItem.querySelector('span')).toHaveClass('right-2');
+    expect(selectedItem.querySelector('svg')).toBeInTheDocument();
   });
 });

@@ -1,12 +1,21 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, beforeEach, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, beforeEach, it, vi } from 'vitest';
 import type { PatientViewModel } from '@/lib/patientViewModel';
 import { buildPatientListRows } from '@/lib/patientListView';
 import PatientsListPage from '@/app/pacientes/page';
 import { usePatientsPage } from '@/hooks/usePatientsPage';
 
 const push = vi.fn();
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+beforeAll(() => {
+  Element.prototype.scrollIntoView = vi.fn();
+});
+
+afterAll(() => {
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push }),
@@ -81,12 +90,36 @@ describe('PatientsListPage', () => {
     expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
   });
 
-  it('opens the existing registration dialog from the toolbar', async () => {
+  it('opens the personal-data registration dialog with radio pregnancy flow', async () => {
     render(<PatientsListPage />);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Novo paciente' }));
 
-    expect(screen.getByRole('dialog', { name: 'Cadastrar Novo Paciente' })).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: 'Cadastrar Novo Paciente' });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: 'Nome Completo' })).toBeRequired();
+    expect(within(dialog).getByRole('textbox', { name: 'WhatsApp' })).toBeRequired();
+    expect(within(dialog).getByRole('textbox', { name: 'Data de nascimento' })).toBeRequired();
+    expect(within(dialog).getByRole('combobox', { name: 'Gênero' })).toHaveAttribute('aria-required', 'true');
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Data de nascimento' })).toBeInTheDocument();
+    expect(screen.queryByText('Idade')).not.toBeInTheDocument();
+    expect(screen.queryByText('Objetivo Clínico / Esportivo')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Gênero' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Feminino' }));
+    const birthDateButton = within(dialog).getByRole('button', { name: 'Abrir calendário para Data de nascimento' });
+    expect(birthDateButton.closest('.grid')).toHaveClass('grid-cols-2');
+    expect(birthDateButton.closest('.grid')).toContainElement(within(dialog).getByRole('combobox', { name: 'Gênero' }));
+    expect(within(dialog).getAllByRole('radio').map((radio) => radio.getAttribute('value'))).toEqual(['no', 'yes']);
+    expect(within(dialog).getByRole('radio', { name: 'Não' })).toBeChecked();
+    expect(within(dialog).getByRole('button', { name: 'Abrir calendário para Data prevista do parto', hidden: true })).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Sim' }));
+    expect(within(dialog).getByRole('radio', { name: 'Sim' })).toBeChecked();
+    const dueDateButton = screen.getByRole('button', { name: 'Abrir calendário para Data prevista do parto' });
+    expect(dueDateButton).toBeInTheDocument();
+    expect(dueDateButton).not.toBeDisabled();
+    expect(dueDateButton.closest('.grid')).toContainElement(within(dialog).getByRole('group', { name: 'Grávida?' }));
+
     const whatsappField = screen.getByRole('textbox', { name: 'WhatsApp' });
     fireEvent.change(whatsappField, { target: { value: '11999999999' } });
     expect(whatsappField).toHaveValue('(11) 99999-9999');

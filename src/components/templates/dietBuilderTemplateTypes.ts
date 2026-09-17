@@ -34,6 +34,7 @@ export interface DietBuilderTemplateProps {
   mealsData?: MealCardContainerProps[];
   meals?: any[];
   onAddMeal?: () => void;
+  onReorderMeals?: (mealIds: string[]) => void;
   onRemoveMeal?: (index: number) => void;
   onUpdateMealHeader?: (index: number, title: string, time: string) => void;
   onAddFoodClick?: (index: number) => void;
@@ -54,8 +55,6 @@ export interface DietBuilderTemplateProps {
   onDiscardDraft?: () => void | Promise<void>;
   canDiscardDraft?: boolean;
   saveStatus?: 'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending';
-  saveError?: string;
-  onRetrySave?: () => void;
   onBackClick?: () => void;
   carbCyclingVariations?: any[];
   activeVariationId?: string;

@@ -7,6 +7,7 @@ import { LocalAccountContextRepository } from '@/lib/infrastructure/local-db/acc
 import { LocalObjectiveCatalogRepository } from '@/lib/infrastructure/local-db/objective-catalog-repository';
 import { LocalPatientRepository } from '@/lib/infrastructure/local-db/patient-repository';
 import { LocalTransactionRunner } from '@/lib/infrastructure/local-db/transaction-runner';
+import { getAgeFromBirthDate } from '@/lib/date-only';
 
 let handle: LocalDatabaseHandle | undefined;
 
@@ -37,6 +38,7 @@ const input = {
   name: 'Ana Lima',
   age: 32,
   gender: 'Feminino',
+  birthDate: '1994-06-12',
   heightCm: 165,
   weightKg: 62,
   phone: null,
@@ -49,6 +51,7 @@ describe('updatePatient use case', () => {
   it('updates only the current patient and increments its version', async () => {
     const app = await application();
     const created = await app.createPatient(input);
+    expect(created.age).toBe(getAgeFromBirthDate(input.birthDate));
     const updated = await app.updatePatient(created.id, created.version, {
       ...input,
       name: '  Ana Lima Atualizada  ',

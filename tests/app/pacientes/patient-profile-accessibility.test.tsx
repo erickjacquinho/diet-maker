@@ -38,6 +38,9 @@ const patient = {
   accountId: 'local-account',
   version: 1,
   archivedAt: null,
+  birthDate: '1997-04-05',
+  isPregnant: true,
+  pregnancyDueDate: '2026-12-10',
 } satisfies PatientViewModel;
 
 function profileState() {
@@ -111,6 +114,12 @@ describe('PatientDetailPage accessibility', () => {
       'hover:bg-error',
       'hover:text-white',
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Ver dados pessoais' }));
+    expect(screen.getByRole('heading', { name: 'Dados pessoais' })).toBeInTheDocument();
+    expect(screen.getByText('Idade')).toBeInTheDocument();
+    expect(screen.getByText(/^\d+a \d+m$/)).toBeInTheDocument();
+    expect(screen.queryByText('05/04/1997')).not.toBeInTheDocument();
+    expect(screen.getByText('10/12/2026')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de avaliações físicas' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de prescrições dietéticas' })).toBeInTheDocument();
   });
@@ -125,7 +134,7 @@ describe('PatientDetailPage accessibility', () => {
     expect(dialog).toHaveClass('z-modal', 'rounded-surface', 'bg-surface');
     expect(screen.getByRole('heading', { name: /Definir pr/ })).toHaveClass('text-style-dialog-title');
     expect(screen.getByText(/Escolha a data/)).toHaveClass('text-style-body', 'text-text-secondary');
-    expect(screen.getByRole('button', { name: 'Data' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toHaveAttribute(
       'aria-haspopup',
       'dialog',
     );
@@ -154,5 +163,16 @@ describe('PatientDetailPage accessibility', () => {
     expect(screen.queryByRole('button', { name: 'Definir acompanhamento' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Nova Dieta' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Nova Avaliação' })).not.toBeInTheDocument();
+  });
+
+  it('shows a fallback badge when the patient has no objective', () => {
+    mockUsePatientProfilePage.mockReturnValue({
+      ...profileState(),
+      patient: { ...patient, objective: '' },
+    } as ReturnType<typeof usePatientProfilePage>);
+
+    render(<PatientDetailPage />);
+
+    expect(screen.getByText('sem objetivo')).toBeInTheDocument();
   });
 });

@@ -8,6 +8,7 @@ import {
 
 export type NumericAssessmentField =
   | 'weightKg'
+  | 'heightCm'
   | 'neckCm'
   | 'scapulaCm'
   | 'bustCm'
@@ -66,7 +67,7 @@ export function useAssessmentForm({
       sex: bodyFatSex,
       heightCm: patient.heightCm,
       neckCm: draft.neckCm ?? Number.NaN,
-      waistCm: draft.waistCm,
+      waistCm: draft.waistCm ?? Number.NaN,
       abdomenCm: draft.abdomenCm ?? Number.NaN,
       hipCm: draft.hipCm ?? Number.NaN,
       weightKg: draft.weightKg,

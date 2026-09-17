@@ -22,7 +22,7 @@ describe('PGlite backup repository', () => {
 
     const snapshot = await repository.readAccountSnapshot('local-account');
 
-    expect(snapshot).toMatchObject({ appId: 'nutridiet-local-pro', formatVersion: 1, schemaVersion: '5', exportedAt: source.exportedAt });
+    expect(snapshot).toMatchObject({ appId: 'nutridiet-local-pro', formatVersion: 1, schemaVersion: '6', exportedAt: source.exportedAt });
     for (const table of ['account', 'objectiveOptions', 'patients', 'bodyAssessments', 'nextFollowUps', 'dietPlans', 'dietVariations', 'dietVariationDays', 'dietMeals', 'dietMealOptions', 'dietMealItems', 'dietItemSnapshots', 'foodCatalogItems', 'recipes', 'recipeIngredients', 'readyMeals', 'readyMealItems'] as const) {
       const sourceRows: readonly unknown[] = source[table];
       const snapshotRows: readonly unknown[] = snapshot[table];

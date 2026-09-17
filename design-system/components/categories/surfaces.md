@@ -40,8 +40,9 @@ Título `card-title`; descrição `body-secondary`; corpo `body`; metadado `meta
 
 | Part | Property | Token |
 | --- | --- | --- |
-| root | background/border | `surface` / `border-subtle` |
+| root | background/border | `surface` / `border-control-essential` |
 | subtle surface | background/border | `surface-subtle` / `border-divider` |
+| boxed surface | background/border | `surface-subtle` / `border-subtle` |
 | interactive hover | background/border | `surface-hover` / `border-hover` |
 | title | text | `text-primary` |
 | description | text | `text-secondary` |
@@ -51,13 +52,13 @@ Título `card-title`; descrição `body-secondary`; corpo `body`; metadado `meta
 
 ## Allowed variants
 
-Card `standard`, `compact`, `highlight`; surface `default` ou `subtle`; separator horizontal/vertical; ScrollArea vertical ou bidirecional quando o conteúdo exigir. `interactive-surface` somente quando toda a superfície possui uma ação primária.
+Card `standard`, `compact`, `highlight`; surface `default`, `subtle` ou `boxed`; separator horizontal/vertical; ScrollArea vertical ou bidirecional quando o conteúdo exigir. `interactive-surface` somente quando toda a superfície possui uma ação primária.
 
 ## State matrix
 
 | State | Background | Text | Border | Icon | Cursor | Motion | Semantic announcement |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| default | `surface` | por conteúdo | `border-subtle` | por conteúdo | default | none | grupo quando nomeado |
+| default | `surface` | por conteúdo | `border-control-essential` | por conteúdo | default | none | grupo quando nomeado |
 | hover | N/A estática; interativa usa `surface-hover` | preservado | `border-hover` | preservado | pointer se interativa | color 120ms | none |
 | pressed | N/A estática; interativa usa `surface-subtle` | preservado | preservado | preservado | pointer | color 120ms | none |
 | focus-visible | N/A estática; interativa recebe ring | preservado | 1px + ring | preservado | pointer | none | nome da ação |
@@ -99,3 +100,4 @@ Passa quando agrupamento, padding, radius, borda, overflow e interatividade pode
 ## Change history
 
 - `CAT-2026-07-31-surfaces`: superfícies flat estabilizadas com radius 8 e borda discreta de 1px.
+- `SURFACES-2026-09-16`: `Surface` default usa `border-control-essential` para delimitar melhor agrupamentos de conteúdo.

@@ -26,6 +26,10 @@ async function createPatient(page: Page, name: string): Promise<string> {
 
   const createDialog = page.getByRole('dialog', { name: 'Cadastrar Novo Paciente' });
   await createDialog.getByLabel('Nome Completo').fill(name);
+  await createDialog.getByLabel('WhatsApp').fill('11999990000');
+  await createDialog.getByLabel('Data de nascimento').fill('01/01/1990');
+  await createDialog.getByRole('combobox', { name: 'Gênero' }).click();
+  await page.getByRole('option', { name: 'Masculino', exact: true }).click();
   await createDialog.getByRole('button', { name: /Salvar Paciente/ }).click();
   await expect(createDialog).toBeHidden({ timeout: 120_000 });
 

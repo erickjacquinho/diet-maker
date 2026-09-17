@@ -1,6 +1,7 @@
 import type { Patient as DomainPatient } from '@/lib/domain/patient';
 import type { Patient as LegacyPatient } from './patientsStoreTypes';
 import { formatWhatsappContact } from './whatsapp';
+import { getAgeFromBirthDate } from './date-only';
 
 export type PatientViewModel = LegacyPatient & {
   accountId?: string;
@@ -19,16 +20,18 @@ export function toPatientViewModel(
     archivedAt: patient.archivedAt,
     code: patient.displayCode,
     name: patient.name,
-    age: patient.age,
     gender: patient.gender,
-    heightCm: patient.heightCm,
-    weightKg: patient.weightKg,
+    birthDate: patient.birthDate ?? undefined,
+    isPregnant: patient.isPregnant,
+    pregnancyDueDate: patient.pregnancyDueDate ?? undefined,
+    heightCm: patient.heightCm ?? 0,
+    weightKg: patient.weightKg ?? 0,
     maritalStatus: patient.maritalStatus ?? undefined,
-    targetKcal: patient.defaultMacroTargets.kcal,
-    targetProtein: patient.defaultMacroTargets.proteinG,
-    targetCarbs: patient.defaultMacroTargets.carbsG,
-    targetFats: patient.defaultMacroTargets.fatsG,
-    objective: patient.currentObjective,
+    targetKcal: patient.defaultMacroTargets.kcal ?? 0,
+    targetProtein: patient.defaultMacroTargets.proteinG ?? 0,
+    targetCarbs: patient.defaultMacroTargets.carbsG ?? 0,
+    targetFats: patient.defaultMacroTargets.fatsG ?? 0,
+    objective: patient.currentObjective ?? '',
     phone: formatWhatsappContact(patient.phone ?? undefined) || undefined,
     whatsapp: formatWhatsappContact(patient.whatsapp ?? undefined) || undefined,
     nextEvent: null,
@@ -36,6 +39,7 @@ export function toPatientViewModel(
     initials: getInitials(patient.name),
     lastActivity: null,
     ...overrides,
+    age: getAgeFromBirthDate(patient.birthDate) ?? 0,
   };
 }
 
@@ -49,19 +53,22 @@ function getInitials(name: string): string {
 export function toPatientInput(patient: PatientViewModel) {
   return {
     name: patient.name,
-    age: patient.age,
+    age: null,
     gender: patient.gender,
-    heightCm: patient.heightCm,
-    weightKg: patient.weightKg,
+    birthDate: patient.birthDate ?? null,
+    isPregnant: patient.isPregnant ?? false,
+    pregnancyDueDate: patient.pregnancyDueDate ?? null,
+    heightCm: patient.heightCm || null,
+    weightKg: patient.weightKg || null,
     maritalStatus: patient.maritalStatus ?? null,
     phone: patient.phone ?? null,
     whatsapp: patient.whatsapp ?? null,
-    currentObjective: patient.objective,
+    currentObjective: patient.objective || null,
     defaultMacroTargets: {
-      proteinG: patient.targetProtein,
-      carbsG: patient.targetCarbs,
-      fatsG: patient.targetFats,
-      kcal: patient.targetKcal,
+      proteinG: patient.targetProtein || null,
+      carbsG: patient.targetCarbs || null,
+      fatsG: patient.targetFats || null,
+      kcal: patient.targetKcal || null,
     },
   };
 }

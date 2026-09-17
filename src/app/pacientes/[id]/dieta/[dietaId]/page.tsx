@@ -67,12 +67,11 @@ export default function DietBuilderPage() {
     handleReorderVariations,
     handleSaveDiet,
     saveStatus,
-    saveError,
-    onRetrySave,
     onDiscardDraft,
     onBackClick,
     flushDraft,
     handleAddMeal,
+    handleReorderMeals,
     handleDuplicateMeal,
     handleCopyMeal,
     handlePasteMeal,
@@ -113,7 +112,7 @@ export default function DietBuilderPage() {
 
     const frameId = window.requestAnimationFrame(() => {
       pendingMealScrollIdRef.current = null;
-      document.getElementById(`meal-card-${pendingMealId}`)?.scrollIntoView({
+      document.getElementById(`meal-card-${pendingMealId}`)?.scrollIntoView?.({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'nearest',
@@ -123,12 +122,11 @@ export default function DietBuilderPage() {
     return () => window.cancelAnimationFrame(frameId);
   }, [currentMeals]);
 
-  const handleAddMealAndOpenFoodSearch = () => {
+  const handleAddMealAndScroll = () => {
     const newMealId = handleAddMeal();
     if (!newMealId) return;
 
     pendingMealScrollIdRef.current = newMealId;
-    setFoodSearchMealIndex(mealGroups.length);
   };
 
   const handleOpenCycleMatrix = async () => {
@@ -271,7 +269,8 @@ export default function DietBuilderPage() {
           metrics: macroMetrics,
         }}
         mealsData={mealsData}
-        onAddMeal={handleAddMealAndOpenFoodSearch}
+        onAddMeal={handleAddMealAndScroll}
+        onReorderMeals={handleReorderMeals}
         onScaleDiet={() => setIsScaleModalOpen(true)}
         scaleDisabled={isNewDiet}
         onOpenAdjustGoalsModal={openAdjustGoalsModal}
@@ -281,8 +280,6 @@ export default function DietBuilderPage() {
         onWhatsAppShare={openWhatsAppModal}
         onSaveDiet={handleSaveDiet}
         saveStatus={saveStatus}
-        saveError={saveError}
-        onRetrySave={onRetrySave}
         onDiscardDraft={onDiscardDraft}
         onBackClick={onBackClick}
       />

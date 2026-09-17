@@ -150,10 +150,10 @@ describe('DietBuilderTemplate top composition', () => {
     expect(onAddMeal).toHaveBeenCalledTimes(1);
   });
 
-  it('announces local persistence states and exposes a retry action', () => {
-    renderTemplate({ saveStatus: 'error', saveError: 'Armazenamento local indisponível.', onRetrySave: vi.fn() });
-    expect(screen.getByRole('status')).toHaveTextContent('Armazenamento local indisponível.');
-    expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument();
+  it('keeps persistence feedback out of the page content', () => {
+    renderTemplate({ saveStatus: 'error' });
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument();
     expect(screen.getByRole('main', { name: 'Elaboração de Dieta' })).not.toHaveAttribute('aria-busy', 'true');
   });
 
@@ -161,7 +161,7 @@ describe('DietBuilderTemplate top composition', () => {
     const onSaveDiet = vi.fn();
     renderTemplate({ saveStatus: 'committing', onSaveDiet });
     expect(screen.getByRole('main', { name: 'Elaboração de Dieta' })).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('status')).toHaveTextContent('Confirmando prescrição');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Salvar Prescrição' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar Prescrição' }));
     expect(onSaveDiet).not.toHaveBeenCalled();

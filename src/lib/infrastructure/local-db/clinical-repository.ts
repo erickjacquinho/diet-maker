@@ -2,8 +2,10 @@ import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type {
   AssessmentPersistenceInput,
+  AssessmentInputSnapshot,
   BodyAssessment,
   CalculationInputSnapshot,
+  CalculationMethod,
   NextFollowUp,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
@@ -36,8 +38,18 @@ function jsonArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
 
-function snapshot(value: unknown): CalculationInputSnapshot {
+function snapshot(value: unknown, calculationMethod: CalculationMethod): AssessmentInputSnapshot {
   const source = (value && typeof value === 'object' ? value : {}) as Partial<CalculationInputSnapshot>;
+  if (calculationMethod === 'NONE') {
+    return {
+      assessmentType: 'simplified',
+      heightCm: requiredNumber(source.heightCm, 'heightCm'),
+      weightKg: requiredNumber(source.weightKg, 'weightKg'),
+      waistCm: numberValue(source.waistCm),
+      abdomenCm: numberValue(source.abdomenCm),
+      hipCm: numberValue(source.hipCm),
+    };
+  }
   return {
     sex: source.sex === 'male' ? 'male' : 'female',
     heightCm: Number(source.heightCm),
@@ -56,22 +68,24 @@ function requiredNumber(value: string | number | null | undefined, field: string
 }
 
 function toAssessment(row: AssessmentRow): BodyAssessment {
+  const calculationMethod = row.calculationMethod as CalculationMethod;
   return {
     id: row.id,
     accountId: row.accountId,
     patientId: row.patientId,
     clinicalDate: row.clinicalDate,
+    assessmentType: calculationMethod === 'NONE' ? 'simplified' : 'complete',
     weightKg: requiredNumber(row.weightKg, 'weightKg'),
-    bodyFatPercent: requiredNumber(row.bodyFatPercent, 'bodyFatPercent'),
-    fatMassKg: requiredNumber(row.fatMassKg, 'fatMassKg'),
-    leanMassKg: requiredNumber(row.leanMassKg, 'leanMassKg'),
-    waistCm: requiredNumber(row.waistCm, 'waistCm'),
-    scapulaCm: requiredNumber(row.scapulaCm, 'scapulaCm'),
-    bustCm: requiredNumber(row.bustCm, 'bustCm'),
-    abdomenCm: requiredNumber(row.abdomenCm, 'abdomenCm'),
-    hipCm: requiredNumber(row.hipCm, 'hipCm'),
-    leftProximalThighCm: requiredNumber(row.leftProximalThighCm, 'leftProximalThighCm'),
-    rightProximalThighCm: requiredNumber(row.rightProximalThighCm, 'rightProximalThighCm'),
+    bodyFatPercent: numberValue(row.bodyFatPercent),
+    fatMassKg: numberValue(row.fatMassKg),
+    leanMassKg: numberValue(row.leanMassKg),
+    waistCm: numberValue(row.waistCm),
+    scapulaCm: numberValue(row.scapulaCm),
+    bustCm: numberValue(row.bustCm),
+    abdomenCm: numberValue(row.abdomenCm),
+    hipCm: numberValue(row.hipCm),
+    leftProximalThighCm: numberValue(row.leftProximalThighCm),
+    rightProximalThighCm: numberValue(row.rightProximalThighCm),
     neckCm: numberValue(row.neckCm),
     leftArmCm: numberValue(row.leftArmCm),
     rightArmCm: numberValue(row.rightArmCm),
@@ -80,9 +94,9 @@ function toAssessment(row: AssessmentRow): BodyAssessment {
     leftCalfCm: numberValue(row.leftCalfCm),
     rightCalfCm: numberValue(row.rightCalfCm),
     autoFilledFields: jsonArray(row.autoFilledFields),
-    calculationMethod: 'US_NAVY',
+    calculationMethod,
     calculationVersion: row.calculationVersion,
-    calculationInputSnapshot: snapshot(row.calculationInputSnapshot),
+    calculationInputSnapshot: snapshot(row.calculationInputSnapshot, calculationMethod),
     version: row.version,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -103,22 +117,24 @@ function toFollowUp(row: FollowUpRow): NextFollowUp {
 
 function assessmentValues(assessment: BodyAssessment | AssessmentPersistenceInput, now: string): typeof bodyAssessments.$inferInsert {
   const source = assessment as BodyAssessment;
+  const nullableNumber = (value: number | undefined) => value == null || !Number.isFinite(value) ? null : String(value);
+  const calculationMethod = source.calculationMethod ?? (source.assessmentType === 'simplified' ? 'NONE' : 'US_NAVY');
   return {
     id: source.id ?? nanoid(16),
     accountId: source.accountId!,
     patientId: source.patientId!,
     clinicalDate: source.clinicalDate,
     weightKg: String(source.weightKg),
-    bodyFatPercent: String(source.bodyFatPercent),
-    fatMassKg: String(source.fatMassKg),
-    leanMassKg: String(source.leanMassKg),
-    waistCm: String(source.waistCm),
-    scapulaCm: String(source.scapulaCm),
-    bustCm: String(source.bustCm),
-    abdomenCm: String(source.abdomenCm),
-    hipCm: String(source.hipCm),
-    leftProximalThighCm: String(source.leftProximalThighCm),
-    rightProximalThighCm: String(source.rightProximalThighCm),
+    bodyFatPercent: nullableNumber(source.bodyFatPercent),
+    fatMassKg: nullableNumber(source.fatMassKg),
+    leanMassKg: nullableNumber(source.leanMassKg),
+    waistCm: nullableNumber(source.waistCm),
+    scapulaCm: nullableNumber(source.scapulaCm),
+    bustCm: nullableNumber(source.bustCm),
+    abdomenCm: nullableNumber(source.abdomenCm),
+    hipCm: nullableNumber(source.hipCm),
+    leftProximalThighCm: nullableNumber(source.leftProximalThighCm),
+    rightProximalThighCm: nullableNumber(source.rightProximalThighCm),
     neckCm: source.neckCm == null ? null : String(source.neckCm),
     leftArmCm: source.leftArmCm == null ? null : String(source.leftArmCm),
     rightArmCm: source.rightArmCm == null ? null : String(source.rightArmCm),
@@ -127,7 +143,7 @@ function assessmentValues(assessment: BodyAssessment | AssessmentPersistenceInpu
     leftCalfCm: source.leftCalfCm == null ? null : String(source.leftCalfCm),
     rightCalfCm: source.rightCalfCm == null ? null : String(source.rightCalfCm),
     autoFilledFields: source.autoFilledFields ?? [],
-    calculationMethod: source.calculationMethod ?? 'US_NAVY',
+    calculationMethod,
     calculationVersion: source.calculationVersion ?? 'us-navy-v1',
     calculationInputSnapshot: source.calculationInputSnapshot,
     version: source.version ?? 1,

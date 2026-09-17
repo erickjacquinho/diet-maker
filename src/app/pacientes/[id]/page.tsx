@@ -2,17 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale } from 'lucide-react';
+import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info } from 'lucide-react';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
-import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton } from '@/components/atoms';
+import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
 import {
   PatientAssessmentsTable,
   PatientDietsTable,
   PatientProfileHeader,
 } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PageContextHeader } from '@/components/molecules';
 import { textStyle } from '@/design-system';
+import { formatAgeFromBirthDate, formatDateOnly } from '@/lib/date-only';
 import { cn } from '@/lib/utils';
 import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
@@ -110,6 +112,46 @@ export default function PatientDetailPage() {
           </PatientProfileHeader.Identity>
 
           <PatientProfileHeader.Actions>
+            <Popover>
+              <PopoverTrigger asChild>
+                <IconButton
+                  size="compact"
+                  variant="quiet"
+                  title="Ver dados pessoais"
+                  aria-label="Ver dados pessoais"
+                  icon={<Info className="size-4" aria-hidden="true" />}
+                />
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80">
+                <div className="flex flex-col gap-3">
+                  <h2 className={textStyle('body-strong')}>Dados pessoais</h2>
+                  <dl className="flex flex-col gap-2 text-style-body-small">
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-text-muted">Idade</dt>
+                      <dd className="font-semibold text-text-primary">{formatAgeFromBirthDate(patient.birthDate) || 'Não informado'}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-text-muted">Gênero</dt>
+                      <dd className="font-semibold text-text-primary">{patient.gender || 'Não informado'}</dd>
+                    </div>
+                    {patient.gender === 'Feminino' && (
+                      <>
+                        <div className="flex items-center justify-between gap-4">
+                          <dt className="text-text-muted">Grávida</dt>
+                          <dd className="font-semibold text-text-primary">{patient.isPregnant ? 'Sim' : 'Não'}</dd>
+                        </div>
+                        {patient.isPregnant && (
+                          <div className="flex items-center justify-between gap-4">
+                            <dt className="text-text-muted">DPP</dt>
+                            <dd className="font-semibold text-text-primary">{formatDateOnly(patient.pregnancyDueDate) || 'Não informado'}</dd>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </dl>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="secondary"
               size="compact"

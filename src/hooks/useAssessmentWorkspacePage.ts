@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import type { PatientViewModel } from '@/lib/patientViewModel';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
-import { ClinicalApplicationError } from '@/lib/domain/clinical';
+import { ClinicalApplicationError, getAssessmentType, type AssessmentType } from '@/lib/domain/clinical';
 import { toAssessmentInput, toLegacyAssessment, type BodyAssessment } from '@/lib/application/patients/clinical-ui-adapter';
 import { calculateBodyComposition, normalizeBodyFatSex } from '@/lib/bodyFat';
 import { useSaveShortcut } from './useSaveShortcut';
@@ -23,6 +23,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   const router = useRouter();
   const [patient, setPatient] = useState<PatientViewModel | null>(null);
   const [draft, setDraft] = useState<BodyAssessment | null>(null);
+  const [assessmentType, setAssessmentType] = useState<AssessmentType>('complete');
   const [previousAssessment, setPreviousAssessment] = useState<BodyAssessment | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,14 +46,18 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       const assessments = canonicalAssessments.map(toLegacyAssessment);
       const sorted = [...assessments].sort((left, right) => (right.clinicalDate ?? right.date).localeCompare(left.clinicalDate ?? left.date) || left.id.localeCompare(right.id));
       if (cancelled) return;
-      setPatient(toPatientViewModel(profile.patient, { initials: profile.initials }));
+      const patientView = toPatientViewModel(profile.patient, { initials: profile.initials });
+      setPatient(patientView);
 
       if (isNew) {
         setPreviousAssessment(sorted[0] ?? null);
+        setAssessmentType('complete');
         setDraft({
           id: `draft-${patientId}`,
           patientId,
           date: new Date().toLocaleDateString('pt-BR'),
+          assessmentType: 'complete',
+          heightCm: patientView.heightCm > 0 ? patientView.heightCm : Number.NaN,
           weightKg: Number.NaN,
           bodyFatPercent: Number.NaN,
           muscleMassKg: Number.NaN,
@@ -75,6 +80,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       } else {
         const existing = assessments.find((item) => item.id === assessmentId) ?? null;
         if (!existing) throw new ClinicalApplicationError('CLINICAL_ASSESSMENT_NOT_FOUND', 'Avaliação não encontrada neste paciente.');
+        setAssessmentType(getAssessmentType(existing));
         setDraft({ ...existing });
         setPreviousAssessment(sorted.find((item) => item.id !== existing.id && (item.clinicalDate ?? item.date) <= (existing.clinicalDate ?? existing.date)) ?? null);
       }
@@ -96,6 +102,16 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
   );
 
   const composition = useMemo(() => {
+    if (assessmentType === 'simplified') {
+      return {
+        bodyFatPercent: null,
+        fatMassKg: null,
+        leanMassKg: null,
+        isValid: false,
+        error: 'A composição corporal está disponível na avaliação completa.',
+      };
+    }
+
     if (!draft || !patient || !bodyFatSex) {
       return {
         bodyFatPercent: null,
@@ -123,25 +139,27 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       sex: bodyFatSex,
       heightCm: patient.heightCm,
       neckCm: effectiveNeck,
-      waistCm: draft.waistCm,
+      waistCm: draft.waistCm ?? Number.NaN,
       abdomenCm: draft.abdomenCm ?? Number.NaN,
       hipCm: draft.hipCm ?? Number.NaN,
       weightKg: draft.weightKg,
     });
-  }, [bodyFatSex, draft, patient, previousAssessment]);
+  }, [assessmentType, bodyFatSex, draft, patient, previousAssessment]);
 
   // Fat-Free Mass Index (FFMI) para ciência esportiva / hipertrofia real
   const ffmi = useMemo(() => {
-    if (!composition.leanMassKg || !patient?.heightCm || patient.heightCm <= 0) return null;
-    const heightM = patient.heightCm / 100;
+    const heightCm = assessmentType === 'simplified' ? draft?.heightCm : patient?.heightCm;
+    if (!composition.leanMassKg || !heightCm || heightCm <= 0) return null;
+    const heightM = heightCm / 100;
     return Number((composition.leanMassKg / (heightM * heightM)).toFixed(1));
-  }, [composition.leanMassKg, patient?.heightCm]);
+  }, [assessmentType, composition.leanMassKg, draft?.heightCm, patient?.heightCm]);
 
   const bmi = useMemo(() => {
-    if (!draft?.weightKg || !patient?.heightCm || patient.heightCm <= 0) return null;
-    const heightM = patient.heightCm / 100;
+    const heightCm = assessmentType === 'simplified' ? draft?.heightCm : patient?.heightCm;
+    if (!draft?.weightKg || !heightCm || heightCm <= 0) return null;
+    const heightM = heightCm / 100;
     return Number((draft.weightKg / (heightM * heightM)).toFixed(1));
-  }, [draft?.weightKg, patient?.heightCm]);
+  }, [assessmentType, draft?.heightCm, draft?.weightKg, patient?.heightCm]);
 
   const waistToHipRatio = useMemo(() => {
     if (!draft?.waistCm || !draft?.hipCm || draft.hipCm <= 0) return null;
@@ -170,14 +188,14 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     const currentBF = composition.bodyFatPercent;
     const prevBF = previousAssessment.bodyFatPercent;
     const bodyFatDiff =
-      currentBF !== null && Number.isFinite(prevBF)
+      currentBF !== null && typeof prevBF === 'number' && Number.isFinite(prevBF)
         ? Number((currentBF - prevBF).toFixed(2))
         : null;
 
     const currentLean = composition.leanMassKg;
     const prevLean = previousAssessment.muscleMassKg;
     const leanMassDiff =
-      currentLean !== null && Number.isFinite(prevLean)
+      currentLean !== null && typeof prevLean === 'number' && Number.isFinite(prevLean)
         ? Number((currentLean - prevLean).toFixed(1))
         : null;
 
@@ -191,7 +209,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     const currentWaist = draft.waistCm;
     const prevWaist = previousAssessment.waistCm;
     const waistDiff =
-      Number.isFinite(currentWaist) && Number.isFinite(prevWaist)
+      typeof currentWaist === 'number' && Number.isFinite(currentWaist) && typeof prevWaist === 'number' && Number.isFinite(prevWaist)
         ? Number((currentWaist - prevWaist).toFixed(1))
         : null;
 
@@ -218,6 +236,13 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     setIsDirty(true);
   }, []);
 
+  const updateAssessmentType = useCallback((type: AssessmentType) => {
+    setAssessmentType(type);
+    setDraft((current) => (current ? { ...current, assessmentType: type } : current));
+    setSubmitError(null);
+    setIsDirty(true);
+  }, []);
+
   const updateDateField = useCallback((date: string) => {
     setDraft((current) => (current ? { ...current, date } : current));
     setIsDirty(true);
@@ -227,21 +252,24 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     if (!draft || !patient) return;
     if (savingRef.current) return;
 
-    // 1. Validação dos 7 Campos Obrigatórios:
-    // peso, escapula, torax, cintura, barriga (abdomen), quadril, coxa proximal
     const missingRequired: string[] = [];
-    if (!draft.weightKg || Number.isNaN(draft.weightKg) || draft.weightKg <= 0) missingRequired.push('Peso');
-    if (!draft.scapulaCm || Number.isNaN(draft.scapulaCm) || draft.scapulaCm <= 0) missingRequired.push('Escápula');
-    if (!draft.bustCm || Number.isNaN(draft.bustCm) || draft.bustCm <= 0) missingRequired.push('Tórax');
-    if (!draft.waistCm || Number.isNaN(draft.waistCm) || draft.waistCm <= 0) missingRequired.push('Cintura');
-    if (!draft.abdomenCm || Number.isNaN(draft.abdomenCm) || draft.abdomenCm <= 0) missingRequired.push('Barriga / Abdômen');
-    if (!draft.hipCm || Number.isNaN(draft.hipCm) || draft.hipCm <= 0) missingRequired.push('Quadril');
+    if (assessmentType === 'simplified') {
+      if (!Number.isFinite(draft.weightKg) || draft.weightKg <= 0) missingRequired.push('Peso');
+      if (typeof draft.heightCm !== 'number' || !Number.isFinite(draft.heightCm) || draft.heightCm <= 0) missingRequired.push('Altura');
+    } else {
+      if (!draft.weightKg || Number.isNaN(draft.weightKg) || draft.weightKg <= 0) missingRequired.push('Peso');
+      if (!draft.scapulaCm || Number.isNaN(draft.scapulaCm) || draft.scapulaCm <= 0) missingRequired.push('Escápula');
+      if (!draft.bustCm || Number.isNaN(draft.bustCm) || draft.bustCm <= 0) missingRequired.push('Tórax');
+      if (!draft.waistCm || Number.isNaN(draft.waistCm) || draft.waistCm <= 0) missingRequired.push('Cintura');
+      if (!draft.abdomenCm || Number.isNaN(draft.abdomenCm) || draft.abdomenCm <= 0) missingRequired.push('Barriga / Abdômen');
+      if (!draft.hipCm || Number.isNaN(draft.hipCm) || draft.hipCm <= 0) missingRequired.push('Quadril');
 
-    const hasThigh =
-      (draft.leftProximalThighCm !== undefined && !Number.isNaN(draft.leftProximalThighCm) && draft.leftProximalThighCm > 0) ||
-      (draft.rightProximalThighCm !== undefined && !Number.isNaN(draft.rightProximalThighCm) && draft.rightProximalThighCm > 0);
+      const hasThigh =
+        (draft.leftProximalThighCm !== undefined && !Number.isNaN(draft.leftProximalThighCm) && draft.leftProximalThighCm > 0) ||
+        (draft.rightProximalThighCm !== undefined && !Number.isNaN(draft.rightProximalThighCm) && draft.rightProximalThighCm > 0);
 
-    if (!hasThigh) missingRequired.push('Coxa Proximal');
+      if (!hasThigh) missingRequired.push('Coxa Proximal');
+    }
 
     if (missingRequired.length > 0) {
       const errorMsg = `Preencha os campos obrigatórios: ${missingRequired.join(', ')}.`;
@@ -273,7 +301,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
       savingRef.current = false;
       setIsSaving(false);
     }
-  }, [draft, patient, composition, isNew, router, isSaving]);
+  }, [assessmentType, draft, patient, composition, isNew, router, isSaving]);
 
   const navigateBack = useCallback(() => {
     if (patient) {
@@ -366,7 +394,9 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     isCopied,
     isLeaveConfirmationOpen,
     submitError,
+    assessmentType,
     updateNumericField,
+    updateAssessmentType,
     updateDateField,
     handleSave,
     handleCancel,

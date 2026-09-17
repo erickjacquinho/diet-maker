@@ -18,6 +18,7 @@ export * from './NextEventModal';
 export * from './AddObjectiveModal';
 export * from './DeletePatientModal';
 export * from './DataTable';
+export * from './SortableList';
 export * from './ActionDropdown';
 export * from './MacroSummary';
 export * from './MacroProportionBar';

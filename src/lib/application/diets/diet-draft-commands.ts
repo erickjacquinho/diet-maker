@@ -13,11 +13,11 @@ function emptyTargets() {
   return { protein: createDecimalString('0'), carbs: createDecimalString('0'), fat: createDecimalString('0'), energyKcal: createDecimalString('0') };
 }
 
-function newDocument(weightKg: number): DietEditableDocument {
+function newDocument(weightKg: number | null): DietEditableDocument {
   return {
     name: 'Prescrição Alimentar',
     mode: 'SIMPLE',
-    weightReferenceKg: createDecimalString(String(weightKg)),
+    ...(weightKg !== null ? { weightReferenceKg: createDecimalString(String(weightKg)) } : {}),
     variations: [{ id: 'variation-simple', position: 0, kind: 'SIMPLE', name: 'Plano diário', inputMode: 'GRAMS', assignedDays: [], targets: emptyTargets(), meals: [] }],
   };
 }

@@ -9,7 +9,7 @@ describe('DatePickerField accessibility', () => {
       <DatePickerField id="follow-up-date" label="Data" value="2026-08-03" onValueChange={vi.fn()} />,
     );
 
-    const trigger = screen.getByRole('button', { name: /data/i });
+    const trigger = screen.getByRole('button', { name: 'Abrir calendário para Data' });
     trigger.focus();
     fireEvent.click(trigger);
 
@@ -48,14 +48,15 @@ describe('DatePickerField accessibility', () => {
       />,
     );
 
-    const trigger = screen.getByRole('button', { name: /data do acompanhamento/i });
+    const input = screen.getByRole('textbox', { name: /data do acompanhamento/i });
 
-    expect(trigger).toHaveAccessibleName('Data do acompanhamento');
-    expect(trigger).toHaveAttribute('aria-required', 'true');
-    expect(trigger).toHaveAttribute('aria-invalid', 'true');
-    expect(trigger).toHaveAttribute('aria-describedby', 'follow-up-date-error');
-    expect(trigger).toBeDisabled();
-    expect(trigger).toHaveClass('border-error-border');
+    expect(input).toHaveAccessibleName('Data do acompanhamento');
+    expect(input).toHaveAttribute('aria-required', 'true');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby', 'follow-up-date-error');
+    expect(input).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Data do acompanhamento' })).toBeDisabled();
+    expect(input).toHaveClass('aria-invalid:border-error-border');
     expect(screen.getByRole('alert')).toHaveTextContent('Informe uma data.');
   });
 });

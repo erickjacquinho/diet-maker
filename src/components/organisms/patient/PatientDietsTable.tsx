@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, ChevronDown, Eye } from 'lucide-react';
+import { Calendar, ChevronDown, Eye, LocateFixed } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +17,7 @@ import {
 import { EditIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { HistoricalDiet } from '@/lib/patientRelatedRecords';
 import type { HistoricalDietVariation } from '@/lib/patientsStoreTypes';
 import type { DietHistoryRow } from '@/lib/application/diets/diet-ports';
@@ -230,6 +231,7 @@ export function DietTableRow({
   const isActive = diet.status === 'Ativa';
   const isCarbCycling = diet.mode === 'carb_cycling';
   const hasCycleDetails = isCarbCycling;
+  const dietTarget = diet.dietTargets ?? diet;
 
   return (
     <TableRow
@@ -293,13 +295,39 @@ export function DietTableRow({
 
       {/* 4. Macros */}
       <TableCell className="min-w-0 whitespace-nowrap px-1 py-1">
-        <MacroSummary
-          protein={diet.proteinG}
-          carbs={diet.carbsG}
-          fats={diet.fatsG}
-          showKcal={false}
-          className={textStyle('table-number')}
-        />
+        <div className="flex items-center gap-2">
+          <MacroSummary
+            protein={diet.proteinG}
+            carbs={diet.carbsG}
+            fats={diet.fatsG}
+            showKcal={false}
+            className={textStyle('table-number')}
+          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="inline-flex shrink-0 cursor-help text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                role="img"
+                tabIndex={0}
+                aria-label="Meta da dieta"
+              >
+                <LocateFixed className="size-4" aria-hidden="true" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="start" className="px-3 py-2">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-style-legal font-semibold text-text-secondary">Meta da dieta</span>
+                <MacroSummary
+                  protein={dietTarget.proteinG}
+                  carbs={dietTarget.carbsG}
+                  fats={dietTarget.fatsG}
+                  kcal={dietTarget.targetKcal}
+                  className="text-style-legal"
+                />
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </TableCell>
 
       {/* 5. Calorias */}
@@ -346,32 +374,34 @@ export function PatientDietsTable({
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
 
   return (
-    <DataTable
-      data={diets}
-      columns={columns}
-      getRowId={(diet) => diet.id}
-      caption="Histórico de prescrições dietéticas e planos alimentares"
-      ariaLabel="Histórico de prescrições dietéticas e planos alimentares"
-      emptyMessage="Nenhuma prescrição dietética registrada para este paciente até o momento."
-      renderRow={(diet) => (
-        <DietTableRow
-          patientId={patientId}
-          diet={toTableView(diet)}
-          isExpanded={expandedDietId === diet.id}
-          onToggleExpand={() =>
-            setExpandedDietId((currentId) => (currentId === diet.id ? null : diet.id))
-          }
-          onOpenReadOnlyDiet={onOpenReadOnlyDiet}
-        />
-      )}
-      expandedRowId={expandedDietId}
-      renderExpandedRow={(diet) =>
-        diet.mode === 'CARB_CYCLING' || diet.mode === 'carb_cycling' ? (
-          <DietCycleDetails diet={'plan' in diet ? toHistoricalDietView(diet) : diet} />
-        ) : null
-      }
-      tableClassName="table-fixed"
-      className="border border-border-subtle rounded-surface overflow-hidden"
-    />
+    <TooltipProvider delayDuration={200}>
+      <DataTable
+        data={diets}
+        columns={columns}
+        getRowId={(diet) => diet.id}
+        caption="Histórico de prescrições dietéticas e planos alimentares"
+        ariaLabel="Histórico de prescrições dietéticas e planos alimentares"
+        emptyMessage="Nenhuma prescrição dietética registrada para este paciente até o momento."
+        renderRow={(diet) => (
+          <DietTableRow
+            patientId={patientId}
+            diet={toTableView(diet)}
+            isExpanded={expandedDietId === diet.id}
+            onToggleExpand={() =>
+              setExpandedDietId((currentId) => (currentId === diet.id ? null : diet.id))
+            }
+            onOpenReadOnlyDiet={onOpenReadOnlyDiet}
+          />
+        )}
+        expandedRowId={expandedDietId}
+        renderExpandedRow={(diet) =>
+          diet.mode === 'CARB_CYCLING' || diet.mode === 'carb_cycling' ? (
+            <DietCycleDetails diet={'plan' in diet ? toHistoricalDietView(diet) : diet} />
+          ) : null
+        }
+        tableClassName="table-fixed"
+        className="border border-border-subtle rounded-surface overflow-hidden"
+      />
+    </TooltipProvider>
   );
 }

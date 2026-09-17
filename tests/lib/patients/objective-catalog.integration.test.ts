@@ -32,10 +32,11 @@ const patientInput = {
   name: 'Paciente do catálogo',
   age: 30,
   gender: 'Masculino',
+  birthDate: '1990-01-01',
   heightCm: 180,
   weightKg: 80,
   phone: null,
-  whatsapp: null,
+  whatsapp: '11999990000',
   currentObjective: 'Preparação para Maratona',
   defaultMacroTargets: { proteinG: 150, carbsG: 200, fatsG: 60, kcal: 2140 },
 };

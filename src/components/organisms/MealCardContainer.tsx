@@ -4,8 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, Surface, DeleteIconButton } from '@/components/atoms';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar } from '../molecules';
-import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar, SortableList } from '../molecules';
+import type { SortableItemRenderContext } from '@/components/molecules/SortableList';
+import type { DataTableColumnDef } from '@/components/molecules/DataTable';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
@@ -196,8 +198,6 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   const [draftTime, setDraftTime] = useState(time);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [isPasteReplaceAlertOpen, setIsPasteReplaceAlertOpen] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverState, setDragOverState] = useState<{ index: number; position: 'top' | 'bottom' } | null>(null);
   const isScaleActionDisabled = true;
 
   useEffect(() => setDraftTitle(title), [title]);
@@ -265,7 +265,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
         onValueChange={hasVariationTabs ? onVariationChange : undefined}
         activationMode="manual"
       >
-      <TabsContent value={selectedVariationId} asChild forceMount className="mt-0">
+      <TabsContent value={selectedVariationId} asChild forceMount>
       <div className="flex flex-col gap-4 flex-1">
         {/* Meal Header */}
         <div className="flex items-center justify-between pb-3 border-b border-border-subtle gap-2 flex-wrap">
@@ -414,7 +414,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
               </Popover>
             </div>
             {hasVariationTabs && (
-              <TabsList aria-label="Variações da refeição" className="h-control-compact shrink-0">
+              <TabsList aria-label="Variações da refeição">
                 {variationOptions.map((option) => (
                   <TabsTrigger
                     key={option.id}
@@ -528,84 +528,92 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
         {/* Items List - Table View */}
         <div className="min-h-12">
-          <DataTable
-            data={items}
-            columns={mealItemColumns}
-            getRowId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
-            caption={`Alimentos da refeição ${title}`}
-            ariaLabel={`Alimentos da refeição ${title}`}
-            emptyMessage={
-              <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
-                <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
-                <span className="text-style-caption">
-                  Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.
-                </span>
-              </span>
-            }
-            className="overflow-hidden rounded-control border border-border-divider bg-surface"
-            renderRow={(item, idx) => (
-                    <MealItemRow
-                      index={idx}
-                      {...item}
-                      isDragging={draggedIndex === idx}
-                      isDragOver={dragOverState?.index === idx && draggedIndex !== idx}
-                      dragOverPosition={dragOverState?.index === idx && draggedIndex !== idx ? dragOverState.position : null}
-                      onDragStart={(index) => setDraggedIndex(index)}
-                      onDragEnd={() => {
-                        setDraggedIndex(null);
-                        setDragOverState(null);
-                      }}
-                      onDragOver={(e, index) => {
-                        e.preventDefault();
-                        if (e.dataTransfer) {
-                          e.dataTransfer.dropEffect = 'move';
-                        }
-                        if (draggedIndex === null || draggedIndex === index) {
-                          setDragOverState(null);
-                          return;
-                        }
-                        const clientY = typeof e.clientY === 'number' ? e.clientY : (e.nativeEvent as MouseEvent)?.clientY ?? 0;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const isBottomHalf = (clientY - rect.top) > (rect.height / 2);
-                        const position = isBottomHalf ? 'bottom' : 'top';
-                        setDragOverState({ index, position });
-                      }}
-                      onDragLeave={(e, index) => {
-                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                          if (dragOverState?.index === index) {
-                            setDragOverState(null);
-                          }
-                        }
-                      }}
-                      onDrop={(e, index) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const source = draggedIndex !== null
-                          ? draggedIndex
-                          : (e.dataTransfer && e.dataTransfer.getData('text/plain') ? Number(e.dataTransfer.getData('text/plain')) : null);
+          <Table
+            aria-label={`Alimentos da refeição ${title}`}
+            containerClassName="overflow-hidden rounded-control border border-border-divider bg-surface"
+          >
+            <TableCaption className="sr-only">Alimentos da refeição {title}</TableCaption>
+            <TableHeader>
+              <TableRow className="border-b border-border-divider bg-surface-subtle hover:bg-surface-subtle">
+                {mealItemColumns.map((column) => (
+                  <TableHead
+                    key={column.id}
+                    scope="col"
+                    className={cn(
+                      'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
+                      column.headerClassName
+                    )}
+                  >
+                    {column.header}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
 
-                        if (source !== null && !isNaN(source)) {
-                          const clientY = typeof e.clientY === 'number' ? e.clientY : (e.nativeEvent as MouseEvent)?.clientY ?? 0;
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const isBottomHalf = (clientY - rect.top) > (rect.height / 2);
-                          let target = isBottomHalf ? index + 1 : index;
-                          if (source < target) {
-                            target -= 1;
-                          }
-                          if (source !== target) {
-                            onReorderItems?.(source, target);
-                          }
-                        }
-                        setDraggedIndex(null);
-                        setDragOverState(null);
-                      }}
-                      onQuantityChange={(newGrams) => onQuantityChange && onQuantityChange(idx, newGrams)}
-                      onSubstitute={() => onSubstituteItem && onSubstituteItem(idx)}
-                      onDuplicate={() => onDuplicateItem && onDuplicateItem(idx)}
-                      onRemove={() => onRemoveItem && onRemoveItem(idx)}
-                    />
+            {items.length === 0 ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={mealItemColumns.length} className="p-4 text-center">
+                    <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
+                      <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
+                      <span className="text-style-caption">
+                        Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.
+                      </span>
+                    </span>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <SortableList
+                items={items}
+                getItemId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
+                getItemLabel={(item) => item.name}
+                ariaLabel={`Alimentos da refeição ${title}`}
+                className="relative"
+                announcementPortal
+                renderContainer={({ ref, className }, children) => (
+                  <TableBody
+                    ref={ref as React.Ref<HTMLTableSectionElement>}
+                    className={cn(className, '[&_tr:last-child]:border-0')}
+                  >
+                    {children}
+                  </TableBody>
+                )}
+                renderItemWrapper={(_, content) => content}
+                renderItem={(item, context: SortableItemRenderContext) => (
+                  <MealItemRow
+                    index={context.visualIndex}
+                    {...item}
+                    sortableProps={context.itemProps}
+                    onQuantityChange={(newGrams) => onQuantityChange?.(context.visualIndex, newGrams)}
+                    onSubstitute={() => onSubstituteItem?.(context.visualIndex)}
+                    onDuplicate={() => onDuplicateItem?.(context.visualIndex)}
+                    onRemove={() => onRemoveItem?.(context.visualIndex)}
+                  />
+                )}
+                renderPlaceholder={({ height }) => (
+                  <TableRow data-testid="sortable-placeholder" aria-hidden="true">
+                    <TableCell colSpan={mealItemColumns.length} className="p-0">
+                      <div
+                        ref={(node) => {
+                          if (node) node.style.height = `${height ?? 44}px`;
+                        }}
+                        className="border-y border-primary bg-primary-soft/20"
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+                renderPreview={(item) => (
+                  <table className="w-full border-separate border-spacing-0 text-style-body-small text-text-primary">
+                    <TableBody>
+                      <MealItemRow {...item} />
+                    </TableBody>
+                  </table>
+                )}
+                onReorder={(_, meta) => onReorderItems?.(meta.fromIndex, meta.toIndex)}
+              />
             )}
-          />
+          </Table>
         </div>
 
         {/* Add Food Button */}
@@ -617,7 +625,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
           onClick={() => onAddFoodClick?.(addFoodButtonRef.current ?? undefined)}
           className="w-full border-dashed border-border-control hover:border-primary/60 hover:bg-surface-hover text-text-primary font-semibold text-style-button-label-compact flex items-center justify-center gap-1.5"
         >
-          <Plus size={14} className="text-success" />
+          <Plus size={14} className="text-primary" />
           <span>Adicionar Alimento</span>
         </Button>
 

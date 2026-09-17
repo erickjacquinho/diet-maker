@@ -52,6 +52,33 @@ describe('MealItemRow quantity keyboard navigation', () => {
     expect(document.activeElement).toBe(firstInput);
   });
 
+  it('propagates a valid quantity change immediately without losing focus', () => {
+    const onQuantityChange = vi.fn();
+
+    render(
+      <table>
+        <tbody>
+          <MealItemRow
+            name="Arroz"
+            kcal={130}
+            protein={2.5}
+            carbs={28}
+            fats={0.2}
+            quantityGrams={100}
+            onQuantityChange={onQuantityChange}
+          />
+        </tbody>
+      </table>,
+    );
+
+    const input = screen.getByRole('spinbutton', { name: /Arroz/i });
+    input.focus();
+    fireEvent.change(input, { target: { value: '150' } });
+
+    expect(onQuantityChange).toHaveBeenCalledWith(150);
+    expect(document.activeElement).toBe(input);
+  });
+
   it('keeps substitute and duplicate actions in the hover action column', () => {
     renderMealRows();
 

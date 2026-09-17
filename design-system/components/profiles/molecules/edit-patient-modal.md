@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Editar dados cadastrais, objetivo e metas de um paciente com proteção contra descarte acidental.
+Editar dados cadastrais pessoais e metas de um paciente com proteção contra descarte acidental. A idade é derivada da data de nascimento; estado civil, idade, altura, peso e objetivo não são editados neste modal.
 
 ## Category inheritance
 
@@ -22,7 +22,7 @@ Herda integralmente [overlays](../../categories/overlays.md) e compõe campos e 
 
 ## Specific anatomy
 
-Dialog com header acessível, formulário rolável de cadastro e metas, footer de cancelar/salvar e confirmação secundária para descartar alterações.
+Dialog com header acessível, formulário rolável de cadastro pessoal, footer de cancelar/salvar e confirmação secundária para descartar alterações.
 
 ## Allowed variants
 
@@ -34,11 +34,11 @@ O rascunho é isolado do paciente persistido; fechamento por Escape, backdrop ou
 
 ## Composition
 
-Base declarada: `ui-dialog`. Compõe `ui-input`, `ui-select`, `ui-button` e `atom-secondary-action-button`. Persistência e criação de objetivos permanecem no consumidor.
+Base declarada: `ui-dialog`. Compõe `ui-input`, `ui-select`, `ui-button` e `molecule-date-picker-field`. Persistência permanece no consumidor.
 
 ## Content rules
 
-Labels devem estar associados aos controles; objetivo e gênero devem permanecer selecionáveis por teclado.
+Labels devem estar associados aos controles; data de nascimento e gênero devem permanecer editáveis por teclado.
 
 ## Exceptions
 

@@ -22,11 +22,12 @@ Herda integralmente [fields](../../categories/fields.md). Traits autorizados: ne
 
 ## Specific anatomy
 
-O root contém label associado ao trigger, botão nativo semântico com a receita de `Input`, `PopoverContent` com `Calendar`, input hidden para submissão e área de description/validation. O trigger mostra `DD/MM/YYYY` ou placeholder; a API pública recebe e emite somente o valor date-only canônico.
+O root contém label associado ao input editável, botão nativo somente de ícone para abrir o calendário, `PopoverContent` com `Calendar`, input hidden para submissão e área de description/validation. O input mostra `DD/MM/AAAA` ou placeholder e emite somente o valor date-only canônico.
 
 ## Visual contract
 
-- O trigger reutiliza a receita `recipes.input` em densidade `standard`, mantendo altura, radius, borda, padding e tipografia do Input do produto.
+- O input editável reutiliza a receita `recipes.input` em densidade `standard`, mantendo altura, radius, borda, padding e tipografia do Input do produto.
+- O botão de calendário usa a variante `quiet` de `Button` em densidade `compact`, com nome acessível que descreve a abertura do calendário.
 - O popover é local ao DatePicker: usa `surface`, `border-subtle`, `rounded-surface` e `shadow-floating`, com alinhamento abaixo do trigger; o primitive `Popover` global não é alterado.
 - A densidade visual do Calendar é aproximadamente 10% menor por padding/gaps internos, mantendo células de 32 px para preservar foco e interação.
 - Mês, weekdays e dias usam text styles registrados; o dia selecionado permanece azul sólido, arredondado e com borda/foco visível.
@@ -42,11 +43,11 @@ Valor vazio mantém placeholder sem transformar o placeholder em label. Ao selec
 
 ## Composition
 
-Compõe `ui-calendar`, `ui-popover`, `ui-input` para o valor hidden e `atom-field-trigger` para o trigger semântico com receita de campo, além dos helpers date-only. O wrapper não conhece pacientes, eventos, persistência ou regras de domínio; essas responsabilidades permanecem na rota consumidora.
+Compõe `ui-calendar`, `ui-popover`, `ui-input` para o campo visível e o valor hidden, e `atom-button` para o acionador do calendário, além dos helpers date-only. O wrapper não conhece pacientes, eventos, persistência ou regras de domínio; essas responsabilidades permanecem na rota consumidora.
 
 ## Content rules
 
-`value` e `onValueChange` usam `YYYY-MM-DD`; `formatDateOnly` apresenta `DD/MM/YYYY` em `pt-BR`. `name` é opcional e, quando fornecido, é usado no input hidden sem alterar o valor visual. O label é sempre obrigatório.
+`value` e `onValueChange` usam `YYYY-MM-DD`; `formatDateOnly` apresenta `DD/MM/YYYY` em `pt-BR`. A digitação aceita `DD/MM/AAAA` e só serializa datas válidas. `name` é opcional e, quando fornecido, é usado no input hidden sem alterar o valor visual. O label é sempre obrigatório.
 
 A migração substitui o único `Input type="date"` encontrado em `src/` — o campo `next-event-date` do diálogo de pacientes. Ícones `Calendar` usados como linguagem visual, datas de leitura e parâmetros de rota não são calendários nativos e permanecem inalterados.
 
@@ -61,7 +62,7 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 ## Acceptance criteria
 
 - identidade, fonte, exports e categoria coincidem com o registro;
-- label, trigger, helper/error e valor submetido permanecem semanticamente associados;
+- label, input editável, botão de calendário, helper/error e valor submetido permanecem semanticamente associados;
 - seleção, placeholder, required, invalid, disabled, Escape e retorno de foco são verificáveis;
 - o wrapper preserva a serialização date-only sem conversão implícita de fuso horário;
 - nenhum estilo ou regra de pacientes é empurrado para a molécula genérica.

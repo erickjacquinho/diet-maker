@@ -8,6 +8,7 @@ import {
   type PatientInput,
 } from '@/lib/domain/patient';
 import { normalizeObjectiveLabel } from '@/lib/domain/objective-option';
+import { getAgeFromBirthDate } from '@/lib/date-only';
 
 const validInput: PatientInput = {
   name: ' Ana  Lima ',
@@ -33,11 +34,16 @@ describe('patient domain invariants', () => {
     expect(getPatientInitials(normalized.name)).toBe('AL');
   });
 
+  it('derives age from birth date and ignores a manual age', () => {
+    expect(normalizePatientInput({ ...validInput, age: 99, birthDate: '2000-01-01' }).age)
+      .toBe(getAgeFromBirthDate('2000-01-01'));
+    expect(normalizePatientInput({ ...validInput, age: 99, birthDate: null }).age).toBeNull();
+  });
+
   it('returns field findings for empty names, invalid dimensions and negative targets', () => {
     const result = validatePatientInput({
       ...validInput,
       name: '   ',
-      age: -1,
       heightCm: 0,
       weightKg: -2,
       defaultMacroTargets: { proteinG: -1, carbsG: 0, fatsG: 0, kcal: 0 },
@@ -46,10 +52,25 @@ describe('patient domain invariants', () => {
     expect(result.valid).toBe(false);
     expect(result.fieldErrors).toEqual(expect.objectContaining({
       name: expect.any(String),
-      age: expect.any(String),
       heightCm: expect.any(String),
       weightKg: expect.any(String),
       'defaultMacroTargets.proteinG': expect.any(String),
+    }));
+  });
+
+  it('requires contact and personal data when creating a patient profile', () => {
+    const result = validatePatientInput({
+      ...validInput,
+      whatsapp: null,
+      gender: null,
+      birthDate: null,
+    }, { requireProfileFields: true });
+
+    expect(result.valid).toBe(false);
+    expect(result.fieldErrors).toEqual(expect.objectContaining({
+      whatsapp: expect.any(String),
+      gender: expect.any(String),
+      birthDate: expect.any(String),
     }));
   });
 

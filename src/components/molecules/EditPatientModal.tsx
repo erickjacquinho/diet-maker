@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { AlertTriangle, Pencil, Plus } from 'lucide-react';
+import { AlertTriangle, Pencil } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { SecondaryActionButton, SelectField } from '@/components/atoms';
-import { DEFAULT_OBJECTIVE_LABELS } from '@/lib/domain/objective-option';
-import { DEFAULT_MARITAL_STATUS_LABELS } from '@/lib/domain/patient';
+import { SelectField } from '@/components/atoms';
+import { DatePickerField } from './DatePickerField';
 import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import type { PatientViewModel } from '@/lib/patientViewModel';
 import { formatWhatsappContact } from '@/lib/whatsapp';
@@ -47,24 +46,23 @@ export function EditPatientModal({
   });
 
   useEffect(() => {
-    if (open && patient) {
+      if (open && patient) {
         setDraft({
         ...patient,
-        maritalStatus: patient.maritalStatus || 'Solteiro(a)',
         whatsapp: formatWhatsappContact(patient.whatsapp) || undefined,
+        birthDate: patient.birthDate || undefined,
+        isPregnant: patient.isPregnant === true,
+        pregnancyDueDate: patient.pregnancyDueDate || undefined,
       });
     }
   }, [open, patient]);
 
-  useEffect(() => {
-    if (objectiveToApply && draft) setDraft((current) => current ? { ...current, objective: objectiveToApply } : current);
-  }, [objectiveToApply]);
-
   const hasUnsavedChanges = Boolean(draft && patient && (
-    draft.name !== patient.name || draft.age !== patient.age || draft.heightCm !== patient.heightCm || draft.weightKg !== patient.weightKg ||
+    draft.name !== patient.name ||
     (draft.gender || 'Masculino') !== (patient.gender || 'Masculino') ||
-    (draft.maritalStatus || 'Solteiro(a)') !== (patient.maritalStatus || 'Solteiro(a)') ||
-    (draft.objective || '') !== (patient.objective || '') ||
+    (draft.birthDate || '') !== (patient.birthDate || '') ||
+    (draft.isPregnant || false) !== (patient.isPregnant || false) ||
+    (draft.pregnancyDueDate || '') !== (patient.pregnancyDueDate || '') ||
     formatWhatsappContact(draft.whatsapp) !== formatWhatsappContact(patient.whatsapp) || draft.targetKcal !== patient.targetKcal ||
     draft.targetProtein !== patient.targetProtein || draft.targetCarbs !== patient.targetCarbs || draft.targetFats !== patient.targetFats
   ));
@@ -86,7 +84,6 @@ export function EditPatientModal({
     void Promise.resolve(onSave({
       ...draft,
       name: draft.name.trim(),
-      maritalStatus: draft.maritalStatus || 'Solteiro(a)',
       whatsapp: formatWhatsappContact(draft.whatsapp) || undefined,
     })).then(() => {
       onOpenChange(false);
@@ -133,70 +130,80 @@ export function EditPatientModal({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <SelectField
-                    id="edit-patient-gender"
-                    label="Gênero"
-                    value={draft.gender || 'Masculino'}
-                    onValueChange={(value) => setDraft({ ...draft, gender: value })}
-                    layer="modal"
-                    options={[
-                      { value: 'Masculino', label: 'Masculino' },
-                      { value: 'Feminino', label: 'Feminino' },
-                      ...(draft.gender && !['Masculino', 'Feminino'].includes(draft.gender)
-                        ? [{ value: draft.gender, label: draft.gender }]
-                        : []),
-                    ]}
-                  />
-                </div>
-                <div>
-                  <SelectField
-                    id="edit-patient-marital-status"
-                    label="Estado Civil"
-                    value={draft.maritalStatus || 'Solteiro(a)'}
-                    onValueChange={(value) => setDraft({ ...draft, maritalStatus: value })}
-                    layer="modal"
-                    options={Array.from(new Set([...DEFAULT_MARITAL_STATUS_LABELS, draft.maritalStatus].filter(Boolean))).map((status) => ({
-                      value: status as string,
-                      label: status as string,
-                    }))}
-                  />
-                </div>
+                <DatePickerField
+                  id="edit-patient-birth-date"
+                  label="Data de nascimento"
+                  value={draft.birthDate}
+                  onValueChange={(value) => setDraft({ ...draft, birthDate: value })}
+                  error={fieldErrors.birthDate}
+                />
+                <SelectField
+                  id="edit-patient-gender"
+                  label="Gênero"
+                  value={draft.gender || ''}
+                  onValueChange={(value) => setDraft({
+                    ...draft,
+                    gender: value,
+                    isPregnant: value === 'Feminino' ? draft.isPregnant : false,
+                    pregnancyDueDate: value === 'Feminino' ? draft.pregnancyDueDate : undefined,
+                  })}
+                  placeholder="Selecione o gênero"
+                  layer="modal"
+                  options={[
+                    { value: 'Masculino', label: 'Masculino' },
+                    { value: 'Feminino', label: 'Feminino' },
+                    ...(draft.gender && !['Masculino', 'Feminino'].includes(draft.gender)
+                      ? [{ value: draft.gender, label: draft.gender }]
+                      : []),
+                  ]}
+                />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className={textStyle('field-label')}>Idade</label>
-                  <Input type="number" value={draft.age} onChange={(event) => setDraft({ ...draft, age: Number(event.target.value) })} className="mt-1" />
-                </div>
-                <div>
-                  <label className={textStyle('field-label')}>Altura (cm)</label>
-                  <Input type="number" value={draft.heightCm} onChange={(event) => setDraft({ ...draft, heightCm: Number(event.target.value) })} className="mt-1" />
-                </div>
-                <div>
-                  <label className={textStyle('field-label')}>Peso (kg)</label>
-                  <Input type="number" value={draft.weightKg} onChange={(event) => setDraft({ ...draft, weightKg: Number(event.target.value) })} className="mt-1" />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-end gap-2">
-                  <div className="flex-1 min-w-0">
-                    <SelectField
-                      id="edit-patient-objective"
-                      label="Objetivo Clínico / Esportivo"
-                      value={draft.objective || ''}
-                      onValueChange={(value) => setDraft({ ...draft, objective: value })}
-                      placeholder="Selecione o objetivo"
-                      layer="modal"
-                      options={Array.from(new Set([...DEFAULT_OBJECTIVE_LABELS, ...objectives, draft.objective].filter(Boolean))).map((obj) => ({
-                        value: obj as string,
-                        label: obj as string,
-                      }))}
+              {draft.gender === 'Feminino' && (
+                <div className="grid grid-cols-2 items-start gap-3">
+                  <fieldset className="flex flex-col gap-2">
+                    <legend className={textStyle('field-label')}>Grávida?</legend>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-style-body-small text-text-primary">
+                        <Input
+                          type="radio"
+                          name="edit-patient-pregnancy"
+                          value="no"
+                          checked={draft.isPregnant !== true}
+                          onChange={() => setDraft({ ...draft, isPregnant: false })}
+                          className="size-4 appearance-auto accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                        />
+                        <span>Não</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-style-body-small text-text-primary">
+                        <Input
+                          type="radio"
+                          name="edit-patient-pregnancy"
+                          value="yes"
+                          checked={draft.isPregnant === true}
+                          onChange={() => setDraft({ ...draft, isPregnant: true })}
+                          className="size-4 appearance-auto accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                        />
+                        <span>Sim</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                  <div
+                    className={draft.isPregnant ? undefined : 'invisible'}
+                    aria-hidden={draft.isPregnant !== true}
+                  >
+                    <DatePickerField
+                      id="edit-patient-pregnancy-due-date"
+                      label="Data prevista do parto"
+                      value={draft.pregnancyDueDate}
+                      onValueChange={(value) => setDraft({ ...draft, pregnancyDueDate: value })}
+                      disabled={draft.isPregnant !== true}
+                      error={draft.isPregnant === true ? fieldErrors.pregnancyDueDate : undefined}
                     />
                   </div>
-                  <SecondaryActionButton type="button" onClick={onRequestAddObjective} icon={<Plus size={14} className="text-success" />} title="Adicionar Novo Objetivo">Novo</SecondaryActionButton>
                 </div>
-              </div>
+              )}
+
               <DialogFooter className="flex gap-2 pt-2">
                 {formError && <p className="text-style-legal text-error flex-1" role="alert">{formError}</p>}
                 <Button type="button" variant="secondary" size="compact" onClick={() => requestClose(false)} disabled={isSubmitting} className="flex-1">Cancelar</Button>

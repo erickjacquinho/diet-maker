@@ -9,7 +9,7 @@ export async function createPatient(
   input: PatientInput,
 ): Promise<Patient> {
   const normalized = normalizePatientInput(input);
-  const validation = validatePatientInput(normalized);
+  const validation = validatePatientInput(normalized, { requireProfileFields: true });
   if (!validation.valid) throw new PatientApplicationError('INVALID_FIELD', 'Revise os campos do paciente.', { fieldErrors: validation.fieldErrors });
   const account = await dependencies.accountContext.requireActive();
   return dependencies.patientRepository.create(account.accountId, normalized);

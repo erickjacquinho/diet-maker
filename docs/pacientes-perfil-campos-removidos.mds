@@ -1,0 +1,29 @@
+# Perfil do paciente — campos removidos da edição
+
+## Escopo
+
+Registro dos campos removidos do modal **Editar Dados do Paciente**, na rota
+`/pacientes/perfil`.
+
+## Valores removidos
+
+| Campo removido | Propriedade relacionada | Tratamento após a alteração |
+| --- | --- | --- |
+| Estado civil | `maritalStatus` | Não é mais editável no modal; o valor existente é preservado. |
+| Idade | `age` | Não é mais editável; é calculada exclusivamente a partir de `birthDate`. O valor legado não é usado como fallback. |
+| Altura | `heightCm` | Não é mais editável no modal; o valor existente é preservado. |
+| Peso | `weightKg` | Não é mais editável no modal; o valor existente é preservado. |
+| Objetivo | `objective` / `currentObjective` | Não é mais editável no modal; o valor existente é preservado. |
+
+## Campos mantidos
+
+Continuam disponíveis para edição:
+
+- nome;
+- WhatsApp;
+- data de nascimento;
+- gênero;
+- dados de gestação, quando aplicáveis.
+
+A data de nascimento passou a ser a fonte de verdade da idade, com recálculo
+na normalização, leitura do repositório e montagem do view model.
