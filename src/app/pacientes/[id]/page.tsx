@@ -33,9 +33,7 @@ export default function PatientDetailPage() {
     assessmentTotal,
     isAssessmentsLoading,
     assessmentsError,
-    activePlan,
     latestAssessment,
-    nextEventSummary,
     whatsappUrl,
     availableObjectives,
     isDeleteModalOpen,
@@ -158,6 +156,16 @@ export default function PatientDetailPage() {
                 </div>
               </PopoverContent>
             </Popover>
+            {!isPatientArchived && (
+              <IconButton
+                size="compact"
+                variant="quiet"
+                title={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
+                aria-label={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
+                icon={<Calendar className="size-4" aria-hidden="true" />}
+                onClick={() => setIsNextEventModalOpen(true)}
+              />
+            )}
             <Button
               variant="secondary"
               size="compact"
@@ -193,9 +201,7 @@ export default function PatientDetailPage() {
       <PatientProfileCurrentContext
         patientId={patientId}
         latestAssessment={latestAssessment}
-        activePlan={activePlan}
-        nextEventSummary={nextEventSummary}
-        onOpenNextEvent={() => setIsNextEventModalOpen(true)}
+        latestDiet={confirmedPlans[0] ?? null}
         readOnly={isPatientArchived}
       />
 

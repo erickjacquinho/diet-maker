@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
@@ -98,13 +98,17 @@ describe('PatientDetailPage accessibility', () => {
     mockUsePatientProfilePage.mockReturnValue(profileState());
   });
 
-  it('exposes current context actions and empty states with accessible names', async () => {
+  it('exposes the new profile regions and the moved follow-up action accessibly', async () => {
     render(<PatientDetailPage />);
 
-    expect(await screen.findByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Plano e acompanhamento' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Próximo acompanhamento' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Definir acompanhamento' })).toHaveClass('focus-visible:ring-2');
+    const progress = await screen.findByRole('region', { name: 'Progresso Atual' });
+    expect(progress).toHaveClass('col-span-2');
+    expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
+    expect(screen.getByRole('region', { name: 'Última dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Próximo acompanhamento' })).not.toBeInTheDocument();
+    const followUpButton = screen.getByRole('button', { name: 'Definir acompanhamento' });
+    expect(followUpButton).toHaveClass('focus-visible:ring-2');
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/nova',
@@ -129,6 +133,8 @@ describe('PatientDetailPage accessibility', () => {
     expect(screen.getByText('10/12/2026')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de avaliações físicas' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de prescrições dietéticas' })).toBeInTheDocument();
+    fireEvent.click(followUpButton);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
 

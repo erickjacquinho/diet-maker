@@ -38,34 +38,27 @@ describe('PatientDetailPage desktop visual contracts', () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
-  it('scenario A keeps the current context primary and the plan empty state honest', async () => {
+  it('scenario A keeps the progress area clear and shows honest empty states', async () => {
     render(React.createElement(PatientDetailPage));
 
-    expect(await screen.findByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Plano alimentar atual' })).toBeInTheDocument();
-    expect(screen.getByText('Nenhuma dieta ativa está vinculada a este paciente.')).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Progresso Atual' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Última dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
+    expect(screen.getByText('Nenhuma dieta registrada.')).toBeInTheDocument();
+    expect(screen.getByText('Nenhuma avaliação registrada.')).toBeInTheDocument();
     expect(screen.queryByText('2020 kcal')).not.toBeInTheDocument();
     expect(screen.queryByText('Metas nutricionais atuais')).not.toBeInTheDocument();
   });
 
-  it('scenario B shows only the compact active plan summary', async () => {
+  it('scenario B shows the latest diet summary', async () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
-      activePlan: {
-        dietId: 'diet-current',
-        name: 'Plano cutting agosto',
-        date: '04/08/2026',
-        status: 'Ativa',
-        targetKcal: 2020,
-        proteinG: 150,
-        carbsG: 220,
-        fatsG: 60,
-      },
+      confirmedPlans: [PATIENT_PROFILE_DIETS[1]],
     }));
 
     render(React.createElement(PatientDetailPage));
 
-    expect(await screen.findByText('Plano ativo')).toBeInTheDocument();
-    const planSummary = within(screen.getByRole('region', { name: 'Plano alimentar atual' }));
+    expect(await screen.findByText('Ativa')).toBeInTheDocument();
+    const planSummary = within(screen.getByRole('region', { name: 'Última dieta' }));
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
@@ -82,16 +75,6 @@ describe('PatientDetailPage desktop visual contracts', () => {
       bodyAssessments: PATIENT_PROFILE_ASSESSMENTS,
       latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
       confirmedPlans: [PATIENT_PROFILE_DIETS[1]],
-      activePlan: {
-        dietId: PATIENT_PROFILE_DIETS[1].id,
-        name: PATIENT_PROFILE_DIETS[1].name,
-        date: PATIENT_PROFILE_DIETS[1].date,
-        status: 'Ativa',
-        targetKcal: PATIENT_PROFILE_DIETS[1].targetKcal,
-        proteinG: PATIENT_PROFILE_DIETS[1].proteinG,
-        carbsG: PATIENT_PROFILE_DIETS[1].carbsG,
-        fatsG: PATIENT_PROFILE_DIETS[1].fatsG,
-      },
     }));
 
     render(React.createElement(PatientDetailPage));
@@ -100,6 +83,6 @@ describe('PatientDetailPage desktop visual contracts', () => {
     expect(assessmentsTable).toBeInTheDocument();
     const dietsTable = screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ });
     expect(dietsTable).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Progresso Atual' })).toBeInTheDocument();
   });
 });

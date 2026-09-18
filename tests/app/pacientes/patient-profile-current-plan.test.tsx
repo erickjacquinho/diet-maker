@@ -1,8 +1,12 @@
-import { render, screen, within, waitFor } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
-import { PATIENT_PROFILE_ASSESSMENTS, PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
+import {
+  PATIENT_PROFILE_ASSESSMENTS,
+  PATIENT_PROFILE_DIETS,
+  PATIENT_PROFILE_FIXTURES,
+} from '../../fixtures/patient-profile';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { makePatientProfileState } from './profileState';
 
@@ -26,40 +30,28 @@ vi.mock('@/hooks/usePatientProfilePage', () => ({
 
 const mockUsePatientProfilePage = vi.mocked(usePatientProfilePage);
 
-describe('PatientDetailPage current plan', () => {
+describe('PatientDetailPage latest diet', () => {
   beforeEach(() => {
     push.mockClear();
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState());
   });
 
-  it('shows a compact summary and a details action when a diet is active', async () => {
+  it('shows a compact summary and a details action for the latest diet', async () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
-      activePlan: {
-        dietId: 'diet-current',
-        name: 'Plano cutting agosto',
-        date: '04/08/2026',
-        status: 'Ativa',
-        targetKcal: 2020,
-        proteinG: 150,
-        carbsG: 220,
-        fatsG: 60,
-      },
+      confirmedPlans: [PATIENT_PROFILE_DIETS[1]],
       latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
     }));
 
     render(<PatientDetailPage />);
 
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(screen.getByText('Plano ativo')).toBeInTheDocument();
-    const planSummary = within(screen.getByRole('region', { name: 'Plano alimentar atual' }));
+    expect(screen.getByText('Ativa')).toBeInTheDocument();
+    const planSummary = within(screen.getByRole('region', { name: 'Última dieta' }));
     expect(planSummary.getByText('Metas diárias')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
     expect(planSummary.getByText(/2\.020/)).toBeInTheDocument();
-    expect(planSummary.getByText(/P\s*3,09 g\/kg/)).toBeInTheDocument();
-    expect(planSummary.getByText(/C\s*4,54 g\/kg/)).toBeInTheDocument();
-    expect(planSummary.getByText(/G\s*1,24 g\/kg/)).toBeInTheDocument();
     expect(planSummary.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',
@@ -67,10 +59,10 @@ describe('PatientDetailPage current plan', () => {
     expect(screen.queryByText('Metas nutricionais atuais')).not.toBeInTheDocument();
   });
 
-  it('does not promote manual targets when no diet is active', async () => {
+  it('does not promote manual targets when no diet is registered', async () => {
     render(<PatientDetailPage />);
 
-    await waitFor(() => expect(screen.getByText('Nenhuma dieta ativa está vinculada a este paciente.')).toBeInTheDocument());
+    expect(await screen.findByText('Nenhuma dieta registrada.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Criar dieta' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(
       'href',
@@ -81,24 +73,13 @@ describe('PatientDetailPage current plan', () => {
 
   it('labels carb-cycling targets as a weekly average', async () => {
     mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
-      activePlan: {
-        dietId: 'diet-cycle',
-        name: 'Ciclo de carboidratos',
-        date: '04/08/2026',
-        status: 'Ativa',
-        mode: 'carb_cycling',
-        targetKcal: 2100,
-        proteinG: 180,
-        carbsG: 197,
-        fatsG: 55,
-      },
+      confirmedPlans: [{ ...PATIENT_PROFILE_DIETS[1], id: 'diet-cycle', name: 'Ciclo de carboidratos', mode: 'carb_cycling' }],
     }));
 
     render(<PatientDetailPage />);
 
-    const planSummary = within(await screen.findByRole('region', { name: 'Plano alimentar atual' }));
+    const planSummary = within(await screen.findByRole('region', { name: 'Última dieta' }));
     expect(planSummary.getByText('Média semanal do ciclo')).toBeInTheDocument();
-    expect(planSummary.getByText('Média semanal por peso')).toBeInTheDocument();
     expect(planSummary.queryByText('Metas diárias')).not.toBeInTheDocument();
   });
 });
