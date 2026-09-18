@@ -2,7 +2,7 @@ import { render, screen, within, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
-import { PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
+import { PATIENT_PROFILE_ASSESSMENTS, PATIENT_PROFILE_FIXTURES } from '../../fixtures/patient-profile';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { makePatientProfileState } from './profileState';
 
@@ -44,17 +44,22 @@ describe('PatientDetailPage current plan', () => {
         carbsG: 220,
         fatsG: 60,
       },
+      latestAssessment: PATIENT_PROFILE_ASSESSMENTS[1],
     }));
 
     render(<PatientDetailPage />);
 
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
     expect(screen.getByText('Plano ativo')).toBeInTheDocument();
-    const planSummary = within(screen.getByLabelText('Plano alimentar atual'));
+    const planSummary = within(screen.getByRole('region', { name: 'Plano alimentar atual' }));
+    expect(planSummary.getByText('Metas diárias')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
-    expect(planSummary.getByText(/2020/)).toBeInTheDocument();
+    expect(planSummary.getByText(/2\.020/)).toBeInTheDocument();
+    expect(planSummary.getByText(/P\s*3,09 g\/kg/)).toBeInTheDocument();
+    expect(planSummary.getByText(/C\s*4,54 g\/kg/)).toBeInTheDocument();
+    expect(planSummary.getByText(/G\s*1,24 g\/kg/)).toBeInTheDocument();
     expect(planSummary.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',
@@ -72,5 +77,28 @@ describe('PatientDetailPage current plan', () => {
       '/pacientes/patient-profile-1/dieta/nova',
     );
     expect(screen.queryByText('2020 kcal')).not.toBeInTheDocument();
+  });
+
+  it('labels carb-cycling targets as a weekly average', async () => {
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      activePlan: {
+        dietId: 'diet-cycle',
+        name: 'Ciclo de carboidratos',
+        date: '04/08/2026',
+        status: 'Ativa',
+        mode: 'carb_cycling',
+        targetKcal: 2100,
+        proteinG: 180,
+        carbsG: 197,
+        fatsG: 55,
+      },
+    }));
+
+    render(<PatientDetailPage />);
+
+    const planSummary = within(await screen.findByRole('region', { name: 'Plano alimentar atual' }));
+    expect(planSummary.getByText('Média semanal do ciclo')).toBeInTheDocument();
+    expect(planSummary.getByText('Média semanal por peso')).toBeInTheDocument();
+    expect(planSummary.queryByText('Metas diárias')).not.toBeInTheDocument();
   });
 });

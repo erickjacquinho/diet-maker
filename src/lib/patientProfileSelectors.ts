@@ -16,6 +16,7 @@ export interface ActivePlanSummary {
   proteinG: number;
   carbsG: number;
   fatsG: number;
+  mode?: 'simple' | 'carb_cycling';
 }
 
 export interface NextEventSummary {
@@ -71,6 +72,7 @@ export function selectActivePlan(diets: HistoricalDiet[]): ActivePlanSummary | n
     proteinG: activePlan.proteinG,
     carbsG: activePlan.carbsG,
     fatsG: activePlan.fatsG,
+    mode: activePlan.mode ?? 'simple',
   };
 }
 
@@ -92,6 +94,7 @@ export function selectCurrentActivePlan(diets: HistoricalDiet[]): ActivePlanSumm
     proteinG: active.proteinG,
     carbsG: active.carbsG,
     fatsG: active.fatsG,
+    mode: active.mode ?? 'simple',
   };
 }
 

@@ -102,6 +102,7 @@ describe('PatientDetailPage accessibility', () => {
     render(<PatientDetailPage />);
 
     expect(await screen.findByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Plano e acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Próximo acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Definir acompanhamento' })).toHaveClass('focus-visible:ring-2');
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(

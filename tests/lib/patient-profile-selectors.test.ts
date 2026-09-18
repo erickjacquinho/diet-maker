@@ -3,6 +3,7 @@ import {
   buildNextEventSummary,
   buildPatientDietHistory,
   selectActivePlan,
+  selectCurrentActivePlan,
   selectLatestAssessment,
 } from '@/lib/patientProfileSelectors';
 import type { DayOfWeek, FullDietPlan } from '@/lib/dietStore';
@@ -30,6 +31,7 @@ describe('patient profile selectors', () => {
       carbsG: 220,
       fatsG: 60,
       status: 'Ativa',
+      mode: 'simple',
     });
   });
 
@@ -115,6 +117,7 @@ describe('patient profile selectors', () => {
       carbsG: 197,
       fatsG: 55,
     });
+    expect(selectCurrentActivePlan([history])?.mode).toBe('carb_cycling');
     expect(history.carbCyclingVariations).toEqual([
       expect.objectContaining({
         id: 'high',

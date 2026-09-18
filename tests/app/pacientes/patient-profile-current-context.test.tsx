@@ -55,7 +55,7 @@ describe('PatientDetailPage current context', () => {
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument());
     expect(screen.getAllByText('Sem avaliação')).toHaveLength(4);
-    expect(screen.getByText('Sem próximo evento')).toBeInTheDocument();
+    expect(screen.getByText('Sem acompanhamento previsto')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Definir acompanhamento' })).toBeInTheDocument();
   });
 });

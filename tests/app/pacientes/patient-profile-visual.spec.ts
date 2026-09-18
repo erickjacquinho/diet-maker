@@ -65,11 +65,11 @@ describe('PatientDetailPage desktop visual contracts', () => {
     render(React.createElement(PatientDetailPage));
 
     expect(await screen.findByText('Plano ativo')).toBeInTheDocument();
-    const planSummary = within(screen.getByLabelText('Plano alimentar atual'));
+    const planSummary = within(screen.getByRole('region', { name: 'Plano alimentar atual' }));
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
-    expect(planSummary.getByText(/2020/)).toBeInTheDocument();
+    expect(planSummary.getByText(/2\.020/)).toBeInTheDocument();
     expect(planSummary.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',

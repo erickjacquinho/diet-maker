@@ -9,6 +9,8 @@ import { MacroSummary } from '@/components/molecules';
 import { textStyle } from '@/design-system';
 import { cn } from '@/lib/utils';
 import { formatDateOnly, normalizeDateToISO } from '@/lib/date-only';
+import { getDaysUntilEvent } from '@/lib/patientListDateUtils';
+import { calculateGPerKg } from '@/lib/nutrition/macroCalculations';
 import type { ActivePlanSummary, NextEventSummary } from '@/lib/patientProfileSelectors';
 import type { BodyAssessment } from '@/lib/patientRelatedRecords';
 
@@ -20,38 +22,13 @@ function formatAssessmentDate(dateStr?: string): string {
 
 function formatRelativeDays(dateStr?: string): string | null {
   if (!dateStr) return null;
-  let day: number, month: number, year: number;
-  if (dateStr.includes('/')) {
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-    day = parseInt(parts[0], 10);
-    month = parseInt(parts[1], 10) - 1;
-    year = parseInt(parts[2], 10);
-  } else if (dateStr.includes('-')) {
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return null;
-    year = parseInt(parts[0], 10);
-    month = parseInt(parts[1], 10) - 1;
-    day = parseInt(parts[2], 10);
-  } else {
-    return null;
-  }
-  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-
-  const target = new Date(year, month, day);
-  const today = new Date();
-  target.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-
-  const diffMs = target.getTime() - today.getTime();
-  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Hoje';
-  if (diffDays === 1) return 'Amanhã';
-  if (diffDays === -1) return 'Ontem';
-  if (diffDays > 1) return `Em ${diffDays} dias`;
-  if (diffDays < -1) return `Atrasado há ${Math.abs(diffDays)} dias`;
-  return null;
+  const daysUntil = getDaysUntilEvent(dateStr);
+  if (daysUntil === null) return null;
+  if (daysUntil === 0) return 'Hoje';
+  if (daysUntil === 1) return 'Amanhã';
+  if (daysUntil > 1) return `Em ${daysUntil} dias`;
+  const elapsedDays = Math.abs(daysUntil);
+  return `Data prevista passou há ${elapsedDays} ${elapsedDays === 1 ? 'dia' : 'dias'}`;
 }
 
 export function PatientProfileCurrentContext({
@@ -76,9 +53,32 @@ export function PatientProfileCurrentContext({
   const relativeEventDays = nextEventSummary?.date
     ? formatRelativeDays(nextEventSummary.date)
     : null;
+  const daysUntilEvent = nextEventSummary?.date
+    ? getDaysUntilEvent(nextEventSummary.date)
+    : null;
+  const weightKg = latestAssessment?.weightKg;
+  const validWeightKg = typeof weightKg === 'number'
+    && Number.isFinite(weightKg)
+    && weightKg > 0
+    ? weightKg
+    : null;
+  const weightLabel = validWeightKg
+    ? `${validWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`
+    : null;
+  const assessmentWeightLabel = latestAssessment?.date
+    ? formatAssessmentDate(latestAssessment.date)
+    : null;
+  const gPerKg = activePlan && validWeightKg
+    ? {
+        protein: calculateGPerKg(activePlan.proteinG, validWeightKg)?.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        carbs: calculateGPerKg(activePlan.carbsG, validWeightKg)?.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        fats: calculateGPerKg(activePlan.fatsG, validWeightKg)?.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      }
+    : null;
+  const isCarbCycling = activePlan?.mode === 'carb_cycling';
 
   return (
-    <div className="flex flex-col gap-6 w-full" aria-label="Contexto atual do paciente">
+    <div className="flex flex-col gap-6 w-full">
       <Surface className="flex flex-col gap-4 p-5 w-full">
         <div className="flex items-center justify-between gap-3">
           <h2 className={textStyle('section-title')}>Indicadores atuais</h2>
@@ -116,108 +116,147 @@ export function PatientProfileCurrentContext({
         />
       </Surface>
 
-      <div className="grid grid-cols-2 gap-4 w-full">
-        {/* 1. Próximo acompanhamento */}
-        <Surface
-          className="flex flex-col justify-between gap-3.5 p-5 min-h-[148px]"
-          role="region"
-          aria-label="Próximo acompanhamento"
-        >
-          <div className="flex items-center justify-between gap-3 border-b border-border-divider pb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="size-4 text-primary shrink-0" aria-hidden="true" />
-              <h2 className={textStyle('section-title')}>Próximo acompanhamento</h2>
-            </div>
-            <Badge variant={nextEventSummary ? 'info' : 'neutral'}>
-              {nextEventSummary ? 'Agendado' : 'Não agendado'}
-            </Badge>
-          </div>
+      <Surface className="flex w-full flex-col gap-6 p-6" role="region" aria-labelledby="plan-follow-up-title">
+        <h2 id="plan-follow-up-title" className={textStyle('section-title')}>
+          Plano e acompanhamento
+        </h2>
 
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <h3 className={cn(textStyle('card-title'), 'truncate')}>
-                {nextEventSummary ? nextEventSummary.label : 'Sem próximo evento'}
-              </h3>
-              {nextEventSummary ? (
-                <div className={cn(textStyle('body-secondary'), 'flex items-center gap-1.5 tabular-nums truncate')}>
-                  <span className="font-semibold text-text-primary">{nextEventSummary.date}</span>
-                  {relativeEventDays ? (
-                    <>
-                      <span className="text-text-muted">•</span>
-                      <span className="font-medium text-text-muted">{relativeEventDays}</span>
-                    </>
-                  ) : null}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <section className="flex min-w-0 flex-col gap-4 md:col-span-2" aria-labelledby="current-diet-title">
+            <div className="flex items-center justify-between gap-3 border-b border-border-divider pb-3">
+              <div className="flex items-center gap-2">
+                <Utensils className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                <h3 id="current-diet-title" className={textStyle('section-title')}>
+                  Plano alimentar atual
+                </h3>
+              </div>
+              <Badge variant={activePlan ? 'success' : 'neutral'}>
+                {activePlan ? 'Plano ativo' : 'Sem prescrição'}
+              </Badge>
+            </div>
+
+            {activePlan ? (
+              <div className="flex min-w-0 flex-col gap-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <h4 className={cn(textStyle('card-title'), 'truncate')}>{activePlan.name}</h4>
+                    <p className={textStyle('body-secondary')}>
+                      Data do plano: {formatAssessmentDate(activePlan.date) || 'Não informada'}
+                    </p>
+                  </div>
+                  {!readOnly && (
+                    <Button asChild variant="secondary" size="compact">
+                      <Link href={`/pacientes/${patientId}/dieta/${activePlan.dietId}`}>
+                        <span>Abrir dieta</span>
+                        <ExternalLink className="size-4" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  )}
                 </div>
-              ) : (
-                <p className={cn(textStyle('body-secondary'), 'truncate')}>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span className={textStyle('caption')}>
+                      {isCarbCycling ? 'Média semanal do ciclo' : 'Metas diárias'}
+                    </span>
+                    <MacroSummary
+                      protein={activePlan.proteinG}
+                      carbs={activePlan.carbsG}
+                      fats={activePlan.fatsG}
+                      kcal={Math.round(activePlan.targetKcal).toLocaleString('pt-BR')}
+                      className="tabular-nums"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className={textStyle('caption')}>
+                      {isCarbCycling ? 'Média semanal por peso' : 'Metas por peso'}
+                      {weightLabel ? ` · base: ${weightLabel}${assessmentWeightLabel ? ` em ${assessmentWeightLabel}` : ''}` : ''}
+                    </span>
+                    {gPerKg ? (
+                      <MacroSummary
+                        protein={gPerKg.protein}
+                        carbs={gPerKg.carbs}
+                        fats={gPerKg.fats}
+                        showKcal={false}
+                        unit=" g/kg"
+                        className="tabular-nums"
+                      />
+                    ) : (
+                      <p className={textStyle('body-secondary')}>
+                        Sem peso de avaliação para calcular g/kg.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <h4 className={textStyle('card-title')}>Nenhuma dieta ativa</h4>
+                  <p className={textStyle('body-secondary')}>
+                    Nenhuma dieta ativa está vinculada a este paciente.
+                  </p>
+                </div>
+                {!readOnly && (
+                  <Button asChild variant="secondary" size="compact">
+                    <Link href={`/pacientes/${patientId}/dieta/nova`}>
+                      <span>Criar plano</span>
+                      <Utensils className="size-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+
+          <section
+            className="flex min-w-0 flex-col gap-4 border-t border-border-divider pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0"
+            aria-labelledby="next-follow-up-title"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                <h3 id="next-follow-up-title" className={textStyle('section-title')}>
+                  Próximo acompanhamento
+                </h3>
+              </div>
+              <Badge variant={daysUntilEvent !== null && daysUntilEvent < 0 ? 'warning' : nextEventSummary ? 'info' : 'neutral'}>
+                {daysUntilEvent !== null && daysUntilEvent < 0
+                  ? 'Data passou'
+                  : nextEventSummary ? 'Agendado' : 'Não agendado'}
+              </Badge>
+            </div>
+
+            {nextEventSummary ? (
+              <div className="flex flex-col gap-1">
+                <h4 className={textStyle('card-title')}>{nextEventSummary.label}</h4>
+                <p className={cn(textStyle('body-secondary'), 'tabular-nums')}>
+                  {formatAssessmentDate(nextEventSummary.date) || nextEventSummary.date}
+                </p>
+                {relativeEventDays && (
+                  <p className={cn(textStyle('body-secondary'), 'font-medium')}>
+                    {relativeEventDays}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <h4 className={textStyle('card-title')}>Sem acompanhamento previsto</h4>
+                <p className={textStyle('body-secondary')}>
                   Nenhum acompanhamento agendado para este paciente.
                 </p>
-              )}
-            </div>
+              </div>
+            )}
 
             {!readOnly && (
-              <Button type="button" variant="secondary" size="compact" onClick={onOpenNextEvent}>
+              <Button type="button" variant="primary" size="compact" className="self-start" onClick={onOpenNextEvent}>
                 {nextEventSummary ? 'Reagendar' : 'Definir acompanhamento'}
               </Button>
             )}
-          </div>
-        </Surface>
-
-        {/* 2. Plano alimentar atual */}
-        <Surface
-          className="flex flex-col justify-between gap-3.5 p-5 min-h-[148px]"
-          aria-labelledby="current-diet-title"
-        >
-          <div className="flex items-center justify-between gap-3 border-b border-border-divider pb-3">
-            <div className="flex items-center gap-2">
-              <Utensils className="size-4 text-primary shrink-0" aria-hidden="true" />
-              <h2 id="current-diet-title" className={textStyle('section-title')}>
-                Plano alimentar atual
-              </h2>
-            </div>
-            <Badge variant={activePlan ? 'success' : 'neutral'}>
-              {activePlan ? 'Plano ativo' : 'Sem prescrição'}
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <h3 className={cn(textStyle('card-title'), 'truncate')}>
-                {activePlan ? activePlan.name : 'Nenhuma dieta ativa'}
-              </h3>
-              {activePlan ? (
-                <MacroSummary
-                  protein={activePlan.proteinG}
-                  carbs={activePlan.carbsG}
-                  fats={activePlan.fatsG}
-                  kcal={activePlan.targetKcal}
-                  className={cn(textStyle('body-secondary'), 'tabular-nums truncate')}
-                />
-              ) : (
-                <p className={cn(textStyle('body-secondary'), 'truncate')}>
-                  Nenhuma dieta ativa está vinculada a este paciente.
-                </p>
-              )}
-            </div>
-
-            {activePlan && !readOnly ? (
-              <Button asChild variant="secondary" size="compact">
-                <Link href={`/pacientes/${patientId}/dieta/${activePlan.dietId}`}>
-                  <span>Abrir dieta</span>
-                  <ExternalLink className="size-3.5" aria-hidden="true" />
-                </Link>
-              </Button>
-            ) : !readOnly ? (
-              <Button asChild variant="secondary" size="compact">
-                <Link href={`/pacientes/${patientId}/dieta/nova`} aria-disabled={readOnly} tabIndex={readOnly ? -1 : undefined}>
-                  <span>Criar plano</span>
-                  <Utensils className="size-3.5" aria-hidden="true" />
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-        </Surface>
-      </div>
+          </section>
+        </div>
+      </Surface>
     </div>
   );
 }
