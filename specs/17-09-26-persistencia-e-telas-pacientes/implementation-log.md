@@ -100,3 +100,16 @@
 - F1 (partial, MEDIUM): a validação exigida pelo plano não tem um resumo integral do Vitest, apesar de os testes específicos da feature, o type-check e os 18 testes de navegador passarem.
 - A auditoria anexou T026 em `tasks.md`. Três execuções completas repetiram o encerramento prematuro sem progresso nem falha reproduzível; o ponto de retomada é concluir `npm test` em uma execução que consiga manter o processo até o resumo final.
 - Estado: bloqueado somente na comprovação integral do Vitest. Nenhum código foi alterado nesta iteração de convergência.
+
+### Retomada T025/T026 — validação integral (18/09/2026)
+
+- O `npm test` sem partição ainda não forneceu um resumo confiável. Para cobrir o inventário inteiro sem omitir falhas, distribuí os 236 arquivos Vitest pelos oito grupos determinísticos de `--shard` (30/30/30/30/29/29/29/29) e executei em listas menores os arquivos restantes de grupos cujo worker encerrou antes do resumo. Cada arquivo do inventário tem resultado positivo; total: **236 arquivos e 904 testes aprovados**, sem falhas.
+- Resultado por grupo: shard 1 — 30/111; shard 2 — 30/102; shard 3 — 30/81; shard 4 — 30/103; shard 5 — 29/121; shard 6 — 29/110; shard 7 — 29/129; shard 8 — 29/147 (arquivos/testes). Os shards 3 e 5 tiveram resultados verbosos parciais completados com os arquivos restantes; shards 6–8 foram executados em lotes menores. `tests/hooks/useAssessmentWorkspacePage.test.ts` passou 4/4 após a correção anterior do mock `application.listAssessments`.
+- `npm run type-check`, `npm run lint` e `npm run build` passaram em 18/09/2026. `npm run test:browser` passou 18/18 na validação completa anterior, sem mudanças de código depois dela.
+- Quickstart e SC-001/SC-002: `/pacientes` retornou 25 de 100 pacientes em 129,0 ms e cinco consultas; `EXPLAIN ANALYZE` mediu 294,8 ms na ordenação. Com 2.000 registros por histórico, as primeiras páginas de avaliações e dietas levaram 8,6 ms e 23,7 ms. Ambos os critérios de 1 segundo passam. Os testes completos cobrem equivalência Decimal, importação schema 4/5/6, checkpoint, retry, recuperação, mutação durante checkpoint e restauração válida/inválida.
+- `T025` e `T026` concluídas. A evidência integral agora fecha o achado F1 da primeira convergência; nenhuma alteração de código foi necessária nesta retomada.
+
+### Convergência final — iteração 2 (18/09/2026)
+
+- Reavaliados FR-001–FR-016, SC-001–SC-006, histórias, edge cases, decisões do plano e os cinco princípios da constituição contra o código e os resultados de teste atuais. A análise cruzada de spec/plan/tasks não encontrou conflito, lacuna de cobertura ou tarefa implementável pendente.
+- Resultado: **convergido, sem novos achados e sem tarefas anexadas**. O achado parcial F1 da iteração 1 foi resolvido pela cobertura Vitest integral documentada acima.

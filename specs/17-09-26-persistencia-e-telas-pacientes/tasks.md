@@ -69,7 +69,7 @@
 **Purpose**: Alinhar as decisões de arquitetura e validar todos os critérios de aceite.
 
 - [X] T024 [skill: general] [P] Record `.nutridiet` as the primary save and the browser database as its local workspace in `docs/adr/ADR-009-nutridiet-principal.md` and `refs/dieta-db/index.md`, replacing the conflicting backup-only description.
-- [ ] T025 [skill: general] Run `npm run type-check`, `npm test`, `npm run test:browser` and the checks in `specs/17-09-26-persistencia-e-telas-pacientes/quickstart.md`; record timings for SC-001/SC-002 and fix regressions before completion.
+- [X] T025 [skill: general] Run `npm run type-check`, `npm test`, `npm run test:browser` and the checks in `specs/17-09-26-persistencia-e-telas-pacientes/quickstart.md`; record timings for SC-001/SC-002 and fix regressions before completion.
 
 ## Dependencies and execution order
 
@@ -101,4 +101,4 @@
 
 ## Phase 7: Convergence
 
-- [ ] T026 Capture a complete Vitest suite result after resolving runner termination per plan: quickstart verification (partial).
+- [X] T026 Capture a complete Vitest suite result after resolving runner termination per plan: quickstart verification (partial).
