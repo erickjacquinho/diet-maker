@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Apresentar pacientes em uma tabela desktop contínua, ordenada pela prioridade do próximo acompanhamento e com o contexto mínimo de evolução corporal para a triagem antes do perfil.
+Apresentar pacientes em uma tabela desktop paginada, ordenada pela prioridade do próximo acompanhamento e com o contexto mínimo de evolução corporal para a triagem antes do perfil.
 
 ## Category inheritance
 
@@ -27,6 +27,8 @@ Caption acessível, cabeçalho de colunas e linhas de paciente com um rail verti
 ## Allowed variants
 
 Uma única sequência de prioridade: atrasados, hoje, próximos acompanhamentos por data e, por último, sem próximo evento. Não há cabeçalhos ou separadores de grupo.
+
+A página e a contagem total são controladas pelo consumidor; cada página tem até 25 pacientes. A busca, a ordenação global e a ordem recebida do servidor são preservadas.
 
 ## Particular states
 
@@ -60,7 +62,7 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 - identidade, source e exports coincidem com o registro;
 - a tabela preserva semântica de caption, escopos, foco visível e navegação por Enter/Espaço;
-- a busca ocorre antes da ordenação e não cria cabeçalhos ou separadores adicionais;
+- busca e ordenação globais ocorrem antes da paginação, sem criar cabeçalhos ou separadores adicionais;
 - BF, delta e período usam formatação `pt-BR` e não dependem de peso atual;
 - os dois indicadores permanecem alinhados e têm descrição não dependente de cor;
 - a prioridade e os estados sem dados permanecem legíveis sem depender exclusivamente de cor;

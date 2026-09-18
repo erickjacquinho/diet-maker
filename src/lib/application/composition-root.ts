@@ -10,11 +10,12 @@ import { archiveObjectiveOption } from './patients/archive-objective-option';
 import { archivePatient } from './patients/archive-patient';
 import { createPatient } from './patients/create-patient';
 import { getPatientProfile } from './patients/get-patient-profile';
-import { listActivePatients } from './patients/list-active-patients';
+import { listActivePatients, listActivePatientsPage, type PatientListPageRequest } from './patients/list-active-patients';
 import { restorePatient } from './patients/restore-patient';
 import { updatePatient } from './patients/update-patient';
 import type { DietDraftStore } from './diets/diet-ports';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
+import type { PageRequest, PageResult } from '@/lib/persistence/page';
 import type { AssessmentInput, BodyAssessment, ConsultationView, NextFollowUp, NextFollowUpInput } from '@/lib/domain/clinical';
 import { createClinicalCommands } from './patients/clinical-commands';
 
@@ -32,16 +33,16 @@ export interface PatientApplicationDependencies {
   idFactory?: () => string;
 }
 
-/** Coordinates an explicit domain mutation with the durable profile save. */
+/** Runs a confirmed mutation before recording its workspace revision and checkpointing it. */
 export interface ConfirmedOperationCoordinator {
   run<T>(operation: () => Promise<T>): Promise<T>;
 }
 
-export function createConfirmedOperationCoordinator(sync: () => Promise<void>): ConfirmedOperationCoordinator {
+export function createConfirmedOperationCoordinator(onConfirmed: () => Promise<void>): ConfirmedOperationCoordinator {
   return {
     async run<T>(operation: () => Promise<T>) {
       const result = await operation();
-      await sync();
+      await onConfirmed();
       return result;
     },
   };
@@ -56,6 +57,7 @@ export interface ArchivePatientResult {
 export interface PatientApplication {
   createPatient(input: PatientInput): Promise<Patient>;
   listActivePatients(query?: string): Promise<PatientListSummary[]>;
+  listActivePatientsPage(request?: PatientListPageRequest): Promise<PageResult<PatientListSummary>>;
   getPatientProfile(patientId: string): Promise<PatientProfile>;
   updatePatient(patientId: string, expectedVersion: number, input: PatientInput): Promise<Patient>;
   addObjectiveOption(label: string): Promise<ObjectiveOption>;
@@ -67,6 +69,7 @@ export interface PatientApplication {
   updateAssessment(patientId: string, assessmentId: string, expectedVersion: number, input: AssessmentInput): Promise<BodyAssessment>;
   getAssessment(patientId: string, assessmentId: string): Promise<BodyAssessment>;
   listAssessments(patientId: string): Promise<BodyAssessment[]>;
+  listAssessmentsPage(patientId: string, request?: PageRequest): Promise<PageResult<BodyAssessment>>;
   getNextFollowUp(patientId: string): Promise<NextFollowUp | null>;
   setNextFollowUp(patientId: string, expectedVersion: number | null, input: NextFollowUpInput): Promise<NextFollowUp>;
   clearNextFollowUp(patientId: string, expectedVersion: number): Promise<void>;
@@ -93,6 +96,7 @@ export function createPatientApplication(dependencies: PatientApplicationDepende
   return {
     createPatient: (input) => runConfirmed(() => dependencies.transactionRunner.run(() => createPatient(patientDeps, input))),
     listActivePatients: (query) => listActivePatients(readerDeps, query),
+    listActivePatientsPage: (request) => listActivePatientsPage(readerDeps, request),
     getPatientProfile: (patientId) => getPatientProfile(readerDeps, patientId),
     updatePatient: (patientId, expectedVersion, input) => runConfirmed(() => dependencies.transactionRunner.run(() => updatePatient(patientDeps, patientId, expectedVersion, input))),
     addObjectiveOption: (label) => runConfirmed(() => dependencies.transactionRunner.run(() => addObjectiveOption(objectiveDeps, label))),
@@ -118,6 +122,7 @@ export function createPatientApplication(dependencies: PatientApplicationDepende
     updateAssessment: (patientId, assessmentId, expectedVersion, input) => runConfirmed(() => clinicalCommands.updateAssessment(patientId, assessmentId, expectedVersion, input)),
     getAssessment: clinicalCommands.getAssessment,
     listAssessments: clinicalCommands.listAssessments,
+    listAssessmentsPage: clinicalCommands.listAssessmentsPage,
     getNextFollowUp: clinicalCommands.getNextFollowUp,
     setNextFollowUp: (patientId, expectedVersion, input) => runConfirmed(() => clinicalCommands.setNextFollowUp(patientId, expectedVersion, input)),
     clearNextFollowUp: (patientId, expectedVersion) => runConfirmed(() => clinicalCommands.clearNextFollowUp(patientId, expectedVersion)),

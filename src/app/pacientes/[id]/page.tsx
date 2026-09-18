@@ -26,7 +26,17 @@ export default function PatientDetailPage() {
     profileError,
     isProfileLoading,
     confirmedPlans,
+    dietTotal,
+    dietPageIndex,
+    setDietPageIndex,
+    isDietsLoading,
+    dietsError,
     bodyAssessments,
+    assessmentTotal,
+    assessmentPageIndex,
+    setAssessmentPageIndex,
+    isAssessmentsLoading,
+    assessmentsError,
     activePlan,
     latestAssessment,
     nextEventSummary,
@@ -208,7 +218,7 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {confirmedPlans.length === 1 ? '1 plano' : `${confirmedPlans.length} planos`}
+              {dietTotal === 1 ? '1 plano' : `${dietTotal} planos`}
             </span>
             {!isPatientArchived && (
               <Link href={`/pacientes/${patientId}/dieta/nova`}>
@@ -221,6 +231,11 @@ export default function PatientDetailPage() {
         <PatientDietsTable
           patientId={patientId}
           diets={confirmedPlans}
+          totalRows={dietTotal}
+          pageIndex={dietPageIndex}
+          onPageChange={setDietPageIndex}
+          loading={isDietsLoading}
+          error={dietsError}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
         />
       </Surface>
@@ -240,7 +255,7 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {bodyAssessments.length === 1 ? '1 avaliação' : `${bodyAssessments.length} avaliações`}
+              {assessmentTotal === 1 ? '1 avaliação' : `${assessmentTotal} avaliações`}
             </span>
             {!isPatientArchived && (
               <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
@@ -255,6 +270,11 @@ export default function PatientDetailPage() {
         <PatientAssessmentsTable
           patientId={patientId}
           assessments={bodyAssessments}
+          totalRows={assessmentTotal}
+          pageIndex={assessmentPageIndex}
+          onPageChange={setAssessmentPageIndex}
+          loading={isAssessmentsLoading}
+          error={assessmentsError}
           onOpenEditAssessment={handleOpenEditAssessment}
         />
       </Surface>

@@ -47,6 +47,7 @@ function makeRepository(assessment: ReturnType<typeof makeClinicalAssessment>): 
   return {
     getAssessment: vi.fn(async () => assessment),
     listAssessments: vi.fn(async () => [assessment]),
+    listAssessmentsPage: vi.fn(async () => ({ items: [assessment], total: 1, pageIndex: 0, pageSize: 25 })),
     listAssessmentsByPatients: vi.fn(async () => ({ [patient.id]: [assessment] })),
     createAssessment: vi.fn(), updateAssessment: vi.fn(),
     getNextFollowUp: vi.fn(async () => null), listNextFollowUps: vi.fn(async () => ({})),
@@ -57,9 +58,9 @@ function makeRepository(assessment: ReturnType<typeof makeClinicalAssessment>): 
 function makeDependencies(clinicalRepository: ClinicalRepository): PatientApplicationDependencies {
   return {
     accountContext: { getActive: async () => ({ accountId: patient.accountId, account: { id: patient.accountId, displayName: 'Teste', createdAt: patient.createdAt, updatedAt: patient.updatedAt } }), requireActive: async () => ({ accountId: patient.accountId, account: { id: patient.accountId, displayName: 'Teste', createdAt: patient.createdAt, updatedAt: patient.updatedAt } }) },
-    patientRepository: { create: vi.fn(), getById: vi.fn(async () => patient), listActive: vi.fn(async () => [patient]), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
+    patientRepository: { create: vi.fn(), getById: vi.fn(async () => patient), listActive: vi.fn(async () => [patient]), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
     objectiveCatalogRepository: { list: vi.fn(async () => []), addCustom: vi.fn(), archiveCustom: vi.fn() },
-    patientProfileReader: { getProfile: vi.fn(async () => null), listActiveSummaries: vi.fn(async () => []) },
+    patientProfileReader: { getProfile: vi.fn(async () => null), listActiveSummaries: vi.fn(async () => []), listActiveSummaryPage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })) },
     transactionRunner: { run: async function run<T>(operation: () => Promise<T>) { return operation(); } },
     clinicalRepository,
     patientDietReader: {

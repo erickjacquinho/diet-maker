@@ -5,6 +5,7 @@ const testState = vi.hoisted(() => ({
   pathname: '/pacientes',
   snapshot: { status: 'empty', syncState: 'unbound', account: null, accountId: null, runtime: null, fileName: null, error: null } as Record<string, unknown>,
   replace: vi.fn(),
+  sync: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -19,6 +20,7 @@ vi.mock('@/lib/application/browser-composition', () => ({
       void listener;
       return () => undefined;
     },
+    sync: testState.sync,
   }),
 }));
 
@@ -33,6 +35,7 @@ describe('SessionAwareAppShell', () => {
     testState.pathname = '/pacientes';
     testState.snapshot = { status: 'empty', syncState: 'unbound', account: null, accountId: null, runtime: null, fileName: null, error: null };
     testState.replace.mockReset();
+    testState.sync.mockReset();
   });
 
   it('redirects an internal route before rendering internal content without a session', async () => {
@@ -63,5 +66,22 @@ describe('SessionAwareAppShell', () => {
     testState.pathname = '/home';
     render(<SessionAwareAppShell><div data-testid="home-content">Home</div></SessionAwareAppShell>);
     await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/pacientes'));
+  });
+
+  it('retries a pending checkpoint after a pathname change without waiting for the write', async () => {
+    testState.snapshot = { status: 'active', syncState: 'pending', account: { displayName: 'Jacques Regiani' }, accountId: 'account-1', runtime: {}, fileName: 'profile.nutridiet', error: null };
+    let finishSync: () => void = () => undefined;
+    const pendingSync = new Promise<void>((resolve) => { finishSync = resolve; });
+    testState.sync.mockReturnValueOnce(pendingSync);
+    const { rerender } = render(<SessionAwareAppShell><div data-testid="internal-content">Pacientes</div></SessionAwareAppShell>);
+
+    expect(testState.sync).not.toHaveBeenCalled();
+    testState.pathname = '/receitas';
+    rerender(<SessionAwareAppShell><div data-testid="internal-content">Pacientes</div></SessionAwareAppShell>);
+
+    await waitFor(() => expect(testState.sync).toHaveBeenCalledOnce());
+    expect(screen.getByTestId('internal-content')).toBeInTheDocument();
+    finishSync();
+    await pendingSync;
   });
 });

@@ -11,18 +11,16 @@ async function source(relativePath: string): Promise<string> {
 }
 
 describe('host persistence boundary', () => {
-  it('keeps the production runtime composition independent from host storage', async () => {
-    const [client, composition, accountContext, draftStore] = await Promise.all([
+  it('keys browser workspace and diet drafts to local persistent storage', async () => {
+    const [client, composition] = await Promise.all([
       source('src/lib/infrastructure/local-db/client.ts'),
       source('src/lib/application/browser-composition.ts'),
-      source('src/lib/infrastructure/local-db/account-context.ts'),
-      source('src/lib/infrastructure/diet-drafts/in-memory-diet-draft-store.ts'),
     ]);
-    const productionRuntime = `${client}\n${composition}\n${accountContext}\n${draftStore}`;
 
-    expect(productionRuntime).not.toMatch(/idb:\/\//);
-    expect(productionRuntime).not.toMatch(/IndexedDB|indexedDB|localStorage|sessionStorage|document\.cookie/);
-    expect(productionRuntime).not.toMatch(/IndexedDbDietDraftStore/);
-    expect(productionRuntime).not.toMatch(/getActiveOrCreate/);
+    expect(client).toMatch(/mode === 'persistent' \? 'idb:\/\/' : 'memory:\/\//);
+    expect(composition).toContain('idb://nutridiet-${encodeURIComponent(account.id)}');
+    expect(composition).toContain('new IndexedDbDietDraftStore()');
+    expect(composition).toContain('new InMemoryDietDraftStore()');
+    expect(composition).not.toMatch(/getActiveOrCreate/);
   });
 });

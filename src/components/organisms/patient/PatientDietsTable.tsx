@@ -22,6 +22,7 @@ import type { HistoricalDiet } from '@/lib/patientRelatedRecords';
 import type { HistoricalDietVariation } from '@/lib/patientsStoreTypes';
 import type { DietHistoryRow } from '@/lib/application/diets/diet-ports';
 import { toHistoricalDietView } from '@/lib/application/diets/diet-history-view';
+import { MAX_PAGE_SIZE } from '@/lib/persistence/page';
 
 type DietTableData = HistoricalDiet | DietHistoryRow;
 
@@ -32,6 +33,11 @@ function toTableView(diet: DietTableData): HistoricalDiet {
 export interface PatientDietsTableProps {
   patientId: string;
   diets: DietTableData[];
+  totalRows?: number;
+  pageIndex?: number;
+  onPageChange?: (pageIndex: number) => void;
+  loading?: boolean;
+  error?: string | null;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
 }
 
@@ -369,22 +375,34 @@ export function DietTableRow({
 export function PatientDietsTable({
   patientId,
   diets = [],
+  totalRows,
+  pageIndex,
+  onPageChange,
+  loading = false,
+  error,
   onOpenReadOnlyDiet,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
-  const [pageIndex, setPageIndex] = React.useState(0);
-  React.useEffect(() => { setPageIndex(0); }, [diets]);
+  const [localPageIndex, setLocalPageIndex] = React.useState(0);
+  React.useEffect(() => { if (!onPageChange) setLocalPageIndex(0); }, [diets, onPageChange]);
+  const pagination = onPageChange
+    ? { pageIndex: pageIndex ?? 0, pageSize: MAX_PAGE_SIZE, totalRows: totalRows ?? diets.length, onPageChange }
+    : diets.length > MAX_PAGE_SIZE
+      ? { pageIndex: localPageIndex, pageSize: MAX_PAGE_SIZE, onPageChange: setLocalPageIndex }
+      : undefined;
 
   return (
     <TooltipProvider delayDuration={200}>
       <DataTable
         data={diets}
-        pagination={diets.length > 25 ? { pageIndex, pageSize: 25, onPageChange: setPageIndex } : undefined}
+        pagination={pagination}
         columns={columns}
         getRowId={(diet) => diet.id}
         caption="Histórico de prescrições dietéticas e planos alimentares"
         ariaLabel="Histórico de prescrições dietéticas e planos alimentares"
         emptyMessage="Nenhuma prescrição dietética registrada para este paciente até o momento."
+        loading={loading}
+        errorMessage={error || undefined}
         renderRow={(diet) => (
           <DietTableRow
             patientId={patientId}

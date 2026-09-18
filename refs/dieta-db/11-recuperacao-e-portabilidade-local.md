@@ -1,4 +1,4 @@
-# Decisão 11 — Recuperação e Portabilidade Local
+# Decisão 11 — Save Principal, Recuperação e Portabilidade Local
 
 - **Status:** Implementada e validada no SDD de backup manual simples
 - **Data:** 2026-08-30
@@ -6,8 +6,12 @@
 
 ## 1. Decisão
 
-A V1 oferece **Exportar backup** e **Restaurar backup** por um arquivo mestre
-`.nutridiet`: JSON UTF-8, sem criptografia e sem senha.
+A V1 grava o save principal da Conta em um arquivo mestre `.nutridiet`: JSON
+UTF-8, sem criptografia e sem senha. O arquivo corresponde ao último
+checkpoint concluído; exportação e restauração continuam disponíveis para
+portabilidade e recuperação. O banco local é a área de trabalho e pode conter
+alterações confirmadas posteriores ao checkpoint. Consulte o
+[ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md).
 
 Não há backup automático, envio para nuvem, sincronização entre dispositivos
 ou lembretes recorrentes. O usuário escolhe quando exportar e onde guardar o

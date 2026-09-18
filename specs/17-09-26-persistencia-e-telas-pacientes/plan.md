@@ -53,7 +53,7 @@ specs/17-09-26-persistencia-e-telas-pacientes/
 
 ```text
 src/app/SessionAwareAppShell.tsx
-src/components/molecules/data-table/{types.ts,DataTable.tsx}
+src/components/molecules/{DataTable.tsx,data-table/types.ts}
 src/components/organisms/patient/{PatientAssessmentsTable.tsx,PatientDietsTable.tsx}
 src/hooks/{usePatientsPage.ts,usePatientProfilePage.ts}
 src/lib/application/{composition-root.ts,profile-session.ts,patients/,diets/}

@@ -21,6 +21,7 @@ import {
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
 import type { DietPlan } from '@/lib/domain/diets/diet-model';
+import { MAX_PAGE_SIZE } from '@/lib/persistence/page';
 
 export function usePatientProfilePage() {
   const params = useParams();
@@ -31,7 +32,17 @@ export function usePatientProfilePage() {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const [confirmedPlans, setConfirmedPlans] = useState<HistoricalDiet[]>([]);
+  const [dietTotal, setDietTotal] = useState(0);
+  const [dietPageIndex, setDietPageIndex] = useState(0);
+  const [isDietsLoading, setIsDietsLoading] = useState(true);
+  const [dietsError, setDietsError] = useState<string | null>(null);
   const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
+  const [assessmentTotal, setAssessmentTotal] = useState(0);
+  const [assessmentPageIndex, setAssessmentPageIndex] = useState(0);
+  const [isAssessmentsLoading, setIsAssessmentsLoading] = useState(true);
+  const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
+  const [profileLatestAssessment, setProfileLatestAssessment] = useState<BodyAssessment | null>(null);
+  const [activePlanSummary, setActivePlanSummary] = useState<ReturnType<typeof selectCurrentActivePlan>>(null);
 
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -69,18 +80,18 @@ export function usePatientProfilePage() {
   }, []);
 
   const profileRequest = useRef(0);
-  const loadProfile = useCallback(async (includeDiets = true) => {
+  const assessmentPageRequest = useRef(0);
+  const dietPageRequest = useRef(0);
+  const loadProfile = useCallback(async (showLoading = true) => {
     const request = ++profileRequest.current;
-    if (includeDiets) setIsProfileLoading(true);
+    if (showLoading) setIsProfileLoading(true);
     setProfileError(null);
     try {
       const application = await getBrowserPatientApplication();
-      const [profile, dietHistory] = await Promise.all([
-        application.getPatientProfile(patientId),
-        includeDiets ? getBrowserDietApplication().then((diets) => diets.listDietHistoryViews(patientId)) : Promise.resolve(null),
-      ]);
+      const profile = await application.getPatientProfile(patientId);
       if (request !== profileRequest.current) return;
       const assessments = (profile.clinical?.assessments ?? []).map(toLegacyAssessment);
+      const latestAssessment = profile.clinical?.latestAssessment ? toLegacyAssessment(profile.clinical.latestAssessment) : assessments[0] ?? null;
       const view = toPatientViewModel(profile.patient, {
         initials: profile.initials,
         nextEvent: toLegacyNextEvent(profile.clinical?.nextFollowUp ?? null),
@@ -89,24 +100,70 @@ export function usePatientProfilePage() {
       });
       setPatient(view);
       setAvailableObjectives(profile.availableObjectives);
-      if (dietHistory) setConfirmedPlans(dietHistory);
-      setBodyAssessments(assessments);
+      setProfileLatestAssessment(latestAssessment);
     } catch (error: unknown) {
       if (request !== profileRequest.current) return;
-      if (includeDiets) setPatient(null);
+      if (showLoading) setPatient(null);
       setProfileError(error instanceof PatientApplicationError ? error.message : 'Não foi possível carregar o perfil do paciente.');
-      if (!includeDiets) {
+      if (!showLoading) {
         toast.error('Os dados foram salvos, mas não foi possível atualizar o perfil. Reabra a tela.');
         return;
       }
       throw error;
     } finally {
-      if (request === profileRequest.current) setIsProfileLoading(false);
+      if (request === profileRequest.current && showLoading) setIsProfileLoading(false);
     }
   }, [patientId]);
 
-  const activePlan = useMemo(() => selectCurrentActivePlan(confirmedPlans), [confirmedPlans]);
-  const latestAssessment = useMemo(() => selectLatestAssessment(bodyAssessments), [bodyAssessments]);
+  const loadAssessmentPage = useCallback(async (requestedPageIndex = assessmentPageIndex) => {
+    const request = ++assessmentPageRequest.current;
+    setIsAssessmentsLoading(true);
+    setAssessmentsError(null);
+    try {
+      const application = await getBrowserPatientApplication();
+      const page = await application.listAssessmentsPage(patientId, { pageIndex: requestedPageIndex, pageSize: MAX_PAGE_SIZE });
+      if (request !== assessmentPageRequest.current) return;
+      const lastPageIndex = Math.max(0, Math.ceil(page.total / MAX_PAGE_SIZE) - 1);
+      setAssessmentTotal(page.total);
+      if (requestedPageIndex > lastPageIndex) {
+        setAssessmentPageIndex(lastPageIndex);
+        return;
+      }
+      setAssessmentPageIndex(page.pageIndex);
+      setBodyAssessments(page.items.map(toLegacyAssessment));
+    } catch (error) {
+      if (request === assessmentPageRequest.current) setAssessmentsError(error instanceof Error ? error.message : 'Não foi possível carregar as avaliações.');
+    } finally {
+      if (request === assessmentPageRequest.current) setIsAssessmentsLoading(false);
+    }
+  }, [assessmentPageIndex, patientId]);
+
+  const loadDietPage = useCallback(async (requestedPageIndex = dietPageIndex) => {
+    const request = ++dietPageRequest.current;
+    setIsDietsLoading(true);
+    setDietsError(null);
+    try {
+      const application = await getBrowserDietApplication();
+      const page = await application.listDietHistoryViewsPage(patientId, { pageIndex: requestedPageIndex, pageSize: MAX_PAGE_SIZE });
+      if (request !== dietPageRequest.current) return;
+      const lastPageIndex = Math.max(0, Math.ceil(page.total / MAX_PAGE_SIZE) - 1);
+      setDietTotal(page.total);
+      if (requestedPageIndex > lastPageIndex) {
+        setDietPageIndex(lastPageIndex);
+        return;
+      }
+      setDietPageIndex(page.pageIndex);
+      setConfirmedPlans(page.items);
+      if (page.pageIndex === 0) setActivePlanSummary(selectCurrentActivePlan(page.items));
+    } catch (error) {
+      if (request === dietPageRequest.current) setDietsError(error instanceof Error ? error.message : 'Não foi possível carregar as dietas.');
+    } finally {
+      if (request === dietPageRequest.current) setIsDietsLoading(false);
+    }
+  }, [dietPageIndex, patientId]);
+
+  const activePlan = useMemo(() => selectCurrentActivePlan(confirmedPlans) ?? activePlanSummary, [activePlanSummary, confirmedPlans]);
+  const latestAssessment = useMemo(() => profileLatestAssessment ?? selectLatestAssessment(bodyAssessments), [bodyAssessments, profileLatestAssessment]);
   const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
   const whatsappContact = patient?.whatsapp ?? patient?.phone;
   const whatsappUrl = useMemo(() => getWhatsappUrl(whatsappContact), [whatsappContact]);
@@ -149,8 +206,9 @@ export function usePatientProfilePage() {
     }
     setIsEditAssessmentOpen(false);
     toast.success(assessmentMode === 'create' ? 'Avaliação física criada com sucesso!' : 'Avaliação física atualizada com sucesso!');
-    await loadProfile(false);
-  }, [assessmentMode, loadProfile, patientId]);
+    setAssessmentPageIndex(0);
+    await Promise.all([loadProfile(false), loadAssessmentPage(0)]);
+  }, [assessmentMode, loadAssessmentPage, loadProfile, patientId]);
 
   const handleSaveNextEvent = useCallback(async (nextEvent: PatientNextEvent) => {
     const application = await getBrowserPatientApplication();
@@ -187,11 +245,19 @@ export function usePatientProfilePage() {
   useEffect(() => {
     if (!patientId) return undefined;
     let cancelled = false;
-    void loadProfile().catch(() => {
+    void loadProfile(true).catch(() => {
       if (cancelled) return;
     });
-    return () => { cancelled = true; profileRequest.current += 1; dietRequest.current += 1; };
+    return () => { cancelled = true; profileRequest.current += 1; dietRequest.current += 1; assessmentPageRequest.current += 1; dietPageRequest.current += 1; };
   }, [loadProfile, patientId]);
+
+  useEffect(() => {
+    if (patientId) void loadAssessmentPage(assessmentPageIndex);
+  }, [assessmentPageIndex, loadAssessmentPage, patientId]);
+
+  useEffect(() => {
+    if (patientId) void loadDietPage(dietPageIndex);
+  }, [dietPageIndex, loadDietPage, patientId]);
 
   const handleSavePatient = useCallback(async (updatedPatient: PatientViewModel) => {
     if (!updatedPatient.version) throw new Error('A versão do paciente não está disponível para atualização.');
@@ -216,7 +282,17 @@ export function usePatientProfilePage() {
     profileError,
     isProfileLoading,
     confirmedPlans,
+    dietTotal,
+    dietPageIndex,
+    setDietPageIndex,
+    isDietsLoading,
+    dietsError,
     bodyAssessments,
+    assessmentTotal,
+    assessmentPageIndex,
+    setAssessmentPageIndex,
+    isAssessmentsLoading,
+    assessmentsError,
     activePlan,
     latestAssessment,
     nextEventSummary,

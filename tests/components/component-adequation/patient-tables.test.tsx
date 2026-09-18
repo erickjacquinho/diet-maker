@@ -105,6 +105,9 @@ describe('component adequation: patient tables and rows', () => {
     render(
       <PatientListTable
         rows={buildPatientListRows([patient], '2026-01-15')}
+        totalRows={1}
+        pageIndex={0}
+        onPageChange={vi.fn()}
         onNavigate={onNavigate}
       />,
     );

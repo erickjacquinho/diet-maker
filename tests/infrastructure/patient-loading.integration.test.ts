@@ -22,7 +22,23 @@ async function setup(size = 1) {
 }
 
 describe('patient loading with the real local database', () => {
-  it('reads 100 patients and 2,000 diets/assessments in four batch queries without hydrating diets', async () => {
+  it('increments the workspace revision after a confirmed mutation', async () => {
+    const timestamp = '2026-09-17T10:00:00.000Z';
+    runtime = await createBrowserPatientRuntime({ id: 'account-a', displayName: 'Conta teste', phone: null, createdAt: timestamp, updatedAt: timestamp });
+    const input = {
+      name: 'Ana Lima', age: 32, gender: 'Feminino', birthDate: '1994-06-12', heightCm: 165, weightKg: 62,
+      phone: null, whatsapp: '11999990000', currentObjective: 'Manutenção',
+      defaultMacroTargets: { proteinG: 110, carbsG: 200, fatsG: 55, kcal: 1755 },
+    };
+
+    await expect(runtime.getCheckpointState()).resolves.toEqual({ workspaceRevision: 0, checkpointRevision: 0 });
+    await runtime.application.createPatient(input);
+    await expect(runtime.getCheckpointState()).resolves.toEqual({ workspaceRevision: 1, checkpointRevision: 0 });
+    await expect(runtime.application.createPatient({ ...input, heightCm: 0 })).rejects.toMatchObject({ code: 'INVALID_FIELD' });
+    await expect(runtime.getCheckpointState()).resolves.toEqual({ workspaceRevision: 1, checkpointRevision: 0 });
+  });
+
+  it('returns 25 of 100 patients with five bounded queries and no diet hydration', async () => {
     const { handle, application } = await setup(100);
     await handle.client.exec(`
       INSERT INTO diet_plans (id, account_id, patient_id, name, mode, status, version, created_at, updated_at, activated_at)
@@ -37,18 +53,51 @@ describe('patient loading with the real local database', () => {
     const hydrate = vi.spyOn(PGliteDietRepository.prototype, 'getById');
     const query = vi.spyOn(handle.client, 'query');
     const start = performance.now();
-    const summaries = await application.listActivePatients();
+    const page = await application.listActivePatientsPage({ pageIndex: 0, pageSize: 25 });
     const duration = performance.now() - start;
     console.info(`[patient-loading] 100 pacientes, 2000 dietas, 2000 avaliações: ${duration.toFixed(1)}ms; ${query.mock.calls.length} consultas`);
     expect(duration).toBeLessThan(1000);
-    expect(summaries).toHaveLength(100);
-    expect(query).toHaveBeenCalledTimes(4);
+    expect(page).toMatchObject({ total: 100, pageIndex: 0, pageSize: 25 });
+    expect(page.items).toHaveLength(25);
+    expect(query).toHaveBeenCalledTimes(5);
     expect(hydrate).not.toHaveBeenCalled();
-    for (const summary of summaries) {
+    for (const summary of page.items) {
       expect(summary.related).toEqual({ dietCount: 20, assessmentCount: 20 });
       expect(summary.clinical?.latestAssessment?.clinicalDate).toBe('2026-09-20');
       expect(summary.clinical?.previousAssessment?.clinicalDate).toBe('2026-09-19');
     }
+  });
+
+  it('returns the first page of 2,000 assessments and diets within one second', async () => {
+    const { handle, application, dietApplication } = await setup();
+    await handle.client.exec(`
+      INSERT INTO diet_plans (id, account_id, patient_id, name, mode, status, version, created_at, updated_at, activated_at)
+      SELECT 'diet-' || lpad(n::text, 4, '0'), 'account-a', 'patient-a', 'Plano ' || n, 'SIMPLE',
+        CASE WHEN n = 2000 THEN 'ACTIVE' ELSE 'SNAPSHOT' END, 1, '2026-09-01', '2026-09-01',
+        to_char(date '2020-01-01' + n, 'YYYY-MM-DD')
+      FROM generate_series(1, 2000) n;
+      INSERT INTO body_assessments (id, account_id, patient_id, clinical_date, weight_kg, auto_filled_fields, calculation_method, calculation_version, calculation_input_snapshot, version, created_at, updated_at)
+      SELECT 'assessment-' || lpad(n::text, 4, '0'), 'account-a', 'patient-a', to_char(date '2020-01-01' + n, 'YYYY-MM-DD'), 70,
+        '[]'::jsonb, 'NONE', 'simplified-v1', '{"assessmentType":"simplified","heightCm":165,"weightKg":70}'::jsonb, 1, '2026-09-01', '2026-09-01'
+      FROM generate_series(1, 2000) n;
+    `);
+    const fullDietRead = vi.spyOn(PGliteDietRepository.prototype, 'getById');
+
+    const assessmentStart = performance.now();
+    const assessmentPage = await application.listAssessmentsPage('patient-a', { pageIndex: 0, pageSize: 25 });
+    const assessmentDuration = performance.now() - assessmentStart;
+    const dietStart = performance.now();
+    const dietPage = await dietApplication.listDietHistoryViewsPage('patient-a', { pageIndex: 0, pageSize: 25 });
+    const dietDuration = performance.now() - dietStart;
+    console.info(`[patient-history] 2.000 registros: avaliações ${assessmentDuration.toFixed(1)}ms, dietas ${dietDuration.toFixed(1)}ms`);
+
+    expect(assessmentPage).toMatchObject({ total: 2000, pageIndex: 0, pageSize: 25 });
+    expect(assessmentPage.items).toHaveLength(25);
+    expect(dietPage).toMatchObject({ total: 2000, pageIndex: 0, pageSize: 25 });
+    expect(dietPage.items).toHaveLength(25);
+    expect(assessmentDuration).toBeLessThan(1000);
+    expect(dietDuration).toBeLessThan(1000);
+    expect(fullDietRead).not.toHaveBeenCalled();
   });
 
   it('keeps projected macros, targets, cycles and meal counts identical to full snapshot calculations', async () => {
@@ -81,6 +130,10 @@ describe('patient loading with the real local database', () => {
     const actual = await dietApplication.listDietHistoryViews('patient-a');
     expect(actual).toEqual(expected);
     expect(query).toHaveBeenCalledTimes(4); // Patient existence + three history queries.
+    query.mockClear();
+    const page = await dietApplication.listDietHistoryViewsPage('patient-a', { pageIndex: 0, pageSize: 1 });
+    expect(page).toMatchObject({ total: expected.length, pageIndex: 0, pageSize: 1, items: [expected[0]] });
+    expect(query).toHaveBeenCalledTimes(5); // Patient scope, count, page, variation summaries and assigned days.
     expect(await repository.listHistoryViews('other-account', 'patient-a')).toEqual([]);
     expect(await repository.listPatientSummaries('other-account', ['patient-a'])).toEqual({ 'patient-a': { dietCount: 0, assessmentCount: 0, lastActivity: null } });
   });

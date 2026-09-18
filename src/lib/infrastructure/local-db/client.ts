@@ -4,7 +4,7 @@ import { applyMigrations } from './migrations';
 import { schema, type LocalDbSchema } from './schema';
 
 export type LocalDatabase = ReturnType<typeof drizzle<LocalDbSchema>>;
-export type LocalDatabaseMode = 'memory' | 'test-memory';
+export type LocalDatabaseMode = 'memory' | 'persistent' | 'test-memory';
 
 export interface LocalDatabaseHandle {
   readonly db: LocalDatabase;
@@ -28,16 +28,20 @@ function isBrowserRuntime(): boolean {
   return typeof window !== 'undefined';
 }
 
-function assertMemoryDataDir(dataDir: string): void {
-  if (!dataDir.startsWith('memory://')) {
-    throw new Error('O runtime de uma sessão exige um filesystem PGlite memory://.');
+function assertDataDir(mode: LocalDatabaseMode, dataDir: string): void {
+  const expectedPrefix = mode === 'persistent' ? 'idb://' : 'memory://';
+  if (!dataDir.startsWith(expectedPrefix)) {
+    throw new Error(`O runtime ${mode} exige um filesystem PGlite ${expectedPrefix}.`);
   }
 }
 
 export async function openLocalDatabase(options: OpenLocalDatabaseOptions = {}): Promise<LocalDatabaseHandle> {
   const mode = options.mode ?? (isBrowserRuntime() ? 'memory' : 'test-memory');
+  if (mode === 'persistent' && !options.dataDir) {
+    throw new Error('O runtime persistente exige uma chave IndexedDB específica do profile.');
+  }
   const dataDir = options.dataDir ?? (mode === 'memory' ? createMemoryDataDir() : 'memory://nutridiet-test');
-  assertMemoryDataDir(dataDir);
+  assertDataDir(mode, dataDir);
 
   let client: PGlite | undefined = options.client;
   try {

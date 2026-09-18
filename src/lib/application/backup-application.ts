@@ -449,13 +449,15 @@ export interface BackupExportResult {
 export interface BackupApplicationDependencies {
   accountContext: AccountContext;
   repository: BackupRepository;
-  draftStore: Pick<DietDraftStore, 'listRecoverableByAccount'>;
+  draftStore: Pick<DietDraftStore, 'listRecoverableByAccount' | 'removeIfRevision'>;
+  getCheckpointState?(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
+  savePendingCheckpoint?(): Promise<void>;
 }
 
 export interface BackupApplication {
   exportBackup(): Promise<BackupExportResult>;
   validateBackup(serialized: string): Promise<BackupEnvelope>;
-  restoreBackup(serialized: string, options?: { confirmed?: boolean }): Promise<void>;
+  restoreBackup(serialized: string, options?: { confirmed?: boolean; pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean }): Promise<void>;
 }
 
 function appErrorFromCause(code: BackupErrorCode, message: string, cause: unknown): BackupApplicationError {
@@ -494,9 +496,32 @@ export function createBackupApplication(dependencies: BackupApplicationDependenc
     restoreBackup: async (serialized, options = {}) => {
       const context = await getValidationContext();
       const envelope = parseBackupEnvelope(serialized, context);
-      const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
-      if (drafts.length > 0) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Resolva, salve ou descarte os rascunhos pendentes antes de importar o backup.');
       if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
+      const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
+      if (drafts.length > 0 && options.discardDrafts) {
+        for (const draft of drafts) {
+          const removed = await dependencies.draftStore.removeIfRevision(draft.draftId, draft.draftRevision);
+          if (!removed) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Um rascunho mudou durante a restauração; nenhum rascunho atualizado foi descartado.');
+        }
+        if ((await dependencies.draftStore.listRecoverableByAccount(context.accountId)).length > 0) {
+          throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Ainda há rascunhos pendentes; a base local não foi alterada.');
+        }
+      } else if (drafts.length > 0) {
+        throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Salve os rascunhos no perfil ou descarte-os explicitamente antes de importar o backup.');
+      }
+      const checkpoint = await dependencies.getCheckpointState?.();
+      if (checkpoint && checkpoint.workspaceRevision > checkpoint.checkpointRevision) {
+        if (options.pendingChanges === 'save') {
+          if (!dependencies.savePendingCheckpoint) throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'O save principal não está disponível para gravar as alterações pendentes.');
+          await dependencies.savePendingCheckpoint();
+          const saved = await dependencies.getCheckpointState?.();
+          if (saved && saved.workspaceRevision > saved.checkpointRevision) {
+            throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Ainda há alterações locais sem checkpoint no arquivo principal.');
+          }
+        } else if (options.pendingChanges !== 'discard') {
+          throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Escolha salvar ou descartar as alterações locais antes de importar o backup.');
+        }
+      }
       try {
         await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
       } catch (cause) {

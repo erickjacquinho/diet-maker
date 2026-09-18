@@ -1,4 +1,4 @@
-import { getPatientInitials } from '@/lib/domain/patient';
+import { getPatientInitials, type Patient } from '@/lib/domain/patient';
 import type { ObjectiveCatalogRepository } from '@/lib/persistence/objective-catalog-repository';
 import type {
   PatientProfile,
@@ -25,6 +25,7 @@ function buildClinicalSummary(
   assessments: readonly import('@/lib/domain/clinical').BodyAssessment[],
   nextFollowUp: import('@/lib/domain/clinical').NextFollowUp | null,
   related: RelatedCounts,
+  assessmentCount = assessments.length,
 ): PatientClinicalSummary {
   const { latestAssessment, previousAssessment } = latestAssessments(assessments);
   const assessmentActivity = latestAssessment
@@ -34,7 +35,7 @@ function buildClinicalSummary(
     .filter((activity): activity is PatientActivity => activity !== null)
     .sort((left, right) => right.eventDate.localeCompare(left.eventDate) || right.confirmedAt.localeCompare(left.confirmedAt) || left.type.localeCompare(right.type) || left.sourceId.localeCompare(right.sourceId))[0] ?? null;
   return {
-    assessmentCount: Math.max(assessments.length, related.assessmentCount),
+    assessmentCount: Math.max(assessmentCount, related.assessmentCount),
     latestAssessment,
     previousAssessment,
     nextFollowUp,
@@ -51,11 +52,14 @@ async function readClinicalProfile(
   clinicalRepository?: ClinicalRepository,
 ): Promise<PatientClinicalProfile | undefined> {
   if (!clinicalRepository) return undefined;
-  const [assessments, nextFollowUp] = await Promise.all([
-    clinicalRepository.listAssessments(accountId, patientId),
+  const assessmentSummary = clinicalRepository.listAssessmentSummaries
+    ? clinicalRepository.listAssessmentSummaries(accountId, [patientId]).then((summaries) => summaries[patientId] ?? { assessments: [], count: 0 })
+    : clinicalRepository.listAssessments(accountId, patientId).then((assessments) => ({ assessments, count: assessments.length }));
+  const [summary, nextFollowUp] = await Promise.all([
+    assessmentSummary,
     clinicalRepository.getNextFollowUp(accountId, patientId),
   ]);
-  return { assessments, ...buildClinicalSummary(assessments, nextFollowUp, related) };
+  return { assessments: summary.assessments, ...buildClinicalSummary(summary.assessments, nextFollowUp, related, summary.count) };
 }
 
 export function createPatientProfileReader(
@@ -79,6 +83,37 @@ export function createPatientProfileReader(
     };
   };
 
+  const readSummaries = async (
+    accountId: string,
+    patients: Patient[],
+  ): Promise<PatientListSummary[]> => {
+    if (!options.clinicalRepository) return Promise.all(patients.map((patient) => toSummary(accountId, patient)));
+    const patientIds = patients.map((patient) => patient.id);
+    if (options.listRelatedCounts && options.clinicalRepository.listAssessmentSummaries) {
+      const [assessmentMap, followUpMap, relatedMap] = await Promise.all([
+        options.clinicalRepository.listAssessmentSummaries(accountId, patientIds),
+        options.clinicalRepository.listNextFollowUps(accountId, patientIds),
+        options.listRelatedCounts(accountId, patientIds),
+      ]);
+      return Promise.all(patients.map((patient) => {
+        const assessment = assessmentMap[patient.id];
+        const related = { ...relatedMap[patient.id], assessmentCount: assessment.count };
+        const clinical = buildClinicalSummary(assessment.assessments, followUpMap[patient.id] ?? null, related);
+        return toSummary(accountId, patient, clinical, related);
+      }));
+    }
+    const [assessmentMap, followUpMap, relatedValues] = await Promise.all([
+      options.clinicalRepository.listAssessmentsByPatients(accountId, patientIds),
+      options.clinicalRepository.listNextFollowUps(accountId, patientIds),
+      Promise.all(patients.map((patient) => relatedCounts(accountId, patient.id))),
+    ]);
+    return Promise.all(patients.map((patient, index) => {
+      const related = relatedValues[index];
+      const clinical = buildClinicalSummary(assessmentMap[patient.id] ?? [], followUpMap[patient.id] ?? null, related);
+      return toSummary(accountId, patient, clinical, related);
+    }));
+  };
+
   return {
     getProfile: async (accountId, patientId): Promise<PatientProfile | null> => {
       const patient = await patientRepository.getById(accountId, patientId);
@@ -96,33 +131,10 @@ export function createPatientProfileReader(
         clinical,
       };
     },
-    listActiveSummaries: async (accountId) => {
-      const patients = await patientRepository.listActive(accountId);
-      if (!options.clinicalRepository) return Promise.all(patients.map((patient) => toSummary(accountId, patient)));
-      const patientIds = patients.map((patient) => patient.id);
-      if (options.listRelatedCounts && options.clinicalRepository.listAssessmentSummaries) {
-        const [assessmentMap, followUpMap, relatedMap] = await Promise.all([
-          options.clinicalRepository.listAssessmentSummaries(accountId, patientIds),
-          options.clinicalRepository.listNextFollowUps(accountId, patientIds),
-          options.listRelatedCounts(accountId, patientIds),
-        ]);
-        return Promise.all(patients.map((patient) => {
-          const assessment = assessmentMap[patient.id];
-          const related = { ...relatedMap[patient.id], assessmentCount: assessment.count };
-          const clinical = buildClinicalSummary(assessment.assessments, followUpMap[patient.id] ?? null, related);
-          return toSummary(accountId, patient, clinical, related);
-        }));
-      }
-      const [assessmentMap, followUpMap, relatedValues] = await Promise.all([
-        options.clinicalRepository.listAssessmentsByPatients(accountId, patientIds),
-        options.clinicalRepository.listNextFollowUps(accountId, patientIds),
-        Promise.all(patients.map((patient) => relatedCounts(accountId, patient.id))),
-      ]);
-      return Promise.all(patients.map((patient, index) => {
-        const related = relatedValues[index];
-        const clinical = buildClinicalSummary(assessmentMap[patient.id] ?? [], followUpMap[patient.id] ?? null, related);
-        return toSummary(accountId, patient, clinical, related);
-      }));
+    listActiveSummaries: async (accountId) => readSummaries(accountId, await patientRepository.listActive(accountId)),
+    listActiveSummaryPage: async (accountId, query) => {
+      const page = await patientRepository.listActivePage(accountId, query);
+      return { ...page, items: await readSummaries(accountId, page.items) };
     },
   };
 }

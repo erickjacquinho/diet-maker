@@ -398,6 +398,61 @@ export const simplifiedAssessmentMigration: LocalMigration = {
   `,
 };
 
+export const patientProfileOptimizationMigration: LocalMigration = {
+  id: '0007_patient_profile_optimization',
+  version: '7',
+  sql: `
+    CREATE TABLE IF NOT EXISTS profile_checkpoint_state (
+      account_id text PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE,
+      workspace_revision integer NOT NULL DEFAULT 0 CHECK (workspace_revision >= 0),
+      checkpoint_revision integer NOT NULL DEFAULT 0 CHECK (checkpoint_revision >= 0 AND checkpoint_revision <= workspace_revision)
+    );
+
+    CREATE TABLE IF NOT EXISTS diet_variation_history_summaries (
+      diet_variation_id text PRIMARY KEY REFERENCES diet_variations(id) ON DELETE CASCADE,
+      prescribed_protein numeric NOT NULL CHECK (prescribed_protein >= 0),
+      prescribed_carbs numeric NOT NULL CHECK (prescribed_carbs >= 0),
+      prescribed_fat numeric NOT NULL CHECK (prescribed_fat >= 0),
+      prescribed_energy_kcal numeric NOT NULL CHECK (prescribed_energy_kcal >= 0)
+    );
+  `,
+};
+
+export const patientListOrderingMigration: LocalMigration = {
+  id: '0008_patient_list_ordering',
+  version: '8',
+  sql: `
+    CREATE COLLATION IF NOT EXISTS nutridiet_pt_br_base
+      (provider = icu, locale = 'pt-BR-u-ks-level1');
+  `,
+};
+
+export const dietHistorySummaryBackfillMigration: LocalMigration = {
+  id: '0009_diet_history_summary_backfill',
+  version: '9',
+  sql: `
+    INSERT INTO diet_variation_history_summaries (
+      diet_variation_id, prescribed_protein, prescribed_carbs, prescribed_fat, prescribed_energy_kcal
+    )
+    SELECT variation.id,
+      COALESCE(SUM(snapshot.prescribed_protein), 0),
+      COALESCE(SUM(snapshot.prescribed_carbs), 0),
+      COALESCE(SUM(snapshot.prescribed_fat), 0),
+      COALESCE(SUM(COALESCE(snapshot.prescribed_energy_kcal, snapshot.prescribed_protein * 4 + snapshot.prescribed_carbs * 4 + snapshot.prescribed_fat * 9)), 0)
+    FROM diet_variations variation
+    LEFT JOIN diet_meals meal ON meal.variation_id = variation.id
+    LEFT JOIN diet_meal_options meal_option ON meal_option.diet_meal_id = meal.id AND meal_option.counts_toward_totals = true
+    LEFT JOIN diet_meal_items item ON item.diet_meal_option_id = meal_option.id AND item.role = 'PRIMARY'
+    LEFT JOIN diet_item_snapshots snapshot ON snapshot.diet_meal_item_id = item.id
+    GROUP BY variation.id
+    ON CONFLICT (diet_variation_id) DO UPDATE SET
+      prescribed_protein = EXCLUDED.prescribed_protein,
+      prescribed_carbs = EXCLUDED.prescribed_carbs,
+      prescribed_fat = EXCLUDED.prescribed_fat,
+      prescribed_energy_kcal = EXCLUDED.prescribed_energy_kcal;
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
@@ -405,6 +460,9 @@ export const migrationFiles: readonly LocalMigration[] = [
   accountProfileMigration,
   patientPersonalDataMigration,
   simplifiedAssessmentMigration,
+  patientProfileOptimizationMigration,
+  patientListOrderingMigration,
+  dietHistorySummaryBackfillMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

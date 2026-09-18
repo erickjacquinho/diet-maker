@@ -18,6 +18,7 @@ import {
   normalizeNextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
+import type { PageRequest, PageResult } from '@/lib/persistence/page';
 
 export interface ClinicalCommandDependencies {
   accountContext: AccountContext;
@@ -130,6 +131,11 @@ export function createClinicalCommands(dependencies: ClinicalCommandDependencies
     listAssessments: async (patientId: string) => {
       const { account } = await getPatient(dependencies, patientId);
       return repository().listAssessments(account.accountId, patientId);
+    },
+
+    listAssessmentsPage: async (patientId: string, request: PageRequest = {}): Promise<PageResult<BodyAssessment>> => {
+      const { account } = await getPatient(dependencies, patientId);
+      return repository().listAssessmentsPage(account.accountId, patientId, request);
     },
 
     getNextFollowUp: async (patientId: string) => {

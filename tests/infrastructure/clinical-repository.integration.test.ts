@@ -43,6 +43,34 @@ describe('PGlite clinical repository', () => {
     await expect(repository.getAssessment('account-alpha', 'patient-alpha-active', 'assessment-a')).resolves.toMatchObject({ weightKg: 63 });
   });
 
+  it('paginates scoped assessments with stable order while keeping the latest summary global', async () => {
+    const repository = await seedDatabase();
+    const patientId = 'patient-alpha-active';
+    for (let index = 0; index < 27; index += 1) {
+      const id = `assessment-${String(index).padStart(2, '0')}`;
+      await repository.createAssessment('account-alpha', patientId, makeClinicalAssessment({
+        id,
+        patientId,
+        clinicalDate: '2026-09-10',
+        createdAt: '2026-09-11T12:00:00.000Z',
+        updatedAt: '2026-09-11T12:00:00.000Z',
+      }));
+    }
+
+    const first = await repository.listAssessmentsPage('account-alpha', patientId, { pageIndex: 0, pageSize: 25 });
+    const second = await repository.listAssessmentsPage('account-alpha', patientId, { pageIndex: 1, pageSize: 25 });
+    const latest = await repository.listAssessmentSummaries('account-alpha', [patientId]);
+
+    expect(first.items).toHaveLength(25);
+    expect(first.items.map(({ id }) => id)).toEqual(Array.from({ length: 25 }, (_, index) => `assessment-${String(index).padStart(2, '0')}`));
+    expect(first).toMatchObject({ total: 27, pageIndex: 0, pageSize: 25 });
+    expect(second.items.map(({ id }) => id)).toEqual(['assessment-25', 'assessment-26']);
+    expect(second).toMatchObject({ total: 27, pageIndex: 1, pageSize: 25 });
+    expect((await repository.listAssessmentsPage('account-beta', patientId)).total).toBe(0);
+    expect((await repository.listAssessmentsPage('account-alpha', 'patient-beta-active')).total).toBe(0);
+    expect(latest[patientId]).toMatchObject({ count: 27, assessments: [{ id: 'assessment-00' }, { id: 'assessment-01' }] });
+  });
+
   it('updates only the selected assessment and rejects stale versions', async () => {
     const repository = await seedDatabase();
     const assessment = makeClinicalAssessment({ id: 'assessment-selected' });

@@ -260,12 +260,19 @@ export function DataTable<TData>({
   tableClassName,
   ariaLabel,
 }: DataTableProps<TData>) {
+  const remotePagination = pagination?.totalRows !== undefined;
   const indexedData = React.useMemo(() => data.map((row, index) => ({ row, index })), [data]);
-  const sortedData = React.useMemo(() => sortRows(indexedData, columns, sort?.state), [indexedData, columns, sort?.state]);
+  const sortedData = React.useMemo(
+    () => remotePagination ? indexedData : sortRows(indexedData, columns, sort?.state),
+    [indexedData, columns, sort?.state, remotePagination],
+  );
   const pageSize = pagination ? Math.max(1, pagination.pageSize) : sortedData.length;
-  const pageCount = pagination ? Math.max(1, Math.ceil(sortedData.length / pageSize)) : 1;
+  const totalRows = pagination?.totalRows ?? sortedData.length;
+  const pageCount = pagination ? Math.max(1, Math.ceil(totalRows / pageSize)) : 1;
   const pageIndex = pagination ? Math.min(Math.max(0, pagination.pageIndex), pageCount - 1) : 0;
-  const visibleData = pagination ? sortedData.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) : sortedData;
+  const visibleData = pagination && !remotePagination
+    ? sortedData.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+    : sortedData;
   const captionLabel = nodeToLabel(caption, 'Tabela de dados');
 
   const selectedSet = React.useMemo(
@@ -421,7 +428,7 @@ export function DataTable<TData>({
       className={cn(tableClassName, scrollsBody && 'block w-full')}
       containerClassName={hasScrollContainer || scrollsBody ? 'overflow-visible' : undefined}
       aria-label={ariaLabel ?? captionLabel}
-      aria-rowcount={data.length + 1}
+      aria-rowcount={totalRows + 1}
       aria-busy={loading || undefined}
       aria-readonly={readOnly || undefined}
     >

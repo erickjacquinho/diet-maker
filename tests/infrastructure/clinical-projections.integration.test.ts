@@ -33,6 +33,11 @@ function repositoryFor(assessments: Record<string, ReturnType<typeof makeClinica
   return {
     getAssessment: vi.fn(async () => null),
     listAssessments: vi.fn(async (_accountId, patientId) => assessments[patientId] ?? []),
+    listAssessmentsPage: vi.fn(async (_accountId, patientId, request = {}) => ({ items: assessments[patientId] ?? [], total: assessments[patientId]?.length ?? 0, pageIndex: request.pageIndex ?? 0, pageSize: request.pageSize ?? 25 })),
+    listAssessmentSummaries: vi.fn(async (_accountId: string, patientIds: readonly string[]) => Object.fromEntries(patientIds.map((id) => {
+      const all = [...(assessments[id] ?? [])].sort((left, right) => right.clinicalDate.localeCompare(left.clinicalDate) || right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id));
+      return [id, { assessments: all.slice(0, 2), count: all.length }];
+    }))),
     listAssessmentsByPatients: vi.fn(async (_accountId: string, patientIds: readonly string[]) => Object.fromEntries(patientIds.map((id: string) => [id, assessments[id] ?? []]))),
     createAssessment: vi.fn(),
     updateAssessment: vi.fn(),
@@ -51,7 +56,7 @@ describe('clinical read projections', () => {
     const followUp = makeClinicalFollowUp({ patientId: first.id, dueDate: '2026-09-11' });
     const repository = repositoryFor({ [first.id]: [older, latest] }, { [first.id]: followUp });
     const reader = createPatientProfileReader(
-      { create: vi.fn(), getById: vi.fn(async () => first), listActive: vi.fn(async () => [first]), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
+      { create: vi.fn(), getById: vi.fn(async () => first), listActive: vi.fn(async () => [first]), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
       { list: vi.fn(async () => []), addCustom: vi.fn(), archiveCustom: vi.fn() },
       async () => ({ dietCount: 2, assessmentCount: 0, lastActivity: { eventDate: '2026-09-09', confirmedAt: '2026-09-09T12:00:00.000Z', type: 'diet', sourceId: 'diet-1' } }),
       { clinicalRepository: repository },
@@ -64,6 +69,7 @@ describe('clinical read projections', () => {
     expect(profile?.clinical?.nextFollowUp?.dueDate).toBe('2026-09-11');
     expect(profile?.clinical?.lastActivity?.type).toBe('assessment');
     expect((profile?.patient as Patient).name).toBe('Ana');
+    expect(repository.listAssessments).not.toHaveBeenCalled();
   });
 
   it('uses one batch assessment read and one batch follow-up read for the active list', async () => {
@@ -71,7 +77,7 @@ describe('clinical read projections', () => {
     const second = patient('patient-b', 'Bia');
     const repository = repositoryFor({ [first.id]: [makeClinicalAssessment({ patientId: first.id })], [second.id]: [] }, {});
     const reader = createPatientProfileReader(
-      { create: vi.fn(), getById: vi.fn(), listActive: vi.fn(async () => [first, second]), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
+      { create: vi.fn(), getById: vi.fn(), listActive: vi.fn(async () => [first, second]), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
       { list: vi.fn(async () => []), addCustom: vi.fn(), archiveCustom: vi.fn() },
       async () => ({ dietCount: 0, assessmentCount: 0 }),
       { clinicalRepository: repository },

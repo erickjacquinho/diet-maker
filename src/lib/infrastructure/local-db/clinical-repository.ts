@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, getTableColumns, inArray, lte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, inArray, lte, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type {
   AssessmentPersistenceInput,
@@ -14,6 +14,7 @@ import {
   normalizeNextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
+import { normalizePageRequest, type PageRequest, type PageResult } from '@/lib/persistence/page';
 import type { LocalDatabaseHandle } from './client';
 import { bodyAssessments, nextFollowUps, patients } from './schema';
 
@@ -218,6 +219,22 @@ export class PGliteClinicalRepository implements ClinicalRepository {
       return result;
     } catch (cause) {
       throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'O histórico clínico dos pacientes não pôde ser carregado.', { cause });
+    }
+  }
+
+  async listAssessmentsPage(accountId: string, patientId: string, request: PageRequest = {}): Promise<PageResult<BodyAssessment>> {
+    const page = normalizePageRequest(request);
+    try {
+      const scope = and(eq(bodyAssessments.accountId, accountId), eq(bodyAssessments.patientId, patientId));
+      const [rows, totals] = await Promise.all([
+        this.handle.db.select().from(bodyAssessments).where(scope)
+          .orderBy(desc(bodyAssessments.clinicalDate), desc(bodyAssessments.createdAt), asc(bodyAssessments.id))
+          .limit(page.pageSize).offset(page.pageIndex * page.pageSize),
+        this.handle.db.select({ total: count() }).from(bodyAssessments).where(scope),
+      ]);
+      return { ...page, total: Number(totals[0]?.total ?? 0), items: rows.map(toAssessment) };
+    } catch (cause) {
+      throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'A página do histórico de avaliações não pôde ser carregada.', { cause });
     }
   }
 

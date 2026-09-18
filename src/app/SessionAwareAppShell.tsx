@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
 import { getBrowserProfileSession } from '@/lib/application/browser-composition';
@@ -19,6 +19,7 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   const router = useRouter();
   const session = getBrowserProfileSession();
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const previousPathname = useRef(pathname);
   const isOnboarding = pathname === ONBOARDING_ROUTE;
   const hasUsableSession = snapshot.status === 'active' || snapshot.status === 'paused' || Boolean(snapshot.runtime);
   const isHydrating = snapshot.hydration === 'pending';
@@ -27,6 +28,13 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
     if (typeof session.restoreActiveProfile !== 'function') return;
     void session.restoreActiveProfile().catch(() => undefined);
   }, [session]);
+
+  useEffect(() => {
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
+    if (!['pending', 'paused', 'syncing'].includes(snapshot.syncState)) return;
+    void session.sync().catch(() => undefined);
+  }, [pathname, session, snapshot.syncState]);
 
   useEffect(() => {
     if (isHydrating) return;

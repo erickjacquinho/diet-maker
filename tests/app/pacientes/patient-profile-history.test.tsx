@@ -234,4 +234,55 @@ describe('PatientDetailPage history with two stacked tables', () => {
     expect(screen.queryByRole('button', { name: /Excluir prescrição/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Editar Plano cutting agosto/ })).not.toBeInTheDocument();
   });
+
+  it('uses remote page totals while keeping edit and diet-detail actions available', () => {
+    const setAssessmentPageIndex = vi.fn();
+    const setDietPageIndex = vi.fn();
+    const assessment = { ...PATIENT_PROFILE_ASSESSMENTS[0], id: 'assessment-page-1', version: 1, abdomenCm: 82 };
+    const diet = { ...PATIENT_PROFILE_DIETS[0], id: 'diet-page-1', name: 'Plano paginado' };
+    const state = makePatientProfileState({
+      bodyAssessments: [assessment],
+      confirmedPlans: [diet],
+      assessmentTotal: 51,
+      assessmentPageIndex: 1,
+      setAssessmentPageIndex,
+      dietTotal: 51,
+      dietPageIndex: 1,
+      setDietPageIndex,
+    } as never);
+    mockUsePatientProfilePage.mockReturnValue(state);
+
+    render(<PatientDetailPage />);
+
+    expect(screen.getByText('51 avaliações')).toBeInTheDocument();
+    expect(screen.getByText('51 planos')).toBeInTheDocument();
+    expect(screen.getAllByText('Página 2 de 3')).toHaveLength(2);
+    expect(screen.getByRole('link', { name: 'Editar Avaliação Física' })).toHaveAttribute(
+      'href',
+      '/pacientes/patient-profile-1/avaliacao/assessment-page-1',
+    );
+    expect(screen.getByRole('button', { name: 'Ver cardápio completo da dieta Plano paginado' })).toBeInTheDocument();
+
+    const nextPageButtons = screen.getAllByRole('button', { name: 'Próxima página' });
+    fireEvent.click(nextPageButtons[0]);
+    fireEvent.click(nextPageButtons[1]);
+    expect(setDietPageIndex).toHaveBeenCalledWith(2);
+    expect(setAssessmentPageIndex).toHaveBeenCalledWith(2);
+  });
+
+  it('shows independent empty and read-error states for remote histories', () => {
+    mockUsePatientProfilePage.mockReturnValue(makePatientProfileState({
+      confirmedPlans: [],
+      bodyAssessments: [],
+      dietTotal: 0,
+      assessmentTotal: 0,
+      dietsError: 'Falha ao ler dietas.',
+      assessmentsError: null,
+    } as never));
+
+    render(<PatientDetailPage />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Falha ao ler dietas.');
+    expect(screen.getByRole('status')).toHaveTextContent('Nenhuma avaliação física registrada');
+  });
 });

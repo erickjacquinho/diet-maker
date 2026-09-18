@@ -45,7 +45,7 @@ export interface SidebarNavProps {
   onRestoreBackup?: () => void | Promise<void>;
   isExporting?: boolean;
   isRestoring?: boolean;
-  profileSyncState?: 'unbound' | 'syncing' | 'synced' | 'paused';
+  profileSyncState?: 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
   onRetryProfileSync?: () => void | Promise<void>;
   isRetryingProfileSync?: boolean;
   onOpenAccount?: () => void;
@@ -99,14 +99,16 @@ function SidebarNavContent({
                   data-profile-sync-state={profileSyncState}
                   role="status"
                 >
-                  {profileSyncState === 'paused'
+                  {profileSyncState === 'pending'
+                    ? 'Alterações locais pendentes no arquivo principal.'
+                    : profileSyncState === 'paused'
                     ? 'Sincronização pausada — reautorize o arquivo para continuar.'
                     : profileSyncState === 'syncing'
                       ? 'Sincronizando o profile…'
                       : profileSyncState === 'synced'
                         ? 'Profile sincronizado no arquivo.'
                         : 'Arquivo do profile não associado.'}
-                  {profileSyncState === 'paused' && onRetryProfileSync ? (
+                  {(profileSyncState === 'pending' || profileSyncState === 'paused') && onRetryProfileSync ? (
                     <Button
                       className="mt-2 w-full"
                       disabled={isRetryingProfileSync}
@@ -116,7 +118,7 @@ function SidebarNavContent({
                       type="button"
                       variant="secondary"
                     >
-                      Reautorizar arquivo
+                      {profileSyncState === 'paused' ? 'Reautorizar arquivo' : 'Salvar alterações'}
                     </Button>
                   ) : null}
                 </div>

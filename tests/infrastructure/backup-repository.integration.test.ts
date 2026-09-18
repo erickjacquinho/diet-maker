@@ -59,6 +59,10 @@ describe('PGlite backup repository', () => {
     handle = await createBackupTestDatabase('repository-replace');
     const original = createBackupEnvelope();
     await seedBackupEnvelope(handle, original);
+    await handle.client.query(`
+      INSERT INTO profile_checkpoint_state (account_id, workspace_revision, checkpoint_revision)
+      VALUES ('local-account', 4, 2)
+    `);
     const replacement = createBackupEnvelope({
       favorites: ['food-restored'],
       patients: [{ ...original.patients[0], name: 'Ana Restaurada', version: 3 }],
@@ -77,12 +81,20 @@ describe('PGlite backup repository', () => {
     expect(snapshot.dietPlans).toEqual(replacement.dietPlans);
     expect(snapshot.recipes).toEqual(replacement.recipes);
     expect(restoredFavorites).toEqual(replacement.favorites);
+    const checkpoint = await handle.client.query<{ workspace_revision: number; checkpoint_revision: number }>(
+      "SELECT workspace_revision, checkpoint_revision FROM profile_checkpoint_state WHERE account_id = 'local-account'",
+    );
+    expect(checkpoint.rows).toEqual([{ workspace_revision: 0, checkpoint_revision: 0 }]);
   });
 
   it.each(['after-delete', 'after-insert'] as const)('rolls back the full base when failure occurs at %s', async (failAt) => {
     handle = await createBackupTestDatabase(`repository-rollback-${failAt}`);
     const original = createBackupEnvelope();
     await seedBackupEnvelope(handle, original);
+    await handle.client.query(`
+      INSERT INTO profile_checkpoint_state (account_id, workspace_revision, checkpoint_revision)
+      VALUES ('local-account', 4, 2)
+    `);
     const replacement = createBackupEnvelope({ patients: [{ ...original.patients[0], name: 'Não deve persistir', version: 9 }] });
     const repository = new PGliteBackupRepository(handle, { failAt });
 
@@ -92,5 +104,19 @@ describe('PGlite backup repository', () => {
     expect(snapshot.patients).toEqual(original.patients);
     expect(snapshot.dietPlans).toEqual(original.dietPlans);
     expect(snapshot.recipes).toEqual(original.recipes);
+    const checkpoint = await handle.client.query<{ workspace_revision: number; checkpoint_revision: number }>(
+      "SELECT workspace_revision, checkpoint_revision FROM profile_checkpoint_state WHERE account_id = 'local-account'",
+    );
+    expect(checkpoint.rows).toEqual([{ workspace_revision: 4, checkpoint_revision: 2 }]);
+  });
+
+  it('rejects a snapshot for another account without changing the current base', async () => {
+    handle = await createBackupTestDatabase('repository-wrong-account');
+    const original = createBackupEnvelope();
+    await seedBackupEnvelope(handle, original);
+    const replacement = createBackupEnvelope({ account: [{ ...original.account[0], id: 'other-account' }] });
+
+    await expect(new PGliteBackupRepository(handle).replaceAccountSnapshot('local-account', replacement)).rejects.toMatchObject({ code: 'BACKUP_RESTORE_FAILED' });
+    await expect(new PGliteBackupRepository(handle).readAccountSnapshot('local-account')).resolves.toMatchObject({ patients: original.patients });
   });
 });

@@ -32,7 +32,7 @@ function createFile(content: string, name = 'backup.nutridiet'): File {
 
 describe('SidebarNavigationAdapter backup actions', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
@@ -139,8 +139,26 @@ describe('SidebarNavigationAdapter backup actions', () => {
 
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Importar backup' }));
 
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Existem rascunhos pendentes.'));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Existem rascunhos não confirmados.'));
     expect(screen.getByRole('dialog')).toHaveAttribute('data-backup-restore-state', 'pending-edits');
-    expect(mocks.restoreBackup).toHaveBeenCalledWith('{"valid":true}', { confirmed: true });
+    expect(mocks.restoreBackup).toHaveBeenCalledWith('{"valid":true}', { confirmed: true, discardDrafts: false });
+    expect(screen.getByRole('button', { name: 'Descartar rascunhos e restaurar' })).toBeInTheDocument();
+  });
+
+  it('requires a save-or-discard choice when the workspace has a pending checkpoint', async () => {
+    mocks.validateBackup.mockResolvedValue({});
+    mocks.restoreBackup.mockRejectedValueOnce(new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'pending'));
+    render(<SidebarNavigationAdapter />);
+
+    fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
+      target: { files: [createFile('{"valid":true}')] },
+    });
+    await screen.findByRole('dialog');
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Importar backup' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Escolha salvá-las ou descartá-las');
+    expect(screen.getByRole('button', { name: 'Salvar pendências e restaurar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Descartar e restaurar' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-backup-restore-state', 'pending-checkpoint');
   });
 });

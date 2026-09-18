@@ -25,14 +25,26 @@ export function makePatientProfileState(
     version: 1,
     archivedAt: null,
   } satisfies NonNullable<PatientProfileState['patient']>;
+  const confirmedPlans = overrides.confirmedPlans ?? [];
+  const bodyAssessments = overrides.bodyAssessments ?? [];
 
   const state: PatientProfileState = {
     patientId: patient.id,
     patient,
     profileError: null,
     isProfileLoading: false,
-    confirmedPlans: [],
-    bodyAssessments: [],
+    confirmedPlans,
+    dietTotal: confirmedPlans.length,
+    dietPageIndex: 0,
+    setDietPageIndex: vi.fn(),
+    isDietsLoading: false,
+    dietsError: null,
+    bodyAssessments,
+    assessmentTotal: bodyAssessments.length,
+    assessmentPageIndex: 0,
+    setAssessmentPageIndex: vi.fn(),
+    isAssessmentsLoading: false,
+    assessmentsError: null,
     activePlan: null,
     latestAssessment: null,
     nextEventSummary: null,

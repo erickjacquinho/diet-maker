@@ -14,7 +14,19 @@ import { usePatientsPage } from '@/hooks/usePatientsPage';
 export default function PatientsListPage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { patients, filteredPatients, rows: patientRows, searchTerm, setSearchTerm, isLoading, error, retry, createPatient } = usePatientsPage();
+  const {
+    patients,
+    rows: patientRows,
+    total,
+    pageIndex,
+    setPageIndex,
+    searchTerm,
+    setSearchTerm,
+    isLoading,
+    error,
+    retry,
+    createPatient,
+  } = usePatientsPage();
 
   const handleCreatePatient = async (formData: CreatePatientFormData) => {
     await createPatient({
@@ -34,9 +46,7 @@ export default function PatientsListPage() {
     });
     setIsModalOpen(false);
   };
-  const countLabel = filteredPatients.length === patients.length
-    ? `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`
-    : `${filteredPatients.length} de ${patients.length} pacientes`;
+  const countLabel = `${total} ${total === 1 ? 'paciente' : 'pacientes'}`;
 
   return (
     <div className="py-6 px-8 max-w-container-workflow mx-auto flex flex-col gap-6 w-full">
@@ -49,7 +59,7 @@ export default function PatientsListPage() {
         </div>
       </div>
 
-      {patients.length > 0 && (
+      {(total > 0 || searchTerm.trim()) && (
         <div className="flex flex-col gap-3">
           <div className="flex flex-row items-center gap-3">
             <InputGroup className="flex-1 h-11 bg-surface border-border-subtle rounded-control">
@@ -95,7 +105,7 @@ export default function PatientsListPage() {
             <Button type="button" variant="secondary" size="compact" onClick={() => void retry()}>Tentar novamente</Button>
           </CardContent>
         </Card>
-      ) : patients.length === 0 ? (
+      ) : total === 0 && !searchTerm.trim() ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
           <CardContent className="p-12 text-center flex flex-col gap-4">
             <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
@@ -114,7 +124,7 @@ export default function PatientsListPage() {
             </CreateButton>
           </CardContent>
         </Card>
-      ) : filteredPatients.length === 0 ? (
+      ) : total === 0 ? (
         <Card className="bg-surface border-border-subtle rounded-surface p-0 max-w-md mx-auto my-8">
           <CardContent className="p-12 text-center flex flex-col gap-4">
             <div className="w-12 h-12 rounded-surface bg-surface-subtle border border-border-subtle flex items-center justify-center mx-auto text-text-muted">
@@ -137,6 +147,9 @@ export default function PatientsListPage() {
         >
           <PatientListTable
             rows={patientRows}
+            totalRows={total}
+            pageIndex={pageIndex}
+            onPageChange={setPageIndex}
             onNavigate={(href) => router.push(href)}
           />
         </section>

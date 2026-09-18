@@ -4,10 +4,12 @@ import type {
   NextFollowUp,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
+import type { PageRequest, PageResult } from './page';
 
 export interface ClinicalRepository {
   getAssessment(accountId: string, patientId: string, assessmentId: string): Promise<BodyAssessment | null>;
   listAssessments(accountId: string, patientId: string): Promise<BodyAssessment[]>;
+  listAssessmentsPage(accountId: string, patientId: string, request?: PageRequest): Promise<PageResult<BodyAssessment>>;
   listAssessmentsByPatients(accountId: string, patientIds: readonly string[]): Promise<Record<string, BodyAssessment[]>>;
   listAssessmentSummaries?(accountId: string, patientIds: readonly string[]): Promise<Record<string, { assessments: BodyAssessment[]; count: number }>>;
   createAssessment(accountId: string, patientId: string, assessment: BodyAssessment | AssessmentPersistenceInput): Promise<BodyAssessment>;

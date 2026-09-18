@@ -1,5 +1,7 @@
 import type { Patient } from '@/lib/domain/patient';
 import type { BodyAssessment, NextFollowUp } from '@/lib/domain/clinical';
+import type { PageResult } from './page';
+import type { PatientPageQuery } from './patient-repository';
 
 export interface PatientActivity {
   eventDate: string;
@@ -46,4 +48,5 @@ export interface PatientListSummary {
 export interface PatientProfileReader {
   getProfile(accountId: string, patientId: string): Promise<PatientProfile | null>;
   listActiveSummaries(accountId: string): Promise<PatientListSummary[]>;
+  listActiveSummaryPage(accountId: string, query: PatientPageQuery): Promise<PageResult<PatientListSummary>>;
 }

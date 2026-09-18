@@ -11,7 +11,7 @@ afterEach(async () => {
 });
 
 describe('clinical database migration', () => {
-  it('upgrades the local schema to v6 while preserving earlier tables and data', async () => {
+  it('upgrades the local schema to v9 while preserving earlier tables and data', async () => {
     handle = await createClinicalTestDatabase('clinical-migration');
     await handle.client.query(`
       INSERT INTO accounts (id, display_name, created_at, updated_at)
@@ -22,7 +22,7 @@ describe('clinical database migration', () => {
       VALUES ('migration-patient', 'migration-account', 'P-0001', 'Paciente', 30, 'Feminino', 165, 62, 'Manutenção', 110, 200, 55, 1755, '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z', 1)
     `);
 
-    expect(handle.schemaVersion).toBe('6');
+    expect(handle.schemaVersion).toBe('9');
     await expect(handle.client.query(`SELECT id, name FROM patients WHERE id = 'migration-patient'`)).resolves.toMatchObject({
       rows: [{ id: 'migration-patient', name: 'Paciente' }],
     });
@@ -35,7 +35,9 @@ describe('clinical database migration', () => {
     const journal = await handle.client.query<{ id: string; version: string }>(
       `SELECT id, version FROM __nutridiet_migrations ORDER BY version`,
     );
-    expect(journal.rows.at(-1)).toEqual({ id: '0006_simplified_assessment', version: '6' });
+    expect(journal.rows.at(-1)).toEqual({ id: '0009_diet_history_summary_backfill', version: '9' });
+    await expect(handle.client.query(`SELECT collname FROM pg_collation WHERE collname = 'nutridiet_pt_br_base'`))
+      .resolves.toMatchObject({ rows: [{ collname: 'nutridiet_pt_br_base' }] });
   });
 
   it('is idempotent and exposes scope, cardinality and value checks', async () => {

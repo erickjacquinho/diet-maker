@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { openLocalDatabase, type LocalDatabaseHandle } from '@/lib/infrastructure/local-db/client';
 import { PGliteDietRepository, type DietRepositoryOptions } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
-import { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariations, patients, accounts } from '@/lib/infrastructure/local-db/schema';
+import { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationHistorySummaries, dietVariations, patients, accounts } from '@/lib/infrastructure/local-db/schema';
 import { createDecimalString } from '@/lib/domain/diets/diet-model';
 
 let handle: LocalDatabaseHandle | undefined;
@@ -21,6 +21,34 @@ async function createRepository(options?: DietRepositoryOptions): Promise<PGlite
 }
 
 describe('diet relational repository', () => {
+  it('returns stable, scoped history pages with the global total', async () => {
+    const repository = await createRepository();
+    await handle!.db.insert(dietPlans).values(Array.from({ length: 27 }, (_, index) => ({
+      id: `diet-${String(index).padStart(2, '0')}`,
+      accountId: 'account-a',
+      patientId: 'patient-a',
+      name: `Plano ${index}`,
+      mode: 'SIMPLE',
+      status: 'SNAPSHOT',
+      weightReferenceKg: null,
+      version: 1,
+      createdAt: '2026-08-30T10:00:00.000Z',
+      updatedAt: '2026-08-30T10:00:00.000Z',
+      activatedAt: '2026-08-30T10:00:00.000Z',
+      supersededAt: null,
+    })));
+
+    const first = await repository.listHistoryViewsPage('account-a', 'patient-a', { pageIndex: 0, pageSize: 25 });
+    const second = await repository.listHistoryViewsPage('account-a', 'patient-a', { pageIndex: 1, pageSize: 25 });
+
+    expect(first).toMatchObject({ total: 27, pageIndex: 0, pageSize: 25 });
+    expect(first.items).toHaveLength(25);
+    expect(first.items.map(({ id }) => id)).toEqual(Array.from({ length: 25 }, (_, index) => `diet-${String(index).padStart(2, '0')}`));
+    expect(second.items.map(({ id }) => id)).toEqual(['diet-25', 'diet-26']);
+    expect((await repository.listHistoryViewsPage('other-account', 'patient-a')).total).toBe(0);
+    expect((await repository.listHistoryViewsPage('account-a', 'other-patient')).total).toBe(0);
+  });
+
   it('reads a confirmed aggregate with its one-to-one snapshot and enforces account/patient scope', async () => {
     const repository = await createRepository();
     await handle!.db.insert(dietPlans).values({ id: 'diet-a', accountId: 'account-a', patientId: 'patient-a', name: 'Plano', mode: 'SIMPLE', status: 'ACTIVE', weightReferenceKg: '64', version: 1, createdAt: '2026-08-30T10:00:00.000Z', updatedAt: '2026-08-30T10:00:00.000Z', activatedAt: '2026-08-30T10:00:00.000Z', supersededAt: null });
@@ -48,6 +76,13 @@ describe('diet relational repository', () => {
     const command = { accountId: 'account-a', patientId: 'patient-a', targetDietId: plan.id, draftId: 'draft-commit', confirmedDraftRevision: 4, plan };
 
     await expect(repository.confirmActive(command)).resolves.toMatchObject({ status: 'COMMITTED_NEW', planId: plan.id, version: 1 });
+    await expect(handle!.db.select().from(dietVariationHistorySummaries)).resolves.toMatchObject([{
+      dietVariationId: 'variation-commit',
+      prescribedProtein: '2.5',
+      prescribedCarbs: '28.1',
+      prescribedFat: '0.2',
+      prescribedEnergyKcal: '128',
+    }]);
     await expect(repository.confirmActive(command)).resolves.toMatchObject({ status: 'ALREADY_COMMITTED', planId: plan.id, version: 1 });
     await expect(repository.getById('account-a', 'patient-a', plan.id)).resolves.toMatchObject({ name: 'Plano confirmado', variations: [{ meals: [{ options: [{ items: [{ snapshot: { sourceId: 'taco-3' } }] }] }] }] });
 

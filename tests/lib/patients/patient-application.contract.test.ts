@@ -61,6 +61,7 @@ function makeDependencies(overrides: Partial<PatientApplicationDependencies> = {
       create: async () => patient,
       getById: async () => patient,
       listActive: async () => [patient],
+      listActivePage: async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 }),
       update: async (_accountId, _patientId, expectedVersion, updateInput) => ({
         ...patient,
         ...updateInput,
@@ -92,6 +93,7 @@ function makeDependencies(overrides: Partial<PatientApplicationDependencies> = {
     patientProfileReader: {
       getProfile: async () => ({ patient, initials: 'JS', availableObjectives: ['Cutting'], related: { dietCount: 0, assessmentCount: 0 } }),
       listActiveSummaries: async () => [],
+      listActiveSummaryPage: async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 }),
     },
     transactionRunner: {
       run: async <T>(operation: () => Promise<T>) => operation(),

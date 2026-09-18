@@ -20,6 +20,7 @@ export interface DataTableSortState {
 export interface DataTablePagination {
   pageIndex: number;
   pageSize: number;
+  totalRows?: number;
   onPageChange: (pageIndex: number) => void;
 }
 

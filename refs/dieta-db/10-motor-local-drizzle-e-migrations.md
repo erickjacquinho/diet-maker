@@ -35,7 +35,7 @@ importar Drizzle; somente os adaptadores de infraestrutura podem fazê-lo.
 
 O schema relacional em TypeScript pode ser mantido sob controle de versão e
 usado para gerar migrations SQL versionadas. A estratégia preferida é gerar e
-aplicar migrations explícitas, não alterar o banco canônico por comandos
+aplicar migrations explícitas, não alterar o banco local de trabalho por comandos
 imperativos espalhados pelo código.
 
 Referências oficiais:
@@ -55,10 +55,12 @@ Referências oficiais:
 - [PGlite](https://pglite.dev/docs/about)
 - [Integração PGlite + Drizzle](https://orm.drizzle.team/docs/connect-pglite)
 
-## 3. Separação entre banco canônico e draft
+## 3. Separação entre área de trabalho relacional e draft
 
 O uso de IndexedDB pelo navegador não significa que o `DietDraftStore` e o
-banco relacional sejam o mesmo armazenamento lógico.
+banco relacional da área de trabalho sejam o mesmo armazenamento lógico. O
+`.nutridiet` é o save principal e representa o último checkpoint concluído,
+conforme o [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md).
 
 ```text
 Banco relacional local
@@ -90,7 +92,7 @@ JSON local.
    explicitamente implementada e validada; caso contrário, é rejeitado.
 7. A migração nunca deve apagar dados clínicos sem uma política explícita de
    preservação ou transformação.
-8. `drizzle-kit push` fica restrito a experimentos locais; o banco canônico usa
+8. `drizzle-kit push` fica restrito a experimentos locais; o banco de trabalho usa
    migrations versionadas.
 
 As migrations desta decisão são evoluções futuras do schema canônico. Elas não

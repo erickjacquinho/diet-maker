@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { LocalDatabaseHandle } from '../client';
-import { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationDays, dietVariations, patients } from '../schema';
+import { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationDays, dietVariationHistorySummaries, dietVariations, patients } from '../schema';
 import type { ConfirmActiveCommand, DietRepository } from '@/lib/application/diets/diet-ports';
 import { DietDomainError } from '@/lib/domain/diets/diet-errors';
 import type { ConfirmActiveResult, DietDayCode, DietPlan, DietVariationKind } from '@/lib/domain/diets/diet-model';
@@ -9,6 +9,7 @@ import { toProjectedHistoricalDietView, type DietHistoryVariation } from '@/lib/
 import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
 import type { PatientActivity } from '@/lib/persistence/patient-profile-reader';
 import { createDecimalString } from '@/lib/domain/diets/diet-model';
+import { normalizePageRequest, type PageRequest, type PageResult } from '@/lib/persistence/page';
 
 type FailureLevel = 'plan' | 'variation' | 'day' | 'meal' | 'option' | 'item' | 'snapshot';
 
@@ -76,22 +77,38 @@ export class PGliteDietRepository implements DietRepository {
   }
 
   async listHistoryViews(accountId: string, patientId: string): Promise<HistoricalDiet[]> {
-    const plans = await this.handle.db.select().from(dietPlans).where(and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId))).orderBy(desc(dietPlans.activatedAt));
+    const plans = await this.handle.db.select().from(dietPlans)
+      .where(and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId)))
+      .orderBy(sql`case when ${dietPlans.status} = 'ACTIVE' then 0 else 1 end`, desc(dietPlans.activatedAt), desc(dietPlans.updatedAt), asc(dietPlans.id));
+    return this.projectHistoryViews(plans);
+  }
+
+  async listHistoryViewsPage(accountId: string, patientId: string, request: PageRequest = {}): Promise<PageResult<HistoricalDiet>> {
+    const page = normalizePageRequest(request);
+    const scope = and(eq(dietPlans.accountId, accountId), eq(dietPlans.patientId, patientId));
+    const [plans, totals] = await Promise.all([
+      this.handle.db.select().from(dietPlans).where(scope)
+        .orderBy(sql`case when ${dietPlans.status} = 'ACTIVE' then 0 else 1 end`, desc(dietPlans.activatedAt), desc(dietPlans.updatedAt), asc(dietPlans.id))
+        .limit(page.pageSize).offset(page.pageIndex * page.pageSize),
+      this.handle.db.select({ total: count() }).from(dietPlans).where(scope),
+    ]);
+    return { ...page, total: Number(totals[0]?.total ?? 0), items: await this.projectHistoryViews(plans) };
+  }
+
+  private async projectHistoryViews(plans: (typeof dietPlans.$inferSelect)[]): Promise<HistoricalDiet[]> {
     if (!plans.length) return [];
     const ids = plans.map((plan) => plan.id);
     const [variations, days] = await Promise.all([
       this.handle.db.select({
         variation: dietVariations,
         mealsCount: sql<number>`count(DISTINCT ${dietMeals.id})::int`,
-        protein: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedProtein}), 0)::text`,
-        carbs: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedCarbs}), 0)::text`,
-        fat: sql<string>`coalesce(sum(${dietItemSnapshots.prescribedFat}), 0)::text`,
-        energy: sql<string>`coalesce(sum(coalesce(${dietItemSnapshots.prescribedEnergyKcal}, ${dietItemSnapshots.prescribedProtein} * 4 + ${dietItemSnapshots.prescribedCarbs} * 4 + ${dietItemSnapshots.prescribedFat} * 9)), 0)::text`,
+        protein: sql<string>`coalesce(max(${dietVariationHistorySummaries.prescribedProtein}), 0)::text`,
+        carbs: sql<string>`coalesce(max(${dietVariationHistorySummaries.prescribedCarbs}), 0)::text`,
+        fat: sql<string>`coalesce(max(${dietVariationHistorySummaries.prescribedFat}), 0)::text`,
+        energy: sql<string>`coalesce(max(${dietVariationHistorySummaries.prescribedEnergyKcal}), 0)::text`,
       }).from(dietVariations)
         .leftJoin(dietMeals, eq(dietMeals.variationId, dietVariations.id))
-        .leftJoin(dietMealOptions, and(eq(dietMealOptions.dietMealId, dietMeals.id), eq(dietMealOptions.countsTowardTotals, true)))
-        .leftJoin(dietMealItems, and(eq(dietMealItems.dietMealOptionId, dietMealOptions.id), eq(dietMealItems.role, 'PRIMARY')))
-        .leftJoin(dietItemSnapshots, eq(dietItemSnapshots.dietMealItemId, dietMealItems.id))
+        .leftJoin(dietVariationHistorySummaries, eq(dietVariationHistorySummaries.dietVariationId, dietVariations.id))
         .where(inArray(dietVariations.dietPlanId, ids)).groupBy(dietVariations.id).orderBy(asc(dietVariations.position)),
       this.handle.db.select().from(dietVariationDays).where(inArray(dietVariationDays.dietPlanId, ids)).orderBy(asc(dietVariationDays.position)),
     ]);
@@ -115,7 +132,7 @@ export class PGliteDietRepository implements DietRepository {
     return plans.map((plan) => toProjectedHistoricalDietView({
       id: plan.id, name: plan.name, activatedAt: plan.activatedAt, mode: plan.mode as DietPlan['mode'], status: plan.status as DietPlan['status'],
       variations: byPlan.get(plan.id) ?? [],
-    })).sort((left, right) => Number(right.status === 'Ativa') - Number(left.status === 'Ativa'));
+    }));
   }
 
   async confirmActive(command: ConfirmActiveCommand): Promise<ConfirmActiveResult> {
@@ -216,5 +233,25 @@ export class PGliteDietRepository implements DietRepository {
     })))));
     this.maybeFail('snapshot');
     if (snapshotRows.length) await tx.insert(dietItemSnapshots).values(snapshotRows);
+    await tx.execute(sql`INSERT INTO diet_variation_history_summaries (
+      diet_variation_id, prescribed_protein, prescribed_carbs, prescribed_fat, prescribed_energy_kcal
+    )
+    SELECT variation.id,
+      COALESCE(SUM(snapshot.prescribed_protein), 0),
+      COALESCE(SUM(snapshot.prescribed_carbs), 0),
+      COALESCE(SUM(snapshot.prescribed_fat), 0),
+      COALESCE(SUM(COALESCE(snapshot.prescribed_energy_kcal, snapshot.prescribed_protein * 4 + snapshot.prescribed_carbs * 4 + snapshot.prescribed_fat * 9)), 0)
+    FROM diet_variations variation
+    LEFT JOIN diet_meals meal ON meal.variation_id = variation.id
+    LEFT JOIN diet_meal_options meal_option ON meal_option.diet_meal_id = meal.id AND meal_option.counts_toward_totals = true
+    LEFT JOIN diet_meal_items item ON item.diet_meal_option_id = meal_option.id AND item.role = 'PRIMARY'
+    LEFT JOIN diet_item_snapshots snapshot ON snapshot.diet_meal_item_id = item.id
+    WHERE variation.diet_plan_id = ${plan.id}
+    GROUP BY variation.id
+    ON CONFLICT (diet_variation_id) DO UPDATE SET
+      prescribed_protein = EXCLUDED.prescribed_protein,
+      prescribed_carbs = EXCLUDED.prescribed_carbs,
+      prescribed_fat = EXCLUDED.prescribed_fat,
+      prescribed_energy_kcal = EXCLUDED.prescribed_energy_kcal`);
   }
 }

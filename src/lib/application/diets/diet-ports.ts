@@ -8,6 +8,8 @@ import type {
   DiscardResult,
 } from '@/lib/domain/diets/diet-model';
 import type { LibraryDietSourceReader } from './library-insertion';
+import type { PageRequest, PageResult } from '@/lib/persistence/page';
+import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
 
 export interface DraftContext {
   accountId: string;
@@ -80,6 +82,11 @@ export interface PatientDietReader {
   countConfirmed(accountId: string, patientId: string): Promise<number>;
 }
 
+export interface DietHistoryViewReader {
+  listHistoryViews(accountId: string, patientId: string): Promise<HistoricalDiet[]>;
+  listHistoryViewsPage(accountId: string, patientId: string, request?: PageRequest): Promise<PageResult<HistoricalDiet>>;
+}
+
 export interface DietApplicationDependencies {
   accountContext: import('@/lib/persistence/account-context').AccountContext;
   patientReader: { getById(accountId: string, patientId: string): Promise<import('@/lib/domain/patient').Patient | null> };
@@ -90,7 +97,7 @@ export interface DietApplicationDependencies {
   idFactory?: () => string;
   librarySourceReader?: LibraryDietSourceReader;
   confirmedOperation?: import('../composition-root').ConfirmedOperationCoordinator;
-  historyViewReader?: { listHistoryViews(accountId: string, patientId: string): Promise<import('@/lib/patientsStoreTypes').HistoricalDiet[]> };
+  historyViewReader?: DietHistoryViewReader;
 }
 
 export interface OpenEditorResult {
@@ -110,6 +117,7 @@ export interface DietApplication {
   reconcileUnknownSave(draftId: string): Promise<{ status: 'COMMITTED' | 'NOT_COMMITTED' | 'REVIEW_REQUIRED'; planId?: string; version?: number }>;
   getPatientDietSummary(patientId: string): Promise<PatientDietSummary>;
   listDietHistoryViews(patientId: string): Promise<import('@/lib/patientsStoreTypes').HistoricalDiet[]>;
+  listDietHistoryViewsPage(patientId: string, request?: PageRequest): Promise<PageResult<HistoricalDiet>>;
   getDietSnapshot(patientId: string, dietId: string): Promise<DietPlan | null>;
   invalidatePatientDrafts(patientId: string): Promise<number>;
   insertRecipeIntoDietDraft(command: import('./library-insertion').RecipeInsertionCommand): Promise<DietDraft>;

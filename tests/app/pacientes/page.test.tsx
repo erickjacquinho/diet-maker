@@ -62,6 +62,9 @@ function state(overrides: Partial<ReturnType<typeof usePatientsPage>> = {}) {
     filteredPatients,
     rows: overrides.rows ?? buildPatientListRows(filteredPatients, '2026-08-01'),
     patientHistoryById: {},
+    total: overrides.total ?? filteredPatients.length,
+    pageIndex: overrides.pageIndex ?? 0,
+    setPageIndex: overrides.setPageIndex ?? vi.fn(),
     searchTerm: '',
     setSearchTerm: vi.fn(),
     isLoading: false,
@@ -88,6 +91,17 @@ describe('PatientsListPage', () => {
     expect(screen.queryByText('Prioridade do acompanhamento')).not.toBeInTheDocument();
     expect(screen.queryByText('Lista de pacientes', { exact: true })).not.toBeInTheDocument();
     expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
+  });
+
+  it('shows the server page count and requests the next remote page', () => {
+    const setPageIndex = vi.fn();
+    mockUsePatientsPage.mockReturnValue(state({ total: 60, pageIndex: 1, setPageIndex }));
+    render(<PatientsListPage />);
+
+    expect(screen.getByRole('status')).toHaveTextContent('60 pacientes');
+    expect(screen.getByText('Página 2 de 3')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(setPageIndex).toHaveBeenCalledWith(2);
   });
 
   it('opens the personal-data registration dialog with radio pregnancy flow', async () => {
@@ -127,7 +141,7 @@ describe('PatientsListPage', () => {
 
   it('shows a reset action when search returns no patients', async () => {
     const setSearchTerm = vi.fn();
-    mockUsePatientsPage.mockReturnValue(state({ filteredPatients: [], setSearchTerm }));
+    mockUsePatientsPage.mockReturnValue(state({ filteredPatients: [], total: 0, searchTerm: 'inexistente', setSearchTerm }));
     render(<PatientsListPage />);
 
     const search = await screen.findByRole('searchbox', { name: 'Buscar pacientes por nome ou objetivo' });
@@ -140,7 +154,7 @@ describe('PatientsListPage', () => {
   });
 
   it('keeps the empty-list guidance available when there are no patients', async () => {
-    mockUsePatientsPage.mockReturnValue(state({ patients: [], filteredPatients: [], rows: [] }));
+    mockUsePatientsPage.mockReturnValue(state({ patients: [], filteredPatients: [], rows: [], total: 0 }));
     render(<PatientsListPage />);
 
     expect(await screen.findByText('Nenhum paciente cadastrado')).toBeInTheDocument();

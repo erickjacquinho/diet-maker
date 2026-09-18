@@ -1,10 +1,14 @@
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { MAX_PAGE_SIZE } from '@/lib/persistence/page';
 import type { PatientListRow } from '@/lib/patientListView';
 import { PatientListTableRow } from './patient/PatientListTableRow';
 
 export interface PatientListTableProps {
   rows: PatientListRow[];
+  totalRows: number;
+  pageIndex: number;
+  onPageChange: (pageIndex: number) => void;
   onNavigate?: (href: string) => void;
 }
 
@@ -41,17 +45,18 @@ const columns: DataTableColumnDef<PatientListRow>[] = [
   },
 ];
 
-export function PatientListTable({ rows, onNavigate }: PatientListTableProps) {
+export function PatientListTable({ rows, totalRows, pageIndex, onPageChange, onNavigate }: PatientListTableProps) {
   return (
     <TooltipProvider delayDuration={150}>
       <DataTable
         data={rows}
         columns={columns}
         getRowId={(row) => row.patient.id}
-        caption="Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento."
+        caption="Lista de pacientes ordenada pela prioridade do próximo acompanhamento."
         ariaLabel="Lista de pacientes"
         emptyMessage="Nenhum paciente encontrado."
         renderRow={(row) => <PatientListTableRow row={row} onNavigate={onNavigate} />}
+        pagination={{ pageIndex, pageSize: MAX_PAGE_SIZE, totalRows, onPageChange }}
         className="overflow-x-auto"
         tableClassName="table-fixed"
       />

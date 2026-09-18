@@ -15,6 +15,10 @@ import type { SaveFilePort } from '@/lib/persistence/save-file';
 
 interface FakeRuntime extends ProfileSessionRuntime {
   readonly runtimeId: string;
+  readonly checkpointState: { workspaceRevision: number; checkpointRevision: number };
+  getCheckpointState(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
+  markWorkspaceDirty(): Promise<void>;
+  advanceCheckpoint(revision: number): Promise<void>;
   imported?: BackupEnvelope;
 }
 
@@ -49,7 +53,17 @@ function createDependencies(filePort: SaveFilePort): ProfileSessionDependencies<
     filePort,
     now: () => '2026-09-12T12:00:00.000Z',
     idFactory: () => `account-${++runtimeNumber}`,
-    createRuntime: vi.fn(async (account: Account): Promise<FakeRuntime> => ({ account, runtimeId: `runtime-${runtimeNumber}` })),
+    createRuntime: vi.fn(async (account: Account): Promise<FakeRuntime> => {
+      const checkpointState = { workspaceRevision: 0, checkpointRevision: 0 };
+      return {
+        account,
+        runtimeId: `runtime-${++runtimeNumber}`,
+        checkpointState,
+        getCheckpointState: async () => ({ ...checkpointState }),
+        markWorkspaceDirty: async () => { checkpointState.workspaceRevision += 1; },
+        advanceCheckpoint: async (revision) => { checkpointState.checkpointRevision = Math.max(checkpointState.checkpointRevision, revision); },
+      };
+    }),
     importSnapshot: vi.fn(async (runtime: FakeRuntime, envelope: BackupEnvelope) => { runtime.imported = envelope; }),
     exportSnapshot: vi.fn(async (runtime: FakeRuntime) => createBackupEnvelope({
       ...createEmptyBackupFixture(),
@@ -183,15 +197,80 @@ describe('profile session', () => {
     expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '6', account: [{ phone: null }] });
   });
 
+  it('does not request permission or rewrite a clean checkpoint', async () => {
+    const filePort = createFilePort({ name: 'clean.nutridiet', content: '' });
+    const { session, dependencies } = createSession(filePort);
+    await session.createProfile({ displayName: 'Sessão Atual' });
+    vi.clearAllMocks();
+
+    await session.sync();
+
+    expect(filePort.requestWritePermission).not.toHaveBeenCalled();
+    expect(dependencies.exportSnapshot).not.toHaveBeenCalled();
+    expect(filePort.write).not.toHaveBeenCalled();
+  });
+
+  it('writes a dirty revision and advances the checkpoint only after success', async () => {
+    const filePort = createFilePort({ name: 'dirty.nutridiet', content: '' });
+    const { session } = createSession(filePort);
+    await session.createProfile({ displayName: 'Sessão Atual' });
+    const runtime = session.getSnapshot().runtime!;
+    await runtime.markWorkspaceDirty();
+
+    await session.sync();
+
+    expect(runtime.checkpointState).toEqual({ workspaceRevision: 1, checkpointRevision: 1 });
+    expect(filePort.write).toHaveBeenCalledTimes(2);
+  });
+
   it('marks an active session paused and preserves it when synchronization write fails', async () => {
     const file: FakeFile = { name: 'write-fails.nutridiet', content: '' };
     const filePort = createFilePort(file);
     const { session } = createSession(filePort);
     await session.createProfile({ displayName: 'Sessão Atual' });
+    const runtime = session.getSnapshot().runtime!;
+    await runtime.markWorkspaceDirty();
     vi.mocked(filePort.write).mockRejectedValueOnce(new Error('permission revoked'));
 
     await expect(session.sync()).rejects.toThrow('permission revoked');
     expect(session.getSnapshot()).toMatchObject({ status: 'paused', syncState: 'paused', account: { displayName: 'Sessão Atual' } });
+    expect(runtime.checkpointState).toEqual({ workspaceRevision: 1, checkpointRevision: 0 });
+    await session.sync();
+    expect(runtime.checkpointState).toEqual({ workspaceRevision: 1, checkpointRevision: 1 });
+  });
+
+  it('keeps a mutation made during a checkpoint pending', async () => {
+    const filePort = createFilePort({ name: 'racing.nutridiet', content: '' });
+    const { session } = createSession(filePort);
+    await session.createProfile({ displayName: 'Sessão Atual' });
+    const runtime = session.getSnapshot().runtime!;
+    await runtime.markWorkspaceDirty();
+    vi.mocked(filePort.write).mockImplementationOnce(async () => { await runtime.markWorkspaceDirty(); });
+
+    await session.sync();
+
+    expect(runtime.checkpointState).toEqual({ workspaceRevision: 2, checkpointRevision: 1 });
+    expect(session.getSnapshot()).toMatchObject({ status: 'active', syncState: 'pending' });
+  });
+
+  it('shares one in-flight checkpoint across simultaneous triggers', async () => {
+    const filePort = createFilePort({ name: 'shared.nutridiet', content: '' });
+    const { session, dependencies } = createSession(filePort);
+    await session.createProfile({ displayName: 'Sessão Atual' });
+    await session.getSnapshot().runtime!.markWorkspaceDirty();
+    vi.clearAllMocks();
+    let release!: () => void;
+    vi.mocked(filePort.write).mockImplementationOnce(() => new Promise<void>((resolve) => { release = resolve; }));
+
+    const first = session.sync();
+    const second = session.sync();
+    await vi.waitFor(() => expect(filePort.write).toHaveBeenCalledTimes(1));
+    release();
+    await Promise.all([first, second]);
+
+    expect(filePort.requestWritePermission).toHaveBeenCalledTimes(1);
+    expect(dependencies.exportSnapshot).toHaveBeenCalledTimes(1);
+    expect(filePort.write).toHaveBeenCalledTimes(1);
   });
 
   it('synchronizes the associated handle in commit-export-write order without reopening a chooser', async () => {
@@ -199,6 +278,7 @@ describe('profile session', () => {
     const filePort = createFilePort(file);
     const { session, dependencies } = createSession(filePort);
     await session.createProfile({ displayName: 'Sessão Atual' });
+    await session.getSnapshot().runtime!.markWorkspaceDirty();
     vi.clearAllMocks();
 
     const order: string[] = [];

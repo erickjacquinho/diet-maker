@@ -21,6 +21,19 @@ export const accounts = pgTable('accounts', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const profileCheckpointState = pgTable(
+  'profile_checkpoint_state',
+  {
+    accountId: text('account_id').primaryKey().references(() => accounts.id, { onDelete: 'cascade' }),
+    workspaceRevision: integer('workspace_revision').notNull().default(0),
+    checkpointRevision: integer('checkpoint_revision').notNull().default(0),
+  },
+  (table) => [
+    check('profile_checkpoint_state_revisions_non_negative', sql`${table.workspaceRevision} >= 0 and ${table.checkpointRevision} >= 0`),
+    check('profile_checkpoint_state_checkpoint_not_ahead', sql`${table.checkpointRevision} <= ${table.workspaceRevision}`),
+  ],
+);
+
 export const objectiveOptions = pgTable(
   'objective_options',
   {
@@ -173,6 +186,20 @@ export const dietVariations = pgTable('diet_variations', {
   targetProtein: numeric('target_protein').notNull(), targetCarbs: numeric('target_carbs').notNull(), targetFat: numeric('target_fat').notNull(), targetKcal: numeric('target_kcal').notNull(),
   gPerKgProtein: numeric('g_per_kg_protein'), gPerKgCarbs: numeric('g_per_kg_carbs'), gPerKgFat: numeric('g_per_kg_fat'),
 });
+
+export const dietVariationHistorySummaries = pgTable(
+  'diet_variation_history_summaries',
+  {
+    dietVariationId: text('diet_variation_id').primaryKey().references(() => dietVariations.id, { onDelete: 'cascade' }),
+    prescribedProtein: numeric('prescribed_protein').notNull(),
+    prescribedCarbs: numeric('prescribed_carbs').notNull(),
+    prescribedFat: numeric('prescribed_fat').notNull(),
+    prescribedEnergyKcal: numeric('prescribed_energy_kcal').notNull(),
+  },
+  (table) => [
+    check('diet_variation_history_summaries_values_non_negative', sql`${table.prescribedProtein} >= 0 and ${table.prescribedCarbs} >= 0 and ${table.prescribedFat} >= 0 and ${table.prescribedEnergyKcal} >= 0`),
+  ],
+);
 
 export const dietVariationDays = pgTable('diet_variation_days', {
   variationId: text('variation_id').notNull(), dietPlanId: text('diet_plan_id').notNull(), accountId: text('account_id').notNull(), patientId: text('patient_id').notNull(), dayCode: text('day_code').notNull(), position: integer('position').notNull(),
@@ -341,12 +368,14 @@ export const readyMealItems = pgTable(
 
 export const schema = {
   accounts,
+  profileCheckpointState,
   objectiveOptions,
   patients,
   bodyAssessments,
   nextFollowUps,
   dietPlans,
   dietVariations,
+  dietVariationHistorySummaries,
   dietVariationDays,
   dietMeals,
   dietMealOptions,

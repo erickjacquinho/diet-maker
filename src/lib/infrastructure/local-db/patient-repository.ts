@@ -1,8 +1,10 @@
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { Patient, PatientInput } from '@/lib/domain/patient';
 import { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import { getAgeFromBirthDate } from '@/lib/date-only';
+import { normalizePageRequest, type PageResult } from '@/lib/persistence/page';
+import type { PatientPageQuery } from '@/lib/persistence/patient-repository';
 import type { LocalDatabaseHandle } from './client';
 import { patients } from './schema';
 
@@ -112,6 +114,92 @@ export class LocalPatientRepository {
       .where(and(eq(patients.accountId, accountId), isNull(patients.archivedAt)))
       .orderBy(asc(patients.name));
     return rows.map(toPatient);
+  }
+
+  async listActivePage(accountId: string, query: PatientPageQuery): Promise<PageResult<Patient>> {
+    const { pageIndex, pageSize } = normalizePageRequest(query);
+    const search = query.query.trim().toLocaleLowerCase('pt-BR');
+    const selected = await this.handle.client.query<{
+      id: string | null;
+      total: number;
+    }>(`
+      WITH matching_patients AS (
+        SELECT p.id, p.name
+        FROM patients p
+        WHERE p.account_id = $1
+          AND p.archived_at IS NULL
+          AND (
+            $2 = ''
+            OR strpos(lower(p.name), $2) > 0
+            OR strpos(lower(coalesce(p.current_objective, '')), $2) > 0
+          )
+      ),
+      activity_candidates AS (
+        SELECT a.patient_id, a.clinical_date AS event_date, a.updated_at AS confirmed_at,
+          'assessment'::text AS activity_type, a.id AS source_id
+        FROM body_assessments a
+        INNER JOIN matching_patients p ON p.id = a.patient_id
+        WHERE a.account_id = $1
+        UNION ALL
+        SELECT d.patient_id, left(d.activated_at, 10) AS event_date, d.updated_at AS confirmed_at,
+          'diet'::text AS activity_type, d.id AS source_id
+        FROM diet_plans d
+        INNER JOIN matching_patients p ON p.id = d.patient_id
+        WHERE d.account_id = $1
+      ),
+      ranked_activities AS (
+        SELECT patient_id, event_date,
+          row_number() OVER (
+            PARTITION BY patient_id
+            ORDER BY event_date DESC, confirmed_at DESC, activity_type ASC, source_id ASC
+          ) AS activity_rank
+        FROM activity_candidates
+      ),
+      ordered_patients AS (
+        SELECT p.id, p.name, f.due_date, a.event_date AS last_activity_date,
+          CASE
+            WHEN f.due_date IS NULL THEN 3
+            WHEN f.due_date < $3 THEN 0
+            WHEN f.due_date = $3 THEN 1
+            ELSE 2
+          END AS group_order,
+          CASE
+            WHEN f.due_date IS NULL THEN coalesce(a.event_date, '')
+            WHEN f.due_date = $3 THEN ''
+            ELSE f.due_date
+          END AS sort_date
+        FROM matching_patients p
+        LEFT JOIN next_follow_ups f ON f.account_id = $1 AND f.patient_id = p.id
+        LEFT JOIN ranked_activities a ON a.patient_id = p.id AND a.activity_rank = 1
+      ),
+      page AS (
+        SELECT * FROM ordered_patients
+        ORDER BY group_order, sort_date, name COLLATE nutridiet_pt_br_base, id
+        LIMIT $4 OFFSET $5
+      )
+      SELECT page.id, (SELECT count(*)::int FROM matching_patients) AS total,
+        page.group_order, page.sort_date, page.name
+      FROM (SELECT 1) AS anchor
+      LEFT JOIN page ON TRUE
+      ORDER BY page.group_order NULLS LAST, page.sort_date NULLS LAST,
+        page.name COLLATE nutridiet_pt_br_base NULLS LAST, page.id NULLS LAST
+    `, [accountId, search, query.today, pageSize, pageIndex * pageSize]);
+    const total = Number(selected.rows[0]?.total ?? 0);
+    const patientIds = selected.rows.flatMap(({ id }) => id === null ? [] : [id]);
+    if (patientIds.length === 0) return { items: [], total, pageIndex, pageSize };
+
+    const rows = await this.handle.db.select().from(patients)
+      .where(and(eq(patients.accountId, accountId), inArray(patients.id, patientIds)));
+    const byId = new Map(rows.map((row) => [row.id, toPatient(row)]));
+    return {
+      items: patientIds.flatMap((id) => {
+        const patient = byId.get(id);
+        return patient ? [patient] : [];
+      }),
+      total,
+      pageIndex,
+      pageSize,
+    };
   }
 
   async update(accountId: string, patientId: string, expectedVersion: number, input: PatientInput): Promise<Patient> {

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { PatientListTable } from '@/components/organisms/PatientListTable';
@@ -29,6 +29,10 @@ const patient: Patient = {
   lastActivity: { at: '2026-08-01T10:00:00.000Z', type: 'assessment' },
 };
 
+function paginationProps(overrides: Partial<{ pageIndex: number; totalRows: number; onPageChange: (pageIndex: number) => void }> = {}) {
+  return { pageIndex: 0, totalRows: 1, onPageChange: vi.fn(), ...overrides };
+}
+
 describe('PatientListTable', () => {
   it('renders the approved semantic table content and history indicators', () => {
     render(
@@ -56,12 +60,13 @@ describe('PatientListTable', () => {
             ],
           },
         })}
+        {...paginationProps()}
       />,
     );
 
     const table = screen.getByRole('table', { name: 'Lista de pacientes' });
     expect(table).toBeInTheDocument();
-    expect(screen.getByText('Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento.')).toBeInTheDocument();
+    expect(screen.getByText('Lista de pacientes ordenada pela prioridade do próximo acompanhamento.')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Paciente' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Objetivo' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Evolução de gordura' })).toBeInTheDocument();
@@ -95,6 +100,7 @@ describe('PatientListTable', () => {
     render(
       <PatientListTable
         rows={buildPatientListRows([patient], '2026-08-03')}
+        {...paginationProps()}
         onNavigate={onNavigate}
       />,
     );
@@ -112,6 +118,7 @@ describe('PatientListTable', () => {
     render(
       <PatientListTable
         rows={buildPatientListRows([patient], '2026-08-03')}
+        {...paginationProps()}
         onNavigate={onNavigate}
       />,
     );
@@ -140,6 +147,7 @@ describe('PatientListTable', () => {
     render(
       <PatientListTable
         rows={buildPatientListRows([emptyPatient], '2026-08-03')}
+        {...paginationProps()}
       />,
     );
 
@@ -147,5 +155,49 @@ describe('PatientListTable', () => {
     expect(screen.getByText('Sem histórico')).toBeInTheDocument();
     expect(screen.getByText('Sem próximo evento')).toBeInTheDocument();
     expect(screen.getByText('Definir no perfil')).toBeInTheDocument();
+  });
+
+  it('preserves remote row order, exposes the global page count and keeps row actions stable', () => {
+    const overduePatient: Patient = {
+      ...patient,
+      id: 'patient-overdue',
+      name: 'Zoe Oliveira',
+      nextEvent: { date: '2026-08-02', type: 'assessment-update' },
+    };
+    const onNavigate = vi.fn();
+    const onPageChange = vi.fn();
+    const rows = [
+      ...buildPatientListRows([overduePatient], '2026-08-03'),
+      ...buildPatientListRows([patient], '2026-08-03'),
+    ];
+    render(
+      <PatientListTable
+        rows={rows}
+        pageIndex={1}
+        totalRows={60}
+        onPageChange={onPageChange}
+        onNavigate={onNavigate}
+      />,
+    );
+
+    const table = screen.getByRole('table', { name: 'Lista de pacientes' });
+    const rowsInTable = within(table).getAllByRole('row').slice(1);
+    expect(table).toHaveAttribute('aria-rowcount', '61');
+    expect(screen.getByText('Página 2 de 3')).toBeInTheDocument();
+    expect(rowsInTable.map((row) => row.getAttribute('aria-label'))).toEqual([
+      'Abrir perfil de Zoe Oliveira',
+      'Abrir perfil de Ana Lima',
+    ]);
+    fireEvent.keyDown(rowsInTable[0], { key: 'Enter' });
+    expect(onNavigate).toHaveBeenCalledWith('/pacientes/patient-overdue');
+    expect(screen.getByRole('link', { name: 'Ver perfil de Zoe Oliveira' })).toHaveAttribute('href', '/pacientes/patient-overdue');
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(onPageChange).toHaveBeenCalledWith(2);
+  });
+
+  it('announces an empty remote result page', () => {
+    render(<PatientListTable rows={[]} {...paginationProps({ totalRows: 0 })} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Nenhum paciente encontrado.');
+    expect(screen.getByText('Página 1 de 1')).toBeInTheDocument();
   });
 });
