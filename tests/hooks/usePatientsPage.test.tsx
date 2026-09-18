@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePatientsPage } from '@/hooks/usePatientsPage';
 
 const testState = vi.hoisted(() => ({
-  listPage: vi.fn(async (_request: { pageIndex?: number; pageSize?: number; query?: string }) => ({ items: [] as unknown[], total: 0, pageIndex: 0, pageSize: 25 })),
+  listAll: vi.fn(),
   createPatient: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: async () => ({
-    listActivePatientsPage: testState.listPage,
+    listActivePatients: testState.listAll,
     createPatient: testState.createPatient,
   }),
 }));
@@ -28,37 +28,38 @@ const summary = {
 
 describe('usePatientsPage', () => {
   beforeEach(() => {
-    testState.listPage.mockReset().mockImplementation(async (request) => ({
-      items: [summary],
-      total: 75,
-      pageIndex: request.pageIndex ?? 0,
-      pageSize: 25,
-    }));
+    testState.listAll.mockReset().mockResolvedValue([summary]);
     testState.createPatient.mockReset();
   });
 
-  it('loads bounded remote pages and resets to page zero when the search changes', async () => {
+  it('loads the complete list once and filters it locally', async () => {
+    const summaries = Array.from({ length: 30 }, (_, index) => ({
+      ...summary,
+      patient: {
+        ...summary.patient,
+        id: `patient-${index}`,
+        name: index === 0 ? 'Ana Lima' : `Paciente ${index}`,
+      },
+    }));
+    testState.listAll.mockResolvedValueOnce(summaries);
     const { result } = renderHook(() => usePatientsPage());
-    await waitFor(() => expect(testState.listPage).toHaveBeenLastCalledWith({ pageIndex: 0, pageSize: 25, query: '' }));
+    await waitFor(() => expect(result.current.rows).toHaveLength(30));
 
-    act(() => result.current.setPageIndex(2));
-    await waitFor(() => expect(testState.listPage).toHaveBeenLastCalledWith({ pageIndex: 2, pageSize: 25, query: '' }));
     act(() => result.current.setSearchTerm('Ana'));
-    await waitFor(() => expect(testState.listPage).toHaveBeenLastCalledWith({ pageIndex: 0, pageSize: 25, query: 'Ana' }));
 
-    expect(result.current.pageIndex).toBe(0);
-    expect(result.current.total).toBe(75);
-    expect(result.current.patients.map((patient) => patient.id)).toEqual(['patient-page']);
+    expect(testState.listAll).toHaveBeenCalledTimes(1);
+    expect(result.current.total).toBe(1);
+    expect(result.current.filteredPatients.map((patient) => patient.id)).toEqual(['patient-0']);
   });
 
   it('keeps empty and read-error results distinct', async () => {
-    testState.listPage.mockResolvedValueOnce({ items: [], total: 0, pageIndex: 0, pageSize: 25 });
+    testState.listAll.mockResolvedValueOnce([]);
     const empty = renderHook(() => usePatientsPage());
     await waitFor(() => expect(empty.result.current.isLoading).toBe(false));
     expect(empty.result.current).toMatchObject({ patients: [], total: 0, error: null });
     empty.unmount();
 
-    testState.listPage.mockRejectedValueOnce(new Error('Falha local'));
+    testState.listAll.mockRejectedValueOnce(new Error('Falha local'));
     const failed = renderHook(() => usePatientsPage());
     await waitFor(() => expect(failed.result.current.error).toBe('Falha local'));
     expect(failed.result.current.patients).toEqual([]);

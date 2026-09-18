@@ -21,7 +21,6 @@ import {
 } from '@/lib/patientProfileSelectors';
 import { getWhatsappUrl } from '@/lib/whatsapp';
 import type { DietPlan } from '@/lib/domain/diets/diet-model';
-import { MAX_PAGE_SIZE } from '@/lib/persistence/page';
 
 export function usePatientProfilePage() {
   const params = useParams();
@@ -33,16 +32,13 @@ export function usePatientProfilePage() {
 
   const [confirmedPlans, setConfirmedPlans] = useState<HistoricalDiet[]>([]);
   const [dietTotal, setDietTotal] = useState(0);
-  const [dietPageIndex, setDietPageIndex] = useState(0);
   const [isDietsLoading, setIsDietsLoading] = useState(true);
   const [dietsError, setDietsError] = useState<string | null>(null);
   const [bodyAssessments, setBodyAssessments] = useState<BodyAssessment[]>([]);
   const [assessmentTotal, setAssessmentTotal] = useState(0);
-  const [assessmentPageIndex, setAssessmentPageIndex] = useState(0);
   const [isAssessmentsLoading, setIsAssessmentsLoading] = useState(true);
   const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
   const [profileLatestAssessment, setProfileLatestAssessment] = useState<BodyAssessment | null>(null);
-  const [activePlanSummary, setActivePlanSummary] = useState<ReturnType<typeof selectCurrentActivePlan>>(null);
 
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -80,8 +76,8 @@ export function usePatientProfilePage() {
   }, []);
 
   const profileRequest = useRef(0);
-  const assessmentPageRequest = useRef(0);
-  const dietPageRequest = useRef(0);
+  const assessmentHistoryRequest = useRef(0);
+  const dietHistoryRequest = useRef(0);
   const loadProfile = useCallback(async (showLoading = true) => {
     const request = ++profileRequest.current;
     if (showLoading) setIsProfileLoading(true);
@@ -115,54 +111,41 @@ export function usePatientProfilePage() {
     }
   }, [patientId]);
 
-  const loadAssessmentPage = useCallback(async (requestedPageIndex = assessmentPageIndex) => {
-    const request = ++assessmentPageRequest.current;
+  const loadAssessmentHistory = useCallback(async () => {
+    const request = ++assessmentHistoryRequest.current;
     setIsAssessmentsLoading(true);
     setAssessmentsError(null);
     try {
       const application = await getBrowserPatientApplication();
-      const page = await application.listAssessmentsPage(patientId, { pageIndex: requestedPageIndex, pageSize: MAX_PAGE_SIZE });
-      if (request !== assessmentPageRequest.current) return;
-      const lastPageIndex = Math.max(0, Math.ceil(page.total / MAX_PAGE_SIZE) - 1);
-      setAssessmentTotal(page.total);
-      if (requestedPageIndex > lastPageIndex) {
-        setAssessmentPageIndex(lastPageIndex);
-        return;
-      }
-      setAssessmentPageIndex(page.pageIndex);
-      setBodyAssessments(page.items.map(toLegacyAssessment));
+      const assessments = await application.listAssessmentsPage(patientId, { pageIndex: 0, pageSize: 10 });
+      if (request !== assessmentHistoryRequest.current) return;
+      setBodyAssessments(assessments.items.map(toLegacyAssessment));
+      setAssessmentTotal(assessments.total);
     } catch (error) {
-      if (request === assessmentPageRequest.current) setAssessmentsError(error instanceof Error ? error.message : 'Não foi possível carregar as avaliações.');
+      if (request === assessmentHistoryRequest.current) setAssessmentsError(error instanceof Error ? error.message : 'Não foi possível carregar as avaliações.');
     } finally {
-      if (request === assessmentPageRequest.current) setIsAssessmentsLoading(false);
+      if (request === assessmentHistoryRequest.current) setIsAssessmentsLoading(false);
     }
-  }, [assessmentPageIndex, patientId]);
+  }, [patientId]);
 
-  const loadDietPage = useCallback(async (requestedPageIndex = dietPageIndex) => {
-    const request = ++dietPageRequest.current;
+  const loadDietHistory = useCallback(async () => {
+    const request = ++dietHistoryRequest.current;
     setIsDietsLoading(true);
     setDietsError(null);
     try {
       const application = await getBrowserDietApplication();
-      const page = await application.listDietHistoryViewsPage(patientId, { pageIndex: requestedPageIndex, pageSize: MAX_PAGE_SIZE });
-      if (request !== dietPageRequest.current) return;
-      const lastPageIndex = Math.max(0, Math.ceil(page.total / MAX_PAGE_SIZE) - 1);
-      setDietTotal(page.total);
-      if (requestedPageIndex > lastPageIndex) {
-        setDietPageIndex(lastPageIndex);
-        return;
-      }
-      setDietPageIndex(page.pageIndex);
-      setConfirmedPlans(page.items);
-      if (page.pageIndex === 0) setActivePlanSummary(selectCurrentActivePlan(page.items));
+      const diets = await application.listDietHistoryViewsPage(patientId, { pageIndex: 0, pageSize: 10 });
+      if (request !== dietHistoryRequest.current) return;
+      setConfirmedPlans(diets.items);
+      setDietTotal(diets.total);
     } catch (error) {
-      if (request === dietPageRequest.current) setDietsError(error instanceof Error ? error.message : 'Não foi possível carregar as dietas.');
+      if (request === dietHistoryRequest.current) setDietsError(error instanceof Error ? error.message : 'Não foi possível carregar as dietas.');
     } finally {
-      if (request === dietPageRequest.current) setIsDietsLoading(false);
+      if (request === dietHistoryRequest.current) setIsDietsLoading(false);
     }
-  }, [dietPageIndex, patientId]);
+  }, [patientId]);
 
-  const activePlan = useMemo(() => selectCurrentActivePlan(confirmedPlans) ?? activePlanSummary, [activePlanSummary, confirmedPlans]);
+  const activePlan = useMemo(() => selectCurrentActivePlan(confirmedPlans), [confirmedPlans]);
   const latestAssessment = useMemo(() => profileLatestAssessment ?? selectLatestAssessment(bodyAssessments), [bodyAssessments, profileLatestAssessment]);
   const nextEventSummary = useMemo(() => buildNextEventSummary(patient?.nextEvent), [patient?.nextEvent]);
   const whatsappContact = patient?.whatsapp ?? patient?.phone;
@@ -206,9 +189,8 @@ export function usePatientProfilePage() {
     }
     setIsEditAssessmentOpen(false);
     toast.success(assessmentMode === 'create' ? 'Avaliação física criada com sucesso!' : 'Avaliação física atualizada com sucesso!');
-    setAssessmentPageIndex(0);
-    await Promise.all([loadProfile(false), loadAssessmentPage(0)]);
-  }, [assessmentMode, loadAssessmentPage, loadProfile, patientId]);
+    await Promise.all([loadProfile(false), loadAssessmentHistory()]);
+  }, [assessmentMode, loadAssessmentHistory, loadProfile, patientId]);
 
   const handleSaveNextEvent = useCallback(async (nextEvent: PatientNextEvent) => {
     const application = await getBrowserPatientApplication();
@@ -248,16 +230,16 @@ export function usePatientProfilePage() {
     void loadProfile(true).catch(() => {
       if (cancelled) return;
     });
-    return () => { cancelled = true; profileRequest.current += 1; dietRequest.current += 1; assessmentPageRequest.current += 1; dietPageRequest.current += 1; };
+    return () => { cancelled = true; profileRequest.current += 1; dietRequest.current += 1; assessmentHistoryRequest.current += 1; dietHistoryRequest.current += 1; };
   }, [loadProfile, patientId]);
 
   useEffect(() => {
-    if (patientId) void loadAssessmentPage(assessmentPageIndex);
-  }, [assessmentPageIndex, loadAssessmentPage, patientId]);
+    if (patientId) void loadAssessmentHistory();
+  }, [loadAssessmentHistory, patientId]);
 
   useEffect(() => {
-    if (patientId) void loadDietPage(dietPageIndex);
-  }, [dietPageIndex, loadDietPage, patientId]);
+    if (patientId) void loadDietHistory();
+  }, [loadDietHistory, patientId]);
 
   const handleSavePatient = useCallback(async (updatedPatient: PatientViewModel) => {
     if (!updatedPatient.version) throw new Error('A versão do paciente não está disponível para atualização.');
@@ -283,14 +265,10 @@ export function usePatientProfilePage() {
     isProfileLoading,
     confirmedPlans,
     dietTotal,
-    dietPageIndex,
-    setDietPageIndex,
     isDietsLoading,
     dietsError,
     bodyAssessments,
     assessmentTotal,
-    assessmentPageIndex,
-    setAssessmentPageIndex,
     isAssessmentsLoading,
     assessmentsError,
     activePlan,

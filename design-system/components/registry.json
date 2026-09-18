@@ -47,7 +47,7 @@
         { "name": "Button", "role": "visual-root", "requiresRootContext": false, "states": ["default", "hover", "pressed", "focus-visible", "disabled", "loading", "error"] },
         { "name": "buttonVariants", "role": "visual-slot", "requiresRootContext": false, "states": ["default", "disabled", "loading"] }
       ],
-      "consumers": ["atom-button", "molecule-meal-item-row", "molecule-patient-badge-header", "organism-diet-mode-switcher", "organism-food-search-modal", "organism-meal-card-container", "template-diet-builder-template"]
+      "consumers": ["atom-button", "molecule-meal-item-row", "molecule-patient-badge-header", "organism-diet-mode-switcher", "organism-food-search-modal", "organism-meal-card-container", "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx", "template-diet-builder-template"]
     },
     {
       "id": "ui-card",
@@ -954,6 +954,7 @@
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
         "src/app/refeicoes/page.tsx",
@@ -1000,6 +1001,7 @@
         "organism-metric-box-group",
         "organism-macro-tracker-header",
         "organism-meal-card-container",
+        "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx",
         "template-diet-builder-template"
       ],
       "primitiveBase": "ui-card",
@@ -2639,6 +2641,8 @@
       "consumers": [
         "organism-food-table-section",
         "organism-patient-list-table",
+        "organism-patient-diets-table",
+        "organism-patient-assessments-table",
         "organism-patient-consultation-history-table"
       ],
       "primitiveBase": "ui-table",
@@ -2831,7 +2835,8 @@
       ],
       "profile": "design-system/components/profiles/organisms/read-only-diet-modal.md",
       "consumers": [
-        "src/app/pacientes/[id]/PatientProfileModals.tsx"
+        "src/app/pacientes/[id]/PatientProfileModals.tsx",
+        "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx"
       ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
@@ -2972,6 +2977,7 @@
       "profile": "design-system/components/profiles/molecules/page-context-header.md",
       "consumers": [
         "src/app/pacientes/[id]/page.tsx",
+        "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx",
         "src/components/templates/DietBuilderTemplate.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx"
       ],
@@ -4264,7 +4270,7 @@
         { "name": "PatientAssessmentsTable", "kind": "component", "documentedBy": "profile" }
       ],
       "profile": "design-system/components/profiles/organisms/patient-assessments-table.md",
-      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx", "organism-patient-consultation-history-table"],
       "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
@@ -4285,7 +4291,7 @@
         { "name": "PatientDietsTable", "kind": "component", "documentedBy": "profile" }
       ],
       "profile": "design-system/components/profiles/organisms/patient-diets-table.md",
-      "consumers": ["src/app/pacientes/[id]/page.tsx", "organism-patient-consultation-history-table"],
+      "consumers": ["src/app/pacientes/[id]/page.tsx", "src/app/pacientes/[id]/_components/PatientHistoryPage.tsx", "organism-patient-consultation-history-table"],
       "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []

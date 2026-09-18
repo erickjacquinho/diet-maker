@@ -38,6 +38,12 @@ const patient = {
 };
 const assessment = makeClinicalAssessment({ id: 'assessment-profile', accountId: patient.accountId, patientId: patient.id });
 const diet = { ...PATIENT_PROFILE_DIETS[0], id: 'diet-profile', name: 'Plano histórico' };
+const assessments = Array.from({ length: 30 }, (_, index) => makeClinicalAssessment({
+  id: `assessment-${index}`,
+  accountId: patient.accountId,
+  patientId: patient.id,
+}));
+const diets = Array.from({ length: 30 }, (_, index) => ({ ...diet, id: `diet-${index}`, name: `Plano ${index}` }));
 const profile = {
   patient,
   initials: 'AL',
@@ -55,36 +61,29 @@ const profile = {
   },
 };
 
-describe('usePatientProfilePage remote history', () => {
+describe('usePatientProfilePage history', () => {
   beforeEach(() => {
     mocks.patientApplication.getPatientProfile.mockReset().mockResolvedValue(profile);
-    mocks.patientApplication.listAssessmentsPage.mockReset().mockImplementation(async (_patientId, request) => ({
-      items: [assessment], total: 51, pageIndex: request.pageIndex ?? 0, pageSize: 25,
-    }));
+    mocks.patientApplication.listAssessmentsPage.mockReset().mockResolvedValue({
+      items: assessments.slice(0, 10), total: assessments.length, pageIndex: 0, pageSize: 10,
+    });
     mocks.patientApplication.updateAssessment.mockReset().mockResolvedValue(assessment);
     mocks.patientApplication.createAssessment.mockReset().mockResolvedValue(assessment);
-    mocks.dietApplication.listDietHistoryViewsPage.mockReset().mockImplementation(async (_patientId, request) => ({
-      items: [diet], total: 51, pageIndex: request.pageIndex ?? 0, pageSize: 25,
-    }));
+    mocks.dietApplication.listDietHistoryViewsPage.mockReset().mockResolvedValue({
+      items: diets.slice(0, 10), total: diets.length, pageIndex: 0, pageSize: 10,
+    });
     mocks.dietApplication.getDietSnapshot.mockReset().mockResolvedValue({ id: diet.id, variations: [{ meals: [{ options: [{ items: [{ name: 'Arroz' }] }] }] }] });
   });
 
-  it('requests controlled pages and their global totals', async () => {
+  it('loads only the 10 newest assessment and diet rows while retaining full totals', async () => {
     const { result } = renderHook(() => usePatientProfilePage());
     await waitFor(() => {
-      expect(mocks.patientApplication.listAssessmentsPage).toHaveBeenCalledWith('patient-profile', { pageIndex: 0, pageSize: 25 });
-      expect(mocks.dietApplication.listDietHistoryViewsPage).toHaveBeenCalledWith('patient-profile', { pageIndex: 0, pageSize: 25 });
+      expect(mocks.patientApplication.listAssessmentsPage).toHaveBeenCalledWith('patient-profile', { pageIndex: 0, pageSize: 10 });
+      expect(mocks.dietApplication.listDietHistoryViewsPage).toHaveBeenCalledWith('patient-profile', { pageIndex: 0, pageSize: 10 });
     });
-
-    act(() => {
-      result.current.setAssessmentPageIndex(1);
-      result.current.setDietPageIndex(1);
-    });
-    await waitFor(() => {
-      expect(mocks.patientApplication.listAssessmentsPage).toHaveBeenLastCalledWith('patient-profile', { pageIndex: 1, pageSize: 25 });
-      expect(mocks.dietApplication.listDietHistoryViewsPage).toHaveBeenLastCalledWith('patient-profile', { pageIndex: 1, pageSize: 25 });
-    });
-    expect(result.current).toMatchObject({ assessmentTotal: 51, dietTotal: 51, assessmentPageIndex: 1, dietPageIndex: 1 });
+    expect(result.current.bodyAssessments).toHaveLength(10);
+    expect(result.current.confirmedPlans).toHaveLength(10);
+    expect(result.current).toMatchObject({ assessmentTotal: 30, dietTotal: 30 });
   });
 
   it('refreshes assessments after save without reloading diets and fetches a diet only when opened', async () => {

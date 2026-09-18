@@ -26,7 +26,7 @@ Herda [data-display](../../categories/data-display.md). Trait autorizado: `nutri
 
 ## Allowed variants
 
-Somente ordenação, expansão, seleção e paginação já oferecidas pelo contrato do consumidor.
+Prévia de até 10 registros no perfil e histórico completo paginado remotamente nas páginas do paciente; os detalhes continuam expandíveis em ambos.
 
 ## Particular states
 
@@ -46,12 +46,13 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-Perfil do paciente e histórico de consultas.
+Perfil do paciente, páginas de histórico completo e histórico de consultas.
 
 ## Acceptance criteria
 
 - parts estão enumeradas e mantêm associação semântica;
 - headers, caption, chaves e expansão são acessíveis;
+- paginação remota recebe apenas a página consultada, preservando a ordem da aplicação;
 - valores e callbacks existentes não são recalculados ou persistidos pela tabela.
 
 ## Implementation status

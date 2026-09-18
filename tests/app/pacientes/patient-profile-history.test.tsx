@@ -235,39 +235,40 @@ describe('PatientDetailPage history with two stacked tables', () => {
     expect(screen.queryByRole('link', { name: /Editar Plano cutting agosto/ })).not.toBeInTheDocument();
   });
 
-  it('uses remote page totals while keeping edit and diet-detail actions available', () => {
-    const setAssessmentPageIndex = vi.fn();
-    const setDietPageIndex = vi.fn();
-    const assessment = { ...PATIENT_PROFILE_ASSESSMENTS[0], id: 'assessment-page-1', version: 1, abdomenCm: 82 };
-    const diet = { ...PATIENT_PROFILE_DIETS[0], id: 'diet-page-1', name: 'Plano paginado' };
+  it('limits profile histories to 10 rows and links to their paginated full-history pages', () => {
+    const assessments = Array.from({ length: 26 }, (_, index) => ({
+      ...PATIENT_PROFILE_ASSESSMENTS[0],
+      id: `assessment-${index}`,
+      version: 1,
+      abdomenCm: 82,
+    }));
+    const diets = Array.from({ length: 26 }, (_, index) => ({
+      ...PATIENT_PROFILE_DIETS[1],
+      id: `diet-${index}`,
+      name: `Plano ${index}`,
+    }));
     const state = makePatientProfileState({
-      bodyAssessments: [assessment],
-      confirmedPlans: [diet],
-      assessmentTotal: 51,
-      assessmentPageIndex: 1,
-      setAssessmentPageIndex,
-      dietTotal: 51,
-      dietPageIndex: 1,
-      setDietPageIndex,
-    } as never);
+      bodyAssessments: assessments.slice(0, 10),
+      assessmentTotal: assessments.length,
+      confirmedPlans: diets.slice(0, 10),
+      dietTotal: diets.length,
+    });
     mockUsePatientProfilePage.mockReturnValue(state);
 
     render(<PatientDetailPage />);
 
-    expect(screen.getByText('51 avaliações')).toBeInTheDocument();
-    expect(screen.getByText('51 planos')).toBeInTheDocument();
-    expect(screen.getAllByText('Página 2 de 3')).toHaveLength(2);
-    expect(screen.getByRole('link', { name: 'Editar Avaliação Física' })).toHaveAttribute(
-      'href',
-      '/pacientes/patient-profile-1/avaliacao/assessment-page-1',
-    );
-    expect(screen.getByRole('button', { name: 'Ver cardápio completo da dieta Plano paginado' })).toBeInTheDocument();
-
-    const nextPageButtons = screen.getAllByRole('button', { name: 'Próxima página' });
-    fireEvent.click(nextPageButtons[0]);
-    fireEvent.click(nextPageButtons[1]);
-    expect(setDietPageIndex).toHaveBeenCalledWith(2);
-    expect(setAssessmentPageIndex).toHaveBeenCalledWith(2);
+    expect(screen.getByText('26 avaliações')).toBeInTheDocument();
+    expect(screen.getByText('26 planos')).toBeInTheDocument();
+    expect(within(screen.getByRole('table', { name: /Histórico de avaliações físicas/ })).getAllByRole('row')).toHaveLength(11);
+    expect(within(screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ })).getAllByRole('row')).toHaveLength(11);
+    expect(screen.getAllByRole('link', { name: 'Editar Avaliação Física' })).toHaveLength(10);
+    expect(screen.getByRole('button', { name: /Ver cardápio completo da dieta Plano 0/ })).toBeInTheDocument();
+    const fullHistoryLinks = screen.getAllByRole('link', { name: 'Ver histórico completo' });
+    expect(fullHistoryLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/pacientes/patient-profile-1/dietas',
+      '/pacientes/patient-profile-1/avaliacoes',
+    ]);
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
   });
 
   it('shows independent empty and read-error states for remote histories', () => {

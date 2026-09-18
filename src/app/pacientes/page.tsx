@@ -15,11 +15,8 @@ export default function PatientsListPage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {
-    patients,
     rows: patientRows,
     total,
-    pageIndex,
-    setPageIndex,
     searchTerm,
     setSearchTerm,
     isLoading,
@@ -147,9 +144,6 @@ export default function PatientsListPage() {
         >
           <PatientListTable
             rows={patientRows}
-            totalRows={total}
-            pageIndex={pageIndex}
-            onPageChange={setPageIndex}
             onNavigate={(href) => router.push(href)}
           />
         </section>

@@ -63,8 +63,6 @@ function state(overrides: Partial<ReturnType<typeof usePatientsPage>> = {}) {
     rows: overrides.rows ?? buildPatientListRows(filteredPatients, '2026-08-01'),
     patientHistoryById: {},
     total: overrides.total ?? filteredPatients.length,
-    pageIndex: overrides.pageIndex ?? 0,
-    setPageIndex: overrides.setPageIndex ?? vi.fn(),
     searchTerm: '',
     setSearchTerm: vi.fn(),
     isLoading: false,
@@ -93,15 +91,23 @@ describe('PatientsListPage', () => {
     expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
   });
 
-  it('shows the server page count and requests the next remote page', () => {
-    const setPageIndex = vi.fn();
-    mockUsePatientsPage.mockReturnValue(state({ total: 60, pageIndex: 1, setPageIndex }));
+  it('shows the total count and all patient rows without pagination', () => {
+    const patients = Array.from({ length: 26 }, (_, index) => ({
+      ...patient,
+      id: `patient-${index}`,
+      name: `Paciente ${String(index + 1).padStart(2, '0')}`,
+    }));
+    mockUsePatientsPage.mockReturnValue(state({
+      patients,
+      filteredPatients: patients,
+      rows: buildPatientListRows(patients, '2026-08-01'),
+      total: patients.length,
+    }));
     render(<PatientsListPage />);
 
-    expect(screen.getByRole('status')).toHaveTextContent('60 pacientes');
-    expect(screen.getByText('Página 2 de 3')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
-    expect(setPageIndex).toHaveBeenCalledWith(2);
+    expect(screen.getByRole('status')).toHaveTextContent('26 pacientes');
+    expect(within(screen.getByRole('table', { name: 'Lista de pacientes' })).getAllByRole('row')).toHaveLength(27);
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
   });
 
   it('opens the personal-data registration dialog with radio pregnancy flow', async () => {

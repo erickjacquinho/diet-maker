@@ -48,6 +48,8 @@ Nenhuma exceção aprovada.
 
 - `organism-food-table-section`
 - `organism-patient-list-table`
+- `organism-patient-diets-table`
+- `organism-patient-assessments-table`
 - `organism-patient-consultation-history-table`
 
 ## Acceptance criteria

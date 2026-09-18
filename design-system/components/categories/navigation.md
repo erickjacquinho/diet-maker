@@ -98,6 +98,8 @@ Usar button para rota; current apenas por cor; largura fora de 224/64; bottom na
 | Transition | Contextual destination | Explicit return |
 | --- | --- | --- |
 | `/pacientes` -> `/pacientes/[id]` | `Pacientes > <nome>` | `/pacientes` |
+| `/pacientes/[id]` -> `/pacientes/[id]/dietas` | `Pacientes > <nome> > Dietas` | `/pacientes/[id]` |
+| `/pacientes/[id]` -> `/pacientes/[id]/avaliacoes` | `Pacientes > <nome> > Avaliações` | `/pacientes/[id]` |
 | `/pacientes/[id]` -> `/pacientes/[id]/dieta/[dietaId]` | `Pacientes > <nome> > Dieta` | `/pacientes/[id]` |
 | `/pacientes/[id]` -> `/pacientes/[id]/consulta/[date]` | `Pacientes > <nome> > Consulta` | `/pacientes/[id]` |
 | consulta -> dieta | `Pacientes > <nome> > Dieta` | `/pacientes/[id]` |

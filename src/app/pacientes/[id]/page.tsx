@@ -27,14 +27,10 @@ export default function PatientDetailPage() {
     isProfileLoading,
     confirmedPlans,
     dietTotal,
-    dietPageIndex,
-    setDietPageIndex,
     isDietsLoading,
     dietsError,
     bodyAssessments,
     assessmentTotal,
-    assessmentPageIndex,
-    setAssessmentPageIndex,
     isAssessmentsLoading,
     assessmentsError,
     activePlan,
@@ -228,12 +224,16 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
+        {dietTotal > confirmedPlans.length && (
+          <div className="flex justify-end">
+            <Button asChild variant="secondary" size="compact">
+              <Link href={`/pacientes/${patientId}/dietas`}>Ver histórico completo</Link>
+            </Button>
+          </div>
+        )}
         <PatientDietsTable
           patientId={patientId}
           diets={confirmedPlans}
-          totalRows={dietTotal}
-          pageIndex={dietPageIndex}
-          onPageChange={setDietPageIndex}
           loading={isDietsLoading}
           error={dietsError}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
@@ -267,12 +267,16 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
+        {assessmentTotal > bodyAssessments.length && (
+          <div className="flex justify-end">
+            <Button asChild variant="secondary" size="compact">
+              <Link href={`/pacientes/${patientId}/avaliacoes`}>Ver histórico completo</Link>
+            </Button>
+          </div>
+        )}
         <PatientAssessmentsTable
           patientId={patientId}
           assessments={bodyAssessments}
-          totalRows={assessmentTotal}
-          pageIndex={assessmentPageIndex}
-          onPageChange={setAssessmentPageIndex}
           loading={isAssessmentsLoading}
           error={assessmentsError}
           onOpenEditAssessment={handleOpenEditAssessment}

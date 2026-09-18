@@ -17,20 +17,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { EditIconButton, IconButton } from '@/components/atoms';
-import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { DataTable, type DataTableColumnDef, type DataTablePagination } from '@/components/molecules/DataTable';
 import { MetricBoxGroup, type MetricBoxGroupItem } from '@/components/organisms/MetricBoxGroup';
 import type { BodyAssessment } from '@/lib/patientsStore';
-import { MAX_PAGE_SIZE } from '@/lib/persistence/page';
 
 export interface PatientAssessmentsTableProps {
   patientId: string;
   assessments: BodyAssessment[];
-  totalRows?: number;
-  pageIndex?: number;
-  onPageChange?: (pageIndex: number) => void;
   loading?: boolean;
   error?: string | null;
   onOpenEditAssessment?: (assessment: BodyAssessment) => void;
+  pagination?: DataTablePagination;
 }
 
 const columns: DataTableColumnDef<BodyAssessment>[] = [
@@ -295,20 +292,11 @@ export function AssessmentTableExpandedRow({
 export function PatientAssessmentsTable({
   patientId,
   assessments = [],
-  totalRows,
-  pageIndex,
-  onPageChange,
   loading = false,
   error,
+  pagination,
 }: PatientAssessmentsTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
-  const [localPageIndex, setLocalPageIndex] = useState(0);
-  React.useEffect(() => { if (!onPageChange) setLocalPageIndex(0); }, [assessments, onPageChange]);
-  const pagination = onPageChange
-    ? { pageIndex: pageIndex ?? 0, pageSize: MAX_PAGE_SIZE, totalRows: totalRows ?? assessments.length, onPageChange }
-    : assessments.length > MAX_PAGE_SIZE
-      ? { pageIndex: localPageIndex, pageSize: MAX_PAGE_SIZE, onPageChange: setLocalPageIndex }
-      : undefined;
 
   const toggleRowExpansion = (rowId: string) => {
     setExpandedRowId((currentId) => (currentId === rowId ? null : rowId));
@@ -317,7 +305,6 @@ export function PatientAssessmentsTable({
   return (
     <DataTable
       data={assessments}
-      pagination={pagination}
       columns={columns}
       getRowId={(assessment) => assessment.id}
       caption="Histórico de avaliações físicas e composição corporal"
@@ -325,6 +312,7 @@ export function PatientAssessmentsTable({
       emptyMessage="Nenhuma avaliação física registrada para este paciente até o momento."
       loading={loading}
       errorMessage={error || undefined}
+      pagination={pagination}
       expandedRowId={expandedRowId}
       renderRow={(assessment) => {
         const rowId = assessment.id;
