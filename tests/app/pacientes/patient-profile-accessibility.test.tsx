@@ -104,7 +104,7 @@ describe('PatientDetailPage accessibility', () => {
     const progress = await screen.findByRole('region', { name: 'Progresso Atual' });
     expect(progress).toHaveClass('col-span-2');
     expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
-    expect(screen.getByRole('region', { name: 'Última dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Próximo acompanhamento' })).not.toBeInTheDocument();
     const followUpButton = screen.getByRole('button', { name: 'Definir acompanhamento' });

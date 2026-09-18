@@ -42,9 +42,9 @@ describe('PatientDetailPage desktop visual contracts', () => {
     render(React.createElement(PatientDetailPage));
 
     expect(await screen.findByRole('region', { name: 'Progresso Atual' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Última dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
-    expect(screen.getByText('Nenhuma dieta registrada.')).toBeInTheDocument();
+    expect(screen.getByText('Nenhuma prescrição registrada.')).toBeInTheDocument();
     expect(screen.getByText('Nenhuma avaliação registrada.')).toBeInTheDocument();
     expect(screen.queryByText('2020 kcal')).not.toBeInTheDocument();
     expect(screen.queryByText('Metas nutricionais atuais')).not.toBeInTheDocument();
@@ -57,8 +57,8 @@ describe('PatientDetailPage desktop visual contracts', () => {
 
     render(React.createElement(PatientDetailPage));
 
-    expect(await screen.findByText('Ativa')).toBeInTheDocument();
-    const planSummary = within(screen.getByRole('region', { name: 'Última dieta' }));
+    const planSummary = within(await screen.findByRole('region', { name: 'Última Prescrição 04/08/2026' }));
+    expect(planSummary.getByText('Ativo')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();

@@ -45,8 +45,8 @@ describe('PatientDetailPage latest diet', () => {
     render(<PatientDetailPage />);
 
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
-    expect(screen.getByText('Ativa')).toBeInTheDocument();
-    const planSummary = within(screen.getByRole('region', { name: 'Última dieta' }));
+    const planSummary = within(screen.getByRole('region', { name: 'Última Prescrição 04/08/2026' }));
+    expect(planSummary.getByText('Ativo')).toBeInTheDocument();
     expect(planSummary.getByText('Metas diárias')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('PatientDetailPage latest diet', () => {
   it('does not promote manual targets when no diet is registered', async () => {
     render(<PatientDetailPage />);
 
-    expect(await screen.findByText('Nenhuma dieta registrada.')).toBeInTheDocument();
+    expect(await screen.findByText('Nenhuma prescrição registrada.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Criar dieta' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(
       'href',
@@ -78,7 +78,7 @@ describe('PatientDetailPage latest diet', () => {
 
     render(<PatientDetailPage />);
 
-    const planSummary = within(await screen.findByRole('region', { name: 'Última dieta' }));
+    const planSummary = within(await screen.findByRole('region', { name: /Última Prescrição/ }));
     expect(planSummary.getByText('Média semanal do ciclo')).toBeInTheDocument();
     expect(planSummary.queryByText('Metas diárias')).not.toBeInTheDocument();
   });

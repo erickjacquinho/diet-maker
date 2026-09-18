@@ -48,10 +48,10 @@ describe('PatientDetailPage current context', () => {
     expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
     expect(progress).not.toHaveTextContent('Peso');
     expect(progress).not.toHaveTextContent('Nenhuma avaliação');
-    const sideSummary = screen.getByRole('group', { name: 'Última dieta e avaliação' });
+    const sideSummary = screen.getByRole('group', { name: 'Última prescrição e avaliação' });
     expect(sideSummary.parentElement).toHaveClass('col-span-1');
     expect(within(sideSummary).getAllByRole('region')).toHaveLength(2);
-    expect(within(sideSummary).getByRole('region', { name: 'Última dieta' })).toBeInTheDocument();
+    expect(within(sideSummary).getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
     expect(within(sideSummary).getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hanna Perfil' })).toBeInTheDocument();
     expect(screen.getByText('Cutting')).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('PatientDetailPage current context', () => {
     const progress = await screen.findByRole('region', { name: 'Progresso Atual' });
     expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
     expect(progress).not.toHaveTextContent('Peso');
-    expect(screen.getByText('Nenhuma dieta registrada.')).toBeInTheDocument();
+    expect(screen.getByText('Nenhuma prescrição registrada.')).toBeInTheDocument();
     expect(screen.getByText('Nenhuma avaliação registrada.')).toBeInTheDocument();
     expect(screen.queryByText('Sem acompanhamento previsto')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Definir acompanhamento' })).toBeInTheDocument();

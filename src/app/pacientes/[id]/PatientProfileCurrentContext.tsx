@@ -73,28 +73,34 @@ export function PatientProfileCurrentContext({
           density="compact"
           className="flex min-w-0 flex-col gap-3"
           role="group"
-          aria-label="Última dieta e avaliação"
+          aria-label="Última prescrição e avaliação"
         >
-          <section className="flex min-w-0 flex-col gap-3" aria-labelledby="latest-diet-title">
+          <section className="flex min-w-0 flex-col gap-3" aria-labelledby="latest-prescription-title">
             <div className="flex items-center justify-between gap-2">
-              <h3 id="latest-diet-title" className={textStyle('card-title')}>
-                Última dieta
+              <h3 id="latest-prescription-title" className={textStyle('card-title')}>
+                Última Prescrição
+                {latestDiet && (
+                  <>
+                    {' '}
+                    <time
+                      dateTime={normalizeDateToISO(latestDiet.date) ?? undefined}
+                      className={textStyle('body-secondary')}
+                    >
+                      {formatDate(latestDiet.date) || 'Data não informada'}
+                    </time>
+                  </>
+                )}
               </h3>
               {latestDiet && (
-                <Badge variant={latestDiet.status === 'Ativa' ? 'success' : 'neutral'}>
-                  {latestDiet.status}
+                <Badge variant={latestDiet.status === 'Ativa' ? 'primary' : 'neutral'} className="px-1">
+                  {latestDiet.status === 'Ativa' ? 'Ativo' : 'Histórico'}
                 </Badge>
               )}
             </div>
 
             {latestDiet ? (
               <>
-                <div className="flex min-w-0 flex-col gap-1">
-                  <h4 className={textStyle('body-strong')}>{latestDiet.name}</h4>
-                  <p className={textStyle('body-secondary')}>
-                    {formatDate(latestDiet.date) || 'Data não informada'}
-                  </p>
-                </div>
+                <h4 className={textStyle('body-strong')}>{latestDiet.name}</h4>
 
                 <div className="flex flex-col gap-2">
                   <span className={textStyle('caption')}>
@@ -125,7 +131,7 @@ export function PatientProfileCurrentContext({
                 )}
               </>
             ) : (
-              <p className={textStyle('body-secondary')}>Nenhuma dieta registrada.</p>
+              <p className={textStyle('body-secondary')}>Nenhuma prescrição registrada.</p>
             )}
           </section>
 
