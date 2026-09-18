@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react';
 import { Badge, SelectField, Surface } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { textStyle } from '@/design-system';
 import { formatDateOnly, normalizeDateToISO } from '@/lib/date-only';
 import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
@@ -67,98 +68,97 @@ export function PatientProfileCurrentContext({
         </div>
       </Surface>
 
-      <div className="col-span-1 flex min-w-0 flex-col gap-4">
+      <div className="col-span-1 min-w-0">
         <Surface
           density="compact"
           className="flex min-w-0 flex-col gap-3"
-          role="region"
-          aria-labelledby="latest-diet-title"
+          role="group"
+          aria-label="Última dieta e avaliação"
         >
-          <div className="flex items-center justify-between gap-2">
-            <h3 id="latest-diet-title" className={textStyle('card-title')}>
-              Última dieta
-            </h3>
-            {latestDiet && (
-              <Badge variant={latestDiet.status === 'Ativa' ? 'success' : 'neutral'}>
-                {latestDiet.status}
-              </Badge>
-            )}
-          </div>
-
-          {latestDiet ? (
-            <>
-              <div className="flex min-w-0 flex-col gap-1">
-                <h4 className={textStyle('body-strong')}>{latestDiet.name}</h4>
-                <p className={textStyle('body-secondary')}>
-                  {formatDate(latestDiet.date) || 'Data não informada'}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <span className={textStyle('caption')}>
-                  {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Metas diárias'}
-                </span>
-                <MacroSummary
-                  protein={formatNumber(latestDiet.proteinG)}
-                  carbs={formatNumber(latestDiet.carbsG)}
-                  fats={formatNumber(latestDiet.fatsG)}
-                  showKcal={false}
-                  className="tabular-nums"
-                />
-                <dl className="flex items-center justify-between gap-3">
-                  <dt className={textStyle('caption')}>Energia</dt>
-                  <dd className={textStyle('body-strong')}>
-                    {formatNumber(latestDiet.targetKcal, 0)} kcal
-                  </dd>
-                </dl>
-              </div>
-
-              {!readOnly && (
-                <Button asChild variant="secondary" size="compact" className="self-start">
-                  <Link href={`/pacientes/${patientId}/dieta/${latestDiet.id}`}>
-                    <span>Abrir dieta</span>
-                    <ExternalLink className="size-4" aria-hidden="true" />
-                  </Link>
-                </Button>
+          <section className="flex min-w-0 flex-col gap-3" aria-labelledby="latest-diet-title">
+            <div className="flex items-center justify-between gap-2">
+              <h3 id="latest-diet-title" className={textStyle('card-title')}>
+                Última dieta
+              </h3>
+              {latestDiet && (
+                <Badge variant={latestDiet.status === 'Ativa' ? 'success' : 'neutral'}>
+                  {latestDiet.status}
+                </Badge>
               )}
-            </>
-          ) : (
-            <p className={textStyle('body-secondary')}>Nenhuma dieta registrada.</p>
-          )}
-        </Surface>
+            </div>
 
-        <Surface
-          density="compact"
-          className="flex min-w-0 flex-col gap-3"
-          role="region"
-          aria-labelledby="latest-assessment-title"
-        >
-          <h3 id="latest-assessment-title" className={textStyle('card-title')}>
-            Última avaliação
-          </h3>
+            {latestDiet ? (
+              <>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <h4 className={textStyle('body-strong')}>{latestDiet.name}</h4>
+                  <p className={textStyle('body-secondary')}>
+                    {formatDate(latestDiet.date) || 'Data não informada'}
+                  </p>
+                </div>
 
-          {latestAssessment ? (
-            <>
-              <p className={textStyle('body-secondary')}>
-                {formatDate(latestAssessment.date) || 'Data não informada'}
-              </p>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                {[
-                  { label: 'Peso', value: formatMeasurement(latestAssessment.weightKg, 'kg') },
-                  { label: 'Gordura corporal', value: formatMeasurement(latestAssessment.bodyFatPercent, '%') },
-                  { label: 'Massa muscular', value: formatMeasurement(latestAssessment.muscleMassKg, 'kg') },
-                  { label: 'Cintura', value: formatMeasurement(latestAssessment.waistCm, 'cm') },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex min-w-0 flex-col gap-1">
-                    <dt className={textStyle('caption')}>{label}</dt>
-                    <dd className={textStyle('body-strong')}>{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </>
-          ) : (
-            <p className={textStyle('body-secondary')}>Nenhuma avaliação registrada.</p>
-          )}
+                <div className="flex flex-col gap-2">
+                  <span className={textStyle('caption')}>
+                    {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Metas diárias'}
+                  </span>
+                  <MacroSummary
+                    protein={formatNumber(latestDiet.proteinG)}
+                    carbs={formatNumber(latestDiet.carbsG)}
+                    fats={formatNumber(latestDiet.fatsG)}
+                    showKcal={false}
+                    className="tabular-nums"
+                  />
+                  <dl className="flex items-center justify-between gap-3">
+                    <dt className={textStyle('caption')}>Energia</dt>
+                    <dd className={textStyle('body-strong')}>
+                      {formatNumber(latestDiet.targetKcal, 0)} kcal
+                    </dd>
+                  </dl>
+                </div>
+
+                {!readOnly && (
+                  <Button asChild variant="secondary" size="compact" className="self-start">
+                    <Link href={`/pacientes/${patientId}/dieta/${latestDiet.id}`}>
+                      <span>Abrir dieta</span>
+                      <ExternalLink className="size-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                )}
+              </>
+            ) : (
+              <p className={textStyle('body-secondary')}>Nenhuma dieta registrada.</p>
+            )}
+          </section>
+
+          <Separator className="bg-border-divider" />
+
+          <section className="flex min-w-0 flex-col gap-3" aria-labelledby="latest-assessment-title">
+            <h3 id="latest-assessment-title" className={textStyle('card-title')}>
+              Última avaliação
+            </h3>
+
+            {latestAssessment ? (
+              <>
+                <p className={textStyle('body-secondary')}>
+                  {formatDate(latestAssessment.date) || 'Data não informada'}
+                </p>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {[
+                    { label: 'Peso', value: formatMeasurement(latestAssessment.weightKg, 'kg') },
+                    { label: 'Gordura corporal', value: formatMeasurement(latestAssessment.bodyFatPercent, '%') },
+                    { label: 'Massa muscular', value: formatMeasurement(latestAssessment.muscleMassKg, 'kg') },
+                    { label: 'Cintura', value: formatMeasurement(latestAssessment.waistCm, 'cm') },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex min-w-0 flex-col gap-1">
+                      <dt className={textStyle('caption')}>{label}</dt>
+                      <dd className={textStyle('body-strong')}>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            ) : (
+              <p className={textStyle('body-secondary')}>Nenhuma avaliação registrada.</p>
+            )}
+          </section>
         </Surface>
       </div>
     </div>
