@@ -88,6 +88,17 @@ export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
         : input.patients,
     }),
   },
+  {
+    from: '6',
+    to: '7',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '7',
+      nextFollowUps: Array.isArray(input.nextFollowUps)
+        ? input.nextFollowUps.map((row) => (isRecord(row) ? { comments: '', ...row } : row))
+        : input.nextFollowUps,
+    }),
+  },
 ];
 
 function fail(code: BackupErrorCode, message: string, cause?: unknown): never {
@@ -185,7 +196,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg'), nullableNumericStringFields('bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
       break;
     case 'nextFollowUps':
-      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'createdAt', 'updatedAt'), { version: isNumber });
+      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), { version: isNumber });
       break;
     case 'dietPlans':
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'name', 'mode', 'status', 'createdAt', 'updatedAt', 'activatedAt'), nullableNumericStringFields('weightReferenceKg'), { version: isNumber }, nullableStringFields('supersededAt'));

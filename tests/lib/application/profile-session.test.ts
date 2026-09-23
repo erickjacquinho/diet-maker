@@ -194,7 +194,7 @@ describe('profile session', () => {
 
     await session.sync();
 
-    expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '6', account: [{ phone: null }] });
+    expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '7', account: [{ phone: null }] });
   });
 
   it('does not request permission or rewrite a clean checkpoint', async () => {

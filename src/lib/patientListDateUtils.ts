@@ -89,6 +89,8 @@ export function formatEventStatus(
   return `Em ${daysUntilEvent} ${daysUntilEvent === 1 ? 'dia' : 'dias'}`;
 }
 
-export function formatEventType(type: PatientNextEventType | undefined): string | null {
-  return type ? EVENT_TYPE_LABELS[type] : null;
+export function formatEventType(type: PatientNextEventType | PatientNextEventType[] | undefined): string | null {
+  if (!type) return null;
+  const types = Array.isArray(type) ? type : [type];
+  return types.map((selectedType) => EVENT_TYPE_LABELS[selectedType]).join(' + ') || null;
 }

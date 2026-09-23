@@ -104,21 +104,15 @@ export function PatientProfileCurrentContext({
 
                 <div className="flex flex-col gap-2">
                   <span className={textStyle('caption')}>
-                    {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Metas diárias'}
+                    {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Objetivo Diário'}
                   </span>
                   <MacroSummary
                     protein={formatNumber(latestDiet.proteinG)}
                     carbs={formatNumber(latestDiet.carbsG)}
                     fats={formatNumber(latestDiet.fatsG)}
-                    showKcal={false}
+                    kcal={formatNumber(latestDiet.targetKcal, 0)}
                     className="tabular-nums"
                   />
-                  <dl className="flex items-center justify-between gap-3">
-                    <dt className={textStyle('caption')}>Energia</dt>
-                    <dd className={textStyle('body-strong')}>
-                      {formatNumber(latestDiet.targetKcal, 0)} kcal
-                    </dd>
-                  </dl>
                 </div>
 
                 {!readOnly && (

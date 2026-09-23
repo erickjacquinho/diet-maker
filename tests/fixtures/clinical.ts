@@ -78,7 +78,7 @@ export function makeClinicalFollowUp(overrides: Partial<NextFollowUp> = {}): Nex
     accountId: CLINICAL_PATIENTS.active.accountId,
     patientId: CLINICAL_PATIENTS.active.patientId,
     dueDate: '2026-09-15',
-    type: 'ASSESSMENT_UPDATE',
+    type: ['ASSESSMENT_UPDATE'],
     version: 1,
     createdAt: CLINICAL_FIXTURE_NOW,
     updatedAt: CLINICAL_FIXTURE_NOW,

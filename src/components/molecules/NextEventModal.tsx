@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, AlertTriangle } from 'lucide-react';
+import { Calendar, AlertTriangle, Check } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
   Dialog,
   DialogContent,
@@ -12,10 +14,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { SelectField, HoldToDeleteButton } from '@/components/atoms';
+import { HoldToDeleteButton } from '@/components/atoms';
 import { DatePickerField } from './DatePickerField';
 import type { PatientNextEvent, PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
+
+function selectedTypes(type: PatientNextEvent['type']): PatientNextEventType[] {
+  return Array.isArray(type) ? type : [type];
+}
+
+function sameTypes(left: PatientNextEvent['type'], right: PatientNextEvent['type']): boolean {
+  const leftTypes = selectedTypes(left);
+  const rightTypes = selectedTypes(right);
+  return leftTypes.length === rightTypes.length && leftTypes.every((type) => rightTypes.includes(type));
+}
 
 export interface NextEventModalProps {
   open: boolean;
@@ -34,7 +46,8 @@ export function NextEventModal({
 }: NextEventModalProps) {
   const [draft, setDraft] = useState<PatientNextEvent>({
     date: '',
-    type: 'assessment-update',
+    type: ['assessment-update'],
+    comments: '',
   });
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
@@ -52,7 +65,7 @@ export function NextEventModal({
 
   useEffect(() => {
     if (open) {
-      setDraft(nextEvent ? { ...nextEvent } : { date: '', type: 'assessment-update' });
+      setDraft(nextEvent ? { ...nextEvent, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
       setIsRemoveConfirmOpen(false);
       setIsDiscardConfirmOpen(false);
       setSubmitError(null);
@@ -62,8 +75,8 @@ export function NextEventModal({
   }, [open, nextEvent]);
 
   const hasUnsavedChanges = Boolean(
-    (nextEvent && (draft.date !== nextEvent.date || draft.type !== nextEvent.type)) ||
-    (!nextEvent && (draft.date !== '' || draft.type !== 'assessment-update'))
+    (nextEvent && (draft.date !== nextEvent.date || !sameTypes(draft.type, nextEvent.type) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
+    (!nextEvent && (draft.date !== '' || !sameTypes(draft.type, ['assessment-update']) || Boolean(draft.comments)))
   );
 
   const requestClose = (nextOpen: boolean) => {
@@ -96,7 +109,7 @@ export function NextEventModal({
   };
 
   const confirmDiscard = () => {
-    setDraft(nextEvent ? { ...nextEvent } : { date: '', type: 'assessment-update' });
+    setDraft(nextEvent ? { ...nextEvent, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
     setIsDiscardConfirmOpen(false);
     onOpenChange(false);
   };
@@ -152,35 +165,58 @@ export function NextEventModal({
           <DialogHeader className="border-b border-border-subtle pb-3">
             <DialogTitle className={textStyle('dialog-title')}>
               <Calendar size={18} className="text-success shrink-0 inline-block mr-2" aria-hidden="true" />
-              <span>{nextEvent ? 'Reagendar acompanhamento' : 'Definir próximo acompanhamento'}</span>
+              <span>Agendar acompanhamento</span>
             </DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Escolha a data e o tipo da próxima atualização deste paciente.
+              Defina a data, o tipo e os comentários do próximo acompanhamento deste paciente.
             </DialogDescription>
           </DialogHeader>
 
           <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <DatePickerField
-                id="next-event-date"
-                label="Data"
-                required
-                value={draft.date}
-                onValueChange={(value) => setDraft((current) => ({ ...current, date: value }))}
-              />
+            <DatePickerField
+              id="next-event-date"
+              label="Data"
+              required
+              value={draft.date}
+              onValueChange={(value) => setDraft((current) => ({ ...current, date: value }))}
+            />
 
-              <SelectField
-                id="next-event-type"
-                label="Tipo"
-                value={draft.type}
-                onValueChange={(value) =>
-                  setDraft((current) => ({ ...current, type: value as PatientNextEventType }))
-                }
-                layer="modal"
-                options={[
+            <div className="flex flex-col gap-2">
+              <span id="next-event-type-label" className={textStyle('field-label')}>Tipo de acompanhamento</span>
+              <ToggleGroup
+                type="multiple"
+                value={selectedTypes(draft.type)}
+                onValueChange={(value) => {
+                  if (value.length > 0) setDraft((current) => ({ ...current, type: value as PatientNextEventType[] }));
+                }}
+                aria-labelledby="next-event-type-label"
+                className="grid w-full grid-cols-2 items-stretch gap-3 rounded-none border-0 bg-transparent p-0"
+              >
+                {([
                   { value: 'assessment-update', label: 'Atualização de avaliação' },
                   { value: 'diet-update', label: 'Atualização de dieta' },
-                ]}
+                ] as const).map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="min-h-14 w-full justify-between whitespace-normal rounded-control border border-border-subtle bg-surface px-3 py-2 text-left text-style-body font-medium data-[state=on]:border-primary data-[state=on]:bg-primary-soft data-[state=on]:text-primary"
+                  >
+                    <span>{option.label}</span>
+                    {selectedTypes(draft.type).includes(option.value) && <Check size={16} className="shrink-0" aria-hidden="true" />}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="next-event-comments" className={textStyle('field-label')}>Observações</label>
+              <Textarea
+                id="next-event-comments"
+                rows={5}
+                className="resize-none"
+                value={draft.comments ?? ''}
+                onChange={(event) => setDraft((current) => ({ ...current, comments: event.target.value }))}
+                placeholder="Adicione detalhes relevantes sobre o acompanhamento."
               />
             </div>
 

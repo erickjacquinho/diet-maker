@@ -146,6 +146,7 @@ export const nextFollowUps = pgTable(
     patientId: text('patient_id').notNull(),
     dueDate: text('due_date').notNull(),
     type: text('type').notNull(),
+    comments: text('comments').notNull().default(''),
     version: integer('version').notNull(),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
@@ -153,7 +154,7 @@ export const nextFollowUps = pgTable(
   (table) => [
     primaryKey({ columns: [table.accountId, table.patientId] }),
     index('next_follow_ups_due_date_idx').on(table.accountId, table.dueDate, table.patientId),
-    check('next_follow_ups_type_check', sql`${table.type} in ('ASSESSMENT_UPDATE', 'DIET_UPDATE')`),
+    check('next_follow_ups_type_check', sql`${table.type} in ('ASSESSMENT_UPDATE', 'DIET_UPDATE', 'BOTH')`),
     check('next_follow_ups_version_positive', sql`${table.version} > 0`),
   ],
 );

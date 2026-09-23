@@ -86,11 +86,12 @@ describe('PGlite clinical repository', () => {
 
   it('sets, replaces and clears one follow-up without creating a projection row', async () => {
     const repository = await seedDatabase();
-    const input = makeClinicalFollowUp();
+    const input = makeClinicalFollowUp({ type: ['ASSESSMENT_UPDATE', 'DIET_UPDATE'], comments: 'Revisar evolução e ajustar o plano.' });
     const created = await repository.setNextFollowUp('account-alpha', 'patient-alpha-active', null, input);
-    expect(created).toMatchObject({ dueDate: input.dueDate, type: input.type, version: 1 });
-    const replaced = await repository.setNextFollowUp('account-alpha', 'patient-alpha-active', 1, { ...input, dueDate: '2026-09-20', type: 'DIET_UPDATE' });
-    expect(replaced).toMatchObject({ dueDate: '2026-09-20', type: 'DIET_UPDATE', version: 2 });
+    expect(created).toMatchObject({ dueDate: input.dueDate, type: input.type, comments: input.comments, version: 1 });
+    await expect(repository.getNextFollowUp('account-alpha', 'patient-alpha-active')).resolves.toMatchObject({ type: input.type, comments: input.comments });
+    const replaced = await repository.setNextFollowUp('account-alpha', 'patient-alpha-active', 1, { ...input, dueDate: '2026-09-20', type: ['DIET_UPDATE'] });
+    expect(replaced).toMatchObject({ dueDate: '2026-09-20', type: ['DIET_UPDATE'], comments: input.comments, version: 2 });
     await expect(repository.setNextFollowUp('account-alpha', 'patient-alpha-active', 1, input)).rejects.toMatchObject({ code: 'CLINICAL_VERSION_CONFLICT' });
     await repository.clearNextFollowUp('account-alpha', 'patient-alpha-active', 2);
     await expect(repository.getNextFollowUp('account-alpha', 'patient-alpha-active')).resolves.toBeNull();

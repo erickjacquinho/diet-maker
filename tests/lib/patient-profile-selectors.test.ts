@@ -55,6 +55,8 @@ describe('patient profile selectors', () => {
       date: '12/08/2026',
       label: 'Atualização de dieta',
     });
+    expect(buildNextEventSummary({ date: '2026-08-12', type: ['assessment-update', 'diet-update'] })?.label)
+      .toBe('Atualização de avaliação + Atualização de dieta');
   });
 
   it('keeps related diet and assessment projections immutable during selection', () => {

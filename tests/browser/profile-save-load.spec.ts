@@ -104,7 +104,7 @@ test('creates a profile and writes schema 6 before entering the internal app', a
   await installFileSystemFakes(page, '');
   await createProfile(page);
   const written = JSON.parse((await readPrimarySave(page)).content);
-  expect(written.schemaVersion).toBe('6');
+  expect(written.schemaVersion).toBe('7');
   expect(written.favorites).toEqual([]);
   expect(written.account[0]).toMatchObject({ displayName: 'Jacques Regiani', phone: '(11) 99999-0000' });
 });

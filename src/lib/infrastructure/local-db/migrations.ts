@@ -453,6 +453,25 @@ export const dietHistorySummaryBackfillMigration: LocalMigration = {
   `,
 };
 
+export const nextFollowUpCommentsMigration: LocalMigration = {
+  id: '0010_next_follow_up_comments',
+  version: '10',
+  sql: `
+    ALTER TABLE next_follow_ups ADD COLUMN IF NOT EXISTS comments text NOT NULL DEFAULT '';
+  `,
+};
+
+export const nextFollowUpMultipleTypesMigration: LocalMigration = {
+  id: '0011_next_follow_up_multiple_types',
+  version: '11',
+  sql: `
+    SET LOCAL lock_timeout = '4s';
+    ALTER TABLE next_follow_ups DROP CONSTRAINT IF EXISTS next_follow_ups_type_check;
+    ALTER TABLE next_follow_ups ADD CONSTRAINT next_follow_ups_type_check
+      CHECK (type IN ('ASSESSMENT_UPDATE', 'DIET_UPDATE', 'BOTH'));
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
@@ -463,6 +482,8 @@ export const migrationFiles: readonly LocalMigration[] = [
   patientProfileOptimizationMigration,
   patientListOrderingMigration,
   dietHistorySummaryBackfillMigration,
+  nextFollowUpCommentsMigration,
+  nextFollowUpMultipleTypesMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

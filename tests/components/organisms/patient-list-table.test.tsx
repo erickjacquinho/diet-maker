@@ -90,6 +90,17 @@ describe('PatientListTable', () => {
     expect(screen.queryByText(/kg/)).not.toBeInTheDocument();
   });
 
+  it('shows the saved objective verbatim and labels an unset objective', () => {
+    const noObjectivePatient = { ...patient, id: 'patient-no-objective', name: 'Sem Objetivo', objective: '' };
+    const fullObjectivePatient = { ...patient, id: 'patient-full-objective', name: 'Recomposição', objective: 'Recomposição Corporal' };
+
+    render(<PatientListTable rows={buildPatientListRows([fullObjectivePatient, noObjectivePatient], '2026-08-03')} />);
+
+    expect(screen.getByText('Recomposição Corporal')).toHaveAttribute('title', 'Recomposição Corporal');
+    expect(screen.getByText('sem objetivo')).toHaveAttribute('title', 'sem objetivo');
+    expect(screen.queryByText('Acompanhamento')).not.toBeInTheDocument();
+  });
+
   it('supports keyboard navigation on the row without competing actions', () => {
     const onNavigate = vi.fn();
     render(

@@ -44,6 +44,9 @@ describe('usePatientsPage', () => {
     testState.listAll.mockResolvedValueOnce(summaries);
     const { result } = renderHook(() => usePatientsPage());
     await waitFor(() => expect(result.current.rows).toHaveLength(30));
+    expect(result.current.rows.find((row) => row.patient.id === 'patient-0')?.patient.objective).toBe(
+      summaries[0].patient.currentObjective,
+    );
 
     act(() => result.current.setSearchTerm('Ana'));
 

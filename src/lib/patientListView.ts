@@ -97,10 +97,13 @@ function getPatientHistoryInput(patient: PatientViewModel, historyByPatient: Rec
     assessments: [],
     hasDiet: false,
   };
+  const eventTypes = patient.nextEvent
+    ? Array.isArray(patient.nextEvent.type) ? patient.nextEvent.type : [patient.nextEvent.type]
+    : [];
   return {
     ...stored,
-    hasAssessment: stored.hasAssessment === true || stored.assessments.length > 0 || patient.nextEvent?.type === 'assessment-update',
-    hasDiet: stored.hasDiet || patient.nextEvent?.type === 'diet-update',
+    hasAssessment: stored.hasAssessment === true || stored.assessments.length > 0 || eventTypes.includes('assessment-update'),
+    hasDiet: stored.hasDiet || eventTypes.includes('diet-update'),
   };
 }
 

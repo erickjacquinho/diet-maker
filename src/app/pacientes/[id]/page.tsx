@@ -120,7 +120,7 @@ export default function PatientDetailPage() {
               <PopoverTrigger asChild>
                 <IconButton
                   size="compact"
-                  variant="quiet"
+                  variant="secondary"
                   title="Ver dados pessoais"
                   aria-label="Ver dados pessoais"
                   icon={<Info className="size-4" aria-hidden="true" />}
@@ -159,7 +159,7 @@ export default function PatientDetailPage() {
             {!isPatientArchived && (
               <IconButton
                 size="compact"
-                variant="quiet"
+                variant="secondary"
                 title={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
                 aria-label={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
                 icon={<Calendar className="size-4" aria-hidden="true" />}

@@ -128,6 +128,7 @@ export const backupFixture: BackupFixture = {
       patientId: 'patient-active',
       dueDate: '2026-09-20',
       type: 'ASSESSMENT_UPDATE',
+      comments: 'Verificar evolução na próxima consulta.',
       version: 1,
       createdAt: BACKUP_FIXTURE_NOW,
       updatedAt: BACKUP_FIXTURE_NOW,

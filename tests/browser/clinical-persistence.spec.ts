@@ -61,14 +61,16 @@ async function chooseDate(page: Page, container: Page | Locator, label: string):
   await day.click();
 }
 
-async function saveFollowUp(page: Page, offsetDays: number, type: string): Promise<void> {
+async function saveFollowUp(page: Page, offsetDays: number, type: string, expectedComments = ''): Promise<void> {
   const region = page.getByRole('region', { name: 'Próximo acompanhamento' });
   await region.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
-  const dialog = page.getByRole('dialog', { name: /Definir próximo acompanhamento|Reagendar acompanhamento/ });
+  const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
+  const comments = dialog.getByRole('textbox', { name: 'Comentários' });
+  await expect(comments).toHaveValue(expectedComments);
   const label = dateLabel(offsetDays);
   await chooseDate(page, dialog, label);
-  await dialog.getByRole('combobox', { name: 'Tipo', exact: true }).click();
-  await page.getByRole('option', { name: type, exact: true }).click();
+  await dialog.getByRole('button', { name: type, exact: true }).click();
+  await comments.fill(`Revisar ${type.toLowerCase()}`);
   await dialog.getByRole('button', { name: /^Salvar/ }).click();
   await expect(dialog).toBeHidden({ timeout: 120_000 });
   await expect(region).toContainText(label);
@@ -154,18 +156,18 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(patientOneRow).toContainText('Atualização de dieta');
 
   await navigateWithinSession(page, patientOnePath);
-  await saveFollowUp(page, 0, 'Atualização de avaliação');
+  await saveFollowUp(page, 0, 'Atualização de avaliação', 'Revisar atualização de dieta');
   await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Hoje');
 
   await navigateWithinSession(page, patientOnePath);
-  await saveFollowUp(page, -1, 'Atualização de avaliação');
+  await saveFollowUp(page, -1, 'Atualização de avaliação', 'Revisar atualização de avaliação');
   await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
   await navigateWithinSession(page, patientOnePath);
   await followUpRegion.getByRole('button', { name: 'Reagendar' }).click();
-  const rescheduleDialog = page.getByRole('dialog', { name: 'Reagendar acompanhamento' });
+  const rescheduleDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
   const removeDialog = page.getByRole('dialog', { name: 'Remover acompanhamento?' });
   await holdToConfirm(page, removeDialog.getByRole('button', { name: 'Sim, remover' }));

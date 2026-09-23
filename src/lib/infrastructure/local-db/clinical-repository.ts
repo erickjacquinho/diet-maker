@@ -6,6 +6,7 @@ import type {
   BodyAssessment,
   CalculationInputSnapshot,
   CalculationMethod,
+  FollowUpType,
   NextFollowUp,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
@@ -28,6 +29,16 @@ export interface ClinicalRepositoryOptions {
 
 type AssessmentRow = typeof bodyAssessments.$inferSelect;
 type FollowUpRow = typeof nextFollowUps.$inferSelect;
+
+function followUpTypesFromStorage(value: string): FollowUpType[] {
+  if (value === 'BOTH') return ['ASSESSMENT_UPDATE', 'DIET_UPDATE'];
+  if (value === 'ASSESSMENT_UPDATE' || value === 'DIET_UPDATE') return [value];
+  throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'O tipo do acompanhamento salvo é inválido.');
+}
+
+function followUpTypesToStorage(types: FollowUpType[]): string {
+  return types.length === 1 ? types[0] : 'BOTH';
+}
 
 function numberValue(value: string | number | null | undefined): number | undefined {
   if (value === null || value === undefined) return undefined;
@@ -109,7 +120,8 @@ function toFollowUp(row: FollowUpRow): NextFollowUp {
     accountId: row.accountId,
     patientId: row.patientId,
     dueDate: row.dueDate,
-    type: row.type as NextFollowUp['type'],
+    type: followUpTypesFromStorage(row.type),
+    comments: row.comments,
     version: row.version,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -341,12 +353,12 @@ export class PGliteClinicalRepository implements ClinicalRepository {
         const timestamp = this.now();
         if (expectedVersion === null) {
           if (current) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Já existe um acompanhamento confirmado para este paciente.');
-          const inserted = await tx.insert(nextFollowUps).values({ accountId, patientId, dueDate: normalized.dueDate, type: normalized.type, version: 1, createdAt: timestamp, updatedAt: timestamp }).returning();
+          const inserted = await tx.insert(nextFollowUps).values({ accountId, patientId, dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: 1, createdAt: timestamp, updatedAt: timestamp }).returning();
           this.maybeFail('follow-up-after-write');
           return inserted[0];
         }
         if (!current || current.version !== expectedVersion) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'O acompanhamento foi atualizado antes desta confirmação.');
-        const updated = await tx.update(nextFollowUps).set({ dueDate: normalized.dueDate, type: normalized.type, version: expectedVersion + 1, updatedAt: timestamp }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
+        const updated = await tx.update(nextFollowUps).set({ dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: expectedVersion + 1, updatedAt: timestamp }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
         this.maybeFail('follow-up-after-write');
         return updated[0];
       });

@@ -9,14 +9,15 @@ describe('patient follow-up projection and commands', () => {
       accountId: 'account-1',
       patientId: 'patient-1',
       dueDate: '2026-09-15',
-      type: 'DIET_UPDATE',
+      type: ['DIET_UPDATE'],
+      comments: 'Revisar o plano alimentar.',
       version: 4,
       createdAt: '2026-09-10T10:00:00.000Z',
       updatedAt: '2026-09-10T10:00:00.000Z',
     });
 
-    expect(event).toEqual({ date: '15/09/2026', type: 'diet-update', version: 4 });
-    expect(toNextFollowUpInput(event!)).toEqual({ dueDate: '15/09/2026', type: 'DIET_UPDATE' });
+    expect(event).toEqual({ date: '15/09/2026', type: ['diet-update'], comments: 'Revisar o plano alimentar.', version: 4 });
+    expect(toNextFollowUpInput(event!)).toEqual({ dueDate: '15/09/2026', type: ['DIET_UPDATE'], comments: 'Revisar o plano alimentar.' });
   });
 
   it('keeps the confirmed dialog open and draft intact when a replacement conflicts', async () => {
@@ -35,7 +36,7 @@ describe('patient follow-up projection and commands', () => {
 
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Conflito de versão.'));
-    expect(screen.getByRole('heading', { name: 'Reagendar acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover data' })).toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });

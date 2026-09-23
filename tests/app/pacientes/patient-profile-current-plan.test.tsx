@@ -47,11 +47,14 @@ describe('PatientDetailPage latest diet', () => {
     expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
     const planSummary = within(screen.getByRole('region', { name: 'Última Prescrição 04/08/2026' }));
     expect(planSummary.getByText('Ativo')).toBeInTheDocument();
-    expect(planSummary.getByText('Metas diárias')).toBeInTheDocument();
+    expect(planSummary.getByText('Objetivo Diário')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
     expect(planSummary.getByText(/G\s*60g/)).toBeInTheDocument();
-    expect(planSummary.getByText(/2\.020/)).toBeInTheDocument();
+    const macroSummary = planSummary.getByTestId('macro-summary');
+    expect(macroSummary).toHaveClass('flex-nowrap');
+    expect(macroSummary).toHaveTextContent(/2\.020\s*kcal/);
+    expect(planSummary.queryByText('Energia')).not.toBeInTheDocument();
     expect(planSummary.getByRole('link', { name: 'Abrir dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/diet-current',
