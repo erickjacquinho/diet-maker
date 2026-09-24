@@ -10,11 +10,13 @@ import {
   Percent,
   MessageCircle,
   FileText,
+  Link2,
   Save,
   Edit3,
   History,
   AlertTriangle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
 import type { DietBuilderTemplateProps } from './dietBuilderTemplateTypes';
@@ -131,6 +133,12 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
             label: 'PDF',
             icon: <FileText size={14} aria-hidden="true" />,
             onSelect: () => onExportPDF?.(),
+          },
+          {
+            id: 'link',
+            label: 'Link',
+            icon: <Link2 size={14} aria-hidden="true" />,
+            onSelect: () => toast.info('O acompanhamento online da dieta estará disponível em breve.'),
           },
         ]}
       />

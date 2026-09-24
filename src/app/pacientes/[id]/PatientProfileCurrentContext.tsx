@@ -57,14 +57,18 @@ export function PatientProfileCurrentContext({
           <h2 id="current-progress-title" className={textStyle('section-title')}>
             Progresso Atual
           </h2>
-          <SelectField
-            id="progress-period"
-            label="Período"
-            defaultValue="30d"
-            options={PROGRESS_PERIODS}
-            size="compact"
-            className="w-40 shrink-0"
-          />
+          <div className="flex shrink-0 items-center gap-2">
+            <label htmlFor="progress-period" className={textStyle('field-label')}>
+              Período
+            </label>
+            <SelectField
+              id="progress-period"
+              defaultValue="30d"
+              options={PROGRESS_PERIODS}
+              size="compact"
+              className="w-40"
+            />
+          </div>
         </div>
       </Surface>
 

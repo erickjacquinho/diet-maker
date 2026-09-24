@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info } from 'lucide-react';
+import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info, History } from 'lucide-react';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
 import {
@@ -227,16 +227,23 @@ export default function PatientDetailPage() {
                 <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
               </Link>
             )}
+            {dietTotal >= 11 && (
+              <Button
+                asChild
+                iconOnly
+                size="compact"
+                variant="secondary"
+                title="Ver histórico completo de prescrições dietéticas"
+                aria-label="Ver histórico completo de prescrições dietéticas"
+              >
+                <Link href={`/pacientes/${patientId}/dietas`}>
+                  <History size={16} aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
-        {dietTotal > confirmedPlans.length && (
-          <div className="flex justify-end">
-            <Button asChild variant="secondary" size="compact">
-              <Link href={`/pacientes/${patientId}/dietas`}>Ver histórico completo</Link>
-            </Button>
-          </div>
-        )}
         <PatientDietsTable
           patientId={patientId}
           diets={confirmedPlans}
@@ -270,16 +277,23 @@ export default function PatientDetailPage() {
                 </CreateButton>
               </Link>
             )}
+            {assessmentTotal >= 11 && (
+              <Button
+                asChild
+                iconOnly
+                size="compact"
+                variant="secondary"
+                title="Ver histórico completo de avaliações físicas"
+                aria-label="Ver histórico completo de avaliações físicas"
+              >
+                <Link href={`/pacientes/${patientId}/avaliacoes`}>
+                  <History size={16} aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
-        {assessmentTotal > bodyAssessments.length && (
-          <div className="flex justify-end">
-            <Button asChild variant="secondary" size="compact">
-              <Link href={`/pacientes/${patientId}/avaliacoes`}>Ver histórico completo</Link>
-            </Button>
-          </div>
-        )}
         <PatientAssessmentsTable
           patientId={patientId}
           assessments={bodyAssessments}

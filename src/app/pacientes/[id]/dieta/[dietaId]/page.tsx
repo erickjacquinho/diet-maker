@@ -54,6 +54,8 @@ export default function DietBuilderPage() {
     isWhatsAppModalOpen,
     setIsWhatsAppModalOpen,
     whatsAppText,
+    whatsAppOptions,
+    updateWhatsAppOptions,
     foodToSubstitute,
     setFoodToSubstitute,
     handleSubstituteFood,
@@ -339,6 +341,9 @@ export default function DietBuilderPage() {
         isOpen={isWhatsAppModalOpen}
         onClose={() => setIsWhatsAppModalOpen(false)}
         whatsAppText={whatsAppText}
+        whatsAppOptions={whatsAppOptions}
+        onOptionsChange={updateWhatsAppOptions}
+        variations={dietPlan.mode === 'carb_cycling' ? dietPlan.carbCyclingVariations : []}
       />
 
       {/* Modal de Substituição de Alimento na Refeição */}

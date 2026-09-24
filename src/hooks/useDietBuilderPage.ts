@@ -174,6 +174,7 @@ export function useDietBuilderPage() {
     targetCarb,
     targetFat,
     activeVariationId,
+    activeMealVariationIds,
     setDietPlan,
     updateActiveMeals,
     getActiveMealVariationId,

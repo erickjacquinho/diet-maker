@@ -180,4 +180,41 @@ describe('NextEventModal', () => {
       comments: 'Revisar o plano alimentar.',
     }));
   });
+
+  it('allows clearing both types but disables save and rejects submission until one is selected', async () => {
+    const onSave = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={null}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+        onClear={vi.fn()}
+      />,
+    );
+
+    const assessmentType = screen.getByRole('button', { name: 'Atualização de avaliação' });
+    const dietType = screen.getByRole('button', { name: 'Atualização de dieta' });
+    const saveButton = screen.getByRole('button', { name: /Salvar/i });
+
+    fireEvent.click(assessmentType);
+    expect(assessmentType).toHaveAttribute('aria-pressed', 'false');
+    expect(dietType).toHaveAttribute('aria-pressed', 'false');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Data/ }), { target: { value: '16/09/2026' } });
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+    expect(onSave).not.toHaveBeenCalled();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Selecione ao menos um tipo de acompanhamento.');
+
+    fireEvent.click(dietType);
+    expect(saveButton).toBeEnabled();
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({
+      date: '2026-09-16',
+      type: ['diet-update'],
+      comments: '',
+    }));
+  });
 });

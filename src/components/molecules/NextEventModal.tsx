@@ -78,6 +78,7 @@ export function NextEventModal({
     (nextEvent && (draft.date !== nextEvent.date || !sameTypes(draft.type, nextEvent.type) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
     (!nextEvent && (draft.date !== '' || !sameTypes(draft.type, ['assessment-update']) || Boolean(draft.comments)))
   );
+  const hasSelectedType = selectedTypes(draft.type).length > 0;
 
   const requestClose = (nextOpen: boolean) => {
     if (!nextOpen && hasUnsavedChanges) {
@@ -92,6 +93,10 @@ export function NextEventModal({
     if (savingRef.current) return;
     if (!draft.date) {
       setSubmitError('Informe a data do acompanhamento.');
+      return;
+    }
+    if (!hasSelectedType) {
+      setSubmitError('Selecione ao menos um tipo de acompanhamento.');
       return;
     }
     savingRef.current = true;
@@ -186,9 +191,7 @@ export function NextEventModal({
               <ToggleGroup
                 type="multiple"
                 value={selectedTypes(draft.type)}
-                onValueChange={(value) => {
-                  if (value.length > 0) setDraft((current) => ({ ...current, type: value as PatientNextEventType[] }));
-                }}
+                onValueChange={(value) => setDraft((current) => ({ ...current, type: value as PatientNextEventType[] }))}
                 aria-labelledby="next-event-type-label"
                 className="grid w-full grid-cols-2 items-stretch gap-3 rounded-none border-0 bg-transparent p-0"
               >
@@ -244,7 +247,7 @@ export function NextEventModal({
                 size="standard"
                 aria-keyshortcuts="Control+s Meta+s"
                 title="Salvar (Ctrl+S)"
-                disabled={isSaving}
+                disabled={isSaving || !hasSelectedType}
               >
                 Salvar <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
               </Button>

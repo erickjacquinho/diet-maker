@@ -26,7 +26,7 @@ Caption acessível, cabeçalho de colunas e linhas de paciente com um rail verti
 
 ## Allowed variants
 
-Uma única sequência de prioridade: atrasados, hoje, próximos acompanhamentos por data e, por último, sem próximo evento. Não há cabeçalhos ou separadores de grupo. Todas as linhas correspondentes à busca são exibidas sem paginação.
+Uma única sequência de prioridade: atrasados, hoje, próximos acompanhamentos por data e, por último, sem próximo evento. Não há cabeçalhos ou separadores de grupo. Os resultados da busca são paginados em grupos de até 30 linhas; os controles aparecem abaixo da tabela somente quando há mais de 30 resultados.
 
 ## Particular states
 
@@ -60,7 +60,7 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 - identidade, source e exports coincidem com o registro;
 - a tabela preserva semântica de caption, escopos, foco visível e navegação por Enter/Espaço;
-- busca e prioridade são aplicadas à lista completa, sem paginação nem cabeçalhos ou separadores adicionais;
+- busca e prioridade são aplicadas à lista completa antes da paginação; cada página exibe no máximo 30 resultados e os controles aparecem apenas acima desse limite, sem cabeçalhos ou separadores adicionais;
 - BF, delta e período usam formatação `pt-BR` e não dependem de peso atual;
 - os dois indicadores permanecem alinhados e têm descrição não dependente de cor;
 - a prioridade e os estados sem dados permanecem legíveis sem depender exclusivamente de cor;

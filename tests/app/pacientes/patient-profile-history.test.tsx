@@ -263,11 +263,10 @@ describe('PatientDetailPage history with two stacked tables', () => {
     expect(within(screen.getByRole('table', { name: /Histórico de prescrições dietéticas/ })).getAllByRole('row')).toHaveLength(11);
     expect(screen.getAllByRole('link', { name: 'Editar Avaliação Física' })).toHaveLength(10);
     expect(screen.getByRole('button', { name: /Ver cardápio completo da dieta Plano 0/ })).toBeInTheDocument();
-    const fullHistoryLinks = screen.getAllByRole('link', { name: 'Ver histórico completo' });
-    expect(fullHistoryLinks.map((link) => link.getAttribute('href'))).toEqual([
-      '/pacientes/patient-profile-1/dietas',
-      '/pacientes/patient-profile-1/avaliacoes',
-    ]);
+    expect(screen.getByRole('link', { name: 'Ver histórico completo de prescrições dietéticas' }))
+      .toHaveAttribute('href', '/pacientes/patient-profile-1/dietas');
+    expect(screen.getByRole('link', { name: 'Ver histórico completo de avaliações físicas' }))
+      .toHaveAttribute('href', '/pacientes/patient-profile-1/avaliacoes');
     expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
   });
 
