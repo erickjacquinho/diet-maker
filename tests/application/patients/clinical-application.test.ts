@@ -148,7 +148,7 @@ describe('PatientApplication clinical boundary', () => {
 
     expect(profile.clinical?.assessmentCount).toBe(1);
     expect(profile.clinical?.latestAssessment?.id).toBe('assessment-alpha-1');
-    expect(profile.clinical?.nextFollowUp?.type).toBe('ASSESSMENT_UPDATE');
+    expect(profile.clinical?.nextFollowUp?.type).toEqual(['ASSESSMENT_UPDATE']);
   });
 
   it('loads list clinical summaries in batch and keeps deterministic latest/previous records', async () => {

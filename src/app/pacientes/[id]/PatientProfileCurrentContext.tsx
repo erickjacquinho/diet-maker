@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { textStyle } from '@/design-system';
 import { formatDateOnly, normalizeDateToISO } from '@/lib/date-only';
-import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
-import type { BodyAssessment } from '@/lib/patientRelatedRecords';
+import type { BodyAssessment, HistoricalDiet } from '@/lib/patientRelatedRecords';
 
 const PROGRESS_PERIODS = [
   { value: '30d', label: '30 dias' },
