@@ -5,6 +5,9 @@ import { createDietCopyCommands } from './diet-copy-commands';
 import { discardDietDraft } from './discard-diet-draft';
 import { reconcileUnknownSave, saveDietAsActive } from './save-diet-as-active';
 import { insertReadyMealIntoDietDraft, insertRecipeIntoDietDraft } from './library-insertion';
+import { toDietHistoryViews } from './diet-history-view';
+import { normalizePageRequest, type PageRequest, type PageResult } from '@/lib/persistence/page';
+import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
 
 export function createDietApplication(dependencies: DietApplicationDependencies): DietApplication {
   const drafts = createDietDraftCommands(dependencies);
@@ -29,6 +32,22 @@ export function createDietApplication(dependencies: DietApplicationDependencies)
       const summary = await dependencies.dietReader.getPatientDietSummary(account.accountId, patientId);
       const recoverable = (await dependencies.draftStore.listRecoverableByPatient(account.accountId, patientId))[0] ?? null;
       return { ...summary, recoverableDraft: recoverable };
+    },
+    async listDietHistoryViews(patientId) {
+      const account = await dependencies.accountContext.requireActive();
+      const patient = await dependencies.patientReader.getById(account.accountId, patientId);
+      if (!patient) throw new DietDomainError('PATIENT_NOT_FOUND', 'Paciente não encontrado nesta Conta.');
+      if (dependencies.historyViewReader) return dependencies.historyViewReader.listHistoryViews(account.accountId, patientId);
+      return toDietHistoryViews(await dependencies.dietReader.getPatientDietSummary(account.accountId, patientId));
+    },
+    async listDietHistoryViewsPage(patientId: string, request: PageRequest = {}): Promise<PageResult<HistoricalDiet>> {
+      const account = await dependencies.accountContext.requireActive();
+      const patient = await dependencies.patientReader.getById(account.accountId, patientId);
+      if (!patient) throw new DietDomainError('PATIENT_NOT_FOUND', 'Paciente não encontrado nesta Conta.');
+      if (dependencies.historyViewReader) return dependencies.historyViewReader.listHistoryViewsPage(account.accountId, patientId, request);
+      const page = normalizePageRequest(request);
+      const all = toDietHistoryViews(await dependencies.dietReader.getPatientDietSummary(account.accountId, patientId));
+      return { ...page, total: all.length, items: all.slice(page.pageIndex * page.pageSize, (page.pageIndex + 1) * page.pageSize) };
     },
     getDietSnapshot: async (patientId, dietId) => {
       const account = await dependencies.accountContext.requireActive();

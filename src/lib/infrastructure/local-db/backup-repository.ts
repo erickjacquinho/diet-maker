@@ -21,6 +21,7 @@ import {
   nextFollowUps,
   objectiveOptions,
   patients,
+  profileCheckpointState,
   readyMealItems,
   readyMeals,
   recipeIngredients,
@@ -157,11 +158,32 @@ export class PGliteBackupRepository implements BackupRepository {
         if (snapshot.dietMealOptions.length) await tx.insert(dietMealOptions).values(snapshot.dietMealOptions);
         if (snapshot.dietMealItems.length) await tx.insert(dietMealItems).values(snapshot.dietMealItems);
         if (snapshot.dietItemSnapshots.length) await tx.insert(dietItemSnapshots).values(snapshot.dietItemSnapshots);
+        await tx.execute(sql`INSERT INTO diet_variation_history_summaries (
+          diet_variation_id, prescribed_protein, prescribed_carbs, prescribed_fat, prescribed_energy_kcal
+        )
+        SELECT variation.id,
+          COALESCE(SUM(item_snapshot.prescribed_protein), 0),
+          COALESCE(SUM(item_snapshot.prescribed_carbs), 0),
+          COALESCE(SUM(item_snapshot.prescribed_fat), 0),
+          COALESCE(SUM(COALESCE(item_snapshot.prescribed_energy_kcal, item_snapshot.prescribed_protein * 4 + item_snapshot.prescribed_carbs * 4 + item_snapshot.prescribed_fat * 9)), 0)
+        FROM diet_variations variation
+        LEFT JOIN diet_meals meal ON meal.variation_id = variation.id
+        LEFT JOIN diet_meal_options meal_option ON meal_option.diet_meal_id = meal.id AND meal_option.counts_toward_totals = true
+        LEFT JOIN diet_meal_items item ON item.diet_meal_option_id = meal_option.id AND item.role = 'PRIMARY'
+        LEFT JOIN diet_item_snapshots item_snapshot ON item_snapshot.diet_meal_item_id = item.id
+        WHERE variation.account_id = ${accountId}
+        GROUP BY variation.id
+        ON CONFLICT (diet_variation_id) DO UPDATE SET
+          prescribed_protein = EXCLUDED.prescribed_protein,
+          prescribed_carbs = EXCLUDED.prescribed_carbs,
+          prescribed_fat = EXCLUDED.prescribed_fat,
+          prescribed_energy_kcal = EXCLUDED.prescribed_energy_kcal`);
         if (snapshot.foodCatalogItems.length) await tx.insert(foodCatalogItems).values(snapshot.foodCatalogItems);
         if (snapshot.recipes.length) await tx.insert(recipes).values(snapshot.recipes);
         if (snapshot.recipeIngredients.length) await tx.insert(recipeIngredients).values(snapshot.recipeIngredients);
         if (snapshot.readyMeals.length) await tx.insert(readyMeals).values(snapshot.readyMeals);
         if (snapshot.readyMealItems.length) await tx.insert(readyMealItems).values(snapshot.readyMealItems);
+        await tx.insert(profileCheckpointState).values({ accountId, workspaceRevision: 0, checkpointRevision: 0 });
 
         if (this.failAt === 'after-insert') throw repositoryFailure('Falha simulada após inserir o backup.');
       });

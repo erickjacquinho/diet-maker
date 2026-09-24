@@ -46,7 +46,7 @@ Modais e destinos globais independentes não usam esta molécula sem uma nova ro
 
 ## Consumers
 
-`src/app/pacientes/[id]/page.tsx`, `src/components/templates/DietBuilderTemplate.tsx` e `src/app/pacientes/[id]/consulta/[date]/page.tsx`.
+`src/app/pacientes/[id]/page.tsx`, `src/app/pacientes/[id]/_components/PatientHistoryPage.tsx`, `src/components/templates/DietBuilderTemplate.tsx` e `src/app/pacientes/[id]/consulta/[date]/page.tsx`.
 
 ## Acceptance criteria
 

@@ -24,7 +24,7 @@ function dateLabel(value: string): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('pt-BR');
 }
 
-function variationType(variation: DietVariation): HistoricalDietVariation['type'] {
+function variationType(variation: Pick<DietVariation, 'kind'>): HistoricalDietVariation['type'] {
   switch (variation.kind) {
     case 'HIGH': return 'high';
     case 'MEDIUM': return 'medium';
@@ -35,6 +35,15 @@ function variationType(variation: DietVariation): HistoricalDietVariation['type'
 }
 
 type DietValues = Pick<HistoricalDiet, 'targetKcal' | 'proteinG' | 'carbsG' | 'fatsG'>;
+
+export interface DietHistoryVariation extends Pick<DietVariation, 'id' | 'name' | 'kind' | 'assignedDays' | 'targets'> {
+  prescribed: DietValues;
+  mealsCount: number;
+}
+
+export interface DietHistoryProjection extends Pick<DietPlan, 'id' | 'name' | 'activatedAt' | 'mode' | 'status'> {
+  variations: DietHistoryVariation[];
+}
 
 function presentationNumber(value: number, decimalPlaces: 0 | 1): number {
   return Number(toPresentation(String(value), decimalPlaces));
@@ -59,7 +68,7 @@ function prescribedValues(plan: DietPlan, variation: DietVariation): DietValues 
   };
 }
 
-function targetValues(variation: DietVariation): DietValues {
+function targetValues(variation: Pick<DietVariation, 'targets'>): DietValues {
   return {
     targetKcal: number(variation.targets.energyKcal),
     proteinG: number(variation.targets.protein),
@@ -68,8 +77,8 @@ function targetValues(variation: DietVariation): DietValues {
   };
 }
 
-function mapVariation(plan: DietPlan, variation: DietVariation): HistoricalDietVariation {
-  const values = normalizeDietValues(prescribedValues(plan, variation));
+function mapVariation(variation: DietHistoryVariation): HistoricalDietVariation {
+  const values = normalizeDietValues(variation.prescribed);
   return {
     id: variation.id,
     name: variation.name,
@@ -77,13 +86,13 @@ function mapVariation(plan: DietPlan, variation: DietVariation): HistoricalDietV
     assignedDays: variation.assignedDays.map((day) => DAY_LABELS[day] ?? day),
     ...values,
     dietTargets: normalizeDietValues(targetValues(variation)),
-    mealsCount: variation.meals.length,
+    mealsCount: variation.mealsCount,
   };
 }
 
 function summaryDietValues(
-  plan: DietPlan,
-  getValues: (variation: DietVariation) => DietValues,
+  plan: DietHistoryProjection,
+  getValues: (variation: DietHistoryVariation) => DietValues,
 ): DietValues {
   const variations = plan.variations;
   if (variations.length === 0) return { targetKcal: 0, proteinG: 0, carbsG: 0, fatsG: 0 };
@@ -113,16 +122,22 @@ function summaryDietValues(
 }
 
 export function toHistoricalDietView(row: DietHistoryRow): HistoricalDiet {
-  const values = summaryDietValues(row.plan, (variation) => prescribedValues(row.plan, variation));
+  return toProjectedHistoricalDietView({ ...row, variations: row.plan.variations.map((variation) => ({
+    ...variation, prescribed: prescribedValues(row.plan, variation), mealsCount: variation.meals.length,
+  })) });
+}
+
+export function toProjectedHistoricalDietView(row: DietHistoryProjection): HistoricalDiet {
+  const values = summaryDietValues(row, (variation) => variation.prescribed);
   return {
     id: row.id,
     name: row.name,
     date: dateLabel(row.activatedAt),
     ...values,
-    dietTargets: summaryDietValues(row.plan, targetValues),
+    dietTargets: summaryDietValues(row, targetValues),
     status: row.status === 'ACTIVE' ? 'Ativa' : 'Histórica',
     mode: row.mode === 'CARB_CYCLING' ? 'carb_cycling' : 'simple',
-    carbCyclingVariations: row.mode === 'CARB_CYCLING' ? row.plan.variations.map((variation) => mapVariation(row.plan, variation)) : undefined,
+    carbCyclingVariations: row.mode === 'CARB_CYCLING' ? row.variations.map(mapVariation) : undefined,
   };
 }
 

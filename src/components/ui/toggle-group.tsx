@@ -3,19 +3,20 @@ import { cn } from "@/lib/utils"
 
 export interface ToggleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   type?: "single" | "multiple"
-  value?: string | number
+  value?: string | number | Array<string | number>
   onValueChange?: (value: any) => void
 }
 
 const ToggleGroupContext = React.createContext<{
-  value?: string | number
+  type: "single" | "multiple"
+  value?: string | number | Array<string | number>
   onValueChange?: (value: any) => void
-}>({})
+}>({ type: "single" })
 
 const ToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupProps>(
   ({ className, type = "single", value, onValueChange, children, role, ...props }, ref) => {
     return (
-      <ToggleGroupContext.Provider value={{ value, onValueChange }}>
+      <ToggleGroupContext.Provider value={{ type, value, onValueChange }}>
         <div
           ref={ref}
           role={role ?? "group"}
@@ -40,10 +41,21 @@ export interface ToggleGroupItemProps extends React.ButtonHTMLAttributes<HTMLBut
 const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupItemProps>(
   ({ className, children, value, onClick, role, ...props }, ref) => {
     const context = React.useContext(ToggleGroupContext)
-    const isSelected = context.value === value
+    const isSelected = Array.isArray(context.value)
+      ? context.value.includes(value)
+      : context.value === value
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(e)
+      if (context.type === "multiple") {
+        const selected = Array.isArray(context.value) ? context.value : []
+        context.onValueChange?.(
+          selected.includes(value)
+            ? selected.filter((item) => item !== value)
+            : [...selected, value],
+        )
+        return
+      }
       context.onValueChange?.(value)
     }
 

@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
-import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/legacy-diet-types';
-import { updateMealVariationItems } from '@/lib/mealVariations';
+import { FullDietPlan, DietMeal, CarbCyclingVariation, getItemGrams, getItemMacros } from '@/lib/legacy-diet-types';
+import { projectMealGroups, updateMealVariationItems, type ActiveMealVariationIds } from '@/lib/mealVariations';
 import { cloneMealsWithFreshIds } from '@/lib/legacy-diet-copy';
 import { calculatePresetCalories } from '@/lib/presetUtils';
+import { calculateMealTotals } from '@/lib/macroCalculations';
 import { MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 import { toast } from 'sonner';
+import type { WhatsAppDietExportOptions } from '@/lib/whatsapp';
 
 export function useDietBuilderModals({
   patient,
@@ -16,6 +18,7 @@ export function useDietBuilderModals({
   targetCarb,
   targetFat,
   activeVariationId,
+  activeMealVariationIds = {},
   setDietPlan,
   updateActiveMeals,
   getActiveMealVariationId,
@@ -28,6 +31,7 @@ export function useDietBuilderModals({
   targetCarb: number;
   targetFat: number;
   activeVariationId: string;
+  activeMealVariationIds?: ActiveMealVariationIds;
   setDietPlan: React.Dispatch<React.SetStateAction<FullDietPlan | null>>;
   updateActiveMeals: (updater: (prevMeals: DietMeal[]) => DietMeal[]) => void;
   getActiveMealVariationId: (mealId: string, meal?: DietMeal) => string;
@@ -50,6 +54,11 @@ export function useDietBuilderModals({
 
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [whatsAppText, setWhatsAppText] = useState('');
+  const [whatsAppOptions, setWhatsAppOptions] = useState<WhatsAppDietExportOptions>({
+    includeNutrition: true,
+    includeMealTimes: true,
+    selectedVariationIds: [],
+  });
 
   const [foodToSubstitute, setFoodToSubstitute] = useState<MealFoodToSubstitute | null>(null);
   const [isImportPreviousDietModalOpen, setIsImportPreviousDietModalOpen] = useState(false);
@@ -157,21 +166,65 @@ export function useDietBuilderModals({
     });
   }, [setDietPlan]);
 
+  const buildWhatsAppText = useCallback((options: WhatsAppDietExportOptions) => {
+    if (!patient || !dietPlan) return '';
+    let msg = `*Plano Alimentar - ${patient.name}*\n\n`;
+    const sections = dietPlan.mode === 'carb_cycling'
+      ? dietPlan.carbCyclingVariations
+        .filter((variation) => options.selectedVariationIds.includes(variation.id))
+        .map((variation) => {
+          const meals = projectMealGroups(variation.meals, 'carb_cycling', variation.id, activeMealVariationIds);
+          return { name: variation.name, meals, totalKcal: calculateMealTotals(meals.flatMap((meal) => meal.items)).kcal };
+        })
+      : [{ name: '', meals: currentMeals, totalKcal: currentTotals.kcal }];
+
+    sections.forEach((section) => {
+      if (section.name) msg += `*${section.name}*\n`;
+      section.meals.forEach((meal) => {
+        const mealTotals = options.includeNutrition
+          ? meal.items.reduce((totals, item) => {
+            const macros = getItemMacros(item);
+            return {
+              protein: totals.protein + macros.protein,
+              carbs: totals.carbs + macros.carbs,
+              fats: totals.fats + macros.fats,
+              kcal: totals.kcal + macros.kcal,
+            };
+          }, { protein: 0, carbs: 0, fats: 0, kcal: 0 })
+          : null;
+        msg += `*${meal.name}${options.includeMealTimes && meal.time ? ` (${meal.time})` : ''}${mealTotals ? ` | Carbo: ${Math.round(mealTotals.carbs)}g` : ''}*\n`;
+        meal.items.forEach((item) => {
+          msg += `• ${item.name} (${getItemGrams(item)}g)\n`;
+        });
+        if (mealTotals) {
+          msg += `*Totais da refeição:* P: ${Math.round(mealTotals.protein)}g | G: ${Math.round(mealTotals.fats)}g | ${Math.round(mealTotals.kcal)} kcal\n`;
+        }
+        msg += '\n';
+      });
+      if (options.includeNutrition) {
+        msg += `*Total do dia${section.name ? ` - ${section.name}` : ''}:* ${Math.round(section.totalKcal)} kcal\n\n`;
+      }
+    });
+    return msg;
+  }, [patient, dietPlan, currentMeals, currentTotals, activeMealVariationIds]);
+
   const openWhatsAppModal = useCallback(() => {
     if (!patient || !dietPlan) return;
-    let msg = `*Plano Alimentar - ${patient.name}*\n\n`;
-    currentMeals.forEach((m) => {
-      msg += `*${m.name} (${m.time})*\n`;
-      m.items.forEach((i) => {
-        const g = i.quantityGrams || i.grams || 100;
-        msg += `• ${i.name} (${g}g) - ${i.kcal} kcal\n`;
-      });
-      msg += '\n';
-    });
-    msg += `*Total:* ${currentTotals.kcal} kcal | P: ${Math.round(currentTotals.proteinG)}g | C: ${Math.round(currentTotals.carbsG)}g | G: ${Math.round(currentTotals.fatsG)}g\n`;
-    setWhatsAppText(msg);
+    const options = {
+      ...whatsAppOptions,
+      selectedVariationIds: dietPlan.mode === 'carb_cycling'
+        ? dietPlan.carbCyclingVariations.map((variation) => variation.id)
+        : [],
+    };
+    setWhatsAppOptions(options);
+    setWhatsAppText(buildWhatsAppText(options));
     setIsWhatsAppModalOpen(true);
-  }, [patient, dietPlan, currentMeals, currentTotals]);
+  }, [patient, dietPlan, buildWhatsAppText, whatsAppOptions]);
+
+  const updateWhatsAppOptions = useCallback((options: WhatsAppDietExportOptions) => {
+    setWhatsAppOptions(options);
+    setWhatsAppText(buildWhatsAppText(options));
+  }, [buildWhatsAppText]);
 
   return {
     foodSearchMealIndex,
@@ -203,6 +256,8 @@ export function useDietBuilderModals({
     setIsWhatsAppModalOpen,
     whatsAppText,
     setWhatsAppText,
+    whatsAppOptions,
+    updateWhatsAppOptions,
     foodToSubstitute,
     setFoodToSubstitute,
     isImportPreviousDietModalOpen,

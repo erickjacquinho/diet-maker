@@ -26,7 +26,7 @@ Caption acessível, cabeçalho com `scope="col"`, corpo de células tipadas, lin
 
 ## Allowed variants
 
-Usa as variantes `standard` ou `compact` da categoria por meio dos primitivos, aceita linhas estáticas ou interativas fornecidas pelo consumidor, seleção controlada nos modos `single` ou `multi`, alturas semânticas `table-compact` ou `table-modal` e virtualização opcional para datasets locais grandes. Não oferece multi-sort ou paginação remota.
+Usa as variantes `standard` ou `compact` da categoria por meio dos primitivos, aceita linhas estáticas ou interativas fornecidas pelo consumidor, seleção controlada nos modos `single` ou `multi`, alturas semânticas `table-compact` ou `table-modal` e virtualização opcional para datasets locais grandes. Não oferece multi-sort. A paginação é local quando `totalRows` não é informado; com `totalRows`, espera-se que `data` contenha somente a página consultada e sua ordem é preservada.
 
 ## Particular states
 
@@ -48,6 +48,8 @@ Nenhuma exceção aprovada.
 
 - `organism-food-table-section`
 - `organism-patient-list-table`
+- `organism-patient-diets-table`
+- `organism-patient-assessments-table`
 - `organism-patient-consultation-history-table`
 
 ## Acceptance criteria

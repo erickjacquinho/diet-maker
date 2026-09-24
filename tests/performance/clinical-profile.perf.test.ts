@@ -46,12 +46,13 @@ describe('clinical profile projection performance', () => {
     const repository: ClinicalRepository = {
       getAssessment: vi.fn(),
       listAssessments: vi.fn(),
+      listAssessmentsPage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })),
       listAssessmentsByPatients: vi.fn(async (_accountId: string, patientIds: readonly string[]) => Object.fromEntries(patientIds.map((id: string) => [id, assessments[id] ?? []]))),
       createAssessment: vi.fn(), updateAssessment: vi.fn(), getNextFollowUp: vi.fn(),
       listNextFollowUps: vi.fn(async () => ({})), setNextFollowUp: vi.fn(), clearNextFollowUp: vi.fn(),
     };
     const reader = createPatientProfileReader(
-      { create: vi.fn(), getById: vi.fn(), listActive: vi.fn(async () => patients), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
+      { create: vi.fn(), getById: vi.fn(), listActive: vi.fn(async () => patients), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
       { list: vi.fn(async () => []), addCustom: vi.fn(), archiveCustom: vi.fn() },
       async () => ({ dietCount: 0, assessmentCount: 0 }),
       { clinicalRepository: repository },

@@ -11,6 +11,7 @@ import type { DietApplication } from './diets/diet-ports';
 import { PGliteDietRepository } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
 import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
 import { InMemoryDietDraftStore } from '@/lib/infrastructure/diet-drafts/in-memory-diet-draft-store';
+import { IndexedDbDietDraftStore } from '@/lib/infrastructure/diet-drafts/indexed-db-diet-draft-store';
 import { createLibraryApplication, type LibraryApplication } from './library/library-application';
 import { PGliteFoodCatalogRepository } from '@/lib/infrastructure/local-db/library/pglite-food-catalog-repository';
 import { PGliteRecipeRepository } from '@/lib/infrastructure/local-db/library/recipe-repository';
@@ -26,11 +27,15 @@ import { getFavoritesFromStorage, setFavoritesFromStorage } from '@/lib/library-
 
 export interface BrowserPatientRuntime {
   readonly account: Account;
+  readonly hasExistingWorkspace: boolean;
   readonly application: PatientApplication;
   readonly dietApplication: DietApplication;
   readonly libraryApplication: LibraryApplication;
   readonly backupApplication: BackupApplication;
   readonly handle: LocalDatabaseHandle;
+  getCheckpointState(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
+  markWorkspaceDirty(): Promise<void>;
+  advanceCheckpoint(revision: number): Promise<void>;
   bindSync(sync: () => Promise<void>): void;
 }
 
@@ -44,38 +49,77 @@ function createBrowserBackupRepository(handle: LocalDatabaseHandle): PGliteBacku
   });
 }
 
-/** Builds an isolated runtime for one in-memory tab session. */
+/** Builds a persistent browser workspace and an isolated memory workspace in tests. */
 export async function createBrowserPatientRuntime(account: Account): Promise<BrowserPatientRuntime> {
-  const handle = await openLocalDatabase({ mode: 'memory' });
+  const inBrowser = typeof window !== 'undefined';
+  const handle = await openLocalDatabase(inBrowser
+    ? { mode: 'persistent', dataDir: `idb://nutridiet-${encodeURIComponent(account.id)}` }
+    : { mode: 'memory' });
   try {
     let syncAfterConfirmedOperation: (() => Promise<void>) | undefined;
+    const getCheckpointState = async () => {
+      const result = await handle.client.query<{ workspace_revision: number; checkpoint_revision: number }>(
+        'SELECT workspace_revision, checkpoint_revision FROM profile_checkpoint_state WHERE account_id = $1',
+        [account.id],
+      );
+      const row = result.rows[0];
+      return row
+        ? { workspaceRevision: row.workspace_revision, checkpointRevision: row.checkpoint_revision }
+        : { workspaceRevision: 0, checkpointRevision: 0 };
+    };
+    const markWorkspaceDirty = async () => {
+      await handle.client.query(`
+        INSERT INTO profile_checkpoint_state (account_id, workspace_revision, checkpoint_revision)
+        VALUES ($1, 1, 0)
+        ON CONFLICT (account_id) DO UPDATE
+        SET workspace_revision = profile_checkpoint_state.workspace_revision + 1
+      `, [account.id]);
+    };
+    const advanceCheckpoint = async (revision: number) => {
+      await handle.client.query(`
+        INSERT INTO profile_checkpoint_state (account_id, workspace_revision, checkpoint_revision)
+        VALUES ($1, $2, $2)
+        ON CONFLICT (account_id) DO UPDATE
+        SET checkpoint_revision = GREATEST(profile_checkpoint_state.checkpoint_revision, $2)
+      `, [account.id, revision]);
+    };
     const confirmedOperation = createConfirmedOperationCoordinator(async () => {
+      await markWorkspaceDirty();
       await syncAfterConfirmedOperation?.();
     });
+    const checkpointRows = await handle.client.query<{ account_id: string }>(
+      'SELECT account_id FROM profile_checkpoint_state WHERE account_id = $1',
+      [account.id],
+    );
+    const hasExistingWorkspace = checkpointRows.rows.length > 0;
     const accountRepository = new LocalAccountContextRepository(handle);
-    const persistedAccount = await accountRepository.saveAccount(account);
+    const existingAccount = await accountRepository.getById(account.id);
+    const persistedAccount = hasExistingWorkspace && existingAccount
+      ? existingAccount
+      : await accountRepository.saveAccount(account);
     const accountContext = createExplicitAccountContext(persistedAccount);
     const patientRepository = new LocalPatientRepository(handle);
     const objectiveCatalogRepository = new LocalObjectiveCatalogRepository(handle);
     const dietRepository = new PGliteDietRepository(handle);
     const dietReader = createPatientDietReader(dietRepository);
     const clinicalRepository = new PGliteClinicalRepository(handle);
-    const draftStore = new InMemoryDietDraftStore();
+    const draftStore = inBrowser ? new IndexedDbDietDraftStore() : new InMemoryDietDraftStore();
     const backupRepository = createBrowserBackupRepository(handle);
-    const backupApplication = createBackupApplication({ accountContext, repository: backupRepository, draftStore });
+    const backupApplication = createBackupApplication({
+      accountContext,
+      repository: backupRepository,
+      draftStore,
+      getCheckpointState,
+      savePendingCheckpoint: async () => {
+        if (!syncAfterConfirmedOperation) throw new Error('Nenhum arquivo principal está associado à sessão atual.');
+        await syncAfterConfirmedOperation();
+      },
+    });
     const patientProfileReader = createPatientProfileReader(
       patientRepository,
       objectiveCatalogRepository,
-      (accountId, patientId) => dietReader.getPatientDietSummary(accountId, patientId).then((summary) => {
-        const plans = [summary.current?.plan, ...summary.history.map((row) => row.plan)].filter((plan): plan is NonNullable<typeof plan> => Boolean(plan));
-        const latest = [...plans].sort((left, right) => right.activatedAt.localeCompare(left.activatedAt) || right.updatedAt.localeCompare(left.updatedAt) || left.id.localeCompare(right.id))[0];
-        return {
-          dietCount: summary.confirmedCount,
-          assessmentCount: 0,
-          lastActivity: latest ? { eventDate: latest.activatedAt.slice(0, 10), confirmedAt: latest.updatedAt, type: 'diet' as const, sourceId: latest.id } : null,
-        };
-      }),
-      { clinicalRepository },
+      (accountId, patientId) => dietRepository.listPatientSummaries(accountId, [patientId]).then((summaries) => summaries[patientId]),
+      { clinicalRepository, listRelatedCounts: (accountId, patientIds) => dietRepository.listPatientSummaries(accountId, patientIds) },
     );
     const foodRepository = new PGliteFoodCatalogRepository(handle);
     const recipeRepository = new PGliteRecipeRepository(handle, { foodRepository });
@@ -83,7 +127,11 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
 
     return {
       account: persistedAccount,
+      hasExistingWorkspace,
       handle,
+      getCheckpointState,
+      markWorkspaceDirty,
+      advanceCheckpoint,
       bindSync: (sync) => { syncAfterConfirmedOperation = sync; },
       application: createPatientApplication({
         accountContext,
@@ -102,6 +150,7 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
         repository: dietRepository,
         draftStore,
         dietReader,
+        historyViewReader: dietRepository,
         confirmedOperation,
         librarySourceReader: {
           getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId),
@@ -118,6 +167,7 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
 }
 
 export async function importBrowserPatientSnapshot(runtime: BrowserPatientRuntime, envelope: BackupEnvelope): Promise<void> {
+  if (runtime.hasExistingWorkspace) return;
   await createBrowserBackupRepository(runtime.handle).replaceAccountSnapshot(envelope.account[0].id, envelope);
 }
 

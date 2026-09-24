@@ -79,6 +79,10 @@ async function createSyntheticPatient(page: Page): Promise<{ name: string; profi
   const dialog = page.getByRole('dialog', { name: 'Cadastrar Novo Paciente' });
   await expect(dialog).toBeVisible({ timeout: pageTimeout });
   await dialog.getByLabel('Nome Completo').fill(name);
+  await dialog.getByLabel('WhatsApp').fill('11999990000');
+  await dialog.getByRole('textbox', { name: 'Data de nascimento' }).fill('01011990');
+  await dialog.getByRole('combobox', { name: 'Gênero' }).click();
+  await page.getByRole('option', { name: 'Masculino', exact: true }).click();
   await dialog.getByRole('button', { name: /Salvar Paciente/ }).click();
   await expect(dialog).toBeHidden({ timeout: pageTimeout });
 

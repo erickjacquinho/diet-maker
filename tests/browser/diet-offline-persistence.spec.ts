@@ -3,7 +3,7 @@ import { createProfileSession } from './helpers/profile-session';
 
 test.describe.configure({ mode: 'serial' });
 
-test('não persiste profile ou drafts no host após reload e mantém a nova aba no onboarding', async ({ browser, baseURL }) => {
+test('mantém o workspace local IndexedDB após reload e exige abertura por uma nova aba', async ({ browser, baseURL }) => {
   test.setTimeout(600_000);
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const first = await context.newPage();
@@ -21,7 +21,9 @@ test('não persiste profile ou drafts no host após reload e mantém a nova aba 
       .map(({ name }) => name)
       .filter((name): name is string => typeof name === 'string' && /nutridiet|diet-browser-journey/i.test(name));
   });
-  expect(hostDatabases).toEqual([]);
+  expect(hostDatabases).toContain('nutridiet-profile-session-v1');
+  expect(hostDatabases.filter((name) => name.startsWith('/pglite/nutridiet-'))).toHaveLength(1);
+  expect(hostDatabases.some((name) => name.includes('diet-browser-journey'))).toBe(false);
 
   const second = await context.newPage();
   await second.goto(`${baseURL ?? 'http://127.0.0.1:3000'}/pacientes`, { waitUntil: 'domcontentloaded', timeout: 120_000 });

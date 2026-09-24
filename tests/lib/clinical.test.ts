@@ -117,7 +117,10 @@ describe('clinical domain', () => {
 
   it('validates follow-up type and represents civil dates as overdue, today, or future', () => {
     expect(validateNextFollowUpInput({ dueDate: '2026-09-15', type: 'DIET_UPDATE' })).toEqual({ valid: true, fieldErrors: {} });
+    expect(validateNextFollowUpInput({ dueDate: '2026-09-15', type: ['ASSESSMENT_UPDATE', 'DIET_UPDATE'] })).toEqual({ valid: true, fieldErrors: {} });
+    expect(validateNextFollowUpInput({ dueDate: '2026-09-15', type: [] }).fieldErrors.type).toBe('Selecione ao menos um tipo de acompanhamento válido.');
     expect(validateNextFollowUpInput({ dueDate: '2026-09-15', type: 'other' as never }).valid).toBe(false);
+    expect(validateNextFollowUpInput({ dueDate: '2026-09-15', type: 'DIET_UPDATE', comments: 4 as never }).fieldErrors.comments).toBe('Informe comentários válidos.');
     expect(getFollowUpStatus('2026-09-10', '2026-09-11')).toBe('OVERDUE');
     expect(getFollowUpStatus('2026-09-11', '2026-09-11')).toBe('TODAY');
     expect(getFollowUpStatus('2026-09-12', '2026-09-11')).toBe('UPCOMING');

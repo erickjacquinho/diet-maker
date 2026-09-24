@@ -42,7 +42,7 @@ export function useAssessmentWorkspacePage(patientId: string, assessmentId: stri
     setSubmitError(null);
     void getBrowserPatientApplication().then(async (application) => {
       const profile = await application.getPatientProfile(patientId);
-      const canonicalAssessments = profile.clinical?.assessments ?? await application.listAssessments(patientId);
+      const canonicalAssessments = await application.listAssessments(patientId);
       const assessments = canonicalAssessments.map(toLegacyAssessment);
       const sorted = [...assessments].sort((left, right) => (right.clinicalDate ?? right.date).localeCompare(left.clinicalDate ?? left.date) || left.id.localeCompare(right.id));
       if (cancelled) return;

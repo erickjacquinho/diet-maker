@@ -97,6 +97,7 @@ vi.mock('@/lib/application/browser-composition', () => ({
 describe('useAssessmentWorkspacePage leave confirmation', () => {
   beforeEach(() => {
     push.mockClear();
+    application.listAssessments.mockResolvedValue([canonicalAssessment]);
     application.getPatientProfile.mockResolvedValue({
       patient,
       initials: 'PT',

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { PatientListTable } from '@/components/organisms/PatientListTable';
@@ -61,7 +61,7 @@ describe('PatientListTable', () => {
 
     const table = screen.getByRole('table', { name: 'Lista de pacientes' });
     expect(table).toBeInTheDocument();
-    expect(screen.getByText('Lista contínua de pacientes ordenada pela prioridade do próximo acompanhamento.')).toBeInTheDocument();
+    expect(screen.getByText('Lista de pacientes ordenada pela prioridade do próximo acompanhamento.')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Paciente' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Objetivo' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Evolução de gordura' })).toBeInTheDocument();
@@ -88,6 +88,17 @@ describe('PatientListTable', () => {
     expect(screen.getByTestId('patient-gender-icon')).toHaveAttribute('data-gender', 'venus');
     expect(screen.getByTestId('patient-row-chevron')).toBeInTheDocument();
     expect(screen.queryByText(/kg/)).not.toBeInTheDocument();
+  });
+
+  it('shows the saved objective verbatim and labels an unset objective', () => {
+    const noObjectivePatient = { ...patient, id: 'patient-no-objective', name: 'Sem Objetivo', objective: '' };
+    const fullObjectivePatient = { ...patient, id: 'patient-full-objective', name: 'Recomposição', objective: 'Recomposição Corporal' };
+
+    render(<PatientListTable rows={buildPatientListRows([fullObjectivePatient, noObjectivePatient], '2026-08-03')} />);
+
+    expect(screen.getByText('Recomposição Corporal')).toHaveAttribute('title', 'Recomposição Corporal');
+    expect(screen.getByText('sem objetivo')).toHaveAttribute('title', 'sem objetivo');
+    expect(screen.queryByText('Acompanhamento')).not.toBeInTheDocument();
   });
 
   it('supports keyboard navigation on the row without competing actions', () => {
@@ -147,5 +158,54 @@ describe('PatientListTable', () => {
     expect(screen.getByText('Sem histórico')).toBeInTheDocument();
     expect(screen.getByText('Sem próximo evento')).toBeInTheDocument();
     expect(screen.getByText('Definir no perfil')).toBeInTheDocument();
+  });
+
+  it('preserves priority order and keeps row actions stable without pagination', () => {
+    const overduePatient: Patient = {
+      ...patient,
+      id: 'patient-overdue',
+      name: 'Zoe Oliveira',
+      nextEvent: { date: '2026-08-02', type: 'assessment-update' },
+    };
+    const onNavigate = vi.fn();
+    const rows = [
+      ...buildPatientListRows([overduePatient], '2026-08-03'),
+      ...buildPatientListRows([patient], '2026-08-03'),
+    ];
+    render(
+      <PatientListTable
+        rows={rows}
+        onNavigate={onNavigate}
+      />,
+    );
+
+    const table = screen.getByRole('table', { name: 'Lista de pacientes' });
+    const rowsInTable = within(table).getAllByRole('row').slice(1);
+    expect(table).toHaveAttribute('aria-rowcount', '3');
+    expect(rowsInTable.map((row) => row.getAttribute('aria-label'))).toEqual([
+      'Abrir perfil de Zoe Oliveira',
+      'Abrir perfil de Ana Lima',
+    ]);
+    fireEvent.keyDown(rowsInTable[0], { key: 'Enter' });
+    expect(onNavigate).toHaveBeenCalledWith('/pacientes/patient-overdue');
+    expect(screen.getByRole('link', { name: 'Ver perfil de Zoe Oliveira' })).toHaveAttribute('href', '/pacientes/patient-overdue');
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
+  });
+
+  it('renders every supplied patient row and announces an empty list without page controls', () => {
+    const patients = Array.from({ length: 26 }, (_, index) => ({
+      ...patient,
+      id: `patient-${index}`,
+      name: `Paciente ${String(index + 1).padStart(2, '0')}`,
+    }));
+    const { rerender } = render(<PatientListTable rows={buildPatientListRows(patients, '2026-08-03')} />);
+    const table = screen.getByRole('table', { name: 'Lista de pacientes' });
+    expect(within(table).getAllByRole('row')).toHaveLength(27);
+    expect(table).toHaveAttribute('aria-rowcount', '27');
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
+
+    rerender(<PatientListTable rows={[]} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Nenhum paciente encontrado.');
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
   });
 });

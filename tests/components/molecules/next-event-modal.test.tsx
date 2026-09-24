@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { NextEventModal } from '@/components/molecules/NextEventModal';
 
@@ -13,7 +13,7 @@ afterAll(() => {
 });
 
 describe('NextEventModal', () => {
-  it('renders the modal with date and select field', () => {
+  it('renders the scheduling form with a date, type options, and five-line comments field', () => {
     render(
       <NextEventModal
         open
@@ -26,26 +26,32 @@ describe('NextEventModal', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Definir próximo acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Atualização de avaliação' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'false');
+    const observations = screen.getByRole('textbox', { name: 'Observações' });
+    expect(observations).toHaveAttribute('rows', '5');
+    expect(observations).toHaveClass('resize-none');
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Salvar/i })).toBeInTheDocument();
   });
 
-  it('renders "Reagendar acompanhamento" and "Remover data" when nextEvent is present', () => {
+  it('keeps the scheduling title and renders "Remover data" when nextEvent is present', () => {
     render(
       <NextEventModal
         open
-        nextEvent={{ date: '2026-09-15', type: 'diet-update' }}
+        nextEvent={{ date: '2026-09-15', type: 'diet-update', comments: 'Revisar evolução.' }}
         onOpenChange={vi.fn()}
         onSave={vi.fn()}
         onClear={vi.fn()}
       />,
     );
 
-    expect(screen.getByRole('heading', { name: 'Reagendar acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover data' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('textbox', { name: 'Observações' })).toHaveValue('Revisar evolução.');
   });
 
   it('opens confirmation alert when "Remover data" is clicked, and confirms removal', async () => {
@@ -93,11 +99,7 @@ describe('NextEventModal', () => {
       />,
     );
 
-    // Change select value to make it dirty
-    const combobox = screen.getByRole('combobox');
-    fireEvent.click(combobox);
-    const option = await screen.findByRole('option', { name: 'Atualização de dieta' });
-    fireEvent.click(option);
+    fireEvent.click(screen.getByRole('button', { name: 'Atualização de dieta' }));
 
     // Try to cancel
     const cancelBtn = screen.getByRole('button', { name: 'Cancelar' });
@@ -150,6 +152,69 @@ describe('NextEventModal', () => {
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     expect(await screen.findByRole('alert')).toHaveTextContent('Conflito de versão.');
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
-    expect(screen.getByRole('heading', { name: 'Reagendar acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
+  });
+
+  it('allows both type boxes to be selected and saves both with the comments', async () => {
+    const onSave = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={null}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+        onClear={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Data/ }), { target: { value: '16/09/2026' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Atualização de dieta' }));
+    expect(screen.getByRole('button', { name: 'Atualização de avaliação' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Observações' }), { target: { value: 'Revisar o plano alimentar.' } });
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({
+      date: '2026-09-16',
+      type: ['assessment-update', 'diet-update'],
+      comments: 'Revisar o plano alimentar.',
+    }));
+  });
+
+  it('allows clearing both types but disables save and rejects submission until one is selected', async () => {
+    const onSave = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={null}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+        onClear={vi.fn()}
+      />,
+    );
+
+    const assessmentType = screen.getByRole('button', { name: 'Atualização de avaliação' });
+    const dietType = screen.getByRole('button', { name: 'Atualização de dieta' });
+    const saveButton = screen.getByRole('button', { name: /Salvar/i });
+
+    fireEvent.click(assessmentType);
+    expect(assessmentType).toHaveAttribute('aria-pressed', 'false');
+    expect(dietType).toHaveAttribute('aria-pressed', 'false');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Data/ }), { target: { value: '16/09/2026' } });
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+    expect(onSave).not.toHaveBeenCalled();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Selecione ao menos um tipo de acompanhamento.');
+
+    fireEvent.click(dietType);
+    expect(saveButton).toBeEnabled();
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({
+      date: '2026-09-16',
+      type: ['diet-update'],
+      comments: '',
+    }));
   });
 });

@@ -1,6 +1,12 @@
 const BRAZIL_COUNTRY_CODE = '55';
 const MAX_LOCAL_DIGITS = 11;
 
+export interface WhatsAppDietExportOptions {
+  includeNutrition: boolean;
+  includeMealTimes: boolean;
+  selectedVariationIds: string[];
+}
+
 function getDigits(value: string | undefined): string {
   return value?.replace(/\D/g, '') ?? '';
 }

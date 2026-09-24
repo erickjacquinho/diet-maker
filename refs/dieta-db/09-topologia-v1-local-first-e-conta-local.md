@@ -18,9 +18,13 @@ Casos de uso
     └── DietDraftStore      → IndexedDB do navegador
 ```
 
-O banco relacional local é a fonte canônica dos dados salvos da Conta e dos
-Pacientes. O `DietDraftStore` é uma exceção deliberada: armazena somente
-rascunhos de dieta ainda não confirmados.
+O `.nutridiet` é o save principal e representa o último checkpoint completo
+dos dados confirmados. O banco relacional local, persistido no IndexedDB, é a
+área de trabalho usada em runtime e conserva alterações confirmadas que ainda
+não chegaram ao arquivo. O `DietDraftStore` permanece separado e armazena
+somente rascunhos de dieta ainda não confirmados. Consulte o
+[ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md) para o contrato de
+checkpoint.
 
 ## 2. Identidade da Conta na V1
 
@@ -43,8 +47,9 @@ antes de existir uma necessidade validada.
 ### 3.1 Dados da Conta e do Paciente
 
 Alimentos customizados, receitas, refeições prontas, pacientes, avaliações e
-dietas confirmadas são salvos explicitamente no banco relacional local por
-meio dos repositórios e casos de uso correspondentes.
+dietas confirmadas são gravados na área de trabalho local por meio dos
+repositórios e casos de uso correspondentes. O `.nutridiet` só é considerado
+atualizado quando o checkpoint dessa revisão termina com sucesso.
 
 O fechamento de uma tela depois de uma alteração não confirmada não deve criar
 uma versão canônica automaticamente, salvo quando o caso de uso daquela
@@ -85,10 +90,11 @@ transfere automaticamente a base. Quando disponível, a aplicação pode
 solicitar retenção persistente ao navegador, sem bloquear o uso por recusa nem
 criar um painel de monitoramento de armazenamento.
 
-Limpeza do navegador, sessão privada ou perda do dispositivo podem apagar
-dados. A recuperação depende do último `.nutridiet` exportado; alterações
-posteriores e drafts não estão nesse backup. Erros de gravação devem ser
-informados sem sucesso falso ou fallback silencioso para outro armazenamento.
+Limpeza do navegador, sessão privada ou perda do dispositivo podem apagar a
+área de trabalho. O último `.nutridiet` recupera o checkpoint concluído;
+alterações confirmadas posteriores e drafts ainda não estarão no arquivo.
+Erros de gravação devem ser informados sem sucesso falso ou fallback
+silencioso para outro armazenamento.
 
 **Justificativa:** manter o trabalho local e informar seus limites sem
 transformar disponibilidade offline em uma nova frente de funcionalidades.

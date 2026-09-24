@@ -11,7 +11,7 @@ afterEach(async () => {
 });
 
 describe('clinical database migration', () => {
-  it('upgrades the local schema to v6 while preserving earlier tables and data', async () => {
+  it('upgrades the local schema to v11 while preserving earlier tables and data', async () => {
     handle = await createClinicalTestDatabase('clinical-migration');
     await handle.client.query(`
       INSERT INTO accounts (id, display_name, created_at, updated_at)
@@ -21,8 +21,15 @@ describe('clinical database migration', () => {
       INSERT INTO patients (id, account_id, display_code, name, age, gender, height_cm, weight_kg, current_objective, target_protein, target_carbs, target_fats, target_kcal, created_at, updated_at, version)
       VALUES ('migration-patient', 'migration-account', 'P-0001', 'Paciente', 30, 'Feminino', 165, 62, 'Manutenção', 110, 200, 55, 1755, '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z', 1)
     `);
+    await handle.client.query(`
+      INSERT INTO next_follow_ups (account_id, patient_id, due_date, type, version, created_at, updated_at)
+      VALUES ('migration-account', 'migration-patient', '2026-10-01', 'ASSESSMENT_UPDATE', 1, '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z')
+    `);
+    await handle.client.query(`ALTER TABLE next_follow_ups DROP COLUMN comments`);
+    await handle.client.query(`DELETE FROM __nutridiet_migrations WHERE id IN ('0010_next_follow_up_comments', '0011_next_follow_up_multiple_types')`);
+    await applyMigrations(handle.client, migrationFiles);
 
-    expect(handle.schemaVersion).toBe('6');
+    expect(handle.schemaVersion).toBe('11');
     await expect(handle.client.query(`SELECT id, name FROM patients WHERE id = 'migration-patient'`)).resolves.toMatchObject({
       rows: [{ id: 'migration-patient', name: 'Paciente' }],
     });
@@ -33,9 +40,15 @@ describe('clinical database migration', () => {
     `)).resolves.toMatchObject({ rows: [{ table_name: 'body_assessments' }, { table_name: 'next_follow_ups' }] });
 
     const journal = await handle.client.query<{ id: string; version: string }>(
-      `SELECT id, version FROM __nutridiet_migrations ORDER BY version`,
+      `SELECT id, version FROM __nutridiet_migrations ORDER BY version::integer`,
     );
-    expect(journal.rows.at(-1)).toEqual({ id: '0006_simplified_assessment', version: '6' });
+    expect(journal.rows.at(-1)).toEqual({ id: '0011_next_follow_up_multiple_types', version: '11' });
+    await expect(handle.client.query(`SELECT comments FROM next_follow_ups WHERE patient_id = 'migration-patient'`))
+      .resolves.toMatchObject({ rows: [{ comments: '' }] });
+    await expect(handle.client.query(`UPDATE next_follow_ups SET type = 'BOTH' WHERE patient_id = 'migration-patient'`))
+      .resolves.toBeDefined();
+    await expect(handle.client.query(`SELECT collname FROM pg_collation WHERE collname = 'nutridiet_pt_br_base'`))
+      .resolves.toMatchObject({ rows: [{ collname: 'nutridiet_pt_br_base' }] });
   });
 
   it('is idempotent and exposes scope, cardinality and value checks', async () => {

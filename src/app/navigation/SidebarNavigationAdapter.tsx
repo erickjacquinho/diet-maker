@@ -29,7 +29,7 @@ const EMPTY_PROFILE_SESSION = {
 };
 
 type ExportState = 'idle' | 'loading' | 'error';
-type RestoreState = 'idle' | 'choosing-file' | 'validating' | 'confirmation' | 'pending-edits' | 'restoring' | 'success' | 'error' | 'cancelled';
+type RestoreState = 'idle' | 'choosing-file' | 'validating' | 'confirmation' | 'pending-edits' | 'pending-checkpoint' | 'restoring' | 'success' | 'error' | 'cancelled';
 
 function getBackupErrorMessage(error: unknown): string {
   if (error instanceof BackupApplicationError) {
@@ -44,6 +44,8 @@ function getBackupErrorMessage(error: unknown): string {
         return 'O backup contém relações de dados inválidas e não foi aplicado.';
       case 'BACKUP_PENDING_EDITS':
         return 'Salve ou descarte os rascunhos pendentes antes de importar.';
+      case 'BACKUP_PENDING_CHECKPOINT':
+        return 'Salve ou descarte as alterações locais pendentes antes de importar.';
       case 'BACKUP_CANCELLED':
         return 'A importação foi cancelada; a base local não foi alterada.';
       case 'BACKUP_EXPORT_FAILED':
@@ -71,6 +73,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
   const [restoreState, setRestoreState] = useState<RestoreState>('idle');
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
+  const [discardDraftsForRestore, setDiscardDraftsForRestore] = useState(false);
   const [restoreContent, setRestoreContent] = useState<string>();
   const [restoreFileName, setRestoreFileName] = useState<string>();
   const [feedback, setFeedback] = useState<{ kind: 'status' | 'error'; message: string }>();
@@ -124,6 +127,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     setFeedback(undefined);
     setRestoreContent(undefined);
     setRestoreFileName(undefined);
+    setDiscardDraftsForRestore(false);
     setRestoreState('choosing-file');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -163,20 +167,34 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     setRestoreDialogOpen(false);
     setRestoreContent(undefined);
     setRestoreFileName(undefined);
+    setDiscardDraftsForRestore(false);
     setRestoreState('cancelled');
     setFeedback({ kind: 'status', message: 'A importação foi cancelada; a base local não foi alterada.' });
   };
 
-  const confirmRestore = async (): Promise<void> => {
+  const confirmRestore = async (options: { pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean } = {}): Promise<void> => {
     if (!restoreContent || isRestoring) return;
     setRestoreState('restoring');
     setFeedback(undefined);
     try {
       const runtime = await getBrowserPatientRuntime();
-      await runtime.backupApplication.restoreBackup(restoreContent, { confirmed: true });
+      await runtime.backupApplication.restoreBackup(restoreContent, {
+        confirmed: true,
+        discardDrafts: options.discardDrafts ?? discardDraftsForRestore,
+        ...options,
+      });
+      if (hasProfileSession) {
+        await runtime.markWorkspaceDirty();
+        try {
+          await profileSession.sync();
+        } catch {
+          // The restored workspace stays local and the session exposes a retry after reload.
+        }
+      }
       setRestoreState('success');
       setRestoreDialogOpen(false);
-      const message = 'Backup importado. A aplicação será recarregada.';
+      setDiscardDraftsForRestore(false);
+      const message = 'Backup importado para o save principal. A aplicação será recarregada.';
       setFeedback({ kind: 'status', message });
       toast.success(message);
       window.location.reload();
@@ -186,8 +204,12 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         toast.error('Salve ou descarte os rascunhos pendentes antes de importar.');
         return;
       }
+      if (error instanceof BackupApplicationError && error.code === 'BACKUP_PENDING_CHECKPOINT') {
+        setRestoreState('pending-checkpoint');
+        return;
+      }
       setRestoreState('error');
-      const message = getBackupErrorMessage(error);
+      const message = error instanceof Error ? error.message : getBackupErrorMessage(error);
       setFeedback({ kind: 'error', message });
       toast.error(message);
     }
@@ -249,7 +271,12 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
             <p>O arquivo não possui senha nem criptografia. Guarde-o em local seguro.</p>
             {restoreState === 'pending-edits' ? (
               <p role="alert" className="rounded-control border border-error-border bg-error-soft p-3 text-style-body text-error">
-                Existem rascunhos pendentes. Resolva-os e confirme novamente; nenhum dado foi alterado.
+                Existem rascunhos não confirmados. Salve-os no perfil ou descarte-os explicitamente antes da restauração.
+              </p>
+            ) : null}
+            {restoreState === 'pending-checkpoint' ? (
+              <p role="alert" className="rounded-control border border-warning-border bg-warning-soft p-3 text-style-body text-warning">
+                Existem alterações confirmadas ainda não gravadas no arquivo principal. Escolha salvá-las ou descartá-las antes da restauração.
               </p>
             ) : null}
           </div>
@@ -258,14 +285,36 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
             <Button type="button" variant="quiet" onClick={cancelRestore} disabled={isRestoring}>
               Cancelar
             </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              loading={restoreState === 'restoring'}
-              onClick={confirmRestore}
-            >
-              Importar backup
-            </Button>
+            {restoreState === 'pending-edits' ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  setDiscardDraftsForRestore(true);
+                  void confirmRestore({ discardDrafts: true });
+                }}
+              >
+                Descartar rascunhos e restaurar
+              </Button>
+            ) : restoreState === 'pending-checkpoint' ? (
+              <>
+                <Button type="button" variant="secondary" onClick={() => void confirmRestore({ pendingChanges: 'save', discardDrafts: discardDraftsForRestore })}>
+                  Salvar pendências e restaurar
+                </Button>
+                <Button type="button" variant="destructive" onClick={() => void confirmRestore({ pendingChanges: 'discard', discardDrafts: discardDraftsForRestore })}>
+                  Descartar e restaurar
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="destructive"
+                loading={restoreState === 'restoring'}
+                onClick={() => void confirmRestore()}
+              >
+                Importar backup
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

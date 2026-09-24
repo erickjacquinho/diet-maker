@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { EditIconButton, Badge } from '@/components/atoms';
 import { MacroSummary } from '@/components/molecules/MacroSummary';
-import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { DataTable, type DataTableColumnDef, type DataTablePagination } from '@/components/molecules/DataTable';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { HistoricalDiet } from '@/lib/patientRelatedRecords';
 import type { HistoricalDietVariation } from '@/lib/patientsStoreTypes';
@@ -32,7 +32,10 @@ function toTableView(diet: DietTableData): HistoricalDiet {
 export interface PatientDietsTableProps {
   patientId: string;
   diets: DietTableData[];
+  loading?: boolean;
+  error?: string | null;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
+  pagination?: DataTablePagination;
 }
 
 const columns: DataTableColumnDef<DietTableData>[] = [
@@ -242,7 +245,7 @@ export function DietTableRow({
       }`}
     >
       {/* 1. Data */}
-      <TableCell className="whitespace-nowrap px-1 py-1">
+      <TableCell className="whitespace-nowrap px-4 py-3.5">
         <div className="flex items-center gap-1.5">
           <Calendar size={13} className="shrink-0 text-text-muted" aria-hidden="true" />
           <span className={textStyle('table-cell-strong')}>{diet.date}</span>
@@ -250,14 +253,9 @@ export function DietTableRow({
       </TableCell>
 
       {/* 2. Tipo do Plano */}
-      <TableCell className="min-w-0 whitespace-nowrap px-1 py-1">
+      <TableCell className="min-w-0 whitespace-nowrap px-1 py-3.5">
         <div className="flex min-w-0 items-center gap-1">
-          <span
-            className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
-          >
-            {formatDietType(diet)}
-          </span>
-          {hasCycleDetails && (
+          {hasCycleDetails ? (
             <Button
               type="button"
               variant="quiet"
@@ -274,27 +272,38 @@ export function DietTableRow({
                 event.stopPropagation();
                 onToggleExpand();
               }}
-              className="shrink-0 p-0 text-text-secondary hover:text-text-primary"
+              className="shrink-0 gap-1 p-0 text-text-secondary hover:text-text-primary"
             >
+              <span
+                className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
+              >
+                {formatDietType(diet)}
+              </span>
               <ChevronDown
                 size={15}
                 aria-hidden="true"
                 className={isExpanded ? 'rotate-180' : undefined}
               />
             </Button>
+          ) : (
+            <span
+              className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
+            >
+              {formatDietType(diet)}
+            </span>
           )}
         </div>
       </TableCell>
 
       {/* 3. Status */}
-      <TableCell className="whitespace-nowrap px-1 py-1 text-center">
+      <TableCell className="whitespace-nowrap px-1 py-3.5 text-center">
         <Badge variant={isActive ? 'primary' : 'neutral'} className="px-1">
           {isActive ? 'Ativo' : 'Histórico'}
         </Badge>
       </TableCell>
 
       {/* 4. Macros */}
-      <TableCell className="min-w-0 whitespace-nowrap px-1 py-1">
+      <TableCell className="min-w-0 whitespace-nowrap px-1 py-3.5">
         <div className="flex items-center gap-2">
           <MacroSummary
             protein={diet.proteinG}
@@ -331,14 +340,14 @@ export function DietTableRow({
       </TableCell>
 
       {/* 5. Calorias */}
-      <TableCell className="whitespace-nowrap px-1 py-1 text-center">
+      <TableCell className="whitespace-nowrap px-1 py-3.5 text-center">
         <span className={`font-bold text-text-primary ${textStyle('table-number')}`}>
           {diet.targetKcal} kcal
         </span>
       </TableCell>
 
       {/* 6. Ações */}
-      <TableCell className="whitespace-nowrap px-1 py-1 text-right">
+      <TableCell className="whitespace-nowrap px-1 py-3.5 text-right">
         <div className="pointer-events-none flex items-center justify-end gap-1 invisible group-hover:pointer-events-auto group-hover:visible group-focus-within:pointer-events-auto group-focus-within:visible">
           <Button
             type="button"
@@ -369,7 +378,10 @@ export function DietTableRow({
 export function PatientDietsTable({
   patientId,
   diets = [],
+  loading = false,
+  error,
   onOpenReadOnlyDiet,
+  pagination,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
 
@@ -382,6 +394,9 @@ export function PatientDietsTable({
         caption="Histórico de prescrições dietéticas e planos alimentares"
         ariaLabel="Histórico de prescrições dietéticas e planos alimentares"
         emptyMessage="Nenhuma prescrição dietética registrada para este paciente até o momento."
+        loading={loading}
+        errorMessage={error || undefined}
+        pagination={pagination}
         renderRow={(diet) => (
           <DietTableRow
             patientId={patientId}

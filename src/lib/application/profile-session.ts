@@ -1,16 +1,19 @@
 import { nanoid } from 'nanoid';
 import type { Account } from '@/lib/domain/account';
 import { normalizeAccountDisplayName } from '@/lib/domain/account';
-import { BackupApplicationError, parseBackupEnvelope, validateBackupEnvelope } from './backup-application';
-import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { BackupApplicationError, validateBackupEnvelope } from './backup-application';
+import { BACKUP_SCHEMA_VERSION, type BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
 import type { SaveFile, SaveFilePermission, SaveFilePort } from '@/lib/persistence/save-file';
 
 export type ProfileSessionStatus = 'empty' | 'busy' | 'active' | 'paused';
-export type ProfileSessionSyncState = 'unbound' | 'syncing' | 'synced' | 'paused';
+export type ProfileSessionSyncState = 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
 export type ProfileSessionHydrationState = 'pending' | 'ready';
 
 export interface ProfileSessionRuntime {
   readonly account: Account;
+  getCheckpointState(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
+  markWorkspaceDirty(): Promise<void>;
+  advanceCheckpoint(revision: number): Promise<void>;
 }
 
 export interface ProfileSessionSnapshot<TRuntime extends ProfileSessionRuntime> {
@@ -132,6 +135,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   let associatedFile: SaveFile | null = null;
   let rememberedFile: SaveFile | null | undefined;
   let restorePromise: Promise<void> | null = null;
+  let checkpointPromise: Promise<void> | null = null;
 
   const notify = () => {
     for (const listener of listeners) listener(snapshot);
@@ -209,8 +213,8 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
 
   const writeSnapshot = async (runtime: TRuntime, file: SaveFile): Promise<void> => {
     const exported = await dependencies.exportSnapshot(runtime);
-    const normalized = validateBackupEnvelope(exported);
-    await dependencies.filePort.write(file, JSON.stringify(normalized));
+    const snapshot = exported.schemaVersion === BACKUP_SCHEMA_VERSION ? exported : validateBackupEnvelope(exported);
+    await dependencies.filePort.write(file, JSON.stringify(snapshot));
   };
 
   const requestPermission = async (file: SaveFile): Promise<SaveFilePermission> => {
@@ -233,8 +237,13 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       if (options.requestPermissionFirst) permission = await requestPermission(file);
 
       let envelope: BackupEnvelope;
+      let sourceSchemaVersion: unknown;
       try {
-        envelope = parseBackupEnvelope(await dependencies.filePort.read(file));
+        const rawInput: unknown = JSON.parse(await dependencies.filePort.read(file));
+        sourceSchemaVersion = typeof rawInput === 'object' && rawInput !== null && !Array.isArray(rawInput)
+          ? (rawInput as Record<string, unknown>).schemaVersion
+          : undefined;
+        envelope = validateBackupEnvelope(rawInput);
       } catch (cause) {
         throw cause instanceof ProfileSessionError ? cause : profileError('LOAD_INVALID', loadValidationMessage(cause), cause);
       }
@@ -243,13 +252,16 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       const account: Account = cloneAccount(accountRow);
       runtime = await dependencies.createRuntime(account);
       await dependencies.importSnapshot(runtime, envelope);
+      if (sourceSchemaVersion !== BACKUP_SCHEMA_VERSION) await runtime.markWorkspaceDirty();
       permission ??= await requestPermission(file);
+      const checkpoint = await runtime.getCheckpointState();
+      const pendingState: ProfileSessionSyncState = checkpoint.workspaceRevision > checkpoint.checkpointRevision ? 'pending' : 'synced';
       if (isPermissionDenied(permission)) {
         await commitRuntime(runtime, file, 'paused');
         runtime = null;
         return;
       }
-      await commitRuntime(runtime, file, 'synced');
+      await commitRuntime(runtime, file, pendingState);
       runtime = null;
     } catch (cause) {
       await dispose(runtime);
@@ -328,6 +340,46 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
     await loadSelectedFile(file, { requestPermissionFirst: true });
   };
 
+  const performSync = async (): Promise<void> => {
+    const previous = begin();
+    const runtime = previous.runtime;
+    if (!runtime || !previous.account || !previous.fileName) {
+      update(previous);
+      throw profileError('SESSION_UNAVAILABLE', 'Nenhum save está associado à sessão atual.');
+    }
+
+    try {
+      const captured = await runtime.getCheckpointState();
+      if (captured.workspaceRevision <= captured.checkpointRevision) {
+        update({ ...previous, status: 'active', syncState: 'synced', error: null });
+        return;
+      }
+
+      update({ status: 'busy', syncState: 'syncing', error: null });
+      if (!associatedFile) throw profileError('SAVE_WRITE_FAILED', 'O arquivo associado não está disponível para sincronização.');
+      const permission = await requestPermission(associatedFile);
+      if (isPermissionDenied(permission)) throw profileError('SAVE_PERMISSION_DENIED', 'A permissão de escrita do save foi revogada.');
+      await writeSnapshot(runtime, associatedFile);
+      await runtime.advanceCheckpoint(captured.workspaceRevision);
+      const current = await runtime.getCheckpointState();
+      const hasPendingChanges = current.workspaceRevision > current.checkpointRevision;
+      update({ status: 'active', syncState: hasPendingChanges ? 'pending' : 'synced', error: null });
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'A sincronização foi pausada.';
+      update({ ...previous, status: 'paused', syncState: 'paused', error: message });
+      throw cause instanceof ProfileSessionError ? cause : profileError('SAVE_WRITE_FAILED', message, cause);
+    }
+  };
+
+  const sync = (): Promise<void> => {
+    if (checkpointPromise) return checkpointPromise;
+    const shared = performSync().finally(() => {
+      if (checkpointPromise === shared) checkpointPromise = null;
+    });
+    checkpointPromise = shared;
+    return shared;
+  };
+
   return {
     getSnapshot: () => snapshot,
     subscribe: (listener) => {
@@ -357,6 +409,8 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
         const permission = await requestPermission(file);
         if (isPermissionDenied(permission)) throw profileError('SAVE_PERMISSION_DENIED', 'Conceda permissão de escrita para criar o arquivo do profile.');
         await writeSnapshot(runtime, file);
+        const checkpoint = await runtime.getCheckpointState();
+        await runtime.advanceCheckpoint(checkpoint.workspaceRevision);
         await commitRuntime(runtime, file, 'synced');
         runtime = null;
       } catch (cause) {
@@ -414,26 +468,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
         });
       }
     },
-    async sync() {
-      const previous = begin();
-      const runtime = previous.runtime;
-      if (!runtime || !previous.account || !previous.fileName) {
-        update(previous);
-        throw profileError('SESSION_UNAVAILABLE', 'Nenhum save está associado à sessão atual.');
-      }
-      update({ status: 'busy', syncState: 'syncing', error: null });
-      try {
-        if (!associatedFile) throw profileError('SAVE_WRITE_FAILED', 'O arquivo associado não está disponível para sincronização.');
-        const permission = await requestPermission(associatedFile);
-        if (isPermissionDenied(permission)) throw profileError('SAVE_PERMISSION_DENIED', 'A permissão de escrita do save foi revogada.');
-        await writeSnapshot(runtime, associatedFile);
-        update({ status: 'active', syncState: 'synced', error: null });
-      } catch (cause) {
-        const message = cause instanceof Error ? cause.message : 'A sincronização foi pausada.';
-        update({ ...previous, status: 'paused', syncState: 'paused', error: message });
-        throw cause instanceof ProfileSessionError ? cause : profileError('SAVE_WRITE_FAILED', message, cause);
-      }
-    },
+    sync,
   };
 }
 

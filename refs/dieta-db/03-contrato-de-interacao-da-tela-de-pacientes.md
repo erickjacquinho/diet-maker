@@ -183,17 +183,18 @@ O cartão **Próximo acompanhamento** abre `NextEventModal`.
 
 Sem evento:
 
-- título de criação;
+- título **Agendar acompanhamento**;
 - data obrigatória;
-- tipo obrigatório;
+- ao menos um tipo obrigatório: atualização de avaliação, atualização de dieta ou ambos;
+- comentários opcionais em campo multilinha de cinco linhas;
 - **Salvar** chama `setNextFollowUp`;
 - **Cancelar** fecha sem mutação.
 
 Com evento:
 
-- título de edição/reagendamento;
+- mantém o título **Agendar acompanhamento**;
 - formulário começa com os valores existentes;
-- **Salvar** substitui o evento em uma operação atômica;
+- tipos e comentários começam com os valores existentes; **Salvar** substitui o evento em uma operação atômica;
 - **Remover data** abre confirmação própria;
 - confirmar remoção chama `clearNextFollowUp`;
 - cancelar remoção mantém o evento.

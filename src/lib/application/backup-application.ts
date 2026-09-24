@@ -88,6 +88,17 @@ export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
         : input.patients,
     }),
   },
+  {
+    from: '6',
+    to: '7',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '7',
+      nextFollowUps: Array.isArray(input.nextFollowUps)
+        ? input.nextFollowUps.map((row) => (isRecord(row) ? { comments: '', ...row } : row))
+        : input.nextFollowUps,
+    }),
+  },
 ];
 
 function fail(code: BackupErrorCode, message: string, cause?: unknown): never {
@@ -125,9 +136,7 @@ function isNullableValue(predicate: (candidate: unknown) => boolean): (value: un
 }
 
 function assertExactKeys(record: UnknownRecord, expected: readonly string[], tableName: string): void {
-  const actual = Object.keys(record).sort();
-  const required = [...expected].sort();
-  if (actual.length !== required.length || actual.some((key, index) => key !== required[index])) {
+  if (Object.keys(record).length !== expected.length || expected.some((key) => !Object.prototype.hasOwnProperty.call(record, key))) {
     fail('BACKUP_FORMAT_INVALID', `O registro ${tableName} possui campos desconhecidos ou incompletos.`);
   }
 }
@@ -187,7 +196,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg'), nullableNumericStringFields('bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
       break;
     case 'nextFollowUps':
-      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'createdAt', 'updatedAt'), { version: isNumber });
+      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), { version: isNumber });
       break;
     case 'dietPlans':
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'name', 'mode', 'status', 'createdAt', 'updatedAt', 'activatedAt'), nullableNumericStringFields('weightReferenceKg'), { version: isNumber }, nullableStringFields('supersededAt'));
@@ -451,13 +460,15 @@ export interface BackupExportResult {
 export interface BackupApplicationDependencies {
   accountContext: AccountContext;
   repository: BackupRepository;
-  draftStore: Pick<DietDraftStore, 'listRecoverableByAccount'>;
+  draftStore: Pick<DietDraftStore, 'listRecoverableByAccount' | 'removeIfRevision'>;
+  getCheckpointState?(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
+  savePendingCheckpoint?(): Promise<void>;
 }
 
 export interface BackupApplication {
   exportBackup(): Promise<BackupExportResult>;
   validateBackup(serialized: string): Promise<BackupEnvelope>;
-  restoreBackup(serialized: string, options?: { confirmed?: boolean }): Promise<void>;
+  restoreBackup(serialized: string, options?: { confirmed?: boolean; pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean }): Promise<void>;
 }
 
 function appErrorFromCause(code: BackupErrorCode, message: string, cause: unknown): BackupApplicationError {
@@ -496,9 +507,32 @@ export function createBackupApplication(dependencies: BackupApplicationDependenc
     restoreBackup: async (serialized, options = {}) => {
       const context = await getValidationContext();
       const envelope = parseBackupEnvelope(serialized, context);
-      const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
-      if (drafts.length > 0) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Resolva, salve ou descarte os rascunhos pendentes antes de importar o backup.');
       if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
+      const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
+      if (drafts.length > 0 && options.discardDrafts) {
+        for (const draft of drafts) {
+          const removed = await dependencies.draftStore.removeIfRevision(draft.draftId, draft.draftRevision);
+          if (!removed) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Um rascunho mudou durante a restauração; nenhum rascunho atualizado foi descartado.');
+        }
+        if ((await dependencies.draftStore.listRecoverableByAccount(context.accountId)).length > 0) {
+          throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Ainda há rascunhos pendentes; a base local não foi alterada.');
+        }
+      } else if (drafts.length > 0) {
+        throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Salve os rascunhos no perfil ou descarte-os explicitamente antes de importar o backup.');
+      }
+      const checkpoint = await dependencies.getCheckpointState?.();
+      if (checkpoint && checkpoint.workspaceRevision > checkpoint.checkpointRevision) {
+        if (options.pendingChanges === 'save') {
+          if (!dependencies.savePendingCheckpoint) throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'O save principal não está disponível para gravar as alterações pendentes.');
+          await dependencies.savePendingCheckpoint();
+          const saved = await dependencies.getCheckpointState?.();
+          if (saved && saved.workspaceRevision > saved.checkpointRevision) {
+            throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Ainda há alterações locais sem checkpoint no arquivo principal.');
+          }
+        } else if (options.pendingChanges !== 'discard') {
+          throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Escolha salvar ou descartar as alterações locais antes de importar o backup.');
+        }
+      }
       try {
         await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
       } catch (cause) {

@@ -81,11 +81,21 @@ export function toAssessmentInput(assessment: BodyAssessment): AssessmentInput {
 
 export function toLegacyNextEvent(followUp: NextFollowUp | null): PatientNextEvent | null {
   if (!followUp) return null;
-  return { date: dateToLegacy(followUp.dueDate), type: followUp.type === 'DIET_UPDATE' ? 'diet-update' : 'assessment-update', version: followUp.version };
+  return {
+    date: dateToLegacy(followUp.dueDate),
+    type: followUp.type.map((type) => type === 'DIET_UPDATE' ? 'diet-update' : 'assessment-update'),
+    ...(followUp.comments ? { comments: followUp.comments } : {}),
+    version: followUp.version,
+  };
 }
 
-export function toNextFollowUpInput(event: Pick<PatientNextEvent, 'date' | 'type'>): NextFollowUpInput {
-  return { dueDate: event.date, type: event.type === 'diet-update' ? 'DIET_UPDATE' : 'ASSESSMENT_UPDATE' };
+export function toNextFollowUpInput(event: Pick<PatientNextEvent, 'date' | 'type' | 'comments'>): NextFollowUpInput {
+  const types = Array.isArray(event.type) ? event.type : [event.type];
+  return {
+    dueDate: event.date,
+    type: types.map((type) => type === 'diet-update' ? 'DIET_UPDATE' : 'ASSESSMENT_UPDATE'),
+    ...(event.comments === undefined ? {} : { comments: event.comments }),
+  };
 }
 
 export function toLegacyLastActivity(activity: { eventDate: string; type: 'assessment' | 'diet' } | null | undefined): PatientLastActivity | null {

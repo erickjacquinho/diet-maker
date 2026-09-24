@@ -50,15 +50,14 @@ describe('patient clinical profile projection', () => {
     }));
   });
 
-  it('renders confirmed assessment values and the same follow-up projection', () => {
+  it('renders confirmed assessment values and allows follow-up rescheduling', () => {
     render(<PatientDetailPage />);
 
     expect(screen.getByText('1 avaliação')).toBeInTheDocument();
     const assessments = screen.getByRole('table', { name: /Histórico de avaliações físicas/ });
     expect(within(assessments).getByText('76 kg')).toBeInTheDocument();
     expect(within(assessments).getByText('19.32%')).toBeInTheDocument();
-    expect(screen.getByText('15/09/2026')).toBeInTheDocument();
-    expect(screen.getByText('Atualização de avaliação')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reagendar acompanhamento' })).toBeInTheDocument();
   });
 
   it('does not expose clinical mutation controls for an archived profile', () => {

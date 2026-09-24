@@ -6,6 +6,7 @@ import type {
 } from './patientsStore';
 import { calculateWeeklyCycleAverage, type CarbCyclingVariation, type StoredDietRecord } from './legacy-diet-types';
 import { normalizeDateToISO } from './date-only';
+import { formatEventType } from './patientListDateUtils';
 
 export interface ActivePlanSummary {
   dietId: string;
@@ -16,6 +17,7 @@ export interface ActivePlanSummary {
   proteinG: number;
   carbsG: number;
   fatsG: number;
+  mode?: 'simple' | 'carb_cycling';
 }
 
 export interface NextEventSummary {
@@ -71,6 +73,7 @@ export function selectActivePlan(diets: HistoricalDiet[]): ActivePlanSummary | n
     proteinG: activePlan.proteinG,
     carbsG: activePlan.carbsG,
     fatsG: activePlan.fatsG,
+    mode: activePlan.mode ?? 'simple',
   };
 }
 
@@ -92,6 +95,7 @@ export function selectCurrentActivePlan(diets: HistoricalDiet[]): ActivePlanSumm
     proteinG: active.proteinG,
     carbsG: active.carbsG,
     fatsG: active.fatsG,
+    mode: active.mode ?? 'simple',
   };
 }
 
@@ -153,6 +157,6 @@ export function buildNextEventSummary(event: PatientNextEvent | null | undefined
 
   return {
     date,
-    label: event.type === 'diet-update' ? 'Atualização de dieta' : 'Atualização de avaliação',
+    label: formatEventType(event.type) ?? 'Atualização de avaliação',
   };
 }

@@ -30,7 +30,7 @@ Criação e edição de acompanhamento.
 
 ## Particular states
 
-Quando há acompanhamento definido, exibe ação de remoção.
+Quando há acompanhamento definido, exibe ação de remoção. É possível desmarcar os dois tipos, mas Salvar permanece desabilitado enquanto nenhum estiver selecionado.
 
 ## Composition
 
@@ -52,6 +52,7 @@ A lista canônica de consumidores é o campo `consumers` do registro; atualmente
 
 - identidade, source e exports coincidem com o registro;
 - permite reagendar e remover a data com confirmação.
+- permite desmarcar ambos os tipos, mantendo Salvar desabilitado enquanto nenhum estiver selecionado.
 
 ## Implementation status
 

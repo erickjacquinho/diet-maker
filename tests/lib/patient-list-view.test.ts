@@ -95,12 +95,18 @@ describe('patient list ordering and filtering', () => {
     const rows = buildPatientListRows([
       PATIENT_LIST_FIXTURES.today,
       PATIENT_LIST_FIXTURES.upcoming,
+      {
+        ...PATIENT_LIST_FIXTURES.today,
+        id: 'patient-both-types',
+        nextEvent: { date: PATIENT_LIST_TODAY, type: ['assessment-update', 'diet-update'] },
+      },
     ], PATIENT_LIST_TODAY);
 
     expect(rows.find((row) => row.patient.id === PATIENT_LIST_FIXTURES.today.id)?.history.hasAssessment).toBe(true);
     expect(rows.find((row) => row.patient.id === PATIENT_LIST_FIXTURES.today.id)?.history.hasDiet).toBe(false);
     expect(rows.find((row) => row.patient.id === PATIENT_LIST_FIXTURES.upcoming.id)?.history.hasAssessment).toBe(false);
     expect(rows.find((row) => row.patient.id === PATIENT_LIST_FIXTURES.upcoming.id)?.history.hasDiet).toBe(true);
+    expect(rows.find((row) => row.patient.id === 'patient-both-types')?.history).toMatchObject({ hasAssessment: true, hasDiet: true });
   });
 
   it('uses patient name as the tie-breaker for equivalent event dates', () => {

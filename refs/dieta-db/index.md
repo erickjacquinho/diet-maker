@@ -11,10 +11,12 @@ execução e abra as decisões de cada etapa para os detalhes.
 
 ## Proposta preservada
 
-Persistir os dados do consultório no navegador, com uma Conta, um profissional
-e uma aba ativa. O nutricionista mantém as edições em rascunho, confirma a
-prescrição por **Salvar** e exporta/restaura a Conta manualmente por um arquivo
-`.nutridiet` em JSON, **sem criptografia e sem senha**.
+Manter os dados do consultório em uma área de trabalho local no navegador, com
+uma Conta, um profissional e uma aba ativa. O arquivo `.nutridiet` em JSON é o
+save principal e autoritativo da Conta: cada checkpoint concluído representa
+todos os dados confirmados até aquela revisão. O banco local conserva o
+trabalho confirmado posterior ao último checkpoint; drafts continuam em
+armazenamento separado. O arquivo não tem criptografia nem senha.
 
 O primeiro fluxo vertical completo é:
 
@@ -39,14 +41,15 @@ indicadas; a tabela não acrescenta requisitos.
 | Biblioteca | Alimentos customizados, receitas e refeições prontas pertencem à Conta e são reutilizáveis entre pacientes | [06](./06-catalogo-de-alimentos-e-customizados.md), [07](./07-receitas-e-refeicoes-prontas.md) |
 | Dados clínicos | Avaliações, acompanhamento existente e prescrições ficam vinculados à Conta e ao Paciente | [02](./02-ciclo-de-vida-e-persistencia-do-paciente.md), [03](./03-contrato-de-interacao-da-tela-de-pacientes.md), [05](./05-arquitetura-backend-e-escopos-de-dados.md) |
 | Rascunho e autosave | IndexedDB guarda somente a edição local; primeiro alimento e autosave não criam dieta confirmada nem alteram histórico | [01](./01-fluxo-paciente-dieta.md), [04](./04-plano-de-execucao-e-validacao.md) |
-| Salvamento | Capturar o último input, validar e confirmar plano, filhos e vigência em uma transação; botão e Ctrl+S usam o mesmo caso de uso | [01](./01-fluxo-paciente-dieta.md), [04](./04-plano-de-execucao-e-validacao.md) |
+| Save principal | Salvar e Ctrl+S fazem checkpoint do `.nutridiet`; navegação também tenta gravar alterações confirmadas, sem reescrever um arquivo limpo | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md) |
+| Confirmação da dieta | Capturar o último input, validar e confirmar plano, filhos e vigência em uma transação; botão e Ctrl+S usam o mesmo caso de uso | [01](./01-fluxo-paciente-dieta.md), [04](./04-plano-de-execucao-e-validacao.md) |
 | Falhas e repetição | Preservar draft em rollback; conferir resultado incerto pelo ID estável antes de repetir; erro só na limpeza não repete o commit | [01](./01-fluxo-paciente-dieta.md) |
 | Vigência e histórico | Uma vigente por paciente, editável por salvamento explícito; ao ser substituída, torna-se histórica e somente leitura | [01](./01-fluxo-paciente-dieta.md), [08](./08-snapshots-versionamento-e-integridade-clinica.md) |
 | Integridade nutricional | Preservar snapshots, unidades, energia da fonte, metas manuais e peso de referência; mudanças no catálogo não recalculam o histórico | [06](./06-catalogo-de-alimentos-e-customizados.md), [08](./08-snapshots-versionamento-e-integridade-clinica.md) |
 | Busca | Preservar a meta já existente de busca de alimentos em menos de 100 ms após inicialização; medir na integração, sem nova certificação de volume | [10](./10-motor-local-drizzle-e-migrations.md) |
 | Offline e abas | Fluxos locais funcionam sem rede após preparação dos recursos; segunda aba é bloqueada antes de abrir o banco | [09](./09-topologia-v1-local-first-e-conta-local.md), [10](./10-motor-local-drizzle-e-migrations.md) |
-| Exportação | Backup manual de todos os dados confirmados da Conta, inclusive arquivados e snapshots, sem drafts, senha ou criptografia | [11](./11-recuperacao-e-portabilidade-local.md), [13](./13-protecao-local-e-backup-simples.md) |
-| Restauração | Validar arquivo e versões, resolver edições pendentes e confirmar a substituição de toda a base em uma transação, sem mesclagem | [11](./11-recuperacao-e-portabilidade-local.md) |
+| Arquivo e portabilidade | O save principal registra todos os dados confirmados da Conta, inclusive arquivados e snapshots, sem drafts, senha ou criptografia | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md), [13](./13-protecao-local-e-backup-simples.md) |
+| Restauração | Validar arquivo e versões, resolver edições pendentes e confirmar a substituição da área local em uma transação, sem mesclagem | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md) |
 | Retenção e privacidade | Informar que navegador/dispositivo podem perder dados, backup só recupera o exportado e quem acessar o arquivo poderá lê-lo | [09](./09-topologia-v1-local-first-e-conta-local.md), [13](./13-protecao-local-e-backup-simples.md) |
 | Arquitetura e legado | UI usa casos de uso/repositórios; descartar dados legados de teste por módulo, sem migrador nem duas fontes canônicas para a mesma entidade | [04](./04-plano-de-execucao-e-validacao.md), [05](./05-arquitetura-backend-e-escopos-de-dados.md), [14](./14-consolidacao-e-portao-de-execucao.md) |
 
@@ -56,7 +59,8 @@ indicadas; a tabela não acrescenta requisitos.
 | --- | --- |
 | Conta / perfil local | Identidade e configurações do profissional que possui a base; `accountId` identifica a propriedade dos dados |
 | Conta + Paciente | Escopo dos registros clínicos, sem permitir associá-los a outro paciente ou Conta |
-| Banco canônico / backend local | Banco relacional dos dados confirmados; na V1 não significa servidor remoto |
+| Save principal / `.nutridiet` | Arquivo portátil autoritativo; corresponde ao último checkpoint de dados confirmados gravado com sucesso |
+| Área de trabalho local | Banco relacional no IndexedDB usado em runtime, que conserva alterações confirmadas posteriores ao último checkpoint |
 | DietDraft / Em Criação | Documento de edição em IndexedDB, recuperável no mesmo navegador, sem constituir prescrição confirmada |
 | Autosave / buffer de rascunho | Gravação da edição no draft; não equivale ao salvamento clínico e só protege o que foi efetivamente persistido |
 | Commit / salvamento explícito | Transação iniciada por Salvar ou Ctrl+S, confirmando os dados da prescrição em conjunto |
@@ -69,7 +73,7 @@ indicadas; a tabela não acrescenta requisitos.
 | VET / meta energética | Objetivo em kcal informado pelo nutricionista; não se confunde com a soma energética dos alimentos |
 | Energia de referência / calculada | Kcal informadas pela fonte ou estimativa identificada por 4–4–9; regras completas na Decisão 06 |
 | g/kg | Gramas do macronutriente por quilograma; a prescrição preserva seu peso de referência, conforme a Decisão 08 |
-| Arquivo mestre / .nutridiet | Backup lógico em JSON dos dados confirmados da Conta; não é rascunho, PDF, arquivo SQL ou cópia física do motor |
+| Banco relacional local | Persistência da área de trabalho do navegador; não é o save principal e não é servidor remoto |
 | Outbox | Mecanismo de sincronização futura, excluído da V1; não há fila a implementar agora |
 
 ## Etapas para os SDDs
@@ -134,6 +138,7 @@ autenticação futura; não gera tarefas implícitas para esta implementação.
 - [12 — Autenticação online futura e soberania dos dados locais](./12-autenticacao-online-e-soberania-local.md)
 - [13 — Proteção local e backup simples](./13-protecao-local-e-backup-simples.md)
 - [14 — Consolidação e divisão da implementação em SDDs](./14-consolidacao-e-portao-de-execucao.md)
+- [ADR-009 — `.nutridiet` como save principal](../../docs/adr/ADR-009-nutridiet-principal.md)
 
 ## Fonte única e manutenção
 

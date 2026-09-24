@@ -115,11 +115,6 @@ function RecordIndicators({ row }: { row: PatientListRow }) {
   );
 }
 
-function getObjectiveLabel(objective: string): string {
-  if (objective === 'Recomposição Corporal') return 'Recomposição';
-  return objective || 'Acompanhamento';
-}
-
 export function PatientListTableRow({
   row,
   onNavigate,
@@ -145,6 +140,7 @@ export function PatientListTableRow({
   ]
     .filter(Boolean)
     .join(' · ');
+  const objectiveLabel = row.patient.objective.trim() || 'sem objetivo';
 
   const hasBodyFat = row.history.currentBodyFatPercent !== null;
   const bodyFatSubtitle = row.history.bodyFatDeltaLabel ?? (hasBodyFat ? 'Sem comparação' : 'Sem histórico');
@@ -190,9 +186,9 @@ export function PatientListTableRow({
       <TableCell className="px-4 py-3 align-middle">
         <span
           className="inline-flex max-w-full truncate whitespace-nowrap rounded-control border border-border-subtle bg-surface-subtle px-2 py-1 text-style-legal font-medium text-text-secondary"
-          title={row.patient.objective}
+          title={objectiveLabel}
         >
-          {getObjectiveLabel(row.patient.objective)}
+          {objectiveLabel}
         </span>
       </TableCell>
       <TableCell className="px-4 py-3 align-middle">

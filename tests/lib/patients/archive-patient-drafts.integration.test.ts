@@ -6,7 +6,7 @@ const patient = { id: 'patient-a', accountId: 'account-a', displayCode: 'P-0001'
 
 function createApp(invalidate: DietDraftStore['invalidateByPatient']) {
   const store: DietDraftStore = { create: vi.fn(), getByContext: vi.fn(), get: vi.fn(), putIfNewer: vi.fn(), reserveTargetId: vi.fn(), removeIfRevision: vi.fn(), invalidateByPatient: invalidate, listRecoverableByPatient: vi.fn(), listRecoverableByAccount: vi.fn() };
-  const patientRepository = { archive: vi.fn(async () => patient), getById: vi.fn(), create: vi.fn(), listActive: vi.fn(), update: vi.fn(), restore: vi.fn() };
+  const patientRepository = { archive: vi.fn(async () => patient), getById: vi.fn(), create: vi.fn(), listActive: vi.fn(), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), restore: vi.fn() };
   return createPatientApplication({
     accountContext: { requireActive: vi.fn(async () => ({ accountId: 'account-a', account: {} as never })), getActive: vi.fn() },
     patientRepository, objectiveCatalogRepository: {} as never, patientProfileReader: {} as never, transactionRunner: { run: <T>(operation: () => Promise<T>) => operation() }, dietDraftStore: store,

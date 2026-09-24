@@ -8,12 +8,32 @@ function createDependencies(envelope: BackupEnvelope) {
     readAccountSnapshot: vi.fn(async () => structuredClone(envelope)),
     replaceAccountSnapshot: vi.fn(async () => undefined),
   };
-  const draftStore = { listRecoverableByAccount: vi.fn(async () => []) };
+  const draftStore = {
+    listRecoverableByAccount: vi.fn(async () => []),
+    removeIfRevision: vi.fn(async () => true),
+  };
+  const checkpointState = { workspaceRevision: 0, checkpointRevision: 0 };
+  const savePendingCheckpoint = vi.fn(async () => {
+    checkpointState.checkpointRevision = checkpointState.workspaceRevision;
+  });
   const accountContext = {
     getActive: vi.fn(),
     requireActive: vi.fn(async () => ({ accountId: 'local-account', account: envelope.account[0] })),
   };
-  return { repository, draftStore, accountContext, application: createBackupApplication({ accountContext, repository, draftStore }) };
+  return {
+    repository,
+    draftStore,
+    accountContext,
+    checkpointState,
+    savePendingCheckpoint,
+    application: createBackupApplication({
+      accountContext,
+      repository,
+      draftStore,
+      getCheckpointState: async () => ({ ...checkpointState }),
+      savePendingCheckpoint,
+    }),
+  };
 }
 
 describe('backup application export', () => {
@@ -53,9 +73,11 @@ describe('backup application export', () => {
 describe('backup application restore', () => {
   it('validates before writing and rejects a malformed or foreign-account file', async () => {
     const dependencies = createDependencies(createBackupEnvelope());
+    const incompatible = { ...createBackupEnvelope(), schemaVersion: '99' };
 
     await expect(dependencies.application.restoreBackup('{broken', { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_FORMAT_INVALID' });
     await expect(dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope({ account: [{ ...createBackupEnvelope().account[0], id: 'other-account' }] })), { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_APP_MISMATCH' });
+    await expect(dependencies.application.restoreBackup(JSON.stringify(incompatible), { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_VERSION_UNSUPPORTED' });
     expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
   });
 
@@ -97,6 +119,44 @@ describe('backup application restore', () => {
     vi.mocked(dependencies.draftStore.listRecoverableByAccount).mockResolvedValue([]);
     await dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true });
     expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledWith('local-account', expect.objectContaining({ appId: 'nutridiet-local-pro' }));
+  });
+
+  it('discards editable drafts only after an explicit, revision-safe choice', async () => {
+    const dependencies = createDependencies(createBackupEnvelope());
+    const draft = { draftId: 'draft-pending', draftRevision: 4 } as never;
+    vi.mocked(dependencies.draftStore.listRecoverableByAccount).mockResolvedValueOnce([draft]);
+
+    await expect(dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_PENDING_EDITS' });
+    expect(dependencies.draftStore.removeIfRevision).not.toHaveBeenCalled();
+
+    vi.mocked(dependencies.draftStore.listRecoverableByAccount).mockResolvedValueOnce([draft]).mockResolvedValueOnce([]);
+    await dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true, discardDrafts: true });
+    expect(dependencies.draftStore.removeIfRevision).toHaveBeenCalledWith('draft-pending', 4);
+    expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledTimes(1);
+  });
+
+  it('requires an explicit save or discard choice for a pending checkpoint', async () => {
+    const dependencies = createDependencies(createBackupEnvelope());
+    dependencies.checkpointState.workspaceRevision = 3;
+    dependencies.checkpointState.checkpointRevision = 1;
+
+    await expect(dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_PENDING_CHECKPOINT' });
+    expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
+
+    await dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true, pendingChanges: 'save' });
+    expect(dependencies.savePendingCheckpoint).toHaveBeenCalledTimes(1);
+    expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the user discard a pending checkpoint without saving it first', async () => {
+    const dependencies = createDependencies(createBackupEnvelope());
+    dependencies.checkpointState.workspaceRevision = 2;
+    dependencies.checkpointState.checkpointRevision = 0;
+
+    await dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true, pendingChanges: 'discard' });
+
+    expect(dependencies.savePendingCheckpoint).not.toHaveBeenCalled();
+    expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledTimes(1);
   });
 
   it('classifies a transactional repository failure without reporting success', async () => {

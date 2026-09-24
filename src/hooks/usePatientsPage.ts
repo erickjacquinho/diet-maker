@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PatientInput } from '@/lib/domain/patient';
 import type { PatientApplicationError } from '@/lib/application/patients/patient-errors';
 import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
@@ -12,13 +12,16 @@ export function usePatientsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const latestRequest = useRef(0);
 
   const loadPatients = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     setIsLoading(true);
     setError(null);
     try {
       const application = await getBrowserPatientApplication();
       const summaries = await application.listActivePatients();
+      if (requestId !== latestRequest.current) return;
       const views = summaries.map(({ patient, initials, clinical }) => toPatientViewModel(patient, {
         initials,
         nextEvent: toLegacyNextEvent(clinical?.nextFollowUp ?? null),
@@ -31,10 +34,11 @@ export function usePatientsPage() {
         hasDiet: clinical?.hasDiet || related.dietCount > 0,
       }])));
     } catch (cause) {
+      if (requestId !== latestRequest.current) return;
       const message = (cause as PatientApplicationError)?.message || 'Não foi possível carregar os pacientes.';
       setError(message);
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequest.current) setIsLoading(false);
     }
   }, []);
 
@@ -47,6 +51,7 @@ export function usePatientsPage() {
     () => buildPatientListRows(filteredPatients, undefined, patientHistoryById),
     [filteredPatients, patientHistoryById],
   );
+  const total = filteredPatients.length;
 
   const createPatient = useCallback(async (input: PatientInput) => {
     const application = await getBrowserPatientApplication();
@@ -62,6 +67,7 @@ export function usePatientsPage() {
     patientHistoryById,
     searchTerm,
     setSearchTerm,
+    total,
     isLoading,
     error,
     retry: loadPatients,

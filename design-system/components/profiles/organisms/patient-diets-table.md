@@ -26,7 +26,7 @@ Herda [data-display](../../categories/data-display.md). Trait autorizado: `nutri
 
 ## Allowed variants
 
-Somente consulta, ordenação, seleção e paginação já disponíveis no consumidor.
+Prévia de até 10 registros no perfil e histórico completo paginado remotamente nas páginas do paciente; a expansão permanece disponível em ambos.
 
 ## Particular states
 
@@ -46,12 +46,13 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-Perfil do paciente, histórico de consultas e ações de consulta/importação.
+Perfil do paciente, páginas de histórico completo e histórico de consultas.
 
 ## Acceptance criteria
 
 - `DietTableRow` mantém semântica e associação com headers;
 - tabela usa estado interno canônico e chaves estáveis;
+- paginação remota recebe apenas a página consultada, preservando a ordem da aplicação;
 - consulta não altera snapshot, origem ou dados persistidos.
 
 ## Implementation status

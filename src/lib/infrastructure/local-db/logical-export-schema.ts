@@ -20,7 +20,7 @@ import type {
 
 export const BACKUP_APP_ID = 'nutridiet-local-pro' as const;
 export const BACKUP_FORMAT_VERSION = 1 as const;
-export const BACKUP_SCHEMA_VERSION = '6' as const;
+export const BACKUP_SCHEMA_VERSION = '7' as const;
 export const LEGACY_BACKUP_SCHEMA_VERSION = '4' as const;
 
 export const BACKUP_TABLE_NAMES = [
@@ -67,7 +67,7 @@ export type ReadyMealItemRow = typeof readyMealItems.$inferSelect;
 export interface BackupEnvelope {
   appId: typeof BACKUP_APP_ID;
   formatVersion: typeof BACKUP_FORMAT_VERSION;
-  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5';
+  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5' | '6';
   exportedAt: string;
   favorites: string[];
   account: AccountRow[];
@@ -95,7 +95,7 @@ export const BACKUP_ROW_KEYS: { readonly [K in BackupTableName]: readonly string
   objectiveOptions: ['id', 'accountId', 'label', 'normalizedLabel', 'origin', 'archivedAt', 'createdAt', 'updatedAt'],
   patients: ['id', 'accountId', 'displayCode', 'name', 'age', 'gender', 'birthDate', 'isPregnant', 'pregnancyDueDate', 'heightCm', 'weightKg', 'maritalStatus', 'phone', 'whatsapp', 'currentObjective', 'targetProtein', 'targetCarbs', 'targetFats', 'targetKcal', 'createdAt', 'updatedAt', 'version', 'archivedAt'],
   bodyAssessments: ['id', 'accountId', 'patientId', 'clinicalDate', 'weightKg', 'bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm', 'autoFilledFields', 'calculationMethod', 'calculationVersion', 'calculationInputSnapshot', 'version', 'createdAt', 'updatedAt'],
-  nextFollowUps: ['accountId', 'patientId', 'dueDate', 'type', 'version', 'createdAt', 'updatedAt'],
+  nextFollowUps: ['accountId', 'patientId', 'dueDate', 'type', 'comments', 'version', 'createdAt', 'updatedAt'],
   dietPlans: ['id', 'accountId', 'patientId', 'name', 'mode', 'status', 'weightReferenceKg', 'version', 'createdAt', 'updatedAt', 'activatedAt', 'supersededAt'],
   dietVariations: ['id', 'dietPlanId', 'accountId', 'patientId', 'position', 'kind', 'name', 'inputMode', 'targetProtein', 'targetCarbs', 'targetFat', 'targetKcal', 'gPerKgProtein', 'gPerKgCarbs', 'gPerKgFat'],
   dietVariationDays: ['variationId', 'dietPlanId', 'accountId', 'patientId', 'dayCode', 'position'],

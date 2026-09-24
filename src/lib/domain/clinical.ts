@@ -157,7 +157,8 @@ export interface NextFollowUp {
   accountId: string;
   patientId: string;
   dueDate: string;
-  type: FollowUpType;
+  type: FollowUpType[];
+  comments?: string;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -165,7 +166,8 @@ export interface NextFollowUp {
 
 export interface NextFollowUpInput {
   dueDate?: string | null;
-  type?: FollowUpType | string | null;
+  type?: FollowUpType | FollowUpType[] | string | null;
+  comments?: string | null;
 }
 
 export interface ConsultationView {
@@ -437,17 +439,26 @@ export interface NextFollowUpValidationResult {
   fieldErrors: Record<string, string>;
 }
 
+const FOLLOW_UP_TYPES: readonly FollowUpType[] = ['ASSESSMENT_UPDATE', 'DIET_UPDATE'];
+
+function normalizeFollowUpTypes(value: NextFollowUpInput['type']): FollowUpType[] | null {
+  const selected: unknown[] = value == null ? [] : Array.isArray(value) ? value : [value];
+  if (selected.length === 0 || selected.some((type) => !FOLLOW_UP_TYPES.includes(type as FollowUpType))) return null;
+  return FOLLOW_UP_TYPES.filter((type) => selected.includes(type));
+}
+
 export function validateNextFollowUpInput(input: NextFollowUpInput): NextFollowUpValidationResult {
   const fieldErrors: Record<string, string> = {};
   if (!normalizeClinicalDate(input.dueDate)) fieldErrors.dueDate = 'Informe uma data de acompanhamento válida.';
-  if (input.type !== 'ASSESSMENT_UPDATE' && input.type !== 'DIET_UPDATE') fieldErrors.type = 'Selecione um tipo de acompanhamento válido.';
+  if (!normalizeFollowUpTypes(input.type)) fieldErrors.type = 'Selecione ao menos um tipo de acompanhamento válido.';
+  if (input.comments != null && typeof input.comments !== 'string') fieldErrors.comments = 'Informe comentários válidos.';
   return { valid: Object.keys(fieldErrors).length === 0, fieldErrors };
 }
 
-export function normalizeNextFollowUpInput(input: NextFollowUpInput): { dueDate: string; type: FollowUpType } {
+export function normalizeNextFollowUpInput(input: NextFollowUpInput): { dueDate: string; type: FollowUpType[]; comments: string } {
   const result = validateNextFollowUpInput(input);
   if (!result.valid) throw new ClinicalApplicationError('CLINICAL_VALIDATION_FAILED', 'O acompanhamento informado é inválido.', { fieldErrors: result.fieldErrors });
-  return { dueDate: normalizeClinicalDate(input.dueDate)!, type: input.type as FollowUpType };
+  return { dueDate: normalizeClinicalDate(input.dueDate)!, type: normalizeFollowUpTypes(input.type)!, comments: input.comments ?? '' };
 }
 
 export function getFollowUpStatus(dueDate: string, today = localToday()): FollowUpStatus {

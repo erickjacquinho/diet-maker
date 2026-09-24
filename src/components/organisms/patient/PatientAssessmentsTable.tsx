@@ -17,14 +17,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { EditIconButton, IconButton } from '@/components/atoms';
-import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { DataTable, type DataTableColumnDef, type DataTablePagination } from '@/components/molecules/DataTable';
 import { MetricBoxGroup, type MetricBoxGroupItem } from '@/components/organisms/MetricBoxGroup';
 import type { BodyAssessment } from '@/lib/patientsStore';
 
 export interface PatientAssessmentsTableProps {
   patientId: string;
   assessments: BodyAssessment[];
+  loading?: boolean;
+  error?: string | null;
   onOpenEditAssessment?: (assessment: BodyAssessment) => void;
+  pagination?: DataTablePagination;
 }
 
 const columns: DataTableColumnDef<BodyAssessment>[] = [
@@ -289,6 +292,9 @@ export function AssessmentTableExpandedRow({
 export function PatientAssessmentsTable({
   patientId,
   assessments = [],
+  loading = false,
+  error,
+  pagination,
 }: PatientAssessmentsTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
@@ -304,6 +310,9 @@ export function PatientAssessmentsTable({
       caption="Histórico de avaliações físicas e composição corporal"
       ariaLabel="Histórico de avaliações físicas e composição corporal"
       emptyMessage="Nenhuma avaliação física registrada para este paciente até o momento."
+      loading={loading}
+      errorMessage={error || undefined}
+      pagination={pagination}
       expandedRowId={expandedRowId}
       renderRow={(assessment) => {
         const rowId = assessment.id;

@@ -9,9 +9,14 @@ async function downloadContent(download: Download): Promise<string> {
   return readFile(path as string, 'utf8');
 }
 
+async function openAccountAction(page: Page, action: 'Exportar backup' | 'Importar backup'): Promise<void> {
+  await page.getByRole('button', { name: /Abrir menu de conta/ }).click();
+  await page.getByRole('menuitem', { name: action }).click();
+}
+
 async function exportBackup(page: Page): Promise<string> {
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Exportar backup local' }).click();
+  await openAccountAction(page, 'Exportar backup');
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^nutridiet-backup-\d{4}-\d{2}-\d{2}\.nutridiet$/);
   return downloadContent(download);
@@ -19,7 +24,7 @@ async function exportBackup(page: Page): Promise<string> {
 
 async function openRestoreDialog(page: Page, content: string): Promise<void> {
   const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-  await page.getByRole('button', { name: 'Importar backup local' }).click();
+  await openAccountAction(page, 'Importar backup');
   await input.setInputFiles({
     name: 'nutridiet-backup.nutridiet',
     mimeType: 'application/json',
@@ -90,7 +95,7 @@ test.describe('backup manual local', () => {
     const content = await exportBackup(page);
 
     const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-    await page.getByRole('button', { name: 'Importar backup local' }).click();
+    await openAccountAction(page, 'Importar backup');
     await input.setInputFiles({
       name: 'backup-invalido.nutridiet',
       mimeType: 'application/json',

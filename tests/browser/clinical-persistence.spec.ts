@@ -1,5 +1,8 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { createProfileSession, navigateWithinSession } from './helpers/profile-session';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { installProfileFileSystemFakes, navigateWithinSession } from './helpers/profile-session';
 
 const assessmentFields = [
   ['Peso atual', '76'],
@@ -27,7 +30,7 @@ async function createPatient(page: Page, name: string): Promise<string> {
   const createDialog = page.getByRole('dialog', { name: 'Cadastrar Novo Paciente' });
   await createDialog.getByLabel('Nome Completo').fill(name);
   await createDialog.getByLabel('WhatsApp').fill('11999990000');
-  await createDialog.getByLabel('Data de nascimento').fill('01/01/1990');
+  await createDialog.getByRole('textbox', { name: 'Data de nascimento' }).fill('01/01/1990');
   await createDialog.getByRole('combobox', { name: 'Gênero' }).click();
   await page.getByRole('option', { name: 'Masculino', exact: true }).click();
   await createDialog.getByRole('button', { name: /Salvar Paciente/ }).click();
@@ -52,20 +55,22 @@ async function saveAssessment(page: Page): Promise<void> {
 }
 
 async function chooseDate(page: Page, container: Page | Locator, label: string): Promise<void> {
-  await container.getByRole('button', { name: 'Data', exact: true }).click();
+  await container.getByRole('button', { name: 'Abrir calendário para Data' }).click({ timeout: 30_000 });
   const day = page.locator(`button[data-day="${label}"]`);
   await expect(day).toBeVisible({ timeout: 30_000 });
   await day.click();
 }
 
-async function saveFollowUp(page: Page, offsetDays: number, type: string): Promise<void> {
+async function saveFollowUp(page: Page, offsetDays: number, type: string, expectedComments = ''): Promise<void> {
   const region = page.getByRole('region', { name: 'Próximo acompanhamento' });
   await region.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
-  const dialog = page.getByRole('dialog', { name: /Definir próximo acompanhamento|Reagendar acompanhamento/ });
+  const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
+  const comments = dialog.getByRole('textbox', { name: 'Comentários' });
+  await expect(comments).toHaveValue(expectedComments);
   const label = dateLabel(offsetDays);
   await chooseDate(page, dialog, label);
-  await dialog.getByRole('combobox', { name: 'Tipo', exact: true }).click();
-  await page.getByRole('option', { name: type, exact: true }).click();
+  await dialog.getByRole('button', { name: type, exact: true }).click();
+  await comments.fill(`Revisar ${type.toLowerCase()}`);
   await dialog.getByRole('button', { name: /^Salvar/ }).click();
   await expect(dialog).toBeHidden({ timeout: 120_000 });
   await expect(region).toContainText(label);
@@ -87,10 +92,21 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   const patientOneName = `Paciente clínico ${Date.now()}`;
   const patientTwoName = `${patientOneName} isolado`;
 
-  await createProfileSession(page, 'Clínico browser');
+  const clinicalBackup = JSON.parse(readFileSync(resolve(process.cwd(), 'tests/fixtures/nutridiet/valid-jacques-regiani.nutridiet'), 'utf8')) as BackupEnvelope;
+  clinicalBackup.account[0].displayName = 'Clínico browser';
+  clinicalBackup.patients[0].name = patientOneName;
+  clinicalBackup.patients[0].gender = 'Masculino';
+  await installProfileFileSystemFakes(page, JSON.stringify(clinicalBackup));
+  await page.goto('/Home', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await page.getByRole('button', { name: 'Abrir arquivo' }).click();
+  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
   await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
 
-  const patientOnePath = await createPatient(page, patientOneName);
+  const patientOneLink = page.getByRole('link', { name: `Ver perfil de ${patientOneName}` });
+  await expect(patientOneLink).toBeVisible({ timeout: 120_000 });
+  const patientOneHref = await patientOneLink.getAttribute('href');
+  expect(patientOneHref).toBeTruthy();
+  const patientOnePath = patientOneHref!;
   const patientOneId = patientOnePath.split('/').at(-1) as string;
   await createPatient(page, patientTwoName);
 
@@ -140,18 +156,18 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(patientOneRow).toContainText('Atualização de dieta');
 
   await navigateWithinSession(page, patientOnePath);
-  await saveFollowUp(page, 0, 'Atualização de avaliação');
+  await saveFollowUp(page, 0, 'Atualização de avaliação', 'Revisar atualização de dieta');
   await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Hoje');
 
   await navigateWithinSession(page, patientOnePath);
-  await saveFollowUp(page, -1, 'Atualização de avaliação');
+  await saveFollowUp(page, -1, 'Atualização de avaliação', 'Revisar atualização de avaliação');
   await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
   await navigateWithinSession(page, patientOnePath);
   await followUpRegion.getByRole('button', { name: 'Reagendar' }).click();
-  const rescheduleDialog = page.getByRole('dialog', { name: 'Reagendar acompanhamento' });
+  const rescheduleDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
   const removeDialog = page.getByRole('dialog', { name: 'Remover acompanhamento?' });
   await holdToConfirm(page, removeDialog.getByRole('button', { name: 'Sim, remover' }));

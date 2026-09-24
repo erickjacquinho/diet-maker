@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PatientDetailPage from '@/app/pacientes/[id]/page';
@@ -50,7 +50,13 @@ function profileState() {
     profileError: null,
     isProfileLoading: false,
     confirmedPlans: [],
+    dietTotal: 0,
+    isDietsLoading: false,
+    dietsError: null,
     bodyAssessments: [],
+    assessmentTotal: 0,
+    isAssessmentsLoading: false,
+    assessmentsError: null,
     activePlan: null,
     latestAssessment: null,
     nextEventSummary: null,
@@ -92,12 +98,34 @@ describe('PatientDetailPage accessibility', () => {
     mockUsePatientProfilePage.mockReturnValue(profileState());
   });
 
-  it('exposes current context actions and empty states with accessible names', async () => {
+  it('exposes the new profile regions and the moved follow-up action accessibly', async () => {
     render(<PatientDetailPage />);
 
-    expect(await screen.findByRole('heading', { name: 'Indicadores atuais' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Próximo acompanhamento' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Definir acompanhamento' })).toHaveClass('focus-visible:ring-2');
+    const progress = await screen.findByRole('region', { name: 'Progresso Atual' });
+    expect(progress).toHaveClass('col-span-2');
+    expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
+    expect(screen.getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Próximo acompanhamento' })).not.toBeInTheDocument();
+    const personalDataButton = screen.getByRole('button', { name: 'Ver dados pessoais' });
+    expect(personalDataButton).toHaveClass(
+      'border-border-control',
+      'bg-surface',
+      'text-text-primary',
+      'h-control-compact',
+      'w-control-compact',
+      'rounded-control',
+    );
+    const followUpButton = screen.getByRole('button', { name: 'Definir acompanhamento' });
+    expect(followUpButton).toHaveClass(
+      'border-border-control',
+      'bg-surface',
+      'text-text-primary',
+      'h-control-compact',
+      'w-control-compact',
+      'rounded-control',
+      'focus-visible:ring-2',
+    );
     expect(screen.getByRole('link', { name: 'Nova Dieta' })).toHaveAttribute(
       'href',
       '/pacientes/patient-profile-1/dieta/nova',
@@ -122,6 +150,8 @@ describe('PatientDetailPage accessibility', () => {
     expect(screen.getByText('10/12/2026')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de avaliações físicas' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Histórico de prescrições dietéticas' })).toBeInTheDocument();
+    fireEvent.click(followUpButton);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
 
@@ -132,13 +162,13 @@ describe('PatientDetailPage accessibility', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveClass('z-modal', 'rounded-surface', 'bg-surface');
-    expect(screen.getByRole('heading', { name: /Definir pr/ })).toHaveClass('text-style-dialog-title');
-    expect(screen.getByText(/Escolha a data/)).toHaveClass('text-style-body', 'text-text-secondary');
+    expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toHaveClass('text-style-dialog-title');
+    expect(screen.getByText(/Defina a data/)).toHaveClass('text-style-body', 'text-text-secondary');
     expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toHaveAttribute(
       'aria-haspopup',
       'dialog',
     );
-    expect(screen.getByRole('combobox')).toHaveAttribute('id', 'next-event-type');
+    expect(screen.getByRole('group', { name: 'Tipo de acompanhamento' })).toBeInTheDocument();
     const cancelButton = screen.getByRole('button', { name: 'Cancelar' });
     const saveButton = screen.getByRole('button', { name: 'Salvar (Ctrl+S)' });
     expect(saveButton).toHaveAttribute('aria-keyshortcuts', 'Control+s Meta+s');

@@ -173,6 +173,38 @@ describe('DataTable contract', () => {
     expect(screen.getByRole('button', { name: 'Próxima página' })).toBeDisabled();
   });
 
+  it('uses the remote total for page count and renders the supplied page as-is', () => {
+    const pageChanges: number[] = [];
+    const remoteRows = [
+      { id: 'row-3', name: 'Item 3', value: 3 },
+      { id: 'row-4', name: 'Item 4', value: 4 },
+    ];
+
+    render(
+      <DataTable
+        data={remoteRows}
+        columns={columns}
+        getRowId={(row) => row.id}
+        caption="Dados"
+        emptyMessage="Nenhum registro encontrado."
+        pagination={{
+          pageIndex: 1,
+          pageSize: 2,
+          totalRows: 5,
+          onPageChange: (pageIndex) => pageChanges.push(pageIndex),
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Página 2 de 3')).toBeInTheDocument();
+    expect(screen.getByText('Item 3')).toBeInTheDocument();
+    expect(screen.getByText('Item 4')).toBeInTheDocument();
+    expect(screen.getAllByRole('row')).toHaveLength(3);
+    expect(screen.getByRole('table', { name: 'Dados' })).toHaveAttribute('aria-rowcount', '6');
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(pageChanges).toEqual([2]);
+  });
+
   it('renders complex rows and associated expanded content with stable row ids', () => {
     const renderRow = (row: Row): ReactNode => (
       <TableRow data-testid={`row-${row.id}`}>

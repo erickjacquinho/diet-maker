@@ -17,7 +17,7 @@ const localAccount = { accountId: 'local-account', schemaVersion: '4' } as const
 function normalizeLegacyEnvelope(envelope: ReturnType<typeof createBackupEnvelope>) {
   return {
     ...envelope,
-    schemaVersion: '6',
+    schemaVersion: '7',
     account: envelope.account.map((account) => ({ ...account, phone: account.phone ?? null })),
   };
 }
@@ -76,7 +76,24 @@ describe('backup envelope validation', () => {
     expectBackupError(() => parseBackupEnvelope(JSON.stringify(createBackupEnvelope({})), { ...localAccount, accountId: 'other-account' }), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), appId: 'other-app' }), localAccount), 'BACKUP_APP_MISMATCH');
     expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), formatVersion: 2 }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
-    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '7' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
+    expectBackupError(() => parseBackupEnvelope(JSON.stringify({ ...createBackupEnvelope(), schemaVersion: '8' }), localAccount), 'BACKUP_VERSION_UNSUPPORTED');
+  });
+
+  it('adds empty comments when migrating a schema 6 follow-up', () => {
+    const envelope = createBackupEnvelope();
+    const { comments: _comments, ...legacyFollowUp } = envelope.nextFollowUps[0];
+    const legacy = {
+      ...envelope,
+      schemaVersion: '6' as const,
+      account: envelope.account.map((account) => ({ ...account, phone: account.phone ?? null })),
+      nextFollowUps: [legacyFollowUp],
+    };
+    void _comments;
+
+    const parsed = parseBackupEnvelope(JSON.stringify(legacy), localAccount);
+
+    expect(parsed.schemaVersion).toBe('7');
+    expect(parsed.nextFollowUps[0]?.comments).toBe('');
   });
 
   it('rejects unknown envelope and row keys in format version one', () => {

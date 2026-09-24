@@ -64,8 +64,8 @@ Esta decisão complementa a [Decisão 01 — Fluxo de Paciente e Dieta](./01-flu
 ### 2.5 Próximo acompanhamento
 
 1. O paciente pode ter no máximo um próximo acompanhamento agendado.
-2. O registro contém data e tipo: atualização de avaliação ou atualização de
-   dieta.
+2. O registro contém data e ao menos um tipo: atualização de avaliação,
+   atualização de dieta ou ambos.
 3. Salvar substitui o agendamento anterior do mesmo paciente.
 4. Remover o agendamento limpa o registro sem apagar o histórico do paciente.
 5. Datas persistidas usam ISO; a apresentação local pertence à interface.
@@ -109,7 +109,7 @@ Patient
 ├── contacts
 ├── currentObjective
 ├── defaultMacroTargets
-├── nextFollowUp (opcional)
+├── nextFollowUp (opcional: dueDate, type e comments)
 ├── createdAt / updatedAt / version
 └── archivedAt (opcional)
 ```

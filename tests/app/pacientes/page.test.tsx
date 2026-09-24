@@ -62,6 +62,7 @@ function state(overrides: Partial<ReturnType<typeof usePatientsPage>> = {}) {
     filteredPatients,
     rows: overrides.rows ?? buildPatientListRows(filteredPatients, '2026-08-01'),
     patientHistoryById: {},
+    total: overrides.total ?? filteredPatients.length,
     searchTerm: '',
     setSearchTerm: vi.fn(),
     isLoading: false,
@@ -88,6 +89,25 @@ describe('PatientsListPage', () => {
     expect(screen.queryByText('Prioridade do acompanhamento')).not.toBeInTheDocument();
     expect(screen.queryByText('Lista de pacientes', { exact: true })).not.toBeInTheDocument();
     expect(screen.getByTestId('record-indicators').querySelector('[data-indicator="assessment"]')).toHaveClass('text-text-muted');
+  });
+
+  it('shows the total count and all patient rows without pagination', () => {
+    const patients = Array.from({ length: 26 }, (_, index) => ({
+      ...patient,
+      id: `patient-${index}`,
+      name: `Paciente ${String(index + 1).padStart(2, '0')}`,
+    }));
+    mockUsePatientsPage.mockReturnValue(state({
+      patients,
+      filteredPatients: patients,
+      rows: buildPatientListRows(patients, '2026-08-01'),
+      total: patients.length,
+    }));
+    render(<PatientsListPage />);
+
+    expect(screen.getByRole('status')).toHaveTextContent('26 pacientes');
+    expect(within(screen.getByRole('table', { name: 'Lista de pacientes' })).getAllByRole('row')).toHaveLength(27);
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
   });
 
   it('opens the personal-data registration dialog with radio pregnancy flow', async () => {
@@ -127,7 +147,7 @@ describe('PatientsListPage', () => {
 
   it('shows a reset action when search returns no patients', async () => {
     const setSearchTerm = vi.fn();
-    mockUsePatientsPage.mockReturnValue(state({ filteredPatients: [], setSearchTerm }));
+    mockUsePatientsPage.mockReturnValue(state({ filteredPatients: [], total: 0, searchTerm: 'inexistente', setSearchTerm }));
     render(<PatientsListPage />);
 
     const search = await screen.findByRole('searchbox', { name: 'Buscar pacientes por nome ou objetivo' });
@@ -140,7 +160,7 @@ describe('PatientsListPage', () => {
   });
 
   it('keeps the empty-list guidance available when there are no patients', async () => {
-    mockUsePatientsPage.mockReturnValue(state({ patients: [], filteredPatients: [], rows: [] }));
+    mockUsePatientsPage.mockReturnValue(state({ patients: [], filteredPatients: [], rows: [], total: 0 }));
     render(<PatientsListPage />);
 
     expect(await screen.findByText('Nenhum paciente cadastrado')).toBeInTheDocument();

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info } from 'lucide-react';
+import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info, History } from 'lucide-react';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
 import {
@@ -26,10 +26,14 @@ export default function PatientDetailPage() {
     profileError,
     isProfileLoading,
     confirmedPlans,
+    dietTotal,
+    isDietsLoading,
+    dietsError,
     bodyAssessments,
-    activePlan,
+    assessmentTotal,
+    isAssessmentsLoading,
+    assessmentsError,
     latestAssessment,
-    nextEventSummary,
     whatsappUrl,
     availableObjectives,
     isDeleteModalOpen,
@@ -116,7 +120,7 @@ export default function PatientDetailPage() {
               <PopoverTrigger asChild>
                 <IconButton
                   size="compact"
-                  variant="quiet"
+                  variant="secondary"
                   title="Ver dados pessoais"
                   aria-label="Ver dados pessoais"
                   icon={<Info className="size-4" aria-hidden="true" />}
@@ -152,6 +156,16 @@ export default function PatientDetailPage() {
                 </div>
               </PopoverContent>
             </Popover>
+            {!isPatientArchived && (
+              <IconButton
+                size="compact"
+                variant="secondary"
+                title={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
+                aria-label={patient.nextEvent ? 'Reagendar acompanhamento' : 'Definir acompanhamento'}
+                icon={<Calendar className="size-4" aria-hidden="true" />}
+                onClick={() => setIsNextEventModalOpen(true)}
+              />
+            )}
             <Button
               variant="secondary"
               size="compact"
@@ -187,9 +201,7 @@ export default function PatientDetailPage() {
       <PatientProfileCurrentContext
         patientId={patientId}
         latestAssessment={latestAssessment}
-        activePlan={activePlan}
-        nextEventSummary={nextEventSummary}
-        onOpenNextEvent={() => setIsNextEventModalOpen(true)}
+        latestDiet={confirmedPlans[0] ?? null}
         readOnly={isPatientArchived}
       />
 
@@ -208,12 +220,26 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {confirmedPlans.length === 1 ? '1 plano' : `${confirmedPlans.length} planos`}
+              {dietTotal === 1 ? '1 plano' : `${dietTotal} planos`}
             </span>
             {!isPatientArchived && (
               <Link href={`/pacientes/${patientId}/dieta/nova`}>
                 <CreateButton icon={<Utensils size={14} />}>Nova Dieta</CreateButton>
               </Link>
+            )}
+            {dietTotal >= 11 && (
+              <Button
+                asChild
+                iconOnly
+                size="compact"
+                variant="secondary"
+                title="Ver histórico completo de prescrições dietéticas"
+                aria-label="Ver histórico completo de prescrições dietéticas"
+              >
+                <Link href={`/pacientes/${patientId}/dietas`}>
+                  <History size={16} aria-hidden="true" />
+                </Link>
+              </Button>
             )}
           </div>
         </div>
@@ -221,6 +247,8 @@ export default function PatientDetailPage() {
         <PatientDietsTable
           patientId={patientId}
           diets={confirmedPlans}
+          loading={isDietsLoading}
+          error={dietsError}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
         />
       </Surface>
@@ -240,7 +268,7 @@ export default function PatientDetailPage() {
 
           <div className="flex items-center gap-3">
             <span className={textStyle('caption')}>
-              {bodyAssessments.length === 1 ? '1 avaliação' : `${bodyAssessments.length} avaliações`}
+              {assessmentTotal === 1 ? '1 avaliação' : `${assessmentTotal} avaliações`}
             </span>
             {!isPatientArchived && (
               <Link href={`/pacientes/${patientId}/avaliacao/nova`}>
@@ -249,12 +277,28 @@ export default function PatientDetailPage() {
                 </CreateButton>
               </Link>
             )}
+            {assessmentTotal >= 11 && (
+              <Button
+                asChild
+                iconOnly
+                size="compact"
+                variant="secondary"
+                title="Ver histórico completo de avaliações físicas"
+                aria-label="Ver histórico completo de avaliações físicas"
+              >
+                <Link href={`/pacientes/${patientId}/avaliacoes`}>
+                  <History size={16} aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
         <PatientAssessmentsTable
           patientId={patientId}
           assessments={bodyAssessments}
+          loading={isAssessmentsLoading}
+          error={assessmentsError}
           onOpenEditAssessment={handleOpenEditAssessment}
         />
       </Surface>

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, inArray, lte, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type {
   AssessmentPersistenceInput,
@@ -6,6 +6,7 @@ import type {
   BodyAssessment,
   CalculationInputSnapshot,
   CalculationMethod,
+  FollowUpType,
   NextFollowUp,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
@@ -14,6 +15,7 @@ import {
   normalizeNextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
+import { normalizePageRequest, type PageRequest, type PageResult } from '@/lib/persistence/page';
 import type { LocalDatabaseHandle } from './client';
 import { bodyAssessments, nextFollowUps, patients } from './schema';
 
@@ -27,6 +29,16 @@ export interface ClinicalRepositoryOptions {
 
 type AssessmentRow = typeof bodyAssessments.$inferSelect;
 type FollowUpRow = typeof nextFollowUps.$inferSelect;
+
+function followUpTypesFromStorage(value: string): FollowUpType[] {
+  if (value === 'BOTH') return ['ASSESSMENT_UPDATE', 'DIET_UPDATE'];
+  if (value === 'ASSESSMENT_UPDATE' || value === 'DIET_UPDATE') return [value];
+  throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'O tipo do acompanhamento salvo é inválido.');
+}
+
+function followUpTypesToStorage(types: FollowUpType[]): string {
+  return types.length === 1 ? types[0] : 'BOTH';
+}
 
 function numberValue(value: string | number | null | undefined): number | undefined {
   if (value === null || value === undefined) return undefined;
@@ -108,7 +120,8 @@ function toFollowUp(row: FollowUpRow): NextFollowUp {
     accountId: row.accountId,
     patientId: row.patientId,
     dueDate: row.dueDate,
-    type: row.type as NextFollowUp['type'],
+    type: followUpTypesFromStorage(row.type),
+    comments: row.comments,
     version: row.version,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -221,6 +234,42 @@ export class PGliteClinicalRepository implements ClinicalRepository {
     }
   }
 
+  async listAssessmentsPage(accountId: string, patientId: string, request: PageRequest = {}): Promise<PageResult<BodyAssessment>> {
+    const page = normalizePageRequest(request);
+    try {
+      const scope = and(eq(bodyAssessments.accountId, accountId), eq(bodyAssessments.patientId, patientId));
+      const [rows, totals] = await Promise.all([
+        this.handle.db.select().from(bodyAssessments).where(scope)
+          .orderBy(desc(bodyAssessments.clinicalDate), desc(bodyAssessments.createdAt), asc(bodyAssessments.id))
+          .limit(page.pageSize).offset(page.pageIndex * page.pageSize),
+        this.handle.db.select({ total: count() }).from(bodyAssessments).where(scope),
+      ]);
+      return { ...page, total: Number(totals[0]?.total ?? 0), items: rows.map(toAssessment) };
+    } catch (cause) {
+      throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'A página do histórico de avaliações não pôde ser carregada.', { cause });
+    }
+  }
+
+  async listAssessmentSummaries(accountId: string, patientIds: readonly string[]): Promise<Record<string, { assessments: BodyAssessment[]; count: number }>> {
+    const result: Record<string, { assessments: BodyAssessment[]; count: number }> = Object.fromEntries(patientIds.map((id) => [id, { assessments: [], count: 0 }]));
+    if (!patientIds.length) return result;
+    try {
+      const ranked = this.handle.db.select({
+        ...getTableColumns(bodyAssessments),
+        count: sql<number>`count(*) OVER (PARTITION BY ${bodyAssessments.patientId})::int`.as('assessment_count'),
+        rank: sql<number>`row_number() OVER (PARTITION BY ${bodyAssessments.patientId} ORDER BY ${bodyAssessments.clinicalDate} DESC, ${bodyAssessments.createdAt} DESC, ${bodyAssessments.id} ASC)`.as('assessment_rank'),
+      }).from(bodyAssessments).where(and(eq(bodyAssessments.accountId, accountId), inArray(bodyAssessments.patientId, [...patientIds]))).as('ranked_assessments');
+      const rows = await this.handle.db.select().from(ranked).where(lte(ranked.rank, 2)).orderBy(asc(ranked.patientId), asc(ranked.rank));
+      for (const row of rows) {
+        result[row.patientId].assessments.push(toAssessment(row));
+        result[row.patientId].count = Number(row.count);
+      }
+      return result;
+    } catch (cause) {
+      throw new ClinicalApplicationError('CLINICAL_READ_FAILED', 'Os resumos clínicos não puderam ser carregados.', { cause });
+    }
+  }
+
   async createAssessment(accountId: string, patientId: string, assessment: BodyAssessment | AssessmentPersistenceInput): Promise<BodyAssessment> {
     if (assessment.accountId && assessment.accountId !== accountId || assessment.patientId && assessment.patientId !== patientId) {
       throw new ClinicalApplicationError('CLINICAL_SCOPE_VIOLATION', 'A avaliação não pertence à Conta e ao paciente informados.');
@@ -304,12 +353,12 @@ export class PGliteClinicalRepository implements ClinicalRepository {
         const timestamp = this.now();
         if (expectedVersion === null) {
           if (current) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Já existe um acompanhamento confirmado para este paciente.');
-          const inserted = await tx.insert(nextFollowUps).values({ accountId, patientId, dueDate: normalized.dueDate, type: normalized.type, version: 1, createdAt: timestamp, updatedAt: timestamp }).returning();
+          const inserted = await tx.insert(nextFollowUps).values({ accountId, patientId, dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: 1, createdAt: timestamp, updatedAt: timestamp }).returning();
           this.maybeFail('follow-up-after-write');
           return inserted[0];
         }
         if (!current || current.version !== expectedVersion) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'O acompanhamento foi atualizado antes desta confirmação.');
-        const updated = await tx.update(nextFollowUps).set({ dueDate: normalized.dueDate, type: normalized.type, version: expectedVersion + 1, updatedAt: timestamp }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
+        const updated = await tx.update(nextFollowUps).set({ dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: expectedVersion + 1, updatedAt: timestamp }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
         this.maybeFail('follow-up-after-write');
         return updated[0];
       });

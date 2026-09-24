@@ -29,7 +29,8 @@ export type PatientNextEventType = 'diet-update' | 'assessment-update';
 
 export interface PatientNextEvent {
   date: string;
-  type: PatientNextEventType;
+  type: PatientNextEventType | PatientNextEventType[];
+  comments?: string;
   version?: number;
 }
 

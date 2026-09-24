@@ -1,0 +1,3 @@
+# Plano
+
+Reutilizar PGlite/Drizzle, cálculo Decimal e DataTable. Criar projeções de leitura nos repositórios existentes; consultas em lote para contagens e atividade; histórico com totais agregados dos snapshots e regras atuais de apresentação. Buscar dieta completa somente ao abrir cardápio. Atualizar perfil sem repetir histórico de dietas após cadastro/avaliação/acompanhamento. Preservar arquivo JSON completo como contrato durável; reduzir trabalho de validação/exportação somente se comprovadamente seguro. Validar equivalência e volume no banco real e executar type-check, testes direcionados e auditorias aplicáveis.

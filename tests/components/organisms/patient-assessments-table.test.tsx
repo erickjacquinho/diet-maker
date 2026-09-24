@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { PatientAssessmentsTable } from '@/components/organisms/patient/PatientAssessmentsTable';
@@ -70,5 +70,31 @@ describe('PatientAssessmentsTable', () => {
     expect(screen.getByText('98 cm')).toBeInTheDocument(); // Quadril
     expect(screen.getByText('102 cm')).toBeInTheDocument(); // Tórax
     expect(screen.getByText('37 / 37.5 cm')).toBeInTheDocument(); // Braço
+  });
+
+  it('renders every assessment row without pagination', () => {
+    const assessments = Array.from({ length: 26 }, (_, index) => ({
+      ...mockAssessments[0], id: `asm-${index}`, date: `${String(index + 1).padStart(2, '0')}/09/2026`,
+    }));
+    render(<PatientAssessmentsTable patientId="p1" assessments={assessments} />);
+    expect(screen.getByText('01/09/2026')).toBeInTheDocument();
+    expect(screen.getByText('26/09/2026')).toBeInTheDocument();
+    expect(within(screen.getByRole('table', { name: /Histórico de avaliações físicas/ })).getAllByRole('row')).toHaveLength(27);
+    expect(screen.queryByRole('button', { name: /página/i })).not.toBeInTheDocument();
+  });
+
+  it('forwards remote pagination controls to the complete-history page', () => {
+    const onPageChange = vi.fn();
+    render(
+      <PatientAssessmentsTable
+        patientId="p1"
+        assessments={[mockAssessments[0]]}
+        pagination={{ pageIndex: 0, pageSize: 1, totalRows: 2, onPageChange }}
+      />,
+    );
+
+    expect(screen.getByText('Página 1 de 2')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
+    expect(onPageChange).toHaveBeenCalledWith(1);
   });
 });
