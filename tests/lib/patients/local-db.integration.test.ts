@@ -47,7 +47,7 @@ const patientInput = {
 describe('local relational patient adapter', () => {
   it('applies migrations idempotently and creates a stable account with default objectives', async () => {
     const application = await createApplication();
-    expect(await applyMigrations(handle!.client)).toBe('9');
+    expect(await applyMigrations(handle!.client)).toBe('11');
     const account = await application.listActivePatients();
     expect(account).toEqual([]);
     const profile = await application.addObjectiveOption('Preparação para Maratona');

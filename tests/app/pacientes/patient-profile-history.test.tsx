@@ -101,15 +101,15 @@ describe('PatientDetailPage history with two stacked tables', () => {
       name: /Histórico de avaliações físicas/,
     });
     expect(assessmentsTable).toBeInTheDocument();
-    expect(screen.getByText('80 kg')).toBeInTheDocument();
-    expect(screen.getByText('15%')).toBeInTheDocument();
-    expect(screen.getByText('35 kg')).toBeInTheDocument();
+    expect(within(assessmentsTable).getByText('80 kg')).toBeInTheDocument();
+    expect(within(assessmentsTable).getByText('15%')).toBeInTheDocument();
+    expect(within(assessmentsTable).getByText('35 kg')).toBeInTheDocument();
 
     // Expansão de detalhes na tabela de avaliações
     const detailsBtn = screen.getByRole('button', { name: 'Detalhes' });
     fireEvent.click(detailsBtn);
     expect(screen.getByText(/Circunferências & Perímetros Corporais/)).toBeInTheDocument();
-    expect(screen.getByText('82 cm')).toBeInTheDocument();
+    expect(within(assessmentsTable).getByText('82 cm')).toBeInTheDocument();
 
     // 2. Tabela de Prescrições Dietéticas
     const dietsTable = screen.getByRole('table', {
