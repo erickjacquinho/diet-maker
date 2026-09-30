@@ -87,9 +87,9 @@ Essa redução preserva o contrato do componente e não altera o modelo de dados
 
 ### Ações secundárias
 
-`WhatsApp` e `PDF` serão agrupados em um menu `Mais ações`, usando o `DropdownMenu` já existente em `src/components/ui/dropdown-menu.tsx`. O menu terá:
+`WhatsApp` e `PDF` serão agrupados em um menu `Exportar Dieta`, usando o `DropdownMenu` já existente em `src/components/ui/dropdown-menu.tsx`. O menu terá:
 
-- trigger com nome acessível `Mais ações`;
+- trigger com nome acessível `Exportar Dieta`;
 - itens textuais com ícones `MessageCircle` e `FileText`;
 - foco, teclado e fechamento delegados ao primitivo Radix existente;
 - os callbacks `onWhatsAppShare` e `onExportPDF` preservados.
@@ -110,7 +110,7 @@ Essa redução preserva o contrato do componente e não altera o modelo de dados
 - O retorno terá nome acessível explícito e preservará a pilha de navegação.
 - Haverá uma única CTA primária na região de página.
 - Todos os controles interativos manterão foco visível e alvo de controle conforme os primitives existentes.
-- O menu `Mais ações` será acionável por mouse e teclado, sem depender de hover.
+- O menu `Exportar Dieta` será acionável por mouse e teclado, sem depender de hover.
 - A troca de modo manterá o estado selecionado anunciado e as opções de ciclo serão reveladas progressivamente.
 - A hierarquia de headings será `h1` da página, seguida dos títulos de seção sem saltos.
 - A reorganização não deverá causar sobreposição, perda de conteúdo ou quebra dentro da faixa desktop suportada.
@@ -123,7 +123,7 @@ Essa redução preserva o contrato do componente e não altera o modelo de dados
 - O seletor de modo aparece antes do contexto de metas, com layout compacto e expansão progressiva para ciclo de carboidratos.
 - `Nova Refeição` aparece na seção de refeições.
 - `Escalar` aparece na região de metas/macros.
-- `WhatsApp` e `PDF` continuam acessíveis pelo menu `Mais ações` e executam os mesmos callbacks.
+- `WhatsApp` e `PDF` continuam acessíveis pelo menu `Exportar Dieta` e executam os mesmos callbacks.
 - O nome do paciente é exibido uma única vez no contexto principal da dieta.
 - O comportamento existente de salvar, alternar modo, escalar, compartilhar, exportar e adicionar refeição permanece preservado.
 - Testes de tipo, suíte relevante e verificação visual da rota passam.
@@ -131,7 +131,7 @@ Essa redução preserva o contrato do componente e não altera o modelo de dados
 ## Validação planejada
 
 - Testes de composição do template para a ordem dos landmarks, títulos e ações.
-- Teste de interação para `Salvar Prescrição`, `Mais ações`, `WhatsApp`, `PDF`, `Nova Refeição` e `Escalar`.
+- Teste de interação para `Salvar Prescrição`, `Exportar Dieta`, `WhatsApp`, `PDF`, `Nova Refeição` e `Escalar`.
 - Teste de acessibilidade para nome do retorno, foco do menu, hierarquia de headings e seleção de modo.
 - Verificação visual em 1024px, 1280px e 1440px, incluindo o estado simples, ciclo de carboidratos e estado vazio de refeições.
 - Execução de `npm run type-check` e dos testes relevantes da rota/componentes.

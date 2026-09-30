@@ -11,6 +11,7 @@ import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { SubstituteFoodModal } from '@/components/organisms/foods/SubstituteFoodModal';
 import { ImportPreviousDietModal } from '@/components/organisms/diets/ImportPreviousDietModal';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from 'sonner';
 
 import { MealCardContainerProps } from '@/components/organisms';
 import { calculateMealsTotal } from '@/lib/macroCalculations';
@@ -134,6 +135,19 @@ export default function DietBuilderPage() {
   const handleOpenCycleMatrix = async () => {
     await flushDraft?.();
     router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
+  };
+
+  const handleOpenPdfPreview = async () => {
+    try {
+      const result = await flushDraft?.();
+      if (result?.status !== 'SAVED') {
+        toast.error('Não foi possível preparar o rascunho para a prévia do PDF.');
+        return;
+      }
+      router.push(`/pacientes/${patientId}/dieta/${dietaId}/pdf`);
+    } catch {
+      toast.error('Não foi possível salvar as alterações locais para a prévia do PDF.');
+    }
   };
 
   const isNewDiet = dietaId === 'nova' || dietPlan?.id === 'nova';
@@ -280,6 +294,7 @@ export default function DietBuilderPage() {
         onOpenImportPreviousDietModal={openImportPreviousDietModal}
         hasPreviousDiets={hasPreviousDiets}
         onWhatsAppShare={openWhatsAppModal}
+        onExportPDF={dietPlan.mode === 'simple' ? handleOpenPdfPreview : undefined}
         onSaveDiet={handleSaveDiet}
         saveStatus={saveStatus}
         onDiscardDraft={onDiscardDraft}

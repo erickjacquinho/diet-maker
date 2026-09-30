@@ -120,7 +120,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
       )}
 
       <ActionDropdown
-        triggerLabel="Mais ações"
+        triggerLabel="Exportar Dieta"
         items={[
           {
             id: 'whatsapp',

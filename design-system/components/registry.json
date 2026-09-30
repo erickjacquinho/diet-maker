@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 74,
-    "capturedAt": "2026-08-30",
+    "currentSourceCount": 75,
+    "capturedAt": "2026-09-29",
     "legacyAudit": {
       "findings": 0,
       "rules": 17,
@@ -246,7 +246,7 @@
         { "name": "TableCell", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "selected", "read-only"] },
         { "name": "TableCaption", "role": "visual-slot", "requiresRootContext": true, "states": ["default", "empty"] }
       ],
-      "consumers": ["molecule-data-table", "src/app/design-system/page.tsx"]
+      "consumers": ["molecule-data-table", "src/app/design-system/page.tsx", "template-diet-pdf-template"]
     },
     {
       "id": "ui-tabs",
@@ -626,7 +626,8 @@
       ],
       "consumers": [
         "template-app-layout-shell",
-        "template-diet-builder-template"
+        "template-diet-builder-template",
+        "template-diet-pdf-template"
       ],
       "decisionRef": "CAT-2026-07-31-structure"
     }
@@ -2643,7 +2644,8 @@
         "organism-patient-list-table",
         "organism-patient-diets-table",
         "organism-patient-assessments-table",
-        "organism-patient-consultation-history-table"
+        "organism-patient-consultation-history-table",
+        "template-diet-pdf-template"
       ],
       "primitiveBase": "ui-table",
       "specStatus": "homologated",
@@ -3446,6 +3448,44 @@
       "primitiveBase": "atom-surface",
       "specStatus": "homologated",
       "exceptions": ["dashed-empty-state"]
+    },
+    {
+      "id": "template-diet-pdf-template",
+      "name": "DietPdfTemplate",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "template",
+      "targetLayer": "template",
+      "primaryCategory": "structure",
+      "traits": [
+        "nutrition-context"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/templates/DietPdfTemplate.tsx",
+          "role": "implementation",
+          "discoveredLayer": "template"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "DietPdfTemplateProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "DietPdfTemplate",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/templates/diet-pdf-template.md",
+      "consumers": [
+        "src/app/pacientes/[id]/dieta/[dietaId]/pdf/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
     },
     {
       "id": "ui-textarea",

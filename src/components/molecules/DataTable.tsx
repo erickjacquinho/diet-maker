@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown, Check } from 'lucide-react';
+import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
@@ -116,7 +117,8 @@ function SortableHeader<TData>({
       aria-pressed={active}
       title={`Ordenar por ${label} (${sortHint})`}
       className={cn(
-        'inline-flex items-center justify-center gap-1.5 font-bold text-style-chart-micro tracking-overline h-auto py-1 px-1 -mx-1 hover:bg-transparent',
+        'inline-flex items-center justify-center gap-1.5 h-auto py-1 px-1 -mx-1 hover:bg-transparent',
+        textStyle('table-header'),
         active ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
       )}
     >
@@ -155,7 +157,7 @@ function TableHeaderRow<TData>({
   return (
     <TableRow className={cn('bg-surface-subtle hover:bg-surface-subtle border-b border-border-divider', className)}>
       {selection && (
-        <TableHead className="w-10 px-3 text-center h-9 bg-surface-subtle" scope="col">
+        <TableHead className="w-10 px-3 text-center h-table-row bg-surface-subtle" scope="col">
           <DataTableCheckbox
             checked={allSelected ? true : someSelected ? 'indeterminate' : false}
             onCheckedChange={onToggleAll}
@@ -176,7 +178,8 @@ function TableHeaderRow<TData>({
             scope="col"
             aria-sort={ariaSort}
             className={cn(
-              'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
+              'h-table-row bg-surface-subtle px-4',
+              textStyle('table-header'),
               alignClass(column.align),
               column.headerClassName
             )}

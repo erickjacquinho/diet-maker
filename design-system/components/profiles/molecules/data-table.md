@@ -51,6 +51,7 @@ Nenhuma exceção aprovada.
 - `organism-patient-diets-table`
 - `organism-patient-assessments-table`
 - `organism-patient-consultation-history-table`
+- `template-diet-pdf-template`
 
 ## Acceptance criteria
 

@@ -73,11 +73,11 @@ describe('DietBuilderTemplate top composition', () => {
     const contextCard = screen.getByTestId('diet-context-card');
     const header = screen.getByRole('banner');
     const saveButton = within(header).getByRole('button', { name: 'Salvar Prescrição' });
-    const moreActionsButton = within(header).getByRole('button', { name: 'Mais ações' });
+    const moreActionsButton = within(header).getByRole('button', { name: 'Exportar Dieta' });
 
     expect(saveButton).toHaveClass('bg-primary');
     expect(within(contextCard).queryByRole('button', { name: 'Salvar Prescrição' })).not.toBeInTheDocument();
-    expect(within(contextCard).queryByRole('button', { name: 'Mais ações' })).not.toBeInTheDocument();
+    expect(within(contextCard).queryByRole('button', { name: 'Exportar Dieta' })).not.toBeInTheDocument();
     expect(within(contextCard).queryByRole('button', { name: 'Nova Refeição' })).not.toBeInTheDocument();
     expect(within(contextCard).queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
 
