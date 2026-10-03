@@ -18,7 +18,7 @@ Centralizar a composição visual e acessível de confirmações do produto sem 
 
 ## Category inheritance
 
-Herda integralmente [overlays](../../categories/overlays.md). Não possui trait adicional.
+Herda integralmente [overlays](../../categories/overlays.md). Trait autorizado: `async`.
 
 ## Specific anatomy
 
@@ -30,7 +30,7 @@ Confirmação neutra ou destrutiva por meio da variante da ação; labels e cont
 
 ## Particular states
 
-Preserva os estados de abertura, fechamento, cancelamento, confirmação e foco definidos por `ui-alert-dialog`.
+Quando `awaitConfirm` está ativo, a ação exibe `confirmPendingLabel` durante a operação, desabilita confirmação e cancelamento e fecha apenas após sucesso. Em falha, permanece aberta; o consumidor apresenta o feedback.
 
 ## Composition
 

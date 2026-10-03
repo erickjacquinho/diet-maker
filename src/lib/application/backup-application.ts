@@ -22,6 +22,7 @@ import type {
   NextFollowUpRow,
   ObjectiveOptionRow,
   PatientRow,
+  ReadyDietRow,
   ReadyMealItemRow,
   ReadyMealRow,
   RecipeIngredientRow,
@@ -97,6 +98,15 @@ export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
       nextFollowUps: Array.isArray(input.nextFollowUps)
         ? input.nextFollowUps.map((row) => (isRecord(row) ? { comments: '', ...row } : row))
         : input.nextFollowUps,
+    }),
+  },
+  {
+    from: '7',
+    to: '8',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '8',
+      readyDiets: [],
     }),
   },
 ];
@@ -234,6 +244,9 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
     case 'readyMealItems':
       Object.assign(fields, stringFields('id', 'readyMealId', 'accountId', 'sourceType', 'sourceId', 'sourceVersion'), nullableNumericStringFields('quantity', 'recipePortions'), nullableStringFields('unit'), { position: isNumber, itemSnapshot: isJsonValue });
       break;
+    case 'readyDiets':
+      Object.assign(fields, stringFields('id', 'accountId', 'name', 'createdAt', 'updatedAt'), { document: isJsonValue, version: isNumber });
+      break;
   }
   const expectedKeys = tableName === 'account' && schemaVersion === LEGACY_BACKUP_SCHEMA_VERSION && !Object.prototype.hasOwnProperty.call(value, 'phone')
     ? ['id', 'displayName', 'createdAt', 'updatedAt']
@@ -290,6 +303,7 @@ function validateRelations(envelope: BackupEnvelope, expectedAccountId?: string)
   envelope.recipeIngredients.forEach((row) => assertAccountScope(row, 'recipeIngredients', accountId));
   envelope.readyMeals.forEach((row) => assertAccountScope(row, 'readyMeals', accountId));
   envelope.readyMealItems.forEach((row) => assertAccountScope(row, 'readyMealItems', accountId));
+  envelope.readyDiets.forEach((row) => assertAccountScope(row, 'readyDiets', accountId));
 
   const patientsById = byId(envelope.patients);
   const plansById = byId(envelope.dietPlans);
@@ -315,6 +329,7 @@ function validateRelations(envelope: BackupEnvelope, expectedAccountId?: string)
   ensureUnique(envelope.recipeIngredients, (row) => row.id, 'recipeIngredients');
   ensureUnique(envelope.readyMeals, (row) => row.id, 'readyMeals');
   ensureUnique(envelope.readyMealItems, (row) => row.id, 'readyMealItems');
+  ensureUnique(envelope.readyDiets, (row) => row.id, 'readyDiets');
   ensureUnique(envelope.nextFollowUps, (row) => `${row.accountId}|${row.patientId}`, 'nextFollowUps');
   ensureUnique(envelope.dietVariationDays, (row) => `${row.variationId}|${row.dayCode}`, 'dietVariationDays');
 
@@ -435,6 +450,7 @@ export function validateBackupEnvelope(rawInput: unknown, context: BackupValidat
     recipeIngredients: rows<RecipeIngredientRow>('recipeIngredients', input.recipeIngredients, input.schemaVersion),
     readyMeals: rows<ReadyMealRow>('readyMeals', input.readyMeals, input.schemaVersion),
     readyMealItems: rows<ReadyMealItemRow>('readyMealItems', input.readyMealItems, input.schemaVersion),
+    readyDiets: rows<ReadyDietRow>('readyDiets', input.readyDiets, input.schemaVersion),
   };
   validateRelations(envelope, context.accountId);
   return envelope;

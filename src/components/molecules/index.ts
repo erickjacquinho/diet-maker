@@ -23,5 +23,6 @@ export * from './ActionDropdown';
 export * from './MacroSummary';
 export * from './MacroProportionBar';
 export * from './ConfirmationAlertDialog';
+export * from './MealBasicsEditor';
 export * from '@/components/atoms/SelectField';
 

@@ -5,6 +5,7 @@ import type {
   FoodState,
   JsonValue,
   MeasurementBasis,
+  DietEditableDocument,
   NutritionSnapshot,
   NutritionValues,
 } from '@/lib/domain/diets/diet-model';
@@ -153,6 +154,21 @@ export interface ReadyMeal {
   updatedAt: string;
   archivedAt: string | null;
   items: ReadyMealItem[];
+}
+
+export interface ReadyDietInput {
+  name: string;
+  document: DietEditableDocument;
+}
+
+export interface ReadyDiet {
+  id: string;
+  accountId: string;
+  name: string;
+  document: DietEditableDocument;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type LibrarySnapshot = NutritionSnapshot;

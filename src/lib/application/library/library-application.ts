@@ -1,13 +1,15 @@
-import type { LibraryListFilter, CustomFoodInput, RecipeInput, ReadyMealInput } from '@/lib/domain/library/library-model';
+import type { LibraryListFilter, CustomFoodInput, RecipeInput, ReadyMealInput, ReadyDietInput } from '@/lib/domain/library/library-model';
 import type { LibraryApplicationDependencies } from './library-ports';
 import { createCustomFoodUseCases } from './custom-food-use-cases';
 import { createRecipeUseCases } from './recipe-use-cases';
 import { createReadyMealUseCases } from './ready-meal-use-cases';
+import { createReadyDietUseCases } from './ready-diet-use-cases';
 
 export function createLibraryApplication(dependencies: LibraryApplicationDependencies) {
   const foods = createCustomFoodUseCases({ accountContext: dependencies.accountContext, repository: dependencies.foodRepository });
   const recipes = createRecipeUseCases({ accountContext: dependencies.accountContext, repository: dependencies.recipeRepository, foodRepository: dependencies.foodRepository });
   const readyMeals = createReadyMealUseCases({ accountContext: dependencies.accountContext, repository: dependencies.readyMealRepository, foodRepository: dependencies.foodRepository, recipeRepository: dependencies.recipeRepository });
+  const readyDiets = createReadyDietUseCases({ accountContext: dependencies.accountContext, repository: dependencies.readyDietRepository });
   const runConfirmed = <T>(operation: () => Promise<T>): Promise<T> => (
     dependencies.confirmedOperation ? dependencies.confirmedOperation.run(operation) : operation()
   );
@@ -39,6 +41,9 @@ export function createLibraryApplication(dependencies: LibraryApplicationDepende
     archiveReadyMeal: (readyMealId: string, expectedVersion: number) => runConfirmed(() => readyMeals.archive(readyMealId, expectedVersion)),
     restoreReadyMeal: (readyMealId: string, expectedVersion: number) => runConfirmed(() => readyMeals.restore(readyMealId, expectedVersion)),
     deleteReadyMeal: (readyMealId: string, expectedVersion: number) => runConfirmed(() => readyMeals.delete(readyMealId, expectedVersion)),
+
+    createReadyDiet: (input: ReadyDietInput) => runConfirmed(() => readyDiets.create(input)),
+    listReadyDiets: () => readyDiets.list(),
   };
 }
 

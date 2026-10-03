@@ -38,7 +38,7 @@ indicadas; a tabela não acrescenta requisitos.
 | Tema | Comportamento esperado | Contrato |
 | --- | --- | --- |
 | Conta e pacientes | Perfil local estável; cadastrar, editar e arquivar pacientes sem apagar seu histórico | [02](./02-ciclo-de-vida-e-persistencia-do-paciente.md), [05](./05-arquitetura-backend-e-escopos-de-dados.md), [09](./09-topologia-v1-local-first-e-conta-local.md) |
-| Biblioteca | Alimentos customizados, receitas e refeições prontas pertencem à Conta e são reutilizáveis entre pacientes | [06](./06-catalogo-de-alimentos-e-customizados.md), [07](./07-receitas-e-refeicoes-prontas.md) |
+| Biblioteca | Alimentos customizados, receitas, refeições prontas e dietas prontas pertencem à Conta e são reutilizáveis entre pacientes | [05](./05-arquitetura-backend-e-escopos-de-dados.md), [06](./06-catalogo-de-alimentos-e-customizados.md), [07](./07-receitas-e-refeicoes-prontas.md) |
 | Dados clínicos | Avaliações, acompanhamento existente e prescrições ficam vinculados à Conta e ao Paciente | [02](./02-ciclo-de-vida-e-persistencia-do-paciente.md), [03](./03-contrato-de-interacao-da-tela-de-pacientes.md), [05](./05-arquitetura-backend-e-escopos-de-dados.md) |
 | Rascunho e autosave | IndexedDB guarda somente a edição local; primeiro alimento e autosave não criam dieta confirmada nem alteram histórico | [01](./01-fluxo-paciente-dieta.md), [04](./04-plano-de-execucao-e-validacao.md) |
 | Save principal | Salvar e Ctrl+S fazem checkpoint do `.nutridiet`; navegação também tenta gravar alterações confirmadas, sem reescrever um arquivo limpo | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md) |
@@ -69,7 +69,7 @@ indicadas; a tabela não acrescenta requisitos.
 | Snapshot nutricional | Cópia dos valores e da composição usados na prescrição, independente de mudanças futuras no catálogo |
 | Versão esperada | Versão da dieta base que o draft pretende atualizar; protege contra sobrescrita de conteúdo desatualizado |
 | ID estável | Identificador reutilizado nas tentativas de salvar a mesma nova dieta, impedindo criar duplicatas por troca de ID |
-| Biblioteca | Alimentos customizados, receitas e refeições prontas da Conta; TACO é a referência de sistema sem proprietário de Conta |
+| Biblioteca | Alimentos customizados, receitas, refeições prontas e dietas prontas da Conta; TACO é a referência de sistema sem proprietário de Conta |
 | VET / meta energética | Objetivo em kcal informado pelo nutricionista; não se confunde com a soma energética dos alimentos |
 | Energia de referência / calculada | Kcal informadas pela fonte ou estimativa identificada por 4–4–9; regras completas na Decisão 06 |
 | g/kg | Gramas do macronutriente por quilograma; a prescrição preserva seu peso de referência, conforme a Decisão 08 |

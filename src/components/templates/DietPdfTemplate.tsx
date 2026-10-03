@@ -9,7 +9,7 @@ export type { DietPdfTemplateProps } from './dietPdfTemplateTypes';
 
 interface DietPdfMacroRow {
   id: string;
-  kind: 'meal-option' | 'day-total';
+  kind: 'meal-option' | 'day-total' | 'diet-total';
   label: string;
   macros: DietPdfMacrosView | null;
 }
@@ -21,7 +21,9 @@ type MealFoodRow =
 
 function MealFoodsTable({ meal }: { meal: DietPdfMealView }) {
   const rows: MealFoodRow[] = meal.options.flatMap((option) => [
-    { id: `${option.id}-heading`, kind: 'option', label: option.label },
+    ...(meal.options.length > 1
+      ? [{ id: `${option.id}-heading`, kind: 'option' as const, label: option.label }]
+      : []),
     ...(option.items.length > 0
       ? option.items.map((item) => ({ id: `${option.id}-${item.id}`, kind: 'food' as const, item }))
       : [{ id: `${option.id}-empty`, kind: 'empty-option' as const }]),
@@ -93,23 +95,44 @@ function MacroSummary({ macros }: { macros: DietPdfMacrosView | null }) {
   );
 }
 
+function MealSection({ meal, headingLevel = 2 }: { meal: DietPdfMealView; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? 'h2' : 'h3';
+  return (
+    <section aria-label={meal.name} className="diet-pdf-meal-block flex flex-col gap-3 border-b border-border-divider pb-4 last:border-b-0">
+      <header className="flex flex-wrap items-baseline gap-2">
+        <Heading className={textStyle('section-title')}>{meal.name}</Heading>
+        {meal.time && <time className={textStyle('metadata')}>{meal.time}</time>}
+      </header>
+      <MealFoodsTable meal={meal} />
+    </section>
+  );
+}
+
 export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
-  const macroRows: DietPdfMacroRow[] = document.meals.flatMap((meal) => meal.options.map((option) => ({
-    id: `${meal.id}-${option.id}`,
-    kind: 'meal-option',
-    label: `${meal.name} · ${option.label}`,
-    macros: option.macros,
-  })));
-  if (document.meals.length > 0) {
+  const isCycle = 'diets' in document;
+  const macroRows: DietPdfMacroRow[] = isCycle
+    ? document.diets.map((diet) => ({
+      id: diet.id,
+      kind: 'diet-total',
+      label: `Dieta ${diet.number}`,
+      macros: diet.macros,
+    }))
+    : document.meals.flatMap((meal) => meal.options.map((option) => ({
+      id: `${meal.id}-${option.id}`,
+      kind: 'meal-option',
+      label: meal.options.length > 1 ? `${meal.name} · ${option.label}` : meal.name,
+      macros: option.macros,
+    })));
+  if (!isCycle && document.meals.length > 0) {
     macroRows.push({ id: 'day-total', kind: 'day-total', label: 'Total do dia', macros: document.dayMacros });
   }
 
   const macroColumns: DataTableColumnDef<DietPdfMacroRow>[] = [
     {
       id: 'meal-option',
-      header: 'Refeição / opção',
+      header: isCycle ? 'Dieta' : 'Refeição / opção',
       align: 'left',
-      cell: (row) => <span className={textStyle(row.kind === 'day-total' ? 'table-cell-strong' : 'table-cell')}>{row.label}</span>,
+      cell: (row) => <span className={textStyle(row.kind === 'meal-option' ? 'table-cell' : 'table-cell-strong')}>{row.label}</span>,
     },
     { id: 'macros', header: 'Macronutrientes', align: 'right', cell: (row) => <MacroSummary macros={row.macros} /> },
     {
@@ -144,34 +167,48 @@ export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
         </div>
       </header>
 
-      {document.meals.length === 0 ? (
+      {isCycle ? (
+        document.diets.length === 0 ? (
+          <section aria-labelledby="diet-pdf-empty-diets" className="flex flex-col gap-3">
+            <h2 id="diet-pdf-empty-diets" className={textStyle('section-title')}>Dietas do ciclo</h2>
+            <p className={textStyle('body-secondary')}>Nenhuma dieta configurada.</p>
+          </section>
+        ) : document.diets.map((diet) => {
+          const details = [diet.name, diet.assignedDays.join(', ')].filter(Boolean).join(' · ');
+          return (
+            <section key={diet.id} aria-label={`Dieta ${diet.number}`} className="diet-pdf-cycle-diet flex flex-col gap-3 border-b border-border-divider pb-4 last:border-b-0">
+              <header className="flex flex-wrap items-baseline gap-2">
+                <h2 className={textStyle('section-title')}>Dieta {diet.number}</h2>
+                {details && <p className={textStyle('metadata')}>{details}</p>}
+              </header>
+              {diet.meals.length === 0
+                ? <p className={textStyle('body-secondary')}>Nenhuma refeição cadastrada.</p>
+                : diet.meals.map((meal) => <MealSection key={meal.id} meal={meal} headingLevel={3} />)}
+            </section>
+          );
+        })
+      ) : document.meals.length === 0 ? (
         <section aria-labelledby="diet-pdf-empty-meals" className="flex flex-col gap-3">
           <h2 id="diet-pdf-empty-meals" className={textStyle('section-title')}>Refeições</h2>
           <p className={textStyle('body-secondary')}>Nenhuma refeição cadastrada.</p>
         </section>
-      ) : document.meals.map((meal) => (
-        <section key={meal.id} aria-label={meal.name} className="diet-pdf-meal-block flex flex-col gap-3 border-b border-border-divider pb-4 last:border-b-0">
-          <header className="flex flex-wrap items-baseline gap-2">
-            <h2 className={textStyle('section-title')}>{meal.name}</h2>
-            {meal.time && <time className={textStyle('metadata')}>{meal.time}</time>}
-          </header>
-          <MealFoodsTable meal={meal} />
-        </section>
-      ))}
+      ) : document.meals.map((meal) => <MealSection key={meal.id} meal={meal} />)}
 
       <section aria-labelledby="diet-pdf-macros-title" className="diet-pdf-summary flex flex-col gap-3 border-t border-border-divider pt-5">
-        <h2 id="diet-pdf-macros-title" className={textStyle('section-title')}>Macros das refeições</h2>
+        <h2 id="diet-pdf-macros-title" className={textStyle('section-title')}>{isCycle ? 'Macros' : 'Macros das refeições'}</h2>
         <p className={textStyle('caption')}>
-          Cada linha mostra uma opção. O total do dia considera apenas as opções principais.
+          {isCycle
+            ? 'Resumo de macronutrientes e calorias de cada dieta do ciclo.'
+            : 'Cada linha mostra uma opção. O total do dia considera apenas as opções principais.'}
         </p>
         <DataTable
           data={macroRows}
           columns={macroColumns}
           getRowId={(row) => row.id}
-          caption="Macros por refeição e total do dia"
-          emptyMessage="Macros indisponíveis sem refeições prescritas."
+          caption={isCycle ? 'Macros por dieta do ciclo' : 'Macros por refeição e total do dia'}
+          emptyMessage={isCycle ? 'Macros indisponíveis sem itens prescritos.' : 'Macros indisponíveis sem refeições prescritas.'}
           readOnly
-          ariaLabel="Macros por refeição e total do dia"
+          ariaLabel={isCycle ? 'Macros por dieta do ciclo' : 'Macros por refeição e total do dia'}
           renderRow={(row, index) => (
             <TableRow
               key={row.id}
@@ -180,6 +217,7 @@ export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
               className={cn(
                 'diet-pdf-macro-row h-table-row border-b border-border-divider hover:bg-surface',
                 row.kind === 'day-total' && 'diet-pdf-day-total-row border-t border-border-divider bg-surface-subtle font-semibold hover:bg-surface-subtle',
+                row.kind === 'diet-total' && 'diet-pdf-cycle-total-row border-t border-border-divider bg-surface-subtle font-semibold hover:bg-surface-subtle',
               )}
             >
               {macroColumns.map((column) => (

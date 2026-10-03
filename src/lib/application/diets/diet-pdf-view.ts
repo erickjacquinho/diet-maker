@@ -1,4 +1,4 @@
-import type { DecimalString, DietEditableDocument } from '@/lib/domain/diets/diet-model';
+import type { DecimalString, DietDayCode, DietEditableDocument, DietVariation } from '@/lib/domain/diets/diet-model';
 import { formatNutrition } from '@/lib/domain/diets/nutrition';
 import { formatDateOnly } from '@/lib/date-only';
 import { calculateDocumentSnapshotTotals, calculateMealOptionSnapshotTotals } from './diet-snapshot-consumers';
@@ -39,6 +39,35 @@ export interface DietPdfViewModel {
   dayMacros: DietPdfMacrosView | null;
 }
 
+export interface DietPdfCycleDietView {
+  id: string;
+  number: number;
+  name: string;
+  assignedDays: string[];
+  meals: DietPdfMealView[];
+  macros: DietPdfMacrosView | null;
+}
+
+export interface DietPdfCycleViewModel {
+  patientName: string;
+  prescriptionDate: string;
+  prescriptionDateIso: string;
+  diets: DietPdfCycleDietView[];
+}
+
+export type DietPdfDocumentViewModel = DietPdfViewModel | DietPdfCycleViewModel;
+
+const SHORT_DAY_LABELS: Record<DietDayCode, string> = {
+  MON: 'Seg',
+  TUE: 'Ter',
+  WED: 'Qua',
+  THU: 'Qui',
+  FRI: 'Sex',
+  SAT: 'Sáb',
+  SUN: 'Dom',
+};
+const DAY_ORDER: DietDayCode[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
 function formatMacros(values: {
   protein: DecimalString;
   carbs: DecimalString;
@@ -53,15 +82,8 @@ function formatMacros(values: {
   };
 }
 
-export function buildDietPdfViewModel(
-  document: DietEditableDocument,
-  patientName: string,
-  prescriptionDateIso: string,
-): DietPdfViewModel {
-  if (document.mode !== 'SIMPLE') throw new Error('O PDF está disponível para dietas simples.');
-
-  const variation = document.variations[0];
-  const meals = [...(variation?.meals ?? [])]
+function buildMeals(variation: DietVariation): DietPdfMealView[] {
+  return [...variation.meals]
     .sort((left, right) => left.position - right.position)
     .map((meal) => ({
       id: meal.id,
@@ -83,27 +105,61 @@ export function buildDietPdfViewModel(
           macros: option.items.length ? formatMacros(calculateMealOptionSnapshotTotals(option)) : null,
         })),
     }));
+}
 
-  const hasPrimaryItems = variation?.meals.some((meal) =>
-    meal.options.some((option) => option.countsTowardTotals && option.items.some((item) => item.role === 'PRIMARY')),
-  ) ?? false;
-  const dayTotals = hasPrimaryItems ? calculateDocumentSnapshotTotals(document, variation?.id) : null;
+function buildVariationMacros(document: DietEditableDocument, variation: DietVariation): DietPdfMacrosView | null {
+  const hasPrimaryItems = variation.meals.some((meal) =>
+    meal.options.some((option) =>
+      option.countsTowardTotals && option.items.some((item) => item.role === 'PRIMARY'),
+    ),
+  );
+  return hasPrimaryItems ? formatMacros(calculateDocumentSnapshotTotals(document, variation.id)) : null;
+}
+
+export function buildDietPdfViewModel(
+  document: DietEditableDocument,
+  patientName: string,
+  prescriptionDateIso: string,
+): DietPdfViewModel {
+  if (document.mode !== 'SIMPLE') throw new Error('O PDF está disponível para dietas simples.');
+
+  const variation = document.variations[0];
+  const meals = variation ? buildMeals(variation) : [];
 
   return {
     patientName,
     prescriptionDate: formatDateOnly(prescriptionDateIso) || 'Data não informada',
     prescriptionDateIso,
     meals,
-    dayMacros: dayTotals ? formatMacros({
-      protein: dayTotals.protein,
-      carbs: dayTotals.carbs,
-      fat: dayTotals.fat,
-      energyKcal: dayTotals.energyKcal,
-    }) : null,
+    dayMacros: variation ? buildVariationMacros(document, variation) : null,
   };
 }
 
-export function createDietPdfFilename(view: DietPdfViewModel): string {
+export function buildDietCyclePdfViewModel(
+  document: DietEditableDocument,
+  patientName: string,
+  prescriptionDateIso: string,
+): DietPdfCycleViewModel {
+  if (document.mode !== 'CARB_CYCLING') throw new Error('O PDF do ciclo está disponível para dietas por ciclo de carboidratos.');
+
+  return {
+    patientName,
+    prescriptionDate: formatDateOnly(prescriptionDateIso) || 'Data não informada',
+    prescriptionDateIso,
+    diets: [...document.variations]
+      .sort((left, right) => left.position - right.position)
+      .map((variation, index) => ({
+        id: variation.id,
+        number: index + 1,
+        name: variation.name,
+        assignedDays: DAY_ORDER.filter((day) => variation.assignedDays.includes(day)).map((day) => SHORT_DAY_LABELS[day]),
+        meals: buildMeals(variation),
+        macros: buildVariationMacros(document, variation),
+      })),
+  };
+}
+
+export function createDietPdfFilename(view: DietPdfDocumentViewModel): string {
   const patientSlug = view.patientName
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

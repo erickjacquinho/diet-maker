@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MealCardContainer } from '@/components/organisms/MealCardContainer';
 
@@ -142,6 +142,31 @@ describe('MealCardContainer meal header fields', () => {
     fireEvent.click(minuteButton);
 
     expect(onTimeChange).toHaveBeenCalledWith('10:45');
+  });
+
+  it('fills the time columns and shows their scrollbar only while scrolling', async () => {
+    renderMealCard();
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar horário' }));
+
+    const hourList = await screen.findByRole('listbox', { name: 'Horas' });
+    const minuteList = screen.getByRole('listbox', { name: 'Minutos' });
+
+    expect(hourList).toHaveClass('w-full');
+    expect(minuteList).toHaveClass('w-full');
+    expect(screen.getByRole('button', { name: 'Hora 08' })).toHaveClass('h-8');
+    expect(screen.getByRole('button', { name: 'Minuto 00' })).toHaveClass('h-8');
+    expect(hourList).toHaveAttribute('data-scrolling', 'false');
+
+    vi.useFakeTimers();
+    try {
+      fireEvent.scroll(hourList);
+      expect(hourList).toHaveAttribute('data-scrolling', 'true');
+
+      act(() => vi.advanceTimersByTime(700));
+      expect(hourList).toHaveAttribute('data-scrolling', 'false');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('restores the current value with Escape without committing it', () => {

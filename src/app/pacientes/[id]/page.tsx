@@ -2,24 +2,35 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info, History } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
+import { WhatsAppShareModal } from '@/components/molecules/WhatsAppShareModal';
 import { CreateButton, SecondaryActionButton, Surface, EditIconButton, DeleteIconButton, IconButton } from '@/components/atoms';
 import {
   PatientAssessmentsTable,
   PatientDietsTable,
   PatientProfileHeader,
 } from '@/components/organisms';
+import type { PatientDietExportFormat } from '@/components/organisms/patient/PatientDietsTable';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PageContextHeader } from '@/components/molecules';
 import { textStyle } from '@/design-system';
 import { formatAgeFromBirthDate, formatDateOnly } from '@/lib/date-only';
+import { getBrowserDietApplication } from '@/lib/application/browser-composition';
+import { fromCanonicalPlan } from '@/lib/application/diets/legacy-diet-adapter';
+import { calculateMealsTotal } from '@/lib/macroCalculations';
+import type { HistoricalDiet } from '@/lib/patientRelatedRecords';
+import type { FullDietPlan } from '@/lib/legacy-diet-types';
+import { buildDietWhatsAppText, type WhatsAppDietExportOptions } from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
 import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
 
 export default function PatientDetailPage() {
+  const router = useRouter();
   const {
     patientId,
     patient,
@@ -62,6 +73,52 @@ export default function PatientDetailPage() {
     handleSavePatient,
     handleDeletePatient,
   } = usePatientProfilePage();
+
+  const [whatsAppExportDiet, setWhatsAppExportDiet] = React.useState<FullDietPlan | null>(null);
+  const [isWhatsAppExportOpen, setIsWhatsAppExportOpen] = React.useState(false);
+  const [whatsAppExportOptions, setWhatsAppExportOptions] = React.useState<WhatsAppDietExportOptions>({
+    includeNutrition: true,
+    includeMealTimes: true,
+    selectedVariationIds: [],
+  });
+
+  const handleExportDiet = React.useCallback(async (diet: HistoricalDiet, format: PatientDietExportFormat) => {
+    if (format !== 'whatsapp') {
+      router.push(`/pacientes/${patientId}/dieta/${diet.id}/${format === 'pdf' ? 'pdf' : 'pagina'}?source=history`);
+      return;
+    }
+
+    try {
+      const application = await getBrowserDietApplication();
+      const snapshot = await application.getDietSnapshot(patientId, diet.id);
+      if (!snapshot) throw new Error('A dieta não foi encontrada.');
+
+      const legacyDiet = fromCanonicalPlan(snapshot);
+      setWhatsAppExportDiet(legacyDiet);
+      setWhatsAppExportOptions({
+        includeNutrition: true,
+        includeMealTimes: true,
+        selectedVariationIds: legacyDiet.mode === 'carb_cycling'
+          ? legacyDiet.carbCyclingVariations.map((variation) => variation.id)
+          : [],
+      });
+      setIsWhatsAppExportOpen(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível abrir a exportação da dieta.');
+    }
+  }, [patientId, router]);
+
+  const whatsAppExportText = React.useMemo(() => {
+    if (!whatsAppExportDiet || !patient) return '';
+    const meals = whatsAppExportDiet.simpleMeals;
+    return buildDietWhatsAppText(
+      patient.name,
+      whatsAppExportDiet,
+      meals,
+      calculateMealsTotal(meals),
+      whatsAppExportOptions,
+    );
+  }, [patient, whatsAppExportDiet, whatsAppExportOptions]);
 
   if (isProfileLoading) {
     return (
@@ -250,6 +307,7 @@ export default function PatientDetailPage() {
           loading={isDietsLoading}
           error={dietsError}
           onOpenReadOnlyDiet={handleOpenReadOnlyDietModal}
+          onExportDiet={handleExportDiet}
         />
       </Surface>
 
@@ -303,6 +361,17 @@ export default function PatientDetailPage() {
         />
       </Surface>
 
+
+      <WhatsAppShareModal
+        isOpen={isWhatsAppExportOpen}
+        onClose={() => setIsWhatsAppExportOpen(false)}
+        whatsAppText={whatsAppExportText}
+        whatsAppOptions={whatsAppExportOptions}
+        onOptionsChange={setWhatsAppExportOptions}
+        variations={whatsAppExportDiet?.mode === 'carb_cycling'
+          ? whatsAppExportDiet.carbCyclingVariations.map(({ id, name }) => ({ id, name }))
+          : []}
+      />
 
       <PatientProfileModals
         patient={patient}

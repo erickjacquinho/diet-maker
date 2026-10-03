@@ -69,13 +69,8 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
   - Suporte a inclusão de opções de substituição manual por refeição.
   - *Referência de Arquitetura*: [ADR-004: Modelo de Alimentos Substitutos](file:///c:/Programmer/diet-maker/docs/adr/ADR-004-food-substitutions-model.md).
 
-#### User Story 3: Escala Proporcional em Lote (% / Factor)
-- **Como** nutricionista,
-- **Eu quero** aumentar ou reduzir a gramatura dos alimentos de uma refeição ou da dieta inteira por uma porcentagem (ex: +15% ou -10%),
-- **Para que** eu possa adequar rapidamente o volume calórico sem precisar alterar alimento por alimento manualmente.
-- **Acceptance Criteria**:
-  - Modal interativo permitindo selecionar aumento (+%) ou redução (-%) com atalhos de 5%, 10%, 15%, 20%, 25%, 30%.
-  - Multiplicação proporcional de todas as gramaturas dos alimentos envolvidos com arredondamento inteligente.
+#### User Story 3: Escala Proporcional em Lote (% / Factor) — removida
+- **Decisão (2026-10-02)**: a escala em lote foi retirada do construtor de dieta. As metas de macronutrientes continuam ajustáveis manualmente, e as porções podem ser editadas por alimento.
 
 #### User Story 4: Exportação para WhatsApp e PDF Clinico
 - **Como** nutricionista,

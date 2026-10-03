@@ -7,7 +7,7 @@
 ## 1. Proposta preservada
 
 - Uma Conta e um profissional por base local, sem login ou sincronização na V1.
-- Biblioteca de alimentos customizados, receitas e refeições prontas da Conta.
+- Biblioteca de alimentos customizados, receitas, refeições prontas e dietas prontas da Conta.
 - Pacientes, acompanhamento existente, prescrições e histórico por Conta + Paciente.
 - `DietDraft` somente em IndexedDB; autosave não cria prescrição confirmada.
 - **Salvar** confirma a dieta em transação; a vigente anterior vira histórico.

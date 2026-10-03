@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Apresentar o documento da dieta simples em formato legível para prévia e geração de PDF.
+Apresentar dietas simples e ciclos de carboidratos em formato legível para prévia e geração de PDF.
 
 ## Category inheritance
 
@@ -22,11 +22,11 @@ Herda integralmente [structure](../../categories/structure.md). Traits autorizad
 
 ## Specific anatomy
 
-Cabeçalho com paciente e data; cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas; outra `DataTable` apresenta uma linha de macros por opção e total diário na última linha.
+Cabeçalho com paciente e data. Na dieta simples, cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas. No ciclo, cada variação é numerada e contém suas refeições e quantidades; uma tabela ao final apresenta macros e kcal por dieta.
 
 ## Allowed variants
 
-Somente dieta simples; cada opção pertence à refeição que a contém.
+Dieta simples ou ciclo de carboidratos; cada opção pertence à refeição que a contém e a ordem das variações do ciclo é preservada.
 
 ## Particular states
 
@@ -34,11 +34,11 @@ Estados vazios de refeições/opções e macros ausentes são apresentados sem i
 
 ## Composition
 
-Recebe um modelo de visualização já calculado; não consulta persistência nem recalcula nutrientes. Compõe `DataTable` para alimentos e macros, usando `TableRow` e `TableCell` para agrupar cada opção e suas linhas de alimentos. A rota controla prévia, navegação e download.
+Recebe um modelo de visualização já calculado; não consulta persistência nem recalcula nutrientes. Compõe `DataTable` para alimentos e macros, usando `TableRow` e `TableCell` para agrupar cada opção e suas linhas de alimentos. O resumo de cada dieta usa apenas itens principais de seus snapshots. A rota controla prévia, navegação e download.
 
 ## Content rules
 
-Exibe nome e quantidade/unidade dos alimentos. Macros seguem a ordem proteína, carboidrato, gordura e kcal; o total diário considera somente as opções principais.
+Exibe nome e quantidade/unidade dos alimentos. Macros seguem a ordem proteína, carboidrato, gordura e kcal; o total da dieta simples e cada total do ciclo consideram somente as opções principais.
 
 ## Exceptions
 
@@ -52,7 +52,8 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 - identidade, source e exports coincidem com o registro;
 - refeições e opções mantêm a hierarquia do documento;
-- o resumo nutricional aparece após as refeições;
+- na dieta simples, o resumo nutricional aparece após as refeições;
+- no ciclo, as refeições de cada dieta aparecem juntas e o resumo de macros fica no final;
 - nenhuma regra visual compartilhada da categoria é redefinida.
 
 ## Implementation status

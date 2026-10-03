@@ -9,7 +9,7 @@
 O NutriDiet terá um modelo relacional com duas fronteiras de propriedade:
 
 1. **Conta:** biblioteca reutilizável do nutricionista, incluindo alimentos
-   customizados, receitas e refeições prontas.
+   customizados, receitas, refeições prontas e modelos de dietas prontas.
 2. **Conta + Paciente:** dados clínicos e prescrições, incluindo pacientes,
    consultas, avaliações, dietas vigentes e snapshots históricos.
 
@@ -66,6 +66,7 @@ Account
 ├── alimentos customizados
 ├── receitas
 ├── refeições prontas
+├── dietas prontas (modelos completos sem patientId)
 ├── objetivos personalizados
 └── pacientes
     ├── consultas
@@ -84,8 +85,14 @@ São reutilizáveis entre pacientes e não devem conter `patientId`:
 - alimentos customizados;
 - receitas e seus ingredientes;
 - refeições prontas e seus itens;
+- dietas prontas com a composição completa e horários editáveis, sem `patientId`;
 - objetivos personalizados;
 - favoritos e ordenações da biblioteca.
+
+`ReadyDiet` é um modelo completo reutilizável da Conta, sem `patientId`. Ele
+guarda uma cópia de `DietEditableDocument` com modo, variações, refeições,
+horários, itens e snapshots. Ajustar nome ou horário ao salvar o modelo não
+altera o rascunho que originou a cópia.
 
 Cada mutação desses dados exige ação explícita de salvar o próprio item. Um
 draft de dieta não é usado como buffer para criar ou editar o catálogo.
@@ -113,6 +120,7 @@ A interface da aplicação deve depender de portas semelhantes a:
 - `CustomFoodRepository`;
 - `RecipeRepository`;
 - `ReadyMealRepository`;
+- `ReadyDietRepository`;
 - `PatientRepository`;
 - `DietRepository`;
 - `DietDraftStore`;
@@ -140,6 +148,7 @@ As operações abaixo são transações atômicas no backend/banco canônico:
 | Salvar alimento customizado | Conta | cria/atualiza alimento, versão e auditoria técnica |
 | Salvar receita | Conta | grava cabeçalho, ingredientes e cálculo nutricional |
 | Salvar refeição pronta | Conta | grava cabeçalho e itens reutilizáveis |
+| Salvar dieta pronta | Conta | grava nome e documento completo reutilizável, sem vínculo clínico com paciente |
 | Salvar paciente | Conta | cria/atualiza cadastro dentro da Conta |
 | Salvar dieta | Conta + Paciente | cria refeições, itens, snapshots e transição de vigência |
 | Arquivar paciente | Conta + Paciente | oculta o paciente sem apagar o histórico |

@@ -1,19 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Download } from 'lucide-react';
 import { DietPdfTemplate } from '@/components/templates';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
-import { buildDietPdfViewModel, createDietPdfFilename, type DietPdfViewModel } from '@/lib/application/diets/diet-pdf-view';
+import { buildDietCyclePdfViewModel, buildDietPdfViewModel, createDietPdfFilename, type DietPdfDocumentViewModel } from '@/lib/application/diets/diet-pdf-view';
 import { normalizeDateToISO, serializeDateOnly } from '@/lib/date-only';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { textStyle } from '@/design-system';
 
 interface PageState {
-  document: DietPdfViewModel | null;
+  document: DietPdfDocumentViewModel | null;
   error: string | null;
   isLoading: boolean;
 }
@@ -21,8 +21,10 @@ interface PageState {
 export default function DietPdfPreviewPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const patientId = params?.id as string;
   const dietaId = (params?.dietaId as string) || 'nova';
+  const isHistoricalExport = searchParams.get('source') === 'history';
   const documentRef = useRef<HTMLDivElement | null>(null);
   const [pageState, setPageState] = useState<PageState>({ document: null, error: null, isLoading: true });
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -38,16 +40,31 @@ export default function DietPdfPreviewPage() {
           getBrowserDietApplication(),
           getBrowserPatientApplication(),
         ]);
+        const profilePromise = patientApplication.getPatientProfile(patientId);
+
+        if (isHistoricalExport) {
+          const [profile, snapshot] = await Promise.all([
+            profilePromise,
+            dietApplication.getDietSnapshot(patientId, dietaId),
+          ]);
+          if (!snapshot) throw new Error('A dieta não foi encontrada.');
+          const patient = toPatientViewModel(profile.patient);
+          const prescriptionDate = normalizeDateToISO(snapshot.activatedAt);
+          if (!prescriptionDate) throw new Error('Não foi possível localizar a data da prescrição salva.');
+
+          const view = snapshot.mode === 'CARB_CYCLING'
+            ? buildDietCyclePdfViewModel(snapshot, patient.name, prescriptionDate)
+            : buildDietPdfViewModel(snapshot, patient.name, prescriptionDate);
+          if (!cancelled) setPageState({ document: view, error: null, isLoading: false });
+          return;
+        }
+
         const [profile, editor] = await Promise.all([
-          patientApplication.getPatientProfile(patientId),
+          profilePromise,
           dietApplication.openEditor(patientId, dietaId),
         ]);
         const patient = toPatientViewModel(profile.patient);
         const { draft } = editor;
-
-        if (draft.payload.mode !== 'SIMPLE') {
-          throw new Error('A prévia em PDF está disponível para dietas simples.');
-        }
 
         const savedDietId = draft.baseDietId ?? (dietaId === 'nova' ? undefined : dietaId);
         let prescriptionDate = serializeDateOnly(new Date());
@@ -58,7 +75,9 @@ export default function DietPdfPreviewPage() {
           prescriptionDate = activatedDate;
         }
 
-        const view = buildDietPdfViewModel(draft.payload, patient.name, prescriptionDate);
+        const view = draft.payload.mode === 'CARB_CYCLING'
+          ? buildDietCyclePdfViewModel(draft.payload, patient.name, prescriptionDate)
+          : buildDietPdfViewModel(draft.payload, patient.name, prescriptionDate);
         if (!cancelled) setPageState({ document: view, error: null, isLoading: false });
       } catch (error) {
         if (!cancelled) {
@@ -73,11 +92,11 @@ export default function DietPdfPreviewPage() {
 
     void load();
     return () => { cancelled = true; };
-  }, [dietaId, patientId]);
+  }, [dietaId, isHistoricalExport, patientId]);
 
   const handleBack = useCallback(() => {
-    router.push(`/pacientes/${patientId}/dieta/${dietaId}`);
-  }, [dietaId, patientId, router]);
+    router.push(isHistoricalExport ? `/pacientes/${patientId}` : `/pacientes/${patientId}/dieta/${dietaId}`);
+  }, [dietaId, isHistoricalExport, patientId, router]);
 
   const handleDownload = useCallback(async () => {
     const documentElement = documentRef.current?.querySelector<HTMLElement>('[data-diet-pdf-document]');
@@ -96,7 +115,7 @@ export default function DietPdfPreviewPage() {
         image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { scale: 2, logging: false, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css'], avoid: ['.diet-pdf-meal-block', '.diet-pdf-option-heading', '.diet-pdf-food-row', '.diet-pdf-macro-row', '.diet-pdf-day-total-row'] },
+        pagebreak: { mode: ['css'], avoid: ['.diet-pdf-meal-block', '.diet-pdf-option-heading', '.diet-pdf-food-row', '.diet-pdf-macro-row', '.diet-pdf-day-total-row', '.diet-pdf-cycle-total-row'] },
       } as Parameters<typeof worker.set>[0] & {
         pagebreak: { mode: string[]; avoid: string[] };
       };
@@ -124,7 +143,7 @@ export default function DietPdfPreviewPage() {
         <div>
           <Button type="button" variant="secondary" size="compact" onClick={handleBack}>
             <ArrowLeft size={16} aria-hidden="true" />
-            Voltar para a dieta
+            {isHistoricalExport ? 'Voltar para o perfil' : 'Voltar para a dieta'}
           </Button>
         </div>
       </main>
@@ -136,7 +155,7 @@ export default function DietPdfPreviewPage() {
       <div role="group" aria-label="Ações da prévia" className="flex flex-wrap items-center justify-between gap-3">
         <Button type="button" variant="secondary" size="compact" onClick={handleBack} disabled={isDownloading}>
           <ArrowLeft size={16} aria-hidden="true" />
-          Voltar para a dieta
+          {isHistoricalExport ? 'Voltar para o perfil' : 'Voltar para a dieta'}
         </Button>
         <Button type="button" variant="primary" size="compact" onClick={handleDownload} disabled={isDownloading}>
           <Download size={16} aria-hidden="true" />

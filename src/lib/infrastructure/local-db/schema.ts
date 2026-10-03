@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { DietEditableDocument } from '@/lib/domain/diets/diet-model';
 import {
   check,
   boolean,
@@ -367,6 +368,27 @@ export const readyMealItems = pgTable(
   ],
 );
 
+// ponytail: keep the editable document whole; normalize meals if cross-template item queries are needed.
+export const readyDiets = pgTable(
+  'ready_diets',
+  {
+    id: text('id').primaryKey(),
+    accountId: text('account_id').notNull().references(() => accounts.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    document: jsonb('document').$type<DietEditableDocument>().notNull(),
+    version: integer('version').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('ready_diets_id_account_idx').on(table.id, table.accountId),
+    index('ready_diets_account_idx').on(table.accountId),
+    check('ready_diets_name_not_empty', sql.raw("length(trim(name)) > 0")),
+    check('ready_diets_version_positive', sql.raw('version > 0')),
+    check('ready_diets_document_object', sql.raw("jsonb_typeof(document) = 'object'")),
+  ],
+);
+
 export const schema = {
   accounts,
   profileCheckpointState,
@@ -387,5 +409,6 @@ export const schema = {
   recipeIngredients,
   readyMeals,
   readyMealItems,
+  readyDiets,
 };
 export type LocalDbSchema = typeof schema;

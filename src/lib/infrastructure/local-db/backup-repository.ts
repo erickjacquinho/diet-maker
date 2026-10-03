@@ -24,6 +24,7 @@ import {
   profileCheckpointState,
   readyMealItems,
   readyMeals,
+  readyDiets,
   recipeIngredients,
   recipes,
 } from './schema';
@@ -76,6 +77,7 @@ export class PGliteBackupRepository implements BackupRepository {
         const ingredientRows = await tx.select().from(recipeIngredients).where(eq(recipeIngredients.accountId, accountId)).orderBy(asc(recipeIngredients.id));
         const readyMealRows = await tx.select().from(readyMeals).where(eq(readyMeals.accountId, accountId)).orderBy(asc(readyMeals.id));
         const readyMealItemRows = await tx.select().from(readyMealItems).where(eq(readyMealItems.accountId, accountId)).orderBy(asc(readyMealItems.id));
+        const readyDietRows = await tx.select().from(readyDiets).where(eq(readyDiets.accountId, accountId)).orderBy(asc(readyDiets.id));
 
         return {
           appId: BACKUP_APP_ID,
@@ -100,6 +102,7 @@ export class PGliteBackupRepository implements BackupRepository {
           recipeIngredients: ingredientRows,
           readyMeals: readyMealRows,
           readyMealItems: readyMealItemRows,
+          readyDiets: readyDietRows,
         };
       });
     } catch (cause) {
@@ -134,6 +137,7 @@ export class PGliteBackupRepository implements BackupRepository {
         await tx.delete(dietVariations).where(eq(dietVariations.accountId, accountId));
         await tx.delete(dietPlans).where(eq(dietPlans.accountId, accountId));
         await tx.delete(readyMealItems).where(eq(readyMealItems.accountId, accountId));
+        await tx.delete(readyDiets).where(eq(readyDiets.accountId, accountId));
         await tx.delete(recipeIngredients).where(eq(recipeIngredients.accountId, accountId));
         await tx.delete(bodyAssessments).where(eq(bodyAssessments.accountId, accountId));
         await tx.delete(nextFollowUps).where(eq(nextFollowUps.accountId, accountId));
@@ -183,6 +187,7 @@ export class PGliteBackupRepository implements BackupRepository {
         if (snapshot.recipeIngredients.length) await tx.insert(recipeIngredients).values(snapshot.recipeIngredients);
         if (snapshot.readyMeals.length) await tx.insert(readyMeals).values(snapshot.readyMeals);
         if (snapshot.readyMealItems.length) await tx.insert(readyMealItems).values(snapshot.readyMealItems);
+        if (snapshot.readyDiets.length) await tx.insert(readyDiets).values(snapshot.readyDiets);
         await tx.insert(profileCheckpointState).values({ accountId, workspaceRevision: 0, checkpointRevision: 0 });
 
         if (this.failAt === 'after-insert') throw repositoryFailure('Falha simulada após inserir o backup.');

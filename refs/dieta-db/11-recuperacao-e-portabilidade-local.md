@@ -29,7 +29,7 @@ O contrato executável e as evidências da implementação estão no
 O arquivo contém somente os dados confirmados da Conta:
 
 - identificação e configurações do perfil profissional;
-- alimentos customizados, receitas e refeições prontas;
+- alimentos customizados, receitas, refeições prontas e dietas prontas;
 - preferências da biblioteca, incluindo os favoritos por ID;
 - pacientes, consultas, avaliações e objetivos já contemplados no produto;
 - dietas vigentes, snapshots históricos e registros arquivados;

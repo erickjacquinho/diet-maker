@@ -6,6 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { MessageCircle, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
+import { formatDateOnly, serializeDateOnly } from '@/lib/date-only';
 import type { WhatsAppDietExportOptions } from '@/lib/whatsapp';
 
 interface WhatsAppShareModalProps {
@@ -60,22 +61,20 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText, whatsAppOpti
                 value={whatsAppOptions.selectedVariationIds}
                 onValueChange={(value: string[]) => onOptionsChange({ ...whatsAppOptions, selectedVariationIds: value })}
                 aria-labelledby="whatsapp-variation-label"
-                className="flex flex-wrap items-center justify-start gap-2 rounded-none border-0 bg-transparent p-0"
+                className="flex flex-wrap justify-start"
               >
                 {variations.map((variation) => (
                   <ToggleGroupItem
                     key={variation.id}
                     value={variation.id}
-                    className="min-h-14 justify-between whitespace-normal rounded-control border border-border-subtle bg-surface px-3 py-2 text-left text-style-body font-medium data-[state=on]:border-primary data-[state=on]:bg-primary-soft data-[state=on]:text-primary"
                   >
-                    <span>{variation.name}</span>
-                    {whatsAppOptions.selectedVariationIds.includes(variation.id) && <Check size={16} className="shrink-0" aria-hidden="true" />}
+                    {variation.name}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
             </div>
           )}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-2">
             <span id="whatsapp-inclusion-label" className="text-style-body-small font-semibold text-text-primary">Incluir:</span>
             <ToggleGroup
               type="multiple"
@@ -89,22 +88,10 @@ export function WhatsAppShareModal({ isOpen, onClose, whatsAppText, whatsAppOpti
                 selectedVariationIds: whatsAppOptions.selectedVariationIds,
               })}
               aria-labelledby="whatsapp-inclusion-label"
-              className="flex items-center gap-2 rounded-none border-0 bg-transparent p-0"
+              className="flex flex-wrap justify-start"
             >
-              <ToggleGroupItem
-                value="nutrition"
-                className="min-h-14 justify-between whitespace-normal rounded-control border border-border-subtle bg-surface px-3 py-2 text-left text-style-body font-medium data-[state=on]:border-primary data-[state=on]:bg-primary-soft data-[state=on]:text-primary"
-              >
-                <span>Macros e calorias</span>
-                {whatsAppOptions.includeNutrition && <Check size={16} className="shrink-0" aria-hidden="true" />}
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="meal-times"
-                className="min-h-14 justify-between whitespace-normal rounded-control border border-border-subtle bg-surface px-3 py-2 text-left text-style-body font-medium data-[state=on]:border-primary data-[state=on]:bg-primary-soft data-[state=on]:text-primary"
-              >
-                <span>Horário das refeições</span>
-                {whatsAppOptions.includeMealTimes && <Check size={16} className="shrink-0" aria-hidden="true" />}
-              </ToggleGroupItem>
+              <ToggleGroupItem value="nutrition">Macros e calorias</ToggleGroupItem>
+              <ToggleGroupItem value="meal-times">Horário das refeições</ToggleGroupItem>
             </ToggleGroup>
           </div>
           <Textarea

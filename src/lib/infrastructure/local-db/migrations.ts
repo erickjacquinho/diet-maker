@@ -472,6 +472,24 @@ export const nextFollowUpMultipleTypesMigration: LocalMigration = {
   `,
 };
 
+export const readyDietsMigration: LocalMigration = {
+  id: '0012_ready_diets',
+  version: '12',
+  sql: `
+    CREATE TABLE IF NOT EXISTS ready_diets (
+      id text PRIMARY KEY,
+      account_id text NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+      name text NOT NULL CHECK (length(trim(name)) > 0),
+      document jsonb NOT NULL CHECK (jsonb_typeof(document) = 'object'),
+      version integer NOT NULL CHECK (version > 0),
+      created_at text NOT NULL,
+      updated_at text NOT NULL
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS ready_diets_id_account_idx ON ready_diets(id, account_id);
+    CREATE INDEX IF NOT EXISTS ready_diets_account_idx ON ready_diets(account_id);
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
@@ -484,6 +502,7 @@ export const migrationFiles: readonly LocalMigration[] = [
   dietHistorySummaryBackfillMigration,
   nextFollowUpCommentsMigration,
   nextFollowUpMultipleTypesMigration,
+  readyDietsMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;
