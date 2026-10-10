@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar, SortableList } from '../molecules';
 import type { SortableItemRenderContext } from '@/components/molecules/SortableList';
-import type { DataTableColumnDef } from '@/components/molecules/DataTable';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
@@ -107,55 +107,55 @@ const mealItemColumns: DataTableColumnDef<MealItemRowProps>[] = [
   {
     id: 'reorder',
     header: <span className="sr-only">Reordenar</span>,
-    headerClassName: 'h-8 w-10 px-2 text-center',
+    headerClassName: 'w-10 px-2 text-center',
     cell: () => null,
   },
   {
     id: 'name',
     header: 'Nome',
-    headerClassName: 'h-8 text-left',
+    headerClassName: 'text-left',
     cell: () => null,
   },
   {
     id: 'food-actions',
     header: <span className="sr-only">Ações do alimento</span>,
-    headerClassName: 'h-8 w-20 px-2 text-center',
+    headerClassName: 'w-20 px-2 text-center',
     cell: () => null,
   },
   {
     id: 'quantity',
     header: 'Quantidade',
-    headerClassName: 'h-8 w-24 text-center',
+    headerClassName: 'w-24 text-center',
     cell: () => null,
   },
   {
     id: 'protein',
     header: 'Proteína',
-    headerClassName: 'h-8 w-20 text-right text-macro-protein',
+    headerClassName: 'w-20 text-right text-macro-protein',
     cell: () => null,
   },
   {
     id: 'carbs',
     header: 'Carboidrato',
-    headerClassName: 'h-8 w-24 text-right text-macro-carbohydrate',
+    headerClassName: 'w-24 text-right text-macro-carbohydrate',
     cell: () => null,
   },
   {
     id: 'fats',
     header: 'Gorduras',
-    headerClassName: 'h-8 w-20 text-right text-macro-fat',
+    headerClassName: 'w-20 text-right text-macro-fat',
     cell: () => null,
   },
   {
     id: 'calories',
     header: 'Calorias',
-    headerClassName: 'h-8 w-24 text-right text-text-primary',
+    headerClassName: 'w-24 text-right text-text-primary',
     cell: () => null,
   },
   {
     id: 'remove',
     header: <span className="sr-only">Remover alimento</span>,
-    headerClassName: 'h-8 w-12 px-2 text-center',
+    headerClassName: 'w-12 px-2 text-center',
     cell: () => null,
   },
 ];
@@ -547,44 +547,21 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
         {/* Items List - Table View */}
         <div className="min-h-12">
-          <Table
-            aria-label={`Alimentos da refeição ${title}`}
-            containerClassName="overflow-hidden rounded-control border border-border-divider bg-surface"
-          >
-            <TableCaption className="sr-only">Alimentos da refeição {title}</TableCaption>
-            <TableHeader>
-              <TableRow className="border-b border-border-divider bg-surface-subtle hover:bg-surface-subtle">
-                {mealItemColumns.map((column) => (
-                  <TableHead
-                    key={column.id}
-                    scope="col"
-                    className={cn(
-                      'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
-                      column.headerClassName
-                    )}
-                  >
-                    {column.header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-
-            {items.length === 0 ? (
-              <TableBody>
-                <TableRow>
-                  <TableCell colSpan={mealItemColumns.length} className="p-4 text-center">
-                    <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
-                      <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
-                      <span className="text-style-caption">
-                        Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.
-                      </span>
-                    </span>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            ) : (
+          <DataTable
+            data={items}
+            columns={mealItemColumns}
+            getRowId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
+            caption={`Alimentos da refeição ${title}`}
+            emptyMessage={(
+              <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
+                <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
+                <span className="text-style-caption">Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.</span>
+              </span>
+            )}
+            className="overflow-hidden rounded-control border border-border-divider bg-surface"
+            renderBody={(rows) => (
               <SortableList
-                items={items}
+                items={rows}
                 getItemId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
                 getItemLabel={(item) => item.name}
                 ariaLabel={`Alimentos da refeição ${title}`}
@@ -632,7 +609,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 onReorder={(_, meta) => onReorderItems?.(meta.fromIndex, meta.toIndex)}
               />
             )}
-          </Table>
+          />
         </div>
 
         {/* Add Food Button */}

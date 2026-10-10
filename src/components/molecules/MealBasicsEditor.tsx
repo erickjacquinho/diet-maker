@@ -13,6 +13,7 @@ export interface MealBasicsEntry {
 export interface MealBasicsEditorProps {
   entries: MealBasicsEntry[];
   idPrefix: string;
+  disabled?: boolean;
   onChange: (entries: MealBasicsEntry[]) => void;
   nameLabel?: string;
   timeLabel?: string;
@@ -21,6 +22,7 @@ export interface MealBasicsEditorProps {
 export function MealBasicsEditor({
   entries,
   idPrefix,
+  disabled = false,
   onChange,
   nameLabel = 'Nome da refeição',
   timeLabel = 'Horário sugerido',
@@ -41,11 +43,11 @@ export function MealBasicsEditor({
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2 flex flex-col gap-1">
                 <label htmlFor={nameId} className={textStyle('field-label')}>{nameLabel}</label>
-                <Input id={nameId} required value={entry.name} onChange={(event) => updateEntry(index, { name: event.target.value })} />
+                <Input id={nameId} disabled={disabled} required value={entry.name} onChange={(event) => updateEntry(index, { name: event.target.value })} />
               </div>
               <div className="flex flex-col gap-1">
                 <label htmlFor={timeId} className={textStyle('field-label')}>{timeLabel}</label>
-                <Input id={timeId} type="time" value={entry.time} onChange={(event) => updateEntry(index, { time: event.target.value })} />
+                <Input id={timeId} disabled={disabled} type="time" value={entry.time} onChange={(event) => updateEntry(index, { time: event.target.value })} />
               </div>
             </div>
           </fieldset>

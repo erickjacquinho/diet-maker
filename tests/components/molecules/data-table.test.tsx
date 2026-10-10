@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DataTable, type DataTableColumnDef, type DataTableSortState } from '@/components/molecules/DataTable';
-import { TableCell, TableRow } from '@/components/ui/table';
+import { TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 interface Row {
   id: string;
@@ -104,6 +104,21 @@ describe('DataTable contract', () => {
     );
     expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar os dados.');
     expect(screen.queryByRole('cell', { name: 'Alfa' })).not.toBeInTheDocument();
+  });
+
+  it('passes only the sorted visible page to a composed body', () => {
+    const renderBody = vi.fn((visible: Row[]) => <TableBody>{visible.map(row => <TableRow key={row.id}><TableCell>{row.name}</TableCell></TableRow>)}</TableBody>);
+    renderTable({ renderBody, sort: { state: { columnId: 'value', direction: 'desc' }, onChange: vi.fn() }, pagination: { pageIndex: 0, pageSize: 1, onPageChange: vi.fn() } });
+    expect(renderBody).toHaveBeenCalledWith([rows[1]]);
+    expect(screen.getByRole('cell', { name: 'Beta' })).toBeInTheDocument();
+    expect(screen.queryByRole('cell', { name: 'Alfa' })).not.toBeInTheDocument();
+  });
+
+  it.each([{ data: [], emptyMessage: 'Vazio' }, { loading: true }, { errorMessage: 'Falha' }])('keeps canonical states ahead of a custom body: %j', props => {
+    const renderBody = vi.fn(() => <TableBody />);
+    renderTable({ ...props, renderBody });
+    expect(renderBody).not.toHaveBeenCalled();
+    expect(screen.getByRole(props.errorMessage ? 'alert' : 'status')).toBeInTheDocument();
   });
 
   it('keeps the shared molecule free of domain imports', () => {

@@ -358,8 +358,8 @@ export function DietTableRow({
       {/* 6. Ações */}
       <TableCell className="whitespace-nowrap px-1 py-3.5 text-right">
         <div className={`flex items-center justify-end gap-1 ${isExportMenuOpen
-          ? 'pointer-events-auto opacity-100'
-          : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100'
+          ? 'visible'
+          : 'invisible group-hover:visible group-focus-within:visible'
         }`}>
           <Button
             type="button"

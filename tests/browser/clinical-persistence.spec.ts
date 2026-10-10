@@ -63,7 +63,7 @@ async function chooseDate(page: Page, container: Page | Locator, label: string):
 
 async function saveFollowUp(page: Page, offsetDays: number, type: string, expectedComments = ''): Promise<void> {
   const region = page.getByRole('region', { name: 'Próximo acompanhamento' });
-  await region.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
+  await page.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   const comments = dialog.getByRole('textbox', { name: 'Comentários' });
   await expect(comments).toHaveValue(expectedComments);
@@ -166,7 +166,7 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
   await navigateWithinSession(page, patientOnePath);
-  await followUpRegion.getByRole('button', { name: 'Reagendar' }).click();
+  await page.getByRole('button', { name: 'Reagendar acompanhamento' }).click();
   const rescheduleDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
   const removeDialog = page.getByRole('dialog', { name: 'Remover acompanhamento?' });

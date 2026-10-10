@@ -22,7 +22,7 @@ Herda integralmente [data-display](../../categories/data-display.md). Não possu
 
 ## Specific anatomy
 
-Caption acessível, cabeçalho com `scope="col"`, corpo de células tipadas, linha de estado com `colSpan` e paginação opcional. `renderRow` e `renderExpandedRow` permitem linhas complexas sem mover regras de domínio para a molécula.
+Caption acessível, cabeçalho com `scope="col"`, corpo de células tipadas, linha de estado com `colSpan` e paginação opcional. `renderRow` e `renderExpandedRow` permitem linhas complexas sem mover regras de domínio para a molécula. `renderBody(rows)` compõe um tbody externo com as linhas visíveis já ordenadas/paginadas; caption, headers e estados permanecem canônicos. Esse corpo responde por seus refs e interações, sem virtualização interna.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Expõe estados `empty`, `loading`, `error` e `read-only` sem dados falsos. Orden
 
 ## Composition
 
-Compõe `ui-table`, `ui-button` e ícones Lucide apenas para estrutura e controles genéricos. A molécula possui a responsabilidade da semântica, estados e controles; colunas, callbacks, navegação e mutações pertencem aos organismos consumidores. Não importa tipos ou regras de alimentos, pacientes, dietas ou avaliações.
+Compõe `ui-table`, `atom-checkbox`, `ui-button` e ícones Lucide apenas para estrutura e controles genéricos. A molécula possui a responsabilidade da semântica, estados e controles; colunas, callbacks, navegação e mutações pertencem aos organismos consumidores. Não importa tipos ou regras de alimentos, pacientes, dietas ou avaliações.
 
 ## Content rules
 
@@ -52,6 +52,7 @@ Nenhuma exceção aprovada.
 - `organism-patient-assessments-table`
 - `organism-patient-consultation-history-table`
 - `template-diet-pdf-template`
+- `organism-meal-card-container`
 
 ## Acceptance criteria
 

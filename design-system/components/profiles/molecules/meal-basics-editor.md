@@ -30,7 +30,7 @@ Entrada unitária ou em lote pela lista `entries`; não há variante visual púb
 
 ## Particular states
 
-Valor controlado pelo consumidor. Lista vazia não renderiza linhas; o consumidor apresenta a orientação do estado empty.
+Valor controlado pelo consumidor; disabled preserva valores e bloqueia edição durante gravação. Lista vazia não renderiza linhas; o consumidor apresenta a orientação do estado empty.
 
 ## Composition
 
@@ -57,4 +57,4 @@ Nenhuma exceção aprovada.
 
 ## Implementation status
 
-Implementado como molécula compartilhada; `specStatus` permanece `specified` no registro.
+Implementado como molécula compartilhada; contrato homologado documentalmente em 2026-10-10, protegido por testes de edição, seleção e confirmação.

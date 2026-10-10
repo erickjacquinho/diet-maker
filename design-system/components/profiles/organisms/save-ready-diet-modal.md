@@ -59,4 +59,4 @@ Nenhuma exceção aprovada.
 
 ## Implementation status
 
-Implementado no fluxo do construtor; `specStatus` permanece `specified` no registro.
+Implementado no fluxo do construtor; contrato homologado documentalmente em 2026-10-10, protegido por testes de edição, seleção e confirmação.

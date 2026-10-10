@@ -32,13 +32,16 @@ function scanDirectory(dirPath) {
 
 function checkMarkdownFile(filePath) {
   fileCount++;
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, 'utf8')
+    .replace(/```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`/g, '');
   // Match markdown links: [label](url)
   const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
   let match;
   while ((match = regex.exec(content)) !== null) {
     const label = match[1];
     let target = match[2].trim();
+
+    if (target.startsWith('"') || target.startsWith("'")) continue;
 
     // Ignore web links and section anchors
     if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('#') || target.startsWith('mailto:')) {
@@ -55,7 +58,7 @@ function checkMarkdownFile(filePath) {
       // Convert to Windows or POSIX path
       resolvedPath = path.normalize(cleanPath);
     } else if (target.startsWith('/')) {
-      cleanPath = target.split('#')[0];
+      const cleanPath = target.split('#')[0];
       resolvedPath = path.join(rootDir, cleanPath);
     } else {
       cleanPath = target.split('#')[0];

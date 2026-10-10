@@ -47,7 +47,7 @@ Label sempre possui texto legível; valor carrega unidade quando ambíguo; legen
 ## Exceptions
 
 `inline-surface-mode`: `inline` é uma exceção de modo sem caixa; sua geometria é fornecida pelo host e deve ser protegida pelos testes do `MetricBoxGroup`.
-ExceptionRecord: inline-surface-mode reviewAt: 2026-09-30 owner: design-system-maintainers
+ExceptionRecord: inline-surface-mode reviewAt: 2027-01-10 owner: design-system-maintainers
 
 ## Consumers
 
@@ -64,3 +64,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 ## Implementation status
 
 Implementado em `molecule`; perfil homologado documentalmente. Homologação não declara a estilização atual conforme.
+
+Revisão 2026-10-10: composição e consumidores preservados; exceção verificada pelos testes da família e auditoria do catálogo.

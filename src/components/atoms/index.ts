@@ -8,3 +8,5 @@ export * from './Avatar';
 export * from './Surface';
 export * from './SelectField';
 export * from '@/components/molecules/MacroSummary';
+
+export { Checkbox, type CheckboxState, type CheckboxProps } from './Checkbox';

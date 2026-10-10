@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/atoms/Checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MealBasicsEditor, type MealBasicsEntry } from '@/components/molecules/MealBasicsEditor';
 import { getMealVariationOptions, type MealVariationOption } from '@/lib/mealVariations';
@@ -148,12 +149,11 @@ export function CreateReadyMealsFromDietModal({
                     <legend className={textStyle('field-label')}>Selecione variações</legend>
                     {options.map((option) => (
                       <label key={option.id} className="flex items-center gap-2 rounded-control border border-border-subtle bg-surface px-3 py-2 text-style-body-small text-text-primary">
-                        <input
-                          type="checkbox"
+                        <Checkbox
+                          aria-label={option.label}
                           checked={selectedIds.includes(option.id)}
                           disabled={isSaving || option.items.length === 0}
-                          onChange={(event) => toggleOption(option, event.target.checked)}
-                          className="size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2"
+                          onCheckedChange={(checked) => toggleOption(option, checked)}
                         />
                         <span>{option.label}</span>
                         {option.items.length === 0 && <span className="text-text-muted">(sem alimentos)</span>}
@@ -164,6 +164,7 @@ export function CreateReadyMealsFromDietModal({
                 )}
                 {entries.length > 0 && (
                   <MealBasicsEditor
+                    disabled={isSaving}
                     entries={entries}
                     idPrefix="ready-meal-batch"
                     onChange={setEntries}

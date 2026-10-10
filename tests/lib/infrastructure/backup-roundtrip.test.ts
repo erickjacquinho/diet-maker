@@ -53,11 +53,11 @@ describe('NutriDiet save round trip', () => {
     ]));
   });
 
-  it('accepts schema 4 accounts without phone and normalizes the next envelope to schema 7', () => {
+  it('accepts schema 4 accounts without phone and normalizes the next envelope to schema 8', () => {
     const legacy = createBackupEnvelope();
     const normalized = validateBackupEnvelope(legacy);
 
-    expect(normalized.schemaVersion).toBe('7');
+    expect(normalized.schemaVersion).toBe('8');
     expect(normalized.account[0]).toHaveProperty('phone', null);
   });
 

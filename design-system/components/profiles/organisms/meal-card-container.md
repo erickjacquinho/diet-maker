@@ -34,7 +34,7 @@ Empty conserva header e action de adicionar; updating preserva itens anteriores.
 
 ## Composition
 
-Base declarada: `atom-surface`. Compõe `Surface` e `MealItemRow`; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compõe `Surface`, `DataTable` e `MealItemRow`; o corpo usa `SortableList` para preservar reordenação por ponteiro e teclado; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 

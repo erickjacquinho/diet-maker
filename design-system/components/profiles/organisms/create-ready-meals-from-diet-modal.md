@@ -34,7 +34,7 @@ Inicializa com a variação ativa da refeição. Opções sem alimentos ficam de
 
 ## Composition
 
-Base `ui-dialog`. Compõe `molecule-meal-basics-editor`, checkbox nativo, `ui-button` e `ui-input`; persistência pertence à página consumidora.
+Base `ui-dialog`. Compõe `molecule-meal-basics-editor`, `atom-checkbox`, `ui-button` e `ui-input`; persistência pertence à página consumidora.
 
 ## Content rules
 
@@ -59,4 +59,4 @@ Nenhuma exceção aprovada.
 
 ## Implementation status
 
-Implementado no fluxo do construtor; `specStatus` permanece `specified` no registro.
+Implementado no fluxo do construtor; contrato homologado documentalmente em 2026-10-10, protegido por testes de edição, seleção e confirmação.

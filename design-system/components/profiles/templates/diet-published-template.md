@@ -57,4 +57,4 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Composição experimental em template. Publicação remota e persistência de checks ainda pendentes; esta etapa é prévia local, sem homologação final.
+Composição experimental em template. Publicação remota e persistência de checks ainda pendentes; o contrato de prévia local é homologado documentalmente e protegido pelo teste do template; o lifecycle continua experimental.

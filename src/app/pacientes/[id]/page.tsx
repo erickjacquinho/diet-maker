@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Utensils, Calendar, MessageCircle, AlertTriangle, Scale, Info, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePatientProfilePage } from '@/hooks/usePatientProfilePage';
@@ -30,8 +29,8 @@ import { PatientProfileModals } from './PatientProfileModals';
 import { PatientProfileCurrentContext } from './PatientProfileCurrentContext';
 
 export default function PatientDetailPage() {
-  const router = useRouter();
   const {
+    router,
     patientId,
     patient,
     profileError,

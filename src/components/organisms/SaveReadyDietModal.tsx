@@ -120,13 +120,14 @@ export function SaveReadyDietModal({
               <DialogDescription>Salve a composição atual e ajuste os nomes e horários das refeições antes de confirmar.</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex min-h-0 flex-col gap-4">
-              <div className="min-h-0 space-y-4 overflow-y-auto">
+              <div className="flex min-h-0 flex-col gap-4 overflow-y-auto">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="ready-diet-name" className={textStyle('field-label')}>Nome da dieta pronta</label>
-                  <Input id="ready-diet-name" required value={name} onChange={(event) => setName(event.target.value)} />
+                  <Input id="ready-diet-name" disabled={isSaving} required value={name} onChange={(event) => setName(event.target.value)} />
                 </div>
                 {draftMeals.length > 0 ? (
                   <MealBasicsEditor
+                    disabled={isSaving}
                     entries={draftMeals}
                     idPrefix="ready-diet-meal"
                     onChange={updateMealBasics}

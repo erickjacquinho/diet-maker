@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 79,
-    "capturedAt": "2026-09-29",
+    "currentSourceCount": 80,
+    "capturedAt": "2026-10-10",
     "legacyAudit": {
       "findings": 0,
       "rules": 17,
@@ -1250,7 +1250,8 @@
         "ui-select",
         "ui-tabs",
         "organism-diet-mode-switcher",
-        "ui-calendar"
+        "ui-calendar",
+        "atom-checkbox"
       ],
       "decisionRef": "CAT-2026-07-31-selection"
     },
@@ -3501,7 +3502,8 @@
         "organism-patient-diets-table",
         "organism-patient-assessments-table",
         "organism-patient-consultation-history-table",
-        "template-diet-pdf-template"
+        "template-diet-pdf-template",
+        "organism-meal-card-container"
       ],
       "primitiveBase": "ui-table",
       "specStatus": "homologated",
@@ -5641,7 +5643,7 @@
         "src/app/pacientes/[id]/dieta/[dietaId]/pagina/page.tsx"
       ],
       "primitiveBase": null,
-      "specStatus": "specified",
+      "specStatus": "homologated",
       "exceptions": []
     },
     {
@@ -5685,7 +5687,7 @@
         "organism-save-ready-diet-modal"
       ],
       "primitiveBase": "ui-input",
-      "specStatus": "specified",
+      "specStatus": "homologated",
       "exceptions": []
     },
     {
@@ -5728,7 +5730,7 @@
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
-      "specStatus": "specified",
+      "specStatus": "homologated",
       "exceptions": []
     },
     {
@@ -5776,7 +5778,49 @@
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx"
       ],
       "primitiveBase": "ui-dialog",
-      "specStatus": "specified",
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "atom-checkbox",
+      "name": "Checkbox",
+      "nature": "product-generic",
+      "lifecycle": "implemented",
+      "currentLayer": "atom",
+      "targetLayer": "atom",
+      "primaryCategory": "selection",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/atoms/Checkbox.tsx",
+          "role": "implementation",
+          "discoveredLayer": "atom"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "CheckboxState",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "CheckboxProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "Checkbox",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/atoms/checkbox.md",
+      "consumers": [
+        "molecule-data-table",
+        "organism-create-ready-meals-from-diet-modal"
+      ],
+      "primitiveBase": "ui-button",
+      "specStatus": "homologated",
       "exceptions": []
     }
   ]
