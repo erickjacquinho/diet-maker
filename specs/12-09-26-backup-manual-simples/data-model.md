@@ -10,8 +10,9 @@ Representa o arquivo mestre `.nutridiet` completo.
 | --- | --- | --- |
 | `appId` | string | Deve ser `nutridiet-local-pro`. |
 | `formatVersion` | integer | Deve ser `1` para o primeiro formato publicado. |
-| `schemaVersion` | string | O export usa o schema atual (`5`); versões anteriores só entram por uma migração registrada. |
+| `schemaVersion` | string | O export usa o schema atual (`10`); versões anteriores só entram por uma migração registrada. |
 | `exportedAt` | ISO-8601 string | Obrigatório e válido; registra o instante do snapshot. |
+| `agendaReminders` | `AgendaReminder[]` | Lembretes pontuais da Conta com IDs únicos e data, hora e tarefa válidas. |
 | `account` | `AccountRow[]` | Deve conter exatamente uma linha com a identidade da Conta local ativa. |
 | `objectiveOptions` | `ObjectiveOptionRow[]` | Todas as opções da Conta, ativas e arquivadas. |
 | `patients` | `PatientRow[]` | Pacientes ativos e arquivados da Conta. |
@@ -38,6 +39,10 @@ O importador aplica migrações puras e determinísticas em cadeia antes da
 validação final. Uma mudança aditiva deve preencher seus campos ausentes com
 defaults explícitos (por exemplo, uma nova coleção começa como `[]`). O arquivo
 de origem permanece inalterado; o próximo save/export grava o schema atual.
+O passo `9 → 10` adiciona `agendaReminders: []` para arquivos anteriores.
+Por compatibilidade, arquivos rotulados como schema 10 que foram exportados
+antes dessa coleção podem omiti-la; a leitura preenche somente esse campo
+ausente com `[]`, sem alterar o arquivo de origem.
 
 ## Scope and ownership invariants
 
@@ -49,6 +54,7 @@ de origem permanece inalterado; o próximo save/export grava o schema atual.
 - O arquivo deve conter exatamente uma Conta e não pode trocar a identidade da Conta local ativa.
 - Cada paciente pode possuir no máximo uma dieta com status `ACTIVE`; históricos `SNAPSHOT` e registros arquivados devem ser preservados.
 - Arrays vazios são válidos e representam ausência de registros; o restaurador não cria defaults de domínio além dos exigidos pela Conta local.
+- `agendaReminders` pertence à única Conta do envelope; IDs duplicados, datas, horários ou tarefas inválidos rejeitam o arquivo antes da restauração.
 
 ## Validation states
 

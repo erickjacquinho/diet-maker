@@ -1,4 +1,4 @@
-import { BookOpen, Palette, Users } from 'lucide-react';
+import { BookOpen, Users } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -19,11 +19,11 @@ const patients: SidebarRouteItem = {
   match: 'patients-prefix',
 };
 
-const designSystem: SidebarRouteItem = {
+const foods: SidebarRouteItem = {
   kind: 'route',
-  href: '/design-system',
-  label: 'Guia Design System',
-  icon: Palette,
+  href: '/alimentos',
+  label: 'Planilha de Alimentos',
+  icon: BookOpen,
 };
 
 describe('sidebar navigation model', () => {
@@ -38,19 +38,19 @@ describe('sidebar navigation model', () => {
     ]);
     expect(sidebarProductionRoutes.map((item) => item.href)).toEqual([
       '/pacientes',
+      '/agenda',
       '/presets',
       '/refeicoes',
       '/receitas',
       '/alimentos',
-      '/design-system',
     ]);
   });
 
   it('matches exact, prefix, and patient routes without false positives', () => {
-    expect(isSidebarRouteActive('/design-system', designSystem)).toBe(true);
-    expect(isSidebarRouteActive('/design-system/tokens', designSystem)).toBe(false);
+    expect(isSidebarRouteActive('/alimentos', foods)).toBe(true);
+    expect(isSidebarRouteActive('/alimentos/tabela', foods)).toBe(false);
     expect(isSidebarRouteActive('/pacientes/123/dieta/1', patients)).toBe(true);
-    expect(isSidebarRouteActive('/presets-extra', sidebarProductionRoutes[1])).toBe(false);
+    expect(isSidebarRouteActive('/presets-extra', sidebarProductionRoutes[2])).toBe(false);
     expect(isSidebarRouteActive('/unknown', patients)).toBe(false);
   });
 
@@ -60,10 +60,10 @@ describe('sidebar navigation model', () => {
       id: 'library',
       label: 'Biblioteca',
       icon: BookOpen,
-      children: [designSystem],
+      children: [foods],
     };
 
-    expect(isSidebarNavigationItemActive('/design-system', group)).toBe(true);
+    expect(isSidebarNavigationItemActive('/alimentos', group)).toBe(true);
     expect(isSidebarNavigationItemActive('/unknown', group)).toBe(false);
   });
 

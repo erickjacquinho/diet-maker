@@ -61,7 +61,7 @@ export function useDietCalculations(
         variations: meal.options.slice(1).map((option) => ({ id: option.id, items: option.items.map(toLegacyItem) })),
       }));
       const totals = calculateDocumentSnapshotTotals(dietPlan, activeVariation?.id);
-      return { mealGroups: meals, currentMeals: meals, targetKcal: Number(activeVariation?.targets.energyKcal ?? 0), targetProt: Number(activeVariation?.targets.protein ?? 0), targetCarb: Number(activeVariation?.targets.carbs ?? 0), targetFat: Number(activeVariation?.targets.fat ?? 0), snapshotTotals: totals, weightReferenceKg: dietPlan.weightReferenceKg ? Number(dietPlan.weightReferenceKg) : patient?.weightKg };
+      return { mealGroups: meals, currentMeals: meals, targetKcal: Number(activeVariation?.targets.energyKcal ?? 0), targetProt: Number(activeVariation?.targets.protein ?? 0), targetCarb: Number(activeVariation?.targets.carbs ?? 0), targetFat: Number(activeVariation?.targets.fat ?? 0), snapshotTotals: totals, weightReferenceKg: dietPlan.weightReferenceKg ? Number(dietPlan.weightReferenceKg) : undefined };
     }
 
     const legacyPlan = dietPlan as FullDietPlan;
@@ -80,7 +80,7 @@ export function useDietCalculations(
         targetCarb: carb,
         targetFat: fat,
         snapshotTotals: null,
-        weightReferenceKg: patient?.weightKg,
+        weightReferenceKg: legacyPlan.weightReferenceKg ? Number(legacyPlan.weightReferenceKg) : undefined,
       };
     } else {
       const activeVar =
@@ -103,7 +103,7 @@ export function useDietCalculations(
         targetCarb: carb,
         targetFat: fat,
         snapshotTotals: null,
-        weightReferenceKg: patient?.weightKg,
+        weightReferenceKg: legacyPlan.weightReferenceKg ? Number(legacyPlan.weightReferenceKg) : undefined,
       };
     }
   }, [dietPlan, activeVariationId, patient, activeMealVariationIds]);

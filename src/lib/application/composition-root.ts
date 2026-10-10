@@ -16,7 +16,7 @@ import { updatePatient } from './patients/update-patient';
 import type { DietDraftStore } from './diets/diet-ports';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
 import type { PageRequest, PageResult } from '@/lib/persistence/page';
-import type { AssessmentInput, BodyAssessment, ConsultationView, NextFollowUp, NextFollowUpInput } from '@/lib/domain/clinical';
+import type { AssessmentInput, BodyAssessment, ConsultationView, NextFollowUp, NextFollowUpDateChange, NextFollowUpDateMove, NextFollowUpInput } from '@/lib/domain/clinical';
 import { createClinicalCommands } from './patients/clinical-commands';
 
 export interface PatientApplicationDependencies {
@@ -71,6 +71,7 @@ export interface PatientApplication {
   listAssessments(patientId: string): Promise<BodyAssessment[]>;
   listAssessmentsPage(patientId: string, request?: PageRequest): Promise<PageResult<BodyAssessment>>;
   getNextFollowUp(patientId: string): Promise<NextFollowUp | null>;
+  moveNextFollowUps(changes: readonly NextFollowUpDateChange[]): Promise<NextFollowUpDateMove[]>;
   setNextFollowUp(patientId: string, expectedVersion: number | null, input: NextFollowUpInput): Promise<NextFollowUp>;
   clearNextFollowUp(patientId: string, expectedVersion: number): Promise<void>;
   getConsultationView(patientId: string, date: string): Promise<ConsultationView>;
@@ -124,6 +125,9 @@ export function createPatientApplication(dependencies: PatientApplicationDepende
     listAssessments: clinicalCommands.listAssessments,
     listAssessmentsPage: clinicalCommands.listAssessmentsPage,
     getNextFollowUp: clinicalCommands.getNextFollowUp,
+    moveNextFollowUps: (changes) => changes.length === 0
+      ? Promise.resolve([])
+      : runConfirmed(() => clinicalCommands.moveNextFollowUps(changes)),
     setNextFollowUp: (patientId, expectedVersion, input) => runConfirmed(() => clinicalCommands.setNextFollowUp(patientId, expectedVersion, input)),
     clearNextFollowUp: (patientId, expectedVersion) => runConfirmed(() => clinicalCommands.clearNextFollowUp(patientId, expectedVersion)),
     getConsultationView: clinicalCommands.getConsultationView,

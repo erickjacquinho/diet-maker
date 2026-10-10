@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { BackupApplicationError, createBackupApplication } from '@/lib/application/backup-application';
 import { BackupRepositoryError, type BackupEnvelope, type BackupRepository } from '@/lib/persistence/backup-repository';
-import { createBackupEnvelope, createEmptyBackupFixture } from '../fixtures/backup';
+import { createBackupEnvelope, createEmptyBackupFixture, createSchema10BackupFixture } from '../fixtures/backup';
 
 function createDependencies(envelope: BackupEnvelope) {
   const repository: BackupRepository = {
@@ -71,6 +71,21 @@ describe('backup application export', () => {
 });
 
 describe('backup application restore', () => {
+  it('migrates and restores schema 10 recipes as portion yields without changing the input save', async () => {
+    const previous = createSchema10BackupFixture();
+    const serialized = JSON.stringify(previous);
+    const dependencies = createDependencies(createBackupEnvelope());
+
+    await dependencies.application.restoreBackup(serialized, { confirmed: true });
+
+    const restored = vi.mocked(dependencies.repository.replaceAccountSnapshot).mock.calls[0]?.[1];
+    expect(restored).toMatchObject({
+      schemaVersion: '11',
+      recipes: [{ yieldPortions: '2', yieldUnit: 'PORTION', preparedWeightGrams: '300' }],
+    });
+    expect(JSON.parse(serialized).recipes[0]).not.toHaveProperty('yieldUnit');
+  });
+
   it('validates before writing and rejects a malformed or foreign-account file', async () => {
     const dependencies = createDependencies(createBackupEnvelope());
     const incompatible = { ...createBackupEnvelope(), schemaVersion: '99' };

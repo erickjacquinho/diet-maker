@@ -30,6 +30,7 @@ export type PatientNextEventType = 'diet-update' | 'assessment-update';
 export interface PatientNextEvent {
   date: string;
   type: PatientNextEventType | PatientNextEventType[];
+  dates?: Partial<Record<PatientNextEventType, string>>;
   comments?: string;
   version?: number;
 }

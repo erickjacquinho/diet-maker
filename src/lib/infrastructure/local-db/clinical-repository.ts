@@ -8,10 +8,13 @@ import type {
   CalculationMethod,
   FollowUpType,
   NextFollowUp,
+  NextFollowUpDateChange,
+  NextFollowUpDateMove,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
 import {
   ClinicalApplicationError,
+  normalizeClinicalDate,
   normalizeNextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { ClinicalRepository } from '@/lib/persistence/clinical-repository';
@@ -116,11 +119,23 @@ function toAssessment(row: AssessmentRow): BodyAssessment {
 }
 
 function toFollowUp(row: FollowUpRow): NextFollowUp {
+  const storedTypes = followUpTypesFromStorage(row.type);
+  const dueDates = {
+    ...(row.assessmentDueDate ?? (storedTypes.includes('ASSESSMENT_UPDATE') ? row.dueDate : null)
+      ? { ASSESSMENT_UPDATE: row.assessmentDueDate ?? row.dueDate }
+      : {}),
+    ...(row.dietDueDate ?? (storedTypes.includes('DIET_UPDATE') ? row.dueDate : null)
+      ? { DIET_UPDATE: row.dietDueDate ?? row.dueDate }
+      : {}),
+  };
+  const type = (['ASSESSMENT_UPDATE', 'DIET_UPDATE'] as const).filter((item) => item in dueDates);
+  const dueDate = Object.values(dueDates).sort()[0] ?? row.dueDate;
   return {
     accountId: row.accountId,
     patientId: row.patientId,
-    dueDate: row.dueDate,
-    type: followUpTypesFromStorage(row.type),
+    dueDate,
+    dueDates,
+    type,
     comments: row.comments,
     version: row.version,
     createdAt: row.createdAt,
@@ -340,6 +355,89 @@ export class PGliteClinicalRepository implements ClinicalRepository {
     }
   }
 
+  async moveNextFollowUps(accountId: string, changes: readonly NextFollowUpDateChange[]): Promise<NextFollowUpDateMove[]> {
+    if (changes.length === 0) return [];
+    if (new Set(changes.map((change) => change.patientId)).size !== changes.length) {
+      throw new ClinicalApplicationError('CLINICAL_VALIDATION_FAILED', 'O mesmo paciente apareceu mais de uma vez na movimentação.');
+    }
+    const normalizedChanges = changes.map((change) => {
+      const dueDate = normalizeClinicalDate(change.dueDate);
+      const hasTypes = Array.isArray(change.types);
+      const types = hasTypes
+        ? (['ASSESSMENT_UPDATE', 'DIET_UPDATE'] as const).filter((type) => change.types.includes(type))
+        : [];
+      if (!dueDate || !Number.isInteger(change.expectedVersion) || change.expectedVersion < 1 || types.length === 0 || !hasTypes || types.length !== change.types.length) {
+        throw new ClinicalApplicationError('CLINICAL_VALIDATION_FAILED', 'A movimentação contém data ou versão inválida.');
+      }
+      return { ...change, dueDate, types };
+    });
+
+    try {
+      return await this.handle.db.transaction(async (tx) => {
+        const patientIds = normalizedChanges.map((change) => change.patientId);
+        const patientRows = await tx.select({ id: patients.id, archivedAt: patients.archivedAt })
+          .from(patients)
+          .where(and(eq(patients.accountId, accountId), inArray(patients.id, patientIds)));
+        const patientsById = new Map(patientRows.map((patient) => [patient.id, patient]));
+        const followUpRows = await tx.select().from(nextFollowUps)
+          .where(and(eq(nextFollowUps.accountId, accountId), inArray(nextFollowUps.patientId, patientIds)));
+        const followUpsByPatient = new Map(followUpRows.map((followUp) => [followUp.patientId, followUp]));
+
+        for (const change of normalizedChanges) {
+          const patient = patientsById.get(change.patientId);
+          if (!patient) throw new ClinicalApplicationError('CLINICAL_PATIENT_NOT_FOUND', 'Paciente não encontrado nesta Conta.');
+          if (patient.archivedAt !== null) throw new ClinicalApplicationError('CLINICAL_PATIENT_ARCHIVED', 'Paciente arquivado não pode receber mutações clínicas.');
+          const current = followUpsByPatient.get(change.patientId);
+          if (!current || current.version !== change.expectedVersion) {
+            throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Um acompanhamento foi atualizado antes desta movimentação. Recarregue a agenda.');
+          }
+          const currentFollowUp = toFollowUp(current);
+          if (change.types.some((type) => currentFollowUp.dueDates?.[type] === undefined)) {
+            throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Um acompanhamento foi atualizado antes desta movimentação. Recarregue a agenda.');
+          }
+        }
+
+        const timestamp = this.now();
+        const moved: NextFollowUpDateMove[] = [];
+        for (const change of normalizedChanges) {
+          const currentRow = followUpsByPatient.get(change.patientId)!;
+          const current = toFollowUp(currentRow);
+          if (change.types.every((type) => current.dueDates?.[type] === change.dueDate)) {
+            const unchanged = current;
+            moved.push({ before: unchanged, after: unchanged });
+            continue;
+          }
+          const dueDates = { ...(current.dueDates ?? {}) };
+          for (const type of change.types) dueDates[type] = change.dueDate;
+          const nextTypes = (['ASSESSMENT_UPDATE', 'DIET_UPDATE'] as const).filter((type) => dueDates[type] !== undefined);
+          const nextDueDate = Object.values(dueDates).sort()[0]!;
+          const updatedRows = await tx.update(nextFollowUps)
+            .set({
+              dueDate: nextDueDate,
+              assessmentDueDate: dueDates.ASSESSMENT_UPDATE ?? null,
+              dietDueDate: dueDates.DIET_UPDATE ?? null,
+              type: followUpTypesToStorage(nextTypes),
+              version: current.version + 1,
+              updatedAt: timestamp,
+            })
+            .where(and(
+              eq(nextFollowUps.accountId, accountId),
+              eq(nextFollowUps.patientId, change.patientId),
+              eq(nextFollowUps.version, change.expectedVersion),
+            ))
+            .returning();
+          const updated = updatedRows[0];
+          if (!updated) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Um acompanhamento foi atualizado antes desta movimentação. Recarregue a agenda.');
+          this.maybeFail('follow-up-after-write');
+          moved.push({ before: current, after: toFollowUp(updated) });
+        }
+        return moved;
+      });
+    } catch (cause) {
+      throw asClinicalFailure(cause, 'Os acompanhamentos não puderam ser movidos; as datas anteriores foram preservadas.');
+    }
+  }
+
   async setNextFollowUp(accountId: string, patientId: string, expectedVersion: number | null, input: NextFollowUpInput): Promise<NextFollowUp> {
     const normalized = normalizeNextFollowUpInput(input);
     try {
@@ -353,12 +451,31 @@ export class PGliteClinicalRepository implements ClinicalRepository {
         const timestamp = this.now();
         if (expectedVersion === null) {
           if (current) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'Já existe um acompanhamento confirmado para este paciente.');
-          const inserted = await tx.insert(nextFollowUps).values({ accountId, patientId, dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: 1, createdAt: timestamp, updatedAt: timestamp }).returning();
+          const inserted = await tx.insert(nextFollowUps).values({
+            accountId,
+            patientId,
+            dueDate: normalized.dueDate,
+            assessmentDueDate: normalized.dueDates.ASSESSMENT_UPDATE ?? null,
+            dietDueDate: normalized.dueDates.DIET_UPDATE ?? null,
+            type: followUpTypesToStorage(normalized.type),
+            comments: normalized.comments,
+            version: 1,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          }).returning();
           this.maybeFail('follow-up-after-write');
           return inserted[0];
         }
         if (!current || current.version !== expectedVersion) throw new ClinicalApplicationError('CLINICAL_VERSION_CONFLICT', 'O acompanhamento foi atualizado antes desta confirmação.');
-        const updated = await tx.update(nextFollowUps).set({ dueDate: normalized.dueDate, type: followUpTypesToStorage(normalized.type), comments: normalized.comments, version: expectedVersion + 1, updatedAt: timestamp }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
+        const updated = await tx.update(nextFollowUps).set({
+          dueDate: normalized.dueDate,
+          assessmentDueDate: normalized.dueDates.ASSESSMENT_UPDATE ?? null,
+          dietDueDate: normalized.dueDates.DIET_UPDATE ?? null,
+          type: followUpTypesToStorage(normalized.type),
+          comments: normalized.comments,
+          version: expectedVersion + 1,
+          updatedAt: timestamp,
+        }).where(and(eq(nextFollowUps.accountId, accountId), eq(nextFollowUps.patientId, patientId), eq(nextFollowUps.version, expectedVersion))).returning();
         this.maybeFail('follow-up-after-write');
         return updated[0];
       });

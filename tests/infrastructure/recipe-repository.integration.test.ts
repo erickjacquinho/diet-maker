@@ -32,12 +32,17 @@ describe('recipe repository', () => {
       ],
     };
     const created = await repository.create('local-account', input);
+    expect(created.yieldUnit).toBe('PORTION');
     expect(created.ingredients).toHaveLength(2);
     expect(created.ingredients[1].ingredientSnapshot.sourceVersion).toBe(String(customFood.version));
     expect(created.nutrition.perPortion.protein).toBeDefined();
     const copy = await repository.duplicate('local-account', created.id);
     expect(copy.id).not.toBe(created.id);
     expect(copy.ingredients.map((item) => item.id)).not.toEqual(created.ingredients.map((item) => item.id));
+    const gramsRecipe = await repository.create('local-account', { ...input, name: 'Vitamina pronta', yieldPortions: '200', yieldUnit: 'g' });
+    expect(gramsRecipe).toMatchObject({ yieldUnit: 'g', yieldPortions: '200', preparedWeightGrams: '200' });
+    expect(Number(gramsRecipe.nutrition.perPrepared100g?.protein)).toBeCloseTo(Number(gramsRecipe.nutrition.total.protein) / 2, 6);
+    await expect(repository.duplicate('local-account', gramsRecipe.id)).resolves.toMatchObject({ yieldUnit: 'g', yieldPortions: '200' });
     await expect(repository.getById('another-account', created.id)).resolves.toBeNull();
   });
 });

@@ -82,6 +82,7 @@ function mapRecipe(row: RecipeRow, ingredientRows: RecipeIngredientRow[]): Recip
     instructions: row.instructions,
     ...(row.prepTimeMinutes === null ? {} : { prepTimeMinutes: row.prepTimeMinutes }),
     yieldPortions: createDecimalString(row.yieldPortions),
+    yieldUnit: row.yieldUnit as Recipe['yieldUnit'],
     ...(row.preparedWeightGrams === null ? {} : { preparedWeightGrams: createDecimalString(row.preparedWeightGrams) }),
     nutrition: {
       total: toNutrition(row.totalProtein, row.totalCarbs, row.totalFat, row.totalFiber, row.totalEnergyKcal),
@@ -127,7 +128,7 @@ export class PGliteRecipeRepository implements RecipeRepository {
     const resolved = await this.resolveIngredients(accountId, input);
     const id = this.idFactory();
     const now = this.now();
-    const nutrition = this.calculateNutrition(resolved.map((ingredient) => ingredient.ingredientSnapshot), input.yieldPortions, input.preparedWeightGrams);
+    const nutrition = this.calculateNutrition(resolved.map((ingredient) => ingredient.ingredientSnapshot), input.yieldPortions, input.preparedWeightGrams, input.yieldUnit ?? 'PORTION');
     await this.handle.db.transaction(async (tx) => {
       await tx.insert(recipes).values(this.recipeRow(id, accountId, input, nutrition, now));
       await tx.insert(recipeIngredients).values(resolved.map((ingredient, position) => ({ ...ingredient, id: this.idFactory(), recipeId: id, accountId, position })));
@@ -141,11 +142,12 @@ export class PGliteRecipeRepository implements RecipeRepository {
     validateRecipeInput(input);
     const current = await this.requireVersion(accountId, recipeId, expectedVersion);
     const resolved = await this.resolveIngredients(accountId, input);
-    const nutrition = this.calculateNutrition(resolved.map((ingredient) => ingredient.ingredientSnapshot), input.yieldPortions, input.preparedWeightGrams);
+    const nutrition = this.calculateNutrition(resolved.map((ingredient) => ingredient.ingredientSnapshot), input.yieldPortions, input.preparedWeightGrams, input.yieldUnit ?? 'PORTION');
     await this.handle.db.transaction(async (tx) => {
       const updated = await tx.update(recipes).set({
         name: input.name.trim(), category: input.category.trim(), instructions: input.instructions?.trim() ?? '', prepTimeMinutes: input.prepTimeMinutes ?? null,
-        yieldPortions: normalizeDecimal(input.yieldPortions), preparedWeightGrams: input.preparedWeightGrams === undefined ? null : normalizeDecimal(input.preparedWeightGrams),
+        yieldPortions: normalizeDecimal(input.yieldPortions), yieldUnit: input.yieldUnit ?? 'PORTION',
+        preparedWeightGrams: input.yieldUnit === 'g' ? normalizeDecimal(input.yieldPortions) : input.preparedWeightGrams === undefined ? null : normalizeDecimal(input.preparedWeightGrams),
         ...this.nutritionRow(nutrition), version: current.version + 1, updatedAt: this.now(),
       }).where(and(eq(recipes.id, recipeId), eq(recipes.accountId, accountId), eq(recipes.version, expectedVersion))).returning({ id: recipes.id });
       if (!updated[0]) throw createLibraryError('LIBRARY_VERSION_CONFLICT', 'A receita foi alterada antes da atualização.');
@@ -161,7 +163,7 @@ export class PGliteRecipeRepository implements RecipeRepository {
     const source = await this.requireEntity(accountId, recipeId);
     return this.create(accountId, {
       name: source.name + ' (cópia)', category: source.category, instructions: source.instructions,
-      prepTimeMinutes: source.prepTimeMinutes, yieldPortions: source.yieldPortions,
+      prepTimeMinutes: source.prepTimeMinutes, yieldPortions: source.yieldPortions, yieldUnit: source.yieldUnit,
       preparedWeightGrams: source.preparedWeightGrams,
       ingredients: source.ingredients.map((ingredient) => ({ sourceType: ingredient.sourceType, sourceId: ingredient.sourceId, quantity: ingredient.quantity, unit: ingredient.unit })),
     });
@@ -210,13 +212,14 @@ export class PGliteRecipeRepository implements RecipeRepository {
     return snapshotFromCustomFood(food, quantity, unit);
   }
 
-  private calculateNutrition(snapshots: NutritionSnapshot[], yieldPortions: string, preparedWeightGrams?: string) {
+  private calculateNutrition(snapshots: NutritionSnapshot[], yieldPortions: string, preparedWeightGrams: string | undefined, yieldUnit: Recipe['yieldUnit']) {
     validatePositiveDecimal(yieldPortions, 'yieldPortions');
     const total = sumNutrition(snapshots.map((snapshot) => snapshot.prescribedNutrients));
+    const preparedWeight = yieldUnit === 'g' ? yieldPortions : preparedWeightGrams;
     return {
       total,
       perPortion: divideNutrition(total, yieldPortions),
-      ...(preparedWeightGrams === undefined ? {} : { perPrepared100g: scaleNutrition(total, '100', preparedWeightGrams) }),
+      ...(preparedWeight === undefined ? {} : { perPrepared100g: scaleNutrition(total, '100', preparedWeight) }),
     };
   }
 
@@ -230,7 +233,8 @@ export class PGliteRecipeRepository implements RecipeRepository {
   private recipeRow(id: string, accountId: string, input: RecipeInput, nutrition: ReturnType<PGliteRecipeRepository['calculateNutrition']>, now: string): typeof recipes.$inferInsert {
     return {
       id, accountId, name: input.name.trim(), category: input.category.trim(), instructions: input.instructions?.trim() ?? '', prepTimeMinutes: input.prepTimeMinutes ?? null,
-      yieldPortions: normalizeDecimal(input.yieldPortions), preparedWeightGrams: input.preparedWeightGrams === undefined ? null : normalizeDecimal(input.preparedWeightGrams),
+      yieldPortions: normalizeDecimal(input.yieldPortions), yieldUnit: input.yieldUnit ?? 'PORTION',
+      preparedWeightGrams: input.yieldUnit === 'g' ? normalizeDecimal(input.yieldPortions) : input.preparedWeightGrams === undefined ? null : normalizeDecimal(input.preparedWeightGrams),
       ...this.nutritionRow(nutrition), status: 'ACTIVE', version: 1, createdAt: now, updatedAt: now, archivedAt: null,
     };
   }

@@ -1,4 +1,4 @@
-import { BookOpen, Palette, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
 
 import type {
   SidebarGroupItem,
@@ -8,6 +8,7 @@ import type {
 
 export const sidebarProductionRoutes: SidebarRouteItem[] = [
   { kind: 'route', href: '/pacientes', label: 'Pacientes', icon: Users, match: 'patients-prefix' },
+  { kind: 'route', href: '/agenda', label: 'Agenda', icon: CalendarDays, match: 'prefix' },
   { kind: 'route', href: '/presets', label: 'Presets de Dietas', icon: Sparkles, match: 'prefix' },
   {
     kind: 'route',
@@ -18,7 +19,6 @@ export const sidebarProductionRoutes: SidebarRouteItem[] = [
   },
   { kind: 'route', href: '/receitas', label: 'Receitas Culinárias', icon: Utensils, match: 'prefix' },
   { kind: 'route', href: '/alimentos', label: 'Planilha de Alimentos', icon: BookOpen, match: 'prefix' },
-  { kind: 'route', href: '/design-system', label: 'Guia Design System', icon: Palette, match: 'prefix' },
 ];
 
 export const sidebarFutureGroup: SidebarGroupItem = {

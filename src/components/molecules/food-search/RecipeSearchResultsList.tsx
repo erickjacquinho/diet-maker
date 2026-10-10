@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumnDef, type DataTableProps } from '@/compo
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { textStyle } from '@/design-system';
-import { type Recipe, calculateRecipeNutrients } from '@/lib/library-ui-adapter';
+import { type Recipe, calculateRecipeNutrients, formatRecipeYield, recipeNutritionBasis } from '@/lib/library-ui-adapter';
 import { cn } from '@/lib/utils';
 
 export interface RecipeSearchResultsListProps {
@@ -30,11 +30,12 @@ export function RecipeSearchResultsList({
   sort,
   mode = 'multi',
 }: RecipeSearchResultsListProps) {
-  // Pre-calculate nutrients per portion for all recipes in searchResults
+  const oneYieldUnit = searchResults.length > 0 && searchResults.every((recipe) => recipe.yieldUnit === searchResults[0].yieldUnit);
+  const sharedBasis = oneYieldUnit ? recipeNutritionBasis(searchResults[0].yieldUnit) : undefined;
   const nutrientsMap = useMemo(() => {
     const map = new Map<string, ReturnType<typeof calculateRecipeNutrients>>();
     searchResults.forEach((r) => {
-      map.set(r.id, calculateRecipeNutrients(r.ingredients, r.servings));
+      map.set(r.id, calculateRecipeNutrients(r.ingredients, r.yieldAmount, r.yieldUnit));
     });
     return map;
   }, [searchResults]);
@@ -72,8 +73,8 @@ export function RecipeSearchResultsList({
                   </TooltipContent>
                 </Tooltip>
                 <span className="flex items-center gap-0.5 text-style-chart-micro font-medium text-text-muted">
-                  <Users size={11} aria-hidden="true" />
-                  <span>{recipe.servings} {recipe.servings === 1 ? 'porção' : 'porções'}</span>
+                  {recipe.yieldUnit === 'PORTION' && <Users size={11} aria-hidden="true" />}
+                  <span>{formatRecipeYield(recipe.yieldAmount, recipe.yieldUnit)}</span>
                 </span>
               </div>
               <span className={cn(textStyle('metadata'), '-mt-1 truncate whitespace-nowrap text-text-muted')}>
@@ -101,52 +102,52 @@ export function RecipeSearchResultsList({
       {
         id: 'protein',
         align: 'center',
-        header: <span className="text-macro-protein">Prot / porção</span>,
-        sortable: true,
+        header: <span className="text-macro-protein">Prot{sharedBasis ? ` / ${sharedBasis}` : ''}</span>,
+        sortable: oneYieldUnit,
         sortValue: (recipe) => nutrientsMap.get(recipe.id)?.portionProteinG ?? 0,
-        sortLabel: 'Proteína por porção',
+        sortLabel: sharedBasis ? `Proteína por ${sharedBasis}` : 'Proteína por base da receita',
         headerClassName: 'w-32 px-3 text-center text-macro-protein',
         className: 'w-32 text-center font-bold text-macro-protein tabular-nums py-2 px-3 text-style-legal',
         cell: (recipe) => {
           const nutrients = nutrientsMap.get(recipe.id);
-          return `${nutrients?.portionProteinG ?? 0}g`;
+          return <>{nutrients?.portionProteinG ?? 0}g{!sharedBasis && <span className="ml-1 text-style-chart-micro font-normal text-text-muted">/ {recipeNutritionBasis(recipe.yieldUnit)}</span>}</>;
         },
       },
       {
         id: 'carbs',
         align: 'center',
-        header: <span className="text-macro-carbohydrate">Carb / porção</span>,
-        sortable: true,
+        header: <span className="text-macro-carbohydrate">Carb{sharedBasis ? ` / ${sharedBasis}` : ''}</span>,
+        sortable: oneYieldUnit,
         sortValue: (recipe) => nutrientsMap.get(recipe.id)?.portionCarbsG ?? 0,
-        sortLabel: 'Carboidrato por porção',
+        sortLabel: sharedBasis ? `Carboidrato por ${sharedBasis}` : 'Carboidrato por base da receita',
         headerClassName: 'w-32 px-3 text-center text-macro-carbohydrate',
         className: 'w-32 text-center font-bold text-macro-carbohydrate tabular-nums py-2 px-3 text-style-legal',
         cell: (recipe) => {
           const nutrients = nutrientsMap.get(recipe.id);
-          return `${nutrients?.portionCarbsG ?? 0}g`;
+          return <>{nutrients?.portionCarbsG ?? 0}g{!sharedBasis && <span className="ml-1 text-style-chart-micro font-normal text-text-muted">/ {recipeNutritionBasis(recipe.yieldUnit)}</span>}</>;
         },
       },
       {
         id: 'fats',
         align: 'center',
-        header: <span className="text-macro-fat">Gord / porção</span>,
-        sortable: true,
+        header: <span className="text-macro-fat">Gord{sharedBasis ? ` / ${sharedBasis}` : ''}</span>,
+        sortable: oneYieldUnit,
         sortValue: (recipe) => nutrientsMap.get(recipe.id)?.portionFatsG ?? 0,
-        sortLabel: 'Gorduras por porção',
+        sortLabel: sharedBasis ? `Gorduras por ${sharedBasis}` : 'Gorduras por base da receita',
         headerClassName: 'w-32 px-3 text-center text-macro-fat',
         className: 'w-32 text-center font-bold text-macro-fat tabular-nums py-2 px-3 text-style-legal',
         cell: (recipe) => {
           const nutrients = nutrientsMap.get(recipe.id);
-          return `${nutrients?.portionFatsG ?? 0}g`;
+          return <>{nutrients?.portionFatsG ?? 0}g{!sharedBasis && <span className="ml-1 text-style-chart-micro font-normal text-text-muted">/ {recipeNutritionBasis(recipe.yieldUnit)}</span>}</>;
         },
       },
       {
         id: 'kcal',
         align: 'center',
-        header: 'Kcal / porção',
-        sortable: true,
+        header: `Kcal${sharedBasis ? ` / ${sharedBasis}` : ''}`,
+        sortable: oneYieldUnit,
         sortValue: (recipe) => nutrientsMap.get(recipe.id)?.portionKcal ?? 0,
-        sortLabel: 'Calorias por porção',
+        sortLabel: sharedBasis ? `Calorias por ${sharedBasis}` : 'Calorias por base da receita',
         headerClassName: 'w-32 px-3 text-center',
         className: 'w-32 text-center font-bold text-text-primary tabular-nums py-2 px-3 text-style-legal',
         cell: (recipe) => {
@@ -154,12 +155,13 @@ export function RecipeSearchResultsList({
           return (
             <>
               {nutrients?.portionKcal ?? 0} <span className="text-style-chart-micro text-text-muted font-normal">kcal</span>
+              {!sharedBasis && <span className="ml-1 text-style-chart-micro text-text-muted font-normal">/ {recipeNutritionBasis(recipe.yieldUnit)}</span>}
             </>
           );
         },
       },
     ],
-    [nutrientsMap]
+    [nutrientsMap, oneYieldUnit, sharedBasis]
   );
 
   return (
@@ -169,7 +171,7 @@ export function RecipeSearchResultsList({
           data={searchResults}
           columns={columns}
           getRowId={(recipe) => recipe.id}
-          caption="Lista de receitas culinárias calculadas por porção"
+          caption="Lista de receitas culinárias com nutrientes na base do rendimento"
           emptyMessage={
             <>
               <span className="inline-flex items-center gap-2 font-semibold text-text-secondary">
@@ -179,7 +181,7 @@ export function RecipeSearchResultsList({
               <span className="ml-2 text-style-caption text-text-muted">
                 {query || categoryFilter !== 'Todas'
                   ? 'Nenhuma receita corresponde aos filtros selecionados.'
-                  : 'Você ainda não cadastrou nenhuma receita culinária. Cadastre receitas na página "Receitas" para reutilizá-las aqui por porção.'}
+                  : 'Você ainda não cadastrou nenhuma receita culinária. Cadastre receitas na página "Receitas" para reutilizá-las aqui.'}
               </span>
             </>
           }

@@ -8,7 +8,8 @@ const recipe = {
   id: "recipe-1",
   name: "Arroz com frango",
   category: "Almoço",
-  servings: 2,
+  yieldAmount: 2,
+  yieldUnit: 'PORTION' as const,
   instructions: "Misture e sirva.",
   ingredients: [
     {

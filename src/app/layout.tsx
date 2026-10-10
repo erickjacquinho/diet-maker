@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
         <SessionAwareAppShell>{children}</SessionAwareAppShell>
         <PatientApplicationBootstrap />
-        <Toaster position="bottom-right" richColors duration={3000} />
+        <Toaster position="bottom-right" richColors duration={3000} toastOptions={{ closeButtonAriaLabel: 'Fechar notificação' }} />
       </body>
     </html>
   );

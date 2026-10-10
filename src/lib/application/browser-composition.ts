@@ -25,6 +25,7 @@ import { createBrowserSaveFilePort } from '@/lib/infrastructure/file-system-acce
 import type { Account } from '@/lib/domain/account';
 import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
 import { getFavoritesFromStorage, setFavoritesFromStorage } from '@/lib/library-ui-adapter';
+import { readAgendaReminders, replaceAgendaReminders } from '@/lib/agenda-reminders';
 
 export interface BrowserPatientRuntime {
   readonly account: Account;
@@ -47,6 +48,8 @@ function createBrowserBackupRepository(handle: LocalDatabaseHandle): PGliteBacku
   return new PGliteBackupRepository(handle, {
     readFavorites: getFavoritesFromStorage,
     writeFavorites: setFavoritesFromStorage,
+    readAgendaReminders,
+    writeAgendaReminders: replaceAgendaReminders,
   });
 }
 
@@ -190,6 +193,14 @@ export async function disposeBrowserPatientRuntime(runtime: BrowserPatientRuntim
 
 export function getBrowserPatientRuntimeIfActive(): BrowserPatientRuntime | null {
   return activeRuntime;
+}
+
+export async function persistAgendaReminderChange(accountId: string): Promise<void> {
+  if (!activeRuntime || activeRuntime.account.id !== accountId || !profileSession) {
+    throw new Error('O arquivo principal não está disponível para salvar o lembrete.');
+  }
+  await activeRuntime.markWorkspaceDirty();
+  await profileSession.sync();
 }
 
 export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime> {

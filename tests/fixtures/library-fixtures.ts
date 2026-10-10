@@ -32,6 +32,7 @@ export const recipeInput = {
   category: 'Café da Manhã',
   instructions: 'Misturar e servir.',
   yieldPortions: '2',
+  yieldUnit: 'PORTION',
   ingredients: [],
 };
 

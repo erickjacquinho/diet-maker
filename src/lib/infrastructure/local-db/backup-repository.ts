@@ -1,6 +1,7 @@
 import { asc, eq, sql } from 'drizzle-orm';
 import type { BackupEnvelope, BackupRepository } from '@/lib/persistence/backup-repository';
 import { BackupRepositoryError } from '@/lib/persistence/backup-repository';
+import type { AgendaReminder } from '@/lib/agenda-reminders';
 import {
   BACKUP_APP_ID,
   BACKUP_FORMAT_VERSION,
@@ -36,6 +37,8 @@ export interface PGliteBackupRepositoryOptions {
   failAt?: BackupRepositoryFailurePoint;
   readFavorites?: () => string[];
   writeFavorites?: (favorites: string[]) => void;
+  readAgendaReminders?: (accountId: string) => AgendaReminder[];
+  writeAgendaReminders?: (accountId: string, reminders: AgendaReminder[]) => boolean;
 }
 
 function repositoryFailure(message: string, cause?: unknown): BackupRepositoryError {
@@ -47,12 +50,16 @@ export class PGliteBackupRepository implements BackupRepository {
   private readonly failAt?: BackupRepositoryFailurePoint;
   private readonly readFavorites: () => string[];
   private readonly writeFavorites: (favorites: string[]) => void;
+  private readonly readAgendaReminders: (accountId: string) => AgendaReminder[];
+  private readonly writeAgendaReminders: (accountId: string, reminders: AgendaReminder[]) => boolean;
 
   constructor(private readonly handle: LocalDatabaseHandle, options: PGliteBackupRepositoryOptions = {}) {
     this.now = options.now ?? (() => new Date().toISOString());
     this.failAt = options.failAt;
     this.readFavorites = options.readFavorites ?? (() => []);
     this.writeFavorites = options.writeFavorites ?? (() => {});
+    this.readAgendaReminders = options.readAgendaReminders ?? (() => []);
+    this.writeAgendaReminders = options.writeAgendaReminders ?? ((_accountId, reminders) => reminders.length === 0);
   }
 
   async readAccountSnapshot(accountId: string): Promise<BackupEnvelope> {
@@ -85,6 +92,7 @@ export class PGliteBackupRepository implements BackupRepository {
           schemaVersion: BACKUP_SCHEMA_VERSION,
           exportedAt: this.now(),
           favorites: [...this.readFavorites()],
+          agendaReminders: [...this.readAgendaReminders(accountId)],
           account: accountRows,
           objectiveOptions: objectiveRows,
           patients: patientRows,
@@ -116,7 +124,14 @@ export class PGliteBackupRepository implements BackupRepository {
       throw repositoryFailure('A substituição não corresponde à Conta local ativa.');
     }
 
+    const previousFavorites = [...this.readFavorites()];
+    const previousAgendaReminders = this.readAgendaReminders(accountId);
+    if (!this.writeAgendaReminders(accountId, [...snapshot.agendaReminders])) {
+      throw repositoryFailure('Os lembretes do calendário não puderam ser salvos; a base local não foi alterada.');
+    }
+
     try {
+      this.writeFavorites([...snapshot.favorites]);
       await this.handle.db.transaction(async (tx) => {
         await tx.execute(sql`DELETE FROM diet_item_snapshots WHERE diet_meal_item_id IN (
           SELECT i.id FROM diet_meal_items i
@@ -192,8 +207,12 @@ export class PGliteBackupRepository implements BackupRepository {
 
         if (this.failAt === 'after-insert') throw repositoryFailure('Falha simulada após inserir o backup.');
       });
-      this.writeFavorites([...snapshot.favorites]);
     } catch (cause) {
+      const remindersRestored = this.writeAgendaReminders(accountId, previousAgendaReminders);
+      this.writeFavorites(previousFavorites);
+      if (!remindersRestored) {
+        throw repositoryFailure('A base de dados foi preservada, mas os lembretes locais não puderam ser revertidos.', cause);
+      }
       if (cause instanceof BackupRepositoryError) throw cause;
       throw repositoryFailure('A base local não pôde ser substituída e foi preservada.', cause);
     }

@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { DietMeal, DietItem } from '@/lib/legacy-diet-types';
-import type { FoodItem } from '@/lib/library-ui-adapter';
+import { createLibraryFoodSnapshot, type FoodItem } from '@/lib/library-ui-adapter';
+import { createDecimalString } from '@/lib/domain/diets/diet-model';
+import { scaleNutrition } from '@/lib/domain/diets/nutrition';
 import {
   appendMealVariation,
   cloneMealGroupWithFreshIds,
@@ -36,12 +38,14 @@ export function useDietMealActions({
   foodSearchMealIndex,
   currentMeals,
   updateActiveMeals,
+  canMutate,
   getActiveMealVariationId,
   onSelectMealVariation,
 }: {
   foodSearchMealIndex: number | null;
   currentMeals: DietMeal[];
   updateActiveMeals: (updater: (prevMeals: DietMeal[]) => DietMeal[]) => void;
+  canMutate?: () => boolean;
   getActiveMealVariationId?: (mealId: string, meal?: DietMeal) => string;
   onSelectMealVariation?: (mealId: string, variationId: string) => void;
 }) {
@@ -67,6 +71,7 @@ export function useDietMealActions({
   );
 
   const handleAddMeal = useCallback(() => {
+    if (canMutate && !canMutate()) return;
     const newMealId = createId('meal');
     updateActiveMeals((prev) => [
       ...prev,
@@ -79,10 +84,11 @@ export function useDietMealActions({
     ]);
     toast.success('Nova refeição adicionada');
     return newMealId;
-  }, [createId, updateActiveMeals]);
+  }, [canMutate, createId, updateActiveMeals]);
 
   const handleRemoveMeal = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       const mealIndex = currentMeals.findIndex((meal) => meal.id === mealId);
       const meal = mealIndex >= 0 ? currentMeals[mealIndex] : undefined;
       if (!meal) return;
@@ -108,6 +114,7 @@ export function useDietMealActions({
         action: {
           label: 'Desfazer',
           onClick: () => {
+            if (canMutate && !canMutate()) return;
             const deleted = lastDeletedMealRef.current;
             if (!deleted || deleted.token !== deletionToken) return;
 
@@ -123,18 +130,20 @@ export function useDietMealActions({
         },
       });
     },
-    [createId, currentMeals, updateActiveMeals]
+    [canMutate, createId, currentMeals, updateActiveMeals]
   );
 
   const handleUpdateMealHeader = useCallback(
     (mealId: string, updates: { name?: string; time?: string }) => {
+      if (canMutate && !canMutate()) return;
       updateActiveMeals((prev) => prev.map((m) => (m.id === mealId ? { ...m, ...updates } : m)));
     },
-    [updateActiveMeals]
+    [canMutate, updateActiveMeals]
   );
 
   const handleAddFoodToMeal = useCallback(
     (itemOrItems: Omit<DietItem, 'id'> | Array<Omit<DietItem, 'id'>>) => {
+      if (canMutate && !canMutate()) return;
       if (foodSearchMealIndex === null) return;
       const itemsList = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
       if (itemsList.length === 0) return;
@@ -162,11 +171,12 @@ export function useDietMealActions({
         toast.success(`${newItems.length} alimentos adicionados à refeição`);
       }
     },
-    [createId, foodSearchMealIndex, resolveActiveId, updateActiveMeals]
+    [canMutate, createId, foodSearchMealIndex, resolveActiveId, updateActiveMeals]
   );
 
   const handleUpdateItemGram = useCallback(
     (mealId: string, itemId: string, newGrams: number) => {
+      if (canMutate && !canMutate()) return;
       updateActiveMeals((prev) =>
         prev.map((meal) => {
           if (meal.id !== mealId) return meal;
@@ -177,24 +187,38 @@ export function useDietMealActions({
             const p = item.protein ?? item.proteinG ?? 0;
             const c = item.carbs ?? item.carbsG ?? 0;
             const f = item.fats ?? item.fatsG ?? item.fatG ?? 0;
+            const prescribedQuantity = item.snapshot ? createDecimalString(String(newGrams)) : undefined;
+            const snapshot = item.snapshot && prescribedQuantity
+              ? {
+                ...item.snapshot,
+                prescribedQuantity,
+                prescribedNutrients: scaleNutrition({
+                  referenceQuantity: item.snapshot.referenceQuantity,
+                  ...item.snapshot.referenceNutrients,
+                }, prescribedQuantity),
+              }
+              : undefined;
+            const nutrients = snapshot?.prescribedNutrients;
             return {
               ...item,
               quantityGrams: newGrams,
               grams: newGrams,
-              kcal: Math.round(item.kcal * ratio),
-              protein: Math.round(p * ratio * 10) / 10,
-              carbs: Math.round(c * ratio * 10) / 10,
-              fats: Math.round(f * ratio * 10) / 10,
+              ...(snapshot ? { snapshot } : {}),
+              kcal: Math.round(Number(nutrients?.energyKcal ?? item.kcal * ratio)),
+              protein: Math.round(Number(nutrients?.protein ?? p * ratio) * 10) / 10,
+              carbs: Math.round(Number(nutrients?.carbs ?? c * ratio) * 10) / 10,
+              fats: Math.round(Number(nutrients?.fat ?? f * ratio) * 10) / 10,
             };
           }));
         })
       );
     },
-    [resolveActiveId, updateActiveMeals]
+    [canMutate, resolveActiveId, updateActiveMeals]
   );
 
   const handleSubstituteFood = useCallback(
     (mealId: string, itemId: string, selectedFood: FoodItem) => {
+      if (canMutate && !canMutate()) return;
       let substitutedFoodName = '';
       let targetGrams = 100;
 
@@ -211,7 +235,8 @@ export function useDietMealActions({
                 : selectedFood.name;
 
             substitutedFoodName = formattedName;
-            const rawFat = selectedFood.fatG ?? selectedFood.fatsG ?? 0;
+            const snapshot = createLibraryFoodSnapshot(selectedFood, String(targetGrams));
+            const nutrients = snapshot.prescribedNutrients;
 
             return {
               ...item,
@@ -219,10 +244,11 @@ export function useDietMealActions({
               name: formattedName,
               quantityGrams: targetGrams,
               grams: targetGrams,
-              kcal: Math.round(selectedFood.kcal * ratio),
-              protein: Math.round(selectedFood.proteinG * ratio * 10) / 10,
-              carbs: Math.round(selectedFood.carbsG * ratio * 10) / 10,
-              fats: Math.round(rawFat * ratio * 10) / 10,
+              snapshot,
+              kcal: Math.round(Number(nutrients.energyKcal ?? selectedFood.kcal * ratio)),
+              protein: Math.round(Number(nutrients.protein) * 10) / 10,
+              carbs: Math.round(Number(nutrients.carbs) * 10) / 10,
+              fats: Math.round(Number(nutrients.fat) * 10) / 10,
             };
           }));
         })
@@ -232,11 +258,12 @@ export function useDietMealActions({
         toast.success(`Alimento substituído por "${substitutedFoodName}" mantendo ${targetGrams}g`);
       }
     },
-    [resolveActiveId, updateActiveMeals]
+    [canMutate, resolveActiveId, updateActiveMeals]
   );
 
   const handleRemoveItem = useCallback(
     (mealId: string, itemId: string) => {
+      if (canMutate && !canMutate()) return;
       const meal = currentMeals.find((currentMeal) => currentMeal.id === mealId);
       const activeVariationId = meal ? resolveActiveId(meal) : '';
       const activeItems = meal ? getActiveMealVariation(meal, activeVariationId).items : [];
@@ -267,6 +294,7 @@ export function useDietMealActions({
         action: {
           label: 'Desfazer',
           onClick: () => {
+            if (canMutate && !canMutate()) return;
             const deletedItem = lastDeletedItemRef.current;
             if (!deletedItem || deletedItem.token !== deletionToken) return;
 
@@ -285,11 +313,12 @@ export function useDietMealActions({
         },
       });
     },
-    [createId, currentMeals, resolveActiveId, updateActiveMeals]
+    [canMutate, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handleDuplicateMeal = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       const sourceMeal = currentMeals.find((meal) => meal.id === mealId);
       if (!sourceMeal) return;
 
@@ -307,11 +336,12 @@ export function useDietMealActions({
       onSelectMealVariation?.(clonedMeal.id, getBaseMealVariationId(clonedMeal.id));
       toast.success('Refeição duplicada com sucesso!');
     },
-    [currentMeals, onSelectMealVariation, updateActiveMeals]
+    [canMutate, currentMeals, onSelectMealVariation, updateActiveMeals]
   );
 
   const handleCopyMeal = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       const sourceMeal = currentMeals.find((meal) => meal.id === mealId);
       if (!sourceMeal) return;
       const activeItems = getActiveMealVariation(sourceMeal, resolveActiveId(sourceMeal)).items;
@@ -320,11 +350,12 @@ export function useDietMealActions({
       setCopiedMealItems(activeItems.map((item) => ({ ...item })));
       toast.success(`${activeItems.length} alimento${activeItems.length === 1 ? '' : 's'} copiado${activeItems.length === 1 ? '' : 's'} da refeição`);
     },
-    [currentMeals, resolveActiveId]
+    [canMutate, currentMeals, resolveActiveId]
   );
 
   const handlePasteMeal = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       if (!copiedMealItems || copiedMealItems.length === 0) return;
 
       const pastedItems = createPastedMealItems(copiedMealItems, createId, getOccupiedItemIds(currentMeals));
@@ -339,11 +370,12 @@ export function useDietMealActions({
 
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
-    [copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
+    [canMutate, copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handlePasteMealAndReplace = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       if (!copiedMealItems || copiedMealItems.length === 0) return;
 
       const targetMeal = currentMeals.find((meal) => meal.id === mealId);
@@ -362,11 +394,12 @@ export function useDietMealActions({
 
       toast.success(`${pastedItems.length} alimento${pastedItems.length === 1 ? '' : 's'} colado${pastedItems.length === 1 ? '' : 's'} e substituído${pastedItems.length === 1 ? '' : 's'} na refeição`);
     },
-    [copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
+    [canMutate, copiedMealItems, createId, currentMeals, resolveActiveId, updateActiveMeals]
   );
 
   const handleDuplicateItem = useCallback(
     (mealId: string, itemId: string) => {
+      if (canMutate && !canMutate()) return;
       let duplicatedItemName = '';
 
       updateActiveMeals((prev) =>
@@ -393,11 +426,12 @@ export function useDietMealActions({
         toast.success(`"${duplicatedItemName}" duplicado na refeição`);
       }
     },
-    [createId, resolveActiveId, updateActiveMeals]
+    [canMutate, createId, resolveActiveId, updateActiveMeals]
   );
 
   const handleReorderItems = useCallback(
     (mealId: string, sourceIndex: number, targetIndex: number) => {
+      if (canMutate && !canMutate()) return;
       if (sourceIndex === targetIndex) return;
       updateActiveMeals((prev) =>
         prev.map((meal) => {
@@ -412,11 +446,12 @@ export function useDietMealActions({
         })
       );
     },
-    [resolveActiveId, updateActiveMeals]
+    [canMutate, resolveActiveId, updateActiveMeals]
   );
 
   const handleReorderMeals = useCallback(
     (mealIds: string[]) => {
+      if (canMutate && !canMutate()) return;
       const currentIds = currentMeals.map((meal) => meal.id);
       const currentIdSet = new Set(currentIds);
       if (
@@ -432,11 +467,12 @@ export function useDietMealActions({
         return mealIds.map((mealId) => mealsById.get(mealId) as DietMeal);
       });
     },
-    [currentMeals, updateActiveMeals]
+    [canMutate, currentMeals, updateActiveMeals]
   );
 
   const handleAddMealVariation = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       const sourceMeal = currentMeals.find((meal) => meal.id === mealId);
       if (!sourceMeal) return;
 
@@ -450,11 +486,12 @@ export function useDietMealActions({
       onSelectMealVariation?.(mealId, result.variationId);
       toast.success('Nova variação adicionada à refeição');
     },
-    [currentMeals, onSelectMealVariation, resolveActiveId, updateActiveMeals]
+    [canMutate, currentMeals, onSelectMealVariation, resolveActiveId, updateActiveMeals]
   );
 
   const handleRemoveMealVariation = useCallback(
     (mealId: string) => {
+      if (canMutate && !canMutate()) return;
       const sourceMeal = currentMeals.find((meal) => meal.id === mealId);
       if (!sourceMeal) return;
 
@@ -465,7 +502,7 @@ export function useDietMealActions({
       onSelectMealVariation?.(mealId, result.activeVariationId);
       toast.success('Variação removida da refeição');
     },
-    [currentMeals, onSelectMealVariation, resolveActiveId, updateActiveMeals]
+    [canMutate, currentMeals, onSelectMealVariation, resolveActiveId, updateActiveMeals]
   );
 
   return {

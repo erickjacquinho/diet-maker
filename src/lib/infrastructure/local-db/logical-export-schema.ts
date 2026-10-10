@@ -18,10 +18,11 @@ import type {
   recipeIngredients,
   recipes,
 } from './schema';
+import type { AgendaReminder } from '@/lib/agenda-reminders';
 
 export const BACKUP_APP_ID = 'nutridiet-local-pro' as const;
 export const BACKUP_FORMAT_VERSION = 1 as const;
-export const BACKUP_SCHEMA_VERSION = '8' as const;
+export const BACKUP_SCHEMA_VERSION = '11' as const;
 export const LEGACY_BACKUP_SCHEMA_VERSION = '4' as const;
 
 export const BACKUP_TABLE_NAMES = [
@@ -70,9 +71,10 @@ export type ReadyDietRow = typeof readyDiets.$inferSelect;
 export interface BackupEnvelope {
   appId: typeof BACKUP_APP_ID;
   formatVersion: typeof BACKUP_FORMAT_VERSION;
-  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5' | '6' | '7';
+  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5' | '6' | '7' | '8' | '9' | '10';
   exportedAt: string;
   favorites: string[];
+  agendaReminders: AgendaReminder[];
   account: AccountRow[];
   objectiveOptions: ObjectiveOptionRow[];
   patients: PatientRow[];
@@ -99,7 +101,7 @@ export const BACKUP_ROW_KEYS: { readonly [K in BackupTableName]: readonly string
   objectiveOptions: ['id', 'accountId', 'label', 'normalizedLabel', 'origin', 'archivedAt', 'createdAt', 'updatedAt'],
   patients: ['id', 'accountId', 'displayCode', 'name', 'age', 'gender', 'birthDate', 'isPregnant', 'pregnancyDueDate', 'heightCm', 'weightKg', 'maritalStatus', 'phone', 'whatsapp', 'currentObjective', 'targetProtein', 'targetCarbs', 'targetFats', 'targetKcal', 'createdAt', 'updatedAt', 'version', 'archivedAt'],
   bodyAssessments: ['id', 'accountId', 'patientId', 'clinicalDate', 'weightKg', 'bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm', 'autoFilledFields', 'calculationMethod', 'calculationVersion', 'calculationInputSnapshot', 'version', 'createdAt', 'updatedAt'],
-  nextFollowUps: ['accountId', 'patientId', 'dueDate', 'type', 'comments', 'version', 'createdAt', 'updatedAt'],
+  nextFollowUps: ['accountId', 'patientId', 'dueDate', 'assessmentDueDate', 'dietDueDate', 'type', 'comments', 'version', 'createdAt', 'updatedAt'],
   dietPlans: ['id', 'accountId', 'patientId', 'name', 'mode', 'status', 'weightReferenceKg', 'version', 'createdAt', 'updatedAt', 'activatedAt', 'supersededAt'],
   dietVariations: ['id', 'dietPlanId', 'accountId', 'patientId', 'position', 'kind', 'name', 'inputMode', 'targetProtein', 'targetCarbs', 'targetFat', 'targetKcal', 'gPerKgProtein', 'gPerKgCarbs', 'gPerKgFat'],
   dietVariationDays: ['variationId', 'dietPlanId', 'accountId', 'patientId', 'dayCode', 'position'],
@@ -108,7 +110,7 @@ export const BACKUP_ROW_KEYS: { readonly [K in BackupTableName]: readonly string
   dietMealItems: ['id', 'dietMealOptionId', 'position', 'role', 'parentItemId', 'name'],
   dietItemSnapshots: ['dietMealItemId', 'sourceType', 'sourceId', 'sourceVersion', 'displayName', 'description', 'measurementBasis', 'foodState', 'referenceQuantity', 'referenceUnit', 'referenceProtein', 'referenceCarbs', 'referenceFat', 'referenceFiber', 'referenceEnergyKcal', 'prescribedQuantity', 'prescribedUnit', 'prescribedProtein', 'prescribedCarbs', 'prescribedFat', 'prescribedFiber', 'prescribedEnergyKcal', 'energySource', 'calculationVersion', 'conversionSnapshot', 'compositionSnapshot'],
   foodCatalogItems: ['id', 'accountId', 'name', 'description', 'brand', 'measurementBasis', 'foodState', 'servingReference', 'servingUnit', 'referenceProtein', 'referenceCarbs', 'referenceFat', 'referenceFiber', 'referenceEnergyKcal', 'energySource', 'calculationVersion', 'status', 'version', 'createdAt', 'updatedAt', 'archivedAt'],
-  recipes: ['id', 'accountId', 'name', 'category', 'instructions', 'prepTimeMinutes', 'yieldPortions', 'preparedWeightGrams', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'totalEnergyKcal', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'perPortionEnergyKcal', 'status', 'version', 'createdAt', 'updatedAt', 'archivedAt'],
+  recipes: ['id', 'accountId', 'name', 'category', 'instructions', 'prepTimeMinutes', 'yieldPortions', 'yieldUnit', 'preparedWeightGrams', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'totalEnergyKcal', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'perPortionEnergyKcal', 'status', 'version', 'createdAt', 'updatedAt', 'archivedAt'],
   recipeIngredients: ['id', 'recipeId', 'accountId', 'position', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit', 'ingredientSnapshot'],
   readyMeals: ['id', 'accountId', 'name', 'description', 'suggestedTime', 'status', 'version', 'createdAt', 'updatedAt', 'archivedAt'],
   readyMealItems: ['id', 'readyMealId', 'accountId', 'position', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit', 'recipePortions', 'itemSnapshot'],
@@ -121,5 +123,6 @@ export const BACKUP_ENVELOPE_KEYS = [
   'schemaVersion',
   'exportedAt',
   'favorites',
+  'agendaReminders',
   ...BACKUP_TABLE_NAMES,
 ] as const;

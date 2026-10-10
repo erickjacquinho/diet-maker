@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Criar ou editar receitas, buscando ingredientes TACO e exibindo os macros calculados por porção.
+Criar ou editar receitas com quantidade e unidade de rendimento, buscando ingredientes TACO e exibindo o total de macros e kcal dos ingredientes adicionados; o rendimento define a base por porção, 100 g, 100 ml ou unidade no consumo.
 
 ## Category inheritance
 
@@ -22,7 +22,7 @@ Herda integralmente [overlays](../../categories/overlays.md) e compõe campos, s
 
 ## Specific anatomy
 
-Dialog com título acessível, campos de identificação, busca de ingredientes, lista rolável, resumo de macros e instruções, seguido de footer de ações.
+Dialog com título acessível, campos de identificação, categoria, quantidade e unidade do rendimento, busca de ingredientes, lista rolável, resumo do total da receita e instruções, seguido de footer de ações.
 
 ## Allowed variants
 
@@ -34,11 +34,11 @@ Resultados de busca aparecem somente após consulta suficiente; submit bloqueia 
 
 ## Composition
 
-Base declarada: `ui-dialog`. Compõe `ui-input`, `ui-select`, `ui-button`, `molecule-taco-search-input`, `molecule-recipe-ingredient-row` e `molecule-auto-kcal-section`. Persistência permanece no consumidor.
+Base declarada: `ui-dialog`. Compõe `ui-input`, `ui-select`, `ui-button`, `molecule-taco-search-input`, `molecule-recipe-ingredient-row`, `molecule-macro-summary` e `molecule-auto-kcal-section`. Persistência permanece no consumidor.
 
 ## Content rules
 
-Ingredientes exibem nome, quantidade e unidade; o resumo de macros deve manter contexto de porção.
+Ingredientes exibem nome, quantidade e unidade; a unidade do rendimento acompanha seu valor; quando há ingredientes, o resumo identifica "Total da receita" e soma proteína, carboidrato, gordura e kcal de todos eles, sem dividir pelo rendimento.
 
 ## Exceptions
 
@@ -52,6 +52,7 @@ A lista canônica de consumidores é o campo `consumers` do registro; atualmente
 
 - identidade, source e exports coincidem com o registro;
 - busca, quantidade e remoção ficam encapsuladas no modal;
+- o resumo mostra os totais dos ingredientes atuais e não aparece vazio;
 - validação bloqueia payload inválido;
 - dialog mantém body rolável, title e footer acessíveis.
 

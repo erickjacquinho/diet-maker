@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { AgendaReminderScheduler } from '@/app/AgendaReminderScheduler';
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
 import { getBrowserProfileSession } from '@/lib/application/browser-composition';
 import { AppLayoutShell } from '@/components/templates';
@@ -72,5 +73,12 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
     );
   }
 
-  return <AppLayoutShell sidebar={<SidebarNavigationAdapter onSignOut={handleSignOut} />}>{children}</AppLayoutShell>;
+  return (
+    <>
+      <AgendaReminderScheduler accountId={snapshot.accountId ?? snapshot.runtime?.account.id ?? null} />
+      <AppLayoutShell sidebar={<SidebarNavigationAdapter onSignOut={handleSignOut} />}>
+        {children}
+      </AppLayoutShell>
+    </>
+  );
 }

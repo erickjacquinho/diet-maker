@@ -40,6 +40,7 @@ const mockDietApplication = {
   autosaveDraft: vi.fn(),
   flushDraft: vi.fn(),
   saveDietAsActive: vi.fn(),
+  reconcileUnknownSave: vi.fn(),
   discardDraft: vi.fn(),
   pullTargets: vi.fn(),
   pullCompleteDiet: vi.fn(),
@@ -164,5 +165,55 @@ describe('useDietBuilderPage meal variation context', () => {
       [lowKey]: lowVariationId,
     });
     expect(result.current.currentMeals[0].items[0].name).toBe('Opção baixo');
+  });
+
+  it('does not trigger page Save with the keyboard shortcut while an edit dialog is open', async () => {
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+
+    act(() => result.current.openAdjustGoalsModal());
+    expect(result.current.isAdjustGoalsModalOpen).toBe(true);
+
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true }));
+    });
+
+    expect(mockDietApplication.flushDraft).not.toHaveBeenCalled();
+    expect(mockDietApplication.saveDietAsActive).not.toHaveBeenCalled();
+  });
+
+  it('keeps the captured diet revision unchanged while explicit Save is busy', async () => {
+    let finishFlush!: (result: { status: 'SAVED'; revision: number; updatedAt: string }) => void;
+    mockDietApplication.flushDraft.mockImplementationOnce(() => new Promise((resolve) => { finishFlush = resolve; }));
+    mockDietApplication.saveDietAsActive.mockResolvedValue({
+      status: 'COMMITTED', draftId: 'draft-variations', planId: 'diet-variations', version: 2,
+      confirmedDraftRevision: 2, message: 'Prescrição confirmada.',
+    });
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+
+    const meal = result.current.dietPlan!.carbCyclingVariations[0].meals[0];
+    const item = meal.items[0];
+    const originalQuantity = item.quantityGrams;
+    const originalProtein = result.current.dietPlan!.carbCyclingVariations[0].targetProtein;
+    let savePromise!: Promise<void>;
+    act(() => { savePromise = result.current.handleSaveDiet(); });
+    await waitFor(() => expect(result.current.confirmationBusy).toBe(true));
+
+    act(() => result.current.handleUpdateItemGram(meal.id, item.id!, originalQuantity + 50));
+    act(() => {
+      result.current.openAdjustGoalsModal();
+      result.current.setTempTargetProt(originalProtein + 20);
+      result.current.handleSaveAdjustedGoals();
+    });
+
+    expect(result.current.dietPlan!.carbCyclingVariations[0].meals[0].items[0].quantityGrams).toBe(originalQuantity);
+    expect(result.current.dietPlan!.carbCyclingVariations[0].targetProtein).toBe(originalProtein);
+
+    await act(async () => {
+      finishFlush({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T12:00:00.000Z' });
+      await savePromise;
+    });
+    expect(result.current.confirmationBusy).toBe(false);
   });
 });

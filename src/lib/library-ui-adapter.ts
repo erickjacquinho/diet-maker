@@ -3,7 +3,7 @@
 import { createTacoSnapshot, listTacoFoods } from '@/lib/application/diets/taco-food-adapter';
 import { createDecimalString, type EnergySource, type NutritionSnapshot } from './domain/diets/diet-model';
 import { scaleNutrition } from './domain/diets/nutrition';
-import type { FoodCatalogItem as DomainFoodCatalogItem, LibraryStatus, ReadyMeal as DomainReadyMeal, Recipe as DomainRecipe, ReadyMealItemInput } from './domain/library/library-model';
+import { recipeYieldUnitFromSnapshot, type FoodCatalogItem as DomainFoodCatalogItem, type LibraryStatus, type ReadyMeal as DomainReadyMeal, type Recipe as DomainRecipe, type RecipeYieldUnit, type ReadyMealItemInput } from './domain/library/library-model';
 import { getEphemeralItem, setEphemeralItem } from './ephemeral-storage';
 
 export interface FoodItem {
@@ -39,7 +39,8 @@ export interface Recipe {
   name: string;
   category: string;
   prepTimeMinutes?: number;
-  servings: number;
+  yieldAmount: number;
+  yieldUnit: RecipeYieldUnit;
   instructions: string;
   ingredients: RecipeIngredient[];
   createdAt: string;
@@ -148,7 +149,7 @@ export function createLibraryFoodSnapshot(food: FoodItem, prescribedQuantity = '
 
 export function toRecipe(recipe: DomainRecipe): Recipe {
   return {
-    id: recipe.id, name: recipe.name, category: recipe.category, prepTimeMinutes: recipe.prepTimeMinutes, servings: Number(recipe.yieldPortions), instructions: recipe.instructions,
+    id: recipe.id, name: recipe.name, category: recipe.category, prepTimeMinutes: recipe.prepTimeMinutes, yieldAmount: Number(recipe.yieldPortions), yieldUnit: recipe.yieldUnit, instructions: recipe.instructions,
     ingredients: recipe.ingredients.map((ingredient) => ({ foodId: ingredient.sourceId, name: ingredient.ingredientSnapshot.displayName, amountGrams: Number(ingredient.quantity), proteinG: Number(ingredient.ingredientSnapshot.prescribedNutrients.protein), carbsG: Number(ingredient.ingredientSnapshot.prescribedNutrients.carbs), fatsG: Number(ingredient.ingredientSnapshot.prescribedNutrients.fat), kcal: Number(ingredient.ingredientSnapshot.prescribedNutrients.energyKcal ?? 0) })),
     createdAt: recipe.createdAt, libraryVersion: recipe.version, status: recipe.status,
   };
@@ -185,6 +186,7 @@ export function toReadyMeal(meal: DomainReadyMeal): ReadyMeal {
       quantity: item.quantity,
       unit: item.unit,
       recipePortions: item.recipePortions,
+      ...(item.sourceType === 'RECIPE' ? { recipeUnit: recipeYieldUnitFromSnapshot(item.itemSnapshot.compositionSnapshot) } : {}),
     })),
   };
 }
@@ -208,14 +210,32 @@ export function searchTacoFoods(query: string, foodsPool: FoodItem[] = listTacoF
   return foodsPool.map((food, index) => ({ food, score: scoreFoodItem(food, query), index })).filter((entry) => entry.score > 0).sort((a, b) => b.score - a.score || a.index - b.index).map((entry) => entry.food);
 }
 
-export function calculateRecipeNutrients(ingredients: RecipeIngredient[], servings: number): RecipeNutrientsSummary {
-  const divisor = Math.max(1, Number(servings) || 1);
+export function formatRecipeYield(amount: number, unit: RecipeYieldUnit): string {
+  if (unit === 'PORTION') return `${amount} ${amount === 1 ? 'porção' : 'porções'}`;
+  if (unit === 'unit') return `${amount} ${amount === 1 ? 'unidade' : 'unidades'}`;
+  return `${amount} ${unit}`;
+}
+
+export function recipeYieldUnitLabel(unit: RecipeYieldUnit): string {
+  if (unit === 'PORTION') return 'porções';
+  return unit === 'unit' ? 'unidades' : unit;
+}
+
+export function recipeNutritionBasis(unit: RecipeYieldUnit): string {
+  if (unit === 'PORTION') return '1 porção';
+  if (unit === 'unit') return '1 unidade';
+  return `100 ${unit}`;
+}
+
+export function calculateRecipeNutrients(ingredients: RecipeIngredient[], yieldAmount: number, yieldUnit: RecipeYieldUnit = 'PORTION'): RecipeNutrientsSummary {
+  const divisor = Math.max(1, Number(yieldAmount) || 1);
+  const multiplier = yieldUnit === 'g' || yieldUnit === 'ml' ? 100 : 1;
   const totalProteinG = Math.round(ingredients.reduce((sum, item) => sum + (Number(item.proteinG) || 0), 0) * 10) / 10;
   const totalCarbsG = Math.round(ingredients.reduce((sum, item) => sum + (Number(item.carbsG) || 0), 0) * 10) / 10;
   const totalFatsG = Math.round(ingredients.reduce((sum, item) => sum + (Number(item.fatsG) || 0), 0) * 10) / 10;
   const totalKcal = Math.round((totalProteinG * 4 + totalCarbsG * 4 + totalFatsG * 9));
-  const portionProteinG = Math.round((totalProteinG / divisor) * 10) / 10;
-  const portionCarbsG = Math.round((totalCarbsG / divisor) * 10) / 10;
-  const portionFatsG = Math.round((totalFatsG / divisor) * 10) / 10;
+  const portionProteinG = Math.round((totalProteinG * multiplier / divisor) * 10) / 10;
+  const portionCarbsG = Math.round((totalCarbsG * multiplier / divisor) * 10) / 10;
+  const portionFatsG = Math.round((totalFatsG * multiplier / divisor) * 10) / 10;
   return { totalProteinG, totalCarbsG, totalFatsG, totalKcal, portionProteinG, portionCarbsG, portionFatsG, portionKcal: Math.round(portionProteinG * 4 + portionCarbsG * 4 + portionFatsG * 9) };
 }

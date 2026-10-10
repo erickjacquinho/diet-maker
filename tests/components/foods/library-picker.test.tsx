@@ -13,6 +13,7 @@ const recipe = {
   instructions: 'Misturar.',
   prepTimeMinutes: 5,
   yieldPortions: '2',
+  yieldUnit: 'PORTION',
   nutrition: { total: {}, perPortion: {} },
   status: 'ACTIVE',
   version: 3,

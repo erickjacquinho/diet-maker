@@ -18,7 +18,8 @@ npm test -- --reporter=dot tests/lib/backup.test.ts tests/application/backup-app
 
 Esperado:
 
-- envelope com todas as tabelas canônicas e sem drafts;
+- envelope com todas as tabelas canônicas, favoritos, lembretes da agenda e sem drafts;
+- lembretes preservados em exportar/restaurar e schema 9 migrado para coleção vazia;
 - rejeição de app/schema incompatível, tipos inválidos, IDs duplicados,
   relações órfãs, Conta divergente e dieta vigente duplicada;
 - exportação consistente;
@@ -49,12 +50,12 @@ npm run test:browser -- tests/browser/backup-persistence.spec.ts --workers=1
 Esperado:
 
 1. Criar dados representativos de Conta, biblioteca, paciente, clínica, dieta
-   vigente e histórico.
-2. Exportar o `.nutridiet` e inspecionar que drafts não aparecem no conteúdo.
-3. Alterar ou arquivar dados locais, selecionar o arquivo e confirmar a
+   vigente, histórico e um lembrete pontual da agenda.
+2. Exportar o `.nutridiet` e inspecionar que o lembrete aparece e drafts não.
+3. Alterar ou arquivar dados locais, consumir/remover o lembrete, selecionar o arquivo e confirmar a
    substituição total.
 4. Recarregar e verificar que todos os dados confirmados retornaram, inclusive
-   arquivados, snapshots e registros clínicos.
+   arquivados, snapshots, registros clínicos e lembretes agendados.
 5. Tentar arquivo inválido e restauração com draft pendente; ambos devem ser
    rejeitados sem alterar a base.
 6. Repetir sem rede e verificar que nenhum request de exportação/restauração é

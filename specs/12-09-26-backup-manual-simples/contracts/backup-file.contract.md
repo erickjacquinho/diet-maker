@@ -12,8 +12,10 @@ executável ou arquivo criptografado.
 {
   "appId": "nutridiet-local-pro",
   "formatVersion": 1,
-  "schemaVersion": "4",
+  "schemaVersion": "10",
   "exportedAt": "2026-09-12T12:00:00.000Z",
+  "favorites": [],
+  "agendaReminders": [],
   "account": [],
   "objectiveOptions": [],
   "patients": [],
@@ -35,8 +37,9 @@ executável ou arquivo criptografado.
 ```
 
 Os arrays carregam as linhas confirmadas das tabelas correspondentes, inclusive
-registros arquivados e snapshots históricos. Drafts e estados temporários nunca
-aparecem no envelope.
+registros arquivados e snapshots históricos. `agendaReminders` contém os
+lembretes pontuais da Conta (`id`, `date`, `time`, `task`). Drafts e estados
+temporários nunca aparecem no envelope.
 
 ## Export contract
 
@@ -50,15 +53,18 @@ aparecem no envelope.
 Antes de qualquer escrita, o consumidor deve:
 
 1. parsear JSON sem executar conteúdo;
-2. validar envelope, campos obrigatórios, `appId`, versões e tipos;
+2. validar envelope, campos obrigatórios, `appId`, versões, tipos e lembretes
+   pontuais (IDs únicos, data, hora e tarefa válidas);
 3. validar exatamente uma Conta com a identidade da Conta local ativa;
 4. validar IDs únicos, relações, escopos, vigência única e tipos de dados;
 5. bloquear a operação se houver drafts editáveis ou gravações pendentes;
 6. informar substituição total sem mesclagem e obter confirmação explícita.
 
-Depois da confirmação, a substituição deve ser atômica. O resultado aceitável é
-o snapshot inteiro restaurado ou a base anterior intacta. O consumidor deve
-recarregar o runtime e as consultas antes de permitir novas edições.
+Depois da confirmação, a substituição das tabelas deve ser transacional; a
+coleção local de lembretes é preparada antes da escrita e revertida se a
+transação falhar. O resultado aceitável é o snapshot inteiro restaurado ou a
+base anterior intacta. O consumidor deve recarregar o runtime e as consultas
+antes de permitir novas edições.
 
 ## Compatibility policy
 
@@ -71,6 +77,11 @@ recarregar o runtime e as consultas antes de permitir novas edições.
 - Campos/tabelas introduzidos por uma versão nova recebem defaults explícitos
   na migração (por exemplo, uma coleção nova começa vazia). O arquivo de
   origem não é alterado; o próximo export gera o envelope atualizado.
+- A migração `9 → 10` inicia `agendaReminders` como `[]`; restaurar um arquivo
+  antigo substitui e limpa os lembretes locais atuais, sem mesclar estados.
+- Arquivos `schemaVersion = "10"` exportados antes da inclusão dos lembretes
+  também podem omitir `agendaReminders`; a importação os normaliza para `[]`.
+  Se o campo estiver presente, continua sujeito à validação estrita.
 - `schemaVersion` futuro ou sem uma migração conhecida é rejeitado.
 - Campos desconhecidos no envelope ou nas linhas são rejeitados depois da
   migração no `formatVersion = 1`; eles nunca são executados nem ignorados

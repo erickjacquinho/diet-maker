@@ -50,6 +50,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onDiscardDraft,
   canDiscardDraft = true,
   saveStatus = 'clean',
+  confirmationBusy = false,
   onBackClick,
 }) => {
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
@@ -81,7 +82,7 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   const handleAdjustGoals = onOpenAdjustGoalsModal || macroTrackerData?.onAdjustGoals;
   const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
   const handlePullPrevious = onOpenImportPreviousDietModal || onPullPreviousGoals;
-  const isSaveBusy = saveStatus === 'saving' || saveStatus === 'committing';
+  const isSaveBusy = confirmationBusy || saveStatus === 'saving' || saveStatus === 'committing';
   const isDiscardBlockedBySave = saveStatus === 'pending' || isSaveBusy;
 
   const headerActions = (
@@ -94,12 +95,14 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           size="compact"
           className="flex items-center gap-1.5"
           aria-keyshortcuts="Control+s Meta+s"
-          aria-label="Salvar Prescrição"
-          title="Salvar Prescrição e fechar (Ctrl+S)"
+          aria-label={confirmationBusy ? 'Confirmando prescrição' : 'Salvar Prescrição'}
+          title={confirmationBusy ? 'Confirmando prescrição' : 'Salvar Prescrição e fechar (Ctrl+S)'}
         >
           <Save size={14} aria-hidden="true" />
           <span>
-            Salvar Prescrição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span>
+            {confirmationBusy
+              ? 'Confirmando…'
+              : <>Salvar Prescrição <span className="opacity-subdued text-style-chart-micro font-mono">(Ctrl+S)</span></>}
           </span>
         </Button>
       )}
@@ -148,9 +151,15 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
+      {confirmationBusy && (
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          Confirmando a prescrição. Aguarde a conclusão do salvamento.
+        </span>
+      )}
       <main
         aria-label="Elaboração de Dieta"
         aria-busy={isSaveBusy ? true : undefined}
+        inert={confirmationBusy || undefined}
         className="flex w-full max-w-container-workflow flex-1 flex-col gap-6 py-6 px-8 lg:mx-auto"
       >
         <PageContextHeader

@@ -13,6 +13,17 @@ import type {
 export type LibraryStatus = 'ACTIVE' | 'ARCHIVED';
 export type LibraryFoodSourceType = 'SYSTEM_TACO' | 'ACCOUNT_CUSTOM';
 export type ReadyMealItemSourceType = 'FOOD' | 'RECIPE';
+export const RECIPE_YIELD_UNITS = ['PORTION', 'g', 'ml', 'unit'] as const;
+export type RecipeYieldUnit = (typeof RECIPE_YIELD_UNITS)[number];
+
+export function isRecipeYieldUnit(value: unknown): value is RecipeYieldUnit {
+  return RECIPE_YIELD_UNITS.some((unit) => unit === value);
+}
+
+export function recipeYieldUnitFromSnapshot(value: JsonValue): RecipeYieldUnit {
+  if (value && typeof value === 'object' && !Array.isArray(value) && isRecipeYieldUnit(value.yieldUnit)) return value.yieldUnit;
+  return 'PORTION';
+}
 
 export interface NutritionValuesInput {
   protein: string;
@@ -72,6 +83,7 @@ export interface RecipeInput {
   instructions?: string;
   prepTimeMinutes?: number;
   yieldPortions: string;
+  yieldUnit?: RecipeYieldUnit;
   preparedWeightGrams?: string;
   ingredients: RecipeIngredientInput[];
 }
@@ -103,6 +115,7 @@ export interface Recipe {
   instructions: string;
   prepTimeMinutes?: number;
   yieldPortions: DecimalString;
+  yieldUnit: RecipeYieldUnit;
   preparedWeightGrams?: DecimalString;
   nutrition: RecipeNutritionSummary;
   status: LibraryStatus;
@@ -119,6 +132,7 @@ export interface ReadyMealItemInput {
   quantity?: string;
   unit?: DietUnit;
   recipePortions?: string;
+  recipeUnit?: RecipeYieldUnit;
 }
 
 export interface ReadyMealInput {

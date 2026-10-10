@@ -157,6 +157,7 @@ export interface NextFollowUp {
   accountId: string;
   patientId: string;
   dueDate: string;
+  dueDates?: Partial<Record<FollowUpType, string>>;
   type: FollowUpType[];
   comments?: string;
   version: number;
@@ -166,8 +167,21 @@ export interface NextFollowUp {
 
 export interface NextFollowUpInput {
   dueDate?: string | null;
+  dueDates?: Partial<Record<FollowUpType, string | null>>;
   type?: FollowUpType | FollowUpType[] | string | null;
   comments?: string | null;
+}
+
+export interface NextFollowUpDateChange {
+  patientId: string;
+  types: FollowUpType[];
+  expectedVersion: number;
+  dueDate: string;
+}
+
+export interface NextFollowUpDateMove {
+  before: NextFollowUp;
+  after: NextFollowUp;
 }
 
 export interface ConsultationView {
@@ -449,16 +463,46 @@ function normalizeFollowUpTypes(value: NextFollowUpInput['type']): FollowUpType[
 
 export function validateNextFollowUpInput(input: NextFollowUpInput): NextFollowUpValidationResult {
   const fieldErrors: Record<string, string> = {};
-  if (!normalizeClinicalDate(input.dueDate)) fieldErrors.dueDate = 'Informe uma data de acompanhamento válida.';
-  if (!normalizeFollowUpTypes(input.type)) fieldErrors.type = 'Selecione ao menos um tipo de acompanhamento válido.';
+  if (input.dueDates !== undefined) {
+    const hasDateMap = typeof input.dueDates === 'object' && input.dueDates !== null && !Array.isArray(input.dueDates);
+    if (!hasDateMap || Object.keys(input.dueDates).some((type) => !FOLLOW_UP_TYPES.includes(type as FollowUpType))) {
+      fieldErrors.type = 'Selecione ao menos um tipo de acompanhamento válido.';
+    }
+    if (hasDateMap) {
+      for (const type of FOLLOW_UP_TYPES) {
+        const value = input.dueDates[type];
+        if (value != null && value !== '' && !normalizeClinicalDate(value)) {
+          fieldErrors[`dueDates.${type}`] = 'Informe uma data de acompanhamento válida.';
+        }
+      }
+      if (!FOLLOW_UP_TYPES.some((type) => Boolean(input.dueDates?.[type]))) {
+        fieldErrors.type ??= 'Selecione ao menos um tipo de acompanhamento válido.';
+      }
+    }
+  } else {
+    if (!normalizeClinicalDate(input.dueDate)) fieldErrors.dueDate = 'Informe uma data de acompanhamento válida.';
+    if (!normalizeFollowUpTypes(input.type)) fieldErrors.type = 'Selecione ao menos um tipo de acompanhamento válido.';
+  }
   if (input.comments != null && typeof input.comments !== 'string') fieldErrors.comments = 'Informe comentários válidos.';
   return { valid: Object.keys(fieldErrors).length === 0, fieldErrors };
 }
 
-export function normalizeNextFollowUpInput(input: NextFollowUpInput): { dueDate: string; type: FollowUpType[]; comments: string } {
+export function normalizeNextFollowUpInput(input: NextFollowUpInput): { dueDate: string; dueDates: Partial<Record<FollowUpType, string>>; type: FollowUpType[]; comments: string } {
   const result = validateNextFollowUpInput(input);
   if (!result.valid) throw new ClinicalApplicationError('CLINICAL_VALIDATION_FAILED', 'O acompanhamento informado é inválido.', { fieldErrors: result.fieldErrors });
-  return { dueDate: normalizeClinicalDate(input.dueDate)!, type: normalizeFollowUpTypes(input.type)!, comments: input.comments ?? '' };
+  const dueDates: Partial<Record<FollowUpType, string>> = {};
+  if (input.dueDates !== undefined) {
+    for (const type of FOLLOW_UP_TYPES) {
+      const date = input.dueDates[type];
+      if (date) dueDates[type] = normalizeClinicalDate(date)!;
+    }
+  } else {
+    const dueDate = normalizeClinicalDate(input.dueDate)!;
+    for (const type of normalizeFollowUpTypes(input.type)!) dueDates[type] = dueDate;
+  }
+  const type = FOLLOW_UP_TYPES.filter((followUpType) => dueDates[followUpType]);
+  const earliestDate = Object.values(dueDates).sort()[0]!;
+  return { dueDate: earliestDate, dueDates, type, comments: input.comments ?? '' };
 }
 
 export function getFollowUpStatus(dueDate: string, today = localToday()): FollowUpStatus {

@@ -46,7 +46,7 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-Importação, histórico de dietas, histórico de consultas e cartões nutricionais que exibem o resumo; a lista definitiva permanece no registry.
+Importação, histórico de dietas, histórico de consultas, modal de receitas e cartões nutricionais que exibem o resumo; a lista definitiva permanece no registry.
 
 ## Acceptance criteria
 

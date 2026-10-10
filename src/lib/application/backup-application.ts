@@ -28,6 +28,7 @@ import type {
   RecipeIngredientRow,
   RecipeRow,
 } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { isAgendaReminder, type AgendaReminder } from '@/lib/agenda-reminders';
 import { BackupRepositoryError, type BackupErrorCode, type BackupRepository } from '@/lib/persistence/backup-repository';
 import type { AccountContext } from '@/lib/persistence/account-context';
 import type { DietDraftStore } from './diets/diet-ports';
@@ -107,6 +108,46 @@ export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
       ...input,
       schemaVersion: '8',
       readyDiets: [],
+    }),
+  },
+  {
+    from: '8',
+    to: '9',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '9',
+      nextFollowUps: Array.isArray(input.nextFollowUps)
+        ? input.nextFollowUps.map((row) => {
+          if (!isRecord(row)) return row;
+          const includesAssessment = row.type === 'ASSESSMENT_UPDATE' || row.type === 'BOTH';
+          const includesDiet = row.type === 'DIET_UPDATE' || row.type === 'BOTH';
+          return {
+            ...row,
+            assessmentDueDate: row.assessmentDueDate ?? (includesAssessment ? row.dueDate : null),
+            dietDueDate: row.dietDueDate ?? (includesDiet ? row.dueDate : null),
+          };
+        })
+        : input.nextFollowUps,
+    }),
+  },
+  {
+    from: '9',
+    to: '10',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '10',
+      agendaReminders: [],
+    }),
+  },
+  {
+    from: '10',
+    to: '11',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '11',
+      recipes: Array.isArray(input.recipes)
+        ? input.recipes.map((row) => isRecord(row) ? { ...row, yieldUnit: 'PORTION' } : row)
+        : input.recipes,
     }),
   },
 ];
@@ -206,7 +247,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg'), nullableNumericStringFields('bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
       break;
     case 'nextFollowUps':
-      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), { version: isNumber });
+      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), nullableStringFields('assessmentDueDate', 'dietDueDate'), { version: isNumber });
       break;
     case 'dietPlans':
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'name', 'mode', 'status', 'createdAt', 'updatedAt', 'activatedAt'), nullableNumericStringFields('weightReferenceKg'), { version: isNumber }, nullableStringFields('supersededAt'));
@@ -233,7 +274,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'name', 'description', 'measurementBasis', 'foodState', 'energySource', 'calculationVersion', 'status', 'createdAt', 'updatedAt'), nullableStringFields('brand', 'servingUnit', 'archivedAt'), nullableNumericStringFields('servingReference', 'referenceEnergyKcal'), numericStringFields('referenceProtein', 'referenceCarbs', 'referenceFat', 'referenceFiber'), { version: isNumber });
       break;
     case 'recipes':
-      Object.assign(fields, stringFields('id', 'accountId', 'name', 'category', 'instructions', 'yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'status', 'createdAt', 'updatedAt'), nullableNumericStringFields('preparedWeightGrams', 'totalEnergyKcal', 'perPortionEnergyKcal'), nullableStringFields('archivedAt'), numericStringFields('yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber'), { prepTimeMinutes: (value: unknown) => value === null || isNumber(value), version: isNumber });
+      Object.assign(fields, stringFields('id', 'accountId', 'name', 'category', 'instructions', 'yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'status', 'createdAt', 'updatedAt'), nullableNumericStringFields('preparedWeightGrams', 'totalEnergyKcal', 'perPortionEnergyKcal'), nullableStringFields('archivedAt'), numericStringFields('yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber'), { yieldUnit: (value: unknown) => value === 'PORTION' || value === 'g' || value === 'ml' || value === 'unit', prepTimeMinutes: (value: unknown) => value === null || isNumber(value), version: isNumber });
       break;
     case 'recipeIngredients':
       Object.assign(fields, stringFields('id', 'recipeId', 'accountId', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit'), { position: isNumber, ingredientSnapshot: isJsonValue });
@@ -258,6 +299,20 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
 function rows<T>(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown, schemaVersion: string): T[] {
   if (!Array.isArray(value)) fail('BACKUP_FORMAT_INVALID', `A coleção ${tableName} deve ser um array.`);
   return value.map((row) => validateRowShape(tableName, row, schemaVersion)) as T[];
+}
+
+function agendaReminderRows(value: unknown): AgendaReminder[] {
+  if (!Array.isArray(value)) fail('BACKUP_FORMAT_INVALID', 'A coleção agendaReminders deve ser um array.');
+  const ids = new Set<string>();
+  return value.map((reminder) => {
+    if (!isRecord(reminder)) fail('BACKUP_FORMAT_INVALID', 'Cada lembrete do calendário deve ser um objeto.');
+    assertExactKeys(reminder, ['id', 'date', 'time', 'task'], 'agendaReminders');
+    if (!isAgendaReminder(reminder) || ids.has(reminder.id)) {
+      fail('BACKUP_FORMAT_INVALID', 'A coleção agendaReminders contém um lembrete inválido ou ID duplicado.');
+    }
+    ids.add(reminder.id);
+    return reminder;
+  });
 }
 
 function ensureUnique<T>(rowsToCheck: readonly T[], key: (row: T) => string, tableName: string): void {
@@ -405,6 +460,14 @@ function migrateBackupInput(input: UnknownRecord): UnknownRecord & { schemaVersi
     }
     current = migrated;
   }
+
+  if (
+    current.schemaVersion === BACKUP_SCHEMA_VERSION
+    && !Object.prototype.hasOwnProperty.call(current, 'agendaReminders')
+  ) {
+    current = { ...current, agendaReminders: [] };
+  }
+
   return current as UnknownRecord & { schemaVersion: string };
 }
 
@@ -433,6 +496,7 @@ export function validateBackupEnvelope(rawInput: unknown, context: BackupValidat
     schemaVersion: BACKUP_SCHEMA_VERSION,
     exportedAt: input.exportedAt,
     favorites,
+    agendaReminders: agendaReminderRows(input.agendaReminders),
     account: rows<AccountRow>('account', input.account, input.schemaVersion).map((row) => ({ ...row, phone: row.phone ?? null })),
     objectiveOptions: rows<ObjectiveOptionRow>('objectiveOptions', input.objectiveOptions, input.schemaVersion),
     patients: rows<PatientRow>('patients', input.patients, input.schemaVersion),

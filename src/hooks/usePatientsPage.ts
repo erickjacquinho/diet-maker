@@ -5,6 +5,8 @@ import { getBrowserPatientApplication } from '@/lib/application/browser-composit
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { buildPatientListRows, filterPatients, type PatientListHistoryInput, type PatientListRow } from '@/lib/patientListView';
 import { toLegacyAssessment, toLegacyLastActivity, toLegacyNextEvent } from '@/lib/application/patients/clinical-ui-adapter';
+import { normalizeDateKey } from '@/lib/patientListDateUtils';
+import type { PatientNextEventType } from '@/lib/patientsStoreTypes';
 
 export function usePatientsPage() {
   const [patients, setPatients] = useState<ReturnType<typeof toPatientViewModel>[]>([]);
@@ -60,6 +62,37 @@ export function usePatientsPage() {
     return created;
   }, [loadPatients]);
 
+  const updateNextFollowUpDates = useCallback((updates: readonly { patientId: string; dates: Partial<Record<PatientNextEventType, string | null>>; version?: number }[]) => {
+    const updatesByPatient = new Map(updates.map((update) => [update.patientId, update]));
+    setPatients((current) => current.map((patient) => {
+      const update = updatesByPatient.get(patient.id);
+      if (!update || !patient.nextEvent) return patient;
+      const currentDates = patient.nextEvent.dates ?? Object.fromEntries(
+        (Array.isArray(patient.nextEvent.type) ? patient.nextEvent.type : [patient.nextEvent.type])
+          .map((type) => [type, patient.nextEvent!.date]),
+      ) as Partial<Record<PatientNextEventType, string>>;
+      const dates: Partial<Record<PatientNextEventType, string>> = {};
+      for (const [type, date] of Object.entries({ ...currentDates, ...update.dates }) as Array<[PatientNextEventType, string | null | undefined]>) {
+        const normalizedDate = date ? normalizeDateKey(date) : null;
+        if (normalizedDate) dates[type] = normalizedDate;
+      }
+      const dateEntries = Object.entries(dates) as Array<[PatientNextEventType, string]>;
+      if (dateEntries.length === 0) return { ...patient, nextEvent: null };
+      const firstDate = dateEntries.map(([, date]) => date).sort()[0];
+      const firstTypes = dateEntries.filter(([, date]) => date === firstDate).map(([type]) => type);
+      return {
+        ...patient,
+        nextEvent: {
+          ...patient.nextEvent,
+          date: firstDate,
+          type: firstTypes,
+          dates,
+          ...(update.version === undefined ? {} : { version: update.version }),
+        },
+      };
+    }));
+  }, []);
+
   return {
     patients,
     filteredPatients,
@@ -72,5 +105,6 @@ export function usePatientsPage() {
     error,
     retry: loadPatients,
     createPatient,
+    updateNextFollowUpDates,
   };
 }

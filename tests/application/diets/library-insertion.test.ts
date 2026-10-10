@@ -26,7 +26,7 @@ describe('library insertion into diet drafts', () => {
     const result = await insertRecipeIntoDietDraft({
       accountContext: { requireActive: vi.fn().mockResolvedValue({ accountId: 'account-a', account: {} }), getActive: vi.fn() },
       draftStore: store,
-      sourceReader: { getRecipe: vi.fn().mockResolvedValue({ id: 'recipe-a', accountId: 'account-a', name: 'Receita', category: 'Café', instructions: '', yieldPortions: '2', nutrition: { total: nutrition, perPortion: nutrition }, status: 'ACTIVE', version: 4, createdAt: '', updatedAt: '', archivedAt: null, ingredients: [] }), getReadyMeal: vi.fn() },
+      sourceReader: { getRecipe: vi.fn().mockResolvedValue({ id: 'recipe-a', accountId: 'account-a', name: 'Receita', category: 'Café', instructions: '', yieldPortions: '2', yieldUnit: 'PORTION', nutrition: { total: nutrition, perPortion: nutrition }, status: 'ACTIVE', version: 4, createdAt: '', updatedAt: '', archivedAt: null, ingredients: [] }), getReadyMeal: vi.fn() },
       idFactory: (() => { let index = 0; return () => `new-${index++}`; })(),
       now: () => '2026-09-01T01:00:00.000Z',
     }, { draftId: 'draft-a', expectedRevision: 3, recipeId: 'recipe-a', variationId: 'variation-a', mealId: 'meal-a' });
@@ -34,6 +34,20 @@ describe('library insertion into diet drafts', () => {
     expect(result.payload.variations[0].meals[0].options[0].id).toBe('new-0');
     expect(result.payload.variations[0].meals[0].options[0].items[0].id).toBe('new-1');
     expect(result.payload.variations[0].meals[0].options[0].items[0].snapshot.sourceType).toBe('RECIPE');
+  });
+
+  it('inserts a gram-yield recipe on a 100 g reference basis', async () => {
+    const nutritionPerGram = { protein: createDecimalString('0.1'), carbs: createDecimalString('0.2'), fat: createDecimalString('0.05'), fiber: createDecimalString('0.01'), energyKcal: createDecimalString('1.65') };
+    const result = await insertRecipeIntoDietDraft({
+      accountContext: { requireActive: vi.fn().mockResolvedValue({ accountId: 'account-a', account: {} }), getActive: vi.fn() },
+      draftStore: storeFor(draftFixture()),
+      sourceReader: { getRecipe: vi.fn().mockResolvedValue({ id: 'recipe-g', accountId: 'account-a', name: 'Pasta', category: 'Almoço', instructions: '', yieldPortions: '200', yieldUnit: 'g', nutrition: { total: nutrition, perPortion: nutritionPerGram }, status: 'ACTIVE', version: 1, createdAt: '', updatedAt: '', archivedAt: null, ingredients: [] }), getReadyMeal: vi.fn() },
+    }, { draftId: 'draft-a', expectedRevision: 3, recipeId: 'recipe-g', variationId: 'variation-a', mealId: 'meal-a' });
+
+    expect(result.payload.variations[0].meals[0].options[0].items[0].snapshot).toMatchObject({
+      measurementBasis: 'PER_100G', referenceQuantity: '100', referenceUnit: 'g',
+      prescribedQuantity: '100', prescribedUnit: 'g', prescribedNutrients: { protein: '10', carbs: '20' },
+    });
   });
 
   it('copies every ready-meal item, rejects archived sources and leaves the source untouched', async () => {

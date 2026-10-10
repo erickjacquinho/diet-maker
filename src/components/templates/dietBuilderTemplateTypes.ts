@@ -54,6 +54,7 @@ export interface DietBuilderTemplateProps {
   onDiscardDraft?: () => void | Promise<void>;
   canDiscardDraft?: boolean;
   saveStatus?: 'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending';
+  confirmationBusy?: boolean;
   onBackClick?: () => void;
   carbCyclingVariations?: any[];
   activeVariationId?: string;

@@ -6,8 +6,8 @@
 ## Decision 1 — Um envelope lógico, reutilizando o schema existente
 
 - **Decision**: O arquivo `.nutridiet` será JSON UTF-8 versionado com `appId`,
-  `formatVersion`, `schemaVersion`, `exportedAt` e arrays das 17 tabelas
-  canônicas já existentes.
+  `formatVersion`, `schemaVersion`, `exportedAt`, as 18 tabelas canônicas e a
+  coleção de lembretes pontuais persistidos da agenda.
 - **Rationale**: Preserva IDs, relações, snapshots, históricos e arquivados sem
   criar dump físico, SQL executável ou um segundo schema de banco.
 - **Chosen values**: `appId = "nutridiet-local-pro"`, `formatVersion = 1` e

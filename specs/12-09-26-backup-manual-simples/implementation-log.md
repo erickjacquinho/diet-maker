@@ -17,7 +17,7 @@
 
 ### T002 — fixtures and helper
 
-- Added deterministic complete/empty backup fixtures in `tests/fixtures/backup.ts` covering all 17 logical tables, active/archived data, historical diet snapshots, clinical records, reusable library rows and the draft boundary.
+- Added deterministic complete/empty backup fixtures in `tests/fixtures/backup.ts` covering all 18 logical tables, active/archived data, historical diet snapshots, clinical records, reusable library rows and the draft boundary.
 - Added `tests/helpers/backup.ts` with isolated in-memory PGlite database creation and dependency-ordered fixture seeding.
 
 ### T003–T005 — contract and pure validation
@@ -62,3 +62,19 @@
 - Final read-only convergence checked `spec.md`, `plan.md`, `tasks.md`, checklists, contracts, quickstart, constitution and the scoped implementation.
 - Coverage: 18 functional requirements, 7 success criteria, 3 user stories and 3 acceptance scenarios; all 27 tasks are complete.
 - Result: converged with zero `missing`, `partial`, `contradicts` or `unrequested` findings. No convergence phase was appended to `tasks.md`.
+
+### T028–T030 — calendar save integration (2026-10-09)
+
+- Added `agendaReminders` to save schema 10; validation checks exact keys, unique IDs, valid date/time and task. Schema 9 migrates to an empty collection.
+- The shared snapshot repository now exports/restores the account-scoped reminder list for both the primary profile save and manual backup. Restore prepares local preferences before the database transaction and compensates them if the transaction fails.
+- Scheduling and consuming reminders mark the profile checkpoint dirty and sync the primary save. Sync failures leave the reminder local and report that it was not saved to the main file.
+- Updated the backup contract, persistence decision, task coverage, fixture fields and schema expectations. The related `closeButtonAriaLabel` type error was moved to the supported toaster-level option; the follow-up date validation uses optional access for strict null checks.
+- Evidence: `npm run type-check` passed; `git diff --check` passed. Automated and browser tests were not run for this addendum.
+- The configured `speckit-implement` shell command is unavailable in this environment; the loaded skill procedure and the backup SDD task plan were followed directly.
+
+### T031 — legacy schema 10 compatibility (2026-10-09)
+
+- Inspected the user-provided save without printing clinical values. It declares schema 10 and has the expected envelope except for `agendaReminders`.
+- The schema-9 migration could not apply because the file already declared the current schema 10. The parser now fills only a missing `agendaReminders` collection with `[]`; present values and all other fields still undergo strict validation.
+- The application parser accepted the supplied file after normalization: 1 patient, 1 assessment, 1 diet plan, and 0 reminders. The source file was not modified.
+- `npm run type-check` and `git diff --check` passed. Automated and browser tests were not run.

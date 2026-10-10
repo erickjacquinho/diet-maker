@@ -20,7 +20,7 @@ Como nutricionista, quero exportar os dados confirmados da minha Conta para um a
 
 **Acceptance Scenarios**:
 
-1. **Given** uma Conta com dados confirmados de perfil, biblioteca, pacientes, registros clínicos, dietas vigentes, históricos e arquivados, **When** o usuário aciona **Exportar backup**, **Then** a aplicação disponibiliza um único arquivo `.nutridiet` contendo esses dados, suas relações, IDs, versões e datas necessários para restauração.
+1. **Given** uma Conta com dados confirmados de perfil, biblioteca, pacientes, registros clínicos, dietas vigentes, históricos e arquivados, além de lembretes agendados na agenda, **When** o usuário aciona **Exportar backup**, **Then** a aplicação disponibiliza um único arquivo `.nutridiet` contendo esses dados, os lembretes da Conta, suas relações, IDs, versões e datas necessários para restauração.
 2. **Given** uma Conta com um draft ou edição temporária não confirmada, **When** o usuário exporta o backup, **Then** o arquivo não contém o draft nem transforma a edição temporária em dado confirmado.
 3. **Given** uma falha durante a geração do arquivo, **When** o processo termina, **Then** a base confirmada permanece inalterada e a aplicação não apresenta o backup como concluído.
 
@@ -70,7 +70,7 @@ Como nutricionista, quero entender o que o backup protege e o que ele não prote
 ### Functional Requirements
 
 - **FR-001**: O sistema MUST oferecer uma ação explícita para exportar um backup manual da Conta ativa.
-- **FR-002**: O sistema MUST incluir no backup somente dados confirmados da Conta, abrangendo perfil e configurações, biblioteca reutilizável, pacientes, avaliações, acompanhamentos, objetivos, dietas vigentes, snapshots históricos, registros arquivados e as projeções de consulta derivadas desses dados, sem criar uma entidade persistida de consulta.
+- **FR-002**: O sistema MUST incluir no backup somente dados confirmados da Conta, abrangendo perfil e configurações, lembretes pontuais de agenda, biblioteca reutilizável, pacientes, avaliações, acompanhamentos, objetivos, dietas vigentes, snapshots históricos, registros arquivados e as projeções de consulta derivadas desses dados, sem criar uma entidade persistida de consulta.
 - **FR-003**: O sistema MUST preservar no arquivo os IDs, relações, versões e datas necessários para reconstruir os dados confirmados.
 - **FR-004**: O sistema MUST registrar no cabeçalho lógico do arquivo o identificador da aplicação, a versão do formato, a versão do schema e a data da exportação.
 - **FR-005**: O sistema MUST excluir drafts, buffers de autosave, edições temporárias e qualquer estado não confirmado do arquivo exportado.
@@ -85,14 +85,16 @@ Como nutricionista, quero entender o que o backup protege e o que ele não prote
 - **FR-014**: O sistema MUST rejeitar arquivo inválido, incompatível, incompleto, cancelado ou inconsistente sem produzir importação parcial nem alterar a base anterior.
 - **FR-015**: O sistema MUST comunicar erros de exportação e restauração com mensagens acionáveis, sem expor dados clínicos em logs de diagnóstico.
 - **FR-016**: O sistema MUST explicar no fluxo de backup que o arquivo não possui senha nem criptografia, pode ser lido por quem obtiver acesso, cobre somente os dados confirmados exportados e depende de o usuário guardar o arquivo.
-- **FR-017**: O sistema MUST manter o backup como operação manual local, sem backup automático, nuvem, sincronização entre dispositivos, lembretes recorrentes, mesclagem de bases, múltiplas contas ou troca entre gerações incompatíveis.
+- **FR-017**: O sistema MUST manter o backup como operação manual local, sem backup automático, nuvem, sincronização entre dispositivos, lembretes recorrentes para exportar backup, mesclagem de bases, múltiplas contas ou troca entre gerações incompatíveis.
 - **FR-018**: O fluxo MUST permanecer compatível com o escopo desktop do produto, operar por teclado, expor nome/role/value acessíveis e apresentar foco visível conforme WCAG 2.2 AA.
+- **FR-019**: O save principal e o backup manual MUST preservar os lembretes pontuais da agenda por ID, data, horário e tarefa; criar ou consumir um lembrete MUST marcar e sincronizar a revisão do arquivo principal. Arquivos schema 9 sem essa coleção MUST restaurá-la como vazia.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Arquivo mestre `.nutridiet`**: representação portátil dos dados confirmados de uma Conta, com cabeçalho versionado e conteúdo normalizado para exportação e restauração.
 - **Cabeçalho do backup**: identificação da aplicação, `formatVersion`, `schemaVersion` e data da exportação usados para validar compatibilidade antes da escrita.
 - **Snapshot de Conta**: conjunto consistente dos dados confirmados, relações, IDs, versões e datas pertencentes a uma única Conta no momento da exportação; a visão de consulta é reconstruída das entidades persistidas e não possui uma tabela própria nesta fase.
+- **Lembrete de agenda**: lembrete pontual da Conta com ID estável, data, hora e tarefa (`diet-update` ou `assessment-update`), restaurado junto ao save e removido do arquivo principal quando consumido.
 - **Resultado da restauração**: estado validado que substitui a base atual inteira ou uma falha que preserva integralmente a base anterior.
 - **Estado de edição pendente**: draft, autosave ou gravação ainda não confirmada que bloqueia a restauração até ser salva ou descartada explicitamente.
 
@@ -100,7 +102,7 @@ Como nutricionista, quero entender o que o backup protege e o que ele não prote
 
 ### Measurable Outcomes
 
-- **SC-001**: Em uma Conta de teste contendo dados de perfil, biblioteca, pacientes, registros clínicos, dietas vigentes, históricos e arquivados, 100% dos dados confirmados e suas relações são recuperados após exportar e restaurar o arquivo, sem dados temporários.
+- **SC-001**: Em uma Conta de teste contendo dados de perfil, biblioteca, pacientes, registros clínicos, dietas vigentes, históricos, arquivados e lembretes agendados, 100% dos dados incluídos e suas relações são recuperados após exportar e restaurar o arquivo, sem dados temporários.
 - **SC-002**: 100% dos arquivos inválidos, incompatíveis ou estruturalmente inconsistentes são rejeitados antes da primeira alteração na base atual.
 - **SC-003**: Em 100% dos cenários de cancelamento, falha ou interrupção cobertos pelos testes, a base anterior permanece íntegra e não contém mistura entre conteúdo antigo e importado.
 - **SC-004**: Um usuário consegue concluir exportação e restauração de uma Conta de teste em até 3 minutos por fluxo, excluindo o tempo de escolha do local do arquivo.

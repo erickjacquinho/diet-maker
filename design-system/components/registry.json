@@ -166,7 +166,6 @@
       ],
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/receitas/page.tsx",
         "src/app/refeicoes/page.tsx"
@@ -699,7 +698,6 @@
       ],
       "consumers": [
         "molecule-sidebar-user-profile",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/page.tsx"
       ]
     },
@@ -929,7 +927,6 @@
       ],
       "consumers": [
         "molecule-data-table",
-        "src/app/design-system/page.tsx",
         "template-diet-pdf-template"
       ]
     },
@@ -1879,7 +1876,6 @@
       "profile": "design-system/components/profiles/ui/card.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
@@ -1964,7 +1960,6 @@
         "organism-food-search-modal",
         "organism-read-only-diet-modal",
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
@@ -2152,9 +2147,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/dropdown-menu.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2241,9 +2234,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/popover.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2277,9 +2268,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/scroll-area.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2527,7 +2516,6 @@
       "profile": "design-system/components/profiles/ui/select.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
@@ -2561,9 +2549,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/separator.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2668,9 +2654,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/sheet.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2735,8 +2719,7 @@
       ],
       "profile": "design-system/components/profiles/ui/table.md",
       "consumers": [
-        "molecule-data-table",
-        "src/app/design-system/page.tsx"
+        "molecule-data-table"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -2781,9 +2764,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/tabs.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2828,8 +2809,7 @@
       ],
       "profile": "design-system/components/profiles/ui/tooltip.md",
       "consumers": [
-        "organism-sidebar-nav",
-        "src/app/design-system/page.tsx"
+        "organism-sidebar-nav"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -5141,6 +5121,7 @@
       ],
       "profile": "design-system/components/profiles/molecules/macro-summary.md",
       "consumers": [
+        "organism-create-recipe-modal",
         "organism-import-previous-diet-modal",
         "organism-patient-diets-table",
         "organism-patient-consultation-history-table"

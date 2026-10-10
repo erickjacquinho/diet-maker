@@ -18,10 +18,4 @@ const system = [
 ] as const satisfies readonly SystemTokenId[];
 const component = ["cmp.button.primary.background", "cmp.button.primary.background.hover", "cmp.button.primary.background.pressed", "cmp.input.border.default", "cmp.card.padding.default"] as const satisfies readonly ComponentTokenId[];
 
-export const tokenCssVariables = {
-  reference: Object.fromEntries(reference.map((id) => [id, `--${id.replaceAll(".", "-")}`])),
-  system: Object.fromEntries(system.map((id) => [id, `--${id.replaceAll(".", "-")}`])),
-  component: Object.fromEntries(component.map((id) => [id, `--${id.replaceAll(".", "-")}`])),
-} as const;
-
 export const tokenNames = { reference, system, component } as const;

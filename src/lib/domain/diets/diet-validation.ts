@@ -13,7 +13,7 @@ function validateItem(item: DietItem, ids: Set<string>): void {
   if (item.role === 'SUBSTITUTE' && (!item.parentItemId || !ids.has(item.parentItemId))) fail('INVALID_DIET', 'Substituto precisa apontar para um item principal existente.');
   if (item.role === 'PRIMARY' && item.parentItemId) fail('INVALID_DIET', 'Item principal não pode apontar para um item pai.');
   const snapshot = item.snapshot;
-  if (snapshot.sourceType !== 'SYSTEM_TACO' || !snapshot.sourceId || !snapshot.sourceVersion) fail('INVALID_SNAPSHOT', 'Cada item precisa carregar um snapshot TACO completo.');
+  if (!['SYSTEM_TACO', 'ACCOUNT_CUSTOM', 'RECIPE', 'READY_MEAL'].includes(snapshot.sourceType) || !snapshot.sourceId.trim() || !snapshot.sourceVersion.trim()) fail('INVALID_SNAPSHOT', 'Cada item precisa carregar origem e versão completas.');
   if (!isDecimalString(snapshot.referenceQuantity) || !isDecimalString(snapshot.prescribedQuantity) || new Decimal(snapshot.referenceQuantity).lte(0) || new Decimal(snapshot.prescribedQuantity).lte(0)) fail('INVALID_SNAPSHOT', 'As quantidades do snapshot precisam ser maiores que zero.');
   for (const value of [
     ...Object.values(snapshot.referenceNutrients),

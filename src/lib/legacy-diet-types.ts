@@ -1,4 +1,5 @@
 import { calculatePresetCalories } from './presetUtils';
+import type { DecimalString, NutritionSnapshot } from './domain/diets/diet-model';
 
 export interface DietItem {
   id?: string;
@@ -14,6 +15,7 @@ export interface DietItem {
   fatG?: number;
   fatsG?: number;
   kcal: number;
+  snapshot?: NutritionSnapshot;
 }
 
 export interface DietMealVariation {
@@ -61,6 +63,7 @@ export interface FullDietPlan {
   id: string;
   patientId: string;
   name: string;
+  weightReferenceKg?: DecimalString;
   createdAt: string;
   updatedAt: string;
   mode: 'simple' | 'carb_cycling';

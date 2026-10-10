@@ -49,7 +49,7 @@ describe('clinical profile projection performance', () => {
       listAssessmentsPage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })),
       listAssessmentsByPatients: vi.fn(async (_accountId: string, patientIds: readonly string[]) => Object.fromEntries(patientIds.map((id: string) => [id, assessments[id] ?? []]))),
       createAssessment: vi.fn(), updateAssessment: vi.fn(), getNextFollowUp: vi.fn(),
-      listNextFollowUps: vi.fn(async () => ({})), setNextFollowUp: vi.fn(), clearNextFollowUp: vi.fn(),
+      listNextFollowUps: vi.fn(async () => ({})), moveNextFollowUps: vi.fn(async () => []), setNextFollowUp: vi.fn(), clearNextFollowUp: vi.fn(),
     };
     const reader = createPatientProfileReader(
       { create: vi.fn(), getById: vi.fn(), listActive: vi.fn(async () => patients), listActivePage: vi.fn(async () => ({ items: [], total: 0, pageIndex: 0, pageSize: 25 })), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },

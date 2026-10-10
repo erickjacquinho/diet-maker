@@ -43,6 +43,7 @@ function repositoryFor(assessments: Record<string, ReturnType<typeof makeClinica
     updateAssessment: vi.fn(),
     getNextFollowUp: vi.fn(async (_accountId, patientId) => followUps[patientId] ?? null),
     listNextFollowUps: vi.fn(async (_accountId: string, patientIds: readonly string[]) => Object.fromEntries(patientIds.filter((id: string) => followUps[id]).map((id: string) => [id, followUps[id]]))),
+    moveNextFollowUps: vi.fn(async () => []),
     setNextFollowUp: vi.fn(),
     clearNextFollowUp: vi.fn(),
   };

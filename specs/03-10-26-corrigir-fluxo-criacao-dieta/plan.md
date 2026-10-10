@@ -49,7 +49,7 @@ Preservar snapshots e peso de referência no round-trip do editor, aceitar as or
 - contracts/diet-editor-save.md: contrato de interação e outcomes.
 - quickstart.md: validação após implementação.
 - checklists/: qualidade da especificação e do fluxo.
-- tasks.md: tarefas por história, será criado em fase posterior.
+- tasks.md: tarefas por história, criado na etapa de decomposição e ativo para esta implementação.
 
 ### Source Code (repository root)
 

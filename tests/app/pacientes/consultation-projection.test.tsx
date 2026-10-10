@@ -51,6 +51,7 @@ function makeRepository(assessment: ReturnType<typeof makeClinicalAssessment>): 
     listAssessmentsByPatients: vi.fn(async () => ({ [patient.id]: [assessment] })),
     createAssessment: vi.fn(), updateAssessment: vi.fn(),
     getNextFollowUp: vi.fn(async () => null), listNextFollowUps: vi.fn(async () => ({})),
+    moveNextFollowUps: vi.fn(async () => []),
     setNextFollowUp: vi.fn(), clearNextFollowUp: vi.fn(),
   };
 }

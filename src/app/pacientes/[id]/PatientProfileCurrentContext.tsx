@@ -76,56 +76,45 @@ export function PatientProfileCurrentContext({
           density="compact"
           className="flex min-w-0 flex-col gap-3"
           role="group"
-          aria-label="Última prescrição e avaliação"
+          aria-label="Prescrição e avaliação"
         >
-          <section className="flex min-w-0 flex-col gap-3" aria-labelledby="latest-prescription-title">
-            <div className="flex items-center justify-between gap-2">
-              <h3 id="latest-prescription-title" className={textStyle('card-title')}>
-                Última Prescrição
-                {latestDiet && (
-                  <>
-                    {' '}
-                    <time
-                      dateTime={normalizeDateToISO(latestDiet.date) ?? undefined}
-                      className={textStyle('body-secondary')}
-                    >
-                      {formatDate(latestDiet.date) || 'Data não informada'}
-                    </time>
-                  </>
-                )}
-              </h3>
-              {latestDiet && (
-                <Badge variant={latestDiet.status === 'Ativa' ? 'primary' : 'neutral'} className="px-1">
-                  {latestDiet.status === 'Ativa' ? 'Ativo' : 'Histórico'}
-                </Badge>
-              )}
-            </div>
-
+          <section className="flex min-w-0 flex-col gap-3" aria-label="Prescrição atual">
             {latestDiet ? (
               <>
-                <h4 className={textStyle('body-strong')}>{latestDiet.name}</h4>
-
-                <div className="flex flex-col gap-2">
-                  <span className={textStyle('caption')}>
-                    {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Objetivo Diário'}
-                  </span>
-                  <MacroSummary
-                    protein={formatNumber(latestDiet.proteinG)}
-                    carbs={formatNumber(latestDiet.carbsG)}
-                    fats={formatNumber(latestDiet.fatsG)}
-                    kcal={formatNumber(latestDiet.targetKcal, 0)}
-                    className="tabular-nums"
-                  />
+                <div className="flex items-center justify-between gap-2">
+                  <Badge variant={latestDiet.status === 'Ativa' ? 'primary' : 'neutral'}>
+                    {latestDiet.status === 'Ativa' ? 'Prescrição Ativa' : 'Histórica'}
+                  </Badge>
+                  <time
+                    dateTime={normalizeDateToISO(latestDiet.date) ?? undefined}
+                    className={textStyle('body-secondary')}
+                  >
+                    {formatDate(latestDiet.date) || 'Data não informada'}
+                  </time>
                 </div>
 
-                {!readOnly && (
-                  <Button asChild variant="secondary" size="compact" className="self-start">
-                    <Link href={`/pacientes/${patientId}/dieta/${latestDiet.id}`}>
-                      <span>Abrir dieta</span>
-                      <ExternalLink className="size-4" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                )}
+                <div className="flex min-w-0 items-center justify-between gap-4">
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <span className={textStyle('caption')}>
+                      {latestDiet.mode === 'carb_cycling' ? 'Média semanal do ciclo' : 'Objetivo Diário'}
+                    </span>
+                    <MacroSummary
+                      protein={formatNumber(latestDiet.proteinG)}
+                      carbs={formatNumber(latestDiet.carbsG)}
+                      fats={formatNumber(latestDiet.fatsG)}
+                      kcal={formatNumber(latestDiet.targetKcal, 0)}
+                      className="tabular-nums"
+                    />
+                  </div>
+
+                  {!readOnly && (
+                    <Button asChild variant="secondary" size="compact" iconOnly className="shrink-0">
+                      <Link href={`/pacientes/${patientId}/dieta/${latestDiet.id}`} aria-label="Abrir dieta">
+                        <ExternalLink className="size-4" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </>
             ) : (
               <p className={textStyle('body-secondary')}>Nenhuma prescrição registrada.</p>

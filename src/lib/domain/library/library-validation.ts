@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 import { libraryValidationError } from './library-errors';
-import type { CustomFoodInput, ReadyMealInput, RecipeInput } from './library-model';
+import { isRecipeYieldUnit, type CustomFoodInput, type ReadyMealInput, type RecipeInput } from './library-model';
 
 const MEASUREMENT_BASES = new Set(['PER_100G', 'PER_100ML', 'PER_UNIT']);
 const FOOD_STATES = new Set(['RAW', 'COOKED', 'PREPARED', 'AS_SOLD']);
@@ -61,6 +61,7 @@ export function validateRecipeInput(input: RecipeInput): void {
   validateLibraryName(input.name);
   validateLibraryName(input.category);
   validatePositiveDecimal(input.yieldPortions, 'yieldPortions');
+  if (input.yieldUnit !== undefined && !isRecipeYieldUnit(input.yieldUnit)) libraryValidationError('yieldUnit', 'é inválida.');
   if (input.prepTimeMinutes !== undefined && (!Number.isInteger(input.prepTimeMinutes) || input.prepTimeMinutes < 0)) {
     libraryValidationError('prepTimeMinutes', 'deve ser um inteiro não negativo.');
   }
@@ -82,12 +83,14 @@ export function validateReadyMealInput(input: ReadyMealInput): void {
     if (!item.sourceId.trim()) libraryValidationError('items.' + index + '.sourceId', 'deve ser informado.');
     if (item.sourceType === 'FOOD') {
       if (item.recipePortions !== undefined) libraryValidationError('items.' + index + '.recipePortions', 'não se aplica a alimentos.');
+      if (item.recipeUnit !== undefined) libraryValidationError('items.' + index + '.recipeUnit', 'não se aplica a alimentos.');
       if (item.quantity === undefined) libraryValidationError('items.' + index + '.quantity', 'deve ser informado.');
       validatePositiveDecimal(item.quantity!, 'items.' + index + '.quantity');
       if (item.unit === undefined) libraryValidationError('items.' + index + '.unit', 'deve ser informado.');
       validateUnit(item.unit!, 'items.' + index + '.unit');
     } else {
       if (item.quantity !== undefined || item.unit !== undefined) libraryValidationError('items.' + index, 'receita usa recipePortions.');
+      if (item.recipeUnit !== undefined && !isRecipeYieldUnit(item.recipeUnit)) libraryValidationError('items.' + index + '.recipeUnit', 'é inválida.');
       if (item.recipePortions === undefined) libraryValidationError('items.' + index + '.recipePortions', 'deve ser informado.');
       validatePositiveDecimal(item.recipePortions!, 'items.' + index + '.recipePortions');
     }

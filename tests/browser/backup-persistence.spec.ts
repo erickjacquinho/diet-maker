@@ -72,7 +72,7 @@ test.describe('backup manual local', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('exporta as 17 tabelas localmente sem request de rede ou drafts', async ({ page, context }) => {
+  test('exporta as 18 tabelas localmente sem request de rede ou drafts', async ({ page, context }) => {
     await exportBackup(page);
     const requests: string[] = [];
     page.on('request', (request) => requests.push(request.url()));

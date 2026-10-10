@@ -26,6 +26,7 @@ import { useDietPresets } from './useDietPresets';
 import { useSaveShortcut } from './useSaveShortcut';
 import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
 import type { DietApplication } from '@/lib/application/diets/diet-ports';
+import type { CheckpointPendingSaveOutcome, ConfirmedDietSaveOutcome, SaveReconciliationOutcome } from '@/lib/domain/diets/diet-model';
 import { fromCanonicalPlan, fromEditableDocument, toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 
@@ -39,6 +40,31 @@ function showSaveErrorToast(message: string, retry: () => void | Promise<void>) 
   });
 }
 
+function showCleanupRetryToast(message: string, retry: () => Promise<void>, severity: 'warning' | 'error' = 'warning') {
+  const options = {
+    duration: severity === 'error' ? Infinity : 7000,
+    action: {
+      label: 'Tentar limpar rascunho',
+      onClick: () => retry(),
+    },
+  };
+  if (severity === 'error') toast.error(message, options);
+  else toast.warning(message, options);
+}
+
+export type DietEditorLoadState =
+  | { status: 'loading' }
+  | { status: 'ready' }
+  | { status: 'error'; code: string; message: string; returnPath: string };
+
+function loadErrorDetails(error: unknown): { code: string; message: string } {
+  const code = typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string'
+    ? error.code
+    : 'UNKNOWN';
+  const message = error instanceof Error && error.message ? error.message : 'Não foi possível abrir a dieta neste momento.';
+  return { code, message };
+}
+
 export function useDietBuilderPage() {
   const params = useParams();
   const router = useRouter();
@@ -47,7 +73,13 @@ export function useDietBuilderPage() {
   const dietaId = (params?.dietaId as string) || 'nova';
 
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [patientLoadStatus, setPatientLoadStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [patientLoadError, setPatientLoadError] = useState<unknown>(null);
+  const [patientLoadAttempt, setPatientLoadAttempt] = useState(0);
   const [dietApplication, setDietApplication] = useState<DietApplication | null>(null);
+  const [dietApplicationLoadStatus, setDietApplicationLoadStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [dietApplicationLoadError, setDietApplicationLoadError] = useState<unknown>(null);
+  const [dietApplicationLoadAttempt, setDietApplicationLoadAttempt] = useState(0);
   const [activeVariationId, setActiveVariationId] = useState<string>('var-high');
   const [activeMealVariationIds, setActiveMealVariationIds] = useState<ActiveMealVariationIds>({});
   const [previousDiets, setPreviousDiets] = useState<PreviousDietSummary[]>([]);
@@ -55,29 +87,50 @@ export function useDietBuilderPage() {
   const lastPersistedDocumentRef = useRef<string | null>(null);
   const currentRevisionRef = useRef<number | null>(null);
   const [saveStatus, setSaveStatus] = useState<'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending'>('clean');
+  const [confirmationBusy, setConfirmationBusy] = useState(false);
+  const confirmationBusyRef = useRef(false);
+  const saveInFlightRef = useRef(false);
 
   useEffect(() => {
     if (!patientId) return;
     let cancelled = false;
+    setPatientLoadStatus('loading');
+    setPatientLoadError(null);
     void getBrowserPatientApplication().then((application) => application.getPatientProfile(patientId)).then((profile) => {
-      if (!cancelled) setPatient(toPatientViewModel(profile.patient));
-    }).catch(() => {
-      if (!cancelled) setPatient(null);
+      if (!cancelled) {
+        setPatient(toPatientViewModel(profile.patient));
+        setPatientLoadStatus('ready');
+      }
+    }).catch((error: unknown) => {
+      if (!cancelled) {
+        setPatient(null);
+        setPatientLoadError(error);
+        setPatientLoadStatus('error');
+      }
     });
     return () => { cancelled = true; };
-  }, [patientId]);
+  }, [patientId, patientLoadAttempt]);
 
   useEffect(() => {
     let cancelled = false;
+    setDietApplicationLoadStatus('loading');
+    setDietApplicationLoadError(null);
     void getBrowserDietApplication().then((application) => {
-      if (!cancelled) setDietApplication(application);
-    }).catch(() => {
-      if (!cancelled) setDietApplication(null);
+      if (!cancelled) {
+        setDietApplication(application);
+        setDietApplicationLoadStatus('ready');
+      }
+    }).catch((error: unknown) => {
+      if (!cancelled) {
+        setDietApplication(null);
+        setDietApplicationLoadError(error);
+        setDietApplicationLoadStatus('error');
+      }
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [dietApplicationLoadAttempt]);
 
-  const { dietPlan, setDietPlan, draft, setDraft: setLoadedDraft } = useDietPresets({
+  const { dietPlan, setDietPlan, draft, setDraft: setLoadedDraft, openStatus, openError, retryOpenEditor } = useDietPresets({
     patientId,
     dietaId,
     patient,
@@ -85,6 +138,45 @@ export function useDietBuilderPage() {
     setActiveVariationId,
     setActiveMealVariationIds,
   });
+
+  const patientFailure = patientLoadStatus === 'error' ? patientLoadError ?? new Error('Não foi possível abrir o perfil do paciente.') : null;
+  const applicationFailure = dietApplicationLoadStatus === 'error' ? dietApplicationLoadError ?? new Error('Não foi possível inicializar o editor local.') : null;
+  const editorFailure = openStatus === 'error' ? openError ?? new Error('Não foi possível abrir o rascunho da dieta.') : null;
+  const loadError = patientFailure ?? applicationFailure ?? editorFailure;
+  const loadState: DietEditorLoadState = loadError !== null
+    ? (() => {
+      const details = loadErrorDetails(loadError);
+      const returnToList = patientLoadError !== null || dietApplicationLoadError !== null || details.code === 'ARCHIVED_PATIENT';
+      return { status: 'error', ...details, returnPath: returnToList ? '/pacientes' : `/pacientes/${patientId}` };
+    })()
+    : patientLoadStatus === 'ready' && dietApplicationLoadStatus === 'ready' && openStatus === 'ready' && patient && dietPlan && draft
+      ? { status: 'ready' }
+      : { status: 'loading' };
+
+  const retryLoad = useCallback(() => {
+    if (patientLoadStatus === 'error') {
+      setPatientLoadStatus('loading');
+      setPatientLoadError(null);
+      setPatientLoadAttempt((attempt) => attempt + 1);
+      return;
+    }
+    if (dietApplicationLoadStatus === 'error') {
+      setDietApplicationLoadStatus('loading');
+      setDietApplicationLoadError(null);
+      setDietApplicationLoadAttempt((attempt) => attempt + 1);
+      return;
+    }
+    retryOpenEditor();
+  }, [dietApplicationLoadStatus, patientLoadStatus, retryOpenEditor]);
+
+  const canMutate = useCallback(() => !confirmationBusyRef.current, []);
+  const setDietPlanIfEditable = useCallback((update: Parameters<typeof setDietPlan>[0]) => {
+    if (!canMutate()) return;
+    setDietPlan((current) => {
+      if (!canMutate()) return current;
+      return typeof update === 'function' ? update(current) : update;
+    });
+  }, [canMutate, setDietPlan]);
 
   useEffect(() => {
     if (!dietApplication || !patientId || !patient) return;
@@ -139,16 +231,18 @@ export function useDietBuilderPage() {
 
   const handleSelectMealVariation = useCallback(
     (mealId: string, variationId: string) => {
+      if (!canMutate()) return;
       const mode = dietPlan?.mode || 'simple';
       const contextKey = getMealVariationContextKey(mode, mealId, activeVariationId);
       setActiveMealVariationIds((prev) => ({ ...prev, [contextKey]: variationId }));
     },
-    [activeVariationId, dietPlan?.mode]
+    [activeVariationId, canMutate, dietPlan?.mode]
   );
 
   const updateActiveMeals = useCallback(
     (updater: (prevMeals: DietMeal[]) => DietMeal[]) => {
-      setDietPlan((prev) => {
+      if (!canMutate()) return;
+      setDietPlanIfEditable((prev) => {
         if (!prev) return prev;
         if (prev.mode === 'simple') {
           return { ...prev, simpleMeals: updater(prev.simpleMeals || []) };
@@ -162,7 +256,7 @@ export function useDietBuilderPage() {
         }
       });
     },
-    [activeVariationId, setDietPlan]
+    [activeVariationId, canMutate, setDietPlanIfEditable]
   );
 
   // Modals hook
@@ -176,8 +270,9 @@ export function useDietBuilderPage() {
     targetFat,
     activeVariationId,
     activeMealVariationIds,
-    setDietPlan,
+    setDietPlan: setDietPlanIfEditable,
     updateActiveMeals,
+    canMutate,
     getActiveMealVariationId,
   });
 
@@ -186,6 +281,7 @@ export function useDietBuilderPage() {
     foodSearchMealIndex: modals.foodSearchMealIndex,
     currentMeals: mealGroups,
     updateActiveMeals,
+    canMutate,
     getActiveMealVariationId,
     onSelectMealVariation: handleSelectMealVariation,
   });
@@ -193,13 +289,15 @@ export function useDietBuilderPage() {
   const { foodSearchMealIndex, setFoodSearchMealIndex } = modals;
 
   const syncInsertedLibraryDraft = useCallback((updated: Awaited<ReturnType<DietApplication['openEditor']>>['draft']) => {
+    if (!canMutate()) return;
     setLoadedDraft(updated);
-    setDietPlan(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
+    setDietPlanIfEditable(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
     currentRevisionRef.current = updated.draftRevision;
     lastPersistedDocumentRef.current = JSON.stringify(updated.payload);
-  }, [dietaId, patientId, setDietPlan, setLoadedDraft]);
+  }, [canMutate, dietaId, patientId, setDietPlanIfEditable, setLoadedDraft]);
 
   const insertLibraryIntoSelectedMeal = useCallback(async (kind: 'recipe' | 'readyMeal', sourceId: string) => {
+    if (!canMutate()) return;
     if (!dietApplication || !draft || foodSearchMealIndex === null) return;
     const targetMeal = mealGroups[foodSearchMealIndex];
     const targetVariation = draft.payload.variations.find((variation) =>
@@ -218,7 +316,7 @@ export function useDietBuilderPage() {
     syncInsertedLibraryDraft(updated);
     setFoodSearchMealIndex(null);
     toast.success(kind === 'recipe' ? 'Receita inserida no rascunho.' : 'Refeição pronta inserida no rascunho.');
-  }, [activeVariationId, dietApplication, dietPlan?.mode, draft, foodSearchMealIndex, getActiveMealVariationId, mealGroups, setFoodSearchMealIndex, syncInsertedLibraryDraft]);
+  }, [activeVariationId, canMutate, dietApplication, dietPlan?.mode, draft, foodSearchMealIndex, getActiveMealVariationId, mealGroups, setFoodSearchMealIndex, syncInsertedLibraryDraft]);
 
   const handleInsertRecipeIntoDietDraft = useCallback(
     (recipeId: string) => insertLibraryIntoSelectedMeal('recipe', recipeId),
@@ -231,7 +329,8 @@ export function useDietBuilderPage() {
   );
 
   const handleModeChange = useCallback((newMode: 'simple' | 'carb_cycling') => {
-    setDietPlan((prev) => {
+    if (!canMutate()) return;
+    setDietPlanIfEditable((prev) => {
       if (!prev) return prev;
       if (newMode !== 'carb_cycling' || prev.carbCyclingVariations.length > 0) {
         if (newMode === 'carb_cycling' && prev.mode !== 'carb_cycling') {
@@ -273,17 +372,19 @@ export function useDietBuilderPage() {
         ],
       };
     });
-  }, [patient?.weightKg, setActiveVariationId, setDietPlan]);
+  }, [canMutate, patient?.weightKg, setActiveVariationId, setDietPlanIfEditable]);
 
   const handleVariationsCountChange = useCallback((newCount: 2 | 3) => {
-    setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariationsCount: newCount } : prev));
+    if (!canMutate()) return;
+    setDietPlanIfEditable((prev) => (prev ? { ...prev, carbCyclingVariationsCount: newCount } : prev));
     if (newCount === 2 && activeVariationId === 'var-med') {
       setActiveVariationId('var-high');
     }
-  }, [activeVariationId, setDietPlan]);
+  }, [activeVariationId, canMutate, setDietPlanIfEditable]);
 
   const handleAddVariation = useCallback(() => {
-    setDietPlan((prev) => {
+    if (!canMutate()) return;
+    setDietPlanIfEditable((prev) => {
       if (!prev) return prev;
       const weight = patient?.weightKg || 70;
       const nextIdx = prev.carbCyclingVariations.length + 1;
@@ -317,10 +418,11 @@ export function useDietBuilderPage() {
       };
     });
     toast.success('Nova variação adicionada ao ciclo!');
-  }, [patient, setDietPlan]);
+  }, [canMutate, patient, setDietPlanIfEditable]);
 
   const handleRemoveVariation = useCallback((varId: string) => {
-    setDietPlan((prev) => {
+    if (!canMutate()) return;
+    setDietPlanIfEditable((prev) => {
       if (!prev) return prev;
       if (prev.carbCyclingVariations.length <= 1) {
         toast.error('O plano precisa ter pelo menos 1 variação.');
@@ -337,46 +439,51 @@ export function useDietBuilderPage() {
       };
     });
     toast.success('Variação removida.');
-  }, [activeVariationId, setDietPlan]);
+  }, [activeVariationId, canMutate, setDietPlanIfEditable]);
 
   const handleReorderVariations = useCallback((newVariations: CarbCyclingVariation[]) => {
-    setDietPlan((prev) => (prev ? { ...prev, carbCyclingVariations: newVariations } : prev));
-  }, [setDietPlan]);
+    if (!canMutate()) return;
+    setDietPlanIfEditable((prev) => (prev ? { ...prev, carbCyclingVariations: newVariations } : prev));
+  }, [canMutate, setDietPlanIfEditable]);
 
   const hasPreviousDiets = previousDiets.length > 0;
 
   const handlePullMacrosOnly = useCallback(
     async (selectedDiet: PreviousDietSummary) => {
+      if (!canMutate()) return;
       if (!selectedDiet || !dietApplication || !draft) return;
       const source = canonicalSourcesRef.current.find((candidate) => candidate.plan.id === selectedDiet.id);
       const targetVariation = draft.payload.variations.find((variation) => variation.id === activeVariationId) ?? draft.payload.variations[0];
       const sourceVariation = source?.plan.variations[0];
       if (!sourceVariation || !targetVariation) return;
       const updated = await dietApplication.pullTargets(draft.draftId, source.plan.id, sourceVariation.id, targetVariation.id);
+      if (!canMutate()) return;
       setLoadedDraft(updated);
-      setDietPlan(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
+      setDietPlanIfEditable(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
       currentRevisionRef.current = updated.draftRevision;
       lastPersistedDocumentRef.current = JSON.stringify(updated.payload);
       toast.success(`Metas importadas da dieta "${selectedDiet.name}".`);
     },
-    [activeVariationId, dietaId, dietApplication, draft, patientId, setDietPlan, setLoadedDraft]
+    [activeVariationId, canMutate, dietaId, dietApplication, draft, patientId, setDietPlanIfEditable, setLoadedDraft]
   );
 
   const handlePullAllMeals = useCallback(
     async (selectedDiet: PreviousDietSummary) => {
+      if (!canMutate()) return;
       if (!selectedDiet || !dietApplication || !draft) return;
       const source = canonicalSourcesRef.current.find((candidate) => candidate.plan.id === selectedDiet.id);
       if (!source) return;
       const updated = await dietApplication.pullCompleteDiet(draft.draftId, source.plan.id);
+      if (!canMutate()) return;
       setLoadedDraft(updated);
-      setDietPlan(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
+      setDietPlanIfEditable(fromEditableDocument(updated.payload, patientId, dietaId === 'nova' ? 'nova' : dietaId, updated.createdAt, updated.updatedAt));
       setActiveVariationId(updated.payload.variations[0]?.id ?? 'var-high');
       currentRevisionRef.current = updated.draftRevision;
       lastPersistedDocumentRef.current = JSON.stringify(updated.payload);
       const totalMeals = updated.payload.variations[0]?.meals.length ?? 0;
       toast.success(`Dieta "${selectedDiet.name}" duplicada com sucesso (${totalMeals} ${totalMeals === 1 ? 'refeição' : 'refeições'}).`);
     },
-    [dietApplication, draft, dietaId, patientId, setDietPlan, setLoadedDraft, setActiveVariationId]
+    [canMutate, dietApplication, draft, dietaId, patientId, setDietPlanIfEditable, setLoadedDraft, setActiveVariationId]
   );
 
   const handlePullPreviousGoals = useCallback(() => {
@@ -387,7 +494,6 @@ export function useDietBuilderPage() {
     modals.openImportPreviousDietModal();
   }, [hasPreviousDiets, modals]);
 
-  const saveInFlightRef = useRef(false);
   const flushCurrentDraft = useCallback(async () => {
     if (!dietApplication || !draft || !dietPlan) return null;
     const result = await dietApplication.flushDraft(draft.draftId, toEditableDocument(dietPlan));
@@ -402,7 +508,36 @@ export function useDietBuilderPage() {
   const handleSaveDiet = useCallback(async () => {
     if (!dietApplication || !draft || !dietPlan || saveInFlightRef.current) return;
     saveInFlightRef.current = true;
+    confirmationBusyRef.current = true;
+    setConfirmationBusy(true);
     setSaveStatus('saving');
+    const retryCleanup = async (confirmedDraftRevision: number): Promise<void> => {
+      try {
+        const outcome = await dietApplication.reconcileUnknownSave(draft.draftId, confirmedDraftRevision, { cleanupOnly: true });
+        if (outcome.status === 'COMMITTED') toast.success('A limpeza do rascunho foi concluída.');
+        else if (outcome.status === 'CLEANUP_PENDING') showCleanupRetryToast(outcome.message, () => retryCleanup(confirmedDraftRevision));
+        else toast.error(outcome.message);
+      } catch (error: unknown) {
+        toast.error(error instanceof Error ? error.message : 'Não foi possível limpar o rascunho confirmado.');
+      }
+    };
+    const finishConfirmed = (outcome: ConfirmedDietSaveOutcome | CheckpointPendingSaveOutcome) => {
+      const localOutcome = outcome.status === 'CHECKPOINT_PENDING' ? outcome.localOutcome : outcome;
+      const cleanupPending = localOutcome.status === 'CLEANUP_PENDING';
+      if (outcome.status === 'CHECKPOINT_PENDING') {
+        if (cleanupPending) {
+          showCleanupRetryToast(outcome.message, () => retryCleanup(localOutcome.confirmedDraftRevision), 'error');
+        } else {
+          toast.error(outcome.message);
+        }
+      } else if (cleanupPending) {
+        showCleanupRetryToast(outcome.message, () => retryCleanup(localOutcome.confirmedDraftRevision));
+      } else {
+        toast.success(outcome.message);
+      }
+      setSaveStatus(cleanupPending ? 'cleanup-pending' : 'persisted');
+      router.push(`/pacientes/${patientId}`);
+    };
     try {
       const flushed = await flushCurrentDraft();
       if (!flushed || flushed.status !== 'SAVED') {
@@ -412,11 +547,27 @@ export function useDietBuilderPage() {
         return;
       }
       setSaveStatus('committing');
-      const outcome = await dietApplication.saveDietAsActive(draft.draftId, flushed.revision);
-      if (outcome.status === 'COMMITTED' || outcome.status === 'CLEANUP_PENDING') {
-        setSaveStatus(outcome.status === 'CLEANUP_PENDING' ? 'cleanup-pending' : 'persisted');
-        toast.success(outcome.message);
-        router.push(`/pacientes/${patientId}`);
+      let outcome = await dietApplication.saveDietAsActive(draft.draftId, flushed.revision);
+      if (outcome.status === 'RESULT_UNKNOWN') {
+        let reconciled: SaveReconciliationOutcome;
+        try {
+          reconciled = await dietApplication.reconcileUnknownSave(draft.draftId, flushed.revision);
+        } catch (error: unknown) {
+          setSaveStatus('error');
+          toast.error(error instanceof Error ? error.message : 'O resultado continua incerto; revise a prescrição antes de tentar novamente.');
+          return;
+        }
+        if (reconciled.status === 'COMMITTED' || reconciled.status === 'CLEANUP_PENDING' || reconciled.status === 'CHECKPOINT_PENDING') {
+          finishConfirmed(reconciled);
+          return;
+        }
+        setSaveStatus('error');
+        if (reconciled.status === 'NOT_COMMITTED') showSaveErrorToast(reconciled.message, handleSaveDiet);
+        else toast.error(reconciled.message);
+        return;
+      }
+      if (outcome.status === 'COMMITTED' || outcome.status === 'CLEANUP_PENDING' || outcome.status === 'CHECKPOINT_PENDING') {
+        finishConfirmed(outcome);
         return;
       }
       setSaveStatus('error');
@@ -427,6 +578,8 @@ export function useDietBuilderPage() {
       showSaveErrorToast(message, handleSaveDiet);
     } finally {
       saveInFlightRef.current = false;
+      confirmationBusyRef.current = false;
+      setConfirmationBusy(false);
     }
   }, [dietApplication, dietPlan, draft, flushCurrentDraft, patientId, router]);
 
@@ -483,16 +636,34 @@ export function useDietBuilderPage() {
   const handleBackClick = useCallback(async () => {
     if (saveInFlightRef.current) return;
     try {
-      await flushCurrentDraft();
-    } finally {
+      const result = await flushCurrentDraft();
+      if (result?.status !== 'SAVED') {
+        const message = result?.status === 'SUPERSEDED'
+          ? 'A edição mudou durante o salvamento. Tente novamente antes de sair.'
+          : result?.status === 'INVALIDATED'
+            ? 'O rascunho foi invalidado e não pôde ser salvo. Revise esta edição antes de sair.'
+            : 'A edição local não foi salva. Tente novamente antes de sair.';
+        showSaveErrorToast(message, () => handleBackClick());
+        return;
+      }
       router.push(`/pacientes/${patientId}`);
+    } catch (error: unknown) {
+      showSaveErrorToast(error instanceof Error ? error.message : 'Não foi possível salvar a edição local. Tente novamente antes de sair.', () => handleBackClick());
     }
   }, [flushCurrentDraft, patientId, router]);
+
+  const hasOpenEditDialog = modals.foodSearchMealIndex !== null
+    || modals.isCopyModalOpen
+    || modals.isCycleMatrixOpen
+    || modals.isAdjustGoalsModalOpen
+    || modals.foodToSubstitute !== null
+    || modals.isImportPreviousDietModalOpen;
 
   useSaveShortcut({
     onSave: handleSaveDiet,
     priority: 0,
-    busy: saveStatus === 'saving' || saveStatus === 'committing',
+    enabled: !hasOpenEditDialog,
+    busy: confirmationBusy,
   });
 
   return {
@@ -500,6 +671,8 @@ export function useDietBuilderPage() {
     dietaId,
     patient,
     dietPlan,
+    loadState,
+    retryLoad,
     activeVariationId,
     setActiveVariationId,
     activeMealVariationIds,
@@ -528,6 +701,7 @@ export function useDietBuilderPage() {
     handlePullMacrosOnly,
     handlePullAllMeals,
     handleSaveDiet,
+    confirmationBusy,
     onDiscardDraft: handleDiscardDraft,
     onBackClick: handleBackClick,
     flushDraft: flushCurrentDraft,

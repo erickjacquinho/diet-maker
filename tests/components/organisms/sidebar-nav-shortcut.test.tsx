@@ -21,17 +21,17 @@ function ProductToggleProbe() {
 
 describe('SidebarNav shortcut readiness', () => {
   it('keeps the visible toggle operable and preserves route context', () => {
-    render(<SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes} />);
+    render(<SidebarNav pathname="/alimentos" navigationItems={sidebarProductionRoutes} />);
 
     const toggle = screen.getByRole('button', { name: 'Recolher Menu' });
-    expect(screen.getByRole('link', { name: 'Guia Design System' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' })).toHaveAttribute(
       'aria-current',
       'page',
     );
 
     fireEvent.click(toggle);
     expect(screen.getByRole('button', { name: 'Expandir Menu' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Guia Design System' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' })).toHaveAttribute(
       'aria-current',
       'page',
     );
@@ -46,7 +46,7 @@ describe('SidebarNav shortcut readiness', () => {
   });
 
   it('does not activate Ctrl+B/Cmd+B or persistence in the current product wrapper', () => {
-    render(<SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes} />);
+    render(<SidebarNav pathname="/alimentos" navigationItems={sidebarProductionRoutes} />);
 
     fireEvent.keyDown(window, { key: 'b', ctrlKey: true });
     fireEvent.keyDown(window, { key: 'b', metaKey: true });
@@ -74,7 +74,7 @@ describe('SidebarNav shortcut readiness', () => {
 
   it('exposes the same product-owned toggle action for a future adapter', () => {
     render(
-      <SidebarNav pathname="/design-system" navigationItems={sidebarProductionRoutes}>
+      <SidebarNav pathname="/alimentos" navigationItems={sidebarProductionRoutes}>
         <ProductToggleProbe />
       </SidebarNav>,
     );

@@ -6,7 +6,7 @@ import { SubstituteFoodModal, type MealFoodToSubstitute } from '@/components/org
 import { ReadyMealSearchResultsList } from '@/components/molecules/food-search/ReadyMealSearchResultsList';
 import { RecipeSearchResultsList } from '@/components/molecules/food-search/RecipeSearchResultsList';
 import type { ReadyMeal } from '@/lib/readyMealsStore';
-import type { Recipe } from '@/lib/recipesStore';
+import type { Recipe } from '@/lib/library-ui-adapter';
 
 const readyMeal: ReadyMeal = {
   id: 'ready-1',
@@ -24,7 +24,8 @@ const recipe: Recipe = {
   id: 'recipe-1',
   name: 'Panqueca de banana com aveia',
   category: 'Café da Manhã',
-  servings: 2,
+  yieldAmount: 2,
+  yieldUnit: 'PORTION',
   instructions: 'Misturar e grelhar',
   createdAt: '2026-08-30',
   ingredients: [

@@ -9,11 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SelectField } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { MacroSummary } from '@/components/molecules/MacroSummary';
 import { MealItemRow, type MealItemRowProps } from '@/components/molecules/MealItemRow';
 import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 import { SubstituteFoodModal, type MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 import type { FoodItem, Recipe, RecipeIngredient } from '@/lib/library-ui-adapter';
+import type { RecipeYieldUnit } from '@/lib/domain/library/library-model';
 import { textStyle } from '@/design-system';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 
@@ -21,11 +23,17 @@ export interface CreateRecipeModalProps {
   open: boolean;
   recipe: Recipe | null;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: { id?: string; name: string; category: string; servings: number; instructions: string; ingredients: RecipeIngredient[] }) => void;
+  onSave: (data: { id?: string; name: string; category: string; yieldAmount: number; yieldUnit: RecipeYieldUnit; instructions: string; ingredients: RecipeIngredient[] }) => void;
 }
 
 const CATEGORIES = ['Café da Manhã', 'Almoço & Jantar', 'Lanches & Snacks', 'Sobremesas Fit', 'Bebidas & Shakes'];
-const EMPTY_FORM = { name: '', category: CATEGORIES[0], servings: 2, instructions: '', ingredients: [] as RecipeIngredient[] };
+const EMPTY_FORM = { name: '', category: CATEGORIES[0], yieldAmount: 2, yieldUnit: 'PORTION' as RecipeYieldUnit, instructions: '', ingredients: [] as RecipeIngredient[] };
+const YIELD_UNIT_OPTIONS: { value: RecipeYieldUnit; label: string }[] = [
+  { value: 'PORTION', label: 'Porções' },
+  { value: 'g', label: 'Gramas (g)' },
+  { value: 'ml', label: 'Mililitros (ml)' },
+  { value: 'unit', label: 'Unidades' },
+];
 
 const mealItemTableColumns: DataTableColumnDef<MealItemRowProps>[] = [
   { id: 'reorder', header: <span className="sr-only">Reordenar</span>, headerClassName: 'h-8 w-10 px-2 text-center', cell: () => null },
@@ -65,7 +73,7 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
       return;
     }
     const nextFormData = recipe
-      ? { name: recipe.name, category: recipe.category, servings: recipe.servings, instructions: recipe.instructions, ingredients: [...recipe.ingredients] }
+      ? { name: recipe.name, category: recipe.category, yieldAmount: recipe.yieldAmount, yieldUnit: recipe.yieldUnit, instructions: recipe.instructions, ingredients: [...recipe.ingredients] }
       : { ...EMPTY_FORM, ingredients: [] };
     setFormData(nextFormData);
     initialFormDataRef.current = nextFormData;
@@ -169,6 +177,13 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
     onDuplicate: () => duplicateIngredient(index),
   }));
 
+  const recipeTotals = formData.ingredients.reduce((total, ingredient) => ({
+    protein: total.protein + ingredient.proteinG,
+    carbs: total.carbs + ingredient.carbsG,
+    fats: total.fats + ingredient.fatsG,
+    kcal: total.kcal + ingredient.kcal,
+  }), { protein: 0, carbs: 0, fats: 0, kcal: 0 });
+
   const handleSubstituteFood = (_mealId: string, _itemId: string, selectedFood: FoodItem) => {
     const target = substitutionTarget;
     if (!target) return;
@@ -193,7 +208,8 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
     event.preventDefault();
     if (!formData.name.trim()) { toast.error('Digite o nome da receita'); return; }
     if (formData.ingredients.length === 0) { toast.error('Adicione pelo menos 1 ingrediente à receita'); return; }
-    onSave({ id: recipe?.id, ...formData, name: formData.name.trim(), servings: Math.max(1, Number(formData.servings) || 1), instructions: formData.instructions.trim() });
+    if (!Number.isFinite(formData.yieldAmount) || formData.yieldAmount <= 0) { toast.error('Informe um rendimento positivo.'); return; }
+    onSave({ id: recipe?.id, ...formData, name: formData.name.trim(), instructions: formData.instructions.trim() });
     onOpenChange(false);
   };
 
@@ -221,16 +237,25 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
         <DialogHeader className="border-b border-border-subtle pb-3"><DialogTitle className="font-bold text-style-body text-text-primary">{recipe ? 'Editar Receita Culinária' : 'Nova Receita Culinária'}</DialogTitle></DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <div><label htmlFor="recipe-name" className={`${textStyle('field-label')} block mb-1`}>Nome da Receita</label><Input id="recipe-name" required value={formData.name} onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))} placeholder="Ex: Bolo de Banana com Aveia e Whey" /></div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <SelectField
               id="recipe-category"
               label="Categoria"
               value={formData.category}
               onValueChange={(value) => setFormData((current) => ({ ...current, category: value }))}
               layer="modal"
+              className="col-span-2"
               options={CATEGORIES.map((category) => ({ value: category, label: category }))}
             />
-            <div><label htmlFor="recipe-servings" className={`${textStyle('field-label')} block mb-1`}>Rendimento (Porções)</label><Input id="recipe-servings" type="number" min={1} value={formData.servings} onChange={(event) => setFormData((current) => ({ ...current, servings: Number(event.target.value) }))} /></div>
+            <div><label htmlFor="recipe-yield-amount" className={`${textStyle('field-label')} block mb-1`}>Rendimento</label><Input id="recipe-yield-amount" type="number" min={formData.yieldUnit === 'g' || formData.yieldUnit === 'ml' ? 0.1 : 1} step={formData.yieldUnit === 'g' || formData.yieldUnit === 'ml' ? 'any' : 1} required value={formData.yieldAmount} onChange={(event) => setFormData((current) => ({ ...current, yieldAmount: event.target.value === '' ? 0 : Number(event.target.value) }))} /></div>
+            <SelectField
+              id="recipe-yield-unit"
+              label="Unidade do rendimento"
+              value={formData.yieldUnit}
+              onValueChange={(value) => setFormData((current) => ({ ...current, yieldUnit: value as RecipeYieldUnit }))}
+              layer="modal"
+              options={YIELD_UNIT_OPTIONS}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-style-legal font-bold text-text-primary tracking-overline">Alimentos Adicionados ({formData.ingredients.length})</span>
@@ -257,6 +282,18 @@ export function CreateRecipeModal({ open, recipe, onOpenChange, onSave }: Create
               <Plus size={14} className="text-success" aria-hidden="true" />
               <span>Adicionar Alimento</span>
             </Button>
+            {formData.ingredients.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-border-subtle bg-surface-subtle p-3">
+                <span className="text-style-caption font-semibold text-text-primary">Total da receita</span>
+                <MacroSummary
+                  protein={Math.round(recipeTotals.protein * 10) / 10}
+                  carbs={Math.round(recipeTotals.carbs * 10) / 10}
+                  fats={Math.round(recipeTotals.fats * 10) / 10}
+                  kcal={recipeTotals.kcal}
+                  className="shrink-0"
+                />
+              </div>
+            )}
           </div>
           <div><label htmlFor="recipe-instructions" className={`${textStyle('field-label')} block mb-1`}>Modo de Preparo / Orientações</label><Textarea id="recipe-instructions" rows={3} value={formData.instructions} onChange={(event) => setFormData((current) => ({ ...current, instructions: event.target.value }))} placeholder="Descreva o passo a passo do preparo da receita..." className="resize-none" /></div>
           <div className="flex gap-2 pt-2">

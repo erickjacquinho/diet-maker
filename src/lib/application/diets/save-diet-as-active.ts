@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { DietDomainError, isDietDomainError } from '@/lib/domain/diets/diet-errors';
 import { validateDietForConfirmation } from '@/lib/domain/diets/diet-validation';
-import type { DietDraft, DietPlan, SaveOutcome } from '@/lib/domain/diets/diet-model';
+import type { DietDraft, DietPlan, SaveOutcome, SaveReconciliationOutcome } from '@/lib/domain/diets/diet-model';
 import type { DietApplicationDependencies, ConfirmActiveCommand } from './diet-ports';
 
 function errorMessage(error: unknown): string {
@@ -38,6 +38,7 @@ function planFromDraft(draft: DietDraft, targetDietId: string, now: string, vers
 
 export async function saveDietAsActive(dependencies: DietApplicationDependencies, draftId: string, expectedRevision: number): Promise<SaveOutcome> {
   let draft: DietDraft;
+  let targetDietId: string | undefined;
   try {
     draft = await loadDraft(dependencies, draftId);
     if (draft.state !== 'EDITABLE') return { status: 'ROLLED_BACK', draftId, message: 'O rascunho foi invalidado.' };
@@ -45,7 +46,7 @@ export async function saveDietAsActive(dependencies: DietApplicationDependencies
     validateDietForConfirmation(draft.payload);
 
     const isUpdate = Boolean(draft.baseDietId);
-    const targetDietId = isUpdate ? draft.baseDietId! : draft.targetDietId ?? dependencies.idFactory?.() ?? nanoid(16);
+    targetDietId = isUpdate ? draft.baseDietId! : draft.targetDietId ?? dependencies.idFactory?.() ?? nanoid(16);
     if (!isUpdate && !draft.targetDietId) {
       const reserved = await dependencies.draftStore.reserveTargetId(draftId, expectedRevision, targetDietId);
       if (!reserved) return { status: 'ROLLED_BACK', draftId, message: 'O rascunho foi removido antes do salvamento.' };
@@ -58,27 +59,40 @@ export async function saveDietAsActive(dependencies: DietApplicationDependencies
       draftId, confirmedDraftRevision: expectedRevision, plan,
     };
     const committed = await dependencies.repository.confirmActive(command);
-    const removed = await dependencies.draftStore.removeIfRevision(draftId, expectedRevision);
-    if (!removed) return { status: 'CLEANUP_PENDING', draftId, planId: committed.planId, version: committed.version, message: 'Prescrição salva; a limpeza do rascunho ficou pendente.' };
-    return { status: 'COMMITTED', draftId, planId: committed.planId, version: committed.version, message: 'Prescrição confirmada.' };
+    let removed = false;
+    try { removed = await dependencies.draftStore.removeIfRevision(draftId, expectedRevision); } catch { /* The plan is committed; only draft cleanup remains. */ }
+    if (!removed) return { status: 'CLEANUP_PENDING', draftId, planId: committed.planId, version: committed.version, confirmedDraftRevision: expectedRevision, message: 'Prescrição salva; a limpeza do rascunho ficou pendente.' };
+    return { status: 'COMMITTED', draftId, planId: committed.planId, version: committed.version, confirmedDraftRevision: expectedRevision, message: 'Prescrição confirmada.' };
   } catch (error) {
     if (isDietDomainError(error) && error.code === 'VERSION_CONFLICT') return { status: 'VERSION_CONFLICT', draftId, message: errorMessage(error) };
-    if (isDietDomainError(error) && error.code === 'RESULT_UNKNOWN') return { status: 'RESULT_UNKNOWN', draftId, message: errorMessage(error) };
+    if (isDietDomainError(error) && error.code === 'RESULT_UNKNOWN') return { status: 'RESULT_UNKNOWN', draftId, planId: targetDietId, confirmedDraftRevision: expectedRevision, message: errorMessage(error) };
     return { status: 'ROLLED_BACK', draftId, message: errorMessage(error) };
   }
 }
 
-export async function reconcileUnknownSave(dependencies: DietApplicationDependencies, draftId: string): Promise<{ status: 'COMMITTED' | 'NOT_COMMITTED' | 'REVIEW_REQUIRED'; planId?: string; version?: number }> {
-  const draft = await loadDraft(dependencies, draftId);
+export async function reconcileUnknownSave(dependencies: DietApplicationDependencies, draftId: string, confirmedDraftRevision: number): Promise<SaveReconciliationOutcome> {
+  let draft: DietDraft;
+  try {
+    draft = await loadDraft(dependencies, draftId);
+  } catch (error) {
+    return { status: 'REVIEW_REQUIRED', draftId, confirmedDraftRevision, message: errorMessage(error) };
+  }
   const identity = draft.baseDietId ?? draft.targetDietId;
-  if (!identity) return { status: 'REVIEW_REQUIRED' };
+  if (!identity) return { status: 'REVIEW_REQUIRED', draftId, confirmedDraftRevision, message: 'Não há um identificador estável para conferir a gravação.' };
   try {
     const plan = await dependencies.repository.getById(draft.accountId, draft.patientId, identity);
-    if (!plan) return { status: 'NOT_COMMITTED' };
-    if (!draft.baseDietId || plan.version === (draft.baseDietVersion ?? 0) + 1) return { status: 'COMMITTED', planId: plan.id, version: plan.version };
-    if (plan.version === draft.baseDietVersion) return { status: 'NOT_COMMITTED' };
-    return { status: 'REVIEW_REQUIRED', planId: plan.id, version: plan.version };
-  } catch {
-    return { status: 'REVIEW_REQUIRED' };
+    if (!plan) return { status: 'NOT_COMMITTED', draftId, planId: identity, confirmedDraftRevision, message: 'A prescrição não foi encontrada; a mesma identidade pode ser tentada novamente.' };
+    if (plan.id !== identity) return { status: 'REVIEW_REQUIRED', draftId, planId: identity, confirmedDraftRevision, message: 'A identidade encontrada não corresponde à tentativa original.' };
+    if (draft.baseDietId && plan.version === draft.baseDietVersion) return { status: 'NOT_COMMITTED', draftId, planId: identity, confirmedDraftRevision, message: 'A versão vigente não mudou; a mesma operação pode ser tentada novamente.' };
+    if (draft.baseDietId && plan.version !== (draft.baseDietVersion ?? 0) + 1) {
+      return { status: 'REVIEW_REQUIRED', draftId, planId: plan.id, confirmedDraftRevision, message: 'A dieta avançou além da revisão desta tentativa e exige conferência.' };
+    }
+
+    let removed = false;
+    try { removed = await dependencies.draftStore.removeIfRevision(draftId, confirmedDraftRevision); } catch { /* Confirmed plan remains; cleanup is still pending. */ }
+    if (!removed) return { status: 'CLEANUP_PENDING', draftId, planId: plan.id, version: plan.version, confirmedDraftRevision, message: 'Prescrição confirmada; a limpeza da revisão enviada ficou pendente.' };
+    return { status: 'COMMITTED', draftId, planId: plan.id, version: plan.version, confirmedDraftRevision, message: 'Prescrição confirmada após reconciliação.' };
+  } catch (error) {
+    return { status: 'REVIEW_REQUIRED', draftId, planId: identity, confirmedDraftRevision, message: errorMessage(error) };
   }
 }

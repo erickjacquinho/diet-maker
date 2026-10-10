@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Badge, EditIconButton, DeleteIconButton, IconButton, Surface } from '@/components/atoms';
 import { Users, PlusCircle, Check, ArchiveRestore } from 'lucide-react';
-import { type Recipe, calculateRecipeNutrients } from '@/lib/library-ui-adapter';
+import { type Recipe, calculateRecipeNutrients, formatRecipeYield, recipeNutritionBasis } from '@/lib/library-ui-adapter';
 
 
 
@@ -22,7 +22,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   onRestore,
   onDelete,
 }) => {
-  const summary = calculateRecipeNutrients(recipe.ingredients, recipe.servings);
+  const summary = calculateRecipeNutrients(recipe.ingredients, recipe.yieldAmount, recipe.yieldUnit);
 
   return (
     <Surface variant="default" density="highlight" className="hover:border-success/40 transition-colors duration-standard flex flex-col justify-between gap-4">
@@ -33,8 +33,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
               {recipe.category}
             </Badge>
             <div className="flex items-center gap-1 text-style-legal text-text-muted font-medium">
-              <Users size={12} />
-              <span>{recipe.servings} porções</span>
+              {recipe.yieldUnit === 'PORTION' && <Users size={12} />}
+              <span>{formatRecipeYield(recipe.yieldAmount, recipe.yieldUnit)}</span>
             </div>
 
           </div>
@@ -48,10 +48,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           )}
         </div>
 
-        {/* Macros Per Portion */}
         <div className="flex flex-col gap-1.5">
           <div className="text-style-legal font-bold text-text-muted tracking-overline">
-            Valores por 1 porção ({recipe.ingredients.length} ingredientes)
+            Valores por {recipeNutritionBasis(recipe.yieldUnit)} ({recipe.ingredients.length} ingredientes)
           </div>
           <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-surface-subtle border border-border-subtle rounded-control text-center">
             <div>

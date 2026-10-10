@@ -14,8 +14,10 @@ alterações confirmadas posteriores ao checkpoint. Consulte o
 [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md).
 
 Não há backup automático, envio para nuvem, sincronização entre dispositivos
-ou lembretes recorrentes. O usuário escolhe quando exportar e onde guardar o
-arquivo. PDF e mensagens de dieta continuam independentes desse fluxo.
+ou lembretes recorrentes para exportar o arquivo. Lembretes pontuais da agenda
+fazem parte dos dados da Conta e são preservados no save principal. O usuário
+escolhe quando exportar e onde guardar o arquivo. PDF e mensagens de dieta
+continuam independentes desse fluxo.
 
 Esta orientação substitui a exigência anterior de backup criptografado. Os
 limites de privacidade estão na
@@ -31,6 +33,7 @@ O arquivo contém somente os dados confirmados da Conta:
 - identificação e configurações do perfil profissional;
 - alimentos customizados, receitas, refeições prontas e dietas prontas;
 - preferências da biblioteca, incluindo os favoritos por ID;
+- lembretes pontuais da agenda por ID, data, hora e tarefa;
 - pacientes, consultas, avaliações e objetivos já contemplados no produto;
 - dietas vigentes, snapshots históricos e registros arquivados;
 - IDs, relações, versões e datas necessários para restaurar esses dados.
@@ -46,11 +49,28 @@ Mudanças de dados de uma feature incrementam `schemaVersion`; o
 `DietDraft` e outros estados temporários do editor não integram o arquivo.
 Exportar não transforma rascunho em prescrição salva.
 
+### 2.1. Retrocompatibilidade do save
+
+Ao atualizar o esquema do save, manter retrocompatibilidade com a versão
+anterior sempre que possível: a aplicação atual deve conseguir abrir e
+restaurar saves da versão imediatamente anterior.
+
+- Adicionar a migração explícita e determinística da versão anterior para a
+  atual, preservando os dados existentes e sem reescrever o arquivo original.
+- Preencher campos novos com valores padrão somente quando forem seguros e
+  coerentes com o domínio; não inventar dados clínicos nem descartar dados
+  silenciosamente para tornar o arquivo compatível.
+- Validar a migração e a restauração com uma fixture de save da versão anterior.
+- Quando a compatibilidade não for possível sem perda ou interpretação
+  insegura dos dados, documentar o motivo e rejeitar o arquivo com uma mensagem
+  clara, preservando o arquivo e a base atual.
+
 ## 3. Exportar
 
 1. O usuário aciona **Exportar backup**.
-2. A aplicação captura uma visão consistente das tabelas confirmadas, sem
-   misturar partes de salvamentos diferentes.
+2. A aplicação captura uma visão consistente das tabelas confirmadas e as
+   preferências persistidas da Conta, sem misturar partes de salvamentos
+   diferentes.
 3. Serializa o conteúdo em JSON e oferece o download `.nutridiet`.
 
 Durante a captura, não intercalar mutações com a leitura das tabelas. A
@@ -72,8 +92,9 @@ concluído. Não há pedido de senha.
 4. A restauração só começa sem rascunhos ou edições pendentes: o usuário deve
    salvá-los ou descartá-los explicitamente antes. A aplicação não os apaga
    silenciosamente nem tenta reaplicá-los à base importada.
-5. Na única aba ativa, suspende novas edições, conclui gravações pendentes e
-   substitui os dados canônicos em **uma transação**.
+5. Na única aba ativa, suspende novas edições, conclui gravações pendentes,
+   prepara os lembretes locais e substitui os dados canônicos em **uma
+   transação**. Se a transação falhar, restaura os lembretes locais anteriores.
 6. Após o commit, recarrega o contexto e as consultas antes de liberar a edição.
 
 Arquivo inválido, versão não suportada, cancelamento ou erro com rollback

@@ -20,6 +20,7 @@ export function useDietBuilderModals({
   activeMealVariationIds = {},
   setDietPlan,
   updateActiveMeals,
+  canMutate,
   getActiveMealVariationId,
 }: {
   patient: Patient | null;
@@ -33,6 +34,7 @@ export function useDietBuilderModals({
   activeMealVariationIds?: ActiveMealVariationIds;
   setDietPlan: React.Dispatch<React.SetStateAction<FullDietPlan | null>>;
   updateActiveMeals: (updater: (prevMeals: DietMeal[]) => DietMeal[]) => void;
+  canMutate?: () => boolean;
   getActiveMealVariationId: (mealId: string, meal?: DietMeal) => string;
 }) {
   const [foodSearchMealIndex, setFoodSearchMealIndex] = useState<number | null>(null);
@@ -60,6 +62,7 @@ export function useDietBuilderModals({
   const [isImportPreviousDietModalOpen, setIsImportPreviousDietModalOpen] = useState(false);
 
   const handleCopyVariation = useCallback(() => {
+    if (canMutate && !canMutate()) return;
     if (!dietPlan || dietPlan.mode !== 'carb_cycling') return;
     const source = dietPlan.carbCyclingVariations.find((v) => v.id === copySourceId);
     if (!source) return;
@@ -77,9 +80,10 @@ export function useDietBuilderModals({
     });
     toast.success('Refeições copiadas com sucesso!');
     setIsCopyModalOpen(false);
-  }, [dietPlan, copySourceId, copyTargetId, setDietPlan]);
+  }, [canMutate, dietPlan, copySourceId, copyTargetId, setDietPlan]);
 
   const handleSaveAdjustedGoals = useCallback(() => {
+    if (canMutate && !canMutate()) return;
     if (!dietPlan) return;
     setDietPlan((prev) => {
       if (!prev) return prev;
@@ -112,9 +116,10 @@ export function useDietBuilderModals({
     });
     toast.success('Metas de macronutrientes atualizadas!');
     setIsAdjustGoalsModalOpen(false);
-  }, [dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, tempVariationName, activeVariationId, setDietPlan]);
+  }, [canMutate, dietPlan, tempTargetProt, tempTargetCarb, tempTargetFat, tempVariationName, activeVariationId, setDietPlan]);
 
   const openAdjustGoalsModal = useCallback(() => {
+    if (canMutate && !canMutate()) return;
     setTempTargetProt(targetProt);
     setTempTargetCarb(targetCarb);
     setTempTargetFat(targetFat);
@@ -123,9 +128,10 @@ export function useDietBuilderModals({
       setTempVariationName(activeVar?.name || '');
     }
     setIsAdjustGoalsModalOpen(true);
-  }, [targetProt, targetCarb, targetFat, dietPlan, activeVariationId]);
+  }, [canMutate, targetProt, targetCarb, targetFat, dietPlan, activeVariationId]);
 
   const handleSaveCycleMatrix = useCallback((updatedVariations: CarbCyclingVariation[]) => {
+    if (canMutate && !canMutate()) return;
     setDietPlan((prev) => {
       if (!prev) return prev;
       return {
@@ -134,7 +140,7 @@ export function useDietBuilderModals({
         carbCyclingVariations: updatedVariations,
       };
     });
-  }, [setDietPlan]);
+  }, [canMutate, setDietPlan]);
 
   const buildWhatsAppText = useCallback((options: WhatsAppDietExportOptions) => {
     if (!patient || !dietPlan) return '';
