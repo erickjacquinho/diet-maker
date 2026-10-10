@@ -18,6 +18,7 @@ import { HoldToDeleteButton } from '@/components/atoms';
 import { DatePickerField } from './DatePickerField';
 import type { PatientNextEvent, PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
+import { normalizeDateToISO } from '@/lib/date-only';
 
 function selectedTypes(type: PatientNextEvent['type']): PatientNextEventType[] {
   return Array.isArray(type) ? type : [type];
@@ -55,6 +56,7 @@ export function NextEventModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const savingRef = useRef(false);
+  const nextEventDate = normalizeDateToISO(nextEvent?.date) ?? '';
 
   useSaveShortcut({
     formRef,
@@ -65,17 +67,17 @@ export function NextEventModal({
 
   useEffect(() => {
     if (open) {
-      setDraft(nextEvent ? { ...nextEvent, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
+      setDraft(nextEvent ? { ...nextEvent, date: nextEventDate, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
       setIsRemoveConfirmOpen(false);
       setIsDiscardConfirmOpen(false);
       setSubmitError(null);
       savingRef.current = false;
       setIsSaving(false);
     }
-  }, [open, nextEvent]);
+  }, [open, nextEvent, nextEventDate]);
 
   const hasUnsavedChanges = Boolean(
-    (nextEvent && (draft.date !== nextEvent.date || !sameTypes(draft.type, nextEvent.type) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
+    (nextEvent && (draft.date !== nextEventDate || !sameTypes(draft.type, nextEvent.type) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
     (!nextEvent && (draft.date !== '' || !sameTypes(draft.type, ['assessment-update']) || Boolean(draft.comments)))
   );
   const hasSelectedType = selectedTypes(draft.type).length > 0;
@@ -114,7 +116,7 @@ export function NextEventModal({
   };
 
   const confirmDiscard = () => {
-    setDraft(nextEvent ? { ...nextEvent, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
+    setDraft(nextEvent ? { ...nextEvent, date: nextEventDate, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
     setIsDiscardConfirmOpen(false);
     onOpenChange(false);
   };
