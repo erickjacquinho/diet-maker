@@ -1,8 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown, Check } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
+import { Checkbox as DataTableCheckbox } from '@/components/atoms/Checkbox';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { DataTablePagination } from './data-table/DataTablePagination';
@@ -15,57 +17,6 @@ import type {
   DataTableSortState,
 } from './data-table/types';
 import { alignClass, nextSortState, nodeToLabel, normalizeSelectionSet, sortRows } from './data-table/utils';
-
-type DataTableCheckboxState = boolean | 'indeterminate';
-
-function DataTableCheckbox({
-  checked = false,
-  disabled = false,
-  onCheckedChange,
-  'aria-label': ariaLabel,
-}: {
-  checked?: DataTableCheckboxState;
-  disabled?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-  'aria-label': string;
-}) {
-  const isChecked = checked === true;
-  const isIndeterminate = checked === 'indeterminate';
-
-  return (
-    <Button
-      type="button"
-      variant="quiet"
-      size="compact"
-      iconOnly
-      role="checkbox"
-      aria-checked={isIndeterminate ? 'mixed' : isChecked}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      onClick={(event) => {
-        event.stopPropagation();
-        onCheckedChange?.(!isChecked);
-      }}
-      className={cn(
-        'group flex size-8 items-center justify-center rounded-compact border-transparent bg-transparent p-0 transition-colors duration-fast hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        disabled ? 'pointer-events-none cursor-not-allowed opacity-disabled' : 'cursor-pointer',
-      )}
-    >
-      <span
-        aria-hidden="true"
-        className={cn(
-          'flex size-4 items-center justify-center rounded-compact border transition-colors duration-fast',
-          isChecked && 'border-primary bg-primary text-on-primary',
-          isIndeterminate && 'border-primary bg-primary-soft text-primary',
-          !isChecked && !isIndeterminate && 'border-border-subtle bg-surface group-hover:border-border-hover',
-        )}
-      >
-        {isChecked && <Check size={12} className="shrink-0" aria-hidden="true" />}
-        {isIndeterminate && <span className="h-px w-2 rounded-round bg-primary" aria-hidden="true" />}
-      </span>
-    </Button>
-  );
-}
 
 export {
   type DataTableColumnDef,
@@ -116,7 +67,8 @@ function SortableHeader<TData>({
       aria-pressed={active}
       title={`Ordenar por ${label} (${sortHint})`}
       className={cn(
-        'inline-flex items-center justify-center gap-1.5 font-bold text-style-chart-micro tracking-overline h-auto py-1 px-1 -mx-1 hover:bg-transparent',
+        'inline-flex items-center justify-center gap-1.5 h-auto py-1 px-1 -mx-1 hover:bg-transparent',
+        textStyle('table-header'),
         active ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
       )}
     >
@@ -155,7 +107,7 @@ function TableHeaderRow<TData>({
   return (
     <TableRow className={cn('bg-surface-subtle hover:bg-surface-subtle border-b border-border-divider', className)}>
       {selection && (
-        <TableHead className="w-10 px-3 text-center h-9 bg-surface-subtle" scope="col">
+        <TableHead className="w-10 px-3 text-center h-table-row bg-surface-subtle" scope="col">
           <DataTableCheckbox
             checked={allSelected ? true : someSelected ? 'indeterminate' : false}
             onCheckedChange={onToggleAll}
@@ -176,7 +128,8 @@ function TableHeaderRow<TData>({
             scope="col"
             aria-sort={ariaSort}
             className={cn(
-              'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
+              'h-table-row bg-surface-subtle px-4',
+              textStyle('table-header'),
               alignClass(column.align),
               column.headerClassName
             )}
@@ -253,6 +206,7 @@ export function DataTable<TData>({
   stickyHeader = false,
   maxHeight,
   virtualization,
+  renderBody,
   renderRow,
   renderExpandedRow,
   expandedRowId = null,
@@ -340,7 +294,7 @@ export function DataTable<TData>({
   const totalColumnCount = columns.length + (selection ? 1 : 0);
   const scrollsBody = Boolean(stickyHeader && maxHeight);
   const hasScrollContainer = Boolean(maxHeight) && !scrollsBody;
-  const virtualized = Boolean(virtualization && scrollsBody && !renderRow);
+  const virtualized = Boolean(virtualization && scrollsBody && !renderRow && !renderBody);
   const overscan = Math.max(0, virtualization?.overscan ?? 8);
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
   const animationFrameRef = React.useRef<number | null>(null);
@@ -444,6 +398,9 @@ export function DataTable<TData>({
           className={scrollsBody ? 'table table-fixed w-full' : undefined}
         />
       </TableHeader>
+      {renderBody && !errorMessage && !loading && visibleData.length > 0 ? (
+        renderBody(visibleData.map(({ row }) => row))
+      ) : (
       <TableBody
         ref={scrollsBody ? bodyRef : undefined}
         onScroll={virtualized ? handleBodyScroll : undefined}
@@ -556,6 +513,7 @@ export function DataTable<TData>({
           </>
         )}
       </TableBody>
+      )}
     </Table>
   );
 

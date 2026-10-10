@@ -4,7 +4,7 @@ Category ID: `selection`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-selection`  
 Allowed traits: `async`, `nutrition-context`  
-Current consumers: `ui-select`, `ui-tabs`, `organism-diet-mode-switcher`
+Current consumers: `atom-checkbox`, `ui-select`, `ui-tabs`, `organism-diet-mode-switcher`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 

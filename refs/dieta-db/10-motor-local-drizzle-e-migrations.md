@@ -68,6 +68,7 @@ Banco relacional local
 ├── alimentos customizados
 ├── receitas
 ├── refeições prontas
+├── dietas prontas
 ├── Pacientes
 ├── avaliações
 └── dietas confirmadas

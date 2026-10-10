@@ -62,19 +62,27 @@ async function chooseDate(page: Page, container: Page | Locator, label: string):
 }
 
 async function saveFollowUp(page: Page, offsetDays: number, type: string, expectedComments = ''): Promise<void> {
-  const region = page.getByRole('region', { name: 'Próximo acompanhamento' });
-  await region.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
+  await page.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
-  const comments = dialog.getByRole('textbox', { name: 'Comentários' });
+  const comments = dialog.getByRole('textbox', { name: 'Observações' });
   await expect(comments).toHaveValue(expectedComments);
   const label = dateLabel(offsetDays);
   await chooseDate(page, dialog, label);
-  await dialog.getByRole('button', { name: type, exact: true }).click();
+  for (const typeLabel of ['Atualização de avaliação', 'Atualização de dieta']) {
+    const button = dialog.getByRole('button', { name: typeLabel, exact: true });
+    if ((await button.getAttribute('aria-pressed') === 'true') !== (typeLabel === type)) {
+      await button.click();
+    }
+  }
   await comments.fill(`Revisar ${type.toLowerCase()}`);
   await dialog.getByRole('button', { name: /^Salvar/ }).click();
   await expect(dialog).toBeHidden({ timeout: 120_000 });
-  await expect(region).toContainText(label);
-  await expect(region).toContainText(type);
+  await page.getByRole('button', { name: 'Reagendar acompanhamento' }).click();
+  await expect(dialog.getByRole('textbox', { name: 'Data', exact: true })).toHaveValue(label);
+  await expect(dialog.getByRole('button', { name: type, exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(comments).toHaveValue(`Revisar ${type.toLowerCase()}`);
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(dialog).toBeHidden();
 }
 
 async function holdToConfirm(page: Page, button: Locator): Promise<void> {
@@ -146,8 +154,6 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   // exercised in the deterministic integration suites; the browser remains single-tab by design.
   // The UI journey below covers the corresponding successful edit and recovery-facing states.
 
-  const followUpRegion = page.getByRole('region', { name: 'Próximo acompanhamento' });
-
   // Create, replace and remove the one allowed follow-up while checking list projections.
   await saveFollowUp(page, 2, 'Atualização de dieta');
   await navigateWithinSession(page, '/pacientes');
@@ -166,14 +172,16 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
   await navigateWithinSession(page, patientOnePath);
-  await followUpRegion.getByRole('button', { name: 'Reagendar' }).click();
+  await page.getByRole('button', { name: 'Reagendar acompanhamento' }).click();
   const rescheduleDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
   const removeDialog = page.getByRole('dialog', { name: 'Remover acompanhamento?' });
   await holdToConfirm(page, removeDialog.getByRole('button', { name: 'Sim, remover' }));
   await expect(removeDialog).toBeHidden({ timeout: 120_000 });
-  await expect(followUpRegion).toContainText('Não agendado');
-  await expect(followUpRegion).toContainText('Sem próximo evento');
+  await expect(page.getByRole('button', { name: 'Definir acompanhamento' })).toBeVisible();
+  await navigateWithinSession(page, '/pacientes');
+  await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Sem próximo evento');
+  await navigateWithinSession(page, patientOnePath);
 
   // Archive preserves the historical rows but removes clinical mutation affordances.
   await page.getByRole('button', { name: 'Arquivar Paciente' }).click();
@@ -200,7 +208,11 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   const isolatedAssessmentTable = page.getByRole('table', { name: 'Histórico de avaliações físicas e composição corporal' });
   await expect(isolatedAssessmentTable).toContainText('Nenhuma avaliação física registrada');
   await expect(isolatedAssessmentTable).not.toContainText('77 kg');
-  await expect(page.getByRole('region', { name: 'Próximo acompanhamento' })).toContainText('Sem próximo evento');
+  await page.getByRole('button', { name: 'Definir acompanhamento' }).click();
+  const isolatedFollowUpDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
+  await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Data', exact: true })).toHaveValue('');
+  await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Observações' })).toHaveValue('');
+  await isolatedFollowUpDialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
 
   const legacyKeys = await page.evaluate(() => Object.keys(localStorage).filter((key) => /nutridiet_(?:patients|assessments_)/i.test(key)));
   expect(legacyKeys).toEqual([]);

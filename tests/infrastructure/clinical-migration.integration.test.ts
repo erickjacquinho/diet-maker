@@ -11,7 +11,7 @@ afterEach(async () => {
 });
 
 describe('clinical database migration', () => {
-  it('upgrades the local schema to v11 while preserving earlier tables and data', async () => {
+  it('upgrades the local schema to v12 while preserving earlier tables and data', async () => {
     handle = await createClinicalTestDatabase('clinical-migration');
     await handle.client.query(`
       INSERT INTO accounts (id, display_name, created_at, updated_at)
@@ -29,7 +29,7 @@ describe('clinical database migration', () => {
     await handle.client.query(`DELETE FROM __nutridiet_migrations WHERE id IN ('0010_next_follow_up_comments', '0011_next_follow_up_multiple_types')`);
     await applyMigrations(handle.client, migrationFiles);
 
-    expect(handle.schemaVersion).toBe('11');
+    expect(handle.schemaVersion).toBe('12');
     await expect(handle.client.query(`SELECT id, name FROM patients WHERE id = 'migration-patient'`)).resolves.toMatchObject({
       rows: [{ id: 'migration-patient', name: 'Paciente' }],
     });
@@ -42,7 +42,7 @@ describe('clinical database migration', () => {
     const journal = await handle.client.query<{ id: string; version: string }>(
       `SELECT id, version FROM __nutridiet_migrations ORDER BY version::integer`,
     );
-    expect(journal.rows.at(-1)).toEqual({ id: '0011_next_follow_up_multiple_types', version: '11' });
+    expect(journal.rows.at(-1)).toEqual({ id: '0012_ready_diets', version: '12' });
     await expect(handle.client.query(`SELECT comments FROM next_follow_ups WHERE patient_id = 'migration-patient'`))
       .resolves.toMatchObject({ rows: [{ comments: '' }] });
     await expect(handle.client.query(`UPDATE next_follow_ups SET type = 'BOTH' WHERE patient_id = 'migration-patient'`))

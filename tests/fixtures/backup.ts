@@ -357,6 +357,7 @@ export const backupFixture: BackupFixture = {
       itemSnapshot: { displayName: 'Receita de teste', portions: '1' },
     },
   ],
+  readyDiets: [],
 };
 
 export function createBackupEnvelope(overrides: Partial<BackupFixture> = {}): BackupEnvelope {

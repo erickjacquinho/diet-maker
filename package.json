@@ -41,6 +41,7 @@
     "date-fns": "^4.4.0",
     "decimal.js": "^10.6.0",
     "drizzle-orm": "0.45.2",
+    "html2pdf.js": "^0.14.0",
     "lucide-react": "^0.475.0",
     "nanoid": "^6.0.1",
     "next": "^15.1.6",

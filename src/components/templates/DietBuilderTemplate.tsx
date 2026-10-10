@@ -7,7 +7,6 @@ import type { DietModeSwitcherProps } from '../organisms/diet/DietModeSwitcher';
 import { Button } from '@/components/atoms';
 import { ConfirmationAlertDialog } from '@/components/molecules/ConfirmationAlertDialog';
 import {
-  Percent,
   MessageCircle,
   FileText,
   Link2,
@@ -15,8 +14,8 @@ import {
   Edit3,
   History,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { DietContextSection } from '../organisms/diet/DietContextSection';
 import { DietMealsSection } from '../organisms/diet/DietMealsSection';
 import type { DietBuilderTemplateProps } from './dietBuilderTemplateTypes';
@@ -38,9 +37,6 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   mealsData = [],
   onAddMeal,
   onReorderMeals,
-  onScaleDiet,
-  onOpenScaleModal,
-  scaleDisabled = false,
   onOpenAdjustGoalsModal,
   onPullPreviousGoals,
   onOpenImportPreviousDietModal,
@@ -48,7 +44,9 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
   onOpenWhatsAppModal,
   onWhatsAppShare,
   onExportPDF,
+  onExportPage,
   onSaveDiet,
+  onOpenSaveReadyDiet,
   onDiscardDraft,
   canDiscardDraft = true,
   saveStatus = 'clean',
@@ -81,10 +79,10 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
 
   const metricsToRender = macroMetrics || macroTrackerData?.metrics || [];
   const handleAdjustGoals = onOpenAdjustGoalsModal || macroTrackerData?.onAdjustGoals;
-  const handleScale = onOpenScaleModal || onScaleDiet;
   const handleWhatsApp = onOpenWhatsAppModal || onWhatsAppShare;
   const handlePullPrevious = onOpenImportPreviousDietModal || onPullPreviousGoals;
   const isSaveBusy = saveStatus === 'saving' || saveStatus === 'committing';
+  const isDiscardBlockedBySave = saveStatus === 'pending' || isSaveBusy;
 
   const headerActions = (
     <>
@@ -111,16 +109,18 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           type="button"
           onClick={() => setIsDiscardDialogOpen(true)}
           disabled={isSaveBusy}
-          variant="quiet"
+          variant="destructive-outline"
           size="compact"
+          className="flex items-center gap-1.5"
           aria-label="Descartar rascunho local"
         >
-          Descartar rascunho
+          <Trash2 size={14} aria-hidden="true" />
+          <span>Descartar rascunho</span>
         </Button>
       )}
 
       <ActionDropdown
-        triggerLabel="Mais ações"
+        triggerLabel="Exportar Dieta"
         items={[
           {
             id: 'whatsapp',
@@ -136,9 +136,10 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           },
           {
             id: 'link',
-            label: 'Link',
+            label: 'Exportar como página externa',
+            disabled: !onExportPage,
             icon: <Link2 size={14} aria-hidden="true" />,
-            onSelect: () => toast.info('O acompanhamento online da dieta estará disponível em breve.'),
+            onSelect: () => onExportPage?.(),
           },
         ]}
       />
@@ -177,36 +178,38 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
         />
 
         <section data-testid="macro-tracker-region" aria-label="Metas nutricionais" className="flex flex-col gap-3">
-          <div className="flex items-center justify-end gap-2 flex-wrap">
-            {handlePullPrevious && (
-              <Button
-                onClick={handlePullPrevious}
-                disabled={hasPreviousDiets === false}
-                variant="secondary"
-                size="compact"
-                className="flex items-center gap-1.5"
-                title={
-                  hasPreviousDiets === false
-                    ? 'Nenhuma dieta anterior cadastrada para este paciente'
-                    : 'Puxar metas ou refeições de dietas anteriores'
-                }
-              >
-                <History size={13} aria-hidden="true" />
-                <span>Puxar Metas Anteriores</span>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            {onOpenSaveReadyDiet && (
+              <Button onClick={onOpenSaveReadyDiet} disabled={isSaveBusy} variant="secondary" size="compact" className="flex items-center gap-1.5">
+                <Save size={14} aria-hidden="true" />
+                <span>Salvar dieta pronta</span>
               </Button>
             )}
-            {handleAdjustGoals && (
-              <Button onClick={handleAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
-                <Edit3 size={13} aria-hidden="true" />
-                <span>Ajustar Metas</span>
-              </Button>
-            )}
-            {handleScale && (
-              <Button onClick={handleScale} disabled={scaleDisabled} variant="secondary" size="compact" className="flex items-center gap-1.5">
-                <Percent size={14} aria-hidden="true" />
-                <span>Escalar</span>
-              </Button>
-            )}
+            <div className="flex items-center justify-end gap-2 flex-wrap">
+              {handlePullPrevious && (
+                <Button
+                  onClick={handlePullPrevious}
+                  disabled={hasPreviousDiets === false}
+                  variant="secondary"
+                  size="compact"
+                  className="flex items-center gap-1.5"
+                  title={
+                    hasPreviousDiets === false
+                      ? 'Nenhuma dieta anterior cadastrada para este paciente'
+                      : 'Puxar metas ou refeições de dietas anteriores'
+                  }
+                >
+                  <History size={13} aria-hidden="true" />
+                  <span>Puxar Metas Anteriores</span>
+                </Button>
+              )}
+              {handleAdjustGoals && (
+                <Button onClick={handleAdjustGoals} variant="secondary" size="compact" className="flex items-center gap-1.5">
+                  <Edit3 size={13} aria-hidden="true" />
+                  <span>Ajustar Metas</span>
+                </Button>
+              )}
+            </div>
           </div>
           <MacroTrackerHeader
             patientInitials={resolvedInitials}
@@ -226,14 +229,16 @@ export const DietBuilderTemplate: React.FC<DietBuilderTemplateProps> = ({
           open={isDiscardDialogOpen}
           onOpenChange={setIsDiscardDialogOpen}
           title="Descartar rascunho local?"
-          description="As alterações ainda não confirmadas serão removidas deste dispositivo. Nenhuma prescrição confirmada será apagada."
+          description={isDiscardBlockedBySave
+            ? 'Aguarde o salvamento local terminar antes de descartar. Nenhuma prescrição confirmada será apagada.'
+            : 'As alterações ainda não confirmadas serão removidas deste dispositivo. Nenhuma prescrição confirmada será apagada.'}
           confirmLabel="Descartar rascunho"
+          confirmPendingLabel="Descartando rascunho..."
           confirmVariant="destructive"
+          confirmDisabled={isDiscardBlockedBySave}
+          awaitConfirm
           icon={<AlertTriangle className="size-4 shrink-0 text-warning" aria-hidden="true" />}
-          onConfirm={() => {
-            void onDiscardDraft();
-            setIsDiscardDialogOpen(false);
-          }}
+          onConfirm={onDiscardDraft}
         />
       )}
     </div>

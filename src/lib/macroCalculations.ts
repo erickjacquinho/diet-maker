@@ -1,31 +1,15 @@
-import { calculatePresetCalories } from './presetUtils';
-import type { DietItem, DietMeal, MealTotals } from './legacy-diet-types';
+import { getItemMacros, type DietItem, type DietMeal, type MealTotals } from './legacy-diet-types';
 
 export function calculateMealTotals(items: DietItem[]): MealTotals {
-  const proteinG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.protein) || 0), 0) * 10) / 10;
-  const carbsG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.carbs) || 0), 0) * 10) / 10;
-  const fatsG = Math.round(items.reduce((acc, curr) => acc + (Number(curr.fats) || 0), 0) * 10) / 10;
-  const kcal = calculatePresetCalories(proteinG, carbsG, fatsG);
+  const itemMacros = items.map(getItemMacros);
+  const proteinG = Math.round(itemMacros.reduce((acc, curr) => acc + curr.protein, 0) * 10) / 10;
+  const carbsG = Math.round(itemMacros.reduce((acc, curr) => acc + curr.carbs, 0) * 10) / 10;
+  const fatsG = Math.round(itemMacros.reduce((acc, curr) => acc + curr.fats, 0) * 10) / 10;
+  const kcal = Math.round(itemMacros.reduce((acc, curr) => acc + curr.kcal, 0));
 
   return { proteinG, carbsG, fatsG, kcal };
 }
 
 export function calculateMealsTotal(meals: DietMeal[]): MealTotals {
-  let proteinG = 0;
-  let carbsG = 0;
-  let fatsG = 0;
-
-  meals.forEach((meal) => {
-    const mealTotals = calculateMealTotals(meal.items);
-    proteinG += mealTotals.proteinG;
-    carbsG += mealTotals.carbsG;
-    fatsG += mealTotals.fatsG;
-  });
-
-  proteinG = Math.round(proteinG * 10) / 10;
-  carbsG = Math.round(carbsG * 10) / 10;
-  fatsG = Math.round(fatsG * 10) / 10;
-  const kcal = calculatePresetCalories(proteinG, carbsG, fatsG);
-
-  return { proteinG, carbsG, fatsG, kcal };
+  return calculateMealTotals(meals.flatMap((meal) => meal.items));
 }

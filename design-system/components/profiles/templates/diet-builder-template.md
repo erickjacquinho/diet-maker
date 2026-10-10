@@ -43,7 +43,7 @@ Slots são nomeados pela responsabilidade; títulos e landmarks preservam ordem 
 ## Exceptions
 
 `dashed-empty-state`: o estado vazio de refeições mantém uma anatomia dashed própria, registrada como exceção de empty-state e não como nova variante de `Surface`.
-ExceptionRecord: dashed-empty-state reviewAt: 2026-09-30 owner: design-system-maintainers
+ExceptionRecord: dashed-empty-state reviewAt: 2027-01-10 owner: design-system-maintainers
 
 ## Consumers
 
@@ -61,3 +61,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 Implementado em `template`; perfil homologado documentalmente. Homologação não declara a estilização atual conforme.
 
+
+Revisão 2026-10-10: composição e consumidores preservados; exceção verificada pelos testes da família e auditoria do catálogo.

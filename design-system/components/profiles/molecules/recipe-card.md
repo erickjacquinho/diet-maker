@@ -43,7 +43,7 @@ Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui 
 ## Exceptions
 
 `inner-macro-summary-data-display`: o resumo de macros interno mantém anatomia compacta de data-display e não deve receber `Surface` aninhado; sua exceção é protegida por teste de consumidor.
-ExceptionRecord: inner-macro-summary-data-display reviewAt: 2026-09-30 owner: design-system-maintainers
+ExceptionRecord: inner-macro-summary-data-display reviewAt: 2027-01-10 owner: design-system-maintainers
 
 ## Consumers
 
@@ -61,3 +61,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 Implementado em `molecule`; perfil homologado documentalmente. Homologação não declara a estilização atual conforme.
 
+
+Revisão 2026-10-10: composição e consumidores preservados; exceção verificada pelos testes da família e auditoria do catálogo.

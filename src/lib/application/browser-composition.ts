@@ -16,6 +16,7 @@ import { createLibraryApplication, type LibraryApplication } from './library/lib
 import { PGliteFoodCatalogRepository } from '@/lib/infrastructure/local-db/library/pglite-food-catalog-repository';
 import { PGliteRecipeRepository } from '@/lib/infrastructure/local-db/library/recipe-repository';
 import { PGliteReadyMealRepository } from '@/lib/infrastructure/local-db/library/ready-meal-repository';
+import { PGliteReadyDietRepository } from '@/lib/infrastructure/local-db/library/ready-diet-repository';
 import { PGliteClinicalRepository } from '@/lib/infrastructure/local-db/clinical-repository';
 import { PGliteBackupRepository } from '@/lib/infrastructure/local-db/backup-repository';
 import { createBackupApplication, type BackupApplication } from './backup-application';
@@ -124,6 +125,7 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
     const foodRepository = new PGliteFoodCatalogRepository(handle);
     const recipeRepository = new PGliteRecipeRepository(handle, { foodRepository });
     const readyMealRepository = new PGliteReadyMealRepository(handle, { foodRepository, recipeRepository });
+    const readyDietRepository = new PGliteReadyDietRepository(handle);
 
     return {
       account: persistedAccount,
@@ -157,7 +159,7 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
           getReadyMeal: (accountId, readyMealId) => readyMealRepository.getById(accountId, readyMealId),
         },
       }),
-      libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository, confirmedOperation }),
+      libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository, readyDietRepository, confirmedOperation }),
       backupApplication,
     };
   } catch (error) {

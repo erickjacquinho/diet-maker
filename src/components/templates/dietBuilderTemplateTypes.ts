@@ -40,9 +40,6 @@ export interface DietBuilderTemplateProps {
   onAddFoodClick?: (index: number) => void;
   onUpdateItemGram?: (mealIndex: number, itemIndex: number, newGrams: number) => void;
   onRemoveItem?: (mealIndex: number, itemIndex: number) => void;
-  onScaleDiet?: () => void;
-  onOpenScaleModal?: () => void;
-  scaleDisabled?: boolean;
   onOpenCopyModal?: () => void;
   onOpenAdjustGoalsModal?: () => void;
   onPullPreviousGoals?: () => void;
@@ -51,7 +48,9 @@ export interface DietBuilderTemplateProps {
   onOpenWhatsAppModal?: () => void;
   onWhatsAppShare?: () => void;
   onExportPDF?: () => void;
+  onExportPage?: () => void;
   onSaveDiet?: () => void;
+  onOpenSaveReadyDiet?: () => void;
   onDiscardDraft?: () => void | Promise<void>;
   canDiscardDraft?: boolean;
   saveStatus?: 'clean' | 'pending' | 'saving' | 'persisted' | 'error' | 'committing' | 'cleanup-pending';

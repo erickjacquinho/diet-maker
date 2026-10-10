@@ -4,7 +4,7 @@ Category ID: `structure`
 Lifecycle: `stable`  
 Decision reference: `CAT-2026-07-31-structure`  
 Allowed traits: `collapsible`, `nutrition-context`  
-Current consumers: `template-app-layout-shell`, `template-diet-builder-template`
+Current consumers: `template-app-layout-shell`, `template-diet-builder-template`, `template-diet-pdf-template`
 
 Normative foundations: [color](../../04-color-system.md), [typography](../../05-typography-system.md), [geometry](../../06-geometry-and-desktop-layout.md), [motion and layers](../../07-icons-motion-and-layers.md), [states and accessibility](../../08-states-and-accessibility.md).
 

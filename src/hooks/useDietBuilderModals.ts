@@ -1,13 +1,12 @@
 import { useState, useCallback } from 'react';
 import { Patient } from '@/lib/patientsStore';
-import { FullDietPlan, DietMeal, CarbCyclingVariation, getItemGrams, getItemMacros } from '@/lib/legacy-diet-types';
-import { projectMealGroups, updateMealVariationItems, type ActiveMealVariationIds } from '@/lib/mealVariations';
+import { FullDietPlan, DietMeal, CarbCyclingVariation } from '@/lib/legacy-diet-types';
+import type { ActiveMealVariationIds } from '@/lib/mealVariations';
 import { cloneMealsWithFreshIds } from '@/lib/legacy-diet-copy';
 import { calculatePresetCalories } from '@/lib/presetUtils';
-import { calculateMealTotals } from '@/lib/macroCalculations';
 import { MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 import { toast } from 'sonner';
-import type { WhatsAppDietExportOptions } from '@/lib/whatsapp';
+import { buildDietWhatsAppText, type WhatsAppDietExportOptions } from '@/lib/whatsapp';
 
 export function useDietBuilderModals({
   patient,
@@ -37,9 +36,6 @@ export function useDietBuilderModals({
   getActiveMealVariationId: (mealId: string, meal?: DietMeal) => string;
 }) {
   const [foodSearchMealIndex, setFoodSearchMealIndex] = useState<number | null>(null);
-  const [isScaleModalOpen, setIsScaleModalOpen] = useState(false);
-  const [scalePercentage, setScalePercentage] = useState<number>(10);
-
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copySourceId, setCopySourceId] = useState<string>('var-high');
   const [copyTargetId, setCopyTargetId] = useState<string>('var-low');
@@ -62,32 +58,6 @@ export function useDietBuilderModals({
 
   const [foodToSubstitute, setFoodToSubstitute] = useState<MealFoodToSubstitute | null>(null);
   const [isImportPreviousDietModalOpen, setIsImportPreviousDietModalOpen] = useState(false);
-
-  const handleApplyScale = useCallback(
-    (percent: number) => {
-      const factor = 1 + percent / 100;
-      updateActiveMeals((prev) =>
-        prev.map((meal) => updateMealVariationItems(meal, getActiveMealVariationId(meal.id, meal), (items) => items.map((item) => {
-            const currentGrams = item.quantityGrams || item.grams || 100;
-            const p = item.protein ?? item.proteinG ?? 0;
-            const c = item.carbs ?? item.carbsG ?? 0;
-            const f = item.fats ?? item.fatsG ?? item.fatG ?? 0;
-            return {
-              ...item,
-              quantityGrams: Math.round(currentGrams * factor),
-              grams: Math.round(currentGrams * factor),
-              kcal: Math.round(item.kcal * factor),
-              protein: Math.round(p * factor * 10) / 10,
-              carbs: Math.round(c * factor * 10) / 10,
-              fats: Math.round(f * factor * 10) / 10,
-            };
-          })))
-      );
-      toast.success(`Dieta ajustada em ${percent > 0 ? '+' : ''}${percent}%`);
-      setIsScaleModalOpen(false);
-    },
-    [getActiveMealVariationId, updateActiveMeals]
-  );
 
   const handleCopyVariation = useCallback(() => {
     if (!dietPlan || dietPlan.mode !== 'carb_cycling') return;
@@ -168,44 +138,7 @@ export function useDietBuilderModals({
 
   const buildWhatsAppText = useCallback((options: WhatsAppDietExportOptions) => {
     if (!patient || !dietPlan) return '';
-    let msg = `*Plano Alimentar - ${patient.name}*\n\n`;
-    const sections = dietPlan.mode === 'carb_cycling'
-      ? dietPlan.carbCyclingVariations
-        .filter((variation) => options.selectedVariationIds.includes(variation.id))
-        .map((variation) => {
-          const meals = projectMealGroups(variation.meals, 'carb_cycling', variation.id, activeMealVariationIds);
-          return { name: variation.name, meals, totalKcal: calculateMealTotals(meals.flatMap((meal) => meal.items)).kcal };
-        })
-      : [{ name: '', meals: currentMeals, totalKcal: currentTotals.kcal }];
-
-    sections.forEach((section) => {
-      if (section.name) msg += `*${section.name}*\n`;
-      section.meals.forEach((meal) => {
-        const mealTotals = options.includeNutrition
-          ? meal.items.reduce((totals, item) => {
-            const macros = getItemMacros(item);
-            return {
-              protein: totals.protein + macros.protein,
-              carbs: totals.carbs + macros.carbs,
-              fats: totals.fats + macros.fats,
-              kcal: totals.kcal + macros.kcal,
-            };
-          }, { protein: 0, carbs: 0, fats: 0, kcal: 0 })
-          : null;
-        msg += `*${meal.name}${options.includeMealTimes && meal.time ? ` (${meal.time})` : ''}${mealTotals ? ` | Carbo: ${Math.round(mealTotals.carbs)}g` : ''}*\n`;
-        meal.items.forEach((item) => {
-          msg += `• ${item.name} (${getItemGrams(item)}g)\n`;
-        });
-        if (mealTotals) {
-          msg += `*Totais da refeição:* P: ${Math.round(mealTotals.protein)}g | G: ${Math.round(mealTotals.fats)}g | ${Math.round(mealTotals.kcal)} kcal\n`;
-        }
-        msg += '\n';
-      });
-      if (options.includeNutrition) {
-        msg += `*Total do dia${section.name ? ` - ${section.name}` : ''}:* ${Math.round(section.totalKcal)} kcal\n\n`;
-      }
-    });
-    return msg;
+    return buildDietWhatsAppText(patient.name, dietPlan, currentMeals, currentTotals, options, activeMealVariationIds);
   }, [patient, dietPlan, currentMeals, currentTotals, activeMealVariationIds]);
 
   const openWhatsAppModal = useCallback(() => {
@@ -229,10 +162,6 @@ export function useDietBuilderModals({
   return {
     foodSearchMealIndex,
     setFoodSearchMealIndex,
-    isScaleModalOpen,
-    setIsScaleModalOpen,
-    scalePercentage,
-    setScalePercentage,
     isCopyModalOpen,
     setIsCopyModalOpen,
     copySourceId,
@@ -263,7 +192,6 @@ export function useDietBuilderModals({
     isImportPreviousDietModalOpen,
     setIsImportPreviousDietModalOpen,
     openImportPreviousDietModal: () => setIsImportPreviousDietModalOpen(true),
-    handleApplyScale,
     handleCopyVariation,
     handleSaveAdjustedGoals,
     openAdjustGoalsModal,

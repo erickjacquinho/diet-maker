@@ -60,6 +60,7 @@ export interface DataTableProps<TData> {
   stickyHeader?: boolean;
   maxHeight?: DataTableMaxHeight;
   virtualization?: DataTableVirtualizationConfig;
+  renderBody?: (rows: TData[]) => ReactNode;
   renderRow?: (row: TData, index: number) => ReactNode;
   renderExpandedRow?: (row: TData, index: number) => ReactNode;
   expandedRowId?: string | null;

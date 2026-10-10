@@ -34,11 +34,47 @@ describe('patient follow-up projection and commands', () => {
       />,
     );
 
+    expect(screen.getByRole('textbox', { name: 'Data' })).toHaveValue('15/09/2026');
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Conflito de versão.'));
     expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover data' })).toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
+
+  it('cancels a restored legacy date without reporting unsaved changes', () => {
+    const onOpenChange = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={{ date: '15/09/2026', type: 'diet-update', version: 4 }}
+        onOpenChange={onOpenChange}
+        onSave={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(screen.queryByRole('heading', { name: 'Descartar alterações?' })).not.toBeInTheDocument();
+  });
+
+  it('submits an unchanged restored follow-up with an ISO date', async () => {
+    const onSave = vi.fn();
+    render(
+      <NextEventModal
+        open
+        nextEvent={{ date: '15/09/2026', type: 'diet-update', version: 4 }}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+        onClear={vi.fn()}
+      />,
+    );
+
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({
+      date: '2026-09-15', type: ['diet-update'], comments: '', version: 4,
+    }));
   });
 
   it('removes the confirmed follow-up only after the explicit hold confirmation', () => {

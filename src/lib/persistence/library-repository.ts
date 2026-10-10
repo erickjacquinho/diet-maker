@@ -4,6 +4,8 @@ import type {
   LibraryListFilter,
   ReadyMeal,
   ReadyMealInput,
+  ReadyDiet,
+  ReadyDietInput,
   Recipe,
   RecipeInput,
 } from '@/lib/domain/library/library-model';
@@ -39,4 +41,9 @@ export interface ReadyMealRepository {
   archive(accountId: string, readyMealId: string, expectedVersion: number): Promise<ReadyMeal>;
   restore(accountId: string, readyMealId: string, expectedVersion: number): Promise<ReadyMeal>;
   deleteIfUnreferenced(accountId: string, readyMealId: string, expectedVersion: number): Promise<boolean>;
+}
+
+export interface ReadyDietRepository {
+  create(accountId: string, input: ReadyDietInput): Promise<ReadyDiet>;
+  list(accountId: string): Promise<ReadyDiet[]>;
 }

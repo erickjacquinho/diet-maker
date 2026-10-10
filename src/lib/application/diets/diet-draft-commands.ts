@@ -50,8 +50,35 @@ export function createDietDraftCommands(dependencies: DietDraftCommandDependenci
   async function openEditor(patientId: string, routeDietId: string): Promise<OpenEditorResult> {
     const { accountId, patient } = await requirePatient(patientId);
     const recovered = await dependencies.draftStore.getByContext(accountId, patientId, routeDietId);
+    const plan = routeDietId === 'nova' ? null : await dependencies.repository.getById(accountId, patientId, routeDietId);
+    if (routeDietId !== 'nova' && !plan) throw new DietDomainError('PATIENT_NOT_FOUND', 'A prescrição não foi encontrada nesta Conta/paciente.');
+    if (plan && plan.status !== 'ACTIVE') throw new DietDomainError('READ_ONLY_DIET', 'Prescrições históricas são somente leitura; crie uma cópia para editar.');
+
     if (recovered) {
       if (recovered.state !== 'EDITABLE') throw new DietDomainError('ARCHIVED_PATIENT', 'O rascunho foi invalidado pelo arquivamento do paciente.');
+      if (plan && recovered.baseDietId === plan.id && recovered.baseDietVersion === plan.version && recovered.payload.mode === plan.mode && recovered.payload.variations.length === plan.variations.length) {
+        const hasPrimaryItems = (variations: DietEditableDocument['variations']) => variations.some((variation) =>
+          variation.meals.some((meal) => meal.options.some((option) => option.countsTowardTotals && option.items.some((item) => item.role === 'PRIMARY'))),
+        );
+        const hasDraftItems = hasPrimaryItems(recovered.payload.variations);
+        const hasPlanItems = hasPrimaryItems(plan.variations);
+        const sameVariations = recovered.payload.variations.every((variation) => plan.variations.some((saved) => saved.id === variation.id));
+
+        if (!hasDraftItems && hasPlanItems && sameVariations) {
+          const planVariations = new Map(plan.variations.map((variation) => [variation.id, variation]));
+          const payload = {
+            ...recovered.payload,
+            variations: recovered.payload.variations.map((variation) => {
+              const saved = planVariations.get(variation.id);
+              return saved ? { ...variation, meals: structuredClone(saved.meals) } : variation;
+            }),
+          };
+          const repairedDraft = { ...recovered, payload, draftRevision: recovered.draftRevision + 1, updatedAt: now() };
+          const result = await dependencies.draftStore.putIfNewer(repairedDraft, recovered.draftRevision);
+          if (result.status !== 'SAVED') throw new DietDomainError('VERSION_CONFLICT', 'O rascunho mudou durante a recuperação das refeições. Reabra a dieta.');
+          return { draft: { ...repairedDraft, draftRevision: result.revision, updatedAt: result.updatedAt }, isNew: false };
+        }
+      }
       return { draft: recovered, isNew: false };
     }
 
@@ -61,12 +88,11 @@ export function createDietDraftCommands(dependencies: DietDraftCommandDependenci
     if (routeDietId === 'nova') {
       payload = newDocument(patient.weightKg);
     } else {
-      const plan = await dependencies.repository.getById(accountId, patientId, routeDietId);
-      if (!plan) throw new DietDomainError('PATIENT_NOT_FOUND', 'A prescrição não foi encontrada nesta Conta/paciente.');
-      if (plan.status !== 'ACTIVE') throw new DietDomainError('READ_ONLY_DIET', 'Prescrições históricas são somente leitura; crie uma cópia para editar.');
-      payload = editableFromPlan(plan);
-      baseDietId = plan.id;
-      baseDietVersion = plan.version;
+      const activePlan = plan;
+      if (!activePlan) throw new DietDomainError('PATIENT_NOT_FOUND', 'A prescrição não foi encontrada nesta Conta/paciente.');
+      payload = editableFromPlan(activePlan);
+      baseDietId = activePlan.id;
+      baseDietVersion = activePlan.version;
     }
 
     const draft: DietDraft = {

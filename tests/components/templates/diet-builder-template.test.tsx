@@ -25,7 +25,6 @@ const renderTemplate = (overrides: Partial<React.ComponentProps<typeof DietBuild
       onSelectVariation: vi.fn(),
     },
     onAddMeal: vi.fn(),
-    onScaleDiet: vi.fn(),
     onWhatsAppShare: vi.fn(),
     onExportPDF: vi.fn(),
     onSaveDiet: vi.fn(),
@@ -73,13 +72,12 @@ describe('DietBuilderTemplate top composition', () => {
     const contextCard = screen.getByTestId('diet-context-card');
     const header = screen.getByRole('banner');
     const saveButton = within(header).getByRole('button', { name: 'Salvar Prescrição' });
-    const moreActionsButton = within(header).getByRole('button', { name: 'Mais ações' });
+    const moreActionsButton = within(header).getByRole('button', { name: 'Exportar Dieta' });
 
     expect(saveButton).toHaveClass('bg-primary');
     expect(within(contextCard).queryByRole('button', { name: 'Salvar Prescrição' })).not.toBeInTheDocument();
-    expect(within(contextCard).queryByRole('button', { name: 'Mais ações' })).not.toBeInTheDocument();
+    expect(within(contextCard).queryByRole('button', { name: 'Exportar Dieta' })).not.toBeInTheDocument();
     expect(within(contextCard).queryByRole('button', { name: 'Nova Refeição' })).not.toBeInTheDocument();
-    expect(within(contextCard).queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
 
     fireEvent.click(saveButton);
     expect(onSaveDiet).toHaveBeenCalledTimes(1);
@@ -106,12 +104,10 @@ describe('DietBuilderTemplate top composition', () => {
   it('keeps contextual actions with macros and meals outside the redesigned top surface', () => {
     renderTemplate();
 
-    const contextCard = screen.getByTestId('diet-context-card');
     const macroRegion = screen.getByTestId('macro-tracker-region');
     const mealsRegion = screen.getByRole('region', { name: 'Refeições' });
 
-    expect(within(contextCard).queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
-    expect(within(macroRegion).getByRole('button', { name: 'Escalar' })).toBeInTheDocument();
+    expect(within(macroRegion).queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
     expect(within(mealsRegion).getByRole('button', { name: 'Nova Refeição' })).toBeInTheDocument();
   });
 
@@ -165,5 +161,18 @@ describe('DietBuilderTemplate top composition', () => {
     expect(screen.getByRole('button', { name: 'Salvar Prescrição' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar Prescrição' }));
     expect(onSaveDiet).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('Published page entry', () => {
+  it('routes the export menu to the page callback without publishing on open', async () => {
+    const openPage = vi.fn();
+    renderTemplate({ onExportPage: openPage });
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Exportar Dieta' }), { key: 'ArrowDown' });
+    const action = await screen.findByRole('menuitem', { name: 'Exportar como página externa' });
+    expect(openPage).not.toHaveBeenCalled();
+    fireEvent.click(action);
+    expect(openPage).toHaveBeenCalledOnce();
   });
 });

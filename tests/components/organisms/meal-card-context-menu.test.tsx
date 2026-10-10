@@ -44,7 +44,6 @@ describe('MealCardContainer actions menu', () => {
     expect(screen.queryByRole('button', { name: 'Copiar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Colar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Duplicar' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Escalar' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
 
     const menu = await openMealActions();
@@ -56,7 +55,7 @@ describe('MealCardContainer actions menu', () => {
     expect(pasteAndReplaceItem).toBeInTheDocument();
     expect(menu).toHaveClass('rounded-control', 'border-border-subtle', 'bg-surface', 'shadow-floating');
     expect(pasteAndReplaceItem).toHaveClass('text-style-nav-item', 'text-text-primary', 'transition-colors', 'duration-fast', 'focus:bg-surface-hover');
-    expect(within(menu).getByRole('menuitem', { name: 'Escalar' })).toBeInTheDocument();
+    expect(within(menu).queryByRole('menuitem', { name: 'Escalar' })).not.toBeInTheDocument();
     expect(within(menu).getByRole('menuitem', { name: 'Nova Variação' })).toBeInTheDocument();
     expect(within(menu).queryByRole('menuitem', { name: 'Excluir da refeição' })).not.toBeInTheDocument();
   });
@@ -121,7 +120,6 @@ describe('MealCardContainer actions menu', () => {
     renderMealCard({
       items: [],
       canPasteMeal: false,
-      scaleDisabled: true,
     });
 
     expect(screen.getByRole('button', { name: 'Excluir refeição' })).toBeInTheDocument();
@@ -130,21 +128,8 @@ describe('MealCardContainer actions menu', () => {
     expect(within(menu).getByRole('menuitem', { name: 'Copiar' })).toHaveAttribute('data-disabled');
     expect(within(menu).getByRole('menuitem', { name: 'Colar' })).toHaveAttribute('data-disabled');
     expect(within(menu).getByRole('menuitem', { name: 'Colar e substituir' })).toHaveAttribute('data-disabled');
-    expect(within(menu).getByRole('menuitem', { name: 'Escalar' })).toHaveAttribute('data-disabled');
     expect(within(menu).getByRole('menuitem', { name: 'Duplicar' })).not.toHaveAttribute('data-disabled');
     expect(within(menu).queryByRole('menuitem', { name: 'Excluir da refeição' })).not.toBeInTheDocument();
-  });
-
-  it('keeps scaling disabled even when a scale callback is provided', async () => {
-    const onScale = vi.fn();
-    renderMealCard({ onScale, scaleDisabled: false });
-
-    const menu = await openMealActions();
-    const scaleItem = within(menu).getByRole('menuitem', { name: 'Escalar' });
-
-    expect(scaleItem).toHaveAttribute('data-disabled');
-    fireEvent.click(scaleItem);
-    expect(onScale).not.toHaveBeenCalled();
   });
 
   it('dismisses through the native dropdown Escape interaction', async () => {

@@ -14,6 +14,7 @@ import {
 } from '@/lib/mealVariations';
 import {
   buildPreviousDietSummaries,
+  cloneMealsWithFreshIds,
   type PreviousDietSummary,
 } from '@/lib/legacy-diet-copy';
 import { calculatePresetCalories } from '@/lib/presetUtils';
@@ -234,7 +235,17 @@ export function useDietBuilderPage() {
       if (!prev) return prev;
       if (newMode !== 'carb_cycling' || prev.carbCyclingVariations.length > 0) {
         if (newMode === 'carb_cycling' && prev.mode !== 'carb_cycling') {
-          setActiveVariationId(prev.carbCyclingVariations[0]?.id || 'var-high');
+          const firstVariation = prev.carbCyclingVariations[0];
+          setActiveVariationId(firstVariation?.id || 'var-high');
+          if (firstVariation && firstVariation.meals.length === 0 && prev.simpleMeals.length > 0) {
+            return {
+              ...prev,
+              mode: newMode,
+              carbCyclingVariations: prev.carbCyclingVariations.map((variation, index) =>
+                index === 0 ? { ...variation, meals: cloneMealsWithFreshIds(prev.simpleMeals) } : variation
+              ),
+            };
+          }
         }
         return { ...prev, mode: newMode };
       }
@@ -242,12 +253,12 @@ export function useDietBuilderPage() {
       const protein = prev.simpleTargetProtein || Math.round(weight * 2);
       const carbs = prev.simpleTargetCarbs || Math.round(weight * 2.5);
       const fat = prev.simpleTargetFats || Math.round(weight * 0.8);
-      const makeVariation = (id: string, name: string, assignedDays: CarbCyclingVariation['assignedDays'], carbFactor: number): CarbCyclingVariation => {
+      const makeVariation = (id: string, name: string, assignedDays: CarbCyclingVariation['assignedDays'], carbFactor: number, meals: DietMeal[] = []): CarbCyclingVariation => {
         const targetCarbs = Math.round(carbs * carbFactor);
         return {
           id, name, type: id === 'var-high' ? 'high' : id === 'var-med' ? 'medium' : 'low', assignedDays,
           targetKcal: calculatePresetCalories(protein, targetCarbs, fat), targetProtein: protein, targetCarbs, targetFats: fat,
-          inputMode: 'grams', gPerKg: { protein: Number((protein / weight).toFixed(1)), carbs: Number((targetCarbs / weight).toFixed(1)), fats: Number((fat / weight).toFixed(1)) }, meals: [],
+          inputMode: 'grams', gPerKg: { protein: Number((protein / weight).toFixed(1)), carbs: Number((targetCarbs / weight).toFixed(1)), fats: Number((fat / weight).toFixed(1)) }, meals,
         };
       };
       setActiveVariationId('var-high');
@@ -256,7 +267,7 @@ export function useDietBuilderPage() {
         mode: newMode,
         carbCyclingVariationsCount: 3,
         carbCyclingVariations: [
-          makeVariation('var-high', 'Dia Alto Carbo', ['seg', 'qua', 'sex'], 1.3),
+          makeVariation('var-high', 'Dia Alto Carbo', ['seg', 'qua', 'sex'], 1.3, cloneMealsWithFreshIds(prev.simpleMeals)),
           makeVariation('var-med', 'Dia Médio Carbo', ['ter', 'qui'], 1),
           makeVariation('var-low', 'Dia Baixo Carbo', ['sab', 'dom'], 0.5),
         ],
@@ -450,11 +461,24 @@ export function useDietBuilderPage() {
   }, [dietApplication, dietPlan, draft, handleSaveDiet, setLoadedDraft]);
 
   const handleDiscardDraft = useCallback(async () => {
-    if (!dietApplication || !draft) return;
-    const revision = currentRevisionRef.current ?? draft.draftRevision;
-    await dietApplication.discardDraft(draft.draftId, revision);
-    router.push(`/pacientes/${patientId}`);
-  }, [dietApplication, draft, patientId, router]);
+    try {
+      if (!dietApplication || !draft) throw new Error('O rascunho não está disponível para descarte.');
+      if (saveInFlightRef.current) throw new Error('Aguarde o salvamento da prescrição antes de descartar o rascunho.');
+      const revision = currentRevisionRef.current ?? draft.draftRevision;
+      let result = await dietApplication.discardDraft(draft.draftId, revision);
+      if (result === 'SUPERSEDED_REVISION') {
+        const latest = await flushCurrentDraft();
+        if (!latest || latest.status === 'INVALIDATED') throw new Error('Não foi possível sincronizar o rascunho antes de descartá-lo.');
+        const latestRevision = latest.status === 'SAVED' ? latest.revision : latest.currentRevision;
+        result = await dietApplication.discardDraft(draft.draftId, latestRevision);
+      }
+      if (result === 'SUPERSEDED_REVISION') throw new Error('O rascunho mudou durante o descarte. Aguarde a sincronização e tente novamente.');
+      router.push(`/pacientes/${patientId}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível descartar o rascunho.');
+      throw error;
+    }
+  }, [dietApplication, draft, flushCurrentDraft, patientId, router]);
 
   const handleBackClick = useCallback(async () => {
     if (saveInFlightRef.current) return;

@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ConfirmationAlertDialog, MealItemRow, MealItemRowProps, MacroProportionBar, SortableList } from '../molecules';
 import type { SortableItemRenderContext } from '@/components/molecules/SortableList';
-import type { DataTableColumnDef } from '@/components/molecules/DataTable';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Percent, Plus, Replace, Trash2 } from 'lucide-react';
+import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { ClipboardCopy, ClipboardPaste, Clock, Copy, MoreHorizontal, Plus, Replace, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   DropdownMenu,
@@ -87,9 +87,9 @@ export interface MealCardContainerProps {
   onPasteMeal?: () => void;
   onPasteMealAndReplace?: () => void;
   canPasteMeal?: boolean;
-  onScale?: () => void;
-  scaleDisabled?: boolean;
   onDeleteMeal?: () => void;
+  onCreateReadyMeal?: () => void;
+  canCreateReadyMeal?: boolean;
   onRemoveItem?: (index: number) => void;
   onSubstituteItem?: (index: number) => void;
   onDuplicateItem?: (index: number) => void;
@@ -107,55 +107,55 @@ const mealItemColumns: DataTableColumnDef<MealItemRowProps>[] = [
   {
     id: 'reorder',
     header: <span className="sr-only">Reordenar</span>,
-    headerClassName: 'h-8 w-10 px-2 text-center',
+    headerClassName: 'w-10 px-2 text-center',
     cell: () => null,
   },
   {
     id: 'name',
     header: 'Nome',
-    headerClassName: 'h-8 text-left',
+    headerClassName: 'text-left',
     cell: () => null,
   },
   {
     id: 'food-actions',
     header: <span className="sr-only">Ações do alimento</span>,
-    headerClassName: 'h-8 w-20 px-2 text-center',
+    headerClassName: 'w-20 px-2 text-center',
     cell: () => null,
   },
   {
     id: 'quantity',
     header: 'Quantidade',
-    headerClassName: 'h-8 w-24 text-center',
+    headerClassName: 'w-24 text-center',
     cell: () => null,
   },
   {
     id: 'protein',
     header: 'Proteína',
-    headerClassName: 'h-8 w-20 text-right text-macro-protein',
+    headerClassName: 'w-20 text-right text-macro-protein',
     cell: () => null,
   },
   {
     id: 'carbs',
     header: 'Carboidrato',
-    headerClassName: 'h-8 w-24 text-right text-macro-carbohydrate',
+    headerClassName: 'w-24 text-right text-macro-carbohydrate',
     cell: () => null,
   },
   {
     id: 'fats',
     header: 'Gorduras',
-    headerClassName: 'h-8 w-20 text-right text-macro-fat',
+    headerClassName: 'w-20 text-right text-macro-fat',
     cell: () => null,
   },
   {
     id: 'calories',
     header: 'Calorias',
-    headerClassName: 'h-8 w-24 text-right text-text-primary',
+    headerClassName: 'w-24 text-right text-text-primary',
     cell: () => null,
   },
   {
     id: 'remove',
     header: <span className="sr-only">Remover alimento</span>,
-    headerClassName: 'h-8 w-12 px-2 text-center',
+    headerClassName: 'w-12 px-2 text-center',
     cell: () => null,
   },
 ];
@@ -177,9 +177,9 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   onPasteMeal,
   onPasteMealAndReplace,
   canPasteMeal = false,
-  onScale,
-  scaleDisabled = false,
   onDeleteMeal,
+  onCreateReadyMeal,
+  canCreateReadyMeal = true,
   onRemoveItem,
   onSubstituteItem,
   onDuplicateItem,
@@ -197,11 +197,24 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
   const [draftTitle, setDraftTitle] = useState(title);
   const [draftTime, setDraftTime] = useState(time);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [scrollingTimeColumn, setScrollingTimeColumn] = useState<'hours' | 'minutes' | null>(null);
+  const timeColumnScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPasteReplaceAlertOpen, setIsPasteReplaceAlertOpen] = useState(false);
-  const isScaleActionDisabled = true;
 
   useEffect(() => setDraftTitle(title), [title]);
   useEffect(() => setDraftTime(time), [time]);
+  useEffect(() => () => {
+    if (timeColumnScrollTimerRef.current !== null) clearTimeout(timeColumnScrollTimerRef.current);
+  }, []);
+
+  const handleTimeColumnScroll = (column: 'hours' | 'minutes') => {
+    if (timeColumnScrollTimerRef.current !== null) clearTimeout(timeColumnScrollTimerRef.current);
+    setScrollingTimeColumn(column);
+    timeColumnScrollTimerRef.current = setTimeout(() => {
+      setScrollingTimeColumn(null);
+      timeColumnScrollTimerRef.current = null;
+    }, 700);
+  };
 
   const computedKcal = calculatePresetCalories(proteinG, carbsG, fatsG);
   const displayKcal = computedKcal > 0 ? computedKcal : kcal;
@@ -331,7 +344,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <PopoverContent
                   align="start"
                   side="bottom"
-                  className="w-auto p-3 shadow-floating bg-surface border-border-subtle"
+                  className="w-52 p-3 shadow-floating bg-surface border-border-subtle"
                 >
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between border-b border-border-subtle pb-1.5 px-1 gap-4">
@@ -342,16 +355,18 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                         {draftTime || '00:00'}
                       </span>
                     </div>
-                    <div className="flex items-start gap-3">
+                    <div className="flex w-full items-start gap-3">
                       {/* Coluna de Horas */}
-                      <div className="flex flex-col gap-1 items-center">
-                        <span className={cn(textStyle('legal'), 'text-text-muted font-medium')}>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span className={cn(textStyle('legal'), 'w-full text-center text-text-muted font-medium')}>
                           Hora
                         </span>
                         <div
                           role="listbox"
                           aria-label="Horas"
-                          className="flex flex-col gap-0.5 max-h-44 overflow-y-auto w-14 pr-1"
+                          data-scrolling={scrollingTimeColumn === 'hours'}
+                          onScroll={() => handleTimeColumnScroll('hours')}
+                          className="meal-time-options flex max-h-44 w-full flex-col gap-0.5 overflow-y-auto px-1"
                         >
                           {HOURS_OPTIONS.map((h) => {
                             const isSelected = currentHour === h;
@@ -364,7 +379,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                                 aria-label={`Hora ${h}`}
                                 onClick={() => handleSelectHour(h)}
                                 className={cn(
-                                  'h-7 w-full text-center justify-center text-style-legal font-medium px-1',
+                                  'h-8 w-full text-center justify-center text-style-legal font-medium px-1',
                                   isSelected && 'font-bold'
                                 )}
                               >
@@ -378,14 +393,16 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                       <div className="w-px h-44 bg-border-subtle self-center" />
 
                       {/* Coluna de Minutos */}
-                      <div className="flex flex-col gap-1 items-center">
-                        <span className={cn(textStyle('legal'), 'text-text-muted font-medium')}>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span className={cn(textStyle('legal'), 'w-full text-center text-text-muted font-medium')}>
                           Min
                         </span>
                         <div
                           role="listbox"
                           aria-label="Minutos"
-                          className="flex flex-col gap-0.5 max-h-44 overflow-y-auto w-14 pr-1"
+                          data-scrolling={scrollingTimeColumn === 'minutes'}
+                          onScroll={() => handleTimeColumnScroll('minutes')}
+                          className="meal-time-options flex max-h-44 w-full flex-col gap-0.5 overflow-y-auto px-1"
                         >
                           {MINUTES_OPTIONS.map((m) => {
                             const isSelected = currentMinute === m;
@@ -398,7 +415,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                                 aria-label={`Minuto ${m}`}
                                 onClick={() => handleSelectMinute(m)}
                                 className={cn(
-                                  'h-7 w-full text-center justify-center text-style-legal font-medium px-1',
+                                  'h-8 w-full text-center justify-center text-style-legal font-medium px-1',
                                   isSelected && 'font-bold'
                                 )}
                               >
@@ -479,14 +496,16 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                   <Replace size={14} aria-hidden="true" />
                   <span>Colar e substituir</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={onScale}
-                  disabled={isScaleActionDisabled || scaleDisabled}
-                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
-                >
-                  <Percent size={14} aria-hidden="true" />
-                  <span>Escalar</span>
-                </DropdownMenuItem>
+                {onCreateReadyMeal && (
+                  <DropdownMenuItem
+                    onSelect={onCreateReadyMeal}
+                    disabled={!canCreateReadyMeal}
+                    className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                  >
+                    <Plus size={14} aria-hidden="true" />
+                    <span>Criar refeição pronta</span>
+                  </DropdownMenuItem>
+                )}
                 {(onAddVariation || (hasVariationTabs && onRemoveVariation)) && (
                   <DropdownMenuSeparator className="bg-border-divider" />
                 )}
@@ -528,44 +547,21 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
 
         {/* Items List - Table View */}
         <div className="min-h-12">
-          <Table
-            aria-label={`Alimentos da refeição ${title}`}
-            containerClassName="overflow-hidden rounded-control border border-border-divider bg-surface"
-          >
-            <TableCaption className="sr-only">Alimentos da refeição {title}</TableCaption>
-            <TableHeader>
-              <TableRow className="border-b border-border-divider bg-surface-subtle hover:bg-surface-subtle">
-                {mealItemColumns.map((column) => (
-                  <TableHead
-                    key={column.id}
-                    scope="col"
-                    className={cn(
-                      'h-9 bg-surface-subtle px-4 font-bold text-style-chart-micro tracking-overline text-text-secondary',
-                      column.headerClassName
-                    )}
-                  >
-                    {column.header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-
-            {items.length === 0 ? (
-              <TableBody>
-                <TableRow>
-                  <TableCell colSpan={mealItemColumns.length} className="p-4 text-center">
-                    <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
-                      <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
-                      <span className="text-style-caption">
-                        Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.
-                      </span>
-                    </span>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            ) : (
+          <DataTable
+            data={items}
+            columns={mealItemColumns}
+            getRowId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
+            caption={`Alimentos da refeição ${title}`}
+            emptyMessage={(
+              <span className="flex flex-col items-center justify-center gap-1 text-text-muted">
+                <span className="text-style-legal font-medium">Nenhum alimento nesta refeição.</span>
+                <span className="text-style-caption">Clique em &quot;+ Adicionar Alimento&quot; para incluir itens da tabela TACO.</span>
+              </span>
+            )}
+            className="overflow-hidden rounded-control border border-border-divider bg-surface"
+            renderBody={(rows) => (
               <SortableList
-                items={items}
+                items={rows}
                 getItemId={(item, index) => item.id || `${id ?? 'meal'}-item-${index}`}
                 getItemLabel={(item) => item.name}
                 ariaLabel={`Alimentos da refeição ${title}`}
@@ -613,7 +609,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 onReorder={(_, meta) => onReorderItems?.(meta.fromIndex, meta.toIndex)}
               />
             )}
-          </Table>
+          />
         </div>
 
         {/* Add Food Button */}

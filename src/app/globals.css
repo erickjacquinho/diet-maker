@@ -20,6 +20,21 @@
   }
 }
 
+@layer components {
+  .meal-time-options {
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+  }
+  .meal-time-options::-webkit-scrollbar { width: var(--ref-space-2); }
+  .meal-time-options::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--sys-radius-round);
+    transition: background-color var(--sys-motion-fast) var(--sys-ease-standard);
+  }
+  .meal-time-options[data-scrolling="true"] { scrollbar-color: var(--sys-color-border-hover) transparent; }
+  .meal-time-options[data-scrolling="true"]::-webkit-scrollbar-thumb { background-color: var(--sys-color-border-hover); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0ms !important;

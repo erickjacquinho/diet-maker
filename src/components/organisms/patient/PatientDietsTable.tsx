@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, ChevronDown, Eye, LocateFixed } from 'lucide-react';
+import { Calendar, ChevronDown, Eye, FileText, Link2, LocateFixed, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
+import { ActionDropdown } from '@/components/molecules/ActionDropdown';
 import {
   Table,
   TableBody,
@@ -35,6 +36,7 @@ export interface PatientDietsTableProps {
   loading?: boolean;
   error?: string | null;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
+  onExportDiet?: (diet: HistoricalDiet, format: PatientDietExportFormat) => void;
   pagination?: DataTablePagination;
 }
 
@@ -48,7 +50,7 @@ const columns: DataTableColumnDef<DietTableData>[] = [
   {
     id: 'name',
     header: 'Plano Alimentar',
-    headerClassName: 'w-1/4 whitespace-nowrap px-2 py-3',
+    headerClassName: 'w-1/6 whitespace-nowrap px-2 py-3',
     cell: () => null,
   },
   {
@@ -72,7 +74,7 @@ const columns: DataTableColumnDef<DietTableData>[] = [
   {
     id: 'actions',
     header: 'Ações',
-    headerClassName: 'w-1/6 whitespace-nowrap px-2 py-3 text-right',
+    headerClassName: 'w-1/4 whitespace-nowrap px-2 py-3 text-right',
     cell: () => null,
   },
 ];
@@ -80,6 +82,8 @@ const columns: DataTableColumnDef<DietTableData>[] = [
 function formatDietType(diet: HistoricalDiet): string {
   return diet.mode === 'carb_cycling' ? 'Ciclo de carboidratos' : 'Simples';
 }
+
+export type PatientDietExportFormat = 'whatsapp' | 'pdf' | 'page';
 
 function formatAssignedDays(days: string[] = []): string {
   const uniqueDays = Array.from(new Set(days));
@@ -224,17 +228,20 @@ export function DietTableRow({
   isExpanded,
   onToggleExpand,
   onOpenReadOnlyDiet,
+  onExportDiet,
 }: {
   patientId: string;
   diet: HistoricalDiet;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onOpenReadOnlyDiet: (diet: HistoricalDiet) => void;
+  onExportDiet?: (diet: HistoricalDiet, format: PatientDietExportFormat) => void;
 }) {
   const isActive = diet.status === 'Ativa';
   const isCarbCycling = diet.mode === 'carb_cycling';
   const hasCycleDetails = isCarbCycling;
   const dietTarget = diet.dietTargets ?? diet;
+  const [isExportMenuOpen, setIsExportMenuOpen] = React.useState(false);
 
   return (
     <TableRow
@@ -272,10 +279,11 @@ export function DietTableRow({
                 event.stopPropagation();
                 onToggleExpand();
               }}
-              className="shrink-0 gap-1 p-0 text-text-secondary hover:text-text-primary"
+              className="min-w-0 max-w-full gap-1 p-0 text-text-secondary hover:text-text-primary"
             >
               <span
-                className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
+                title={formatDietType(diet)}
+                className={`min-w-0 truncate whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
               >
                 {formatDietType(diet)}
               </span>
@@ -287,7 +295,8 @@ export function DietTableRow({
             </Button>
           ) : (
             <span
-              className={`min-w-0 whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
+              title={formatDietType(diet)}
+              className={`block min-w-0 truncate whitespace-nowrap font-semibold text-text-primary ${textStyle('body-strong')}`}
             >
               {formatDietType(diet)}
             </span>
@@ -348,12 +357,16 @@ export function DietTableRow({
 
       {/* 6. Ações */}
       <TableCell className="whitespace-nowrap px-1 py-3.5 text-right">
-        <div className="pointer-events-none flex items-center justify-end gap-1 invisible group-hover:pointer-events-auto group-hover:visible group-focus-within:pointer-events-auto group-focus-within:visible">
+        <div className={`flex items-center justify-end gap-1 ${isExportMenuOpen
+          ? 'visible'
+          : 'invisible group-hover:visible group-focus-within:visible'
+        }`}>
           <Button
             type="button"
             variant="secondary"
             size="compact"
             iconOnly
+            className={isExportMenuOpen ? 'invisible' : undefined}
             onClick={() => onOpenReadOnlyDiet(diet)}
             aria-label={`Ver cardápio completo da dieta ${diet.name}`}
             title={`Ver cardápio completo da dieta ${diet.name}`}
@@ -363,11 +376,50 @@ export function DietTableRow({
           {isActive && (
             <Link
               href={`/pacientes/${patientId}/dieta/${diet.id}`}
+              className={isExportMenuOpen ? 'invisible' : undefined}
               title={`Editar ${diet.name} no Construtor de Dietas`}
               aria-label={`Editar ${diet.name} no Construtor de Dietas`}
             >
               <EditIconButton title="Editar no Construtor de Dietas" size="compact" />
             </Link>
+          )}
+          {onExportDiet && (
+            <ActionDropdown
+              trigger={(
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="compact"
+                  iconOnly
+                  aria-label={`Exportar dieta ${diet.name}`}
+                  title={`Exportar dieta ${diet.name}`}
+                >
+                  <MoreHorizontal size={15} aria-hidden="true" />
+                </Button>
+              )}
+              onOpenChange={setIsExportMenuOpen}
+              items={[
+                {
+                  id: 'whatsapp',
+                  label: 'WhatsApp',
+                  icon: <MessageCircle size={14} aria-hidden="true" />,
+                  onSelect: () => onExportDiet(diet, 'whatsapp'),
+                },
+                {
+                  id: 'pdf',
+                  label: 'PDF',
+                  icon: <FileText size={14} aria-hidden="true" />,
+                  onSelect: () => onExportDiet(diet, 'pdf'),
+                },
+                {
+                  id: 'page',
+                  label: 'Exportar como página externa',
+                  disabled: isCarbCycling,
+                  icon: <Link2 size={14} aria-hidden="true" />,
+                  onSelect: () => onExportDiet(diet, 'page'),
+                },
+              ]}
+            />
           )}
         </div>
       </TableCell>
@@ -381,6 +433,7 @@ export function PatientDietsTable({
   loading = false,
   error,
   onOpenReadOnlyDiet,
+  onExportDiet,
   pagination,
 }: PatientDietsTableProps) {
   const [expandedDietId, setExpandedDietId] = React.useState<string | null>(null);
@@ -406,6 +459,7 @@ export function PatientDietsTable({
               setExpandedDietId((currentId) => (currentId === diet.id ? null : diet.id))
             }
             onOpenReadOnlyDiet={onOpenReadOnlyDiet}
+            onExportDiet={onExportDiet}
           />
         )}
         expandedRowId={expandedDietId}

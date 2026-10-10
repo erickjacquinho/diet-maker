@@ -52,6 +52,7 @@ A lista canônica de consumidores é o campo `consumers` do registro; atualmente
 
 - identidade, source e exports coincidem com o registro;
 - permite reagendar e remover a data com confirmação.
+- restaura datas ISO ou legadas sem apagar o campo nem sinalizar alterações inexistentes; envia a data em ISO.
 - permite desmarcar ambos os tipos, mantendo Salvar desabilitado enquanto nenhum estiver selecionado.
 
 ## Implementation status

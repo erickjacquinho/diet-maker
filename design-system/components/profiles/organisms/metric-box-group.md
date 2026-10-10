@@ -43,7 +43,7 @@ Cada item deve fornecer label e value conforme o contrato de `MetricBox`. Unidad
 ## Exceptions
 
 `no-padding-grid-shell`: o shell usa `Surface` com `p-0` para preservar o grid sem padding interno; o override é de layout e não cria uma segunda receita visual.
-ExceptionRecord: no-padding-grid-shell reviewAt: 2026-09-30 owner: design-system-maintainers
+ExceptionRecord: no-padding-grid-shell reviewAt: 2027-01-10 owner: design-system-maintainers
 
 ## Consumers
 
@@ -62,3 +62,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 ## Implementation status
 
 Implementado em `organism`; perfil homologado documentalmente.
+
+Revisão 2026-10-10: composição e consumidores preservados; exceção verificada pelos testes da família e auditoria do catálogo.

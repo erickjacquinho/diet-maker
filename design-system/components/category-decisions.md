@@ -141,7 +141,7 @@ Cada decisão inicial possui um registro completo. `Replacement` é `none` enqua
 - Status: `accepted/stable`
 - Category/lifecycle affected: `structure` / `stable`
 - Problem: Shell, containers, grids e regiões desktop precisavam de limites de layout sem estilizar filhos.
-- Consumers: `template-app-layout-shell`, `template-diet-builder-template`.
+- Consumers: `template-app-layout-shell`, `template-diet-builder-template`, `template-diet-pdf-template`.
 - Alternatives: Usar `surfaces` para página; deixar grid em cada tela; misturar navegação no shell.
 - Impact: Fixa layout desktop e composição estrutural, mantendo aparência interna nas categorias filhas.
 - Compatibility: Compatível com `collapsible` e `nutrition-context`; não define tokens de conteúdo.

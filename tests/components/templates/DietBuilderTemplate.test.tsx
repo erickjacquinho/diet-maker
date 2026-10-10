@@ -20,7 +20,7 @@ describe('DietBuilderTemplate header action dropdown', () => {
       />,
     );
 
-    const trigger = screen.getByRole('button', { name: /mais ações/i });
+    const trigger = screen.getByRole('button', { name: /exportar dieta/i });
     expect(trigger).toBeInTheDocument();
 
     fireEvent.pointerDown(trigger, { button: 0, pointerType: 'mouse' });

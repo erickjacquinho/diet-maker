@@ -41,6 +41,8 @@ export interface ActionDropdownProps {
   align?: 'start' | 'center' | 'end';
   /** Lista de ações executáveis */
   items: readonly DropdownActionItem[] | DropdownActionItem[];
+  /** Notifica quando o menu abre ou fecha */
+  onOpenChange?: (open: boolean) => void;
   /** Classes CSS adicionais para o container ou trigger */
   className?: string;
   /** Rótulo acessível do botão */
@@ -55,11 +57,12 @@ export function ActionDropdown({
   size = 'compact',
   align = 'end',
   items,
+  onOpenChange,
   className = '',
   'aria-label': ariaLabel,
 }: ActionDropdownProps) {
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         {trigger ? (
           trigger

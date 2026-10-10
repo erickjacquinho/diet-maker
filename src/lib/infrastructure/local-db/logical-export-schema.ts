@@ -14,13 +14,14 @@ import type {
   patients,
   readyMealItems,
   readyMeals,
+  readyDiets,
   recipeIngredients,
   recipes,
 } from './schema';
 
 export const BACKUP_APP_ID = 'nutridiet-local-pro' as const;
 export const BACKUP_FORMAT_VERSION = 1 as const;
-export const BACKUP_SCHEMA_VERSION = '7' as const;
+export const BACKUP_SCHEMA_VERSION = '8' as const;
 export const LEGACY_BACKUP_SCHEMA_VERSION = '4' as const;
 
 export const BACKUP_TABLE_NAMES = [
@@ -41,6 +42,7 @@ export const BACKUP_TABLE_NAMES = [
   'recipeIngredients',
   'readyMeals',
   'readyMealItems',
+  'readyDiets',
 ] as const;
 
 export type BackupTableName = (typeof BACKUP_TABLE_NAMES)[number];
@@ -63,11 +65,12 @@ export type RecipeRow = typeof recipes.$inferSelect;
 export type RecipeIngredientRow = typeof recipeIngredients.$inferSelect;
 export type ReadyMealRow = typeof readyMeals.$inferSelect;
 export type ReadyMealItemRow = typeof readyMealItems.$inferSelect;
+export type ReadyDietRow = typeof readyDiets.$inferSelect;
 
 export interface BackupEnvelope {
   appId: typeof BACKUP_APP_ID;
   formatVersion: typeof BACKUP_FORMAT_VERSION;
-  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5' | '6';
+  schemaVersion: typeof BACKUP_SCHEMA_VERSION | typeof LEGACY_BACKUP_SCHEMA_VERSION | '5' | '6' | '7';
   exportedAt: string;
   favorites: string[];
   account: AccountRow[];
@@ -87,6 +90,7 @@ export interface BackupEnvelope {
   recipeIngredients: RecipeIngredientRow[];
   readyMeals: ReadyMealRow[];
   readyMealItems: ReadyMealItemRow[];
+  readyDiets: ReadyDietRow[];
 }
 
 /** Runtime field names for strict format-one validation. */
@@ -108,6 +112,7 @@ export const BACKUP_ROW_KEYS: { readonly [K in BackupTableName]: readonly string
   recipeIngredients: ['id', 'recipeId', 'accountId', 'position', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit', 'ingredientSnapshot'],
   readyMeals: ['id', 'accountId', 'name', 'description', 'suggestedTime', 'status', 'version', 'createdAt', 'updatedAt', 'archivedAt'],
   readyMealItems: ['id', 'readyMealId', 'accountId', 'position', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit', 'recipePortions', 'itemSnapshot'],
+  readyDiets: ['id', 'accountId', 'name', 'document', 'version', 'createdAt', 'updatedAt'],
 };
 
 export const BACKUP_ENVELOPE_KEYS = [

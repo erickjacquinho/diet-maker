@@ -22,7 +22,7 @@ Herda integralmente [nutrition-domain](../../categories/nutrition-domain.md). Tr
 
 ## Specific anatomy
 
-Card com header de refeição, resumo, lista de `MealItemRow`, estado empty e ações da refeição. Quando a refeição possui mais de uma opção, o header acrescenta um `TabsList` controlado com os rótulos posicionais `Variação 1` a `Variação 5`; nome e horário continuam compartilhados pelo grupo.
+Card com header de refeição, resumo, lista de `MealItemRow`, estado empty e ações da refeição. Quando a refeição possui mais de uma opção, o header acrescenta um `TabsList` controlado com os rótulos posicionais `Variação 1` a `Variação 5`; nome e horário continuam compartilhados pelo grupo. O menu pode oferecer `Criar refeição pronta` quando ao menos uma opção contém alimentos.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Empty conserva header e action de adicionar; updating preserva itens anteriores.
 
 ## Composition
 
-Base declarada: `atom-surface`. Compõe `Surface` e `MealItemRow`; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
+Base declarada: `atom-surface`. Compõe `Surface`, `DataTable` e `MealItemRow`; o corpo usa `SortableList` para preservar reordenação por ponteiro e teclado; compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules
 
@@ -42,7 +42,7 @@ Nomes, kcal, g e percentuais seguem o contexto do domínio; macro sempre possui 
 
 ## Interaction contract
 
-`Tabs` é controlado pelo contexto da página e usa ativação manual. Clique, Enter e Espaço alteram a opção; as setas, Home e End conservam a navegação roving do primitive. O botão de adicionar copia a opção ativa e abre a nova última opção; excluir atua apenas quando há mais de uma opção.
+`Tabs` é controlado pelo contexto da página e usa ativação manual. Clique, Enter e Espaço alteram a opção; as setas, Home e End conservam a navegação roving do primitive. O botão de adicionar copia a opção ativa e abre a nova última opção; excluir atua apenas quando há mais de uma opção. `Criar refeição pronta` abre o modal de seleção e salva em lote cada variação escolhida como uma refeição pronta independente.
 
 ## Accessibility behavior
 

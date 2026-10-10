@@ -107,7 +107,7 @@ function legacyItem(item: DietItem): LegacyDietItem {
     protein: Number(nutrients.protein),
     carbs: Number(nutrients.carbs),
     fats: Number(nutrients.fat),
-    kcal: Number(nutrients.energyKcal ?? 0),
+    kcal: Number(nutrients.energyKcal ?? (Number(nutrients.protein) * 4 + Number(nutrients.carbs) * 4 + Number(nutrients.fat) * 9)),
     snapshot: structuredClone(item.snapshot),
   } as LegacyDietItem;
 }

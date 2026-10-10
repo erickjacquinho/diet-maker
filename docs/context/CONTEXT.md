@@ -36,8 +36,8 @@ estimativa e meta manual seguem a [Decisão 06](../../refs/dieta-db/06-catalogo-
 - **Definição**: Base oficial de composição nutricional dos alimentos no Brasil (valores padrão por 100g de parte comestível).
 - **Custom Alimentos**: Alimentos ou suplementos criados pelo nutricionista armazenados localmente.
 
-### 5. Escala Proporcional de Porções
-- **Definição**: Operação matemática em lote que multiplica a gramatura de todos os alimentos de uma refeição ou dieta inteira por um fator percentual (ex: `+15%` ou `x 1.15`), permitindo ajuste rápido de caloria/volume sem re-digitar item por item.
+### 5. Escala Proporcional de Porções — removida
+- **Status**: A escala em lote não faz mais parte do construtor de dieta. As metas de macronutrientes são ajustadas manualmente, e as porções são editadas por alimento.
 
 ### 6. Receitas Culinárias & Ingredientes
 - **Definição**: Composição gastronômica estruturada contendo nome, rendimento (número de porções), tempo de preparo, instruções de preparo e lista de ingredientes (`amountGrams`, macros e alimento de origem).
