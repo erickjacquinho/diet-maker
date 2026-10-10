@@ -65,11 +65,16 @@ async function saveFollowUp(page: Page, offsetDays: number, type: string, expect
   const region = page.getByRole('region', { name: 'Próximo acompanhamento' });
   await page.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
-  const comments = dialog.getByRole('textbox', { name: 'Comentários' });
+  const comments = dialog.getByRole('textbox', { name: 'Observações' });
   await expect(comments).toHaveValue(expectedComments);
   const label = dateLabel(offsetDays);
   await chooseDate(page, dialog, label);
-  await dialog.getByRole('button', { name: type, exact: true }).click();
+  for (const typeLabel of ['Atualização de avaliação', 'Atualização de dieta']) {
+    const button = dialog.getByRole('button', { name: typeLabel, exact: true });
+    if ((await button.getAttribute('aria-pressed') === 'true') !== (typeLabel === type)) {
+      await button.click();
+    }
+  }
   await comments.fill(`Revisar ${type.toLowerCase()}`);
   await dialog.getByRole('button', { name: /^Salvar/ }).click();
   await expect(dialog).toBeHidden({ timeout: 120_000 });
