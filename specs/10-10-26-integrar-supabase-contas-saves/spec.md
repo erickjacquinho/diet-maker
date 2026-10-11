@@ -4,9 +4,9 @@
 
 **Created**: 2026-10-10
 
-**Status**: Especificação clarificada — pronta para planejamento e validação documental, sem implementação nesta execução.
+**Status**: Implementação e publicação foram autorizadas. O app está em Production em `https://nutridiet-eight.vercel.app`; T024 e T029 foram concluídas com provas remotas. T026 segue aberta para a validação pendente de Edge e do picker nativo do Windows. Histórico e limites estão em `implementation-log.md` e `validation-report.md`.
 
-**Input**: Pedido completo preservado em [.sdd-context.json](./.sdd-context.json): primeira integração preparada para Vercel, landing placeholder, login, cadastro e recuperação de senha, identidade e banco no Supabase, dashboard dos saves locais e vínculo permanente entre conta e save. Todas as operações remotas devem ser autorizadas pelo backend. Não publicar nesta entrega. O pedido atual é produzir o plano usando SDD e terminar antes de implementar.
+**Input**: Pedido completo preservado em [.sdd-context.json](./.sdd-context.json), ampliado em 2026-10-11 para publicação: landing placeholder, login, cadastro e recuperação, identidade e banco no Supabase, dashboard dos saves locais e vínculo permanente entre conta e save. Todas as operações remotas devem ser autorizadas pelo backend. Hospedar o app na Vercel com o endereço `vercel.app` do projeto; usar Gmail no SMTP inicial. Sem domínio próprio informado.
 
 ## Objetivo, atores e limites
 
@@ -14,7 +14,7 @@ Preparar o acesso online do profissional ao NutriDiet, com um catálogo dos seus
 
 Os atores são visitante sem sessão, profissional com conta online e proprietário de um ou mais saves. Outro profissional autenticado é um ator não autorizado para saves que não lhe pertencem. Não existem equipes, compartilhamento ou transferência de propriedade no pedido.
 
-Esta execução produz somente documentação para revisão humana. A implementação futura inclui páginas, autorização do backend e estrutura de identidade, perfil e catálogo no Supabase. Publicação na Vercel, domínio público, deploy de funções, mudanças no Supabase durante este planejamento e funcionamento de produção ficam fora desta execução. O link da landing significa um endereço de página preparado no aplicativo; um endereço público depende de publicação posterior.
+Esta execução inclui implementação e publicação da aplicação Next.js na Vercel, além do schema/Auth dedicado no Supabase. O endereço público usa o domínio `vercel.app` associado ao projeto; DNS ou domínio próprio e deploy de Edge Functions continuam fora do escopo. A publicação só é funcional depois de configurar variáveis server-side, migration, Auth/SMTP e callbacks para o endereço efetivo.
 
 O arquivo local continua sendo o save solicitado. “Sincronizado” nesta dashboard significa encontrar e reconhecer o arquivo na localização autorizada lembrada neste navegador; não significa upload ou cópia na nuvem. O estado de localização é diferente do estado de gravação de alterações no arquivo, que já existe no aplicativo.
 
@@ -27,6 +27,7 @@ O arquivo local continua sendo o save solicitado. “Sincronizado” nesta dashb
 - Q: Onde deve acontecer a criptografia do save: processamento temporário no backend ou conteúdo inteiramente local com material criptográfico autorizado no navegador? → A: Opção B — conteúdo clínico permanece no computador; após autorização do backend, o navegador usa material criptográfico para abrir e gravar o arquivo, inclusive durante a janela offline. Isso não concede acesso ao banco Supabase; a chave não aparece no save, mas o navegador autorizado precisa conseguir utilizá-la.
 - Q: Como tratar saves antigos sem proprietário online: primeira vinculação ao importar ou adiar importação legada? → A: Opção A — a primeira conta autenticada que importa uma identidade legada ainda não vinculada torna-se proprietária do save protegido. Criar uma cópia criptografada e preservar o original; a proteção começa na nova cópia, e o original continua legível e não comprova seu dono histórico.
 - Q: Posso fechar o cadastro com login por e-mail, verificação por link, média mensal, atuação em anos e campos obrigatórios com números não negativos? → A: Ajuste ao padrão proposto: incluir as opções “1–6 meses” e “6–12 meses” no tempo de atuação, além de anos. Os demais elementos do padrão proposto são mantidos. As faixas são respostas autodeclaradas e não devem ser convertidas em uma duração exata.
+- Execução iniciada: em 2026-10-10, o usuário autorizou `$sdd-implement` e projeto Supabase dedicado na organização Jacquinho, plano Free, região São Paulo; naquele momento, publicação não fazia parte do pedido. Em 2026-10-11, autorizou publicar a aplicação pela conta Vercel atual, sem domínio próprio, e escolheu Gmail como remetente inicial. O nome do projeto Vercel pode ser decidido pelo executor; usar endereço `vercel.app`. Migration e Auth remotos dependem de SMTP e segredos provisionados.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -102,18 +103,18 @@ O profissional cria um save ou carrega um arquivo pela primeira vez. A primeira 
 6. **Given** um save antigo válido cuja identidade legada ainda não foi vinculada, **When** um profissional autenticado confirma sua importação e a nova gravação conclui, **Then** torna-se proprietário da cópia protegida; o conteúdo é migrado localmente sem alterar o original ou enviar prontuários ao backend.
 7. **Given** uma identidade legada já vinculada a outro profissional, **When** tenta adotá-la novamente, **Then** o backend recusa a vinculação. Um arquivo legado legível ou adulterado não comprova propriedade histórica; sua cópia original não recebe proteção retroativa.
 
-### User Story 5 - Preparar a integração sem publicar (Priority: P2)
+### User Story 5 - Publicar a integração operacional (Priority: P2)
 
-O responsável recebe requisitos, plano e tarefas verificáveis para preparar a integração. O aplicativo e os serviços externos não são modificados por esta execução documental.
+O profissional acessa a aplicação publicada na Vercel; os fluxos de conta usam o Supabase dedicado e e-mail de autenticação entregue pelo SMTP configurado.
 
-**Why this priority**: A publicação foi explicitamente adiada e decisões de segurança precisam ser revisadas antes da execução.
+**Why this priority**: Login, criação de conta e recuperação só atendem usuários reais quando hospedagem, origem, callbacks e envio de e-mail estão integrados.
 
-**Independent Test**: Conferir os artefatos e o escopo da diferença de arquivos; verificar ausência de alterações de implementação ou de serviços nesta etapa.
+**Independent Test**: Abrir o endereço Vercel final, criar e confirmar uma conta sintética, autenticar, solicitar recovery e acessar os próprios saves; verificar callbacks, cookies seguros e ausência de conteúdo clínico na rede.
 
 **Acceptance Scenarios**:
 
-1. **Given** o fluxo SDD, **When** conclui a validação documental, **Then** entrega spec, plano, tarefas e checklists para validação humana antes da implementação.
-2. **Given** a integração futura, **When** executada com autorização posterior, **Then** páginas e estrutura de banco podem ser preparadas sem publicar um endereço público da aplicação.
+1. **Given** o projeto Vercel e o Supabase estão configurados, **When** o deploy de produção termina, **Then** a aplicação responde em HTTPS sem expor segredos no bundle ou nos logs.
+2. **Given** a landing publicada, **When** um profissional confirma o e-mail, entra e solicita recuperação, **Then** as mensagens chegam pelo SMTP Gmail configurado e os redirects retornam à origem aprovada.
 
 ### Edge Cases
 
@@ -153,7 +154,7 @@ O responsável recebe requisitos, plano e tarefas verificáveis para preparar a 
 - **FR-018**: Exigir internet em cada login, criação e abertura de save para validação pelo backend. Uma autorização online bem-sucedida permite continuar o trabalho local no save já aberto por até oito horas a partir dessa validação; não autoriza novo login, criação ou reabertura offline. Ao expirar ou sair, bloquear o acesso e exigir validação online sem apagar trabalho confirmado ou drafts. Indisponibilidade do serviço não renova a janela nem concede novo vínculo; durante a autorização, cifragem e checkpoints do arquivo são locais conforme FR-012, sem conexão obrigatória para cada gravação.
 - **FR-019**: Reaproveitar a área normal do aplicativo após criar/carregar o save, preservando os contratos de dados clínicos, drafts, gravação local e checkpoint do arquivo.
 - **FR-020**: Permitir adoção explícita de uma identidade legada ainda não vinculada pela primeira conta autenticada que a importa. O backend registra um único proprietário e recusa reivindicação da mesma identidade já vinculada por outra conta. Validar e migrar o conteúdo em memória no computador, gravando uma nova cópia criptografada com chave permanente sem reescrever o original; somente concluir abertura após confirmar a escrita e validação da cópia protegida. Repetir uma adoção pelo mesmo proprietário não troca a chave de um vínculo já estabelecido. O JSON antigo não comprova seu dono histórico e originais/cópias legíveis ou adulteradas não recebem sigilo nem prova criptográfica retroativos.
-- **FR-021**: Preparar integração para Vercel e Supabase sem publicar a aplicação. Nesta execução SDD não criar projeto remoto, executar SQL, implantar funções ou alterar código do aplicativo.
+- **FR-021**: Configurar o projeto Supabase dedicado autorizado, aplicar a migration validada e preparar Auth/SMTP; publicar o aplicativo Next.js na Vercel no endereço `vercel.app` do projeto. Não publicar Edge Functions nem vincular domínio próprio.
 - **FR-022**: Apresentar erro, carregamento, envio concluído e indisponibilidade com semântica acessível; solicitações repetidas não devem duplicar cadastro ou vínculo concluído.
 
 ### Non-Functional Requirements
@@ -164,7 +165,7 @@ O responsável recebe requisitos, plano e tarefas verificáveis para preparar a 
 - **NFR-004**: Cancelamento, importação inválida, falha de autorização ou falha de gravação não podem apagar ou sobrescrever silenciosamente o save original nem o trabalho anterior.
 - **NFR-005**: Preservar a compatibilidade de saves anteriores quando possível por migração determinística e validação antes de trocar a área de trabalho; documentar qualquer limite de proteção dos arquivos antigos.
 - **NFR-006**: Registrar falhas de autenticação e autorização sem credenciais, chaves, tokens, e-mail completo ou conteúdo clínico; proteger operações de identidade contra tentativas repetidas automatizadas.
-- **NFR-007**: Sincronização de conteúdo clínico com a nuvem, colaboração, contas de pacientes, cobrança, OAuth e publicação não foram pedidos para esta fase e não geram tarefas implícitas.
+- **NFR-007**: Sincronização de conteúdo clínico com a nuvem, colaboração, contas de pacientes, cobrança, OAuth, PWA e publicação de Edge Functions não foram pedidos para esta fase e não geram tarefas implícitas.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -188,7 +189,7 @@ O responsável recebe requisitos, plano e tarefas verificáveis para preparar a 
 - **SC-006**: A identidade da chave de cada save permanece igual depois de três novos logins, reabertura, mudança de localização e recuperação de senha; a chave legível não aparece nos arquivos nem nas respostas de catálogo.
 - **SC-007**: Recuperação válida permite novo login; autorização inválida, expirada ou reutilizada não redefine senha. E-mail existente e inexistente produzem respostas públicas equivalentes.
 - **SC-008**: Todas as falhas de importação, autorização e gravação previstas preservam o arquivo original e o trabalho confirmado; um save da versão anterior é usado para verificar a política de compatibilidade aprovada.
-- **SC-009**: A entrega documental não publica aplicação, altera banco remoto ou declara recursos implementados; a execução futura só começa após validação humana do pacote SDD.
+- **SC-009**: A aplicação publicada em HTTPS usa somente o projeto Supabase dedicado, Auth com SMTP/callback configurados e segredos server-side; login, confirmação, recuperação e acesso ao catálogo passam por um teste sintético de produção.
 - **SC-010**: Login, criação e nova abertura de save falham sem conexão; o save já aberto permite trabalho local antes do limite de oito horas e bloqueia acesso a partir da expiração ou logout, sem perder dados confirmados e drafts.
 - **SC-011**: A matriz de criação, abertura, edição, checkpoint e recuperação não transmite conteúdo clínico, arquivo ou drafts ao backend/Supabase. Um checkpoint durante a janela offline produz arquivo protegido válido, sem chave secreta legível, e só é confirmado após escrita bem-sucedida.
 - **SC-012**: Importar a fixture legada compatível preserva os bytes do arquivo original e seus dados na cópia protegida, registra um único proprietário e conserva a mesma chave em repetição pelo mesmo profissional; outra conta não adota novamente a mesma identidade já vinculada. O fluxo informa que o original continua legível e não comprova propriedade histórica.
@@ -201,5 +202,6 @@ O responsável recebe requisitos, plano e tarefas verificáveis para preparar a 
 - Foi confirmado que não há trânsito, upload, backup ou sincronização do conteúdo dos saves no Supabase. O backend guarda identidade, perfil profissional, catálogo e chave protegida, e autoriza uso criptográfico local na sessão; o conteúdo clínico continua no computador. A regra de soberania clínica da Decisão 12 permanece vigente.
 - O navegador depende de referência autorizada e permissões locais para reencontrar arquivos. O backend verifica direito de acesso, mas não observa o disco do profissional nem aceita o status local como prova de propriedade.
 - A proteção cifrada abrange o arquivo principal, suas cópias protegidas e os segredos/dados de perfil próprios no banco remoto. PGlite e drafts locais já existentes continuam na arquitetura atual; este escopo não promete cifrar todo armazenamento do dispositivo. Supabase Auth precisa usar o e-mail para autenticação/envio, portanto não se promete ocultá-lo de operadores privilegiados do provedor. Conteúdo já entregue e uma chave utilizável em sessão não podem ser revogados criptograficamente contra quem controla o navegador.
-- O provedor solicitado é Supabase para identidade/banco; Vercel é a hospedagem futura mencionada. Projeto/ambiente Supabase, URL de retorno e serviço de e-mail serão especificados para a execução antes de qualquer mutação remota.
-- O ajuste final do cadastro acrescenta faixas de meses à proposta apresentada; login por e-mail, verificação por link, média mensal, campos obrigatórios e números não negativos foram mantidos nessa resposta. Está concluída a clarificação funcional; os contratos técnicos e entradas de provisionamento serão explicitados no plano, sem presumir autorização para publicação.
+- O usuário autorizou o projeto Supabase dedicado na organização Jacquinho, região São Paulo, e, em 2026-10-11, ampliou o escopo para deploy na conta Vercel atual. Sem domínio próprio: usar o hostname `vercel.app` atribuído ao projeto. Gmail é o SMTP inicial; a senha de app é fornecida somente pelo arquivo local ignorado `.env.smtp.local`.
+- O ajuste final do cadastro acrescenta faixas de meses à proposta apresentada; login por e-mail, verificação por link, média mensal, campos obrigatórios e números não negativos foram mantidos nessa resposta.
+- Em 2026-10-11 o usuário escolheu publicação na conta Vercel já conectada, sem domínio próprio, e Gmail como SMTP de Auth. O remetente é o endereço Gmail verificado e a credencial é uma senha de app guardada localmente; não é credencial Vercel.

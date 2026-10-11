@@ -1,10 +1,10 @@
 # Estado do fluxo SDD
 
-Data: 2026-10-10, America/Sao_Paulo.
+Data: 2026-10-11, America/Sao_Paulo.
 
 Diretório âncora: `specs/10-10-26-integrar-supabase-contas-saves`.
 
-**Estado atual após minimize**: 29 tarefas abertas, 42/42 requisitos cobertos, 2 checklists (16/16 e24/24), sem implementação. Revisão solicitada pelo usuário e aplicada somente ao pacote documental; aguarda validação humana do plano para execução. O histórico abaixo inclui a primeira versão de 46 tarefas.
+**Estado atual**: T024 e T029 concluídas. Supabase remoto está configurado e o deployment `nutridiet` está `READY` em `https://nutridiet-eight.vercel.app`. O smoke HTTPS autenticado passou para signup, perfil, confirmação, login, recuperação, saves e autorização; bundle/logs não expuseram segredos e os registros de teste foram removidos. T026 permanece aberta: Chrome está aprovado, mas Edge não está instalado e o picker nativo do Windows não foi validado. O restante deste arquivo preserva o histórico do planejamento e as tentativas anteriores.
 
 ## Preparação e especificação
 
@@ -33,7 +33,7 @@ Diretório âncora: `specs/10-10-26-integrar-supabase-contas-saves`.
 - 46 tarefas anteriores mapeadas para29, reunindo cenários antes do código e uma jornada integrada. Reexecutar matriz já aprovada só por mudança/falha/risco aberto.
 - Análise revalidada no pacote consolidado; nenhum requisito/tarefa/skill sem cobertura. Spec preservado byte a byte. Nenhuma consulta substantiva ao Jev nesta revisão: preflight no_decision, sem atribuir a ele as simplificações.
 
-## Evidência do estado atual do produto
+## Baseline histórico do produto antes da implementação
 
 - `src/app/page.tsx`: redireciona `/` para `/home`; não existe landing pública implementada.
 - `src/app/layout.tsx` e `src/app/SessionAwareAppShell.tsx`: shell global com gate de profile local, sem autenticação online. Páginas públicas novas precisam ficar fora do gate clínico na implementação futura.

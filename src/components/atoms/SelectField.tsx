@@ -32,6 +32,7 @@ export function SelectField<T extends string = string>({
   className = '',
   triggerClassName = '',
   'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
 }: SelectFieldProps<T>) {
   return (
     <div className={cn('flex flex-col gap-1 w-full', className)}>
@@ -61,6 +62,7 @@ export function SelectField<T extends string = string>({
           aria-label={ariaLabel || label}
           aria-required={required}
           aria-invalid={state === 'error'}
+          aria-describedby={ariaDescribedBy}
           className={cn('w-full', triggerClassName)}
         >
           <SelectValue placeholder={placeholder} />
@@ -93,6 +95,7 @@ export function SelectField<T extends string = string>({
 
       {state === 'error' && errorMessage && (
         <span
+          id={ariaDescribedBy}
           role="alert"
           className="text-style-legal text-error font-medium mt-0.5"
         >

@@ -48,4 +48,6 @@ export interface SelectFieldProps<T extends string = string> {
   triggerClassName?: string;
   /** Rótulo acessível quando label visual não for renderizado */
   'aria-label'?: string;
+  /** Id de uma descrição auxiliar ou de validação associada ao trigger */
+  'aria-describedby'?: string;
 }

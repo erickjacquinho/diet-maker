@@ -6,7 +6,6 @@ import "@fontsource/plus-jakarta-sans/700.css";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { SessionAwareAppShell } from "@/app/SessionAwareAppShell";
-import { PatientApplicationBootstrap } from "@/app/PatientApplicationBootstrap";
 
 export const metadata: Metadata = {
   title: "NutriDiet Local Pro - Sistema Nutricional Swiss Warm Minimalist",
@@ -22,7 +21,6 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="bg-canvas text-text-primary font-sans antialiased min-h-screen">
         <SessionAwareAppShell>{children}</SessionAwareAppShell>
-        <PatientApplicationBootstrap />
         <Toaster position="bottom-right" richColors duration={3000} toastOptions={{ closeButtonAriaLabel: 'Fechar notificação' }} />
       </body>
     </html>

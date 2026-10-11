@@ -20,16 +20,19 @@ import { PGliteReadyDietRepository } from '@/lib/infrastructure/local-db/library
 import { PGliteClinicalRepository } from '@/lib/infrastructure/local-db/clinical-repository';
 import { PGliteBackupRepository } from '@/lib/infrastructure/local-db/backup-repository';
 import { createBackupApplication, type BackupApplication } from './backup-application';
-import { createProfileSession, type ProfileSession } from './profile-session';
+import { createProfileSession, type OnlineSaveScope, type ProfileSession, type ProfileSessionOnlineSaveGateway } from './profile-session';
 import { createBrowserSaveFilePort } from '@/lib/infrastructure/file-system-access/browser-save-file';
 import type { Account } from '@/lib/domain/account';
 import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
-import { getFavoritesFromStorage, setFavoritesFromStorage } from '@/lib/library-ui-adapter';
+import { decodeBase64Url, type ProtectedSaveGrant } from '@/lib/domain/protected-save';
+import { createOnlineSaveSession, guardOnlineSaveApplication, type OnlineSaveRevocationMarker, type OnlineSaveSession } from './online-save-session';
+import { getFavoritesFromStorage, setActiveFavoritesAccountId, setFavoritesFromStorage } from '@/lib/library-ui-adapter';
 import { readAgendaReminders, replaceAgendaReminders } from '@/lib/agenda-reminders';
 
 export interface BrowserPatientRuntime {
   readonly account: Account;
   readonly hasExistingWorkspace: boolean;
+  readonly onlineScope?: OnlineSaveScope;
   readonly application: PatientApplication;
   readonly dietApplication: DietApplication;
   readonly libraryApplication: LibraryApplication;
@@ -43,21 +46,31 @@ export interface BrowserPatientRuntime {
 
 let activeRuntime: BrowserPatientRuntime | null = null;
 let profileSession: ProfileSession<BrowserPatientRuntime> | undefined;
+let onlineSaveSession: OnlineSaveSession | undefined;
+let pendingBrowserRevocation: Promise<void> | null = null;
+const draftPreservers = new WeakMap<DietApplication, DietApplication['flushDraft']>();
+
+export async function preserveBrowserDietDraft(application: DietApplication, ...args: Parameters<DietApplication['flushDraft']>): ReturnType<DietApplication['flushDraft']> {
+  const preserve = draftPreservers.get(application);
+  if (!preserve || profileSession?.getSnapshot().runtime?.dietApplication !== application) throw new Error('O rascunho não pertence ao runtime em preservação.');
+  return preserve(...args);
+}
 
 function createBrowserBackupRepository(handle: LocalDatabaseHandle): PGliteBackupRepository {
   return new PGliteBackupRepository(handle, {
-    readFavorites: getFavoritesFromStorage,
-    writeFavorites: setFavoritesFromStorage,
+    readFavorites: (accountId) => getFavoritesFromStorage(accountId),
+    writeFavorites: (accountId, favorites) => setFavoritesFromStorage(favorites, accountId),
     readAgendaReminders,
     writeAgendaReminders: replaceAgendaReminders,
   });
 }
 
 /** Builds a persistent browser workspace and an isolated memory workspace in tests. */
-export async function createBrowserPatientRuntime(account: Account): Promise<BrowserPatientRuntime> {
+export async function createBrowserPatientRuntime(account: Account, onlineScope?: OnlineSaveScope): Promise<BrowserPatientRuntime> {
   const inBrowser = typeof window !== 'undefined';
+  const workspaceKey = onlineScope ? `${onlineScope.ownerId}:${onlineScope.saveId}` : account.id;
   const handle = await openLocalDatabase(inBrowser
-    ? { mode: 'persistent', dataDir: `idb://nutridiet-${encodeURIComponent(account.id)}` }
+    ? { mode: 'persistent', dataDir: `idb://nutridiet-${encodeURIComponent(workspaceKey)}` }
     : { mode: 'memory' });
   try {
     let syncAfterConfirmedOperation: (() => Promise<void>) | undefined;
@@ -107,12 +120,23 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
     const dietRepository = new PGliteDietRepository(handle);
     const dietReader = createPatientDietReader(dietRepository);
     const clinicalRepository = new PGliteClinicalRepository(handle);
-    const draftStore = inBrowser ? new IndexedDbDietDraftStore() : new InMemoryDietDraftStore();
+    const draftStore = inBrowser
+      ? new IndexedDbDietDraftStore({ databaseName: onlineScope
+        ? `nutridiet-diet-drafts-v1-${encodeURIComponent(workspaceKey)}`
+        : 'nutridiet-diet-drafts-v1' })
+      : new InMemoryDietDraftStore();
     const backupRepository = createBrowserBackupRepository(handle);
     const backupApplication = createBackupApplication({
       accountContext,
       repository: backupRepository,
       draftStore,
+      ...(onlineScope && onlineSaveSession
+        ? { protectedSave: { session: onlineSaveSession, identity: onlineScope, authorizeRestore: async () => {
+          const gateway = createBrowserOnlineSaveGateway();
+          const grant = await gateway.authorizeSave(onlineScope.saveId, onlineScope.bindingProof);
+          await gateway.session.authorize(grant);
+        } } }
+        : {}),
       getCheckpointState,
       savePendingCheckpoint: async () => {
         if (!syncAfterConfirmedOperation) throw new Error('Nenhum arquivo principal está associado à sessão atual.');
@@ -130,9 +154,10 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
     const readyMealRepository = new PGliteReadyMealRepository(handle, { foodRepository, recipeRepository });
     const readyDietRepository = new PGliteReadyDietRepository(handle);
 
-    return {
+    const runtime: BrowserPatientRuntime = {
       account: persistedAccount,
       hasExistingWorkspace,
+      ...(onlineScope ? { onlineScope } : {}),
       handle,
       getCheckpointState,
       markWorkspaceDirty,
@@ -165,6 +190,18 @@ export async function createBrowserPatientRuntime(account: Account): Promise<Bro
       libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository, readyDietRepository, confirmedOperation }),
       backupApplication,
     };
+    if (onlineScope && onlineSaveSession) {
+      const preserveDraft = runtime.dietApplication.flushDraft;
+      const guarded = {
+        ...runtime,
+        application: guardOnlineSaveApplication(runtime.application, onlineSaveSession, onlineScope),
+        dietApplication: guardOnlineSaveApplication(runtime.dietApplication, onlineSaveSession, onlineScope),
+        libraryApplication: guardOnlineSaveApplication(runtime.libraryApplication, onlineSaveSession, onlineScope),
+      };
+      draftPreservers.set(guarded.dietApplication, preserveDraft);
+      return guarded;
+    }
+    return runtime;
   } catch (error) {
     await handle.close();
     throw error;
@@ -182,21 +219,25 @@ export async function exportBrowserPatientSnapshot(runtime: BrowserPatientRuntim
 
 export function activateBrowserPatientRuntime(runtime: BrowserPatientRuntime): BrowserPatientRuntime {
   activeRuntime = runtime;
+  setActiveFavoritesAccountId(runtime.account.id);
   return runtime;
 }
 
 export async function disposeBrowserPatientRuntime(runtime: BrowserPatientRuntime | null | undefined): Promise<void> {
   if (!runtime) return;
-  if (activeRuntime === runtime) activeRuntime = null;
+  if (activeRuntime === runtime) {
+    activeRuntime = null;
+    setActiveFavoritesAccountId(undefined);
+  }
   await runtime.handle.close();
 }
 
 export function getBrowserPatientRuntimeIfActive(): BrowserPatientRuntime | null {
-  return activeRuntime;
+  return profileSession?.isSaveAuthorized() ? activeRuntime : null;
 }
 
 export async function persistAgendaReminderChange(accountId: string): Promise<void> {
-  if (!activeRuntime || activeRuntime.account.id !== accountId || !profileSession) {
+  if (!activeRuntime || activeRuntime.account.id !== accountId || !profileSession?.isSaveAuthorized()) {
     throw new Error('O arquivo principal não está disponível para salvar o lembrete.');
   }
   await activeRuntime.markWorkspaceDirty();
@@ -204,8 +245,167 @@ export async function persistAgendaReminderChange(accountId: string): Promise<vo
 }
 
 export async function getBrowserPatientRuntime(): Promise<BrowserPatientRuntime> {
-  if (!activeRuntime) throw new Error('Nenhum profile está ativo nesta sessão.');
+  if (!activeRuntime || !profileSession?.isSaveAuthorized()) throw new Error('O save está bloqueado ou não autorizado nesta sessão.');
   return activeRuntime;
+}
+
+const revocationMarkerKey = 'nutridiet.online-save-revocation-pending';
+const uuidPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
+
+function createBrowserRevocationMarker(): OnlineSaveRevocationMarker {
+  return {
+    isPending() {
+      if (typeof window === 'undefined') return false;
+      return window.localStorage.getItem(revocationMarkerKey) === '1';
+    },
+    markPending() {
+      if (typeof window === 'undefined') throw new Error('Local storage is unavailable.');
+      window.localStorage.setItem(revocationMarkerKey, '1');
+    },
+    clear() {
+      if (typeof window === 'undefined') throw new Error('Local storage is unavailable.');
+      window.localStorage.removeItem(revocationMarkerKey);
+    },
+  };
+}
+
+async function fetchJson(url: string, init?: RequestInit): Promise<Record<string, unknown>> {
+  const response = await fetch(url, {
+    ...init,
+    cache: 'no-store',
+    credentials: 'same-origin',
+  });
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new Error('O serviço de conta não retornou uma resposta válida.');
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new Error('O serviço de conta não retornou uma resposta válida.');
+  }
+  if (!response.ok) {
+    const code = (body as Record<string, unknown>).code;
+    if (code === 'AUTH_REQUIRED') throw new Error('Entre novamente para abrir ou criar um save.');
+    if (code === 'PROFILE_REQUIRED') throw new Error('Conclua seu cadastro para acessar os saves.');
+    throw new Error('A operação online do save não pôde ser concluída.');
+  }
+  return body as Record<string, unknown>;
+}
+
+async function getCsrfToken(): Promise<string> {
+  const body = await fetchJson('/api/auth/csrf');
+  if (typeof body.csrfToken !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(body.csrfToken)) {
+    throw new Error('Não foi possível preparar uma operação protegida.');
+  }
+  return body.csrfToken;
+}
+
+export async function signOutBrowserAccount(): Promise<void> {
+  const csrfToken = await getCsrfToken();
+  const response = await fetch('/api/auth/logout', {
+    method: 'POST',
+    cache: 'no-store',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ csrfToken }),
+  });
+  if (!response.ok) throw new Error('Não foi possível encerrar a sessão da conta. Tente novamente.');
+  if (onlineSaveSession) onlineSaveSession.acknowledgeRemoteRevocation();
+  else createBrowserRevocationMarker().clear();
+}
+
+export function revokePendingBrowserSession(): Promise<void> {
+  if (pendingBrowserRevocation) return pendingBrowserRevocation;
+  if (!createBrowserRevocationMarker().isPending()) return Promise.resolve();
+  const pending = signOutBrowserAccount().finally(() => {
+    if (pendingBrowserRevocation === pending) pendingBrowserRevocation = null;
+  });
+  pendingBrowserRevocation = pending;
+  return pending;
+}
+
+function createBrowserOnlineSaveGateway(): ProfileSessionOnlineSaveGateway {
+  const session = onlineSaveSession ??= createOnlineSaveSession({
+    isOnline: () => typeof navigator === 'undefined' || navigator.onLine !== false,
+    revocationMarker: createBrowserRevocationMarker(),
+  });
+  return {
+    session,
+    async getCurrentOwnerId() {
+      const body = await fetchJson('/api/auth/session');
+      const user = body.user;
+      if (!user || typeof user !== 'object' || Array.isArray(user)) throw new Error('Entre na sua conta para acessar os saves.');
+      const ownerId = (user as Record<string, unknown>).id;
+      if (typeof ownerId !== 'string' || !uuidPattern.test(ownerId)) throw new Error('A sessão da conta não pôde ser validada.');
+      if (body.profileComplete !== true) throw new Error('Conclua seu cadastro para acessar os saves.');
+      return ownerId;
+    },
+    createIdempotencyKey() {
+      return globalThis.crypto.randomUUID();
+    },
+    async registerSave(input) {
+      const csrfToken = await getCsrfToken();
+      const body = await fetchJson('/api/saves', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...input, csrfToken }),
+      });
+      if (
+        typeof body.saveId !== 'string' || !uuidPattern.test(body.saveId)
+        || typeof body.localAccountId !== 'string'
+        || typeof body.keyId !== 'string' || !uuidPattern.test(body.keyId)
+        || typeof body.bindingProof !== 'string'
+        || body.localAccountId !== input.localAccountId
+      ) throw new Error('O registro do save não corresponde à Conta clínica selecionada.');
+      return {
+        saveId: body.saveId,
+        localAccountId: body.localAccountId,
+        keyId: body.keyId,
+        bindingProof: body.bindingProof,
+      };
+    },
+    async authorizeSave(saveId, bindingProof) {
+      const csrfToken = await getCsrfToken();
+      const body = await fetchJson(`/api/saves/${encodeURIComponent(saveId)}/authorize`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ bindingProof, csrfToken }),
+      });
+      const rawEncodedKey = body.key;
+      if (
+        typeof body.ownerId !== 'string' || !uuidPattern.test(body.ownerId)
+        || body.saveId !== saveId
+        || typeof body.localAccountId !== 'string'
+        || typeof body.keyId !== 'string' || !uuidPattern.test(body.keyId)
+        || body.bindingProof !== bindingProof
+        || typeof body.authorizedAt !== 'number' || !Number.isSafeInteger(body.authorizedAt)
+        || typeof body.expiresAt !== 'number' || !Number.isSafeInteger(body.expiresAt)
+        || typeof rawEncodedKey !== 'string'
+      ) throw new Error('A autorização do save não pôde ser validada.');
+      const rawKey = decodeBase64Url(rawEncodedKey);
+      if (!rawKey || rawKey.length !== 32) {
+        rawKey?.fill(0);
+        throw new Error('A chave do save não pôde ser validada.');
+      }
+      try {
+        const key = await crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+        (body as Record<string, unknown>).key = '';
+        return {
+          ownerId: body.ownerId,
+          saveId,
+          localAccountId: body.localAccountId,
+          keyId: body.keyId,
+          bindingProof,
+          authorizedAt: body.authorizedAt,
+          expiresAt: body.expiresAt,
+          key,
+        } satisfies ProtectedSaveGrant;
+      } finally {
+        rawKey.fill(0);
+      }
+    },
+  };
 }
 
 export function getBrowserProfileSession(): ProfileSession<BrowserPatientRuntime> {
@@ -213,6 +413,7 @@ export function getBrowserProfileSession(): ProfileSession<BrowserPatientRuntime
     let session: ProfileSession<BrowserPatientRuntime>;
     session = createProfileSession<BrowserPatientRuntime>({
       filePort: createBrowserSaveFilePort(),
+      onlineSave: createBrowserOnlineSaveGateway(),
       createRuntime: createBrowserPatientRuntime,
       importSnapshot: importBrowserPatientSnapshot,
       exportSnapshot: exportBrowserPatientSnapshot,

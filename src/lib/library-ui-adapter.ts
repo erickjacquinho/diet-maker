@@ -83,13 +83,22 @@ export interface ReadyMeal {
 }
 
 const FAVORITES_KEY = 'nutridiet_favorite_foods';
+let activeFavoritesAccountId: string | undefined;
 
-export function getFavoritesFromStorage(): string[] {
-  return getEphemeralItem<string[]>(FAVORITES_KEY, []);
+export function setActiveFavoritesAccountId(accountId?: string): void {
+  activeFavoritesAccountId = accountId;
 }
 
-export function setFavoritesFromStorage(favorites: string[]): void {
-  setEphemeralItem(FAVORITES_KEY, favorites);
+function favoritesKey(accountId = activeFavoritesAccountId): string {
+  return accountId ? `${FAVORITES_KEY}:${encodeURIComponent(accountId)}` : FAVORITES_KEY;
+}
+
+export function getFavoritesFromStorage(accountId?: string): string[] {
+  return getEphemeralItem<string[]>(favoritesKey(accountId), []);
+}
+
+export function setFavoritesFromStorage(favorites: string[], accountId?: string): void {
+  setEphemeralItem(favoritesKey(accountId), favorites);
 }
 
 export function toggleFavoriteFood(foodId: string): string[] {

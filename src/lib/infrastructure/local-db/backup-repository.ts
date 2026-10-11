@@ -35,8 +35,8 @@ export type BackupRepositoryFailurePoint = 'after-delete' | 'after-insert';
 export interface PGliteBackupRepositoryOptions {
   now?: () => string;
   failAt?: BackupRepositoryFailurePoint;
-  readFavorites?: () => string[];
-  writeFavorites?: (favorites: string[]) => void;
+  readFavorites?: (() => string[]) | ((accountId: string) => string[]);
+  writeFavorites?: ((favorites: string[]) => void) | ((accountId: string, favorites: string[]) => void);
   readAgendaReminders?: (accountId: string) => AgendaReminder[];
   writeAgendaReminders?: (accountId: string, reminders: AgendaReminder[]) => boolean;
 }
@@ -48,8 +48,8 @@ function repositoryFailure(message: string, cause?: unknown): BackupRepositoryEr
 export class PGliteBackupRepository implements BackupRepository {
   private readonly now: () => string;
   private readonly failAt?: BackupRepositoryFailurePoint;
-  private readonly readFavorites: () => string[];
-  private readonly writeFavorites: (favorites: string[]) => void;
+  private readonly readFavorites: PGliteBackupRepositoryOptions['readFavorites'];
+  private readonly writeFavorites: PGliteBackupRepositoryOptions['writeFavorites'];
   private readonly readAgendaReminders: (accountId: string) => AgendaReminder[];
   private readonly writeAgendaReminders: (accountId: string, reminders: AgendaReminder[]) => boolean;
 
@@ -60,6 +60,22 @@ export class PGliteBackupRepository implements BackupRepository {
     this.writeFavorites = options.writeFavorites ?? (() => {});
     this.readAgendaReminders = options.readAgendaReminders ?? (() => []);
     this.writeAgendaReminders = options.writeAgendaReminders ?? ((_accountId, reminders) => reminders.length === 0);
+  }
+
+  private readFavoritesFor(accountId: string): string[] {
+    if (!this.readFavorites) return [];
+    return this.readFavorites.length > 0
+      ? (this.readFavorites as (accountId: string) => string[])(accountId)
+      : (this.readFavorites as () => string[])();
+  }
+
+  private writeFavoritesFor(accountId: string, favorites: string[]): void {
+    if (!this.writeFavorites) return;
+    if (this.writeFavorites.length > 1) {
+      (this.writeFavorites as (accountId: string, favorites: string[]) => void)(accountId, favorites);
+    } else {
+      (this.writeFavorites as (favorites: string[]) => void)(favorites);
+    }
   }
 
   async readAccountSnapshot(accountId: string): Promise<BackupEnvelope> {
@@ -91,7 +107,7 @@ export class PGliteBackupRepository implements BackupRepository {
           formatVersion: BACKUP_FORMAT_VERSION,
           schemaVersion: BACKUP_SCHEMA_VERSION,
           exportedAt: this.now(),
-          favorites: [...this.readFavorites()],
+          favorites: [...this.readFavoritesFor(accountId)],
           agendaReminders: [...this.readAgendaReminders(accountId)],
           account: accountRows,
           objectiveOptions: objectiveRows,
@@ -124,14 +140,14 @@ export class PGliteBackupRepository implements BackupRepository {
       throw repositoryFailure('A substituição não corresponde à Conta local ativa.');
     }
 
-    const previousFavorites = [...this.readFavorites()];
+    const previousFavorites = [...this.readFavoritesFor(accountId)];
     const previousAgendaReminders = this.readAgendaReminders(accountId);
     if (!this.writeAgendaReminders(accountId, [...snapshot.agendaReminders])) {
       throw repositoryFailure('Os lembretes do calendário não puderam ser salvos; a base local não foi alterada.');
     }
 
     try {
-      this.writeFavorites([...snapshot.favorites]);
+      this.writeFavoritesFor(accountId, [...snapshot.favorites]);
       await this.handle.db.transaction(async (tx) => {
         await tx.execute(sql`DELETE FROM diet_item_snapshots WHERE diet_meal_item_id IN (
           SELECT i.id FROM diet_meal_items i
@@ -209,7 +225,7 @@ export class PGliteBackupRepository implements BackupRepository {
       });
     } catch (cause) {
       const remindersRestored = this.writeAgendaReminders(accountId, previousAgendaReminders);
-      this.writeFavorites(previousFavorites);
+      this.writeFavoritesFor(accountId, previousFavorites);
       if (!remindersRestored) {
         throw repositoryFailure('A base de dados foi preservada, mas os lembretes locais não puderam ser revertidos.', cause);
       }

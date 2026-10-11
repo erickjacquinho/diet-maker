@@ -3,9 +3,23 @@ import type { Account } from '@/lib/domain/account';
 import { normalizeAccountDisplayName } from '@/lib/domain/account';
 import { BackupApplicationError, validateBackupEnvelope } from './backup-application';
 import { BACKUP_SCHEMA_VERSION, type BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
-import type { SaveFile, SaveFilePermission, SaveFilePort } from '@/lib/persistence/save-file';
+import {
+  decodeBase64Url,
+  parseProtectedSaveEnvelope,
+  type ProtectedSaveGrant,
+} from '@/lib/domain/protected-save';
+import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
+import type { OnlineSaveSession } from './online-save-session';
+import type {
+  PendingSaveRegistration,
+  SaveFileAssociation,
+  SaveFile,
+  SaveFilePermission,
+  SaveFilePort,
+  SaveFileRetryMetadata,
+} from '@/lib/persistence/save-file';
 
-export type ProfileSessionStatus = 'empty' | 'busy' | 'active' | 'paused';
+export type ProfileSessionStatus = 'empty' | 'busy' | 'active' | 'paused' | 'locked';
 export type ProfileSessionSyncState = 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
 export type ProfileSessionHydrationState = 'pending' | 'ready';
 
@@ -18,6 +32,7 @@ export interface ProfileSessionRuntime {
 
 export interface ProfileSessionSnapshot<TRuntime extends ProfileSessionRuntime> {
   readonly status: ProfileSessionStatus;
+  readonly authorizationExpiresAt: number | null;
   readonly syncState: ProfileSessionSyncState;
   readonly account: Account | null;
   readonly accountId: string | null;
@@ -26,6 +41,24 @@ export interface ProfileSessionSnapshot<TRuntime extends ProfileSessionRuntime> 
   readonly hydration: ProfileSessionHydrationState;
   readonly resumeFileName: string | null;
   readonly error: string | null;
+  readonly protectedCopyRequired: boolean;
+}
+
+export interface OnlineSaveScope extends Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'> {}
+
+export interface OnlineSaveRegistration {
+  readonly saveId: string;
+  readonly localAccountId: string;
+  readonly keyId: string;
+  readonly bindingProof: string;
+}
+
+export interface ProfileSessionOnlineSaveGateway {
+  readonly session: OnlineSaveSession;
+  getCurrentOwnerId(): Promise<string>;
+  createIdempotencyKey(): string;
+  registerSave(input: { localAccountId: string; idempotencyKey: string; label: string }): Promise<OnlineSaveRegistration>;
+  authorizeSave(saveId: string, bindingProof: string): Promise<ProtectedSaveGrant>;
 }
 
 export interface CreateProfileInput {
@@ -42,6 +75,9 @@ export type ProfileSessionErrorCode =
   | 'LOAD_CANCELLED'
   | 'LOAD_INVALID'
   | 'LOAD_FAILED'
+  | 'SAVE_NOT_LOCATED'
+  | 'SAVE_REFERENCE_LOST'
+  | 'DRAFT_PRESERVATION_FAILED'
   | 'SESSION_UNAVAILABLE';
 
 export class ProfileSessionError extends Error {
@@ -58,9 +94,10 @@ export class ProfileSessionError extends Error {
 
 export interface ProfileSessionDependencies<TRuntime extends ProfileSessionRuntime> {
   filePort: SaveFilePort;
+  onlineSave?: ProfileSessionOnlineSaveGateway;
   now?: () => string;
   idFactory?: () => string;
-  createRuntime(account: Account): Promise<TRuntime>;
+  createRuntime(account: Account, scope?: OnlineSaveScope): Promise<TRuntime>;
   importSnapshot(runtime: TRuntime, envelope: BackupEnvelope): Promise<void>;
   exportSnapshot(runtime: TRuntime): Promise<BackupEnvelope>;
   disposeRuntime?(runtime: TRuntime): Promise<void>;
@@ -71,8 +108,17 @@ export interface ProfileSessionDependencies<TRuntime extends ProfileSessionRunti
 export interface ProfileSession<TRuntime extends ProfileSessionRuntime> {
   getSnapshot(): ProfileSessionSnapshot<TRuntime>;
   subscribe(listener: (snapshot: ProfileSessionSnapshot<TRuntime>) => void): () => void;
+  isSaveAuthorized(): boolean;
+  onResume(): void;
+  registerPendingDraftFlush(flush: () => Promise<void>): () => void;
+  retryLockedSave(): Promise<void>;
   createProfile(input: CreateProfileInput): Promise<void>;
+  adoptLegacyProfile(): Promise<void>;
+  listPendingRegistrations(): Promise<Array<{ localAccountId: string; fileName: string; hasSourceFile: boolean }>>;
+  resumePendingProfile(localAccountId: string, input: CreateProfileInput): Promise<void>;
   loadProfile(): Promise<void>;
+  openSave(saveId: string, association?: SaveFileAssociation): Promise<void>;
+  locateSave(saveId: string): Promise<void>;
   restoreActiveProfile(): Promise<void>;
   resumeProfile(): Promise<void>;
   signOut(): Promise<void>;
@@ -115,6 +161,11 @@ function isMissingFileError(error: unknown): boolean {
   return error instanceof ProfileSessionError && isMissingFileError(error.cause);
 }
 
+function isPermissionError(error: unknown): boolean {
+  if (typeof DOMException !== 'undefined' && error instanceof DOMException && error.name === 'NotAllowedError') return true;
+  return error instanceof ProfileSessionError && isPermissionError(error.cause);
+}
+
 export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   dependencies: ProfileSessionDependencies<TRuntime>,
 ): ProfileSession<TRuntime> {
@@ -123,6 +174,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   const listeners = new Set<(snapshot: ProfileSessionSnapshot<TRuntime>) => void>();
   let snapshot: ProfileSessionSnapshot<TRuntime> = {
     status: 'empty',
+    authorizationExpiresAt: null,
     syncState: 'unbound',
     account: null,
     accountId: null,
@@ -131,18 +183,29 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
     hydration: 'pending',
     resumeFileName: null,
     error: null,
+    protectedCopyRequired: false,
   };
   let associatedFile: SaveFile | null = null;
+  let onlineIdentity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'> | null = null;
+  let pendingLegacy: { file: SaveFile; envelope: BackupEnvelope; sourceSchemaVersion: unknown } | null = null;
   let rememberedFile: SaveFile | null | undefined;
   let restorePromise: Promise<void> | null = null;
   let checkpointPromise: Promise<void> | null = null;
+  let lockTransition: Promise<void> | null = null;
+  let lockedDraftFlushers: Array<() => Promise<void>> | null = null;
+  let lockReason: 'expired' | 'sign-out' = 'expired';
+  const pendingDraftFlushers = new Set<() => Promise<void>>();
 
   const notify = () => {
     for (const listener of listeners) listener(snapshot);
   };
 
   const update = (next: Partial<ProfileSessionSnapshot<TRuntime>>) => {
-    snapshot = { ...snapshot, ...next };
+    snapshot = {
+      ...snapshot,
+      ...next,
+      authorizationExpiresAt: dependencies.onlineSave?.session.getSnapshot().expiresAt ?? null,
+    };
     notify();
   };
 
@@ -165,7 +228,76 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
     if (runtime) await dependencies.deactivateRuntime?.(runtime);
   };
 
+  const startLockTransition = (reason: 'expired' | 'sign-out', markRevocation: boolean): Promise<void> => {
+    if (lockTransition) {
+      if (reason === 'sign-out') lockReason = reason;
+      if (markRevocation) dependencies.onlineSave?.session.lock({ revocationPending: true });
+      return lockTransition;
+    }
+    const runtime = snapshot.runtime;
+    lockReason = reason;
+    if (!runtime) {
+      if (markRevocation) dependencies.onlineSave?.session.lock({ revocationPending: true });
+      onlineIdentity = null;
+      if (reason === 'sign-out') {
+        associatedFile = null;
+        rememberedFile = null;
+        restorePromise = null;
+        update({
+          status: 'empty', syncState: 'unbound', account: null, accountId: null,
+          runtime: null, fileName: null, hydration: 'ready', resumeFileName: null,
+          error: null, protectedCopyRequired: false,
+        });
+      }
+      return Promise.resolve();
+    }
+
+    const flushers = lockedDraftFlushers ?? [...pendingDraftFlushers];
+    lockedDraftFlushers = flushers;
+    const checkpoint = checkpointPromise;
+    update({ status: 'locked', syncState: 'paused', error: null });
+    const transition = Promise.resolve().then(async () => {
+      await dependencies.onlineSave?.session.waitForIdle();
+      await checkpoint?.catch(() => undefined);
+      for (const flush of flushers) await flush();
+      lockedDraftFlushers = null;
+      await deactivate(runtime);
+      await dispose(runtime);
+      associatedFile = null;
+      rememberedFile = null;
+      restorePromise = null;
+      onlineIdentity = null;
+      update({
+        status: 'empty', syncState: 'unbound', account: null, accountId: null,
+        runtime: null, fileName: null, hydration: 'ready', resumeFileName: null,
+        error: null, protectedCopyRequired: false,
+      });
+    }).catch((cause: unknown) => {
+      update({
+        status: 'locked', syncState: 'paused', account: snapshot.account,
+        accountId: snapshot.accountId, runtime, fileName: snapshot.fileName,
+        hydration: 'ready', error: cause instanceof Error ? cause.message : 'O rascunho local não foi preservado.',
+      });
+      throw profileError('DRAFT_PRESERVATION_FAILED', 'O rascunho não foi preservado. Tente novamente antes de sair.', cause);
+    }).finally(() => {
+      if (lockTransition === transition) lockTransition = null;
+    });
+    lockTransition = transition;
+    if (markRevocation) dependencies.onlineSave?.session.lock({ revocationPending: true });
+    return transition;
+  };
+
+  dependencies.onlineSave?.session.subscribe((onlineSnapshot) => {
+    if (snapshot.authorizationExpiresAt !== onlineSnapshot.expiresAt) {
+      update({ authorizationExpiresAt: onlineSnapshot.expiresAt });
+    }
+    if (onlineSnapshot.status === 'locked' && snapshot.runtime && snapshot.status !== 'locked' && !lockTransition) {
+      void startLockTransition('expired', false).catch(() => undefined);
+    }
+  });
+
   const readRememberedFile = async (): Promise<SaveFile | null> => {
+    if (dependencies.onlineSave) return null;
     if (rememberedFile !== undefined) return rememberedFile;
     if (!dependencies.filePort.restoreActiveFile) {
       rememberedFile = null;
@@ -182,6 +314,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
 
   const rememberActiveFile = async (file: SaveFile): Promise<void> => {
     rememberedFile = file;
+    if (dependencies.onlineSave) return;
     try {
       await dependencies.filePort.persistActiveFile?.(file);
     } catch {
@@ -190,6 +323,9 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   };
 
   const commitRuntime = async (runtime: TRuntime, file: SaveFile, syncState: ProfileSessionSyncState) => {
+    if (dependencies.onlineSave && (!onlineIdentity || !dependencies.onlineSave.session.isAuthorizedFor(onlineIdentity))) {
+      throw profileError('SESSION_UNAVAILABLE', 'A autorização do save expirou antes de abrir o arquivo.');
+    }
     const previousRuntime = snapshot.runtime;
     await activate(runtime);
     await rememberActiveFile(file);
@@ -204,6 +340,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       hydration: 'ready',
       resumeFileName: null,
       error: syncState === 'paused' ? 'O arquivo está associado, mas a sincronização está pausada.' : null,
+      protectedCopyRequired: false,
     });
     if (previousRuntime && previousRuntime !== runtime) {
       await deactivate(previousRuntime);
@@ -212,6 +349,16 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   };
 
   const writeSnapshot = async (runtime: TRuntime, file: SaveFile): Promise<void> => {
+    if (dependencies.onlineSave) {
+      if (!onlineIdentity) throw profileError('SESSION_UNAVAILABLE', 'O save precisa ser autorizado antes da gravação.');
+      await dependencies.onlineSave.session.withOperation(onlineIdentity, async (grant) => {
+        const exported = await dependencies.exportSnapshot(runtime);
+        const snapshot = validateBackupEnvelope(exported, { accountId: runtime.account.id });
+        const serialized = await encryptProtectedSave(snapshot, grant);
+        await dependencies.filePort.write(file, serialized);
+      });
+      return;
+    }
     const exported = await dependencies.exportSnapshot(runtime);
     const snapshot = exported.schemaVersion === BACKUP_SCHEMA_VERSION ? exported : validateBackupEnvelope(exported);
     await dependencies.filePort.write(file, JSON.stringify(snapshot));
@@ -268,6 +415,182 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       update({ ...previous, hydration: 'ready', error: cause instanceof Error ? cause.message : 'O arquivo não pôde ser carregado.' });
       if (cause instanceof ProfileSessionError) throw cause;
       throw profileError('LOAD_FAILED', 'O profile não pôde ser carregado.', cause);
+    }
+  };
+
+  const activateRegisteredSave = async (options: {
+    ownerId: string;
+    file: SaveFile;
+    account: Account;
+    idempotencyKey: string;
+    sourceFile?: SaveFile;
+    sourceEnvelope?: BackupEnvelope;
+    sourceSchemaVersion?: unknown;
+    previous: ProfileSessionSnapshot<TRuntime>;
+  }): Promise<void> => {
+    const onlineSave = dependencies.onlineSave;
+    if (!onlineSave) throw profileError('SESSION_UNAVAILABLE', 'A integração online do save não está disponível.');
+    let runtime: TRuntime | null = null;
+    onlineIdentity = null;
+    try {
+      const permission = await requestPermission(options.file);
+      if (isPermissionDenied(permission)) {
+        throw profileError('SAVE_PERMISSION_DENIED', 'Conceda permissão de escrita para criar a cópia protegida.');
+      }
+      const retry = {
+        localAccountId: options.account.id,
+        idempotencyKey: options.idempotencyKey,
+      };
+      if (!dependencies.filePort.persistPendingRegistration) {
+        throw profileError('SESSION_UNAVAILABLE', 'Não foi possível preservar a identidade da tentativa local.');
+      }
+      await dependencies.filePort.persistPendingRegistration({
+        ownerId: options.ownerId,
+        ...retry,
+        file: options.file,
+        ...(options.sourceFile ? { sourceFile: options.sourceFile } : {}),
+      });
+
+      const registration = await onlineSave.registerSave({
+        localAccountId: options.account.id,
+        idempotencyKey: options.idempotencyKey,
+        label: options.account.displayName,
+      });
+      if (registration.localAccountId !== options.account.id) {
+        throw profileError('SESSION_UNAVAILABLE', 'O registro do save não corresponde à Conta clínica selecionada.');
+      }
+      const grant = await onlineSave.authorizeSave(registration.saveId, registration.bindingProof);
+      if (
+        grant.ownerId !== options.ownerId
+        || grant.saveId !== registration.saveId
+        || grant.localAccountId !== options.account.id
+        || grant.keyId !== registration.keyId
+        || grant.bindingProof !== registration.bindingProof
+      ) throw profileError('SESSION_UNAVAILABLE', 'A autorização retornou uma identidade incompatível.');
+      await onlineSave.session.authorize(grant);
+      onlineIdentity = {
+        ownerId: grant.ownerId,
+        saveId: grant.saveId,
+        localAccountId: grant.localAccountId,
+        keyId: grant.keyId,
+        bindingProof: grant.bindingProof,
+      };
+
+      runtime = await dependencies.createRuntime(options.account, {
+        ownerId: grant.ownerId,
+        saveId: grant.saveId,
+        localAccountId: grant.localAccountId,
+        keyId: grant.keyId,
+        bindingProof: grant.bindingProof,
+      });
+      const existingWorkspace = (runtime as TRuntime & { hasExistingWorkspace?: boolean }).hasExistingWorkspace === true;
+      if (options.sourceEnvelope && !existingWorkspace) {
+        await dependencies.importSnapshot(runtime, validateBackupEnvelope(options.sourceEnvelope, { accountId: grant.localAccountId }));
+        if (options.sourceSchemaVersion !== BACKUP_SCHEMA_VERSION) await runtime.markWorkspaceDirty();
+      }
+
+      await writeSnapshot(runtime, options.file);
+      const written = await onlineSave.session.withOperation(onlineIdentity, async (activeGrant) => {
+        const serialized = await dependencies.filePort.read(options.file);
+        return decryptProtectedSave(serialized, activeGrant);
+      });
+      if (written.schemaVersion !== BACKUP_SCHEMA_VERSION || written.account[0]?.id !== grant.localAccountId) {
+        throw profileError('SAVE_WRITE_FAILED', 'A cópia protegida não passou pela validação após a gravação.');
+      }
+
+      const checkpoint = await runtime.getCheckpointState();
+      await runtime.advanceCheckpoint(checkpoint.workspaceRevision);
+      if (!dependencies.filePort.persistFileAssociation || !dependencies.filePort.clearPendingRegistration) {
+        throw profileError('SESSION_UNAVAILABLE', 'Não foi possível salvar a referência local do save.');
+      }
+      await dependencies.filePort.persistFileAssociation(
+        onlineIdentity,
+        options.file,
+        { ...retry, bindingProof: grant.bindingProof },
+      );
+      await dependencies.filePort.clearPendingRegistration(grant.ownerId, grant.localAccountId);
+      const current = await runtime.getCheckpointState();
+      await commitRuntime(runtime, options.file, current.workspaceRevision > current.checkpointRevision ? 'pending' : 'synced');
+      runtime = null;
+      pendingLegacy = null;
+    } catch (cause) {
+      await dispose(runtime);
+      onlineSave.session.lock();
+      onlineIdentity = null;
+      update({
+        ...options.previous,
+        hydration: 'ready',
+        protectedCopyRequired: pendingLegacy !== null,
+        error: cause instanceof Error ? cause.message : 'O save protegido não pôde ser preparado.',
+      });
+      if (cause instanceof ProfileSessionError) throw cause;
+      throw profileError('SAVE_WRITE_FAILED', 'O save protegido não pôde ser preparado.', cause);
+    }
+  };
+
+  const loadProtectedSave = async (
+    file: SaveFile,
+    envelopeValue: unknown,
+    previous: ProfileSessionSnapshot<TRuntime>,
+  ): Promise<void> => {
+    const onlineSave = dependencies.onlineSave;
+    if (!onlineSave) throw profileError('LOAD_INVALID', 'Este save exige uma sessão online.');
+    if (previous.runtime) throw profileError('SESSION_BUSY', 'Feche o save atual antes de abrir outro.');
+    let runtime: TRuntime | null = null;
+    onlineIdentity = null;
+    try {
+      const envelope = parseProtectedSaveEnvelope(envelopeValue);
+      const ownerId = await onlineSave.getCurrentOwnerId();
+      const grant = await onlineSave.authorizeSave(envelope.saveId, envelope.bindingProof);
+      if (grant.ownerId !== ownerId || grant.saveId !== envelope.saveId || grant.bindingProof !== envelope.bindingProof) {
+        throw profileError('LOAD_INVALID', 'A autorização não corresponde à identidade deste arquivo.');
+      }
+      await onlineSave.session.authorize(grant);
+      onlineIdentity = {
+        ownerId: grant.ownerId,
+        saveId: grant.saveId,
+        localAccountId: grant.localAccountId,
+        keyId: grant.keyId,
+        bindingProof: grant.bindingProof,
+      };
+      const backup = await onlineSave.session.withOperation(onlineIdentity, (activeGrant) =>
+        decryptProtectedSave(JSON.stringify(envelope), activeGrant));
+      const accountRow = backup.account[0];
+      if (!accountRow) throw profileError('LOAD_INVALID', 'O save não contém uma Conta clínica válida.');
+      const account = cloneAccount(accountRow);
+      runtime = await dependencies.createRuntime(account, {
+        ownerId: grant.ownerId,
+        saveId: grant.saveId,
+        localAccountId: grant.localAccountId,
+        keyId: grant.keyId,
+        bindingProof: grant.bindingProof,
+      });
+      const existingWorkspace = (runtime as TRuntime & { hasExistingWorkspace?: boolean }).hasExistingWorkspace === true;
+      if (!existingWorkspace) await dependencies.importSnapshot(runtime, backup);
+      const permission = dependencies.filePort.queryPermission
+        ? await dependencies.filePort.queryPermission(file, 'readwrite')
+        : 'prompt';
+      if (!dependencies.filePort.persistFileAssociation) {
+        throw profileError('SESSION_UNAVAILABLE', 'Não foi possível salvar a referência local do save.');
+      }
+      await dependencies.filePort.persistFileAssociation(onlineIdentity, file, {
+        localAccountId: grant.localAccountId,
+        bindingProof: grant.bindingProof,
+      });
+      const checkpoint = await runtime.getCheckpointState();
+      const syncState = permission !== 'granted'
+        ? 'paused'
+        : checkpoint.workspaceRevision > checkpoint.checkpointRevision ? 'pending' : 'synced';
+      await commitRuntime(runtime, file, syncState);
+      runtime = null;
+      pendingLegacy = null;
+    } catch (cause) {
+      await dispose(runtime);
+      onlineSave.session.lock();
+      onlineIdentity = null;
+      update({ ...previous, hydration: 'ready', protectedCopyRequired: false, error: cause instanceof Error ? cause.message : 'O save protegido não pôde ser aberto.' });
+      if (cause instanceof ProfileSessionError) throw cause;
+      throw profileError('LOAD_FAILED', 'O save protegido não pôde ser aberto.', cause);
     }
   };
 
@@ -332,6 +655,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   };
 
   const resumeProfile = async (): Promise<void> => {
+    if (dependencies.onlineSave) throw profileError('SESSION_UNAVAILABLE', 'Escolha um save no catálogo online para autorizar sua abertura.');
     await restoreActiveProfile();
     if (snapshot.runtime) return;
 
@@ -349,6 +673,9 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
     }
 
     try {
+      if (dependencies.onlineSave && onlineIdentity && !dependencies.onlineSave.session.isAuthorizedFor(onlineIdentity)) {
+        throw profileError('SESSION_UNAVAILABLE', 'A autorização do save expirou ou foi bloqueada.');
+      }
       const captured = await runtime.getCheckpointState();
       if (captured.workspaceRevision <= captured.checkpointRevision) {
         update({ ...previous, status: 'active', syncState: 'synced', error: null });
@@ -361,10 +688,12 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       if (isPermissionDenied(permission)) throw profileError('SAVE_PERMISSION_DENIED', 'A permissão de escrita do save foi revogada.');
       await writeSnapshot(runtime, associatedFile);
       await runtime.advanceCheckpoint(captured.workspaceRevision);
+      if (snapshot.status === 'locked') throw profileError('SESSION_UNAVAILABLE', 'A sessão do save foi bloqueada durante o checkpoint.');
       const current = await runtime.getCheckpointState();
       const hasPendingChanges = current.workspaceRevision > current.checkpointRevision;
       update({ status: 'active', syncState: hasPendingChanges ? 'pending' : 'synced', error: null });
     } catch (cause) {
+      if (snapshot.status === 'locked') throw cause instanceof ProfileSessionError ? cause : profileError('SESSION_UNAVAILABLE', 'A sessão do save foi bloqueada durante o checkpoint.', cause);
       const message = cause instanceof Error ? cause.message : 'A sincronização foi pausada.';
       update({ ...previous, status: 'paused', syncState: 'paused', error: message });
       throw cause instanceof ProfileSessionError ? cause : profileError('SAVE_WRITE_FAILED', message, cause);
@@ -373,7 +702,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
 
   const sync = (): Promise<void> => {
     if (checkpointPromise) return checkpointPromise;
-    const shared = performSync().finally(() => {
+    const shared = Promise.resolve().then(performSync).finally(() => {
       if (checkpointPromise === shared) checkpointPromise = null;
     });
     checkpointPromise = shared;
@@ -386,10 +715,59 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
+    isSaveAuthorized() {
+      if (dependencies.onlineSave) return Boolean(onlineIdentity && dependencies.onlineSave.session.isAuthorizedFor(onlineIdentity));
+      return Boolean(snapshot.runtime) && (snapshot.status === 'active' || snapshot.status === 'paused');
+    },
+    onResume() {
+      dependencies.onlineSave?.session.onResume();
+    },
+    registerPendingDraftFlush(flush) {
+      pendingDraftFlushers.add(flush);
+      return () => pendingDraftFlushers.delete(flush);
+    },
+    async retryLockedSave() {
+      if (lockTransition) return lockTransition;
+      if (snapshot.status !== 'locked' || !snapshot.runtime) return;
+      await startLockTransition(lockReason, false);
+    },
     async createProfile(input) {
       const displayName = normalizeAccountDisplayName(input.displayName);
       if (!displayName) throw profileError('PROFILE_NAME_REQUIRED', 'Informe o nome do profile.');
+      if (dependencies.onlineSave && snapshot.runtime) {
+        throw profileError('SESSION_BUSY', 'Feche o save atual antes de criar outro.');
+      }
       const previous = begin();
+      if (dependencies.onlineSave) {
+        try {
+          const file = await dependencies.filePort.chooseNew();
+          if (!file) {
+            update({ ...previous, hydration: 'ready' });
+            return;
+          }
+          const ownerId = await dependencies.onlineSave.getCurrentOwnerId();
+          const timestamp = now();
+          const account: Account = {
+            id: idFactory(),
+            displayName,
+            phone: normalizePhone(input.phone),
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          };
+          await activateRegisteredSave({
+            ownerId,
+            file,
+            account,
+            idempotencyKey: dependencies.onlineSave.createIdempotencyKey(),
+            previous,
+          });
+          return;
+        } catch (cause) {
+          if (snapshot.status === 'busy') update({ ...previous, hydration: 'ready', error: cause instanceof Error ? cause.message : 'O save não pôde ser criado.' });
+          if (cause instanceof ProfileSessionError) throw cause;
+          throw profileError('SAVE_WRITE_FAILED', 'O save protegido não pôde ser criado.', cause);
+        }
+      }
       let runtime: TRuntime | null = null;
       try {
         const file = await dependencies.filePort.chooseNew();
@@ -422,6 +800,10 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
     },
     async loadProfile() {
       const previous = begin();
+      if (dependencies.onlineSave && previous.runtime) {
+        update(previous);
+        throw profileError('SESSION_BUSY', 'Feche o save atual antes de abrir outro.');
+      }
       let file: SaveFile | null;
       try {
         file = await dependencies.filePort.chooseExisting();
@@ -434,12 +816,211 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
         update({ ...previous, hydration: 'ready' });
         return;
       }
+      if (dependencies.onlineSave) {
+        try {
+          const parsed: unknown = JSON.parse(await dependencies.filePort.read(file));
+          if (parsed && typeof parsed === 'object' && (parsed as Record<string, unknown>).formatVersion === 2) {
+            await loadProtectedSave(file, parsed, previous);
+            return;
+          }
+          const sourceSchemaVersion = parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+            ? (parsed as Record<string, unknown>).schemaVersion
+            : undefined;
+          const envelope = validateBackupEnvelope(parsed);
+          if (!envelope.account[0]) throw profileError('LOAD_INVALID', 'O save não contém uma Conta clínica válida.');
+          pendingLegacy = { file, envelope, sourceSchemaVersion };
+          update({ ...previous, hydration: 'ready', protectedCopyRequired: true, error: null });
+        } catch (cause) {
+          update({ ...previous, hydration: 'ready', protectedCopyRequired: false, error: cause instanceof Error ? cause.message : 'O arquivo não pôde ser validado.' });
+          if (cause instanceof ProfileSessionError) throw cause;
+          throw profileError('LOAD_INVALID', loadValidationMessage(cause), cause);
+        }
+        return;
+      }
       await loadSelectedFile(file, {}, previous);
+    },
+    async openSave(saveId, restoredAssociation) {
+      if (!dependencies.onlineSave || !dependencies.filePort.restoreFileAssociation) {
+        throw profileError('SESSION_UNAVAILABLE', 'A abertura pelo catálogo não está disponível neste navegador.');
+      }
+      if (!/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(saveId)) {
+        throw profileError('LOAD_INVALID', 'O identificador do save é inválido.');
+      }
+      if (snapshot.runtime) throw profileError('SESSION_BUSY', 'Feche o save atual antes de abrir outro.');
+      const previous = begin();
+      try {
+        let association = restoredAssociation;
+        if (association && association.saveId !== saveId) {
+          throw profileError('SAVE_NOT_LOCATED', 'A referência local deste save não corresponde ao catálogo.');
+        }
+        if (association) {
+          const permission = await requestPermission(association.file);
+          if (isPermissionDenied(permission)) {
+            throw profileError('SAVE_PERMISSION_DENIED', 'Autorize o acesso ao arquivo para abrir este save.');
+          }
+        }
+        const ownerId = await dependencies.onlineSave.getCurrentOwnerId();
+        association ??= await dependencies.filePort.restoreFileAssociation({ ownerId, saveId }) ?? undefined;
+        if (!association) throw profileError('SAVE_NOT_LOCATED', 'Este save não tem arquivo associado neste navegador. Use Localizar para vinculá-lo.');
+        if (association.ownerId !== ownerId || association.saveId !== saveId) {
+          throw profileError('SAVE_NOT_LOCATED', 'A referência local deste save não corresponde à conta atual.');
+        }
+        if (!restoredAssociation) {
+          const permission = await requestPermission(association.file);
+          if (isPermissionDenied(permission)) {
+            throw profileError('SAVE_PERMISSION_DENIED', 'Autorize o acesso ao arquivo para abrir este save.');
+          }
+        }
+        const raw: unknown = JSON.parse(await dependencies.filePort.read(association.file));
+        const envelope = parseProtectedSaveEnvelope(raw);
+        if (envelope.saveId !== saveId) {
+          throw profileError('LOAD_INVALID', 'O arquivo associado pertence a outro save; a referência local precisa ser corrigida.');
+        }
+        await loadProtectedSave(association.file, envelope, previous);
+      } catch (cause) {
+        if (snapshot.status !== 'busy') throw cause;
+        const error = isMissingFileError(cause)
+          ? profileError('SAVE_REFERENCE_LOST', 'O arquivo associado não foi encontrado. Localize o arquivo novamente.', cause)
+          : isPermissionError(cause)
+            ? profileError('SAVE_PERMISSION_DENIED', 'Conceda permissão para abrir o arquivo deste save.', cause)
+            : cause;
+        update({ ...previous, hydration: 'ready', error: error instanceof Error ? error.message : 'O save não pôde ser aberto.' });
+        if (error instanceof ProfileSessionError) throw error;
+        throw profileError('LOAD_FAILED', 'O save não pôde ser aberto.', error);
+      }
+    },
+    async locateSave(saveId) {
+      if (!dependencies.onlineSave) throw profileError('SESSION_UNAVAILABLE', 'A localização de saves online não está disponível.');
+      if (!/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(saveId)) {
+        throw profileError('LOAD_INVALID', 'O identificador do save é inválido.');
+      }
+      if (snapshot.runtime) throw profileError('SESSION_BUSY', 'Feche o save atual antes de localizar outro.');
+      const previous = begin();
+      try {
+        const file = await dependencies.filePort.chooseExisting();
+        if (!file) {
+          update({ ...previous, hydration: 'ready' });
+          return;
+        }
+        const raw: unknown = JSON.parse(await dependencies.filePort.read(file));
+        const envelope = parseProtectedSaveEnvelope(raw);
+        if (envelope.saveId !== saveId) {
+          throw profileError('LOAD_INVALID', 'O arquivo selecionado pertence a outro save. Escolha o arquivo correspondente a esta linha.');
+        }
+        await loadProtectedSave(file, envelope, previous);
+      } catch (cause) {
+        if (snapshot.status !== 'busy') throw cause;
+        const error = isMissingFileError(cause)
+          ? profileError('SAVE_REFERENCE_LOST', 'O arquivo selecionado não está mais disponível.', cause)
+          : isPermissionError(cause)
+            ? profileError('SAVE_PERMISSION_DENIED', 'Conceda permissão para ler o arquivo selecionado.', cause)
+            : cause;
+        update({ ...previous, hydration: 'ready', error: error instanceof Error ? error.message : 'O arquivo não pôde ser associado a este save.' });
+        if (error instanceof ProfileSessionError) throw error;
+        throw profileError('LOAD_INVALID', loadValidationMessage(error), error);
+      }
+    },
+    async adoptLegacyProfile() {
+      if (!dependencies.onlineSave || !pendingLegacy) {
+        throw profileError('SESSION_UNAVAILABLE', 'Selecione e valide um arquivo legado antes de criar a cópia protegida.');
+      }
+      if (snapshot.runtime) throw profileError('SESSION_BUSY', 'Feche o save atual antes de importar outro.');
+      const candidate = pendingLegacy;
+      const previous = begin();
+      try {
+        const file = await dependencies.filePort.chooseNew();
+        if (!file) {
+          update({ ...previous, hydration: 'ready', protectedCopyRequired: true });
+          return;
+        }
+        if (dependencies.filePort.isSameEntry && await dependencies.filePort.isSameEntry(candidate.file, file)) {
+          throw profileError('SAVE_WRITE_FAILED', 'Escolha um destino diferente para preservar o arquivo original.');
+        }
+        const account = cloneAccount(candidate.envelope.account[0]);
+        await activateRegisteredSave({
+          ownerId: await dependencies.onlineSave.getCurrentOwnerId(),
+          file,
+          account,
+          idempotencyKey: dependencies.onlineSave.createIdempotencyKey(),
+          sourceFile: candidate.file,
+          sourceEnvelope: candidate.envelope,
+          sourceSchemaVersion: candidate.sourceSchemaVersion,
+          previous,
+        });
+      } catch (cause) {
+        if (snapshot.status === 'busy') {
+          update({ ...previous, hydration: 'ready', protectedCopyRequired: pendingLegacy !== null, error: cause instanceof Error ? cause.message : 'A cópia protegida não pôde ser criada.' });
+        }
+        if (cause instanceof ProfileSessionError) throw cause;
+        throw profileError('SAVE_WRITE_FAILED', 'A cópia protegida não pôde ser criada.', cause);
+      }
+    },
+    async listPendingRegistrations() {
+      if (!dependencies.onlineSave || !dependencies.filePort.listPendingRegistrations) return [];
+      const ownerId = await dependencies.onlineSave.getCurrentOwnerId();
+      const pending = await dependencies.filePort.listPendingRegistrations(ownerId);
+      return pending.map((attempt) => ({
+        localAccountId: attempt.localAccountId,
+        fileName: attempt.file.name,
+        hasSourceFile: Boolean(attempt.sourceFile),
+      }));
+    },
+    async resumePendingProfile(localAccountId, input) {
+      if (!dependencies.onlineSave || !dependencies.filePort.restorePendingRegistration) {
+        throw profileError('SESSION_UNAVAILABLE', 'Não há uma tentativa de save recuperável neste navegador.');
+      }
+      if (snapshot.runtime) throw profileError('SESSION_BUSY', 'Feche o save atual antes de retomar outro.');
+      const previous = begin();
+      try {
+        const ownerId = await dependencies.onlineSave.getCurrentOwnerId();
+        const pending = await dependencies.filePort.restorePendingRegistration(ownerId, localAccountId);
+        if (!pending) throw profileError('SESSION_UNAVAILABLE', 'A tentativa de save não foi encontrada neste navegador.');
+        let sourceEnvelope: BackupEnvelope | undefined;
+        let sourceSchemaVersion: unknown;
+        let account: Account;
+        if (pending.sourceFile) {
+          const raw: unknown = JSON.parse(await dependencies.filePort.read(pending.sourceFile));
+          sourceSchemaVersion = raw && typeof raw === 'object' && !Array.isArray(raw)
+            ? (raw as Record<string, unknown>).schemaVersion
+            : undefined;
+          sourceEnvelope = validateBackupEnvelope(raw, { accountId: localAccountId });
+          account = cloneAccount(sourceEnvelope.account[0]);
+        } else {
+          const displayName = normalizeAccountDisplayName(input.displayName);
+          if (!displayName) throw profileError('PROFILE_NAME_REQUIRED', 'Informe o nome do profile para retomar o save.');
+          const timestamp = now();
+          account = {
+            id: localAccountId,
+            displayName,
+            phone: normalizePhone(input.phone),
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          };
+        }
+        await activateRegisteredSave({
+          ownerId,
+          file: pending.file,
+          account,
+          idempotencyKey: pending.idempotencyKey,
+          ...(pending.sourceFile ? { sourceFile: pending.sourceFile } : {}),
+          ...(sourceEnvelope ? { sourceEnvelope, sourceSchemaVersion } : {}),
+          previous,
+        });
+      } catch (cause) {
+        if (snapshot.status === 'busy') update({ ...previous, hydration: 'ready', error: cause instanceof Error ? cause.message : 'A tentativa não pôde ser retomada.' });
+        if (cause instanceof ProfileSessionError) throw cause;
+        throw profileError('SAVE_WRITE_FAILED', 'A tentativa de save não pôde ser retomada.', cause);
+      }
     },
     restoreActiveProfile,
     resumeProfile,
     async signOut() {
       if (snapshot.status === 'busy') throw profileError('SESSION_BUSY', 'Aguarde a operação de profile terminar.');
+
+      if (dependencies.onlineSave) {
+        await startLockTransition('sign-out', true);
+        return;
+      }
 
       const runtime = snapshot.runtime;
       update({ status: 'busy', error: null });
@@ -450,10 +1031,12 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
         associatedFile = null;
         rememberedFile = null;
         restorePromise = null;
-        try {
-          await dependencies.filePort.clearActiveFile?.();
-        } catch {
-          // Logout must not delete or block on the durable save file.
+        if (!dependencies.onlineSave) {
+          try {
+            await dependencies.filePort.clearActiveFile?.();
+          } catch {
+            // Logout must not delete or block on the durable save file.
+          }
         }
         update({
           status: 'empty',
@@ -465,6 +1048,7 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
           hydration: 'ready',
           resumeFileName: null,
           error: null,
+          protectedCopyRequired: false,
         });
       }
     },

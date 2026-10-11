@@ -1,4 +1,4 @@
-# Decisão 11 — Save Principal, Recuperação e Portabilidade Local
+# Decisão 11 — Save Principal, Recuperação e Portabilidade
 
 - **Status:** Implementada e validada no SDD de backup manual simples
 - **Data:** 2026-08-30
@@ -6,12 +6,13 @@
 
 ## 1. Decisão
 
-A V1 grava o save principal da Conta em um arquivo mestre `.nutridiet`: JSON
-UTF-8, sem criptografia e sem senha. O arquivo corresponde ao último
-checkpoint concluído; exportação e restauração continuam disponíveis para
-portabilidade e recuperação. O banco local é a área de trabalho e pode conter
-alterações confirmadas posteriores ao checkpoint. Consulte o
-[ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md).
+O save principal continua sendo um arquivo mestre `.nutridiet` do último
+checkpoint concluído. O envelope lógico clínico schema 11 permanece compatível;
+quando associado a uma conta online, o arquivo usa um envelope externo v2
+cifrado com AES-256-GCM. Arquivos legados/desvinculados no envelope v1 continuam
+JSON sem cifragem e podem ser lidos por quem os obtiver. O banco local é a área
+de trabalho e pode conter alterações confirmadas posteriores ao checkpoint.
+Consulte o [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md).
 
 Não há backup automático, envio para nuvem, sincronização entre dispositivos
 ou lembretes recorrentes para exportar o arquivo. Lembretes pontuais da agenda
@@ -38,10 +39,11 @@ O arquivo contém somente os dados confirmados da Conta:
 - dietas vigentes, snapshots históricos e registros arquivados;
 - IDs, relações, versões e datas necessários para restaurar esses dados.
 
-O cabeçalho lógico contém identificador da aplicação, `formatVersion`,
-`schemaVersion` e data da exportação. Os dados ficam em uma estrutura
-normalizada definida no SDD do backup. Não é um dump físico do motor nem um
-arquivo SQL executável.
+O payload lógico contém identificador da aplicação, `formatVersion`,
+`schemaVersion` e data da exportação, em estrutura normalizada definida no SDD
+de backup. No arquivo protegido, o cabeçalho externo contém somente versão,
+saveId, algoritmo, prova opaca e ciphertext; o payload schema 11 fica dentro da
+cifra. Não é dump físico do motor nem arquivo SQL executável.
 
 Mudanças de dados de uma feature incrementam `schemaVersion`; o
 `formatVersion` só muda quando o envelope/protocolo muda.
@@ -67,11 +69,12 @@ restaurar saves da versão imediatamente anterior.
 
 ## 3. Exportar
 
-1. O usuário aciona **Exportar backup**.
-2. A aplicação captura uma visão consistente das tabelas confirmadas e as
-   preferências persistidas da Conta, sem misturar partes de salvamentos
-   diferentes.
-3. Serializa o conteúdo em JSON e oferece o download `.nutridiet`.
+1. O usuário aciona **Exportar backup** com uma autorização válida para o save.
+2. A aplicação captura uma visão consistente das tabelas confirmadas e das
+   preferências persistidas da Conta clínica, sem misturar revisões.
+3. Valida/migra o payload lógico em memória, cifra-o com AES-256-GCM e oferece
+   o download `.nutridiet` protegido. O menu não exporta plaintext do save
+   vinculado.
 
 Durante a captura, não intercalar mutações com a leitura das tabelas. A
 exclusividade não precisa durar até o usuário escolher a pasta de download.
@@ -80,8 +83,9 @@ concluído. Não há pedido de senha.
 
 ## 4. Restaurar
 
-1. O usuário seleciona o arquivo.
-2. Antes de modificar a base, a aplicação valida JSON, identificador, versões
+1. O usuário seleciona o arquivo e a conta online reautoriza o save.
+2. Antes de modificar a base, a aplicação autentica o envelope externo, então
+   valida JSON, identificador, versões
    suportadas, tipos, IDs, relações, uma única Conta e unicidade da dieta
    vigente. Versões de schema anteriores que possuam uma migração registrada
    são convertidas em memória, em sequência, para o schema atual; a migração é
@@ -110,8 +114,11 @@ save/export do perfil já carregado grava o envelope no schema atual.
 
 ## 5. Limites
 
-- Qualquer pessoa com acesso ao arquivo pode ler os dados; não há proteção
-  por senha ou criptografia.
+- O envelope protegido v2 impede leitura do payload sem chave e autorização
+  válidas; não exige uma senha separada. Saves legados v1 permanecem plaintext
+  e não ganham proteção retroativa.
+- A cifra do arquivo não cifra o IndexedDB/PGlite nem os drafts do editor e não
+  protege dados enquanto o runtime está autorizado e aberto.
 - O backup permite recuperar somente o que foi exportado. Alterações
   posteriores e drafts não estão protegidos por esse arquivo.
 - Limpeza do navegador ou perda do dispositivo pode apagar a base local.

@@ -12,11 +12,13 @@ execução e abra as decisões de cada etapa para os detalhes.
 ## Proposta preservada
 
 Manter os dados do consultório em uma área de trabalho local no navegador, com
-uma Conta, um profissional e uma aba ativa. O arquivo `.nutridiet` em JSON é o
-save principal e autoritativo da Conta: cada checkpoint concluído representa
-todos os dados confirmados até aquela revisão. O banco local conserva o
-trabalho confirmado posterior ao último checkpoint; drafts continuam em
-armazenamento separado. O arquivo não tem criptografia nem senha.
+uma Conta clínica, um profissional e uma aba ativa. O arquivo `.nutridiet` é o
+save principal e autoritativo: cada checkpoint concluído representa todos os
+dados confirmados até aquela revisão. O banco local conserva o trabalho
+confirmado posterior ao último checkpoint; drafts continuam em armazenamento
+separado. Save online vinculado usa envelope externo cifrado; arquivo legado ou
+desvinculado continua plaintext até adoção por cópia protegida. Consulte as
+Decisões 11–13 para limites do dispositivo e do formato.
 
 O primeiro fluxo vertical completo é:
 
@@ -48,9 +50,9 @@ indicadas; a tabela não acrescenta requisitos.
 | Integridade nutricional | Preservar snapshots, unidades, energia da fonte, metas manuais e peso de referência; mudanças no catálogo não recalculam o histórico | [06](./06-catalogo-de-alimentos-e-customizados.md), [08](./08-snapshots-versionamento-e-integridade-clinica.md) |
 | Busca | Preservar a meta já existente de busca de alimentos em menos de 100 ms após inicialização; medir na integração, sem nova certificação de volume | [10](./10-motor-local-drizzle-e-migrations.md) |
 | Offline e abas | Fluxos locais funcionam sem rede após preparação dos recursos; segunda aba é bloqueada antes de abrir o banco | [09](./09-topologia-v1-local-first-e-conta-local.md), [10](./10-motor-local-drizzle-e-migrations.md) |
-| Arquivo e portabilidade | O save principal registra os dados confirmados da Conta, incluindo arquivados, snapshots e lembretes da agenda, sem drafts, senha ou criptografia | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md), [13](./13-protecao-local-e-backup-simples.md) |
+| Arquivo e portabilidade | O save principal registra dados confirmados, sem drafts; save vinculado usa envelope cifrado, sem senha de arquivo, e legado/desvinculado permanece plaintext | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md), [13](./13-protecao-local-e-backup-simples.md) |
 | Restauração | Validar arquivo e versões, resolver edições pendentes e confirmar a substituição da área local em uma transação, sem mesclagem | [ADR-009](../../docs/adr/ADR-009-nutridiet-principal.md), [11](./11-recuperacao-e-portabilidade-local.md) |
-| Retenção e privacidade | Informar que navegador/dispositivo podem perder dados, backup só recupera o exportado e quem acessar o arquivo poderá lê-lo | [09](./09-topologia-v1-local-first-e-conta-local.md), [13](./13-protecao-local-e-backup-simples.md) |
+| Retenção e privacidade | Informar que navegador/dispositivo podem perder dados, backup só recupera o exportado e banco local/drafts não recebem cifra em repouso nesta feature | [09](./09-topologia-v1-local-first-e-conta-local.md), [13](./13-protecao-local-e-backup-simples.md) |
 | Arquitetura e legado | UI usa casos de uso/repositórios; descartar dados legados de teste por módulo, sem migrador nem duas fontes canônicas para a mesma entidade | [04](./04-plano-de-execucao-e-validacao.md), [05](./05-arquitetura-backend-e-escopos-de-dados.md), [14](./14-consolidacao-e-portao-de-execucao.md) |
 
 ## Glossário da persistência
@@ -90,6 +92,7 @@ cada SDD, sem duplicar o plano detalhado:
 | 4 | Biblioteca reutilizável | [06](./06-catalogo-de-alimentos-e-customizados.md), [07](./07-receitas-e-refeicoes-prontas.md) e [08](./08-snapshots-versionamento-e-integridade-clinica.md) |
 | 5 | Avaliações e acompanhamento existentes | [02](./02-ciclo-de-vida-e-persistencia-do-paciente.md), [03](./03-contrato-de-interacao-da-tela-de-pacientes.md) e [05](./05-arquitetura-backend-e-escopos-de-dados.md) |
 | 6 | Backup manual simples | [11](./11-recuperacao-e-portabilidade-local.md) e [13](./13-protecao-local-e-backup-simples.md) |
+| 7 | Conta online e saves locais protegidos | [12](./12-autenticacao-online-e-soberania-local.md), [11](./11-recuperacao-e-portabilidade-local.md) e [13](./13-protecao-local-e-backup-simples.md) |
 
 Os SDDs das etapas 1–5 já foram criados em `specs/`, executados e validados:
 
@@ -108,10 +111,13 @@ biblioteca, avaliações ou backup.
 
 ## Limites e justificativas
 
-Continuam fora da V1: login online, múltiplos profissionais, colaboração,
-sincronização, outbox, armazenamento clínico remoto, backup automático,
-criptografia, exportação isolada `.diet`, revisão histórica de cada edição,
-migração de dados de teste e uso simultâneo de abas.
+Continuam fora do escopo atual: múltiplos profissionais por conta, colaboração,
+sincronização clínica, outbox, armazenamento remoto de prontuários, backup
+automático, criptografia de IndexedDB/drafts/dispositivo, exportação isolada
+`.diet`, revisão histórica de cada edição, migração de dados de teste e uso
+simultâneo de abas. Login online e cifra do arquivo protegido são cobertos pela
+[Decisão 12](./12-autenticacao-online-e-soberania-local.md); não implicam que o
+conteúdo clínico seja armazenado na nuvem.
 
 Também não há gerações de base, tabela de recibos, infraestrutura de upgrades
 automáticos ou funcionalidades avançadas de PWA. Offline básico e testes dos
@@ -119,8 +125,9 @@ fluxos entregues permanecem necessários.
 
 As justificativas do que foi retirado e do que foi mantido estão na
 [Decisão 14, seções 5 e 6](./14-consolidacao-e-portao-de-execucao.md).
-A [Decisão 12](./12-autenticacao-online-e-soberania-local.md) registra somente
-autenticação futura; não gera tarefas implícitas para esta implementação.
+A [Decisão 12](./12-autenticacao-online-e-soberania-local.md) registra a
+integração local entregue; ativação remota, SMTP e publicação continuam fora do
+que já foi validado.
 
 ## Catálogo das decisões
 
@@ -139,6 +146,7 @@ autenticação futura; não gera tarefas implícitas para esta implementação.
 - [13 — Proteção local e backup simples](./13-protecao-local-e-backup-simples.md)
 - [14 — Consolidação e divisão da implementação em SDDs](./14-consolidacao-e-portao-de-execucao.md)
 - [ADR-009 — `.nutridiet` como save principal](../../docs/adr/ADR-009-nutridiet-principal.md)
+- [Guia de setup Auth/Supabase](../../docs/setup/online-auth.md)
 
 ## Fonte única e manutenção
 
@@ -151,6 +159,6 @@ Alterações futuras deste escopo devem ser feitas na decisão correspondente.
 Este índice reúne requisitos e vocabulário para consulta; regras detalhadas
 e justificativas ficam nos documentos indicados.
 
-A orientação de backup sem criptografia e sem senha substitui os requisitos
-anteriores em contrário. A consolidação não revoga requisitos de outras áreas
-do produto, não muda a proposta e não autoriza funcionalidades fora da V1.
+A orientação de backup sem senha permanece. A Decisão 12 acrescenta o serviço
+online e o envelope externo cifrado para saves vinculados, sem alterar o schema
+clínico, cifrar todo o dispositivo ou autorizar envio de prontuário à nuvem.

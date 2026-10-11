@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { afterEach, describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { PGliteBackupRepository } from '@/lib/infrastructure/local-db/backup-repository';
 import { validateBackupEnvelope } from '@/lib/application/backup-application';
 import { createBackupEnvelope, createEmptyBackupFixture, createSchema10BackupFixture } from '../fixtures/backup';
@@ -71,7 +72,7 @@ describe('PGlite backup repository', () => {
       nextFollowUps: [],
     });
     let restoredFavorites: string[] = [];
-    const repository = new PGliteBackupRepository(handle, { writeFavorites: (favorites) => { restoredFavorites = favorites; } });
+    const repository = new PGliteBackupRepository(handle, { writeFavorites: (favorites: string[]) => { restoredFavorites = favorites; } });
 
     await repository.replaceAccountSnapshot('local-account', replacement);
     const snapshot = await repository.readAccountSnapshot('local-account');
@@ -91,6 +92,7 @@ describe('PGlite backup repository', () => {
   it('restores recipes from a schema 10 fixture with the safe portion default', async () => {
     handle = await createBackupTestDatabase('repository-restore-schema-10');
     const previous = createSchema10BackupFixture();
+    const originalHash = createHash('sha256').update(JSON.stringify(previous)).digest('hex');
     const migrated = validateBackupEnvelope(previous);
     const repository = new PGliteBackupRepository(handle);
 
@@ -100,6 +102,7 @@ describe('PGlite backup repository', () => {
     expect(restored.schemaVersion).toBe('11');
     expect(restored.recipes[0]).toMatchObject({ yieldPortions: '2', yieldUnit: 'PORTION', preparedWeightGrams: '300' });
     expect(previous.recipes[0]).not.toHaveProperty('yieldUnit');
+    expect(createHash('sha256').update(JSON.stringify(previous)).digest('hex')).toBe(originalHash);
   });
 
   it.each(['after-delete', 'after-insert'] as const)('rolls back the full base when failure occurs at %s', async (failAt) => {

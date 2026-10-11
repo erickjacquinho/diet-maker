@@ -13,9 +13,11 @@ o navegador conserva o trabalho confirmado que ainda não chegou ao arquivo.
 
 ## Decisão
 
-1. O `.nutridiet` é o save principal e autoritativo da Conta. Ele contém um
-   checkpoint lógico e completo dos dados confirmados, em JSON, que pode ser
-   aberto e restaurado em outro perfil compatível.
+1. O `.nutridiet` é o save principal e autoritativo da Conta clínica. Ele contém
+   um checkpoint lógico e completo dos dados confirmados. O payload segue em
+   JSON versionado; em save vinculado a uma conta online, um envelope externo
+   v2 AES-256-GCM protege esse payload. Um legado/desvinculado v1 permanece
+   plaintext até que uma cópia protegida seja criada.
 2. O banco PGlite persistido no IndexedDB é a área de trabalho local. Ele atende
    às consultas e mutações durante o uso e conserva as alterações confirmadas
    posteriores ao último checkpoint. Sua gravação não equivale a salvar o
@@ -43,3 +45,14 @@ o navegador conserva o trabalho confirmado que ainda não chegou ao arquivo.
   `refs/dieta-db/09-topologia-v1-local-first-e-conta-local.md` e
   `refs/dieta-db/10-motor-local-drizzle-e-migrations.md`; as decisões de motor,
   repositórios, transações e migrations permanecem vigentes.
+
+## Conta online e limites de proteção
+
+A [Decisão 12](../../refs/dieta-db/12-autenticacao-online-e-soberania-local.md)
+adiciona identidade online e autorização do save sem mover dados clínicos para
+o Supabase. Rascunhos permanecem no store local; o banco de trabalho IndexedDB
+não recebe cifragem em repouso nesta feature. O envelope protegido não representa
+cifra do dispositivo inteiro nem E2EE estrita. Consulte também as
+[Decisões 11](../../refs/dieta-db/11-recuperacao-e-portabilidade-local.md) e
+[13](../../refs/dieta-db/13-protecao-local-e-backup-simples.md) para formatos
+legado e backup.

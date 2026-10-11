@@ -40,14 +40,26 @@ describe('SidebarNavigationAdapter backup actions', () => {
   });
 
   it('exports the application result as a downloadable .nutridiet file', async () => {
+    const encryptedContent = JSON.stringify({
+      appId: 'nutridiet-local-pro',
+      formatVersion: 2,
+      saveId: 'bf00f2cc-00c4-4c60-a074-46d1965f6089',
+      algorithm: 'AES-256-GCM',
+      bindingProof: 'v1:test-key:' + 'A'.repeat(43),
+      iv: 'AAAAAAAAAAAAAAAA',
+      ciphertext: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    });
     mocks.exportBackup.mockResolvedValue({
       fileName: 'nutridiet-backup-2026-09-12.nutridiet',
-      content: '{"formatVersion":1}',
+      content: encryptedContent,
       envelope: {},
     });
-    const createObjectURL = vi.fn(() => 'blob:backup');
+    const blobs: Blob[] = [];
     const revokeObjectURL = vi.fn();
-    vi.spyOn(window.URL, 'createObjectURL').mockImplementation(createObjectURL);
+    const createObjectURL = vi.spyOn(window.URL, 'createObjectURL').mockImplementation((blob) => {
+      blobs.push(blob as Blob);
+      return 'blob:backup';
+    });
     vi.spyOn(window.URL, 'revokeObjectURL').mockImplementation(revokeObjectURL);
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
@@ -57,6 +69,8 @@ describe('SidebarNavigationAdapter backup actions', () => {
 
     await waitFor(() => expect(mocks.exportBackup).toHaveBeenCalledTimes(1));
     expect(createObjectURL).toHaveBeenCalledTimes(1);
+    await expect(blobs[0].text()).resolves.toBe(encryptedContent);
+    expect(encryptedContent).not.toContain('Paciente');
     expect(click).toHaveBeenCalledTimes(1);
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:backup');
     expect(screen.getByRole('status')).toHaveTextContent('Backup exportado como nutridiet-backup-2026-09-12.nutridiet.');
@@ -75,7 +89,7 @@ describe('SidebarNavigationAdapter backup actions', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(mocks.validateBackup).toHaveBeenCalledWith('{"valid":true}');
     expect(screen.getByText(/Não haverá mesclagem\./)).toBeInTheDocument();
-    expect(screen.getByText('O arquivo não possui senha nem criptografia. Guarde-o em local seguro.')).toBeInTheDocument();
+    expect(screen.getByText('Este arquivo é cifrado para o save autorizado e exige a conta vinculada para ser aberto.')).toBeInTheDocument();
   });
 
   it('exposes loading, disabled and keyboard-operable states without logging clinical content', async () => {

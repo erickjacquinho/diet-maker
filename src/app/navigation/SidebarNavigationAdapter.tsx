@@ -15,16 +15,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { BackupApplicationError } from '@/lib/application/backup-application';
+import type { ProfileSessionSnapshot } from '@/lib/application/profile-session';
 import { getBrowserPatientRuntime } from '@/lib/application/browser-composition';
 import * as browserComposition from '@/lib/application/browser-composition';
+import type { BrowserPatientRuntime } from '@/lib/application/browser-composition';
 import { SIDEBAR_NAVIGATION_ITEMS } from './sidebar-navigation-config';
 
 export type SidebarNavigationAdapterProps = Omit<SidebarNavProps, 'pathname' | 'navigationItems'>;
 
-const EMPTY_PROFILE_SNAPSHOT = { status: 'empty' as const, syncState: 'unbound' as const, account: null, accountId: null, runtime: null, fileName: null, hydration: 'ready' as const, resumeFileName: null, error: null };
+const EMPTY_PROFILE_SNAPSHOT: ProfileSessionSnapshot<BrowserPatientRuntime> = { status: 'empty', authorizationExpiresAt: null, syncState: 'unbound', account: null, accountId: null, runtime: null, fileName: null, hydration: 'ready', resumeFileName: null, error: null, protectedCopyRequired: false };
 const EMPTY_PROFILE_SESSION = {
   getSnapshot: () => EMPTY_PROFILE_SNAPSHOT,
-  subscribe: (_listener: () => void) => () => undefined,
+  subscribe: (_listener: (snapshot: ProfileSessionSnapshot<BrowserPatientRuntime>) => void) => () => undefined,
   sync: async () => undefined,
 };
 
@@ -46,6 +48,8 @@ function getBackupErrorMessage(error: unknown): string {
         return 'Salve ou descarte os rascunhos pendentes antes de importar.';
       case 'BACKUP_PENDING_CHECKPOINT':
         return 'Salve ou descarte as alterações locais pendentes antes de importar.';
+      case 'BACKUP_AUTH_REQUIRED':
+        return 'Autorize novamente este save antes de exportar ou importar um backup.';
       case 'BACKUP_CANCELLED':
         return 'A importação foi cancelada; a base local não foi alterada.';
       case 'BACKUP_EXPORT_FAILED':
@@ -268,7 +272,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
             <p className="break-words">Arquivo: {restoreFileName ?? 'backup selecionado'}</p>
             <p>Todos os dados atuais da Conta local serão substituídos. Não haverá mesclagem.</p>
             <p>Rascunhos ou edições pendentes precisam ser salvos ou descartados antes da importação.</p>
-            <p>O arquivo não possui senha nem criptografia. Guarde-o em local seguro.</p>
+            <p>Este arquivo é cifrado para o save autorizado e exige a conta vinculada para ser aberto.</p>
             {restoreState === 'pending-edits' ? (
               <p role="alert" className="rounded-control border border-error-border bg-error-soft p-3 text-style-body text-error">
                 Existem rascunhos não confirmados. Salve-os no perfil ou descarte-os explicitamente antes da restauração.
