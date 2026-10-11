@@ -4,9 +4,8 @@ import type { PatientApplicationError } from '@/lib/application/patients/patient
 import { getBrowserPatientApplication } from '@/lib/application/browser-composition';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { buildPatientListRows, filterPatients, type PatientListHistoryInput, type PatientListRow } from '@/lib/patientListView';
-import { toLegacyAssessment, toLegacyLastActivity, toLegacyNextEvent } from '@/lib/application/patients/clinical-ui-adapter';
+import { toLegacyAssessment, toLegacyLastActivity, toLegacyNextEvent, type PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
 import { normalizeDateKey } from '@/lib/patientListDateUtils';
-import type { PatientNextEventType } from '@/lib/patientsStoreTypes';
 
 export function usePatientsPage() {
   const [patients, setPatients] = useState<ReturnType<typeof toPatientViewModel>[]>([]);

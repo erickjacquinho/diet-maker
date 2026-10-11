@@ -18,8 +18,11 @@ describe('host persistence boundary', () => {
     ]);
 
     expect(client).toMatch(/mode === 'persistent' \? 'idb:\/\/' : 'memory:\/\//);
-    expect(composition).toContain('idb://nutridiet-${encodeURIComponent(account.id)}');
-    expect(composition).toContain('new IndexedDbDietDraftStore()');
+    expect(composition).toContain('const workspaceKey = onlineScope ? `${onlineScope.ownerId}:${onlineScope.saveId}` : account.id');
+    expect(composition).toContain('idb://nutridiet-${encodeURIComponent(workspaceKey)}');
+    expect(composition).toContain('new IndexedDbDietDraftStore({ databaseName: onlineScope');
+    expect(composition).toContain('nutridiet-diet-drafts-v1-${encodeURIComponent(workspaceKey)}');
+    expect(composition).toContain("'nutridiet-diet-drafts-v1'");
     expect(composition).toContain('new InMemoryDietDraftStore()');
     expect(composition).not.toMatch(/getActiveOrCreate/);
   });
