@@ -186,7 +186,7 @@ export function NextEventModal({
               <span>Agendar acompanhamento</span>
             </DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Defina uma data para cada tipo de acompanhamento. Você pode agendar somente um deles.
+              Defina uma data para cada tipo de acompanhamento; você pode agendar um ou ambos.
             </DialogDescription>
           </DialogHeader>
 

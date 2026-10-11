@@ -48,13 +48,13 @@ describe('PatientDetailPage current context', () => {
     expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
     expect(progress).not.toHaveTextContent('Peso');
     expect(progress).not.toHaveTextContent('Nenhuma avaliação');
-    const sideSummary = screen.getByRole('group', { name: 'Última prescrição e avaliação' });
+    const sideSummary = screen.getByRole('group', { name: 'Prescrição e avaliação' });
     expect(sideSummary.parentElement).toHaveClass('col-span-1');
     expect(within(sideSummary).getAllByRole('region')).toHaveLength(2);
-    expect(within(sideSummary).getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
+    expect(within(sideSummary).getByRole('region', { name: 'Prescrição atual' })).toBeInTheDocument();
     expect(within(sideSummary).getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hanna Perfil' })).toBeInTheDocument();
-    expect(screen.getByText('Cutting')).toBeInTheDocument();
+    expect(within(sideSummary).getByText('Nenhuma prescrição registrada.')).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: 'Última avaliação' })).getByText('48,5 kg')).toBeInTheDocument();
     expect(screen.queryByText('Metas nutricionais atuais')).not.toBeInTheDocument();
   });

@@ -124,6 +124,11 @@ const mockDietApplication = {
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
   getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
+  getBrowserProfileSession: () => ({
+    isSaveAuthorized: () => true,
+    registerPendingDraftFlush: () => () => undefined,
+  }),
+  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => mockDietApplication.flushDraft(...args),
 }));
 
 describe('contextual header navigation', () => {

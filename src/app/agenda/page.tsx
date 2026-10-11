@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { AlertTriangle, ChevronLeft, ChevronRight, Clock3, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+import { Checkbox } from '@/components/atoms';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -143,16 +144,15 @@ function PendingPatientList({
                 )}
               >
                 {selectionMode ? (
-                  <label className="flex h-full w-full cursor-pointer items-center gap-2 px-2">
-                    <input
-                      type="checkbox"
+                  <div className="flex h-full w-full items-center gap-2 px-2">
+                    <Checkbox
                       checked={selected}
-                      onChange={() => onToggleAppointment(selection)}
+                      onCheckedChange={() => onToggleAppointment(selection)}
                       aria-label={`Selecionar ${taskLabel} de ${patient.name} para remanejar`}
-                      className="size-4 shrink-0 cursor-pointer accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                      className="shrink-0"
                     />
                     <span className="truncate text-style-body-small text-text-primary">{patient.name}</span>
-                  </label>
+                  </div>
                 ) : (
                   <div className="flex h-full w-full items-center justify-between gap-2 px-2">
                     <span className="truncate text-style-body-small text-text-primary">{patient.name}</span>
@@ -160,7 +160,7 @@ function PendingPatientList({
                       asChild
                       variant="quiet"
                       size="compact"
-                      className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none"
+                      className="opacity-subdued transition-opacity group-hover:opacity-full focus-visible:opacity-full motion-reduce:transition-none"
                     >
                       <Link
                         href={getHref(patient.id)}
@@ -643,8 +643,7 @@ export default function AgendaPage() {
             </div>
             <div
               role="rowgroup"
-              className="grid flex-1"
-              style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
+              className="grid flex-1 auto-rows-fr"
             >
               {weeks.map((week, weekIndex) => (
                 <div key={format(week[0], 'yyyy-MM-dd')} role="row" className="grid grid-cols-7 divide-x divide-border-subtle border-b border-border-subtle last:border-b-0">
@@ -695,7 +694,7 @@ export default function AgendaPage() {
                               <span
                                 aria-current={isToday ? 'date' : undefined}
                                 className={cn(
-                                  'flex size-6 items-center justify-center rounded-full text-style-caption',
+                                  'flex size-6 items-center justify-center rounded-control text-style-caption',
                                   isToday ? 'bg-primary text-on-primary' : 'text-text-primary',
                                   !isSameMonth(day, visibleMonth) && 'text-text-muted',
                                 )}
@@ -705,8 +704,10 @@ export default function AgendaPage() {
                             </div>
                             <div className="flex flex-col gap-1">
                               {dietCount + assessmentCount > 0 && (
-                                <button
+                                <Button
                                   type="button"
+                                  variant="quiet"
+                                  size="compact"
                                   draggable={!isMovingEvents}
                                   disabled={isMovingEvents}
                                   aria-haspopup="dialog"
@@ -727,7 +728,7 @@ export default function AgendaPage() {
                                     setDragOverDate(null);
                                   }}
                                   className={cn(
-                                    'group flex w-full cursor-grab flex-col gap-1 rounded-control border border-border-subtle bg-surface-subtle px-2 py-2 text-left text-style-legal font-medium leading-4 text-text-primary transition-colors hover:border-primary-focus focus-visible:border-primary-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:cursor-grabbing motion-reduce:transition-none',
+                                    'group flex h-auto w-full cursor-grab flex-col gap-1 rounded-control border border-border-subtle bg-surface-subtle px-2 py-2 text-left text-style-legal font-medium text-text-primary transition-colors hover:border-primary-focus focus-visible:border-primary-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:cursor-grabbing motion-reduce:transition-none',
                                     draggedDate === dateKey && 'opacity-disabled',
                                   )}
                                 >
@@ -741,7 +742,7 @@ export default function AgendaPage() {
                                       {assessmentLabel}
                                     </span>
                                   )}
-                                </button>
+                                </Button>
                               )}
                               {dayReminders.map((reminder) => (
                                 <Badge key={reminder.id} variant="neutral" className="w-full min-w-0 justify-start gap-1 font-medium">
@@ -920,7 +921,7 @@ export default function AgendaPage() {
         }}
       >
         {activeDate && (
-          <DialogContent className="flex max-h-dialog flex-col" style={{ height: 'var(--cmp-dialog-max-height)' }}>
+          <DialogContent className="flex h-full max-h-dialog flex-col">
             <DialogHeader>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

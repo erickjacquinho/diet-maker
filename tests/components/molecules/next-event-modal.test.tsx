@@ -27,9 +27,11 @@ describe('NextEventModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Atualização de avaliação' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('textbox', { name: 'Atualização de avaliação' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Atualização de dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Atualização de avaliação' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Atualização de dieta' })).toBeInTheDocument();
+    expect(screen.getByText(/você pode agendar um ou ambos/)).toBeInTheDocument();
     const observations = screen.getByRole('textbox', { name: 'Observações' });
     expect(observations).toHaveAttribute('rows', '5');
     expect(observations).toHaveClass('resize-none');
@@ -50,7 +52,7 @@ describe('NextEventModal', () => {
 
     expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover data' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('textbox', { name: 'Atualização de dieta' })).toHaveValue('15/09/2026');
     expect(screen.getByRole('textbox', { name: 'Observações' })).toHaveValue('Revisar evolução.');
   });
 
@@ -99,7 +101,7 @@ describe('NextEventModal', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Atualização de dieta' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Atualização de dieta' }), { target: { value: '20/09/2026' } });
 
     // Try to cancel
     const cancelBtn = screen.getByRole('button', { name: 'Cancelar' });
@@ -167,54 +169,60 @@ describe('NextEventModal', () => {
       />,
     );
 
-    fireEvent.change(screen.getByRole('textbox', { name: /Data/ }), { target: { value: '16/09/2026' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Atualização de dieta' }));
-    expect(screen.getByRole('button', { name: 'Atualização de avaliação' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Atualização de dieta' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Atualização de avaliação' }), { target: { value: '16/09/2026' } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Atualização de dieta' }), { target: { value: '18/09/2026' } });
     fireEvent.change(screen.getByRole('textbox', { name: 'Observações' }), { target: { value: 'Revisar o plano alimentar.' } });
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith({
-      date: '2026-09-16',
+      date: '2026-09-18',
       type: ['assessment-update', 'diet-update'],
+      dates: { 'assessment-update': '2026-09-16', 'diet-update': '2026-09-18' },
       comments: 'Revisar o plano alimentar.',
     }));
   });
 
-  it('allows clearing both types but disables save and rejects submission until one is selected', async () => {
+  it('allows clearing both dates but prevents saving until at least one is entered again', async () => {
     const onSave = vi.fn();
     render(
       <NextEventModal
         open
-        nextEvent={null}
+        nextEvent={{
+          date: '2026-09-15',
+          type: ['assessment-update', 'diet-update'],
+          dates: { 'assessment-update': '2026-09-15', 'diet-update': '2026-09-16' },
+          version: 4,
+        }}
         onOpenChange={vi.fn()}
         onSave={onSave}
         onClear={vi.fn()}
       />,
     );
 
-    const assessmentType = screen.getByRole('button', { name: 'Atualização de avaliação' });
-    const dietType = screen.getByRole('button', { name: 'Atualização de dieta' });
+    const assessmentDate = screen.getByRole('textbox', { name: 'Atualização de avaliação' });
+    const dietDate = screen.getByRole('textbox', { name: 'Atualização de dieta' });
     const saveButton = screen.getByRole('button', { name: /Salvar/i });
 
-    fireEvent.click(assessmentType);
-    expect(assessmentType).toHaveAttribute('aria-pressed', 'false');
-    expect(dietType).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.change(assessmentDate, { target: { value: '' } });
+    fireEvent.change(dietDate, { target: { value: '' } });
+    expect(assessmentDate).toHaveValue('');
+    expect(dietDate).toHaveValue('');
     expect(saveButton).toBeDisabled();
 
-    fireEvent.change(screen.getByRole('textbox', { name: /Data/ }), { target: { value: '16/09/2026' } });
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     expect(onSave).not.toHaveBeenCalled();
-    expect(await screen.findByRole('alert')).toHaveTextContent('Selecione ao menos um tipo de acompanhamento.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Informe a data de pelo menos um tipo de acompanhamento.');
 
-    fireEvent.click(dietType);
+    fireEvent.change(dietDate, { target: { value: '16/09/2026' } });
     expect(saveButton).toBeEnabled();
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith({
       date: '2026-09-16',
       type: ['diet-update'],
+      dates: { 'diet-update': '2026-09-16' },
       comments: '',
+      version: 4,
     }));
   });
 });

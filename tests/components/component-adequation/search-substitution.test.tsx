@@ -85,7 +85,7 @@ describe('component adequation: search and substitution', () => {
     );
 
     const recipeTable = screen.getByRole('table', {
-      name: 'Lista de receitas culinárias calculadas por porção',
+      name: 'Lista de receitas culinárias com nutrientes na base do rendimento',
     });
     expect(within(recipeTable).getByRole('columnheader', { name: 'Receita Culinária' })).toBeInTheDocument();
     expect(within(recipeTable).getByText('2 porções')).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('component adequation: search and substitution', () => {
         onToggleRecipe={vi.fn()}
       />,
     );
-    expect(screen.getByRole('table', { name: 'Lista de receitas culinárias calculadas por porção' })).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Lista de receitas culinárias com nutrientes na base do rendimento' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent(/Nenhuma receita culinária encontrada/);
   });
 

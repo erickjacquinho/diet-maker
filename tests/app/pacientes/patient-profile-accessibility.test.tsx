@@ -104,7 +104,7 @@ describe('PatientDetailPage accessibility', () => {
     const progress = await screen.findByRole('region', { name: 'Progresso Atual' });
     expect(progress).toHaveClass('col-span-2');
     expect(within(progress).getByRole('combobox', { name: 'Período' })).toHaveTextContent('30 dias');
-    expect(screen.getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Prescrição atual' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Próximo acompanhamento' })).not.toBeInTheDocument();
     const personalDataButton = screen.getByRole('button', { name: 'Ver dados pessoais' });
@@ -163,12 +163,17 @@ describe('PatientDetailPage accessibility', () => {
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveClass('z-modal', 'rounded-surface', 'bg-surface');
     expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toHaveClass('text-style-dialog-title');
-    expect(screen.getByText(/Defina a data/)).toHaveClass('text-style-body', 'text-text-secondary');
-    expect(screen.getByRole('button', { name: 'Abrir calendário para Data' })).toHaveAttribute(
+    expect(screen.getByText(/Defina uma data para cada tipo/)).toHaveClass('text-style-body', 'text-text-secondary');
+    expect(screen.getByRole('textbox', { name: 'Atualização de avaliação' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Atualização de dieta' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Atualização de avaliação' })).toHaveAttribute(
       'aria-haspopup',
       'dialog',
     );
-    expect(screen.getByRole('group', { name: 'Tipo de acompanhamento' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir calendário para Atualização de dieta' })).toHaveAttribute(
+      'aria-haspopup',
+      'dialog',
+    );
     const cancelButton = screen.getByRole('button', { name: 'Cancelar' });
     const saveButton = screen.getByRole('button', { name: 'Salvar (Ctrl+S)' });
     expect(saveButton).toHaveAttribute('aria-keyshortcuts', 'Control+s Meta+s');

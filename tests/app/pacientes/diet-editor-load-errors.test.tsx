@@ -30,6 +30,11 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mocks.patientApplication),
   getBrowserDietApplication: () => Promise.resolve(mocks.dietApplication),
+  getBrowserProfileSession: () => ({
+    isSaveAuthorized: () => true,
+    registerPendingDraftFlush: () => () => undefined,
+  }),
+  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => mocks.dietApplication.flushDraft(...args),
 }));
 
 const patient = {
