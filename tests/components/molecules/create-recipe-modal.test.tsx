@@ -18,7 +18,8 @@ describe('CreateRecipeModal layer consumers', () => {
     id: 'recipe-1',
     name: 'Receita teste',
     category: 'Café da Manhã',
-    servings: 2,
+    yieldAmount: 2,
+    yieldUnit: 'PORTION' as const,
     instructions: 'Misture e sirva.',
     ingredients: [{
       foodId: 'food-1',
@@ -58,12 +59,23 @@ describe('CreateRecipeModal layer consumers', () => {
       />,
     );
 
-    const category = screen.getByRole('combobox');
+    const category = screen.getByRole('combobox', { name: 'Categoria' });
     fireEvent.click(category);
 
     await waitFor(() => {
       expect(screen.getByRole('listbox')).toHaveClass('z-modal');
     });
+  });
+
+  it('saves the selected measurement unit with the yield amount', async () => {
+    const onSave = vi.fn();
+    render(<CreateRecipeModal open recipe={recipeWithIngredient} onOpenChange={vi.fn()} onSave={onSave} />);
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Unidade do rendimento' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Gramas (g)' }));
+    fireEvent.click(screen.getByRole('button', { name: /Salvar Receita/ }));
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ yieldAmount: 2, yieldUnit: 'g' }));
   });
 
   it('connects ingredient substitution and duplication actions', async () => {

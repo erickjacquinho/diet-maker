@@ -44,9 +44,9 @@ describe('PatientDetailPage latest diet', () => {
 
     render(<PatientDetailPage />);
 
-    expect(await screen.findByText('Plano cutting agosto')).toBeInTheDocument();
-    const planSummary = within(screen.getByRole('region', { name: 'Última Prescrição 04/08/2026' }));
-    expect(planSummary.getByText('Ativo')).toBeInTheDocument();
+    const planSummary = within(screen.getByRole('region', { name: 'Prescrição atual' }));
+    expect(planSummary.getByText('Prescrição Ativa')).toBeInTheDocument();
+    expect(planSummary.getByText('04/08/2026')).toBeInTheDocument();
     expect(planSummary.getByText('Objetivo Diário')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('PatientDetailPage latest diet', () => {
 
     render(<PatientDetailPage />);
 
-    const planSummary = within(await screen.findByRole('region', { name: /Última Prescrição/ }));
+    const planSummary = within(await screen.findByRole('region', { name: 'Prescrição atual' }));
     expect(planSummary.getByText('Média semanal do ciclo')).toBeInTheDocument();
     expect(planSummary.queryByText('Metas diárias')).not.toBeInTheDocument();
   });

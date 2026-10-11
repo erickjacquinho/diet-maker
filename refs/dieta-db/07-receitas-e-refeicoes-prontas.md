@@ -26,6 +26,7 @@ Recipe
 ├── name / category / instructions
 ├── prepTimeMinutes
 ├── yieldPortions
+├── yieldUnit (PORTION | g | ml | unit)
 ├── preparedWeightGrams (quando conhecido)
 ├── status / createdAt / updatedAt
 └── RecipeIngredient[]
@@ -53,12 +54,15 @@ Ao salvar uma receita, o caso de uso deve:
 2. normalizar quantidades e unidades;
 3. congelar o snapshot nutricional de cada ingrediente naquela versão;
 4. somar os nutrientes totais da preparação;
-5. calcular nutrientes por porção usando `yieldPortions`;
+5. calcular nutrientes por `yieldPortions` na unidade definida por `yieldUnit`;
 6. registrar a versão e o momento do cálculo.
 
-Quando `preparedWeightGrams` existir, a receita também pode expor valores por
-100 g preparada. Sem peso preparado, o sistema não deve estimar rendimento por
-peso; deve oferecer apenas a base suportada pelos dados informados.
+`yieldUnit` ausente em uma entrada legada significa `PORTION`. Quando o
+rendimento for `g`, o próprio valor de `yieldPortions` informa o peso preparado
+e a receita pode expor nutrientes por 100 g. Quando for `ml`, pode expor
+nutrientes por 100 ml. Para receitas em porções, `preparedWeightGrams` continua
+opcional e permite expor nutrientes por 100 g preparada. Sem a medida
+correspondente, o sistema não deve estimar peso ou volume.
 
 `yieldPortions` e, quando informado, `preparedWeightGrams` devem ser positivos
 e finitos. Não substituir rendimento inválido por 1 nem inferir densidade.

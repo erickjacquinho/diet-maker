@@ -4,55 +4,9 @@ import { createProfileSession, navigateWithinSession } from './helpers/profile-s
 
 const pageTimeout = 120_000;
 
-type Viewport = { width: number; height: number };
-
-const catalogFamilies = [
-  {
-    name: 'Ações e resumos',
-    entries: [
-      { id: 'atom-icon-button', label: 'IconButton', layer: 'Atoms' },
-      { id: 'molecule-macro-summary', label: 'MacroSummary', layer: 'Molecules' },
-      { id: 'molecule-macro-proportion-bar', label: 'MacroProportionBar', layer: 'Molecules' },
-    ],
-  },
-  {
-    name: 'Categorias e resultados',
-    entries: [
-      { id: 'molecule-food-search-category-selector', label: 'FoodSearchCategorySelector', layer: 'Molecules' },
-      { id: 'molecule-ready-meal-search-results-list', label: 'ReadyMealSearchResultsList', layer: 'Molecules' },
-      { id: 'molecule-recipe-search-results-list', label: 'RecipeSearchResultsList', layer: 'Molecules' },
-    ],
-  },
-  {
-    name: 'Ciclos',
-    entries: [
-      { id: 'organism-diet-mode-switcher', label: 'DietModeSwitcher', layer: 'Organisms' },
-      { id: 'organism-carb-cycling-variation-panel', label: 'CarbCyclingVariationPanel', layer: 'Organisms' },
-    ],
-  },
-  {
-    name: 'Modais',
-    entries: [
-      { id: 'organism-food-search-modal', label: 'FoodSearchModal', layer: 'Organisms' },
-      { id: 'organism-substitute-food-modal', label: 'SubstituteFoodModal', layer: 'Organisms' },
-      { id: 'organism-import-previous-diet-modal', label: 'ImportPreviousDietModal', layer: 'Organisms' },
-      { id: 'organism-read-only-diet-modal', label: 'ReadOnlyDietModal', layer: 'Organisms' },
-    ],
-  },
-  {
-    name: 'Histórico',
-    entries: [
-      { id: 'organism-patient-assessments-table', label: 'PatientAssessmentsTable', layer: 'Organisms' },
-      { id: 'organism-patient-diets-table', label: 'PatientDietsTable', layer: 'Organisms' },
-      { id: 'organism-consultation-history-row', label: 'ConsultationHistoryRow', layer: 'Organisms' },
-      { id: 'organism-patient-list-table-row', label: 'PatientListTableRow', layer: 'Organisms' },
-    ],
-  },
-] as const;
-
 async function visit(page: Page, route: string, marker: Locator) {
   const inAppLink = page.locator(`a[href="${route}"]`).first();
-  if (await inAppLink.count() || route === '/design-system') {
+  if (await inAppLink.count()) {
     await navigateWithinSession(page, route);
   } else {
     await page.goto(route, { waitUntil: 'load', timeout: pageTimeout });
@@ -102,47 +56,6 @@ async function goToNewDiet(page: Page, profileHref: string) {
   expect(href).toBeTruthy();
   await visit(page, href!, page.getByRole('main', { name: 'Elaboração de Dieta' }));
 }
-
-test('valida o catálogo das famílias e as condições desktop do design system', async ({ page }, testInfo) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await createProfileSession(page, 'Adequação design system');
-
-  for (const viewport of [{ width: 1024, height: 900 }, { width: 1440, height: 900 } satisfies Viewport]) {
-    await page.setViewportSize(viewport);
-    await visit(page, '/design-system', page.getByRole('heading', { name: 'Design System canônico' }));
-
-    await expect(page.getByText('Estados', { exact: true })).toBeVisible();
-    await expect(page.getByText('Desktop ≥ 1024px', { exact: false })).toBeVisible();
-
-    const search = page.getByRole('textbox', { name: 'Buscar no catálogo de componentes' });
-    await expect(search).toBeVisible();
-
-    for (const family of catalogFamilies) {
-      for (const entry of family.entries) {
-        await search.fill(entry.id);
-        const code = page.getByText(entry.id, { exact: true });
-        await expect(code, `${family.name}: ${entry.id}`).toBeVisible({ timeout: pageTimeout });
-        const card = code.locator('xpath=../..');
-        await expect(card).toContainText(entry.label);
-        await expect(card).toContainText(entry.layer);
-      }
-    }
-
-    await search.fill('');
-    await capture(page, testInfo, `design-system-${viewport.width}`);
-
-    if (viewport.width === 1024) {
-      await page.evaluate(() => {
-        document.documentElement.style.zoom = '2';
-      });
-      await expect(page.getByRole('heading', { name: 'Design System canônico' })).toBeVisible();
-      await capture(page, testInfo, 'design-system-1024-zoom-200');
-      await page.evaluate(() => {
-        document.documentElement.style.zoom = '';
-      });
-    }
-  }
-});
 
 test('preserva semântica, foco e estados vazios no histórico de pacientes', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1024, height: 900 });

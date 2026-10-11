@@ -6,7 +6,7 @@ import { SubstituteFoodModal, type MealFoodToSubstitute } from '@/components/org
 import { ReadyMealSearchResultsList } from '@/components/molecules/food-search/ReadyMealSearchResultsList';
 import { RecipeSearchResultsList } from '@/components/molecules/food-search/RecipeSearchResultsList';
 import type { ReadyMeal } from '@/lib/readyMealsStore';
-import type { Recipe } from '@/lib/recipesStore';
+import type { Recipe } from '@/lib/library-ui-adapter';
 
 const readyMeal: ReadyMeal = {
   id: 'ready-1',
@@ -24,7 +24,8 @@ const recipe: Recipe = {
   id: 'recipe-1',
   name: 'Panqueca de banana com aveia',
   category: 'Café da Manhã',
-  servings: 2,
+  yieldAmount: 2,
+  yieldUnit: 'PORTION',
   instructions: 'Misturar e grelhar',
   createdAt: '2026-08-30',
   ingredients: [
@@ -84,7 +85,7 @@ describe('component adequation: search and substitution', () => {
     );
 
     const recipeTable = screen.getByRole('table', {
-      name: 'Lista de receitas culinárias calculadas por porção',
+      name: 'Lista de receitas culinárias com nutrientes na base do rendimento',
     });
     expect(within(recipeTable).getByRole('columnheader', { name: 'Receita Culinária' })).toBeInTheDocument();
     expect(within(recipeTable).getByText('2 porções')).toBeInTheDocument();
@@ -112,7 +113,7 @@ describe('component adequation: search and substitution', () => {
         onToggleRecipe={vi.fn()}
       />,
     );
-    expect(screen.getByRole('table', { name: 'Lista de receitas culinárias calculadas por porção' })).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Lista de receitas culinárias com nutrientes na base do rendimento' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent(/Nenhuma receita culinária encontrada/);
   });
 

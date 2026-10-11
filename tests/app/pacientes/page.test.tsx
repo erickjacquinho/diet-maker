@@ -70,6 +70,7 @@ function state(overrides: Partial<ReturnType<typeof usePatientsPage>> = {}) {
     retry: vi.fn(),
     createPatient: vi.fn(),
     ...overrides,
+    updateNextFollowUpDates: overrides.updateNextFollowUpDates ?? vi.fn(),
   };
 }
 

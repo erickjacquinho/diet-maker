@@ -17,7 +17,7 @@
 
 **Purpose**: Preserve existing user work before touching overlapping files.
 
-- [ ] T001 [skill: $ponytail] Review and record the current diffs for src/app/pacientes/[id]/dieta/[dietaId]/page.tsx, src/hooks/useDietBuilderPage.ts, src/hooks/useDietBuilderModals.ts, src/lib/application/diets/legacy-diet-adapter.ts and src/components/templates/DietBuilderTemplate.tsx; preserve every unrelated change during implementation.
+- [X] T001 [skill: $ponytail] Review and record the current diffs for src/app/pacientes/[id]/dieta/[dietaId]/page.tsx, src/hooks/useDietBuilderPage.ts, src/hooks/useDietBuilderModals.ts, src/lib/application/diets/legacy-diet-adapter.ts and src/components/templates/DietBuilderTemplate.tsx; preserve every unrelated change during implementation.
 
 ## Phase 2: Foundational
 
@@ -33,17 +33,17 @@ No package, schema, or shared framework setup is required. Existing profile, die
 
 ### Tests for User Story 1
 
-- [ ] T002 [skill: $tdd] [P] [US1] Extend tests/infrastructure/diet-snapshot-roundtrip.integration.test.ts for changed quantities and saved/reopened snapshot equality using the frozen reference.
-- [ ] T003 [skill: $tdd] [P] [US1] Extend tests/hooks/useDietMealActions.test.ts for changing quantity and substituting a source without retaining the old snapshot.
-- [ ] T004 [skill: $tdd] [P] [US1] Extend tests/lib/diets/diet-validation.test.ts for complete snapshots from all modeled editor sources while rejecting malformed provenance/quantities.
-- [ ] T005 [skill: $tdd] [P] [US1] Extend tests/hooks/useDietCalculations.test.ts for using the diet weight reference and leaving g/kg unavailable when a legacy reference is absent.
+- [X] T002 [skill: $tdd] [P] [US1] Extend tests/infrastructure/diet-snapshot-roundtrip.integration.test.ts for changed quantities and saved/reopened snapshot equality using the frozen reference.
+- [X] T003 [skill: $tdd] [P] [US1] Extend tests/hooks/useDietMealActions.test.ts for changing quantity and substituting a source without retaining the old snapshot.
+- [X] T004 [skill: $tdd] [P] [US1] Extend tests/lib/diets/diet-validation.test.ts for complete snapshots from all modeled editor sources while rejecting malformed provenance/quantities.
+- [X] T005 [skill: $tdd] [P] [US1] Extend tests/hooks/useDietCalculations.test.ts for using the diet weight reference and leaving g/kg unavailable when a legacy reference is absent.
 
 ### Implementation for User Story 1
 
-- [ ] T006 [skill: $ponytail] [P] [US1] Preserve weightReferenceKg in both directions of src/lib/application/diets/legacy-diet-adapter.ts and add the optional legacy field in src/lib/legacy-diet-types.ts.
-- [ ] T007 [skill: $ponytail] [P] [US1] Update quantity/substitution snapshots in src/hooks/useDietMealActions.ts using the existing source snapshot helpers in src/lib/library-ui-adapter.ts.
-- [ ] T008 [skill: $ponytail] [P] [US1] Use the plan's reference weight in src/hooks/useDietCalculations.ts and avoid profile-weight fallback for plans with no recoverable reference.
-- [ ] T009 [skill: $ponytail] [P] [US1] Align src/lib/domain/diets/diet-validation.ts with modeled snapshot source types while retaining identity, provenance, quantity, and nutrient validation.
+- [X] T006 [skill: $ponytail] [P] [US1] Preserve weightReferenceKg in both directions of src/lib/application/diets/legacy-diet-adapter.ts and add the optional legacy field in src/lib/legacy-diet-types.ts.
+- [X] T007 [skill: $ponytail] [P] [US1] Update quantity/substitution snapshots in src/hooks/useDietMealActions.ts using the existing source snapshot helpers in src/lib/library-ui-adapter.ts.
+- [X] T008 [skill: $ponytail] [P] [US1] Use the plan's reference weight in src/hooks/useDietCalculations.ts and avoid profile-weight fallback for plans with no recoverable reference.
+- [X] T009 [skill: $ponytail] [P] [US1] Align src/lib/domain/diets/diet-validation.ts with modeled snapshot source types while retaining identity, provenance, quantity, and nutrient validation.
 
 **Checkpoint**: US1 round-trip tests pass for the editor's supported source types and legacy weight behavior.
 
@@ -55,16 +55,16 @@ No package, schema, or shared framework setup is required. Existing profile, die
 
 ### Tests for User Story 2
 
-- [ ] T010 [skill: $tdd] [P] [US2] Extend tests/lib/diets/save-diet-as-active.test.ts for committed cleanup retry, stable-ID reconciliation, and preserving a newer draft revision.
-- [ ] T011 [skill: $tdd] [P] [US2] Add tests/application/diets/diet-application-checkpoint.test.ts for committed reconciliation checkpointing, noncommitted no-checkpoint, and file-sync failure after local commit.
-- [ ] T012 [skill: $tdd] [P] [US2] Add tests/hooks/useDietBuilderSaveOutcome.test.ts for RESULT_UNKNOWN reconciliation and CHECKPOINT_PENDING/CLEANUP_PENDING actions without resubmitting the diet.
+- [X] T010 [skill: $tdd] [P] [US2] Extend tests/lib/diets/save-diet-as-active.test.ts for committed cleanup retry, stable-ID reconciliation, and preserving a newer draft revision.
+- [X] T011 [skill: $tdd] [P] [US2] Add tests/application/diets/diet-application-checkpoint.test.ts for committed reconciliation checkpointing, noncommitted no-checkpoint, and file-sync failure after local commit.
+- [X] T012 [skill: $tdd] [P] [US2] Add tests/hooks/useDietBuilderSaveOutcome.test.ts for RESULT_UNKNOWN reconciliation and CHECKPOINT_PENDING/CLEANUP_PENDING actions without resubmitting the diet.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [skill: $backend-architect-ddd] [US2] Add the minimum discriminated outcome fields/statuses in src/lib/domain/diets/diet-model.ts and src/lib/application/diets/diet-ports.ts for checkpoint-pending and cleanup reconciliation.
-- [ ] T014 [skill: $backend-architect-ddd] [US2] Update src/lib/application/diets/save-diet-as-active.ts so reconciliation confirms the stable ID, cleans only the confirmed revision, and distinguishes committed, not committed, cleanup pending, and review required.
-- [ ] T015 [skill: $backend-architect-ddd] [US2] Update src/lib/application/diets/diet-application.ts to checkpoint after local commit or committed reconciliation, preserve the local outcome if profile sync fails, and never repeat the diet mutation for checkpoint retry.
-- [ ] T016 [skill: $nextjs-fullstack-master] [US2] Update src/hooks/useDietBuilderPage.ts so unknown results reconcile before retry, cleanup-pending exposes cleanup-only retry, committed/checkpoint-pending outcomes return to the patient profile, and file retry never resubmits the diet.
+- [X] T013 [skill: $backend-architect-ddd] [US2] Add the minimum discriminated outcome fields/statuses in src/lib/domain/diets/diet-model.ts and src/lib/application/diets/diet-ports.ts for checkpoint-pending and cleanup reconciliation.
+- [X] T014 [skill: $backend-architect-ddd] [US2] Update src/lib/application/diets/save-diet-as-active.ts so reconciliation confirms the stable ID, cleans only the confirmed revision, and distinguishes committed, not committed, cleanup pending, and review required.
+- [X] T015 [skill: $backend-architect-ddd] [US2] Update src/lib/application/diets/diet-application.ts to checkpoint after local commit or committed reconciliation, preserve the local outcome if profile sync fails, and never repeat the diet mutation for checkpoint retry.
+- [X] T016 [skill: $nextjs-fullstack-master] [US2] Update src/hooks/useDietBuilderPage.ts so unknown results reconcile before retry, cleanup-pending exposes cleanup-only retry, committed/checkpoint-pending outcomes return to the patient profile, and file retry never resubmits the diet.
 
 **Checkpoint**: Every save result has one truthful user state and retries cannot create a second active diet.
 
@@ -76,14 +76,14 @@ No package, schema, or shared framework setup is required. Existing profile, die
 
 ### Tests for User Story 3
 
-- [ ] T017 [skill: $tdd] [P] [US3] Extend tests/app/pacientes/diet-editor-persistence.test.tsx for back/cycle-matrix exits and preview guards when flush is failed, superseded, invalidated, or successful.
-- [ ] T018 [skill: $tdd] [P] [US3] Extend tests/components/templates/DietBuilderTemplate.test.tsx and tests/hooks/useDietBuilderPage.test.ts for dialog shortcut blocking, inert editor region during explicit confirmation, and nonblocking autosave.
+- [X] T017 [skill: $tdd] [P] [US3] Extend tests/app/pacientes/diet-editor-persistence.test.tsx for back/cycle-matrix exits and preview guards when flush is failed, superseded, invalidated, or successful.
+- [X] T018 [skill: $tdd] [P] [US3] Extend tests/components/templates/DietBuilderTemplate.test.tsx and tests/hooks/useDietBuilderPage.test.ts for dialog shortcut blocking, inert editor region during explicit confirmation, and nonblocking autosave.
 
 ### Implementation for User Story 3
 
-- [ ] T019 [skill: $nextjs-fullstack-master] [US3] Gate back/cycle-matrix exits in src/hooks/useDietBuilderPage.ts and src/app/pacientes/[id]/dieta/[dietaId]/page.tsx on flush status SAVED; preserve existing PDF/page preview guards.
-- [ ] T020 [skill: $ui-styling] [US3] Add confirmationBusy distinct from background autosave in src/hooks/useDietBuilderPage.ts; disable the save shortcut while edit dialogs are open and inert the existing editable region with accessible busy status in src/components/templates/DietBuilderTemplate.tsx.
-- [ ] T021 [skill: $ponytail] [US3] Guard hook-level mutation entry points in src/hooks/useDietBuilderPage.ts, src/hooks/useDietBuilderModals.ts, and src/hooks/useDietMealActions.ts so callbacks cannot change the captured revision during confirmation.
+- [X] T019 [skill: $nextjs-fullstack-master] [US3] Gate back/cycle-matrix exits in src/hooks/useDietBuilderPage.ts and src/app/pacientes/[id]/dieta/[dietaId]/page.tsx on flush status SAVED; preserve existing PDF/page preview guards.
+- [X] T020 [skill: $ui-styling] [US3] Add confirmationBusy distinct from background autosave in src/hooks/useDietBuilderPage.ts; disable the save shortcut while edit dialogs are open and inert the existing editable region with accessible busy status in src/components/templates/DietBuilderTemplate.tsx.
+- [X] T021 [skill: $ponytail] [US3] Guard hook-level mutation entry points in src/hooks/useDietBuilderPage.ts, src/hooks/useDietBuilderModals.ts, and src/hooks/useDietMealActions.ts so callbacks cannot change the captured revision during confirmation.
 
 **Checkpoint**: Explicit Save captures one fixed revision; failed flushes keep the editor open, and routine autosave remains editable.
 
@@ -95,18 +95,22 @@ No package, schema, or shared framework setup is required. Existing profile, die
 
 ### Tests for User Story 4
 
-- [ ] T022 [skill: $tdd] [P] [US4] Add tests/app/pacientes/diet-editor-load-errors.test.tsx for patient, diet, and persistence open failures, retry, and safe return.
+- [X] T022 [skill: $tdd] [P] [US4] Add tests/app/pacientes/diet-editor-load-errors.test.tsx for patient, diet, and persistence open failures, retry, and safe return.
 
 ### Implementation for User Story 4
 
-- [ ] T023 [skill: $nextjs-fullstack-master] [US4] Preserve openEditor failure categories in src/hooks/useDietPresets.ts and src/hooks/useDietBuilderPage.ts, with loading, ready, and error states.
-- [ ] T024 [skill: $ui-styling] [US4] Render the actionable error state in src/app/pacientes/[id]/dieta/[dietaId]/page.tsx and retain accessible retry/back actions.
+- [X] T023 [skill: $nextjs-fullstack-master] [US4] Preserve openEditor failure categories in src/hooks/useDietPresets.ts and src/hooks/useDietBuilderPage.ts, with loading, ready, and error states.
+- [X] T024 [skill: $ui-styling] [US4] Render the actionable error state in src/app/pacientes/[id]/dieta/[dietaId]/page.tsx and retain accessible retry/back actions.
 
 **Checkpoint**: No supported open failure remains on an indefinite spinner.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T025 [skill: $webapp-testing] Update specs/03-10-26-corrigir-fluxo-criacao-dieta/quickstart.md with implementation outcomes, then run its focused tests, npm run type-check, npm run test, and the desktop accessibility/browser smoke.
+- [X] T025 [skill: $webapp-testing] Update specs/03-10-26-corrigir-fluxo-criacao-dieta/quickstart.md with implementation outcomes, then run its focused tests, npm run type-check, npm run test, and the desktop accessibility/browser smoke.
+
+## Phase 8: Convergence
+
+- [X] T026 [skill: $tdd] [US1] Extend the repository round-trip test to confirm and reopen snapshots from all four modeled sources with source version and composition preserved per US1/AC6 and SC-009 (partial)
 
 ## Dependencies & Execution Order
 

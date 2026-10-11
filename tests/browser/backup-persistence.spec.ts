@@ -1,7 +1,10 @@
 import { readFile } from 'node:fs/promises';
 
 import { expect, test, type Download, type Page } from '@playwright/test';
-import { createProfileSession } from './helpers/profile-session';
+import { createProfileSession, decryptBrowserSave, encryptBrowserSave, openRememberedSave } from './helpers/profile-session';
+
+test.use({ trace: 'off' });
+test.setTimeout(300_000);
 
 async function downloadContent(download: Download): Promise<string> {
   const path = await download.path();
@@ -72,7 +75,7 @@ test.describe('backup manual local', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('exporta as 17 tabelas localmente sem request de rede ou drafts', async ({ page, context }) => {
+  test('exporta as 18 tabelas localmente sem request de rede ou drafts', async ({ page, context }) => {
     await exportBackup(page);
     const requests: string[] = [];
     page.on('request', (request) => requests.push(request.url()));
@@ -84,11 +87,14 @@ test.describe('backup manual local', () => {
 
     expect(Date.now() - startedAt).toBeLessThan(10_000);
     expect(requests).toHaveLength(requestCountBefore);
-    expect(content).toContain('"formatVersion":1');
-    expect(content).toContain('"account"');
-    expect(content).toContain('"objectiveOptions"');
-    expect(content).toContain('"readyMealItems"');
-    expect(content).not.toContain('draft');
+    expect(JSON.parse(content)).toMatchObject({ formatVersion: 2, algorithm: 'AES-256-GCM' });
+    expect(content).not.toContain('Backup browser');
+    expect(content).not.toContain('"patients"');
+    const payload = await decryptBrowserSave(page, content);
+    expect(payload).toHaveProperty('account');
+    expect(payload).toHaveProperty('objectiveOptions');
+    expect(payload).toHaveProperty('readyMealItems');
+    expect(payload).not.toHaveProperty('drafts');
   });
 
   test('valida arquivo inválido, permite cancelar e restaura um backup válido após reload', async ({ page }) => {
@@ -107,7 +113,7 @@ test.describe('backup manual local', () => {
     await openRestoreDialog(page, content);
     const dialog = page.getByRole('dialog', { name: 'Importar backup' });
     await expect(dialog).toContainText('Não haverá mesclagem.');
-    await expect(dialog).toContainText('não possui senha nem criptografia');
+    await expect(dialog).toContainText('Este arquivo é cifrado');
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
     await expect(dialog).toBeHidden();
 
@@ -115,8 +121,7 @@ test.describe('backup manual local', () => {
     const reloadPromise = page.waitForEvent('load');
     await page.getByRole('dialog', { name: 'Importar backup' }).getByRole('button', { name: 'Importar backup', exact: true }).click();
     await reloadPromise;
-    await expect(page).toHaveURL(/\/home$/, { timeout: 120_000 });
-    await expect(page.getByRole('button', { name: 'Criar perfil' })).toBeVisible({ timeout: 120_000 });
+    await openRememberedSave(page);
   });
 
   test('não consulta rascunhos legados em IndexedDB durante a importação', async ({ page }) => {
@@ -126,22 +131,22 @@ test.describe('backup manual local', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Importar backup' });
     await dialog.getByRole('button', { name: 'Importar backup', exact: true }).click();
-    await expect(page).toHaveURL(/\/home$/, { timeout: 120_000 });
+    await expect(page).toHaveURL(/\/saves$/, { timeout: 120_000 });
   });
 
   test('preserva a base anterior quando a transação de importação falha', async ({ page }) => {
     const content = await exportBackup(page);
-    const invalidSnapshot = JSON.parse(content) as { objectiveOptions: Array<{ origin: string }> };
-    invalidSnapshot.objectiveOptions[0].origin = 'INVALID_ORIGIN';
+    const invalidSnapshot = await decryptBrowserSave(page, content);
+    invalidSnapshot.objectiveOptions[0].origin = 'INVALID_ORIGIN' as typeof invalidSnapshot.objectiveOptions[number]['origin'];
 
-    await openRestoreDialog(page, JSON.stringify(invalidSnapshot));
+    await openRestoreDialog(page, await encryptBrowserSave(page, invalidSnapshot));
     const dialog = page.getByRole('dialog', { name: 'Importar backup' });
     await dialog.getByRole('button', { name: 'Importar backup', exact: true }).click();
     await expect(page.locator('[data-backup-feedback="error"]')).toContainText('A importação falhou; a base anterior foi preservada.');
 
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
     await expect(dialog).toBeHidden();
-    const afterFailure = JSON.parse(await exportBackup(page)) as { objectiveOptions: Array<{ origin: string }> };
+    const afterFailure = await decryptBrowserSave(page, await exportBackup(page));
     expect(afterFailure.objectiveOptions[0].origin).toBe('SYSTEM');
   });
 });

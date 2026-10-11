@@ -153,12 +153,40 @@ export interface ConfirmActiveResult {
   version: number;
 }
 
-export interface SaveOutcome {
-  status: 'ROLLED_BACK' | 'VERSION_CONFLICT' | 'RESULT_UNKNOWN' | 'COMMITTED' | 'CLEANUP_PENDING';
+export interface ConfirmedDietSaveOutcome {
+  status: 'COMMITTED' | 'CLEANUP_PENDING';
+  draftId: string;
+  planId: string;
+  version: number;
+  confirmedDraftRevision: number;
+  message: string;
+}
+
+export interface CheckpointPendingSaveOutcome {
+  status: 'CHECKPOINT_PENDING';
+  draftId: string;
+  localOutcome: ConfirmedDietSaveOutcome;
+  message: string;
+}
+
+export type SaveOutcome = ConfirmedDietSaveOutcome | CheckpointPendingSaveOutcome | {
+  status: 'ROLLED_BACK' | 'VERSION_CONFLICT' | 'RESULT_UNKNOWN';
   draftId: string;
   message: string;
   planId?: string;
-  version?: number;
+  confirmedDraftRevision?: number;
+};
+
+export type SaveReconciliationOutcome = ConfirmedDietSaveOutcome | CheckpointPendingSaveOutcome | {
+  status: 'NOT_COMMITTED' | 'REVIEW_REQUIRED';
+  draftId: string;
+  planId?: string;
+  confirmedDraftRevision: number;
+  message: string;
+};
+
+export interface SaveReconciliationOptions {
+  cleanupOnly?: boolean;
 }
 
 export interface AutosaveSavedResult {

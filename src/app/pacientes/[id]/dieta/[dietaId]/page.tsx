@@ -24,7 +24,7 @@ import { getMealVariationOptions } from '@/lib/mealVariations';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
 import type { DietItem, DietMeal } from '@/lib/legacy-diet-types';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
-import type { ReadyMealItemInput } from '@/lib/domain/library/library-model';
+import { recipeYieldUnitFromSnapshot, type ReadyMealItemInput } from '@/lib/domain/library/library-model';
 import { toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 
 function toReadyMealItemInput(item: DietItem): ReadyMealItemInput {
@@ -32,7 +32,7 @@ function toReadyMealItemInput(item: DietItem): ReadyMealItemInput {
   if (!snapshot) throw new Error(`O alimento "${item.name}" não possui origem para a biblioteca.`);
 
   if (snapshot.sourceType === 'RECIPE') {
-    return { sourceType: 'RECIPE', sourceId: snapshot.sourceId, recipePortions: snapshot.prescribedQuantity };
+    return { sourceType: 'RECIPE', sourceId: snapshot.sourceId, recipePortions: snapshot.prescribedQuantity, recipeUnit: recipeYieldUnitFromSnapshot(snapshot.compositionSnapshot) };
   }
   if (snapshot.sourceType === 'SYSTEM_TACO' || snapshot.sourceType === 'ACCOUNT_CUSTOM') {
     return { sourceType: 'FOOD', sourceId: snapshot.sourceId, quantity: snapshot.prescribedQuantity, unit: snapshot.prescribedUnit };
@@ -100,6 +100,9 @@ export default function DietBuilderPage() {
     handleReorderVariations,
     handleSaveDiet,
     saveStatus,
+    confirmationBusy,
+    loadState,
+    retryLoad,
     onDiscardDraft,
     onBackClick,
     flushDraft,
@@ -162,8 +165,16 @@ export default function DietBuilderPage() {
   };
 
   const handleOpenCycleMatrix = async () => {
-    await flushDraft?.();
-    router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
+    try {
+      const result = await flushDraft?.();
+      if (result?.status !== 'SAVED') {
+        toast.error('Não foi possível salvar a edição local para abrir a matriz de ciclo. Tente novamente.');
+        return;
+      }
+      router.push(`/pacientes/${patientId}/dieta/${dietaId}/ciclo`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível salvar a edição local para abrir a matriz de ciclo.');
+    }
   };
 
   const handleOpenPdfPreview = async () => {
@@ -345,7 +356,23 @@ export default function DietBuilderPage() {
   }, [currentMeals, mealGroups, getActiveMealVariationId, handleSelectMealVariation, handleAddMealVariation, handleRemoveMealVariation, handleUpdateMealHeader, setFoodSearchMealIndex, handleDuplicateMeal, handleCopyMeal, handlePasteMeal, handlePasteMealAndReplace, hasCopiedMeal, handleDuplicateItem, handleRemoveMeal, setFoodToSubstitute, handleUpdateItemGram, handleRemoveItem, handleReorderItems]);
 
 
-  if (!dietPlan || !patient) {
+  if (loadState.status === 'error') {
+    const returnLabel = loadState.returnPath === '/pacientes' ? 'Voltar à lista de pacientes' : 'Voltar à ficha do paciente';
+    return (
+      <main aria-label="Erro ao abrir a dieta" className="flex w-full max-w-container-workflow flex-1 flex-col gap-6 px-8 py-6 lg:mx-auto">
+        <section role="alert" aria-live="assertive" className="flex flex-col gap-3">
+          <h1 className={textStyle('section-title')}>Não foi possível abrir a dieta</h1>
+          <p className={textStyle('body')}>{loadState.message}</p>
+        </section>
+        <div className="flex items-center gap-2">
+          <Button variant="primary" onClick={retryLoad}>Tentar novamente</Button>
+          <Button variant="secondary" onClick={() => router.push(loadState.returnPath)}>{returnLabel}</Button>
+        </div>
+      </main>
+    );
+  }
+
+  if (loadState.status !== 'ready' || !dietPlan || !patient) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <Spinner className="size-8 text-success" />
@@ -404,6 +431,7 @@ export default function DietBuilderPage() {
         saveStatus={saveStatus}
         onDiscardDraft={onDiscardDraft}
         onBackClick={onBackClick}
+        confirmationBusy={confirmationBusy}
       />
 
       <CreateReadyMealsFromDietModal

@@ -490,6 +490,27 @@ export const readyDietsMigration: LocalMigration = {
   `,
 };
 
+export const nextFollowUpSeparateDatesMigration: LocalMigration = {
+  id: '0013_next_follow_up_separate_dates',
+  version: '13',
+  sql: `
+    ALTER TABLE next_follow_ups ADD COLUMN IF NOT EXISTS assessment_due_date text;
+    ALTER TABLE next_follow_ups ADD COLUMN IF NOT EXISTS diet_due_date text;
+    UPDATE next_follow_ups
+    SET assessment_due_date = CASE WHEN type IN ('ASSESSMENT_UPDATE', 'BOTH') THEN COALESCE(assessment_due_date, due_date) ELSE NULL END,
+        diet_due_date = CASE WHEN type IN ('DIET_UPDATE', 'BOTH') THEN COALESCE(diet_due_date, due_date) ELSE NULL END;
+  `,
+};
+
+export const recipeYieldUnitMigration: LocalMigration = {
+  id: '0014_recipe_yield_unit',
+  version: '14',
+  sql: `
+    ALTER TABLE recipes ADD COLUMN yield_unit text NOT NULL DEFAULT 'PORTION';
+    ALTER TABLE recipes ADD CONSTRAINT recipes_yield_unit_check CHECK (yield_unit in ('PORTION', 'g', 'ml', 'unit'));
+  `,
+};
+
 export const migrationFiles: readonly LocalMigration[] = [
   ...legacyMigrationFiles.slice(0, 2),
   reusableLibraryMigration,
@@ -503,6 +524,8 @@ export const migrationFiles: readonly LocalMigration[] = [
   nextFollowUpCommentsMigration,
   nextFollowUpMultipleTypesMigration,
   readyDietsMigration,
+  nextFollowUpSeparateDatesMigration,
+  recipeYieldUnitMigration,
 ];
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query' | 'transaction'>;

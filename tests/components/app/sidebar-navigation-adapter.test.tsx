@@ -16,9 +16,9 @@ describe('SidebarNavigationAdapter boundary', () => {
     render(<SidebarNavigationAdapter />);
 
     expect(screen.getByRole('link', { name: /Pacientes/ })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('link', { name: /Guia Design System/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Agenda' })).toHaveAttribute(
       'href',
-      '/design-system',
+      '/agenda',
     );
     expect(
       within(screen.getByRole('navigation'))
@@ -26,11 +26,11 @@ describe('SidebarNavigationAdapter boundary', () => {
         .map((link) => link.getAttribute('href')),
     ).toEqual([
       '/pacientes',
+      '/agenda',
       '/presets',
       '/refeicoes',
       '/receitas',
       '/alimentos',
-      '/design-system',
     ]);
   });
 

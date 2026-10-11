@@ -91,6 +91,7 @@ export function toEditableDocument(plan: FullDietPlan): DietEditableDocument {
   return {
     name: plan.name,
     mode: plan.mode === 'carb_cycling' ? 'CARB_CYCLING' : 'SIMPLE',
+    ...(plan.weightReferenceKg ? { weightReferenceKg: plan.weightReferenceKg } : {}),
     variations,
   };
 }
@@ -129,6 +130,7 @@ export function fromEditableDocument(document: DietEditableDocument, patientId: 
     id,
     patientId,
     name: document.name,
+    ...(document.weightReferenceKg ? { weightReferenceKg: document.weightReferenceKg } : {}),
     createdAt: dateText(createdAt),
     updatedAt: dateText(updatedAt),
     mode: document.mode === 'CARB_CYCLING' ? 'carb_cycling' : 'simple',

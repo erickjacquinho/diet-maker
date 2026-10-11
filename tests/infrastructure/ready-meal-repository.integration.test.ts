@@ -25,5 +25,8 @@ describe('ready meal repository', () => {
     expect(meal.items).toHaveLength(2);
     expect(meal.items[1].itemSnapshot.sourceType).toBe('RECIPE');
     expect(meal.items[1].recipePortions).toBe('1');
+    const gramRecipe = await recipeRepository.create('local-account', { name: 'Receita por peso', category: 'Teste', yieldPortions: '200', yieldUnit: 'g', ingredients: [{ sourceType: 'SYSTEM_TACO', sourceId: 'taco-1', quantity: '100', unit: 'g' }] });
+    const gramMeal = await repository.create('local-account', { name: 'Combo por peso', items: [{ sourceType: 'RECIPE', sourceId: gramRecipe.id, recipePortions: '100' }] });
+    expect(gramMeal.items[0]?.itemSnapshot).toMatchObject({ measurementBasis: 'PER_100G', referenceQuantity: '100', referenceUnit: 'g', prescribedQuantity: '100', prescribedUnit: 'g' });
   });
 });

@@ -7,6 +7,7 @@ export type BackupFixture = Omit<BackupEnvelope, 'appId' | 'formatVersion' | 'sc
 
 export const backupFixture: BackupFixture = {
   favorites: [],
+  agendaReminders: [],
   account: [
     {
       id: BACKUP_FIXTURE_ACCOUNT_ID,
@@ -127,6 +128,8 @@ export const backupFixture: BackupFixture = {
       accountId: BACKUP_FIXTURE_ACCOUNT_ID,
       patientId: 'patient-active',
       dueDate: '2026-09-20',
+      assessmentDueDate: '2026-09-20',
+      dietDueDate: null,
       type: 'ASSESSMENT_UPDATE',
       comments: 'Verificar evolução na próxima consulta.',
       version: 1,
@@ -296,6 +299,7 @@ export const backupFixture: BackupFixture = {
       instructions: 'Misturar e servir.',
       prepTimeMinutes: 10,
       yieldPortions: '2',
+      yieldUnit: 'PORTION',
       preparedWeightGrams: '300',
       totalProtein: '20',
       totalCarbs: '30',
@@ -367,6 +371,20 @@ export function createBackupEnvelope(overrides: Partial<BackupFixture> = {}): Ba
     schemaVersion: '4' as const,
     exportedAt: BACKUP_FIXTURE_NOW,
     ...createBackupFixture(overrides),
+  };
+}
+
+export function createSchema10BackupFixture(overrides: Partial<BackupFixture> = {}) {
+  const envelope = createBackupEnvelope(overrides);
+  return {
+    ...envelope,
+    schemaVersion: '10' as const,
+    account: envelope.account.map((account) => ({ ...account, phone: account.phone ?? null })),
+    recipes: envelope.recipes.map((recipe) => {
+      const { yieldUnit, ...previousRecipe } = recipe;
+      void yieldUnit;
+      return previousRecipe;
+    }),
   };
 }
 

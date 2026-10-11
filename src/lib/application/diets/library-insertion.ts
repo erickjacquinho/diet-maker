@@ -39,14 +39,19 @@ export interface ReadyMealInsertionCommand {
 }
 
 function recipeSnapshot(recipe: Recipe): NutritionSnapshot {
-  const energy = calculateEnergyFromNutrition(recipe.nutrition.perPortion);
-  const referenceNutrients = { ...recipe.nutrition.perPortion, energyKcal: energy.value };
+  const isMeasuredYield = recipe.yieldUnit === 'g' || recipe.yieldUnit === 'ml';
+  const unit = recipe.yieldUnit === 'PORTION' ? 'unit' : recipe.yieldUnit;
+  const referenceQuantity = createDecimalString(isMeasuredYield ? '100' : '1');
+  const perReference = scaleNutrition(recipe.nutrition.perPortion, referenceQuantity, '1');
+  const energy = calculateEnergyFromNutrition(perReference);
+  const referenceNutrients = { ...perReference, energyKcal: energy.value };
   return {
     sourceType: 'RECIPE', sourceId: recipe.id, sourceVersion: String(recipe.version), displayName: recipe.name, description: recipe.instructions,
-    measurementBasis: 'PER_UNIT', foodState: 'PREPARED', referenceQuantity: createDecimalString('1'), referenceUnit: 'unit', referenceNutrients,
-    prescribedQuantity: createDecimalString('1'), prescribedUnit: 'unit', prescribedNutrients: scaleNutrition(referenceNutrients, '1', '1'),
+    measurementBasis: recipe.yieldUnit === 'g' ? 'PER_100G' : recipe.yieldUnit === 'ml' ? 'PER_100ML' : 'PER_UNIT',
+    foodState: 'PREPARED', referenceQuantity, referenceUnit: unit, referenceNutrients,
+    prescribedQuantity: referenceQuantity, prescribedUnit: unit, prescribedNutrients: scaleNutrition(referenceNutrients, referenceQuantity, referenceQuantity),
     energySource: energy.source, calculationVersion: 'recipe-decimal-v1', conversionSnapshot: { schemaVersion: 1, conversions: [] },
-    compositionSnapshot: { schemaVersion: 1, source: 'RECIPE', sourceVersion: recipe.version, ingredientCount: recipe.ingredients.length },
+    compositionSnapshot: { schemaVersion: 1, source: 'RECIPE', sourceVersion: recipe.version, ingredientCount: recipe.ingredients.length, yieldUnit: recipe.yieldUnit },
   };
 }
 

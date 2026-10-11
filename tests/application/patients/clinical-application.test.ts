@@ -49,6 +49,7 @@ function makeClinicalRepository(overrides: Partial<ClinicalRepository> = {}): Cl
     updateAssessment: vi.fn(async (_accountId, _patientId, _assessmentId, _expectedVersion, value) => value as BodyAssessment),
     getNextFollowUp: vi.fn(async () => makeClinicalFollowUp()),
     listNextFollowUps: vi.fn(async () => ({ [assessment.patientId]: makeClinicalFollowUp() })),
+    moveNextFollowUps: vi.fn(async () => []),
     setNextFollowUp: vi.fn(async () => makeClinicalFollowUp()),
     clearNextFollowUp: vi.fn(async () => undefined),
     ...overrides,

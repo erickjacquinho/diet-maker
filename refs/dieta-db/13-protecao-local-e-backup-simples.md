@@ -1,58 +1,74 @@
-# Decisão 13 — Proteção Local e Backup Simples
+# Decisão 13 — Proteção local e limites do backup
 
-- **Status:** Corrigido e implementado no fluxo de backup manual simples
-- **Data:** 2026-08-30
-- **Escopo:** Limites de proteção da V1, sem criptografia e sem senha de backup
+- **Status:** Implementada com limites explícitos
+- **Data da atualização:** 2026-10-11
+- **Escopo:** Arquivo principal, backup, banco local e legados sem vínculo online
 
-## 1. Decisão
+## 1. Formatos e proteção
 
-A V1 não implementa criptografia própria do banco nem do arquivo
-`.nutridiet`. Também não exige senha para exportar ou restaurar o backup.
+O payload clínico lógico segue o contrato versionado da
+[Decisão 11](11-recuperacao-e-portabilidade-local.md). Quando vinculado à conta
+online, o `.nutridiet` usa envelope externo v2 com AES-256-GCM e identidade de
+save autenticada; a mesma chave permanente do save é autorizada pelo backend e
+usada localmente. O download de backup pelo menu também permanece nesse formato
+protegido.
 
-Esta decisão revoga o requisito anterior de backup criptografado, incluindo
-derivação de chave, senha por arquivo, envelope autenticado e testes
-criptográficos. Esses mecanismos não devem reaparecer como pré-requisitos dos
-SDDs de persistência.
+Arquivos legados ou ainda não vinculados no envelope v1 são JSON plaintext e
+não ganham sigilo retroativamente. A adoção de um legado cria uma cópia
+protegida, mantendo o original. Não existe senha separada do arquivo nem
+derivação de chave a partir da senha de login.
 
-O backup é o JSON simples definido na
-[Decisão 11](11-recuperacao-e-portabilidade-local.md).
+## 2. Limites reais
 
-## 2. Proteção e limites reais
+- A cifra cobre o arquivo protegido, não o banco IndexedDB/PGlite, drafts,
+  arquivos temporários ou o perfil inteiro do dispositivo.
+- Enquanto o save está autorizado e aberto, o runtime pode ler dados clínicos;
+  o controle do navegador, sistema operacional ou uma sessão comprometida pode
+  expô-los. Logout/expiração bloqueia novas ações, mas não revoga dados já
+  entregues ao dispositivo.
+- Supabase Auth recebe o e-mail para autenticação e envio. Operadores
+  privilegiados do provedor podem processar os dados de Auth sob os termos do
+  serviço.
+- A KEK de servidor envolve as DEKs e cifra o perfil profissional persistido.
+  Sua perda pode inutilizar os valores cifrados. Uma rotação precisa re-envolver
+  ciphertexts com suporte às KEKs antigas e verificação de rollback.
+- Restauração valida o envelope e as relações antes de substituir a base; não
+  mescla dados. Rascunhos continuam no store local separado e exigem tratamento
+  explícito durante restauração.
 
-A V1 não tem login na aplicação. O acesso ao computador, perfil do navegador
-e arquivos exportados fica sob controle do usuário. Controles do sistema
-operacional podem proteger o ambiente, mas configurá-los não é uma nova
-funcionalidade nem uma exigência de implementação do NutriDiet.
+Não há cifra de todo o dispositivo nem alegação de E2EE estrita: o servidor
+controla a KEK de wrapping e o browser recebe uma CryptoKey não extraível para
+uso na sessão autorizada. A arquitetura reduz o conteúdo remoto e protege os
+arquivos em repouso, mas não protege o runtime desbloqueado.
 
-Quem obtiver o arquivo `.nutridiet` poderá ler seu conteúdo. A extensão do
-arquivo e a validação de schema não oferecem sigilo nem comprovam autoria.
-O fluxo de backup deve informar isso em texto simples, sem modais recorrentes.
+## 3. Envio e armazenamento remoto
 
-A aplicação não envia automaticamente o banco ou o backup para a nuvem e não
-deve incluir dados clínicos em logs de diagnóstico.
+O backend guarda somente identidade/Auth, perfil profissional cifrado,
+catálogo mínimo de saves, chave envolvida, prova HMAC e limitadores técnicos.
+Não recebe automaticamente banco, backup, pacientes, contatos, prescrições,
+receitas, macros ou drafts. Localização de arquivo e status de UI nunca são
+prova de ownership nem geram autorização.
 
-## 3. Validação indispensável
+## 4. SMTP e sessão
 
-Antes de restaurar, validar a estrutura e as relações do arquivo e pedir
-confirmação para substituir a base. Erros não podem deixar uma importação
-parcial. Esses controles protegem a integridade dos dados; não constituem
-criptografia ou autenticação do arquivo.
+Confirmação e recuperação dependem de envio de e-mail. Mailpit captura mensagens
+no ambiente local; testes usam contas sintéticas e não entregam e-mail real.
+Para ambiente remoto, configure SMTP e remetente aprovados antes de habilitar
+signup/recovery para endereços reais.
 
-## 4. Fora da V1
+A autorização de um save dura até oito horas desde o grant. Reload não restaura
+grant, e login/criação/abertura exigem internet. No vencimento ou logout a tela
+clínica é mascarada imediatamente; operações previamente aceitas e flush local
+de draft/checkpoint são concluídos antes de desmontar a sessão. Falha mantém a
+área local bloqueada e recuperável por retry.
 
-- senha do arquivo, recuperação de senha e gerenciamento de chaves;
-- criptografia do banco, do backup ou dos PDFs;
-- assinatura digital e verificação criptográfica de autoria do backup;
-- login online, biometria ou bloqueio por tempo;
-- backup automático e armazenamento remoto.
+## 5. Fora do escopo
 
-A autenticação descrita na Decisão 12 continua futura. Uma eventual senha de
-login não deve ser confundida com senha do backup, que não faz parte da
-proposta atual.
+- cifrar IndexedDB/PGlite, drafts, PDFs ou todo o perfil do sistema operacional;
+- backup automático, sincronização clínica, colaboração ou armazenamento em
+  nuvem de prontuários;
+- senha de arquivo, equipes, transferência de save ou revogação retroativa de
+  plaintext legado;
+- rotação automática de KEK até existir procedimento versionado de rewrap.
 
-**Justificativa:** preservar a solução manual e simples solicitada, mantendo
-apenas validações necessárias para não importar dados inválidos nem apagar a
-base por engano.
-
-Os testes e a evidência do fluxo implementado estão no
-[relatório de validação do SDD de backup](../../specs/12-09-26-backup-manual-simples/validation-report.md).
+Implementação/evidência: [SDD de contas e saves](../../specs/10-10-26-integrar-supabase-contas-saves/implementation-log.md).

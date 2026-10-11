@@ -51,6 +51,7 @@ Nenhuma exceção aprovada.
 - `organism-patient-diets-table`
 - `organism-patient-assessments-table`
 - `organism-patient-consultation-history-table`
+- `organism-saves-dashboard`
 - `template-diet-pdf-template`
 - `organism-meal-card-container`
 

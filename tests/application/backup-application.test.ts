@@ -1,9 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BackupApplicationError, createBackupApplication } from '@/lib/application/backup-application';
+import { randomBytes, randomUUID } from 'node:crypto';
+import { BackupApplicationError, createBackupApplication, validateBackupEnvelope } from '@/lib/application/backup-application';
 import { BackupRepositoryError, type BackupEnvelope, type BackupRepository } from '@/lib/persistence/backup-repository';
-import { createBackupEnvelope, createEmptyBackupFixture } from '../fixtures/backup';
+import { createBackupEnvelope, createEmptyBackupFixture, createSchema10BackupFixture } from '../fixtures/backup';
+import { encodeBindingProof, type ProtectedSaveGrant } from '@/lib/domain/protected-save';
+import { createOnlineSaveSession } from '@/lib/application/online-save-session';
+import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
 
-function createDependencies(envelope: BackupEnvelope) {
+function createDependencies(envelope: BackupEnvelope, protectedSave?: {
+  session: ReturnType<typeof createOnlineSaveSession>;
+  identity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'>;
+  authorizeRestore(): Promise<void>;
+}) {
   const repository: BackupRepository = {
     readAccountSnapshot: vi.fn(async () => structuredClone(envelope)),
     replaceAccountSnapshot: vi.fn(async () => undefined),
@@ -32,6 +40,7 @@ function createDependencies(envelope: BackupEnvelope) {
       draftStore,
       getCheckpointState: async () => ({ ...checkpointState }),
       savePendingCheckpoint,
+      ...(protectedSave ? { protectedSave } : {}),
     }),
   };
 }
@@ -44,8 +53,9 @@ describe('backup application export', () => {
     const result = await application.exportBackup();
 
     expect(result.fileName).toMatch(/\.nutridiet$/);
-    expect(result.envelope).toEqual(envelope);
-    expect(JSON.parse(result.content)).toEqual(envelope);
+    const migrated = validateBackupEnvelope(envelope, { accountId: 'local-account' });
+    expect(result.envelope).toEqual(migrated);
+    expect(JSON.parse(result.content)).toEqual(migrated);
     expect(result.content).toContain('Consultório de Teste');
     expect(repository.readAccountSnapshot).toHaveBeenCalledWith('local-account');
     expect(draftStore.listRecoverableByAccount).not.toHaveBeenCalled();
@@ -71,6 +81,21 @@ describe('backup application export', () => {
 });
 
 describe('backup application restore', () => {
+  it('migrates and restores schema 10 recipes as portion yields without changing the input save', async () => {
+    const previous = createSchema10BackupFixture();
+    const serialized = JSON.stringify(previous);
+    const dependencies = createDependencies(createBackupEnvelope());
+
+    await dependencies.application.restoreBackup(serialized, { confirmed: true });
+
+    const restored = vi.mocked(dependencies.repository.replaceAccountSnapshot).mock.calls[0]?.[1];
+    expect(restored).toMatchObject({
+      schemaVersion: '11',
+      recipes: [{ yieldPortions: '2', yieldUnit: 'PORTION', preparedWeightGrams: '300' }],
+    });
+    expect(JSON.parse(serialized).recipes[0]).not.toHaveProperty('yieldUnit');
+  });
+
   it('validates before writing and rejects a malformed or foreign-account file', async () => {
     const dependencies = createDependencies(createBackupEnvelope());
     const incompatible = { ...createBackupEnvelope(), schemaVersion: '99' };
@@ -166,3 +191,103 @@ describe('backup application restore', () => {
     await expect(dependencies.application.restoreBackup(JSON.stringify(createBackupEnvelope()), { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_RESTORE_FAILED' });
   });
 });
+
+describe('protected backup application', () => {
+  it('requires fresh online authorization before restore and preserves the base on refusal', async () => {
+    const grant = await createBackupGrant();
+    const access = await createProtectedBackupAccess(grant, true);
+    const dependencies = createDependencies(createBackupEnvelope(), access);
+    const serialized = await encryptProtectedSave(createBackupEnvelope(), grant);
+    access.authorizeRestore.mockRejectedValueOnce(new Error('offline'));
+    await expect(dependencies.application.restoreBackup(serialized, { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_AUTH_REQUIRED' });
+    expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
+    await dependencies.application.restoreBackup(serialized, { confirmed: true });
+    expect(access.authorizeRestore).toHaveBeenCalledTimes(2);
+    expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledOnce();
+  });
+  it('exports encrypted content with the current save identity and key', async () => {
+    const envelope = createBackupEnvelope({ patients: [{ ...createBackupEnvelope().patients[0], name: 'Paciente privado' }] });
+    const grant = await createBackupGrant();
+    const access = await createProtectedBackupAccess(grant, true);
+    const { application } = createDependencies(envelope, access);
+
+    const result = await application.exportBackup();
+
+    expect(result.content).not.toContain('Paciente privado');
+    await expect(decryptProtectedSave(result.content, grant)).resolves.toEqual(validateBackupEnvelope(envelope, { accountId: 'local-account' }));
+  });
+
+  it('refuses direct export, validation, and restore calls while the save grant is locked', async () => {
+    const envelope = createBackupEnvelope();
+    const grant = await createBackupGrant();
+    const serialized = await encryptProtectedSave(envelope, grant);
+    const access = await createProtectedBackupAccess(grant, false);
+    const dependencies = createDependencies(createBackupEnvelope(), access);
+
+    await expect(dependencies.application.exportBackup()).rejects.toMatchObject({ code: 'BACKUP_AUTH_REQUIRED' });
+    await expect(dependencies.application.validateBackup(serialized)).rejects.toMatchObject({ code: 'BACKUP_AUTH_REQUIRED' });
+    await expect(dependencies.application.restoreBackup(serialized, { confirmed: true })).rejects.toMatchObject({ code: 'BACKUP_AUTH_REQUIRED' });
+    expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('rejects plaintext and another save identity before repository mutation', async () => {
+    const grant = await createBackupGrant();
+    const access = await createProtectedBackupAccess(grant, true);
+    const dependencies = createDependencies(createBackupEnvelope(), access);
+
+    await expect(dependencies.application.validateBackup(JSON.stringify(createBackupEnvelope())))
+      .rejects.toMatchObject({ code: 'BACKUP_FORMAT_INVALID' });
+    const otherGrant = await createBackupGrant();
+    const foreign = await encryptProtectedSave(createBackupEnvelope(), otherGrant);
+    await expect(dependencies.application.restoreBackup(foreign, { confirmed: true }))
+      .rejects.toMatchObject({ code: 'BACKUP_APP_MISMATCH' });
+    expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('requires explicit confirmation and restores only authenticated ciphertext for the same save', async () => {
+    const envelope = createBackupEnvelope({ favorites: ['saved-favorite'] });
+    const grant = await createBackupGrant();
+    const serialized = await encryptProtectedSave(envelope, grant);
+    const access = await createProtectedBackupAccess(grant, true);
+    const dependencies = createDependencies(createBackupEnvelope(), access);
+
+    await expect(dependencies.application.restoreBackup(serialized, { confirmed: false }))
+      .rejects.toMatchObject({ code: 'BACKUP_CANCELLED' });
+    expect(dependencies.repository.replaceAccountSnapshot).not.toHaveBeenCalled();
+    await dependencies.application.restoreBackup(serialized, { confirmed: true });
+    expect(dependencies.repository.replaceAccountSnapshot).toHaveBeenCalledWith('local-account', expect.objectContaining({ favorites: ['saved-favorite'] }));
+  });
+});
+
+async function createBackupGrant(): Promise<ProtectedSaveGrant> {
+  const raw = randomBytes(32);
+  const key = await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  raw.fill(0);
+  const authorizedAt = Date.now();
+  return {
+    ownerId: randomUUID(),
+    saveId: randomUUID(),
+    localAccountId: 'local-account',
+    keyId: randomUUID(),
+    bindingProof: encodeBindingProof('backup-test-v1', Buffer.alloc(32, 0x6a).toString('base64url')),
+    authorizedAt,
+    expiresAt: authorizedAt + 8 * 60 * 60 * 1000,
+    key,
+  };
+}
+
+async function createProtectedBackupAccess(grant: ProtectedSaveGrant, active: boolean) {
+  const session = createOnlineSaveSession({ isOnline: () => true });
+  if (active) await session.authorize(grant);
+  return {
+    session,
+    authorizeRestore: vi.fn(async () => undefined),
+    identity: {
+      ownerId: grant.ownerId,
+      saveId: grant.saveId,
+      localAccountId: grant.localAccountId,
+      keyId: grant.keyId,
+      bindingProof: grant.bindingProof,
+    },
+  };
+}

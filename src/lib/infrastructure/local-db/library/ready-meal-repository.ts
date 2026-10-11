@@ -4,7 +4,7 @@ import { createLibraryError } from '@/lib/application/library/library-errors';
 import { createTacoSnapshot } from '@/lib/application/diets/taco-food-adapter';
 import { listTacoFoods } from '@/lib/application/diets/taco-food-adapter';
 import type { FoodCatalogRepository, ReadyMealRepository, RecipeRepository } from '@/lib/persistence/library-repository';
-import type { FoodCatalogItem, LibraryListFilter, ReadyMeal, ReadyMealItem, ReadyMealInput, Recipe } from '@/lib/domain/library/library-model';
+import { recipeYieldUnitFromSnapshot, type FoodCatalogItem, type LibraryListFilter, type ReadyMeal, type ReadyMealItem, type ReadyMealInput, type Recipe } from '@/lib/domain/library/library-model';
 import { createDecimalString, type DietUnit, type NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 import { calculateEnergyFromNutrition, normalizeDecimal, scaleNutrition } from '@/lib/domain/library/library-nutrition';
 import { validateReadyMealInput } from '@/lib/domain/library/library-validation';
@@ -45,14 +45,19 @@ function customFoodSnapshot(food: FoodCatalogItem, quantity: string, unit: DietU
 }
 
 function recipeSnapshot(recipe: Recipe, portions: string): NutritionSnapshot {
-  const energy = calculateEnergyFromNutrition(recipe.nutrition.perPortion);
-  const referenceNutrients = { ...recipe.nutrition.perPortion, energyKcal: energy.value };
+  const isMeasuredYield = recipe.yieldUnit === 'g' || recipe.yieldUnit === 'ml';
+  const unit = recipe.yieldUnit === 'PORTION' ? 'unit' : recipe.yieldUnit;
+  const referenceQuantity = isMeasuredYield ? '100' : '1';
+  const perReference = scaleNutrition(recipe.nutrition.perPortion, referenceQuantity, '1');
+  const energy = calculateEnergyFromNutrition(perReference);
+  const referenceNutrients = { ...perReference, energyKcal: energy.value };
   return {
     sourceType: 'RECIPE', sourceId: recipe.id, sourceVersion: String(recipe.version), displayName: recipe.name, description: recipe.instructions,
-    measurementBasis: 'PER_UNIT', foodState: 'PREPARED', referenceQuantity: createDecimalString('1'), referenceUnit: 'unit', referenceNutrients,
-    prescribedQuantity: createDecimalString(normalizeDecimal(portions)), prescribedUnit: 'unit', prescribedNutrients: scaleNutrition(referenceNutrients, portions, '1'),
+    measurementBasis: recipe.yieldUnit === 'g' ? 'PER_100G' : recipe.yieldUnit === 'ml' ? 'PER_100ML' : 'PER_UNIT',
+    foodState: 'PREPARED', referenceQuantity: createDecimalString(referenceQuantity), referenceUnit: unit, referenceNutrients,
+    prescribedQuantity: createDecimalString(normalizeDecimal(portions)), prescribedUnit: unit, prescribedNutrients: scaleNutrition(referenceNutrients, portions, referenceQuantity),
     energySource: energy.source, calculationVersion: 'recipe-decimal-v1', conversionSnapshot: { schemaVersion: 1, conversions: [] },
-    compositionSnapshot: { schemaVersion: 1, source: 'RECIPE', sourceVersion: recipe.version, ingredientCount: recipe.ingredients.length },
+    compositionSnapshot: { schemaVersion: 1, source: 'RECIPE', sourceVersion: recipe.version, ingredientCount: recipe.ingredients.length, yieldUnit: recipe.yieldUnit },
   };
 }
 
@@ -132,7 +137,7 @@ export class PGliteReadyMealRepository implements ReadyMealRepository {
 
   async duplicate(accountId: string, readyMealId: string): Promise<ReadyMeal> {
     const source = await this.requireEntity(accountId, readyMealId);
-    return this.create(accountId, { name: source.name + ' (cópia)', description: source.description, suggestedTime: source.suggestedTime, items: source.items.map((item) => item.sourceType === 'FOOD' ? { sourceType: 'FOOD' as const, sourceId: item.sourceId, quantity: item.quantity!, unit: item.unit! } : { sourceType: 'RECIPE' as const, sourceId: item.sourceId, recipePortions: item.recipePortions! }) });
+    return this.create(accountId, { name: source.name + ' (cópia)', description: source.description, suggestedTime: source.suggestedTime, items: source.items.map((item) => item.sourceType === 'FOOD' ? { sourceType: 'FOOD' as const, sourceId: item.sourceId, quantity: item.quantity!, unit: item.unit! } : { sourceType: 'RECIPE' as const, sourceId: item.sourceId, recipePortions: item.recipePortions!, recipeUnit: recipeYieldUnitFromSnapshot(item.itemSnapshot.compositionSnapshot) }) });
   }
 
   async archive(accountId: string, readyMealId: string, expectedVersion: number): Promise<ReadyMeal> {
@@ -160,6 +165,7 @@ export class PGliteReadyMealRepository implements ReadyMealRepository {
       const recipe = await this.options.recipeRepository.getById(accountId, item.sourceId);
       if (!recipe) throw createLibraryError('LIBRARY_NOT_FOUND', 'Receita não encontrada nesta Conta.');
       if (recipe.status !== 'ACTIVE') throw createLibraryError('LIBRARY_VALIDATION_FAILED', 'Receitas arquivadas não podem ser usadas em uma nova refeição pronta.', 'items');
+      if (item.recipeUnit !== undefined && item.recipeUnit !== recipe.yieldUnit) throw createLibraryError('LIBRARY_VALIDATION_FAILED', 'A unidade de rendimento desta receita mudou; atualize o item antes de salvar.', 'items');
       return { sourceType: 'RECIPE' as const, sourceId: item.sourceId, sourceVersion: String(recipe.version), recipePortions: createDecimalString(normalizeDecimal(item.recipePortions!)), itemSnapshot: recipeSnapshot(recipe, item.recipePortions!) };
     }));
   }

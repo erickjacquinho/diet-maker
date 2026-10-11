@@ -467,7 +467,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
               >
                 <DropdownMenuItem
                   onSelect={onDuplicate}
-                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                  className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <Copy size={14} aria-hidden="true" />
                   <span>Duplicar</span>
@@ -475,7 +475,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <DropdownMenuItem
                   onSelect={onCopyMeal}
                   disabled={items.length === 0}
-                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                  className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <ClipboardCopy size={14} aria-hidden="true" />
                   <span>Copiar</span>
@@ -483,7 +483,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <DropdownMenuItem
                   onSelect={onPasteMeal}
                   disabled={!canPasteMeal}
-                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                  className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <ClipboardPaste size={14} aria-hidden="true" />
                   <span>Colar</span>
@@ -491,7 +491,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 <DropdownMenuItem
                   onSelect={() => setIsPasteReplaceAlertOpen(true)}
                   disabled={!canPasteMeal}
-                  className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                  className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                 >
                   <Replace size={14} aria-hidden="true" />
                   <span>Colar e substituir</span>
@@ -500,7 +500,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                   <DropdownMenuItem
                     onSelect={onCreateReadyMeal}
                     disabled={!canCreateReadyMeal}
-                    className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                    className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                   >
                     <Plus size={14} aria-hidden="true" />
                     <span>Criar refeição pronta</span>
@@ -514,7 +514,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                     onSelect={onAddVariation}
                     disabled={variationLimitReached}
                     aria-describedby={variationLimitReached ? variationLimitMessageId : undefined}
-                    className="gap-2 rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
+                    className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-primary focus:bg-surface-hover focus:text-text-primary"
                   >
                     <Plus size={14} aria-hidden="true" />
                     <span>Nova Variação</span>
@@ -528,7 +528,7 @@ export const MealCardContainer: React.FC<MealCardContainerProps> = ({
                 {hasVariationTabs && onRemoveVariation && (
                   <DropdownMenuItem
                     onSelect={onRemoveVariation}
-                    className="gap-2 rounded-control text-style-nav-item text-text-secondary focus:bg-surface-hover focus:text-text-primary"
+                    className="gap-2 cursor-pointer rounded-control text-style-nav-item text-text-secondary focus:bg-surface-hover focus:text-text-primary"
                   >
                     <Trash2 size={14} aria-hidden="true" />
                     <span>Excluir Variação</span>

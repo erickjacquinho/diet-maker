@@ -2,14 +2,15 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { RecipeSearchResultsList } from '../RecipeSearchResultsList';
-import type { Recipe } from '@/lib/recipesStore';
+import type { Recipe } from '@/lib/library-ui-adapter';
 
 const mockRecipes: Recipe[] = [
   {
     id: 'rec-1',
     name: 'Panqueca de Banana',
     category: 'Café da Manhã',
-    servings: 2,
+    yieldAmount: 2,
+    yieldUnit: 'PORTION',
     instructions: 'Misturar e grelhar',
     createdAt: '2026-08-01',
     ingredients: [
@@ -69,6 +70,18 @@ describe('RecipeSearchResultsList', () => {
     );
 
     expect(screen.getByText('Nenhuma receita culinária encontrada')).toBeInTheDocument();
+  });
+
+  it('labels nutrients by the common non-portion yield basis', () => {
+    render(<RecipeSearchResultsList
+      searchResults={[{ ...mockRecipes[0], id: 'rec-grams', yieldAmount: 200, yieldUnit: 'g' }]}
+      selectedRecipeIds={new Set()}
+      query=""
+      onToggleRecipe={vi.fn()}
+    />);
+
+    expect(screen.getByRole('columnheader', { name: /Prot \/ 100 g/ })).toBeInTheDocument();
+    expect(screen.getByText('7.2g')).toBeInTheDocument();
   });
 
   it('calls onToggleRecipe when row is clicked', () => {

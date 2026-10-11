@@ -15,6 +15,7 @@
 - [x] CHK004 O contrato do cabeçalho versionado e seus campos obrigatórios está documentado? [Completeness, Spec §FR-004, §Key Entities]
 - [x] CHK005 O escopo exclui explicitamente senha, criptografia, nuvem, sincronização, automação, mesclagem e múltiplas bases? [Completeness, Spec §FR-017, §Assumptions]
 - [x] CHK006 A especificação registra dependências da Fase 4, da Fase 5, da Conta única e do bloqueio de segunda aba? [Completeness, Spec §Assumptions]
+- [x] CHK044 O contrato inclui a coleção de lembretes pontuais da agenda e define como arquivos schema 9 são migrados e restaurados? [Completeness, Spec FR-019]
 
 ## Requirement Clarity
 

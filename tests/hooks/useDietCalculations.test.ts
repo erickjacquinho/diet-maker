@@ -1,9 +1,13 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { useDietCalculations } from '@/hooks/useDietCalculations';
+import { createDecimalString } from '@/lib/domain/diets/diet-model';
 import { getMealVariationContextKey, getMealVariationOptions } from '@/lib/mealVariations';
-import { carbCyclingDietWithIsolatedDays, legacyMeal } from '../fixtures/meal-variations';
+import { carbCyclingDietWithIsolatedDays, legacyMeal, simpleDietWithVariation } from '../fixtures/meal-variations';
+import { simpleDraftFixture } from '../fixtures/diets';
+import type { DietEditableDocument } from '@/lib/domain/diets/diet-model';
 import type { FullDietPlan } from '@/lib/dietStore';
+import type { Patient } from '@/lib/patientsStore';
 
 describe('useDietCalculations active meal projection', () => {
   it('uses only the selected meal variation in the visible meals and totals', () => {
@@ -105,5 +109,31 @@ describe('useDietCalculations active meal projection', () => {
     });
 
     expect(result.current.currentMeals[0].items[0].name).toBe('Base 1');
+  });
+
+  it('uses the legacy plan reference weight instead of the current patient weight', () => {
+    const plan: FullDietPlan = { ...simpleDietWithVariation, weightReferenceKg: createDecimalString('64') };
+    const patient = { weightKg: 90 } as Patient;
+    const { result } = renderHook(() => useDietCalculations(plan, 'var-high', patient));
+
+    expect(result.current.macroMetrics[0].gPerKgMeta).toBe('2.2');
+  });
+
+  it('leaves g/kg unavailable when a legacy plan has no recoverable reference weight', () => {
+    const patient = { weightKg: 90 } as Patient;
+    const { result } = renderHook(() => useDietCalculations(simpleDietWithVariation, 'var-high', patient));
+
+    expect(result.current.macroMetrics[0].gPerKgRatio).toBeUndefined();
+    expect(result.current.macroMetrics[0].gPerKgMeta).toBeUndefined();
+  });
+
+  it('does not use current patient weight when a canonical plan has no reference', () => {
+    const document = structuredClone(simpleDraftFixture.payload) as DietEditableDocument;
+    delete document.weightReferenceKg;
+    const patient = { weightKg: 90 } as Patient;
+    const { result } = renderHook(() => useDietCalculations(document, 'variation-simple', patient));
+
+    expect(result.current.macroMetrics[0].gPerKgRatio).toBeUndefined();
+    expect(result.current.macroMetrics[0].gPerKgMeta).toBeUndefined();
   });
 });

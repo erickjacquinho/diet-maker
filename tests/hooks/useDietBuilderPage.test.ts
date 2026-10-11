@@ -9,6 +9,10 @@ import { toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter'
 import { tacoSnapshotFixture } from '../fixtures/diets';
 
 const mockPush = vi.fn();
+const mockProfileSession = vi.hoisted(() => ({
+  isSaveAuthorized: vi.fn(() => true),
+  registerPendingDraftFlush: vi.fn((_flush: () => Promise<void>) => () => undefined),
+}));
 
 const canonicalPatient = {
   id: 'patient-variations',
@@ -40,6 +44,7 @@ const mockDietApplication = {
   autosaveDraft: vi.fn(),
   flushDraft: vi.fn(),
   saveDietAsActive: vi.fn(),
+  reconcileUnknownSave: vi.fn(),
   discardDraft: vi.fn(),
   pullTargets: vi.fn(),
   pullCompleteDiet: vi.fn(),
@@ -53,6 +58,8 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
   getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
+  getBrowserProfileSession: () => mockProfileSession,
+  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => mockDietApplication.flushDraft(...args),
 }));
 
 const patient = {
@@ -116,6 +123,7 @@ const dietPlan: FullDietPlan = {
 describe('useDietBuilderPage meal variation context', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockProfileSession.isSaveAuthorized.mockReturnValue(true);
     mockPatientApplication.getPatientProfile.mockResolvedValue({ patient: canonicalPatient, initials: 'PT', availableObjectives: ['Manutenção'] });
     mockDietApplication.openEditor.mockResolvedValue({
       draft: {
@@ -164,5 +172,85 @@ describe('useDietBuilderPage meal variation context', () => {
       [lowKey]: lowVariationId,
     });
     expect(result.current.currentMeals[0].items[0].name).toBe('Opção baixo');
+  });
+
+  it('does not trigger page Save with the keyboard shortcut while an edit dialog is open', async () => {
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+
+    act(() => result.current.openAdjustGoalsModal());
+    expect(result.current.isAdjustGoalsModalOpen).toBe(true);
+
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true }));
+    });
+
+    expect(mockDietApplication.flushDraft).not.toHaveBeenCalled();
+    expect(mockDietApplication.saveDietAsActive).not.toHaveBeenCalled();
+  });
+
+  it('keeps the captured diet revision unchanged while explicit Save is busy', async () => {
+    let finishFlush!: (result: { status: 'SAVED'; revision: number; updatedAt: string }) => void;
+    mockDietApplication.flushDraft.mockImplementationOnce(() => new Promise((resolve) => { finishFlush = resolve; }));
+    mockDietApplication.saveDietAsActive.mockResolvedValue({
+      status: 'COMMITTED', draftId: 'draft-variations', planId: 'diet-variations', version: 2,
+      confirmedDraftRevision: 2, message: 'Prescrição confirmada.',
+    });
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+
+    const meal = result.current.dietPlan!.carbCyclingVariations[0].meals[0];
+    const item = meal.items[0];
+    const originalQuantity = item.quantityGrams;
+    const originalProtein = result.current.dietPlan!.carbCyclingVariations[0].targetProtein;
+    let savePromise!: Promise<void>;
+    act(() => { savePromise = result.current.handleSaveDiet(); });
+    await waitFor(() => expect(result.current.confirmationBusy).toBe(true));
+
+    act(() => result.current.handleUpdateItemGram(meal.id, item.id!, originalQuantity + 50));
+    act(() => {
+      result.current.openAdjustGoalsModal();
+      result.current.setTempTargetProt(originalProtein + 20);
+      result.current.handleSaveAdjustedGoals();
+    });
+
+    expect(result.current.dietPlan!.carbCyclingVariations[0].meals[0].items[0].quantityGrams).toBe(originalQuantity);
+    expect(result.current.dietPlan!.carbCyclingVariations[0].targetProtein).toBe(originalProtein);
+
+    await act(async () => {
+      finishFlush({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T12:00:00.000Z' });
+      await savePromise;
+    });
+    expect(result.current.confirmationBusy).toBe(false);
+  });
+
+  it('blocks new clinical edits after the online save locks but still flushes the current local draft', async () => {
+    mockProfileSession.isSaveAuthorized.mockReturnValue(false);
+    mockDietApplication.flushDraft.mockResolvedValue({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T12:00:00.000Z' });
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+    const originalCount = result.current.dietPlan!.carbCyclingVariations.length;
+
+    act(() => result.current.handleAddVariation());
+    expect(result.current.dietPlan!.carbCyclingVariations).toHaveLength(originalCount);
+
+    const preserveDraft = mockProfileSession.registerPendingDraftFlush.mock.calls.at(-1)?.[0];
+    expect(preserveDraft).toBeTypeOf('function');
+    await act(async () => preserveDraft!());
+    expect(mockDietApplication.flushDraft).toHaveBeenCalledWith('draft-variations', expect.objectContaining({ mode: 'CARB_CYCLING' }));
+  });
+
+  it('retries a superseded local flush once before declaring the draft preserved', async () => {
+    mockDietApplication.flushDraft
+      .mockResolvedValueOnce({ status: 'SUPERSEDED', currentRevision: 2 })
+      .mockResolvedValueOnce({ status: 'SAVED', revision: 3, updatedAt: '2026-08-30T12:00:00.000Z' });
+    const { result } = renderHook(() => useDietBuilderPage());
+    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
+
+    const preserveDraft = mockProfileSession.registerPendingDraftFlush.mock.calls.at(-1)?.[0];
+    await act(async () => preserveDraft!());
+
+    expect(mockDietApplication.flushDraft).toHaveBeenCalledTimes(2);
+    expect(mockDietApplication.flushDraft).toHaveBeenLastCalledWith('draft-variations', expect.objectContaining({ mode: 'CARB_CYCLING' }));
   });
 });

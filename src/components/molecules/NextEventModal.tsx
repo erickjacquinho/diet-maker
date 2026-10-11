@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, AlertTriangle, Check } from 'lucide-react';
+import { Calendar, AlertTriangle } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
   Dialog,
   DialogContent,
@@ -16,18 +15,38 @@ import {
 } from '@/components/ui/dialog';
 import { HoldToDeleteButton } from '@/components/atoms';
 import { DatePickerField } from './DatePickerField';
-import type { PatientNextEvent, PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
+import { toClinicalConsultationDate, type PatientNextEvent, type PatientNextEventType } from '@/lib/application/patients/clinical-ui-adapter';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import { normalizeDateToISO } from '@/lib/date-only';
 
-function selectedTypes(type: PatientNextEvent['type']): PatientNextEventType[] {
-  return Array.isArray(type) ? type : [type];
+const FOLLOW_UP_TYPES: Array<{ type: PatientNextEventType; label: string }> = [
+  { type: 'assessment-update', label: 'Atualização de avaliação' },
+  { type: 'diet-update', label: 'Atualização de dieta' },
+];
+
+function eventDates(event: PatientNextEvent | null): Partial<Record<PatientNextEventType, string>> {
+  if (!event) return {};
+  if (event.dates) {
+    return Object.fromEntries(Object.entries(event.dates).map(([type, date]) => [type, toClinicalConsultationDate(date)]));
+  }
+  const types = Array.isArray(event.type) ? event.type : [event.type];
+  return Object.fromEntries(types.map((type) => [type, toClinicalConsultationDate(event.date)]));
 }
 
-function sameTypes(left: PatientNextEvent['type'], right: PatientNextEvent['type']): boolean {
-  const leftTypes = selectedTypes(left);
-  const rightTypes = selectedTypes(right);
-  return leftTypes.length === rightTypes.length && leftTypes.every((type) => rightTypes.includes(type));
+function sameDates(left: Partial<Record<PatientNextEventType, string>>, right: Partial<Record<PatientNextEventType, string>>): boolean {
+  return FOLLOW_UP_TYPES.every(({ type }) => toClinicalConsultationDate(left[type] ?? '') === toClinicalConsultationDate(right[type] ?? ''));
+}
+
+function eventDraft(event: PatientNextEvent | null): PatientNextEvent {
+  const dates = eventDates(event);
+  const types = FOLLOW_UP_TYPES.filter(({ type }) => dates[type]).map(({ type }) => type);
+  return {
+    date: event?.date ?? '',
+    type: types,
+    dates,
+    comments: event?.comments ?? '',
+    ...(event?.version === undefined ? {} : { version: event.version }),
+  };
 }
 
 export interface NextEventModalProps {
@@ -45,11 +64,7 @@ export function NextEventModal({
   onSave,
   onClear,
 }: NextEventModalProps) {
-  const [draft, setDraft] = useState<PatientNextEvent>({
-    date: '',
-    type: ['assessment-update'],
-    comments: '',
-  });
+  const [draft, setDraft] = useState<PatientNextEvent>(() => eventDraft(null));
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -67,7 +82,7 @@ export function NextEventModal({
 
   useEffect(() => {
     if (open) {
-      setDraft(nextEvent ? { ...nextEvent, date: nextEventDate, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
+      setDraft(eventDraft(nextEvent));
       setIsRemoveConfirmOpen(false);
       setIsDiscardConfirmOpen(false);
       setSubmitError(null);
@@ -77,10 +92,10 @@ export function NextEventModal({
   }, [open, nextEvent, nextEventDate]);
 
   const hasUnsavedChanges = Boolean(
-    (nextEvent && (draft.date !== nextEventDate || !sameTypes(draft.type, nextEvent.type) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
-    (!nextEvent && (draft.date !== '' || !sameTypes(draft.type, ['assessment-update']) || Boolean(draft.comments)))
+    (nextEvent && (!sameDates(draft.dates ?? {}, eventDates(nextEvent)) || (draft.comments ?? '') !== (nextEvent.comments ?? ''))) ||
+    (!nextEvent && (Object.values(draft.dates ?? {}).some(Boolean) || Boolean(draft.comments)))
   );
-  const hasSelectedType = selectedTypes(draft.type).length > 0;
+  const hasSelectedType = Object.values(draft.dates ?? {}).some(Boolean);
 
   const requestClose = (nextOpen: boolean) => {
     if (!nextOpen && hasUnsavedChanges) {
@@ -93,12 +108,8 @@ export function NextEventModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (savingRef.current) return;
-    if (!draft.date) {
-      setSubmitError('Informe a data do acompanhamento.');
-      return;
-    }
     if (!hasSelectedType) {
-      setSubmitError('Selecione ao menos um tipo de acompanhamento.');
+      setSubmitError('Informe a data de pelo menos um tipo de acompanhamento.');
       return;
     }
     savingRef.current = true;
@@ -116,7 +127,7 @@ export function NextEventModal({
   };
 
   const confirmDiscard = () => {
-    setDraft(nextEvent ? { ...nextEvent, date: nextEventDate, type: selectedTypes(nextEvent.type), comments: nextEvent.comments ?? '' } : { date: '', type: ['assessment-update'], comments: '' });
+    setDraft(eventDraft(nextEvent));
     setIsDiscardConfirmOpen(false);
     onOpenChange(false);
   };
@@ -175,42 +186,27 @@ export function NextEventModal({
               <span>Agendar acompanhamento</span>
             </DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Defina a data, o tipo e os comentários do próximo acompanhamento deste paciente.
+              Defina uma data para cada tipo de acompanhamento; você pode agendar um ou ambos.
             </DialogDescription>
           </DialogHeader>
 
           <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <DatePickerField
-              id="next-event-date"
-              label="Data"
-              required
-              value={draft.date}
-              onValueChange={(value) => setDraft((current) => ({ ...current, date: value }))}
-            />
-
-            <div className="flex flex-col gap-2">
-              <span id="next-event-type-label" className={textStyle('field-label')}>Tipo de acompanhamento</span>
-              <ToggleGroup
-                type="multiple"
-                value={selectedTypes(draft.type)}
-                onValueChange={(value) => setDraft((current) => ({ ...current, type: value as PatientNextEventType[] }))}
-                aria-labelledby="next-event-type-label"
-                className="grid w-full grid-cols-2 items-stretch gap-3 rounded-none border-0 bg-transparent p-0"
-              >
-                {([
-                  { value: 'assessment-update', label: 'Atualização de avaliação' },
-                  { value: 'diet-update', label: 'Atualização de dieta' },
-                ] as const).map((option) => (
-                  <ToggleGroupItem
-                    key={option.value}
-                    value={option.value}
-                    className="min-h-14 w-full justify-between whitespace-normal rounded-control border border-border-subtle bg-surface px-3 py-2 text-left text-style-body font-medium data-[state=on]:border-primary data-[state=on]:bg-primary-soft data-[state=on]:text-primary"
-                  >
-                    <span>{option.label}</span>
-                    {selectedTypes(draft.type).includes(option.value) && <Check size={16} className="shrink-0" aria-hidden="true" />}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+            <div className="flex flex-col gap-4">
+              {FOLLOW_UP_TYPES.map(({ type, label }) => (
+                <DatePickerField
+                  key={type}
+                  id={`next-event-date-${type}`}
+                  label={label}
+                  value={draft.dates?.[type] ?? ''}
+                  onValueChange={(value) => setDraft((current) => {
+                    const dates = { ...(current.dates ?? {}) };
+                    if (value) dates[type] = value;
+                    else delete dates[type];
+                    const types = FOLLOW_UP_TYPES.filter(({ type: candidate }) => dates[candidate]).map(({ type: candidate }) => candidate);
+                    return { ...current, date: value || current.date, type: types, dates };
+                  })}
+                />
+              ))}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -267,7 +263,7 @@ export function NextEventModal({
               <span>Remover acompanhamento?</span>
             </DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Tem certeza de que deseja remover a data do próximo acompanhamento agendado?
+              Tem certeza de que deseja remover as datas dos próximos acompanhamentos agendados?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 pt-2">

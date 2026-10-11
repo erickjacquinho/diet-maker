@@ -8,7 +8,6 @@ export const routeAcceptanceMatrix = [
   { path: "/presets", file: "src/app/presets/page.tsx", states: ["default", "empty", "error"] },
   { path: "/receitas", file: "src/app/receitas/page.tsx", states: ["default", "empty", "error"] },
   { path: "/refeicoes", file: "src/app/refeicoes/page.tsx", states: ["default", "empty", "error"] },
-  { path: "/design-system", file: "src/app/design-system/page.tsx", states: ["default", "read-only"] },
 ] as const;
 
 export type RouteAcceptanceRecord = {

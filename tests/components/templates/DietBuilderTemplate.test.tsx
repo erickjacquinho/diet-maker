@@ -101,4 +101,25 @@ describe('DietBuilderTemplate header action dropdown', () => {
     fireEvent.click(pullButton);
     expect(handleOpenModal).toHaveBeenCalledTimes(1);
   });
+
+  it('makes the editor region inert and announces explicit confirmation only', () => {
+    const props = {
+      patientId: 'pat-1',
+      patientName: 'Carlos Silva',
+      patientObjective: 'Emagrecimento',
+      onSaveDiet: vi.fn(),
+    };
+    const { rerender } = render(<DietBuilderTemplate {...props} confirmationBusy />);
+    const main = screen.getByRole('main', { name: 'Elaboração de Dieta' });
+
+    expect(main).toHaveAttribute('inert');
+    expect(main).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('Confirmando a prescrição');
+
+    rerender(<DietBuilderTemplate {...props} confirmationBusy={false} saveStatus="pending" />);
+
+    expect(main).not.toHaveAttribute('inert');
+    expect(main).not.toHaveAttribute('aria-busy');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
 });

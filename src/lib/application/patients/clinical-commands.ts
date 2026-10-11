@@ -8,6 +8,7 @@ import type {
   BodyAssessment,
   ConsultationView,
   NextFollowUp,
+  NextFollowUpDateChange,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
 import {
@@ -142,6 +143,19 @@ export function createClinicalCommands(dependencies: ClinicalCommandDependencies
       const { account } = await getPatient(dependencies, patientId);
       return repository().getNextFollowUp(account.accountId, patientId);
     },
+
+    moveNextFollowUps: (changes: readonly NextFollowUpDateChange[]) => dependencies.transactionRunner.run(async () => {
+      if (changes.length === 0) return [];
+      const { accountId } = await requireAccount(dependencies);
+      const normalizedChanges = changes.map((change) => {
+        const dueDate = normalizeClinicalDate(change.dueDate);
+        if (!dueDate || !Number.isInteger(change.expectedVersion) || change.expectedVersion < 1) {
+          throw new ClinicalApplicationError('CLINICAL_VALIDATION_FAILED', 'A movimentação contém data ou versão inválida.');
+        }
+        return { ...change, dueDate };
+      });
+      return repository().moveNextFollowUps(accountId, normalizedChanges);
+    }),
 
     setNextFollowUp: (patientId: string, expectedVersion: number | null, input: NextFollowUpInput) => dependencies.transactionRunner.run(async () => {
       const { account, patient } = await getPatient(dependencies, patientId);

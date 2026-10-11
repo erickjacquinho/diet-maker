@@ -96,7 +96,7 @@ describe('Sidebar primitive contract', () => {
         <Sidebar>
           <SidebarMenuSub>
             <li>
-              <SidebarMenuSubButton href="/design-system">Guia Design System</SidebarMenuSubButton>
+              <SidebarMenuSubButton href="/alimentos">Planilha de Alimentos</SidebarMenuSubButton>
             </li>
           </SidebarMenuSub>
         </Sidebar>

@@ -42,7 +42,7 @@ describe('PatientDetailPage desktop visual contracts', () => {
     render(React.createElement(PatientDetailPage));
 
     expect(await screen.findByRole('region', { name: 'Progresso Atual' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /Última Prescrição/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Prescrição atual' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Última avaliação' })).toBeInTheDocument();
     expect(screen.getByText('Nenhuma prescrição registrada.')).toBeInTheDocument();
     expect(screen.getByText('Nenhuma avaliação registrada.')).toBeInTheDocument();
@@ -57,8 +57,9 @@ describe('PatientDetailPage desktop visual contracts', () => {
 
     render(React.createElement(PatientDetailPage));
 
-    const planSummary = within(await screen.findByRole('region', { name: 'Última Prescrição 04/08/2026' }));
-    expect(planSummary.getByText('Ativo')).toBeInTheDocument();
+    const planSummary = within(await screen.findByRole('region', { name: 'Prescrição atual' }));
+    expect(planSummary.getByText('Prescrição Ativa')).toBeInTheDocument();
+    expect(planSummary.getByText('04/08/2026')).toBeInTheDocument();
     expect(planSummary.getByText('Objetivo Diário')).toBeInTheDocument();
     expect(planSummary.getByText(/P\s*150g/)).toBeInTheDocument();
     expect(planSummary.getByText(/C\s*220g/)).toBeInTheDocument();

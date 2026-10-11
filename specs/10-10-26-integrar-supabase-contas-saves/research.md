@@ -12,9 +12,9 @@ Consultada em 2026-10-10, documental, sem teste de implementação/mutação rem
 
 ## R2 — Banco privado
 
-**Decisão:** Data API desligada, schema privado via postgres+Drizzle; runtime NOBYPASSRLS não dono, grants mínimos e ator transacional.
+**Decisão:** Data API desligada, schema privado via `pg`+Drizzle; runtime NOBYPASSRLS não dono, grants mínimos e ator transacional.
 
-**Razão:** SDK `.schema('private')` exige exposição à API. Supavisor transacional atende serverless sem prepared statements; prepare:false/TLS/SET LOCAL evitam estado de owner persistente no pool. [API](https://supabase.com/docs/guides/api/securing-your-api), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [conexões](https://supabase.com/docs/guides/database/connecting-to-postgres), [set_config](https://www.postgresql.org/docs/current/functions-admin.html).
+**Razão:** SDK `.schema('private')` exige exposição à API. Supavisor transacional atende serverless. Refinamento de 2026-10-10: a documentação atual da Supabase alerta que o pool transacional não suporta query pipelining e que Postgres.js, usado no primeiro setup, pipeline por padrão sem opção funcional para desligá-lo mantendo `sql.begin()`. O driver `pg` deixa o pipeline desligado por padrão; Drizzle suporta ambos os drivers. Jev sugeriu `pg` com confiança baixa (0,28); decisão final usa a evidência direta dos drivers e da Supabase, com pool máximo 1, TLS e sem prepared statements nomeados. O owner continua em `set_config(..., true)` dentro da transação Drizzle. [conexões Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres), [Postgres.js Supabase](https://supabase.com/docs/guides/database/postgres-js), [pipelining node-postgres](https://node-postgres.com/features/pipelining), [Drizzle PostgreSQL](https://orm.drizzle.team/docs/get-started-postgresql), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [set_config](https://www.postgresql.org/docs/current/functions-admin.html).
 
 **Alternativas:** schema público com política dependente do browser, service_role normal ignorando RLS ou PGlite enviado ao servidor não cumprem os limites.
 
@@ -58,7 +58,7 @@ Conta clínica tem `id:string` e profile-session usa `nanoid(16)`, portanto loca
 
 ## R7 — Ambiente/e-mail/segredos
 
-**Decisão:** SMTP próprio/templates TokenHash, callbacks fixos e backup de segredo servidor; projeto dedicado selecionado antes do provisionamento futuro, Vercel sem publicação.
+**Decisão:** SMTP próprio/templates TokenHash, callbacks fixos e backup de segredo servidor; projeto dedicado foi selecionado antes do provisionamento. A premissa original de não publicar na Vercel foi substituída pelo pedido do usuário de 2026-10-11; ver escopo atualizado em `spec.md`.
 
 **Razão:** SMTP padrão só atende equipe e tem limites; novo Free/default SMTP restringe templates. Auth usa e-mail em registros/claims. Vercel usa tipo Secret para segredos. [SMTP](https://supabase.com/docs/guides/auth/auth-smtp), [Free](https://supabase.com/changelog/46599-changes-to-email-template-customisation-on-free-tier), [claims](https://supabase.com/docs/guides/auth/jwt-fields), [Vercel Secret](https://vercel.com/changelog/environment-variables-now-use-config-and-secret-types).
 
@@ -66,7 +66,7 @@ Conta clínica tem `id:string` e profile-session usa `nanoid(16)`, portanto loca
 
 ## Fechamento
 
-Nenhuma pergunta funcional aberta. Entradas operacionais futuras: alvo/organização/custo, SMTP/remetente, URLs permitidas e segredos fora dos documentos. Conformidade depende das provas de quickstart, não desta pesquisa.
+As decisões funcionais e de destino estão fechadas: projeto Supabase dedicado `diet-maker` na organização `Jacquinho`, projeto Vercel `nutridiet` no plano Hobby/região `gru1`, publicação autorizada, sem domínio próprio, e Gmail como remetente inicial. Em 2026-10-11, a Vercel atribuiu `nutridiet-eight.vercel.app`; migration, SMTP, templates Auth e callbacks foram aplicados no Supabase dedicado. A senha de app está no arquivo local ignorado `.env.smtp.local`. Ainda faltam confirmar recebimento do e-mail sintético, concluir os segredos/conexão runtime e fazer as provas HTTPS do quickstart. Não guardar credenciais nestes documentos.
 
 ## Revisão minimize — 2026-10-10
 

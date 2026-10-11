@@ -34,7 +34,7 @@ describe('patient follow-up projection and commands', () => {
       />,
     );
 
-    expect(screen.getByRole('textbox', { name: 'Data' })).toHaveValue('15/09/2026');
+    expect(screen.getByRole('textbox', { name: 'Atualização de dieta' })).toHaveValue('15/09/2026');
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Conflito de versão.'));
     expect(screen.getByRole('heading', { name: 'Agendar acompanhamento' })).toBeInTheDocument();
@@ -73,7 +73,11 @@ describe('patient follow-up projection and commands', () => {
 
     fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
     await waitFor(() => expect(onSave).toHaveBeenCalledWith({
-      date: '2026-09-15', type: ['diet-update'], comments: '', version: 4,
+      date: '15/09/2026',
+      dates: { 'diet-update': '2026-09-15' },
+      type: ['diet-update'],
+      comments: '',
+      version: 4,
     }));
   });
 

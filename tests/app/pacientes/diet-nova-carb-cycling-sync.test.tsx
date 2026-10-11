@@ -8,6 +8,10 @@ import { createInitialDietPlan, type FullDietPlan } from '@/lib/dietStore';
 import { fromEditableDocument, toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
 
 const mockPush = vi.fn();
+const mockProfileSession = vi.hoisted(() => ({
+  isSaveAuthorized: () => true,
+  registerPendingDraftFlush: () => () => undefined,
+}));
 let storedDiets: FullDietPlan[] = [];
 let initialMode: FullDietPlan['mode'] = 'carb_cycling';
 
@@ -50,6 +54,8 @@ const mockDietApplication = {
 vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
   getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
+  getBrowserProfileSession: () => mockProfileSession,
+  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => mockDietApplication.flushDraft(...args),
   getBrowserLibraryApplication: () => Promise.resolve({
     listCustomFoods: vi.fn().mockResolvedValue([]),
     listRecipes: vi.fn().mockResolvedValue([]),

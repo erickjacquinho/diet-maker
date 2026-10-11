@@ -1,8 +1,10 @@
 // @vitest-environment node
 
 import { afterEach, describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { PGliteBackupRepository } from '@/lib/infrastructure/local-db/backup-repository';
-import { createBackupEnvelope, createEmptyBackupFixture } from '../fixtures/backup';
+import { validateBackupEnvelope } from '@/lib/application/backup-application';
+import { createBackupEnvelope, createEmptyBackupFixture, createSchema10BackupFixture } from '../fixtures/backup';
 import { createBackupTestDatabase, seedBackupEnvelope } from '../helpers/backup';
 import type { LocalDatabaseHandle } from '@/lib/infrastructure/local-db/client';
 
@@ -14,7 +16,7 @@ afterEach(async () => {
 });
 
 describe('PGlite backup repository', () => {
-  it('reads one consistent snapshot containing all 17 tables and historical/archived rows', async () => {
+  it('reads one consistent snapshot containing all 18 tables and historical/archived rows', async () => {
     handle = await createBackupTestDatabase('repository-read');
     const source = createBackupEnvelope({ favorites: ['taco-arroz-cozido', 'food-custom'] });
     await seedBackupEnvelope(handle, source);
@@ -22,8 +24,8 @@ describe('PGlite backup repository', () => {
 
     const snapshot = await repository.readAccountSnapshot('local-account');
 
-    expect(snapshot).toMatchObject({ appId: 'nutridiet-local-pro', formatVersion: 1, schemaVersion: '8', exportedAt: source.exportedAt });
-    for (const table of ['account', 'objectiveOptions', 'patients', 'bodyAssessments', 'nextFollowUps', 'dietPlans', 'dietVariations', 'dietVariationDays', 'dietMeals', 'dietMealOptions', 'dietMealItems', 'dietItemSnapshots', 'foodCatalogItems', 'recipes', 'recipeIngredients', 'readyMeals', 'readyMealItems'] as const) {
+    expect(snapshot).toMatchObject({ appId: 'nutridiet-local-pro', formatVersion: 1, schemaVersion: '11', exportedAt: source.exportedAt });
+    for (const table of ['account', 'objectiveOptions', 'patients', 'bodyAssessments', 'nextFollowUps', 'dietPlans', 'dietVariations', 'dietVariationDays', 'dietMeals', 'dietMealOptions', 'dietMealItems', 'dietItemSnapshots', 'foodCatalogItems', 'recipes', 'recipeIngredients', 'readyMeals', 'readyMealItems', 'readyDiets'] as const) {
       const sourceRows: readonly unknown[] = source[table];
       const snapshotRows: readonly unknown[] = snapshot[table];
       const expectedRows = table === 'account'
@@ -70,7 +72,7 @@ describe('PGlite backup repository', () => {
       nextFollowUps: [],
     });
     let restoredFavorites: string[] = [];
-    const repository = new PGliteBackupRepository(handle, { writeFavorites: (favorites) => { restoredFavorites = favorites; } });
+    const repository = new PGliteBackupRepository(handle, { writeFavorites: (favorites: string[]) => { restoredFavorites = favorites; } });
 
     await repository.replaceAccountSnapshot('local-account', replacement);
     const snapshot = await repository.readAccountSnapshot('local-account');
@@ -85,6 +87,22 @@ describe('PGlite backup repository', () => {
       "SELECT workspace_revision, checkpoint_revision FROM profile_checkpoint_state WHERE account_id = 'local-account'",
     );
     expect(checkpoint.rows).toEqual([{ workspace_revision: 0, checkpoint_revision: 0 }]);
+  });
+
+  it('restores recipes from a schema 10 fixture with the safe portion default', async () => {
+    handle = await createBackupTestDatabase('repository-restore-schema-10');
+    const previous = createSchema10BackupFixture();
+    const originalHash = createHash('sha256').update(JSON.stringify(previous)).digest('hex');
+    const migrated = validateBackupEnvelope(previous);
+    const repository = new PGliteBackupRepository(handle);
+
+    await repository.replaceAccountSnapshot('local-account', migrated);
+
+    const restored = await repository.readAccountSnapshot('local-account');
+    expect(restored.schemaVersion).toBe('11');
+    expect(restored.recipes[0]).toMatchObject({ yieldPortions: '2', yieldUnit: 'PORTION', preparedWeightGrams: '300' });
+    expect(previous.recipes[0]).not.toHaveProperty('yieldUnit');
+    expect(createHash('sha256').update(JSON.stringify(previous)).digest('hex')).toBe(originalHash);
   });
 
   it.each(['after-delete', 'after-insert'] as const)('rolls back the full base when failure occurs at %s', async (failAt) => {

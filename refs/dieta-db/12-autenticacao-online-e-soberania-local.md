@@ -1,94 +1,95 @@
-# Decisão 12 — Autenticação Online Futura e Soberania dos Dados Locais
+# Decisão 12 — Conta online, saves protegidos e soberania clínica
 
-- **Status:** Aprovado pelo usuário para especificação; implementação pendente
-- **Data:** 2026-08-30
-- **Escopo:** Acesso futuro ao perfil profissional sem sincronizar prontuários
+- **Status:** Implementada no código local pelo SDD de contas e saves; ativação remota pendente
+- **Data da atualização:** 2026-10-11
+- **Escopo:** Identidade profissional, autorização dos saves e limites dos dados locais
 
-## 1. Decisão aprovada
+## 1. Identidade e responsabilidades
 
-A autenticação será adicionada posteriormente como um serviço online de
-identidade, ativação e validação do perfil profissional. Ela não transforma o
-NutriDiet em um produto de prontuário em nuvem.
+Supabase Auth valida a identidade online do profissional, confirmação de e-mail,
+credenciais e sessão. O perfil profissional é cifrado no banco remoto. O catálogo
+remoto conserva apenas proprietário, IDs necessários ao vínculo, rótulo cifrado,
+datas e material de chave cifrado. O `ownerId` vem do guard de sessão do backend;
+parâmetros, UUIDs isolados, estado da interface e `user_metadata` não concedem
+acesso.
 
-Todo requisito de sessão, vinculação online e janela de oito horas deste
-documento se aplica somente a essa fase futura. A V1 de persistência opera sem
-login online, conforme as Decisões 09, 13 e 14.
-
-O serviço online valida que a chave/perfil profissional corresponde ao usuário
-autenticado por ID e senha. Cada Conta terá inicialmente um único profissional
-proprietário, com perfil único e intransferível. Não haverá membros, equipes ou
-comunicação entre profissionais nesta fase.
-
-A validação online serve para autorizar a abertura da Conta local pelo perfil
-correto. Ela não valida cada salvamento clínico, pois os salvamentos ocorrem
-somente no banco local enquanto o acesso estiver desbloqueado.
+A conta profissional online e a Conta clínica dentro do `.nutridiet` são
+identidades distintas. `localAccountId` é preservado como texto e vinculado a
+um `saveId` de proprietário único. Não existem equipes, compartilhamento,
+transferência nem sincronização entre dispositivos nesta fase.
 
 ## 2. Soberania dos dados clínicos
 
-O serviço de autenticação pode receber somente os dados mínimos para validar a
-identidade e o direito de acesso, como identificador do perfil, credenciais,
-estado de ativação e metadados técnicos indispensáveis.
-
-Ele não pode receber, ler, armazenar, indexar ou sincronizar:
+O serviço online não recebe, armazena, indexa ou sincroniza:
 
 - pacientes e contatos;
-- avaliações, consultas ou anotações;
-- dietas, refeições, alimentos, receitas ou macros;
-- snapshots, arquivo `.nutridiet` ou conteúdo do banco local.
+- avaliações, consultas, anotações, dietas e refeições;
+- alimentos, receitas, macros, snapshots, banco local ou drafts;
+- handles, caminhos locais e conteúdo de arquivo `.nutridiet`.
 
-Os dados clínicos permanecem no banco relacional local e só são abertos após a
-validação de acesso ao perfil profissional. Autenticação é um controle de
-acesso; não é replicação, backup nem transporte de prontuário.
+Esses dados permanecem no dispositivo. O arquivo principal vinculado usa um
+envelope externo v2 AES-256-GCM; o backend guarda a DEK envolvida e a prova de
+vínculo, e entrega material de autorização somente no endpoint específico após
+validar conta, proprietário, sessão e prova. O conteúdo clínico não é enviado
+para o Supabase. Catálogo e autorização são metadados de controle de acesso,
+não backup, upload ou confirmação de checkpoint.
 
-Uma futura senha de login não protege o arquivo exportado. O backup atual é
-JSON sem senha nem criptografia, conforme a
-[Decisão 13 — Proteção local e backup simples](./13-protecao-local-e-backup-simples.md).
+## 3. Autorização e continuidade
 
-## 3. Limites da futura Conta online
+Login, criação de save e abertura/reabertura exigem conexão e validação do
+backend. Um grant aceito vincula `(ownerId, saveId, localAccountId, keyId,
+bindingProof)`, importa a CryptoKey como não extraível e dura no máximo oito
+horas desde a autorização. Reload perde o grant. A localização de arquivo e o
+estado do navegador não o criam nem renovam.
 
-```text
-Serviço online de identidade
-└── perfil profissional + chave/ativação + estado de acesso
+Enquanto um save já está aberto e o grant permanece válido, leitura, edição,
+drafts e checkpoints ocorrem localmente; cada gravação clínica não precisa
+consultar Supabase. Offline não permite login, criar save ou reabrir arquivo.
+Na expiração, suspensão reconhecida ou logout, novas operações e a árvore
+clínica são bloqueadas. A aplicação conclui operações já aceitas, checkpoint e
+flush do draft local antes de descartar o runtime; uma falha preserva o runtime
+bloqueado para retry explícito. Nenhum outro tuple recebe esses dados.
 
-Banco local do profissional
-└── toda a Conta clínica e seus Pacientes
-```
+Não há garantia de primeiro carregamento offline, cache PWA completo ou
+coordenação entre abas. Essa feature não implementa suporte PWA novo.
 
-O `accountId` local deve ser vinculado de forma estável ao identificador do
-perfil profissional validado online. Uma sessão autenticada não autoriza abrir
-uma Conta local vinculada a outro perfil.
+## 4. Arquivos, legado e backup
 
-## 4. Política de disponibilidade aprovada
+O envelope clínico lógico e o schema local permanecem independentes do novo
+envelope externo. Arquivos protegidos v2 exigem autorização e AES-GCM válida
+antes de trocar o banco local. Saves legados plaintext continuam legíveis; a
+adoção cria uma cópia protegida em destino distinto e não regrava o original.
+Uma migração determinística do payload reconhecido acontece em memória e não
+reescreve silenciosamente o arquivo de origem.
 
-Após uma autenticação online bem-sucedida, o serviço entrega uma autorização
-de acesso local vinculada ao perfil profissional e à Conta correspondente, com
-validade de **oito horas**.
+O arquivo/export protegido não cifra IndexedDB, PGlite, drafts ou outros dados
+do dispositivo. A proteção não se promete contra quem controla o navegador,
+sistema operacional, sessão já autorizada ou material de chave já entregue ao
+runtime. O e-mail continua visível ao provedor de Auth. Portanto, a arquitetura
+é cifrada localmente e minimiza dados remotos; não é uma alegação de E2EE
+estrita nem de cifra de todo armazenamento do dispositivo.
 
-Durante essas oito horas, desde que a PWA já esteja carregada/cacheada no
-dispositivo:
+## 5. Chaves e operação
 
-- a aplicação pode abrir os dados locais sem internet;
-- leituras e salvamentos clínicos ocorrem somente no banco local;
-- nenhuma validação remota é exigida para cada salvamento;
-- nenhum dado clínico é enviado para o serviço de autenticação.
+Uma DEK aleatória por save cifra o arquivo local; o servidor guarda apenas sua
+forma envolvida por uma KEK de servidor. Perfil profissional e metadados
+privados também usam cifra autenticada. A KEK precisa de backup restrito e
+recuperável separado do repositório. O código atual mantém uma KEK ativa; perda
+ou troca sem re-envolvimento pode tornar dados persistidos ilegíveis. Rotação
+histórica ainda exige procedimento próprio antes de ocorrer.
 
-Após a expiração da autorização, a aplicação bloqueia o acesso à Conta local e
-solicita conexão para nova autenticação. Ela não apaga, altera nem sincroniza
-os dados clínicos durante o bloqueio.
+Auth remoto requer confirmação de e-mail e SMTP adequado para destinatários da
+aplicação. Não se envia e-mail real durante testes sem destinatários/serviço
+aprovados. Redirects devem corresponder ao `APP_ORIGIN` HTTPS estável aprovado.
 
-Se o aplicativo nunca tiver sido carregado online antes, ele não estará
-disponível sem internet: a PWA precisa primeiro obter e armazenar os recursos
-da interface a partir da hospedagem.
+## 6. Estado de ativação
 
-A restauração técnica do `.nutridiet` permanece local e não exige senha do
-arquivo. Na fase autenticada, restaurar não autoriza exibir prontuários nem
-renova a janela de acesso na fase autenticada: abrir a Conta restaurada exige
-uma autorização válida para o perfil correspondente. A V1 sem autenticação
-não aplica essa restrição futura.
+O projeto dedicado `diet-maker` foi criado no Supabase e o CLI está linkado a
+ele. Migration, usuários, configuração remota de Auth, SMTP, callbacks e
+deploy ainda não foram aplicados. Desenvolvimento e testes locais usam Docker
+e Mailpit. A implementação local não representa autenticação ou disponibilidade
+remota em produção.
 
-## 5. Fora desta decisão
-
-Não são definidos aqui provedor de autenticação, recuperação de senha,
-licenciamento comercial, vinculação a dispositivo, RLS, Supabase, API, telas de
-login ou sincronização online. Esses detalhes só serão tratados quando a fase
-de autenticação começar.
+Contratos executáveis e evidências estão em
+[SDD de contas e saves](../../specs/10-10-26-integrar-supabase-contas-saves/implementation-log.md)
+e [guia de setup](../../docs/setup/online-auth.md).

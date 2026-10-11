@@ -15,7 +15,7 @@ import { textStyle } from '@/design-system';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import type { ReadyMealItemInput } from '@/lib/domain/library/library-model';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
-import { calculateRecipeNutrients, listTacoFoodItems, toFoodItem, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
+import { calculateRecipeNutrients, listTacoFoodItems, recipeYieldUnitLabel, toFoodItem, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
 
 export interface ReadyMealFormData {
   id?: string;
@@ -189,17 +189,18 @@ export function CreateReadyMealModal({ open, meal, onOpenChange, onSave }: Creat
   const tableItems: MealItemRowProps[] = (formData.items ?? []).map((item, index) => {
     if (item.sourceType === 'RECIPE') {
       const recipe = recipePool.find((candidate) => candidate.id === item.sourceId);
-      const nutrients = recipe ? calculateRecipeNutrients(recipe.ingredients, recipe.servings) : null;
+      const nutrients = recipe ? calculateRecipeNutrients(recipe.ingredients, recipe.yieldAmount, recipe.yieldUnit) : null;
       const portions = Math.max(0.1, Number(item.recipePortions) || 1);
+      const scale = recipe?.yieldUnit === 'g' || recipe?.yieldUnit === 'ml' ? portions / 100 : portions;
       return {
         id: `${item.sourceType}-${item.sourceId}-${index}`,
         name: recipe?.name ?? item.sourceId,
-        kcal: Math.round((nutrients?.portionKcal ?? 0) * portions),
-        protein: Math.round((nutrients?.portionProteinG ?? 0) * portions * 10) / 10,
-        carbs: Math.round((nutrients?.portionCarbsG ?? 0) * portions * 10) / 10,
-        fats: Math.round((nutrients?.portionFatsG ?? 0) * portions * 10) / 10,
+        kcal: Math.round((nutrients?.portionKcal ?? 0) * scale),
+        protein: Math.round((nutrients?.portionProteinG ?? 0) * scale * 10) / 10,
+        carbs: Math.round((nutrients?.portionCarbsG ?? 0) * scale * 10) / 10,
+        fats: Math.round((nutrients?.portionFatsG ?? 0) * scale * 10) / 10,
         quantityGrams: portions,
-        quantityUnit: 'porções',
+        quantityUnit: recipe ? recipeYieldUnitLabel(recipe.yieldUnit) : 'porções',
         onQuantityChange: (value) => updateRecipePortions(index, value),
         onRemove: () => removeItem(index),
       };

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { DietMeal } from '@/lib/dietStore';
 import { useDietMealActions } from '@/hooks/useDietMealActions';
 import { getBaseMealVariationId } from '@/lib/mealVariations';
+import { createLibraryFoodSnapshot, type FoodItem } from '@/lib/library-ui-adapter';
 
 vi.mock('sonner', () => ({
       toast: {
@@ -26,6 +27,45 @@ const mealsFixture: DietMeal[] = [
     ],
   },
 ];
+
+function customFood(overrides: Partial<FoodItem> = {}): FoodItem {
+  return {
+    id: 'custom-rice',
+    name: 'Arroz integral',
+    preparo: 'Personalizado',
+    category: 'Customizados',
+    kcal: 128,
+    proteinG: 2.5,
+    carbsG: 28.1,
+    fatsG: 0.2,
+    fiberG: 1.6,
+    source: 'CUSTOM',
+    isFavorite: false,
+    libraryVersion: 3,
+    energySource: 'REFERENCE',
+    ...overrides,
+  };
+}
+
+function mealWithSnapshot(food: FoodItem, quantityGrams = 100): DietMeal[] {
+  const snapshot = createLibraryFoodSnapshot(food, String(quantityGrams));
+  const item = Object.assign({
+    id: 'item-1',
+    foodId: food.id,
+    name: food.name,
+    quantityGrams,
+    grams: quantityGrams,
+    kcal: Number(snapshot.prescribedNutrients.energyKcal),
+    protein: Number(snapshot.prescribedNutrients.protein),
+    carbs: Number(snapshot.prescribedNutrients.carbs),
+    fats: Number(snapshot.prescribedNutrients.fat),
+  }, { snapshot });
+  return [{ ...mealsFixture[0], items: [item] }];
+}
+
+function itemSnapshot(item: DietMeal['items'][number]) {
+  return item.snapshot;
+}
 
 describe('useDietMealActions item deletion undo', () => {
   beforeEach(() => {
@@ -167,6 +207,68 @@ describe('useDietMealActions item deletion undo', () => {
       protein: 4,
       carbs: 56,
       fats: 0,
+    });
+  });
+
+  it('updates prescribed snapshot nutrients from the captured reference when quantity changes', () => {
+    const food = customFood();
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState(mealWithSnapshot(food));
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+      return { meals, actions };
+    });
+
+    act(() => result.current.actions.handleUpdateItemGram('meal-1', 'item-1', 200));
+
+    const snapshot = itemSnapshot(result.current.meals[0].items[0]);
+    expect(snapshot).toMatchObject({
+      sourceType: 'ACCOUNT_CUSTOM',
+      sourceId: 'custom-rice',
+      sourceVersion: '3',
+      referenceQuantity: '100',
+      referenceNutrients: { protein: '2.5', carbs: '28.1', fat: '0.2', fiber: '1.6', energyKcal: '128' },
+      prescribedQuantity: '200',
+      prescribedNutrients: { protein: '5', carbs: '56.2', fat: '0.4', fiber: '3.2', energyKcal: '256' },
+    });
+  });
+
+  it('replaces the old source snapshot when substituting a food', () => {
+    const original = customFood();
+    const selected = customFood({
+      id: 'custom-yogurt',
+      name: 'Iogurte natural',
+      preparo: 'inNatura',
+      kcal: 60,
+      proteinG: 4,
+      carbsG: 5,
+      fatsG: 2,
+      fiberG: 0,
+      libraryVersion: 7,
+    });
+    const { result } = renderHook(() => {
+      const [meals, setMeals] = useState(mealWithSnapshot(original, 150));
+      const actions = useDietMealActions({
+        foodSearchMealIndex: null,
+        currentMeals: meals,
+        updateActiveMeals: (updater) => setMeals(updater),
+      });
+      return { meals, actions };
+    });
+
+    act(() => result.current.actions.handleSubstituteFood('meal-1', 'item-1', selected));
+
+    const snapshot = itemSnapshot(result.current.meals[0].items[0]);
+    expect(result.current.meals[0].items[0]).toMatchObject({ foodId: 'custom-yogurt', name: 'Iogurte natural', quantityGrams: 150 });
+    expect(snapshot).toMatchObject({
+      sourceType: 'ACCOUNT_CUSTOM',
+      sourceId: 'custom-yogurt',
+      sourceVersion: '7',
+      prescribedQuantity: '150',
+      prescribedNutrients: { protein: '6', carbs: '7.5', fat: '3', fiber: '0', energyKcal: '90' },
     });
   });
 

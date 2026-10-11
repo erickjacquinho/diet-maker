@@ -1,4 +1,4 @@
-import type { BodyAssessment, PatientLastActivity } from './patientsStoreTypes';
+import type { BodyAssessment, PatientLastActivity, PatientNextEventType } from './patientsStoreTypes';
 import type { PatientViewModel } from './patientViewModel';
 import {
   PATIENT_LIST_GROUP_IDS,
@@ -97,9 +97,11 @@ function getPatientHistoryInput(patient: PatientViewModel, historyByPatient: Rec
     assessments: [],
     hasDiet: false,
   };
-  const eventTypes = patient.nextEvent
-    ? Array.isArray(patient.nextEvent.type) ? patient.nextEvent.type : [patient.nextEvent.type]
-    : [];
+  const eventTypes = patient.nextEvent?.dates
+    ? Object.keys(patient.nextEvent.dates) as PatientNextEventType[]
+    : patient.nextEvent
+      ? Array.isArray(patient.nextEvent.type) ? patient.nextEvent.type : [patient.nextEvent.type]
+      : [];
   return {
     ...stored,
     hasAssessment: stored.hasAssessment === true || stored.assessments.length > 0 || eventTypes.includes('assessment-update'),

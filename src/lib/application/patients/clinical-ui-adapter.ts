@@ -81,15 +81,44 @@ export function toAssessmentInput(assessment: BodyAssessment): AssessmentInput {
 
 export function toLegacyNextEvent(followUp: NextFollowUp | null): PatientNextEvent | null {
   if (!followUp) return null;
+  if (!followUp.dueDates) {
+    return {
+      date: dateToLegacy(followUp.dueDate),
+      type: followUp.type.map((type) => type === 'DIET_UPDATE' ? 'diet-update' : 'assessment-update'),
+      ...(followUp.comments ? { comments: followUp.comments } : {}),
+      version: followUp.version,
+    };
+  }
+  const assessmentDate = followUp.dueDates.ASSESSMENT_UPDATE ?? (followUp.type.includes('ASSESSMENT_UPDATE') ? followUp.dueDate : undefined);
+  const dietDate = followUp.dueDates.DIET_UPDATE ?? (followUp.type.includes('DIET_UPDATE') ? followUp.dueDate : undefined);
+  const dates = {
+    ...(assessmentDate ? { 'assessment-update': dateToLegacy(assessmentDate) } : {}),
+    ...(dietDate ? { 'diet-update': dateToLegacy(dietDate) } : {}),
+  };
+  const firstDate = Object.values(dates).map(toClinicalConsultationDate).sort()[0] ?? followUp.dueDate;
+  const firstTypes = (['assessment-update', 'diet-update'] as const).filter((type) => {
+    const date = dates[type];
+    return date !== undefined && toClinicalConsultationDate(date) === firstDate;
+  });
   return {
-    date: dateToLegacy(followUp.dueDate),
-    type: followUp.type.map((type) => type === 'DIET_UPDATE' ? 'diet-update' : 'assessment-update'),
+    date: dateToLegacy(firstDate),
+    type: firstTypes,
+    dates,
     ...(followUp.comments ? { comments: followUp.comments } : {}),
     version: followUp.version,
   };
 }
 
-export function toNextFollowUpInput(event: Pick<PatientNextEvent, 'date' | 'type' | 'comments'>): NextFollowUpInput {
+export function toNextFollowUpInput(event: Pick<PatientNextEvent, 'date' | 'type' | 'dates' | 'comments'>): NextFollowUpInput {
+  if (event.dates) {
+    return {
+      dueDates: {
+        ...(event.dates['assessment-update'] ? { ASSESSMENT_UPDATE: toClinicalConsultationDate(event.dates['assessment-update']) } : {}),
+        ...(event.dates['diet-update'] ? { DIET_UPDATE: toClinicalConsultationDate(event.dates['diet-update']) } : {}),
+      },
+      ...(event.comments === undefined ? {} : { comments: event.comments }),
+    };
+  }
   const types = Array.isArray(event.type) ? event.type : [event.type];
   return {
     dueDate: event.date,

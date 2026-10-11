@@ -52,6 +52,28 @@ Os avisos `act(...)` e a mensagem `Not implemented: navigation to another Docume
 emitidos por alguns testes são ruído preexistente do conjunto de testes/jsdom e
 não representam falhas: todos os 805 testes terminaram aprovados.
 
+## Addendum — integração com `/calendario` (2026-10-09)
+
+- O save schema 10 preserva lembretes pontuais da agenda e migra arquivos schema
+  9 para uma coleção vazia; os prazos de avaliação e dieta continuam no registro
+  de acompanhamento já exportado.
+- `npm run type-check` e `git diff --check` passaram após o addendum.
+- Vitest e Playwright não foram executados para esta alteração; os resultados
+  acima cobrem a versão anterior do contrato e não validam o round-trip de
+  lembretes.
+
+## Addendum — compatibilidade com save schema 10 sem lembretes (2026-10-09)
+
+- O arquivo fornecido usa `schemaVersion = "10"` e não contém `agendaReminders`,
+  variante exportada antes de o campo ser incluído. A leitura normaliza somente
+  esse campo ausente para `[]`; lembretes presentes e os demais dados continuam
+  validados sem relaxamento.
+- `parseBackupEnvelope` aceitou o arquivo fornecido após a normalização (1
+  paciente, 1 avaliação, 1 plano de dieta e 0 lembretes); o arquivo original
+  não foi modificado.
+- `npm run type-check` e `git diff --check` passaram. Testes automatizados e
+  browser não foram executados.
+
 O hook obrigatório configurado em `.specify/extensions.yml` referencia
 `speckit-implement`, mas esse executável não está disponível no PATH deste
 workspace. A execução foi roteada pela invocação explícita de `$sdd-implement`,

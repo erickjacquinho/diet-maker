@@ -28,9 +28,13 @@ import type {
   RecipeIngredientRow,
   RecipeRow,
 } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { isAgendaReminder, type AgendaReminder } from '@/lib/agenda-reminders';
 import { BackupRepositoryError, type BackupErrorCode, type BackupRepository } from '@/lib/persistence/backup-repository';
 import type { AccountContext } from '@/lib/persistence/account-context';
 import type { DietDraftStore } from './diets/diet-ports';
+import { ProtectedSaveError, type ProtectedSaveGrant } from '@/lib/domain/protected-save';
+import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
+import { OnlineSaveSessionError, type OnlineSaveSession } from './online-save-session';
 
 export interface BackupValidationContext {
   accountId?: string;
@@ -107,6 +111,46 @@ export const BACKUP_MIGRATIONS: readonly BackupMigrationStep[] = [
       ...input,
       schemaVersion: '8',
       readyDiets: [],
+    }),
+  },
+  {
+    from: '8',
+    to: '9',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '9',
+      nextFollowUps: Array.isArray(input.nextFollowUps)
+        ? input.nextFollowUps.map((row) => {
+          if (!isRecord(row)) return row;
+          const includesAssessment = row.type === 'ASSESSMENT_UPDATE' || row.type === 'BOTH';
+          const includesDiet = row.type === 'DIET_UPDATE' || row.type === 'BOTH';
+          return {
+            ...row,
+            assessmentDueDate: row.assessmentDueDate ?? (includesAssessment ? row.dueDate : null),
+            dietDueDate: row.dietDueDate ?? (includesDiet ? row.dueDate : null),
+          };
+        })
+        : input.nextFollowUps,
+    }),
+  },
+  {
+    from: '9',
+    to: '10',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '10',
+      agendaReminders: [],
+    }),
+  },
+  {
+    from: '10',
+    to: '11',
+    migrate: (input) => ({
+      ...input,
+      schemaVersion: '11',
+      recipes: Array.isArray(input.recipes)
+        ? input.recipes.map((row) => isRecord(row) ? { ...row, yieldUnit: 'PORTION' } : row)
+        : input.recipes,
     }),
   },
 ];
@@ -206,7 +250,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'clinicalDate', 'calculationMethod', 'calculationVersion', 'createdAt', 'updatedAt'), numericStringFields('weightKg'), nullableNumericStringFields('bodyFatPercent', 'fatMassKg', 'leanMassKg', 'waistCm', 'scapulaCm', 'bustCm', 'abdomenCm', 'hipCm', 'leftProximalThighCm', 'rightProximalThighCm', 'neckCm', 'leftArmCm', 'rightArmCm', 'leftDistalThighCm', 'rightDistalThighCm', 'leftCalfCm', 'rightCalfCm'), { autoFilledFields: isJsonValue, calculationInputSnapshot: isJsonValue, version: isNumber });
       break;
     case 'nextFollowUps':
-      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), { version: isNumber });
+      Object.assign(fields, stringFields('accountId', 'patientId', 'dueDate', 'type', 'comments', 'createdAt', 'updatedAt'), nullableStringFields('assessmentDueDate', 'dietDueDate'), { version: isNumber });
       break;
     case 'dietPlans':
       Object.assign(fields, stringFields('id', 'accountId', 'patientId', 'name', 'mode', 'status', 'createdAt', 'updatedAt', 'activatedAt'), nullableNumericStringFields('weightReferenceKg'), { version: isNumber }, nullableStringFields('supersededAt'));
@@ -233,7 +277,7 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
       Object.assign(fields, stringFields('id', 'accountId', 'name', 'description', 'measurementBasis', 'foodState', 'energySource', 'calculationVersion', 'status', 'createdAt', 'updatedAt'), nullableStringFields('brand', 'servingUnit', 'archivedAt'), nullableNumericStringFields('servingReference', 'referenceEnergyKcal'), numericStringFields('referenceProtein', 'referenceCarbs', 'referenceFat', 'referenceFiber'), { version: isNumber });
       break;
     case 'recipes':
-      Object.assign(fields, stringFields('id', 'accountId', 'name', 'category', 'instructions', 'yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'status', 'createdAt', 'updatedAt'), nullableNumericStringFields('preparedWeightGrams', 'totalEnergyKcal', 'perPortionEnergyKcal'), nullableStringFields('archivedAt'), numericStringFields('yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber'), { prepTimeMinutes: (value: unknown) => value === null || isNumber(value), version: isNumber });
+      Object.assign(fields, stringFields('id', 'accountId', 'name', 'category', 'instructions', 'yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber', 'status', 'createdAt', 'updatedAt'), nullableNumericStringFields('preparedWeightGrams', 'totalEnergyKcal', 'perPortionEnergyKcal'), nullableStringFields('archivedAt'), numericStringFields('yieldPortions', 'totalProtein', 'totalCarbs', 'totalFat', 'totalFiber', 'perPortionProtein', 'perPortionCarbs', 'perPortionFat', 'perPortionFiber'), { yieldUnit: (value: unknown) => value === 'PORTION' || value === 'g' || value === 'ml' || value === 'unit', prepTimeMinutes: (value: unknown) => value === null || isNumber(value), version: isNumber });
       break;
     case 'recipeIngredients':
       Object.assign(fields, stringFields('id', 'recipeId', 'accountId', 'sourceType', 'sourceId', 'sourceVersion', 'quantity', 'unit'), { position: isNumber, ingredientSnapshot: isJsonValue });
@@ -258,6 +302,20 @@ function validateRowShape(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknow
 function rows<T>(tableName: keyof typeof BACKUP_ROW_KEYS, value: unknown, schemaVersion: string): T[] {
   if (!Array.isArray(value)) fail('BACKUP_FORMAT_INVALID', `A coleção ${tableName} deve ser um array.`);
   return value.map((row) => validateRowShape(tableName, row, schemaVersion)) as T[];
+}
+
+function agendaReminderRows(value: unknown): AgendaReminder[] {
+  if (!Array.isArray(value)) fail('BACKUP_FORMAT_INVALID', 'A coleção agendaReminders deve ser um array.');
+  const ids = new Set<string>();
+  return value.map((reminder) => {
+    if (!isRecord(reminder)) fail('BACKUP_FORMAT_INVALID', 'Cada lembrete do calendário deve ser um objeto.');
+    assertExactKeys(reminder, ['id', 'date', 'time', 'task'], 'agendaReminders');
+    if (!isAgendaReminder(reminder) || ids.has(reminder.id)) {
+      fail('BACKUP_FORMAT_INVALID', 'A coleção agendaReminders contém um lembrete inválido ou ID duplicado.');
+    }
+    ids.add(reminder.id);
+    return reminder;
+  });
 }
 
 function ensureUnique<T>(rowsToCheck: readonly T[], key: (row: T) => string, tableName: string): void {
@@ -405,6 +463,14 @@ function migrateBackupInput(input: UnknownRecord): UnknownRecord & { schemaVersi
     }
     current = migrated;
   }
+
+  if (
+    current.schemaVersion === BACKUP_SCHEMA_VERSION
+    && !Object.prototype.hasOwnProperty.call(current, 'agendaReminders')
+  ) {
+    current = { ...current, agendaReminders: [] };
+  }
+
   return current as UnknownRecord & { schemaVersion: string };
 }
 
@@ -433,6 +499,7 @@ export function validateBackupEnvelope(rawInput: unknown, context: BackupValidat
     schemaVersion: BACKUP_SCHEMA_VERSION,
     exportedAt: input.exportedAt,
     favorites,
+    agendaReminders: agendaReminderRows(input.agendaReminders),
     account: rows<AccountRow>('account', input.account, input.schemaVersion).map((row) => ({ ...row, phone: row.phone ?? null })),
     objectiveOptions: rows<ObjectiveOptionRow>('objectiveOptions', input.objectiveOptions, input.schemaVersion),
     patients: rows<PatientRow>('patients', input.patients, input.schemaVersion),
@@ -479,6 +546,11 @@ export interface BackupApplicationDependencies {
   draftStore: Pick<DietDraftStore, 'listRecoverableByAccount' | 'removeIfRevision'>;
   getCheckpointState?(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
   savePendingCheckpoint?(): Promise<void>;
+  protectedSave?: {
+    readonly session: OnlineSaveSession;
+    readonly identity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'>;
+    authorizeRestore(): Promise<void>;
+  };
 }
 
 export interface BackupApplication {
@@ -504,56 +576,112 @@ export function createBackupApplication(dependencies: BackupApplicationDependenc
     return { accountId: active.accountId, schemaVersion: BACKUP_SCHEMA_VERSION };
   };
 
+  const withProtectedGrant = async <T>(
+    context: { accountId: string; schemaVersion: string },
+    operation: (grant: ProtectedSaveGrant) => Promise<T>,
+  ): Promise<T> => {
+    const protectedSave = dependencies.protectedSave;
+    if (!protectedSave) throw new Error('Protected backup access is unavailable.');
+    if (context.accountId !== protectedSave.identity.localAccountId) {
+      throw new BackupApplicationError('BACKUP_APP_MISMATCH', 'O arquivo pertence a outra Conta clínica.');
+    }
+    try {
+      return await protectedSave.session.withOperation(protectedSave.identity, operation);
+    } catch (cause) {
+      if (cause instanceof BackupApplicationError) throw cause;
+      if (cause instanceof OnlineSaveSessionError) {
+        throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'Autorize novamente este save para continuar.');
+      }
+      if (cause instanceof ProtectedSaveError) {
+        if (cause.code === 'IDENTITY_MISMATCH') {
+          throw new BackupApplicationError('BACKUP_APP_MISMATCH', 'O arquivo pertence a outra Conta clínica ou save.');
+        }
+        if (cause.code === 'KEY_INVALID') {
+          throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'A autorização deste save não está disponível.');
+        }
+        throw new BackupApplicationError('BACKUP_FORMAT_INVALID', 'O arquivo protegido não é um backup NutriDiet válido.');
+      }
+      throw cause;
+    }
+  };
+
+  const restoreValidatedEnvelope = async (
+    context: { accountId: string; schemaVersion: string },
+    envelope: BackupEnvelope,
+    options: { confirmed?: boolean; pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean },
+  ): Promise<void> => {
+    if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
+    const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
+    if (drafts.length > 0 && options.discardDrafts) {
+      for (const draft of drafts) {
+        const removed = await dependencies.draftStore.removeIfRevision(draft.draftId, draft.draftRevision);
+        if (!removed) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Um rascunho mudou durante a restauração; nenhum rascunho atualizado foi descartado.');
+      }
+      if ((await dependencies.draftStore.listRecoverableByAccount(context.accountId)).length > 0) {
+        throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Ainda há rascunhos pendentes; a base local não foi alterada.');
+      }
+    } else if (drafts.length > 0) {
+      throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Salve os rascunhos no perfil ou descarte-os explicitamente antes de importar o backup.');
+    }
+    const checkpoint = await dependencies.getCheckpointState?.();
+    if (checkpoint && checkpoint.workspaceRevision > checkpoint.checkpointRevision) {
+      if (options.pendingChanges === 'save') {
+        if (!dependencies.savePendingCheckpoint) throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'O save principal não está disponível para gravar as alterações pendentes.');
+        await dependencies.savePendingCheckpoint();
+        const saved = await dependencies.getCheckpointState?.();
+        if (saved && saved.workspaceRevision > saved.checkpointRevision) {
+          throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Ainda há alterações locais sem checkpoint no arquivo principal.');
+        }
+      } else if (options.pendingChanges !== 'discard') {
+        throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Escolha salvar ou descartar as alterações locais antes de importar o backup.');
+      }
+    }
+    try {
+      await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
+    } catch (cause) {
+      throw appErrorFromCause('BACKUP_RESTORE_FAILED', 'A importação falhou; a base anterior foi preservada.', cause);
+    }
+  };
+
   return {
     exportBackup: async () => {
       try {
         const active = await dependencies.accountContext.requireActive();
-        const envelope = await dependencies.repository.readAccountSnapshot(active.accountId);
-        const content = JSON.stringify(envelope);
-        if (!content) throw new Error('O conteúdo do backup ficou vazio.');
-        return { fileName: exportFileName(envelope.exportedAt), content, envelope };
+        const context = { accountId: active.accountId, schemaVersion: BACKUP_SCHEMA_VERSION };
+        const exportWithGrant = async (grant?: ProtectedSaveGrant) => {
+          const envelope = await dependencies.repository.readAccountSnapshot(active.accountId);
+          const validated = validateBackupEnvelope(envelope, { accountId: active.accountId });
+          const content = grant ? await encryptProtectedSave(validated, grant) : JSON.stringify(validated);
+          if (!content) throw new Error('O conteúdo do backup ficou vazio.');
+          return { fileName: exportFileName(validated.exportedAt), content, envelope: validated };
+        };
+        return dependencies.protectedSave
+          ? await withProtectedGrant(context, (grant) => exportWithGrant(grant))
+          : await exportWithGrant();
       } catch (cause) {
         throw appErrorFromCause('BACKUP_EXPORT_FAILED', 'O backup não pôde ser concluído. A base local permanece utilizável.', cause);
       }
     },
     validateBackup: async (serialized) => {
       const context = await getValidationContext();
-      return parseBackupEnvelope(serialized, context);
+      if (!dependencies.protectedSave) return parseBackupEnvelope(serialized, context);
+      return withProtectedGrant(context, (grant) => decryptProtectedSave(serialized, grant));
     },
     restoreBackup: async (serialized, options = {}) => {
       const context = await getValidationContext();
-      const envelope = parseBackupEnvelope(serialized, context);
+      if (!dependencies.protectedSave) {
+        return restoreValidatedEnvelope(context, parseBackupEnvelope(serialized, context), options);
+      }
+      if (!dependencies.protectedSave.session.isAuthorizedFor(dependencies.protectedSave.identity)) {
+        throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'Autorize novamente este save para continuar.');
+      }
       if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
-      const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
-      if (drafts.length > 0 && options.discardDrafts) {
-        for (const draft of drafts) {
-          const removed = await dependencies.draftStore.removeIfRevision(draft.draftId, draft.draftRevision);
-          if (!removed) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Um rascunho mudou durante a restauração; nenhum rascunho atualizado foi descartado.');
-        }
-        if ((await dependencies.draftStore.listRecoverableByAccount(context.accountId)).length > 0) {
-          throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Ainda há rascunhos pendentes; a base local não foi alterada.');
-        }
-      } else if (drafts.length > 0) {
-        throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Salve os rascunhos no perfil ou descarte-os explicitamente antes de importar o backup.');
-      }
-      const checkpoint = await dependencies.getCheckpointState?.();
-      if (checkpoint && checkpoint.workspaceRevision > checkpoint.checkpointRevision) {
-        if (options.pendingChanges === 'save') {
-          if (!dependencies.savePendingCheckpoint) throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'O save principal não está disponível para gravar as alterações pendentes.');
-          await dependencies.savePendingCheckpoint();
-          const saved = await dependencies.getCheckpointState?.();
-          if (saved && saved.workspaceRevision > saved.checkpointRevision) {
-            throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Ainda há alterações locais sem checkpoint no arquivo principal.');
-          }
-        } else if (options.pendingChanges !== 'discard') {
-          throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Escolha salvar ou descartar as alterações locais antes de importar o backup.');
-        }
-      }
-      try {
-        await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
-      } catch (cause) {
-        throw appErrorFromCause('BACKUP_RESTORE_FAILED', 'A importação falhou; a base anterior foi preservada.', cause);
-      }
+      try { await dependencies.protectedSave.authorizeRestore(); }
+      catch { throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'A restauração exige uma nova autorização online deste save.'); }
+      return withProtectedGrant(context, async (grant) => {
+        const envelope = await decryptProtectedSave(serialized, grant);
+        return restoreValidatedEnvelope(context, envelope, options);
+      });
     },
   };
 }

@@ -2,6 +2,8 @@ import type {
   AssessmentPersistenceInput,
   BodyAssessment,
   NextFollowUp,
+  NextFollowUpDateChange,
+  NextFollowUpDateMove,
   NextFollowUpInput,
 } from '@/lib/domain/clinical';
 import type { PageRequest, PageResult } from './page';
@@ -16,6 +18,7 @@ export interface ClinicalRepository {
   updateAssessment(accountId: string, patientId: string, assessmentId: string, expectedVersion: number, assessment: BodyAssessment | AssessmentPersistenceInput): Promise<BodyAssessment>;
   getNextFollowUp(accountId: string, patientId: string): Promise<NextFollowUp | null>;
   listNextFollowUps(accountId: string, patientIds: readonly string[]): Promise<Record<string, NextFollowUp>>;
+  moveNextFollowUps(accountId: string, changes: readonly NextFollowUpDateChange[]): Promise<NextFollowUpDateMove[]>;
   setNextFollowUp(accountId: string, patientId: string, expectedVersion: number | null, input: NextFollowUpInput): Promise<NextFollowUp>;
   clearNextFollowUp(accountId: string, patientId: string, expectedVersion: number): Promise<void>;
 }

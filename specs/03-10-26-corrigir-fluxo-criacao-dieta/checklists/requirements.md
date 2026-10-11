@@ -31,4 +31,4 @@
 
 ## Notes
 
-- A auditoria de ambiguidades do Estado Clarify ainda precisa confirmar se as suposições de experiência de recuperação estão completas.
+- A revisão humana deste SDD foi confirmada pela invocação de `$sdd-implement` em 2026-10-03; os itens de clareza e recuperação acima permanecem como critérios de validação da implementação.

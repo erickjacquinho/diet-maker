@@ -29,7 +29,7 @@ description: "Tarefas mínimas para a Fase 6 de backup manual simples"
 - [x] T003 [skill: $tdd] [P] Escrever testes de envelope, tipos, versão, identidade `local-account`, chaves desconhecidas, IDs, escopos, relações e dieta vigente única em `tests/lib/backup.test.ts`.
 - [x] T004 [skill: $backend-architect-ddd] Definir `BackupEnvelope`, tipos de erro e o port em `src/lib/persistence/backup-repository.ts` e `src/lib/infrastructure/local-db/logical-export-schema.ts`, mantendo um único contrato `.nutridiet`.
 - [x] T005 [skill: $backend-architect-ddd] Implementar parse e validação pura no único módulo `src/lib/application/backup-application.ts`, fazendo T003 passar sem executar SQL, código ou conteúdo do arquivo.
-- [x] T006 [skill: $tdd] [P] Escrever testes de leitura consistente, cobertura das 17 tabelas, arrays vazios, arquivados, snapshots, substituição e rollback em `tests/infrastructure/backup-repository.integration.test.ts`.
+- [x] T006 [skill: $tdd] [P] Escrever testes de leitura consistente, cobertura das 18 tabelas, arrays vazios, arquivados, snapshots, substituição e rollback em `tests/infrastructure/backup-repository.integration.test.ts`.
 - [x] T007 [skill: $backend-architect-ddd] Implementar leitura e substituição transacional por Conta em `src/lib/infrastructure/local-db/backup-repository.ts`, usando `src/lib/infrastructure/local-db/schema.ts`, com deleção reversa de FKs e inserção por dependência.
 - [x] T008 [skill: $tdd] [P] Escrever teste de consulta por Conta e bloqueio de draft editável em `tests/infrastructure/backup-drafts.integration.test.ts`.
 - [x] T009 [skill: $backend-architect-ddd] Adicionar `listRecoverableByAccount` ao contrato e ao adapter de `src/lib/application/diets/diet-ports.ts` e `src/lib/infrastructure/diet-drafts/indexed-db-diet-draft-store.ts`; bloquear restore sem apagar drafts.
@@ -42,7 +42,7 @@ description: "Tarefas mínimas para a Fase 6 de backup manual simples"
 
 **Goal**: Baixar um `.nutridiet` consistente com todos os dados confirmados e nenhum draft.
 
-**Independent Test**: Exportar uma Conta fixture completa, parsear o arquivo e comparar as 17 tabelas e relações com a base, incluindo arquivados e snapshots.
+**Independent Test**: Exportar uma Conta fixture completa, parsear o arquivo e comparar as 18 tabelas e relações com a base, incluindo arquivados e snapshots.
 
 - [x] T012 [skill: $tdd] [P] Escrever testes de exportação, serialização UTF-8, extensão, arrays vazios e falha sem mutação em `tests/application/backup-application.test.ts`.
 - [x] T013 [skill: $backend-architect-ddd] [US1] Implementar exportação e erro acionável em `src/lib/application/backup-application.ts`, delegando a captura ao port e excluindo drafts.
@@ -84,14 +84,24 @@ description: "Tarefas mínimas para a Fase 6 de backup manual simples"
 - [x] T026 [skill: $speckit-implement] Executar `quickstart.md`, type-check, lint, Vitest serial, Playwright offline, links, auditorias e build; registrar evidências em `specs/12-09-26-backup-manual-simples/validation-report.md`.
 - [x] T027 [skill: $speckit-converge] Executar análise final de `spec.md`, `plan.md`, `tasks.md`, checklists, contratos e quickstart; corrigir somente lacunas de cobertura antes de concluir a fase.
 
+## Phase 7: Calendar save integration
+
+**Purpose**: Keep the primary `.nutridiet` save and manual backup aligned with
+the persisted agenda state without adding a second storage subsystem.
+
+- [x] T028 [skill: $speckit-implement] Include account-scoped agenda reminders in save schema 10, validate reminder IDs/date/time/task, migrate schema 9 to an empty reminder collection, and restore reminders alongside the existing account snapshot.
+- [x] T029 [skill: $speckit-implement] Mark reminder creation and consumption as profile checkpoint changes; update the backup contract, reference decision, quickstart, fixtures, and schema-version expectations.
+- [x] T030 [skill: $speckit-implement] Run `npm run type-check` and `git diff --check`; record that automated and browser tests were not run for this addendum.
+- [x] T031 [skill: $speckit-implement] Accept the legacy schema-10 save shape that predates `agendaReminders` by defaulting only the missing collection to `[]` before strict validation.
+
 ## Requirements Coverage
 
 | Requirement | Tasks |
 | --- | --- |
 | FR-001 | T013–T015 |
-| FR-002 | T004, T006, T007, T013 |
-| FR-003 | T003, T004, T006 |
-| FR-004 | T003, T004, T012, T013 |
+| FR-002 | T004, T006, T007, T013, T028 |
+| FR-003 | T003, T004, T006, T028 |
+| FR-004 | T003, T004, T012, T013, T028 |
 | FR-005 | T003, T009, T012, T013, T016 |
 | FR-006 | T006, T012, T013 |
 | FR-007 | T014, T018, T021 |
@@ -99,16 +109,17 @@ description: "Tarefas mínimas para a Fase 6 de backup manual simples"
 | FR-009 | T003, T005, T011, T017, T018 |
 | FR-010 | T017, T018, T021 |
 | FR-011 | T008, T009, T017, T018, T022 |
-| FR-012 | T006, T019, T020, T022 |
+| FR-012 | T006, T019, T020, T022, T028 |
 | FR-013 | T018, T022 |
 | FR-014 | T005, T017, T019, T022 |
 | FR-015 | T018, T023, T024 |
 | FR-016 | T023, T024 |
 | FR-017 | T001, T011, T024, T025 |
 | FR-018 | T014, T015, T021, T023, T024 |
-| SC-001 | T006, T016, T019, T022 |
-| SC-002 | T003, T005, T017, T019 |
-| SC-003 | T006, T019, T020, T022 |
+| FR-019 | T028, T029, T030 |
+| SC-001 | T006, T016, T019, T022, T028 |
+| SC-002 | T003, T005, T017, T019, T028 |
+| SC-003 | T006, T019, T020, T022, T028 |
 | SC-004 | T016 |
 | SC-005 | T023, T024 |
 | SC-006 | T016, T022, T023 |
@@ -131,8 +142,8 @@ description: "Tarefas mínimas para a Fase 6 de backup manual simples"
 
 ## Definition of Done
 
-- Tarefas T001–T027 concluídas e todos os FR-001–FR-018/SC-001–SC-007 rastreáveis.
-- Backup contém somente dados confirmados das 17 tabelas; drafts ficam fora e bloqueiam restore.
+- Tarefas T001–T030 concluídas e todos os FR-001–FR-019/SC-001–SC-007 rastreáveis.
+- Backup contém dados confirmados das 18 tabelas e os lembretes persistidos da agenda; drafts ficam fora e bloqueiam restore.
 - Arquivo inválido não escreve; restauração válida substitui a Conta em uma transação; falha preserva a base anterior.
 - Nenhuma semântica `.diet` concorrente, rota nova, tabela nova ou camada especulativa permanece.
 - Quickstart e todos os gates gerais passam com evidência registrada.

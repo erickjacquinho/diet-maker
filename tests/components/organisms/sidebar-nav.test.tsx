@@ -26,22 +26,22 @@ describe('SidebarNav preservation contract', () => {
         .map((link) => link.getAttribute('href')),
     ).toEqual([
       '/pacientes',
+      '/agenda',
       '/presets',
       '/refeicoes',
       '/receitas',
       '/alimentos',
-      '/design-system',
     ]);
   });
 
   it.each([
-    ['/design-system', '/design-system'],
-    ['/design-system/tokens', '/design-system'],
+    ['/alimentos', '/alimentos'],
+    ['/alimentos/tabela', '/alimentos'],
     [sidebarNestedPatientPathname, '/pacientes'],
   ])('marks the matching destination current for %s', (pathname, href) => {
     renderSidebar({ pathname });
 
-    expect(screen.getByRole('link', { name: new RegExp(href === '/pacientes' ? 'Pacientes' : 'Guia Design System') })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: new RegExp(href === '/pacientes' ? 'Pacientes' : 'Planilha de Alimentos') })).toHaveAttribute(
       'aria-current',
       'page',
     );

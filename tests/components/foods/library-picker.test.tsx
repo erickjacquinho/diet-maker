@@ -13,6 +13,7 @@ const recipe = {
   instructions: 'Misturar.',
   prepTimeMinutes: 5,
   yieldPortions: '2',
+  yieldUnit: 'PORTION',
   nutrition: { total: {}, perPortion: {} },
   status: 'ACTIVE',
   version: 3,
@@ -63,7 +64,7 @@ describe('library picker in the diet editor', () => {
 
     await waitFor(() => expect(screen.getByRole('button', { name: /Receitas/ })).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: /Receitas/ }));
-    const table = await screen.findByRole('table', { name: 'Lista de receitas culinárias calculadas por porção' });
+    const table = await screen.findByRole('table', { name: 'Lista de receitas culinárias com nutrientes na base do rendimento' });
     fireEvent.click(within(table).getByRole('row', { name: /Receita do picker/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Inserir na Dieta' }));
 

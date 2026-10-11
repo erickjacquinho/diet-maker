@@ -8,13 +8,29 @@ import { insertReadyMealIntoDietDraft, insertRecipeIntoDietDraft } from './libra
 import { toDietHistoryViews } from './diet-history-view';
 import { normalizePageRequest, type PageRequest, type PageResult } from '@/lib/persistence/page';
 import type { HistoricalDiet } from '@/lib/patientsStoreTypes';
+import type { CheckpointPendingSaveOutcome, ConfirmedDietSaveOutcome, SaveReconciliationOptions, SaveReconciliationOutcome } from '@/lib/domain/diets/diet-model';
+
+async function checkpointLocalCommit(
+  dependencies: DietApplicationDependencies,
+  localOutcome: ConfirmedDietSaveOutcome,
+): Promise<ConfirmedDietSaveOutcome | CheckpointPendingSaveOutcome> {
+  if (!dependencies.confirmedOperation) return localOutcome;
+  try {
+    await dependencies.confirmedOperation.run(async () => undefined);
+    return localOutcome;
+  } catch {
+    return {
+      status: 'CHECKPOINT_PENDING',
+      draftId: localOutcome.draftId,
+      localOutcome,
+      message: `${localOutcome.message} O checkpoint do arquivo principal ficou pendente.`,
+    };
+  }
+}
 
 export function createDietApplication(dependencies: DietApplicationDependencies): DietApplication {
   const drafts = createDietDraftCommands(dependencies);
   const copies = createDietCopyCommands(dependencies);
-  const runConfirmed = <T>(operation: () => Promise<T>): Promise<T> => (
-    dependencies.confirmedOperation ? dependencies.confirmedOperation.run(operation) : operation()
-  );
   return {
     openEditor: drafts.openEditor,
     autosaveDraft: drafts.autosaveDraft,
@@ -23,8 +39,17 @@ export function createDietApplication(dependencies: DietApplicationDependencies)
     listPreviousDietSources: copies.listPreviousDietSources,
     pullTargets: copies.pullTargets,
     pullCompleteDiet: copies.pullCompleteDiet,
-    saveDietAsActive: (draftId, expectedRevision) => runConfirmed(() => saveDietAsActive(dependencies, draftId, expectedRevision)),
-    reconcileUnknownSave: (draftId) => reconcileUnknownSave(dependencies, draftId),
+    async saveDietAsActive(draftId, expectedRevision) {
+      const outcome = await saveDietAsActive(dependencies, draftId, expectedRevision);
+      return outcome.status === 'COMMITTED' || outcome.status === 'CLEANUP_PENDING'
+        ? checkpointLocalCommit(dependencies, outcome)
+        : outcome;
+    },
+    async reconcileUnknownSave(draftId, confirmedDraftRevision, options?: SaveReconciliationOptions): Promise<SaveReconciliationOutcome> {
+      const outcome = await reconcileUnknownSave(dependencies, draftId, confirmedDraftRevision);
+      if (outcome.status !== 'COMMITTED' && outcome.status !== 'CLEANUP_PENDING') return outcome;
+      return options?.cleanupOnly ? outcome : checkpointLocalCommit(dependencies, outcome);
+    },
     async getPatientDietSummary(patientId) {
       const account = await dependencies.accountContext.requireActive();
       const patient = await dependencies.patientReader.getById(account.accountId, patientId);

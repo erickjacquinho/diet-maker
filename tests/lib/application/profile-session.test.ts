@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createBackupEnvelope, createEmptyBackupFixture } from '../../fixtures/backup';
@@ -11,7 +12,11 @@ import {
 } from '@/lib/application/profile-session';
 import type { Account } from '@/lib/domain/account';
 import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
-import type { SaveFilePort } from '@/lib/persistence/save-file';
+import type { PendingSaveRegistration, SaveFilePort } from '@/lib/persistence/save-file';
+import { encodeBindingProof, parseProtectedSaveEnvelope, type ProtectedSaveGrant } from '@/lib/domain/protected-save';
+import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
+import { createOnlineSaveSession } from '@/lib/application/online-save-session';
+import { createSchema10BackupFixture } from '../../fixtures/backup';
 
 interface FakeRuntime extends ProfileSessionRuntime {
   readonly runtimeId: string;
@@ -194,7 +199,7 @@ describe('profile session', () => {
 
     await session.sync();
 
-    expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '8', account: [{ phone: null }] });
+    expect(JSON.parse(file.content)).toMatchObject({ schemaVersion: '11', account: [{ phone: null }] });
   });
 
   it('does not request permission or rewrite a clean checkpoint', async () => {
@@ -302,3 +307,349 @@ describe('profile session', () => {
     expect(session.getSnapshot()).toMatchObject({ status: 'active', syncState: 'synced' });
   });
 });
+
+describe('online protected profile session', () => {
+  it('authorizes before creating PGlite and writes and verifies an encrypted initial copy', async () => {
+    const order: string[] = [];
+    const file = { name: 'new-protected.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file, order);
+    const ownerId = randomUUID();
+    const grant = await createOnlineGrant('account-1', { ownerId });
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant, order);
+    const runtimeImplementation = dependencies.createRuntime.getMockImplementation() as (account: Account) => Promise<FakeRuntime>;
+    dependencies.createRuntime.mockImplementation(async (account) => {
+      order.push('runtime');
+      return runtimeImplementation(account);
+    });
+    const session = createProfileSession(dependencies);
+
+    await session.createProfile({ displayName: 'Consultório protegido' });
+
+    expect(order.indexOf('authorize')).toBeLessThan(order.indexOf('runtime'));
+    expect(dependencies.createRuntime).toHaveBeenCalledWith(expect.objectContaining({ id: 'account-1' }), {
+      ownerId,
+      saveId: grant.saveId,
+      localAccountId: 'account-1',
+      keyId: grant.keyId,
+      bindingProof: grant.bindingProof,
+    });
+    const envelope = parseProtectedSaveEnvelope(JSON.parse(file.content));
+    expect(envelope).toMatchObject({ formatVersion: 2, saveId: grant.saveId, bindingProof: grant.bindingProof });
+    expect(file.content).not.toContain('Consultório protegido');
+    await expect(decryptProtectedSave(file.content, grant)).resolves.toMatchObject({
+      schemaVersion: '11',
+      account: [{ id: 'account-1', displayName: 'Consultório protegido' }],
+    });
+    expect(filePort.persistFileAssociation).toHaveBeenCalledWith(
+      expect.objectContaining({ ownerId, saveId: grant.saveId, localAccountId: 'account-1' }),
+      file,
+      expect.objectContaining({ bindingProof: grant.bindingProof }),
+    );
+    expect(session.getSnapshot().status).toBe('active');
+    expect(onlineSave.session.getSnapshot().status).toBe('active');
+  });
+
+  it('validates and migrates a schema-10 legacy file before any runtime, then writes a protected copy without changing the source', async () => {
+    const sourceEnvelope = createSchema10BackupFixture();
+    const source = { name: 'legacy.nutridiet', content: JSON.stringify(sourceEnvelope) };
+    const target = { name: 'legacy-protected.nutridiet', content: '' };
+    const originalBytes = source.content;
+    const originalHash = createHash('sha256').update(originalBytes).digest('hex');
+    const filePort = createOnlineFilePort(target);
+    filePort.existing = source;
+    const ownerId = randomUUID();
+    const grant = await createOnlineGrant(sourceEnvelope.account[0].id, { ownerId });
+    const { dependencies } = createOnlineDependencies(filePort, grant);
+    const session = createProfileSession(dependencies);
+
+    await session.loadProfile();
+    expect(session.getSnapshot()).toMatchObject({ protectedCopyRequired: true, status: 'empty', runtime: null });
+    expect(dependencies.createRuntime).not.toHaveBeenCalled();
+    await session.adoptLegacyProfile();
+
+    expect(source.content).toBe(originalBytes);
+    expect(createHash('sha256').update(source.content).digest('hex')).toBe(originalHash);
+    expect(JSON.parse(source.content)).toEqual(sourceEnvelope);
+    expect(session.getSnapshot()).toMatchObject({ status: 'active', accountId: sourceEnvelope.account[0].id });
+    const protectedCopy = parseProtectedSaveEnvelope(JSON.parse(target.content));
+    expect(protectedCopy.saveId).toBe(grant.saveId);
+    await expect(decryptProtectedSave(target.content, grant)).resolves.toMatchObject({
+      schemaVersion: '11',
+      account: [{ id: sourceEnvelope.account[0].id }],
+    });
+    expect(filePort.isSameEntry).toHaveBeenCalledWith(source, target);
+  });
+
+  it('retries a failed first write with the same local ID, idempotency key, and DEK', async () => {
+    const order: string[] = [];
+    const file = { name: 'retry-protected.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file, order);
+    const ownerId = randomUUID();
+    const grant = await createOnlineGrant('account-1', { ownerId });
+    const { dependencies, registeredInputs } = createOnlineDependencies(filePort, grant, order);
+    vi.mocked(filePort.write).mockRejectedValueOnce(new Error('destination unavailable'));
+    const session = createProfileSession(dependencies);
+
+    await expect(session.createProfile({ displayName: 'Retomar o save' })).rejects.toMatchObject({ code: 'SAVE_WRITE_FAILED' });
+    const pending = await filePort.restorePendingRegistration!(ownerId, 'account-1');
+    expect(pending).toMatchObject({ localAccountId: 'account-1', idempotencyKey: expect.any(String) });
+
+    await session.resumePendingProfile('account-1', { displayName: 'Retomar o save' });
+
+    expect(registeredInputs).toHaveLength(2);
+    expect(registeredInputs[1]).toEqual(registeredInputs[0]);
+    expect(parseProtectedSaveEnvelope(JSON.parse(file.content)).saveId).toBe(grant.saveId);
+    await expect(decryptProtectedSave(file.content, grant)).resolves.toMatchObject({ account: [{ id: 'account-1' }] });
+    expect(session.getSnapshot().status).toBe('active');
+  });
+
+  it('does not create a local runtime when online identity resolution fails', async () => {
+    const file = { name: 'offline.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-1');
+    const { dependencies } = createOnlineDependencies(filePort, grant);
+    dependencies.onlineSave!.getCurrentOwnerId = vi.fn(async () => { throw new Error('auth unavailable'); });
+    const session = createProfileSession(dependencies);
+
+    await expect(session.createProfile({ displayName: 'Sem rede' })).rejects.toMatchObject({ code: 'SAVE_WRITE_FAILED' });
+    expect(dependencies.createRuntime).not.toHaveBeenCalled();
+    expect(filePort.write).not.toHaveBeenCalled();
+  });
+
+  it('opens only the locally associated save after matching and authorizing its protected envelope', async () => {
+    const file = { name: 'exact-save.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const accessOrder: string[] = [];
+    vi.mocked(filePort.requestWritePermission).mockImplementation(async () => {
+      accessOrder.push('permission');
+      return 'granted';
+    });
+    vi.mocked(filePort.read).mockImplementation(async (selected) => {
+      accessOrder.push('read');
+      return (selected as FakeFile).content;
+    });
+    const grant = await createOnlineGrant('account-open');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const backup = createBackupEnvelope({
+      ...createEmptyBackupFixture(),
+      account: [{ ...createBackupEnvelope().account[0], id: grant.localAccountId, displayName: 'Save encontrado' }],
+    });
+    file.content = await encryptProtectedSave(backup, grant);
+    await filePort.persistFileAssociation!(
+      { ownerId: grant.ownerId, saveId: grant.saveId },
+      file,
+      { localAccountId: grant.localAccountId, bindingProof: grant.bindingProof },
+    );
+    const association = await filePort.restoreFileAssociation!({ ownerId: grant.ownerId, saveId: grant.saveId });
+    vi.mocked(onlineSave.getCurrentOwnerId).mockImplementation(async () => {
+      accessOrder.push('owner');
+      return grant.ownerId;
+    });
+    const session = createProfileSession(dependencies);
+
+    await session.openSave(grant.saveId, association ?? undefined);
+
+    expect(accessOrder.slice(0, 3)).toEqual(['permission', 'owner', 'read']);
+    expect(onlineSave.authorizeSave).toHaveBeenCalledWith(grant.saveId, grant.bindingProof);
+    expect(session.getSnapshot()).toMatchObject({ status: 'paused', syncState: 'paused', accountId: grant.localAccountId, fileName: file.name });
+  });
+
+  it('locates a row only with a protected file whose embedded save ID matches the requested row', async () => {
+    const file = { name: 'different-save.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-other');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const backup = createBackupEnvelope({
+      ...createEmptyBackupFixture(),
+      account: [{ ...createBackupEnvelope().account[0], id: grant.localAccountId }],
+    });
+    file.content = await encryptProtectedSave(backup, grant);
+    filePort.existing = file;
+    const session = createProfileSession(dependencies);
+
+    await expect(session.locateSave(randomUUID())).rejects.toMatchObject({ code: 'LOAD_INVALID' });
+    expect(onlineSave.authorizeSave).not.toHaveBeenCalled();
+    expect(filePort.persistFileAssociation).not.toHaveBeenCalled();
+    expect(session.getSnapshot()).toMatchObject({ status: 'empty', runtime: null });
+  });
+
+  it('refuses to open a catalog row with no local association', async () => {
+    const filePort = createOnlineFilePort(null);
+    const grant = await createOnlineGrant('account-missing');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const session = createProfileSession(dependencies);
+
+    await expect(session.openSave(grant.saveId)).rejects.toMatchObject({ code: 'SAVE_NOT_LOCATED' });
+    expect(onlineSave.authorizeSave).not.toHaveBeenCalled();
+    expect(dependencies.createRuntime).not.toHaveBeenCalled();
+  });
+
+  it('relinks the selected protected file to its existing catalog save without registering or replacing its key', async () => {
+    const file = { name: 'same-name.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-relink');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const backup = createBackupEnvelope({
+      ...createEmptyBackupFixture(),
+      account: [{ ...createBackupEnvelope().account[0], id: grant.localAccountId }],
+    });
+    file.content = await encryptProtectedSave(backup, grant);
+    filePort.existing = file;
+    const session = createProfileSession(dependencies);
+
+    await session.locateSave(grant.saveId);
+
+    expect(onlineSave.registerSave).not.toHaveBeenCalled();
+    expect(onlineSave.authorizeSave).toHaveBeenCalledWith(grant.saveId, grant.bindingProof);
+    expect(filePort.persistFileAssociation).toHaveBeenCalledWith(
+      expect.objectContaining({ saveId: grant.saveId, keyId: grant.keyId, bindingProof: grant.bindingProof }),
+      file,
+      expect.objectContaining({ localAccountId: grant.localAccountId, bindingProof: grant.bindingProof }),
+    );
+  });
+
+  it('reports a lost file permission without treating it as a missing save or granting access', async () => {
+    const file = { name: 'permission-required.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-permission');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    await filePort.persistFileAssociation!(
+      { ownerId: grant.ownerId, saveId: grant.saveId },
+      file,
+      { localAccountId: grant.localAccountId, bindingProof: grant.bindingProof },
+    );
+    vi.mocked(filePort.read).mockRejectedValueOnce(new DOMException('Permission required', 'NotAllowedError'));
+    const session = createProfileSession(dependencies);
+
+    await expect(session.openSave(grant.saveId)).rejects.toMatchObject({ code: 'SAVE_PERMISSION_DENIED' });
+    expect(onlineSave.authorizeSave).not.toHaveBeenCalled();
+    expect(dependencies.createRuntime).not.toHaveBeenCalled();
+  });
+
+  it('flushes registered local drafts before logout disposes the runtime', async () => {
+    const file = { name: 'logout-flush.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-1');
+    const { dependencies } = createOnlineDependencies(filePort, grant);
+    const session = createProfileSession(dependencies);
+    await session.createProfile({ displayName: 'Preservar antes de sair' });
+    const flushDraft = vi.fn(async () => undefined);
+    session.registerPendingDraftFlush(flushDraft);
+
+    await session.signOut();
+
+    expect(flushDraft).toHaveBeenCalledOnce();
+    expect(session.getSnapshot()).toMatchObject({ status: 'empty', runtime: null, account: null });
+    expect(dependencies.disposeRuntime).toHaveBeenCalledOnce();
+  });
+
+  it('keeps a failed draft flush locked and mounted for retry instead of disposing the runtime', async () => {
+    const file = { name: 'logout-retry.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-1');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const session = createProfileSession(dependencies);
+    await session.createProfile({ displayName: 'Rascunho preservado' });
+    const flushDraft = vi.fn(async () => undefined);
+    flushDraft.mockRejectedValueOnce(new Error('IndexedDB indisponível'));
+    const unregister = session.registerPendingDraftFlush(flushDraft);
+
+    await expect(session.signOut()).rejects.toMatchObject({ code: 'DRAFT_PRESERVATION_FAILED' });
+    unregister();
+    expect(session.getSnapshot()).toMatchObject({ status: 'locked', runtime: expect.any(Object) });
+    expect(session.isSaveAuthorized()).toBe(false);
+    expect(onlineSave.session.getSnapshot().status).toBe('locked');
+    expect(dependencies.disposeRuntime).not.toHaveBeenCalled();
+
+    await session.retryLockedSave();
+
+    expect(flushDraft).toHaveBeenCalledTimes(2);
+    expect(session.getSnapshot()).toMatchObject({ status: 'empty', runtime: null });
+    expect(dependencies.disposeRuntime).toHaveBeenCalledOnce();
+  });
+
+  it('locks on an online deadline event, waits for draft preservation, then closes the workspace', async () => {
+    const file = { name: 'deadline-flush.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file);
+    const grant = await createOnlineGrant('account-1');
+    const { dependencies, onlineSave } = createOnlineDependencies(filePort, grant);
+    const session = createProfileSession(dependencies);
+    await session.createProfile({ displayName: 'Fim da autorização' });
+    let beginFlush!: () => void;
+    let finishFlush!: () => void;
+    const flushStarted = new Promise<void>((resolve) => { beginFlush = resolve; });
+    session.registerPendingDraftFlush(() => new Promise<void>((resolve) => { finishFlush = resolve; beginFlush(); }));
+
+    onlineSave.session.lock();
+
+    expect(session.getSnapshot()).toMatchObject({ status: 'locked', runtime: expect.any(Object) });
+    expect(session.isSaveAuthorized()).toBe(false);
+    expect(dependencies.disposeRuntime).not.toHaveBeenCalled();
+    await flushStarted;
+    const preservation = session.retryLockedSave();
+    finishFlush();
+    await preservation;
+
+    expect(session.getSnapshot()).toMatchObject({ status: 'empty', runtime: null });
+    expect(dependencies.disposeRuntime).toHaveBeenCalledOnce();
+  });
+});
+
+function createOnlineFilePort(file: FakeFile | null, order: string[] = []) {
+  const port = createFilePort(file);
+  const pending = new Map<string, PendingSaveRegistration>();
+  const associations = new Map<string, { ownerId: string; saveId: string; localAccountId: string; bindingProof?: string; file: SaveFile }>();
+  port.persistPendingRegistration = vi.fn(async (attempt) => {
+    order.push('pending');
+    pending.set(`${attempt.ownerId}:${attempt.localAccountId}`, attempt);
+  });
+  port.restorePendingRegistration = vi.fn(async (ownerId, localAccountId) => pending.get(`${ownerId}:${localAccountId}`) ?? null);
+  port.listPendingRegistrations = vi.fn(async (ownerId) => [...pending.values()].filter((attempt) => attempt.ownerId === ownerId));
+  port.clearPendingRegistration = vi.fn(async (ownerId, localAccountId) => { pending.delete(`${ownerId}:${localAccountId}`); });
+  port.persistFileAssociation = vi.fn(async (identity, selected, retry) => {
+    associations.set(`${identity.ownerId}:${identity.saveId}`, { ...identity, ...retry, file: selected });
+  });
+  port.restoreFileAssociation = vi.fn(async (identity) => associations.get(`${identity.ownerId}:${identity.saveId}`) ?? null);
+  port.isSameEntry = vi.fn(async (first, second) => first === second);
+  return port;
+}
+
+async function createOnlineGrant(localAccountId: string, overrides: Partial<ProtectedSaveGrant> = {}): Promise<ProtectedSaveGrant> {
+  const raw = randomBytes(32);
+  const key = await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  raw.fill(0);
+  const authorizedAt = Date.now();
+  return {
+    ownerId: randomUUID(),
+    saveId: randomUUID(),
+    localAccountId,
+    keyId: randomUUID(),
+    bindingProof: encodeBindingProof('profile-session-v1', Buffer.alloc(32, 0x52).toString('base64url')),
+    authorizedAt,
+    expiresAt: authorizedAt + 8 * 60 * 60 * 1000,
+    key,
+    ...overrides,
+  };
+}
+
+function createOnlineDependencies(
+  filePort: ReturnType<typeof createOnlineFilePort>,
+  grant: ProtectedSaveGrant,
+  order: string[] = [],
+) {
+  const dependencies = createDependencies(filePort);
+  const registeredInputs: Array<{ localAccountId: string; idempotencyKey: string; label: string }> = [];
+  const onlineSession = createOnlineSaveSession({ isOnline: () => true });
+  dependencies.onlineSave = {
+    session: onlineSession,
+    getCurrentOwnerId: vi.fn(async () => { order.push('owner'); return grant.ownerId; }),
+    createIdempotencyKey: () => 'e9686c58-087f-4310-8dd1-aa68c54877de',
+    registerSave: vi.fn(async (input) => {
+      order.push('register');
+      registeredInputs.push(input);
+      return { saveId: grant.saveId, localAccountId: grant.localAccountId, keyId: grant.keyId, bindingProof: grant.bindingProof };
+    }),
+    authorizeSave: vi.fn(async () => { order.push('authorize'); return grant; }),
+  };
+  return { dependencies, onlineSave: dependencies.onlineSave, registeredInputs };
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 80,
+    "currentSourceCount": 84,
     "capturedAt": "2026-10-10",
     "legacyAudit": {
       "findings": 0,
@@ -166,7 +166,6 @@
       ],
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/receitas/page.tsx",
         "src/app/refeicoes/page.tsx"
@@ -699,7 +698,6 @@
       ],
       "consumers": [
         "molecule-sidebar-user-profile",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/page.tsx"
       ]
     },
@@ -929,7 +927,6 @@
       ],
       "consumers": [
         "molecule-data-table",
-        "src/app/design-system/page.tsx",
         "template-diet-pdf-template"
       ]
     },
@@ -1879,7 +1876,6 @@
       "profile": "design-system/components/profiles/ui/card.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
@@ -1964,7 +1960,6 @@
         "organism-food-search-modal",
         "organism-read-only-diet-modal",
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/consulta/[date]/page.tsx",
         "src/app/pacientes/[id]/dieta/[dietaId]/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
@@ -2152,9 +2147,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/dropdown-menu.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2241,9 +2234,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/popover.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2277,9 +2268,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/scroll-area.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2527,7 +2516,6 @@
       "profile": "design-system/components/profiles/ui/select.md",
       "consumers": [
         "src/app/alimentos/page.tsx",
-        "src/app/design-system/page.tsx",
         "src/app/pacientes/[id]/page.tsx",
         "src/app/pacientes/page.tsx",
         "src/app/presets/page.tsx",
@@ -2561,9 +2549,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/separator.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2668,9 +2654,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/sheet.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2735,8 +2719,7 @@
       ],
       "profile": "design-system/components/profiles/ui/table.md",
       "consumers": [
-        "molecule-data-table",
-        "src/app/design-system/page.tsx"
+        "molecule-data-table"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -2781,9 +2764,7 @@
         }
       ],
       "profile": "design-system/components/profiles/ui/tabs.md",
-      "consumers": [
-        "src/app/design-system/page.tsx"
-      ],
+      "consumers": [],
       "primitiveBase": null,
       "specStatus": "homologated",
       "exceptions": []
@@ -2828,8 +2809,7 @@
       ],
       "profile": "design-system/components/profiles/ui/tooltip.md",
       "consumers": [
-        "organism-sidebar-nav",
-        "src/app/design-system/page.tsx"
+        "organism-sidebar-nav"
       ],
       "primitiveBase": null,
       "specStatus": "homologated",
@@ -3503,7 +3483,8 @@
         "organism-patient-assessments-table",
         "organism-patient-consultation-history-table",
         "template-diet-pdf-template",
-        "organism-meal-card-container"
+        "organism-meal-card-container",
+        "organism-saves-dashboard"
       ],
       "primitiveBase": "ui-table",
       "specStatus": "homologated",
@@ -5141,6 +5122,7 @@
       ],
       "profile": "design-system/components/profiles/molecules/macro-summary.md",
       "consumers": [
+        "organism-create-recipe-modal",
         "organism-import-previous-diet-modal",
         "organism-patient-diets-table",
         "organism-patient-consultation-history-table"
@@ -5559,52 +5541,192 @@
       ],
       "profile": "design-system/components/profiles/molecules/profile-create-dialog.md",
       "consumers": [
-        "organism-profile-onboarding"
+        "organism-saves-dashboard"
       ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
       "exceptions": []
     },
     {
-      "id": "organism-profile-onboarding",
-      "name": "ProfileOnboarding",
+      "id": "organism-login-form",
+      "name": "LoginForm",
       "nature": "domain",
       "lifecycle": "implemented",
       "currentLayer": "organism",
       "targetLayer": "organism",
-      "primaryCategory": "actions",
+      "primaryCategory": "fields",
       "traits": [
         "async"
       ],
       "sourceFiles": [
         {
-          "path": "src/components/organisms/profile-onboarding.tsx",
+          "path": "src/components/organisms/LoginForm.tsx",
           "role": "implementation",
           "discoveredLayer": "organism"
         }
       ],
       "publicExports": [
         {
-          "name": "ProfileOnboardingSnapshot",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "ProfileOnboardingProps",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "ProfileOnboarding",
+          "name": "LoginForm",
           "kind": "component",
           "documentedBy": "profile"
         }
       ],
-      "profile": "design-system/components/profiles/organisms/profile-onboarding.md",
+      "profile": "design-system/components/profiles/organisms/login-form.md",
       "consumers": [
-        "src/app/Home/page.tsx"
+        "src/app/login/page.tsx"
       ],
       "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-registration-form",
+      "name": "RegistrationForm",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "fields",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/RegistrationForm.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "RegistrationFormMode",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "RegistrationForm",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/registration-form.md",
+      "consumers": [
+        "src/app/criar-conta/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-recovery-password-form",
+      "name": "RecoveryPasswordForm",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "fields",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/RecoveryPasswordForm.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "RecoveryPasswordForm",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/recovery-password-form.md",
+      "consumers": [
+        "src/app/recuperar-senha/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-reset-password-form",
+      "name": "ResetPasswordForm",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "fields",
+      "traits": [
+        "async"
+      ],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/ResetPasswordForm.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "ResetPasswordForm",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/reset-password-form.md",
+      "consumers": [
+        "src/app/redefinir-senha/page.tsx"
+      ],
+      "primitiveBase": null,
+      "specStatus": "homologated",
+      "exceptions": []
+    },
+    {
+      "id": "organism-saves-dashboard",
+      "name": "SavesDashboard",
+      "nature": "domain",
+      "lifecycle": "implemented",
+      "currentLayer": "organism",
+      "targetLayer": "organism",
+      "primaryCategory": "data-display",
+      "traits": [],
+      "sourceFiles": [
+        {
+          "path": "src/components/organisms/SavesDashboard.tsx",
+          "role": "implementation",
+          "discoveredLayer": "organism"
+        }
+      ],
+      "publicExports": [
+        {
+          "name": "SaveCatalogItem",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SaveLocationState",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SavesDashboardProps",
+          "kind": "type",
+          "documentedBy": "non-visual"
+        },
+        {
+          "name": "SavesDashboard",
+          "kind": "component",
+          "documentedBy": "profile"
+        }
+      ],
+      "profile": "design-system/components/profiles/organisms/saves-dashboard.md",
+      "consumers": [
+        "src/app/saves/page.tsx"
+      ],
+      "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
     },

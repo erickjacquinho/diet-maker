@@ -6,6 +6,9 @@ import type {
   DietPlan,
   DietVariation,
   DiscardResult,
+  SaveOutcome,
+  SaveReconciliationOptions,
+  SaveReconciliationOutcome,
 } from '@/lib/domain/diets/diet-model';
 import type { LibraryDietSourceReader } from './library-insertion';
 import type { PageRequest, PageResult } from '@/lib/persistence/page';
@@ -113,8 +116,8 @@ export interface DietApplication {
   listPreviousDietSources(patientId: string): Promise<PreviousDietSource[]>;
   pullTargets(draftId: string, sourceDietId: string, sourceVariationId: string, targetVariationId: string): Promise<DietDraft>;
   pullCompleteDiet(draftId: string, sourceDietId: string): Promise<DietDraft>;
-  saveDietAsActive(draftId: string, expectedRevision: number): Promise<import('@/lib/domain/diets/diet-model').SaveOutcome>;
-  reconcileUnknownSave(draftId: string): Promise<{ status: 'COMMITTED' | 'NOT_COMMITTED' | 'REVIEW_REQUIRED'; planId?: string; version?: number }>;
+  saveDietAsActive(draftId: string, expectedRevision: number): Promise<SaveOutcome>;
+  reconcileUnknownSave(draftId: string, confirmedDraftRevision: number, options?: SaveReconciliationOptions): Promise<SaveReconciliationOutcome>;
   getPatientDietSummary(patientId: string): Promise<PatientDietSummary>;
   listDietHistoryViews(patientId: string): Promise<import('@/lib/patientsStoreTypes').HistoricalDiet[]>;
   listDietHistoryViewsPage(patientId: string, request?: PageRequest): Promise<PageResult<HistoricalDiet>>;

@@ -2,7 +2,7 @@
 
 **Data**: 2026-10-10. **Branch atual preservada**: `codex/diet-pdf-export`.
 
-**Especificação**: [spec.md](./spec.md). **Estado**: desenho proposto, aguardando validação humana. Nenhum item abaixo foi implementado nesta entrega.
+**Especificação**: [spec.md](./spec.md). **Estado**: implementação e publicação autorizadas; projeto Supabase/Auth/SMTP ativo e app publicado em Production. Smoke HTTPS da T029 aprovado; T026 ainda aguarda Edge e picker nativo do Windows.
 
 ## Summary
 
@@ -16,15 +16,15 @@ Cadastro: faixas autodeclaradas **1–6 meses**, **6–12 meses** ou quantidade 
 | --- | --- |
 | Linguagem/framework | TypeScript 5, React 19, Next.js App Router existente; lock atual Next 15.5.22. Sem upgrade de framework. Runtime Node nas rotas backend. |
 | Dependências existentes | Drizzle 0.45.2, PGlite 0.5.8, Radix/Shadcn e design system do repositório. |
-| Novas dependências necessárias | `@supabase/supabase-js`, `@supabase/ssr`, `postgres` e marcador `server-only`; verificar compatibilidade e fixar versões no lock durante setup. Nenhum SDK Supabase no bundle cliente. |
+| Novas dependências necessárias | `@supabase/supabase-js`, `@supabase/ssr`, `pg` e marcador `server-only`; `@types/pg` de desenvolvimento. Nenhum SDK Supabase no bundle cliente. |
 | Armazenamento | Supabase Auth/Postgres privado: identidade/metadados. File System Access, PGlite e IndexedDB: arquivo/workspace/drafts/referências locais. |
 | Testes | Vitest, Testing Library e Playwright existentes; Supabase local descartável para integração Auth/roles/RLS. Testes novos sob `tests/`. |
 | Plataforma | Desktop >=1024px, claro. Chrome/Edge com File System Access; ausência da API produz indisponibilidade explícita. |
 | Desempenho | Catálogo paginado de 50 registros, contagem e navegação até todos os saves. Verificar arquivos só na página visível; não carregar conteúdo clínico remoto. Nenhum SLA/throughput pedido. |
-| Restrições | Sem trânsito clínico, segredo persistido no cliente, abertura offline ou publicação. Preservar legado/drafts. |
+| Restrições | Sem trânsito clínico, segredo persistido no cliente, abertura offline ou deploy de Edge Functions. Publicar o app Next.js no hostname `vercel.app`; preservar legado/drafts. |
 | Escala | Vários saves por conta, um dono por save; sem equipes, compartilhamento ou sincronização clínica. |
 
-Versões exatas dos novos pacotes serão resultado do setup futuro. Organização/projeto Supabase e SMTP são entradas operacionais tratadas antes de provisionar, não perguntas funcionais abertas. Nenhum alvo remoto foi escolhido.
+Versões exatas dos pacotes ficam fixadas no lock. O projeto Supabase `diet-maker` foi criado na organização `Jacquinho`, região São Paulo, e o projeto Vercel `nutridiet` da conta atual foi criado e vinculado ao checkout. As funções Vercel usam `gru1` para ficar junto ao banco `sa-east-1`; o plano Hobby suporta uma região e mantém a mesma origem HTTPS. O usuário escolheu Gmail como remetente e autorizou publicação sem domínio próprio. SMTP, migration, variáveis server-side e deployment foram configurados; smoke HTTPS está registrado em `validation-report.md`.
 
 ## Constitution Check
 
@@ -65,7 +65,7 @@ Rate limit durável em buckets privados HMAC com incremento atômico: login 10/1
 
 ### Banco privado e conexão
 
-Desabilitar Data API do projeto dedicado. Schema `private`, sem grants a PUBLIC/anon/authenticated nem funções privilegiadas expostas. Driver `postgres` + Drizzle, Supavisor transacional, TLS validado, `prepare:false`, pool pequeno. Runtime NOBYPASSRLS, sem ownership/herança administrativa; admin de migração é outra credencial.
+Desabilitar Data API do projeto dedicado. Schema `private`, sem grants a PUBLIC/anon/authenticated nem funções privilegiadas expostas. Usar `pg` + Drizzle em Supavisor transacional, TLS, pool de uma conexão por runtime serverless e sem named prepared statements. `pg` deixa query pipelining desabilitado por padrão; isso evita o risco documentado no pool transacional com Postgres.js. Cada consulta de Conta/save roda em transação explícita; `set_config('app.owner_id', ..., true)` não sai da transação. Runtime NOBYPASSRLS, sem ownership/herança administrativa; admin de migração é outra credencial. Para validar `auth.sessions`, o runtime lê apenas `id,user_id` pela view privada `private.runtime_auth_sessions`; ele não recebe `USAGE` no schema `auth`.
 
 Catálogo em transação única com `set_config('app.owner_id', UUID validado no backend, true)`; ausência de ator nega. Não conservar ator no pool. Claim é UNIQUE/atômico e conflito não expõe outro dono. Perfil e saves exigem somente INSERT/SELECT pela role runtime, sem UPDATE/DELETE. Runtime recebe só SELECT(id,user_id) em Auth sessions. Bootstrap usa o ator retornado pelo serviço Auth; conclusão de perfil usa sessão verificada. Buckets conservam os privilégios mínimos de incremento/limpeza com policy restrita à role runtime.
 
@@ -146,8 +146,8 @@ Provas futuras: duas contas/acesso direto; roles/grants/RLS/conexão reutilizada
 - Browser autorizado usa chave/conteúdo; CryptoKey não extraível não impede instrumentação do próprio dispositivo. PGlite/drafts não são cifrados neste escopo.
 - Legado permanece legível; first claim não prova dono histórico. Perda da KEK pode inutilizar saves. Auth precisa manter e-mail utilizável pelo provedor.
 - SMTP próprio/templates TokenHash antes do teste remoto. Token de e-mail é exceção estreita de URL em NFR-002, com redaction/referrer e URL limpa.
-- Handles dependem de origem e permissão; futuro domínio Vercel não herda localhost.
-- Implementação aprovada resolve projeto dedicado/organização/custo antes de criar, valida migração local antes de aplicar no alvo remoto. Preparar env e Vercel sem deploy/domínio/link público. Nenhuma mutação externa nesta entrega.
+- Handles dependem de origem e permissão; a origem Vercel publicada não herda a permissão concedida em localhost.
+- O projeto dedicado foi provisionado no Supabase Free da organização autorizada e o app foi publicado no projeto Vercel Hobby com variáveis Production server-side e callbacks conferidos. Não ligar domínio próprio nem implantar Edge Functions.
 
 ## Complexity Tracking
 

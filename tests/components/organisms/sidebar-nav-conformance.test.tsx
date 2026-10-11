@@ -27,10 +27,10 @@ describe('SidebarNav Design System conformance', () => {
 
   it('keeps future submenu items on the 36px canonical control height', () => {
     render(
-      <SidebarNav pathname="/design-system" navigationItems={[sidebarFutureGroup]} />,
+      <SidebarNav pathname="/alimentos" navigationItems={[sidebarFutureGroup]} />,
     );
 
-    expect(screen.getByRole('link', { name: 'Guia Design System' }).closest('[data-sidebar="menu-sub-button"]')).toHaveClass(
+    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' }).closest('[data-sidebar="menu-sub-button"]')).toHaveClass(
       'h-control-standard',
       '[&>svg]:size-4',
     );

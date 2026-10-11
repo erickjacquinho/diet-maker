@@ -15,7 +15,6 @@ const patientFlowFiles = [
   'src/components/molecules/EditPatientModal.tsx',
   'src/components/molecules/DeletePatientModal.tsx',
   'src/components/molecules/AddObjectiveModal.tsx',
-  'src/lib/application/browser-composition.ts',
   'src/lib/application/composition-root.ts',
 ];
 
@@ -61,6 +60,18 @@ describe('legacy patient persistence cutover', () => {
     const violations = patientFlowFiles.flatMap((file) => forbidden.test(readSource(file)) ? [file] : []);
 
     expect(violations).toEqual([]);
+  });
+
+  it('limits browser local storage to the nonclinical pending-revocation marker', () => {
+    const source = readSource('src/lib/application/browser-composition.ts');
+    const localStorageCalls = source.match(/window\.localStorage\.(?:getItem|setItem|removeItem)\([^;]+\)/g) ?? [];
+
+    expect(source).toContain("const revocationMarkerKey = 'nutridiet.online-save-revocation-pending'");
+    expect(localStorageCalls).toEqual([
+      'window.localStorage.getItem(revocationMarkerKey)',
+      "window.localStorage.setItem(revocationMarkerKey, '1')",
+      'window.localStorage.removeItem(revocationMarkerKey)',
+    ]);
   });
 
   it('keeps canonical patient modules free from legacy storage and UI dependencies', () => {

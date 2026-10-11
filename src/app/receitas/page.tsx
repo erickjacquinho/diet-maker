@@ -73,14 +73,15 @@ export default function RecipesPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveRecipe = async (data: { id?: string; name: string; category: string; servings: number; instructions: string; ingredients: Recipe['ingredients'] }) => {
+  const handleSaveRecipe = async (data: { id?: string; name: string; category: string; yieldAmount: number; yieldUnit: Recipe['yieldUnit']; instructions: string; ingredients: Recipe['ingredients'] }) => {
     try {
       const application = await getBrowserLibraryApplication();
       const input = {
         name: data.name,
         category: data.category,
         instructions: data.instructions,
-        yieldPortions: String(data.servings),
+        yieldPortions: String(data.yieldAmount),
+        yieldUnit: data.yieldUnit,
         ingredients: data.ingredients.map((ingredient) => ({ sourceType: ingredient.foodId.startsWith('taco-') ? 'SYSTEM_TACO' as const : 'ACCOUNT_CUSTOM' as const, sourceId: ingredient.foodId, quantity: String(ingredient.amountGrams), unit: 'g' as const })),
       };
       if (data.id) {
@@ -121,7 +122,8 @@ export default function RecipesPage() {
                     category: recipe.category,
                     instructions: recipe.instructions,
                     prepTimeMinutes: recipe.prepTimeMinutes,
-                    yieldPortions: String(recipe.servings),
+                    yieldPortions: String(recipe.yieldAmount),
+                    yieldUnit: recipe.yieldUnit,
                     ingredients: recipe.ingredients.map((ingredient) => ({
                       sourceType: ingredient.foodId.startsWith('taco-') ? 'SYSTEM_TACO' as const : 'ACCOUNT_CUSTOM' as const,
                       sourceId: ingredient.foodId,

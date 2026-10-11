@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-10-11T05:12:18.529Z",
+  "summary": {
+    "totalFilesScanned": 166,
+    "compliantFiles": 164,
+    "nonCompliantFiles": 2,
+    "totalViolations": 5,
+    "complianceScorePercentage": 98.8
+  },
+  "violations": [
+    {
+      "file": "src/app/agenda/page.tsx",
+      "line": 147,
+      "column": 21,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<input"
+    },
+    {
+      "file": "src/app/agenda/page.tsx",
+      "line": 647,
+      "column": 15,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}"
+    },
+    {
+      "file": "src/app/agenda/page.tsx",
+      "line": 708,
+      "column": 33,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "button",
+      "suggestedReplacement": "<Button> (from Design System @/components/ui)",
+      "snippet": "<button"
+    },
+    {
+      "file": "src/app/agenda/page.tsx",
+      "line": 923,
+      "column": 65,
+      "type": "INLINE_STYLE",
+      "element": "style",
+      "suggestedReplacement": "Use Tailwind CSS classes or Design System spacing/color tokens",
+      "snippet": "<DialogContent className=\"flex max-h-dialog flex-col\" style={{ height: 'var(--cmp-dialog-max-height)' }}>"
+    },
+    {
+      "file": "src/components/organisms/CreateReadyMealsFromDietModal.tsx",
+      "line": 151,
+      "column": 25,
+      "type": "RESTRICTED_HTML_TAG",
+      "element": "input",
+      "suggestedReplacement": "<Input> (from Design System @/components/ui)",
+      "snippet": "<input"
+    }
+  ]
+}

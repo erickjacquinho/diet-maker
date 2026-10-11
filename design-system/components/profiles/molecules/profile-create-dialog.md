@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Coletar nome e telefone do profile antes da primeira escrita do arquivo.
+Coletar o nome clínico e o telefone que identificam o save local antes da primeira escrita do arquivo.
 
 ## Category inheritance
 
@@ -22,7 +22,7 @@ Herda integralmente [overlays](../../categories/overlays.md) e compõe campos e 
 
 ## Specific anatomy
 
-Dialog com título, descrição, campos Nome e Telefone lado a lado, feedback de validação e ação Salvar profile.
+Dialog com título, descrição, campos Nome e Telefone lado a lado, feedback de validação e ação Salvar profile clínico no novo save.
 
 ## Allowed variants
 
@@ -30,7 +30,7 @@ Somente criação; loading preserva a largura da ação e impede submissões con
 
 ## Particular states
 
-Nome vazio recebe erro associado e foco; falha de escrita permanece no dialog; cancelamento mantém a rota de onboarding.
+Nome vazio recebe erro associado e foco; falha de escrita permanece no dialog; cancelamento mantém a dashboard de saves.
 
 ## Composition
 
@@ -46,7 +46,7 @@ Nenhuma exceção aprovada.
 
 ## Consumers
 
-A lista canônica de consumidores é o campo `consumers` do registro; atualmente `src/components/organisms/profile-onboarding.tsx`.
+A lista canônica de consumidores é o campo `consumers` do registro; atualmente `src/components/organisms/SavesDashboard.tsx`.
 
 ## Acceptance criteria
 

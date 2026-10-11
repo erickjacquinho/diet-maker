@@ -2,7 +2,9 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
-import { installProfileFileSystemFakes, navigateWithinSession } from './helpers/profile-session';
+import { decryptBrowserSave, loadLegacyProfileSession, navigateWithinSession, readPrimarySave } from './helpers/profile-session';
+
+test.use({ trace: 'off' });
 
 const assessmentFields = [
   ['Peso atual', '76'],
@@ -54,35 +56,31 @@ async function saveAssessment(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { level: 1, name: 'Perfil do paciente' })).toBeVisible({ timeout: 120_000 });
 }
 
-async function chooseDate(page: Page, container: Page | Locator, label: string): Promise<void> {
-  await container.getByRole('button', { name: 'Abrir calendário para Data' }).click({ timeout: 30_000 });
+async function chooseDate(page: Page, container: Page | Locator, label: string, field: string): Promise<void> {
+  await container.getByRole('button', { name: `Abrir calendário para ${field}` }).click({ timeout: 30_000 });
   const day = page.locator(`button[data-day="${label}"]`);
   await expect(day).toBeVisible({ timeout: 30_000 });
   await day.click();
 }
 
 async function saveFollowUp(page: Page, offsetDays: number, type: string, expectedComments = ''): Promise<void> {
-  await page.getByRole('button', { name: /Definir acompanhamento|Reagendar/ }).click();
+  await page.getByRole('button', { name: /^(Definir|Reagendar) acompanhamento$/ }).click({ timeout: 30_000 });
   const dialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   const comments = dialog.getByRole('textbox', { name: 'Observações' });
   await expect(comments).toHaveValue(expectedComments);
   const label = dateLabel(offsetDays);
-  await chooseDate(page, dialog, label);
-  for (const typeLabel of ['Atualização de avaliação', 'Atualização de dieta']) {
-    const button = dialog.getByRole('button', { name: typeLabel, exact: true });
-    if ((await button.getAttribute('aria-pressed') === 'true') !== (typeLabel === type)) {
-      await button.click();
-    }
-  }
+  await dialog.getByLabel('Atualização de avaliação', { exact: true }).fill('');
+  await dialog.getByLabel('Atualização de dieta', { exact: true }).fill('');
+  await chooseDate(page, dialog, label, type);
   await comments.fill(`Revisar ${type.toLowerCase()}`);
   await dialog.getByRole('button', { name: /^Salvar/ }).click();
   await expect(dialog).toBeHidden({ timeout: 120_000 });
-  await page.getByRole('button', { name: 'Reagendar acompanhamento' }).click();
-  await expect(dialog.getByRole('textbox', { name: 'Data', exact: true })).toHaveValue(label);
-  await expect(dialog.getByRole('button', { name: type, exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(comments).toHaveValue(`Revisar ${type.toLowerCase()}`);
-  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
-  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Reagendar acompanhamento', exact: true })).toBeVisible();
+  const payload = await decryptBrowserSave(page, (await readPrimarySave(page)).content);
+  const [day, month, year] = label.split('/');
+  const dueDateField = type === 'Atualização de dieta' ? 'dietDueDate' : 'assessmentDueDate';
+  expect(payload.nextFollowUps).toHaveLength(1);
+  expect(payload.nextFollowUps[0]).toMatchObject({ [dueDateField]: `${year}-${month}-${day}`, comments: `Revisar ${type.toLowerCase()}` });
 }
 
 async function holdToConfirm(page: Page, button: Locator): Promise<void> {
@@ -104,9 +102,7 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   clinicalBackup.account[0].displayName = 'Clínico browser';
   clinicalBackup.patients[0].name = patientOneName;
   clinicalBackup.patients[0].gender = 'Masculino';
-  await installProfileFileSystemFakes(page, JSON.stringify(clinicalBackup));
-  await page.goto('/Home', { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  await page.getByRole('button', { name: 'Abrir arquivo' }).click();
+  await loadLegacyProfileSession(page, JSON.stringify(clinicalBackup));
   await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
   await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
 
@@ -149,6 +145,7 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(assessmentTable).toContainText('77 kg');
   await expect(assessmentTable).toContainText('80 kg');
   await expect(assessmentTable).not.toContainText('76 kg');
+  console.info('Clinical journey: assessment creation and edit passed.');
 
   // Optimistic version rejection is covered by the same canonical repository/application
   // exercised in the deterministic integration suites; the browser remains single-tab by design.
@@ -172,13 +169,15 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Atrasado há 1 dia');
 
   await navigateWithinSession(page, patientOnePath);
-  await page.getByRole('button', { name: 'Reagendar acompanhamento' }).click();
+  await page.getByRole('button', { name: 'Reagendar acompanhamento', exact: true }).click();
   const rescheduleDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
   await rescheduleDialog.getByRole('button', { name: 'Remover data' }).click();
   const removeDialog = page.getByRole('dialog', { name: 'Remover acompanhamento?' });
   await holdToConfirm(page, removeDialog.getByRole('button', { name: 'Sim, remover' }));
   await expect(removeDialog).toBeHidden({ timeout: 120_000 });
-  await expect(page.getByRole('button', { name: 'Definir acompanhamento' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Definir acompanhamento', exact: true })).toBeVisible();
+  expect((await decryptBrowserSave(page, (await readPrimarySave(page)).content)).nextFollowUps).toHaveLength(0);
+  console.info('Clinical journey: follow-up create, replace and remove passed.');
   await navigateWithinSession(page, '/pacientes');
   await expect(page.getByRole('row').filter({ hasText: patientOneName }).first()).toContainText('Sem próximo evento');
   await navigateWithinSession(page, patientOnePath);
@@ -208,9 +207,11 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   const isolatedAssessmentTable = page.getByRole('table', { name: 'Histórico de avaliações físicas e composição corporal' });
   await expect(isolatedAssessmentTable).toContainText('Nenhuma avaliação física registrada');
   await expect(isolatedAssessmentTable).not.toContainText('77 kg');
-  await page.getByRole('button', { name: 'Definir acompanhamento' }).click();
+  await expect(page.getByRole('button', { name: 'Definir acompanhamento', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Definir acompanhamento', exact: true }).click();
   const isolatedFollowUpDialog = page.getByRole('dialog', { name: 'Agendar acompanhamento' });
-  await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Data', exact: true })).toHaveValue('');
+  await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Atualização de avaliação', exact: true })).toHaveValue('');
+  await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Atualização de dieta', exact: true })).toHaveValue('');
   await expect(isolatedFollowUpDialog.getByRole('textbox', { name: 'Observações' })).toHaveValue('');
   await isolatedFollowUpDialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
 
@@ -223,4 +224,5 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
 
   // Keep the id in the journey so the URL is asserted as a patient-scoped route.
   expect(patientOneId).toBeTruthy();
+  console.info('Clinical journey: archive and patient isolation passed.');
 });
