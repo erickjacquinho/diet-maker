@@ -38,6 +38,10 @@ The molecule owns identity fallback rendering and receives doctor metadata and c
 
 `onOpenAccount` and `onSignOut` are optional callbacks for account actions. When account actions or backup actions are supplied, expanded and collapsed identity render a keyboard-operable Button/IconButton with a dropdown containing `Visão geral`, `Configurações`, `Sair` and the available backup commands. Without any callback, the profile is informational and has no button role, action cursor or action hover.
 
+Na integração de produção, `SidebarNavigationAdapter` fornece a abertura de Configurações como Dialog vazio, com título acessível e fechamento padrão, sem mudar a rota. Um `onOpenAccount` explícito do consumidor permanece respeitado. O conteúdo e o estado desse modal pertencem à integração da aplicação, sem alterar o contrato visual desta molécula.
+
+`onOpenAccount` recebe opcionalmente o botão do perfil como origem para restaurar foco após um modal. Consumidores sem parâmetros continuam compatíveis; a referência não altera os controles nem o fechamento do menu.
+
 Sem primitive base único; compõe somente dependências permitidas pela layer. Compound parts pertencem a esta família e não recebem perfil independente. Dependências ascendentes e controles interativos aninhados são proibidos.
 
 ## Content rules

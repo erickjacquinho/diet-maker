@@ -18,7 +18,7 @@ export interface SidebarUserProfileProps {
   doctorName?: string;
   doctorRole?: string;
   isCollapsed?: boolean;
-  onOpenAccount?: () => void;
+  onOpenAccount?: (trigger?: HTMLButtonElement) => void;
   onExportBackup?: () => void | Promise<void>;
   onRestoreBackup?: () => void | Promise<void>;
   onSignOut?: () => void | Promise<void>;
@@ -38,6 +38,8 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   isRestoring = false,
 }) => {
   const accountLabel = `Abrir menu de conta de ${doctorName}`;
+  const accountTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const handleOpenAccount = () => onOpenAccount?.(accountTriggerRef.current ?? undefined);
   const hasDropdown = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
   const hasAction = Boolean(onOpenAccount || onExportBackup || onRestoreBackup || onSignOut);
 
@@ -65,6 +67,7 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <IconButton
+                  ref={accountTriggerRef}
                   variant="quiet"
                   aria-label={accountLabel}
                   className="mx-auto size-9 rounded-control border border-border-subtle bg-surface-subtle p-0 text-text-primary hover:border-text-muted hover:bg-surface-hover"
@@ -95,7 +98,7 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
                 <span>Visão geral</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+            <DropdownMenuItem onClick={handleOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
               <Settings className="size-4 text-text-muted" aria-hidden="true" />
               <span>Configurações</span>
             </DropdownMenuItem>
@@ -126,7 +129,8 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
           <IconButton
-            onClick={onOpenAccount}
+            ref={accountTriggerRef}
+            onClick={handleOpenAccount}
             variant="quiet"
             aria-label={accountLabel}
             className="mx-auto size-9 rounded-control border border-border-subtle bg-surface-subtle p-0 text-text-primary hover:border-text-muted hover:bg-surface-hover"
@@ -164,6 +168,7 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
+            ref={accountTriggerRef}
             type="button"
             variant="quiet"
             size="standard"
@@ -192,7 +197,7 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
               <span>Visão geral</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
+          <DropdownMenuItem onClick={handleOpenAccount} className="flex cursor-pointer items-center gap-2 text-style-legal">
             <Settings className="size-4 text-text-muted" aria-hidden="true" />
             <span>Configurações</span>
           </DropdownMenuItem>
@@ -221,10 +226,11 @@ export const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
 
   return (
     <Button
+      ref={accountTriggerRef}
       type="button"
       variant="quiet"
       size="standard"
-      onClick={onOpenAccount}
+      onClick={handleOpenAccount}
       aria-label={accountLabel}
       className="flex h-10 w-full items-center justify-start gap-2.5 rounded-control px-2 py-1.5 text-left hover:bg-surface-hover transition-colors"
     >

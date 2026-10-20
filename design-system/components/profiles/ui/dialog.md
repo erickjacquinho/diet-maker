@@ -24,6 +24,8 @@ Herda integralmente [overlays](../../categories/overlays.md). Traits autorizados
 
 Parts públicas cobrem root, portal, overlay, trigger, content, header, footer, title, description e close; `Title` é obrigatório no uso modal.
 
+`SidebarNavigationAdapter` compõe o modal vazio de Configurações com essas parts, sem alterar o primitivo ou adicionar uma variante visual.
+
 ## Visual contract
 
 - `DialogOverlay` usa `overlay-backdrop` e `z-overlay`, sem blur.

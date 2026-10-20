@@ -44,6 +44,8 @@ Labels nomeiam destinos; estado current é programático; collapsed conserva nom
 
 `SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSignOut`, `onExportBackup`, `onRestoreBackup`, estados assíncronos de backup, `profileSyncState`, `onRetryProfileSync`, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
 
+`onOpenAccount` pode receber opcionalmente o botão do perfil para retorno de foco; callbacks sem argumentos permanecem compatíveis. O organismo repassa essa origem sem controlar o modal da aplicação.
+
 ## Exceptions
 
 Nenhuma exceção aprovada.

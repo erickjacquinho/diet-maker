@@ -25,6 +25,7 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-008 |
 | **Pesquisa Mercadológica** | [refs/pesquisa-mercadologica/index.md](file:///c:/Programmer/diet-maker/refs/pesquisa-mercadologica/index.md) | Panorama do mercado brasileiro, concorrentes, personas e proposta de valor |
 | **Dieta DB & Persistência** | [refs/dieta-db/index.md](file:///c:/Programmer/diet-maker/refs/dieta-db/index.md) | Arquitetura do banco relacional local, receitas, refeições e arquivo mestre |
+| **Proposta futura — MVP online / Supabase por conta** | [refs/dieta-db/proposta-mvp-online-supabase.md](refs/dieta-db/proposta-mvp-online-supabase.md) | Retomar ao discutir migração 100% online: conta única com todos os dados, sem saves ou portabilidade; após estabilizar o núcleo e antes do lançamento do MVP. Registro de intenção, não autorização de execução |
 | **Retrocompatibilidade do Save** | [refs/dieta-db/11-recuperacao-e-portabilidade-local.md](refs/dieta-db/11-recuperacao-e-portabilidade-local.md#21-retrocompatibilidade-do-save) | Regra obrigatória ao atualizar o esquema do save: preservar compatibilidade com a versão anterior sempre que possível |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 

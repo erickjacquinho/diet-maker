@@ -48,7 +48,7 @@ export interface SidebarNavProps {
   profileSyncState?: 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
   onRetryProfileSync?: () => void | Promise<void>;
   isRetryingProfileSync?: boolean;
-  onOpenAccount?: () => void;
+  onOpenAccount?: (trigger?: HTMLButtonElement) => void;
   onSignOut?: () => void | Promise<void>;
   initialCollapsed?: boolean;
   children?: React.ReactNode;

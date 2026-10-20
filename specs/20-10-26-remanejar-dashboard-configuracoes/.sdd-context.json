@@ -1,0 +1,6 @@
+{
+  "task": "Criar SDD do remanejamento para /dashboard com funcoes atuais de /saves, mantendo saves locais por enquanto e simplificando sidebar. Criar agora apenas Configuracoes em modal vazio. Demais mudancas aguardam validacao humana; sem migracao online.",
+  "slug": "remanejar-dashboard-configuracoes",
+  "feature_dir": "specs/20-10-26-remanejar-dashboard-configuracoes",
+  "date": "2026-10-20"
+}

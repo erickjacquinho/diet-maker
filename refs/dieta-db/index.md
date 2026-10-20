@@ -9,6 +9,10 @@ recompor os contratos de armazenamento.
 [divisão em SDDs](./14-consolidacao-e-portao-de-execucao.md) para planejar a
 execução e abra as decisões de cada etapa para os detalhes.
 
+**Direção futura acordada, ainda não implementada:** [MVP online com Supabase e
+dados por conta](./proposta-mvp-online-supabase.md). Retomar após estabilizar o
+núcleo e antes do lançamento do MVP; os contratos locais abaixo continuam vigentes.
+
 ## Proposta preservada
 
 Manter os dados do consultório em uma área de trabalho local no navegador, com
