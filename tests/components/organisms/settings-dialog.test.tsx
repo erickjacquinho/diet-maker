@@ -92,4 +92,21 @@ describe('SettingsDialog', () => {
     expect(within(dialog).getByText('Nenhum save está aberto nesta sessão.')).toBeInTheDocument();
     expect(within(dialog).queryByRole('form', { name: 'Configurações do save' })).not.toBeInTheDocument();
   });
+
+  it('blocks file operations until pending save settings are saved or discarded', () => {
+    const { dialog } = renderDialog({ defaultTab: 'save', savesContent: <button type="button">Abrir arquivo</button> });
+    const openFile = within(dialog).getByRole('button', { name: 'Abrir arquivo' });
+    expect(openFile).toBeEnabled();
+    fireEvent.change(within(dialog).getByLabelText(/^Nome do save/), { target: { value: 'Outro nome' } });
+    expect(openFile).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Descartar alterações' }));
+    expect(openFile).toBeEnabled();
+  });
+
+  it('keeps Settings open while a file operation is busy', () => {
+    const { props, dialog } = renderDialog({ busy: true, defaultTab: 'save' });
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    expect(props.onOpenChange).not.toHaveBeenCalled();
+    expect(within(dialog).getByLabelText(/^Nome do save/)).toBeDisabled();
+  });
 });

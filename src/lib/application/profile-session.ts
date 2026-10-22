@@ -193,6 +193,8 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   };
   let associatedFile: SaveFile | null = null;
   let onlineIdentity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'> | null = null;
+  /** Label already written to the file but not yet to the account catalog, so resubmitting it retries the rename. */
+  let pendingCatalogLabel: { saveId: string; label: string } | null = null;
   let pendingLegacy: { file: SaveFile; envelope: BackupEnvelope; sourceSchemaVersion: unknown } | null = null;
   let rememberedFile: SaveFile | null | undefined;
   let restorePromise: Promise<void> | null = null;
@@ -939,20 +941,34 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
       }
       const phone = normalizePhone(input.phone);
       const renamed = current.displayName !== displayName;
-      if (!renamed && (current.phone ?? null) === phone) return;
+      const changed = renamed || (current.phone ?? null) !== phone;
+      const saveId = onlineIdentity?.saveId ?? null;
+      const retryCatalog = pendingCatalogLabel !== null
+        && pendingCatalogLabel.saveId === saveId
+        && pendingCatalogLabel.label === displayName;
+      if (!changed && !retryCatalog) return;
 
-      const stored = await dependencies.updateAccount(runtime, { ...current, displayName, phone, updatedAt: now() });
-      await runtime.markWorkspaceDirty();
-      update({ account: cloneAccount(stored) });
-      await sync();
-
-      const onlineSave = dependencies.onlineSave;
-      if (renamed && onlineSave?.renameSave && onlineIdentity) {
-        try {
-          await onlineSave.renameSave(onlineIdentity.saveId, displayName);
-        } catch (cause) {
-          throw profileError('SAVE_RENAME_FAILED', 'O nome foi salvo no arquivo, mas a lista de saves da conta não foi atualizada.', cause);
+      let stored = current;
+      try {
+        if (changed) {
+          stored = await dependencies.updateAccount(runtime, { ...current, displayName, phone, updatedAt: now() });
+          await runtime.markWorkspaceDirty();
+          await sync();
         }
+
+        const onlineSave = dependencies.onlineSave;
+        if ((renamed || retryCatalog) && onlineSave?.renameSave && saveId) {
+          try {
+            await onlineSave.renameSave(saveId, displayName);
+            pendingCatalogLabel = null;
+          } catch (cause) {
+            pendingCatalogLabel = { saveId, label: displayName };
+            throw profileError('SAVE_RENAME_FAILED', 'O nome foi salvo no arquivo, mas a lista de saves da conta não foi atualizada. Salve novamente para tentar outra vez.', cause);
+          }
+        }
+      } finally {
+        // Published after the catalog rename so consumers that refetch the catalog on a name change see the new label.
+        if (stored !== current) update({ account: cloneAccount(stored) });
       }
     },
     async adoptLegacyProfile() {

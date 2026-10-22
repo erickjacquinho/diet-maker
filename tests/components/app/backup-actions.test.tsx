@@ -2,7 +2,12 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BackupApplicationError } from '@/lib/application/backup-application';
-import DashboardPage from '@/app/dashboard/page';
+import { useSaveManagement } from '@/app/navigation/useSaveManagement';
+
+function SaveManagementTest() {
+  const management = useSaveManagement(true, async () => undefined);
+  return <>{management.content}{management.dialogs}</>;
+}
 
 const mocks = vi.hoisted(() => ({
   exportBackup: vi.fn(),
@@ -44,7 +49,7 @@ function createFile(content: string, name = 'backup.nutridiet'): File {
   return file;
 }
 
-describe('Dashboard backup actions', () => {
+describe('Settings saves backup actions', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.snapshot = {
@@ -97,7 +102,7 @@ describe('Dashboard backup actions', () => {
     vi.spyOn(window.URL, 'revokeObjectURL').mockImplementation(revokeObjectURL);
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Exportar backup' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Exportar backup' }));
 
@@ -112,7 +117,7 @@ describe('Dashboard backup actions', () => {
 
   it('validates the selected file before opening the replacement confirmation', async () => {
     mocks.validateBackup.mockResolvedValue({});
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
@@ -128,7 +133,7 @@ describe('Dashboard backup actions', () => {
 
   it('cancels restoration without applying the selected backup', async () => {
     mocks.validateBackup.mockResolvedValue({});
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
@@ -154,7 +159,7 @@ describe('Dashboard backup actions', () => {
       finishExport = () => resolve(result);
     }));
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
 
     const exportButton = screen.getByRole('button', { name: 'Exportar backup' });
     await waitFor(() => expect(exportButton).toBeEnabled());
@@ -175,7 +180,7 @@ describe('Dashboard backup actions', () => {
       'BACKUP_FORMAT_INVALID',
       'invalid',
     ));
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
@@ -193,7 +198,7 @@ describe('Dashboard backup actions', () => {
       'BACKUP_PENDING_EDITS',
       'pending',
     ));
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
@@ -213,7 +218,7 @@ describe('Dashboard backup actions', () => {
   it('requires a save-or-discard choice when the workspace has a pending checkpoint', async () => {
     mocks.validateBackup.mockResolvedValue({});
     mocks.restoreBackup.mockRejectedValueOnce(new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'pending'));
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
@@ -231,9 +236,9 @@ describe('Dashboard backup actions', () => {
 
   it('does not request a runtime or enable backup without an authorized file', async () => {
     mocks.snapshot = { ...mocks.snapshot, status: 'empty', runtime: null, fileName: null };
-    render(<DashboardPage />);
+    render(<SaveManagementTest />);
 
-    expect(await screen.findByRole('heading', { name: 'Início' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Saves da conta' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Exportar backup' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Importar backup' })).toBeDisabled();
     expect(screen.getByText(/Abra um arquivo autorizado/)).toBeInTheDocument();

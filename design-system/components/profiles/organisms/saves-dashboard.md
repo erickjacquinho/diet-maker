@@ -22,7 +22,7 @@ Herda integralmente [data-display](../../categories/data-display.md). Compõe a�
 
 ## Specific anatomy
 
-Cabeçalho com ações Criar/Importar, total do catálogo, tabela paginada com rótulo/data/disponibilidade local/ações e área condicional para proteger uma cópia importada.
+Seção de Configurações → Saves com ações Criar/Importar/Sair e backups, total do catálogo, tabela paginada com rótulo/data/disponibilidade local/ações e área condicional para proteger uma cópia importada.
 
 ## Allowed variants
 
@@ -34,7 +34,9 @@ Tabela anuncia loading, erro e vazio. Disponibilidade local diferencia verifica�
 
 ## Composition
 
-Usa `DataTable`, `Badge`, `Button`, `ProfileCreateDialog` e `Card`. A página consumidora consulta catálogo/associações e injeta as ações; o organismo não acessa rede, Auth, filesystem ou banco.
+Usa `DataTable`, `Badge`, `Button` e `Card`. O adaptador `src/app/navigation/useSaveManagement.tsx` consulta catálogo/associações e injeta as ações; o organismo não acessa rede, Auth, filesystem ou banco.
+
+A ação `onCreateRequest` solicita o diálogo de criação ao consumidor, que pausa Configurações antes de abri-lo.
 
 ## Content rules
 

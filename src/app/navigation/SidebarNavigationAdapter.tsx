@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { SidebarNav, type SidebarNavProps } from '@/components/organisms/SidebarNav';
@@ -11,6 +11,7 @@ import { getBrowserProfessionalProfileStore } from '@/lib/application/profession
 import { getProfessionalFullName, getProfessionalTitle, type ProfessionalProfile } from '@/lib/domain/professional-profile';
 import * as browserComposition from '@/lib/application/browser-composition';
 import type { BrowserPatientRuntime } from '@/lib/application/browser-composition';
+import { useSaveManagement } from './useSaveManagement';
 import { SIDEBAR_NAVIGATION_ITEMS } from './sidebar-navigation-config';
 
 export type SidebarNavigationAdapterProps = Omit<SidebarNavProps, 'pathname' | 'navigationItems'>;
@@ -25,6 +26,7 @@ const EMPTY_PROFILE_SESSION = {
 
 export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> = (props) => {
   const pathname = usePathname() ?? '';
+  const router = useRouter();
   let getProfileSession: typeof browserComposition.getBrowserProfileSession | undefined;
   try {
     getProfileSession = browserComposition.getBrowserProfileSession;
@@ -41,9 +43,27 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     professionalProfileStore.getSnapshot,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<'profile' | 'save'>('profile');
+  const saveManagement = useSaveManagement(settingsOpen, async () => {
+    if (props.onSignOut) { await props.onSignOut(); return; }
+    await browserComposition.getBrowserProfileSession().signOut();
+    await browserComposition.signOutBrowserAccount();
+    professionalProfileStore.reset();
+    router.replace('/login');
+  });
   const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: 'status' | 'error'; message: string }>();
+
+  useEffect(() => {
+    const openSaves = () => {
+      settingsTriggerRef.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
+      setSettingsTab('save');
+      setSettingsOpen(true);
+    };
+    window.addEventListener('nutridiet:open-saves', openSaves);
+    return () => window.removeEventListener('nutridiet:open-saves', openSaves);
+  }, []);
 
   useEffect(() => {
     void professionalProfileStore.load();
@@ -88,6 +108,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         navigationItems={SIDEBAR_NAVIGATION_ITEMS}
         onOpenAccount={props.onOpenAccount ?? ((trigger) => {
           settingsTriggerRef.current = trigger ?? null;
+          setSettingsTab('profile');
           setSettingsOpen(true);
         })}
         doctorName={doctorName}
@@ -99,6 +120,10 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
 
       <SettingsDialog
         open={settingsOpen}
+        defaultTab={settingsTab}
+        savesContent={saveManagement.content}
+        suspended={saveManagement.overlayOpen}
+        busy={saveManagement.busy}
         onOpenChange={(open) => {
           setSettingsOpen(open);
           if (open && professionalProfile.status !== 'ready') void professionalProfileStore.load();
@@ -121,6 +146,8 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         onSaveSettings={handleSaveSettings}
         onSyncSave={() => profileSession.sync()}
       />
+
+      {saveManagement.dialogs}
 
       <div
         aria-live="polite"

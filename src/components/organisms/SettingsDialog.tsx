@@ -57,8 +57,9 @@ export interface SettingsDialogProps {
   save: SettingsSaveState;
   onSaveSettings: (input: SaveSettingsInput) => Promise<void>;
   onSyncSave: () => Promise<void>;
-  /** Link rendered in the save tab when no save is open. */
-  dashboardHref?: string;
+  savesContent?: ReactNode;
+  suspended?: boolean;
+  busy?: boolean;
 }
 
 const SAVE_LABEL_MAX = 80;
@@ -177,7 +178,9 @@ export function SettingsDialog({
   save,
   onSaveSettings,
   onSyncSave,
-  dashboardHref = '/dashboard',
+  savesContent,
+  suspended = false,
+  busy = false,
 }: SettingsDialogProps) {
   const id = useId();
   const [tab, setTab] = useState<SettingsTab>(defaultTab);
@@ -195,6 +198,8 @@ export function SettingsDialog({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveFeedback, setSaveFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
   const [savingSave, setSavingSave] = useState(false);
+  /** Set when the last save attempt failed, so the same values can be submitted again even if the baseline caught up. */
+  const [saveRetryable, setSaveRetryable] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
 
@@ -216,6 +221,7 @@ export function SettingsDialog({
     && (saveDraft.displayName !== saveBaseline.displayName || saveDraft.phone !== saveBaseline.phone);
 
   const requestOpenChange = (next: boolean) => {
+    if (!next && (busy || savingProfile || savingSave || syncing)) return;
     if (!next && (profileDirty || saveDirty) && !savingProfile && !savingSave) {
       setDiscardOpen(true);
       return;
@@ -277,8 +283,10 @@ export function SettingsDialog({
     setSaveFeedback(null);
     try {
       await onSaveSettings({ displayName, phone: saveDraft.phone.trim() || null });
+      setSaveRetryable(false);
       setSaveFeedback({ kind: 'status', message: 'Configurações do save atualizadas.' });
     } catch (error) {
+      setSaveRetryable(true);
       setSaveFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Não foi possível salvar as configurações do save.' });
     } finally {
       setSavingSave(false);
@@ -313,239 +321,246 @@ export function SettingsDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={requestOpenChange}>
-        <DialogContent className="max-h-screen max-w-3xl overflow-y-auto" onCloseAutoFocus={onCloseAutoFocus}>
+      <Dialog open={open && !suspended && !discardOpen} onOpenChange={requestOpenChange}>
+        <DialogContent className="max-h-screen max-w-3xl overflow-y-auto" onCloseAutoFocus={(event) => {
+          if (suspended || discardOpen) event.preventDefault();
+          else onCloseAutoFocus?.(event);
+        }}>
           <DialogHeader>
             <DialogTitle className={textStyle('dialog-title')}>Configurações</DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Seu perfil profissional vale para toda a conta. As configurações do save valem apenas para o arquivo aberto.
+              Gerencie seu perfil profissional, os saves da conta e os backups dos arquivos locais.
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)} className="flex flex-col gap-4">
-            <TabsList className="self-start">
-              <TabsTrigger value="profile" className="gap-2">
-                <UserRound className="size-4" aria-hidden="true" />
-                Perfil profissional
-              </TabsTrigger>
-              <TabsTrigger value="save" className="gap-2">
-                <HardDrive className="size-4" aria-hidden="true" />
-                Save
-              </TabsTrigger>
-            </TabsList>
+          <fieldset disabled={busy} className="min-w-0">
+            <Tabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)} className="flex flex-col gap-4">
+              <TabsList className="self-start">
+                <TabsTrigger value="profile" className="gap-2">
+                  <UserRound className="size-4" aria-hidden="true" />
+                  Perfil profissional
+                </TabsTrigger>
+                <TabsTrigger value="save" className="gap-2">
+                  <HardDrive className="size-4" aria-hidden="true" />
+                  Saves
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="profile">
-              {!draft ? (
-                <div className="flex flex-col items-start gap-3 py-4">
-                  {profile.status === 'error' ? (
-                    <>
-                      <p role="alert" className={textStyle('validation-error')}>{profile.error ?? 'Não foi possível carregar seu perfil.'}</p>
-                      <Button type="button" variant="secondary" size="compact" onClick={onRetryProfile}>Tentar novamente</Button>
-                    </>
-                  ) : (
-                    <p role="status" className={textStyle('helper')}>Carregando seu perfil…</p>
-                  )}
-                </div>
-              ) : (
-                <form onSubmit={submitProfile} noValidate aria-busy={savingProfile} aria-label="Perfil profissional" className="flex flex-col gap-6">
-                  <Section title="Identificação">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Field id={`${id}-firstName`} label="Nome" error={profileErrors.firstName} required>
-                        <Input {...fieldProps('firstName')} autoComplete="given-name" maxLength={PROFESSIONAL_PROFILE_LIMITS.name}
-                          value={draft.firstName} onChange={(event) => setField('firstName', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-lastName`} label="Sobrenome" error={profileErrors.lastName} required>
-                        <Input {...fieldProps('lastName')} autoComplete="family-name" maxLength={PROFESSIONAL_PROFILE_LIMITS.name}
-                          value={draft.lastName} onChange={(event) => setField('lastName', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-professionalTitle`} label="Título profissional" hint="Aparece no menu e nos documentos.">
-                        <Input {...fieldProps('professionalTitle')} placeholder={DEFAULT_PROFESSIONAL_TITLE} maxLength={PROFESSIONAL_PROFILE_LIMITS.professionalTitle}
-                          value={draft.professionalTitle} onChange={(event) => setField('professionalTitle', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-crn`} label="Registro profissional (CRN)">
-                        <Input {...fieldProps('crn')} placeholder="CRN-3 12345" maxLength={PROFESSIONAL_PROFILE_LIMITS.crn}
-                          value={draft.crn} onChange={(event) => setField('crn', event.target.value)} />
-                      </Field>
-                    </div>
-                  </Section>
-
-                  <Section title="Atuação">
-                    <div className="grid grid-cols-2 gap-4">
-                      <SelectField<ProfileDraft['experienceKind']>
-                        id={`${id}-experienceKind`}
-                        label="Experiência profissional"
-                        value={draft.experienceKind}
-                        onValueChange={(value) => setField('experienceKind', value)}
-                        placeholder="Selecione uma faixa"
-                        options={experienceOptions}
-                        layer="modal"
-                        required
-                        state={profileErrors.experienceKind ? 'error' : 'default'}
-                        errorMessage={profileErrors.experienceKind}
-                      />
-                      {draft.experienceKind === 'years' ? (
-                        <Field id={`${id}-experienceYears`} label="Anos de experiência" error={profileErrors.experienceYears} required>
-                          <Input {...fieldProps('experienceYears')} type="number" min="0" step="any" inputMode="decimal"
-                            value={draft.experienceYears} onChange={(event) => setField('experienceYears', event.target.value)} />
+              <TabsContent value="profile">
+                {!draft ? (
+                  <div className="flex flex-col items-start gap-3 py-4">
+                    {profile.status === 'error' ? (
+                      <>
+                        <p role="alert" className={textStyle('validation-error')}>{profile.error ?? 'Não foi possível carregar seu perfil.'}</p>
+                        <Button type="button" variant="secondary" size="compact" onClick={onRetryProfile}>Tentar novamente</Button>
+                      </>
+                    ) : (
+                      <p role="status" className={textStyle('helper')}>Carregando seu perfil…</p>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={submitProfile} noValidate aria-busy={savingProfile} aria-label="Perfil profissional" className="flex flex-col gap-6">
+                    <Section title="Identificação">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field id={`${id}-firstName`} label="Nome" error={profileErrors.firstName} required>
+                          <Input {...fieldProps('firstName')} autoComplete="given-name" maxLength={PROFESSIONAL_PROFILE_LIMITS.name}
+                            value={draft.firstName} onChange={(event) => setField('firstName', event.target.value)} />
                         </Field>
-                      ) : <div aria-hidden="true" />}
-                      <Field id={`${id}-averagePatientsPerMonth`} label="Média de pacientes por mês" error={profileErrors.averagePatientsPerMonth} required>
-                        <Input {...fieldProps('averagePatientsPerMonth')} type="number" min="0" step="any" inputMode="decimal"
-                          value={draft.averagePatientsPerMonth} onChange={(event) => setField('averagePatientsPerMonth', event.target.value)} />
-                      </Field>
-                      <SelectField<ProfessionalServiceMode | ''>
-                        id={`${id}-serviceMode`}
-                        label="Modalidade de atendimento"
-                        value={draft.serviceMode}
-                        onValueChange={(value) => setField('serviceMode', value)}
-                        placeholder="Selecione"
-                        options={serviceModeOptions}
-                        layer="modal"
-                      />
-                    </div>
-                    <Field id={`${id}-specialties`} label="Especialidades e áreas de atuação" hint="Ex.: nutrição esportiva, clínica, materno-infantil.">
-                      <Textarea {...fieldProps('specialties')} rows={2} maxLength={PROFESSIONAL_PROFILE_LIMITS.specialties}
-                        value={draft.specialties} onChange={(event) => setField('specialties', event.target.value)} />
-                    </Field>
-                    <Field id={`${id}-bio`} label="Apresentação" hint={`${Array.from(draft.bio).length}/${PROFESSIONAL_PROFILE_LIMITS.bio} caracteres`}>
-                      <Textarea {...fieldProps('bio')} rows={3} maxLength={PROFESSIONAL_PROFILE_LIMITS.bio}
-                        value={draft.bio} onChange={(event) => setField('bio', event.target.value)} />
-                    </Field>
-                  </Section>
-
-                  <Section title="Contato e consultório">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Field id={`${id}-accountEmail`} label="E-mail de acesso" hint="Usado para entrar na conta; não pode ser alterado aqui.">
-                        <Input id={`${id}-accountEmail`} value={profile.accountEmail ?? ''} readOnly />
-                      </Field>
-                      <Field id={`${id}-contactEmail`} label="E-mail de contato" error={profileErrors.contactEmail}>
-                        <Input {...fieldProps('contactEmail')} type="email" autoComplete="email" maxLength={PROFESSIONAL_PROFILE_LIMITS.contactEmail}
-                          value={draft.contactEmail} onChange={(event) => setField('contactEmail', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-phone`} label="Telefone / WhatsApp">
-                        <Input {...fieldProps('phone')} type="tel" inputMode="numeric" autoComplete="tel" placeholder="(11) 99999-9999"
-                          value={draft.phone} onChange={(event) => setField('phone', formatWhatsappContact(event.target.value))} />
-                      </Field>
-                      <Field id={`${id}-instagram`} label="Instagram" error={profileErrors.instagram}>
-                        <Input {...fieldProps('instagram')} placeholder="@seuperfil" maxLength={PROFESSIONAL_PROFILE_LIMITS.instagram}
-                          value={draft.instagram} onChange={(event) => setField('instagram', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-website`} label="Site" error={profileErrors.website}>
-                        <Input {...fieldProps('website')} type="url" inputMode="url" placeholder="www.seusite.com.br" maxLength={PROFESSIONAL_PROFILE_LIMITS.website}
-                          value={draft.website} onChange={(event) => setField('website', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-clinicName`} label="Consultório ou clínica">
-                        <Input {...fieldProps('clinicName')} autoComplete="organization" maxLength={PROFESSIONAL_PROFILE_LIMITS.clinicName}
-                          value={draft.clinicName} onChange={(event) => setField('clinicName', event.target.value)} />
-                      </Field>
-                      <Field id={`${id}-city`} label="Cidade">
-                        <Input {...fieldProps('city')} autoComplete="address-level2" maxLength={PROFESSIONAL_PROFILE_LIMITS.city}
-                          value={draft.city} onChange={(event) => setField('city', event.target.value)} />
-                      </Field>
-                      <SelectField
-                        id={`${id}-state`}
-                        label="UF"
-                        value={draft.state}
-                        onValueChange={(value) => setField('state', value)}
-                        placeholder="Selecione"
-                        options={stateOptions}
-                        layer="modal"
-                      />
-                    </div>
-                  </Section>
-
-                  <Section title="Documentos">
-                    <div className="flex items-start gap-2">
-                      <Checkbox
-                        id={`${id}-showOnDocuments`}
-                        checked={draft.showOnDocuments}
-                        onCheckedChange={(checked) => setField('showOnDocuments', checked)}
-                        aria-label="Exibir meus dados profissionais nos PDFs de dieta"
-                        className="-m-2 shrink-0"
-                      />
-                      <div className="flex flex-col gap-1">
-                        <span className={textStyle('body')}>Exibir meus dados profissionais nos PDFs de dieta</span>
-                        <span className={textStyle('helper')}>
-                          {draft.showOnDocuments && signaturePreview ? `Assinatura: ${signaturePreview}` : 'Os PDFs não identificam o profissional responsável.'}
-                        </span>
+                        <Field id={`${id}-lastName`} label="Sobrenome" error={profileErrors.lastName} required>
+                          <Input {...fieldProps('lastName')} autoComplete="family-name" maxLength={PROFESSIONAL_PROFILE_LIMITS.name}
+                            value={draft.lastName} onChange={(event) => setField('lastName', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-professionalTitle`} label="Título profissional" hint="Aparece no menu e nos documentos.">
+                          <Input {...fieldProps('professionalTitle')} placeholder={DEFAULT_PROFESSIONAL_TITLE} maxLength={PROFESSIONAL_PROFILE_LIMITS.professionalTitle}
+                            value={draft.professionalTitle} onChange={(event) => setField('professionalTitle', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-crn`} label="Registro profissional (CRN)">
+                          <Input {...fieldProps('crn')} placeholder="CRN-3 12345" maxLength={PROFESSIONAL_PROFILE_LIMITS.crn}
+                            value={draft.crn} onChange={(event) => setField('crn', event.target.value)} />
+                        </Field>
                       </div>
-                    </div>
-                  </Section>
+                    </Section>
 
-                  <FormFooter feedback={profileFeedback} formError={profileErrors.form}>
-                    <Button type="button" variant="secondary" size="standard" disabled={!profileDirty || savingProfile}
-                      onClick={() => { setDraft(baseline); setProfileErrors({}); setProfileFeedback(null); }}>
-                      Descartar alterações
-                    </Button>
-                    <Button type="submit" variant="primary" size="standard" disabled={!profileDirty || savingProfile} loading={savingProfile}>
-                      Salvar perfil
-                    </Button>
-                  </FormFooter>
-                </form>
-              )}
-            </TabsContent>
-
-            <TabsContent value="save">
-              {!save.details ? (
-                <div className="flex flex-col items-start gap-2 py-4">
-                  <p className={textStyle('body')}>Nenhum save está aberto nesta sessão.</p>
-                  <p className={textStyle('helper')}>
-                    Abra ou crie um save em <a href={dashboardHref} className={textStyle('link-inline')}>Início</a> para editar as configurações dele.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={submitSave} noValidate aria-busy={savingSave} aria-label="Configurações do save" className="flex flex-col gap-6">
-                  <Section title="Identificação do save">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Field id={`${id}-saveName`} label="Nome do save" error={saveError ?? undefined} required hint="Também aparece na lista de saves da conta.">
-                        <Input id={`${id}-saveName`} maxLength={SAVE_LABEL_MAX} disabled={!save.editable}
-                          aria-invalid={saveError ? true : undefined} aria-describedby={saveError ? `${id}-saveName-error` : undefined}
-                          value={saveDraft.displayName}
-                          onChange={(event) => { setSaveDraft({ ...saveDraft, displayName: event.target.value }); setSaveError(null); setSaveFeedback(null); }} />
-                      </Field>
-                      <Field id={`${id}-savePhone`} label="Telefone do consultório">
-                        <Input id={`${id}-savePhone`} type="tel" inputMode="numeric" placeholder="(11) 99999-9999" disabled={!save.editable}
-                          value={saveDraft.phone}
-                          onChange={(event) => { setSaveDraft({ ...saveDraft, phone: formatWhatsappContact(event.target.value) }); setSaveFeedback(null); }} />
-                      </Field>
-                    </div>
-                  </Section>
-
-                  <Section title="Arquivo e sincronização">
-                    <dl className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1">
-                        <dt className={textStyle('field-label')}>Arquivo</dt>
-                        <dd className={textStyle('field-value')}>{save.fileName ?? 'Não associado'}</dd>
+                    <Section title="Atuação">
+                      <div className="grid grid-cols-2 gap-4">
+                        <SelectField<ProfileDraft['experienceKind']>
+                          id={`${id}-experienceKind`}
+                          label="Experiência profissional"
+                          value={draft.experienceKind}
+                          onValueChange={(value) => setField('experienceKind', value)}
+                          placeholder="Selecione uma faixa"
+                          options={experienceOptions}
+                          layer="modal"
+                          required
+                          state={profileErrors.experienceKind ? 'error' : 'default'}
+                          errorMessage={profileErrors.experienceKind}
+                        />
+                        {draft.experienceKind === 'years' ? (
+                          <Field id={`${id}-experienceYears`} label="Anos de experiência" error={profileErrors.experienceYears} required>
+                            <Input {...fieldProps('experienceYears')} type="number" min="0" step="any" inputMode="decimal"
+                              value={draft.experienceYears} onChange={(event) => setField('experienceYears', event.target.value)} />
+                          </Field>
+                        ) : <div aria-hidden="true" />}
+                        <Field id={`${id}-averagePatientsPerMonth`} label="Média de pacientes por mês" error={profileErrors.averagePatientsPerMonth} required>
+                          <Input {...fieldProps('averagePatientsPerMonth')} type="number" min="0" step="any" inputMode="decimal"
+                            value={draft.averagePatientsPerMonth} onChange={(event) => setField('averagePatientsPerMonth', event.target.value)} />
+                        </Field>
+                        <SelectField<ProfessionalServiceMode | ''>
+                          id={`${id}-serviceMode`}
+                          label="Modalidade de atendimento"
+                          value={draft.serviceMode}
+                          onValueChange={(value) => setField('serviceMode', value)}
+                          placeholder="Selecione"
+                          options={serviceModeOptions}
+                          layer="modal"
+                        />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <dt className={textStyle('field-label')}>Estado</dt>
-                        <dd className={textStyle('field-value')} data-sync-state={save.syncState}>{syncLabels[save.syncState]}</dd>
+                      <Field id={`${id}-specialties`} label="Especialidades e áreas de atuação" hint="Ex.: nutrição esportiva, clínica, materno-infantil.">
+                        <Textarea {...fieldProps('specialties')} rows={2} maxLength={PROFESSIONAL_PROFILE_LIMITS.specialties}
+                          value={draft.specialties} onChange={(event) => setField('specialties', event.target.value)} />
+                      </Field>
+                      <Field id={`${id}-bio`} label="Apresentação" hint={`${Array.from(draft.bio).length}/${PROFESSIONAL_PROFILE_LIMITS.bio} caracteres`}>
+                        <Textarea {...fieldProps('bio')} rows={3} maxLength={PROFESSIONAL_PROFILE_LIMITS.bio}
+                          value={draft.bio} onChange={(event) => setField('bio', event.target.value)} />
+                      </Field>
+                    </Section>
+
+                    <Section title="Contato e consultório">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field id={`${id}-accountEmail`} label="E-mail de acesso" hint="Usado para entrar na conta; não pode ser alterado aqui.">
+                          <Input id={`${id}-accountEmail`} value={profile.accountEmail ?? ''} readOnly />
+                        </Field>
+                        <Field id={`${id}-contactEmail`} label="E-mail de contato" error={profileErrors.contactEmail}>
+                          <Input {...fieldProps('contactEmail')} type="email" autoComplete="email" maxLength={PROFESSIONAL_PROFILE_LIMITS.contactEmail}
+                            value={draft.contactEmail} onChange={(event) => setField('contactEmail', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-phone`} label="Telefone / WhatsApp">
+                          <Input {...fieldProps('phone')} type="tel" inputMode="numeric" autoComplete="tel" placeholder="(11) 99999-9999"
+                            value={draft.phone} onChange={(event) => setField('phone', formatWhatsappContact(event.target.value))} />
+                        </Field>
+                        <Field id={`${id}-instagram`} label="Instagram" error={profileErrors.instagram}>
+                          <Input {...fieldProps('instagram')} placeholder="@seuperfil" maxLength={PROFESSIONAL_PROFILE_LIMITS.instagram}
+                            value={draft.instagram} onChange={(event) => setField('instagram', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-website`} label="Site" error={profileErrors.website}>
+                          <Input {...fieldProps('website')} type="url" inputMode="url" placeholder="www.seusite.com.br" maxLength={PROFESSIONAL_PROFILE_LIMITS.website}
+                            value={draft.website} onChange={(event) => setField('website', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-clinicName`} label="Consultório ou clínica">
+                          <Input {...fieldProps('clinicName')} autoComplete="organization" maxLength={PROFESSIONAL_PROFILE_LIMITS.clinicName}
+                            value={draft.clinicName} onChange={(event) => setField('clinicName', event.target.value)} />
+                        </Field>
+                        <Field id={`${id}-city`} label="Cidade">
+                          <Input {...fieldProps('city')} autoComplete="address-level2" maxLength={PROFESSIONAL_PROFILE_LIMITS.city}
+                            value={draft.city} onChange={(event) => setField('city', event.target.value)} />
+                        </Field>
+                        <SelectField
+                          id={`${id}-state`}
+                          label="UF"
+                          value={draft.state}
+                          onValueChange={(value) => setField('state', value)}
+                          placeholder="Selecione"
+                          options={stateOptions}
+                          layer="modal"
+                        />
                       </div>
-                    </dl>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Button type="button" variant="secondary" size="compact" onClick={() => void syncNow()} disabled={!save.editable || syncing} loading={syncing}>
-                        <RefreshCw className="size-4" aria-hidden="true" />
-                        Sincronizar agora
+                    </Section>
+
+                    <Section title="Documentos">
+                      <div className="flex items-start gap-2">
+                        <Checkbox
+                          id={`${id}-showOnDocuments`}
+                          checked={draft.showOnDocuments}
+                          onCheckedChange={(checked) => setField('showOnDocuments', checked)}
+                          aria-label="Exibir meus dados profissionais nos PDFs de dieta"
+                          className="-m-2 shrink-0"
+                        />
+                        <div className="flex flex-col gap-1">
+                          <span className={textStyle('body')}>Exibir meus dados profissionais nos PDFs de dieta</span>
+                          <span className={textStyle('helper')}>
+                            {draft.showOnDocuments && signaturePreview ? `Assinatura: ${signaturePreview}` : 'Os PDFs não identificam o profissional responsável.'}
+                          </span>
+                        </div>
+                      </div>
+                    </Section>
+
+                    <FormFooter feedback={profileFeedback} formError={profileErrors.form}>
+                      <Button type="button" variant="secondary" size="standard" disabled={!profileDirty || savingProfile}
+                        onClick={() => { setDraft(baseline); setProfileErrors({}); setProfileFeedback(null); }}>
+                        Descartar alterações
                       </Button>
-                      <span className={textStyle('helper')}>
-                        Exportação e restauração de backup ficam em <a href={dashboardHref} className={textStyle('link-inline')}>Início</a>.
-                      </span>
-                    </div>
-                  </Section>
+                      <Button type="submit" variant="primary" size="standard" disabled={!profileDirty || savingProfile} loading={savingProfile}>
+                        Salvar perfil
+                      </Button>
+                    </FormFooter>
+                  </form>
+                )}
+              </TabsContent>
 
-                  <FormFooter feedback={saveFeedback}>
-                    <Button type="button" variant="secondary" size="standard" disabled={!saveDirty || savingSave}
-                      onClick={() => { setSaveDraft(saveBaseline); setSaveError(null); setSaveFeedback(null); }}>
-                      Descartar alterações
-                    </Button>
-                    <Button type="submit" variant="primary" size="standard" disabled={!save.editable || !saveDirty || savingSave} loading={savingSave}>
-                      Salvar configurações do save
-                    </Button>
-                  </FormFooter>
-                </form>
-              )}
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="save" className="space-y-6">
+                <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing} className="min-w-0">
+                  <legend className="sr-only">Gerenciar saves e backups</legend>
+                  {savesContent}
+                </fieldset>
+                {(profileDirty || saveDirty) && <p role="status" className={textStyle('helper')}>Salve ou descarte as alterações das configurações antes de gerenciar os arquivos.</p>}
+                {!save.details ? (
+                  <div className="flex flex-col items-start gap-2 py-4">
+                    <p className={textStyle('body')}>Nenhum save está aberto nesta sessão.</p>
+                    <p className={textStyle('helper')}>
+                      Abra ou crie um save nesta aba para editar as configurações dele.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={submitSave} noValidate aria-busy={savingSave} aria-label="Configurações do save" className="flex flex-col gap-6">
+                    <Section title="Identificação do save">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field id={`${id}-saveName`} label="Nome do save" error={saveError ?? undefined} required hint="Também aparece na lista de saves da conta.">
+                          <Input id={`${id}-saveName`} maxLength={SAVE_LABEL_MAX} disabled={!save.editable || busy}
+                            aria-invalid={saveError ? true : undefined} aria-describedby={saveError ? `${id}-saveName-error` : undefined}
+                            value={saveDraft.displayName}
+                            onChange={(event) => { setSaveDraft({ ...saveDraft, displayName: event.target.value }); setSaveError(null); setSaveFeedback(null); }} />
+                        </Field>
+                        <Field id={`${id}-savePhone`} label="Telefone do consultório">
+                          <Input id={`${id}-savePhone`} type="tel" inputMode="numeric" placeholder="(11) 99999-9999" disabled={!save.editable || busy}
+                            value={saveDraft.phone}
+                            onChange={(event) => { setSaveDraft({ ...saveDraft, phone: formatWhatsappContact(event.target.value) }); setSaveFeedback(null); }} />
+                        </Field>
+                      </div>
+                    </Section>
+
+                    <Section title="Arquivo e sincronização">
+                      <dl className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <dt className={textStyle('field-label')}>Arquivo</dt>
+                          <dd className={textStyle('field-value')}>{save.fileName ?? 'Não associado'}</dd>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <dt className={textStyle('field-label')}>Estado</dt>
+                          <dd className={textStyle('field-value')} data-sync-state={save.syncState}>{syncLabels[save.syncState]}</dd>
+                        </div>
+                      </dl>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button type="button" variant="secondary" size="compact" onClick={() => void syncNow()} disabled={!save.editable || syncing || busy} loading={syncing}>
+                          <RefreshCw className="size-4" aria-hidden="true" />
+                          Sincronizar agora
+                        </Button>
+                      </div>
+                    </Section>
+
+                    <FormFooter feedback={saveFeedback}>
+                      <Button type="button" variant="secondary" size="standard" disabled={!saveDirty || savingSave}
+                        onClick={() => { setSaveDraft(saveBaseline); setSaveError(null); setSaveFeedback(null); }}>
+                        Descartar alterações
+                      </Button>
+                      <Button type="submit" variant="primary" size="standard" disabled={busy || !save.editable || !(saveDirty || saveRetryable) || savingSave} loading={savingSave}>
+                        Salvar configurações do save
+                      </Button>
+                    </FormFooter>
+                  </form>
+                )}
+              </TabsContent>
+            </Tabs>
+          </fieldset>
         </DialogContent>
       </Dialog>
 

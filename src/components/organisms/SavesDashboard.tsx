@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { Download, FolderOpen, LogOut, MapPin, Plus, Upload } from 'lucide-react';
 import { Badge, Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
-import { ProfileCreateDialog } from '@/components/molecules/profile-create-dialog';
 import { Card } from '@/components/ui/card';
-import type { CreateProfileInput } from '@/lib/application/profile-session';
 
 export interface SaveCatalogItem {
   saveId: string;
@@ -29,7 +27,7 @@ export interface SavesDashboardProps {
   backupState?: 'idle' | 'exporting' | 'restoring';
   backupUnavailableReason?: string;
   onPageChange(pageIndex: number): void;
-  onCreate(input: CreateProfileInput): Promise<void>;
+  onCreateRequest(): void;
   onImport(): Promise<void>;
   onSignOut(): Promise<void>;
   onOpen(saveId: string): Promise<void>;
@@ -65,7 +63,7 @@ export function SavesDashboard({
   backupState = 'idle',
   backupUnavailableReason,
   onPageChange,
-  onCreate,
+  onCreateRequest,
   onImport,
   onSignOut,
   onOpen,
@@ -74,7 +72,6 @@ export function SavesDashboard({
   onExportBackup,
   onRestoreBackup,
 }: SavesDashboardProps) {
-  const [createOpen, setCreateOpen] = useState(false);
   const [localAction, setLocalAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const busy = actionBusy ?? localAction;
@@ -135,12 +132,11 @@ export function SavesDashboard({
   ];
 
   return (
-    <main className="mx-auto flex w-full max-w-screen-xl flex-col gap-6 p-8" data-route="dashboard">
-      <header className="flex items-end justify-between gap-6">
+    <section className="flex min-w-0 flex-col gap-4" aria-label="Gerenciar saves">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <p className="text-style-overline font-semibold text-primary">NutriDiet Local Pro</p>
-          <h1 className="text-style-page-title font-bold text-text-primary">Início</h1>
-          <p className="text-style-body-large text-text-secondary">Crie, importe ou abra os arquivos associados à sua conta.</p>
+          <h2 className="text-style-section-title font-semibold text-text-primary">Saves da conta</h2>
+          <p className="text-style-body-small text-text-secondary">Crie, importe ou abra os arquivos associados à sua conta.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button type="button" variant="quiet" disabled={Boolean(busy)} onClick={() => void runAction('sign-out', onSignOut)}>
@@ -151,14 +147,14 @@ export function SavesDashboard({
             <FolderOpen size={16} aria-hidden="true" />
             Importar arquivo
           </Button>
-          <Button type="button" variant="primary" disabled={Boolean(busy)} onClick={() => setCreateOpen(true)}>
+          <Button type="button" variant="primary" disabled={Boolean(busy)} onClick={onCreateRequest}>
             <Plus size={16} aria-hidden="true" />
             Criar save
           </Button>
         </div>
       </header>
 
-      <Card className="flex flex-col gap-4 p-6" aria-busy={loading || Boolean(busy) || undefined}>
+      <Card className="flex min-w-0 flex-col gap-4 p-4" aria-busy={loading || Boolean(busy) || undefined}>
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-style-section-title font-semibold text-text-primary">Arquivos locais</h2>
           <p className="text-style-body-small text-text-secondary" aria-live="polite">
@@ -215,7 +211,6 @@ export function SavesDashboard({
         {actionError ? <p role="alert" className="text-style-body-small text-error">{actionError}</p> : null}
       </Card>
 
-      <ProfileCreateDialog open={createOpen} onOpenChange={setCreateOpen} onSubmit={onCreate} />
-    </main>
+    </section>
   );
 }

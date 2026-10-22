@@ -5613,7 +5613,7 @@
       ],
       "profile": "design-system/components/profiles/molecules/profile-create-dialog.md",
       "consumers": [
-        "organism-saves-dashboard"
+        "src/app/navigation/useSaveManagement.tsx"
       ],
       "primitiveBase": "ui-dialog",
       "specStatus": "homologated",
@@ -5796,7 +5796,7 @@
       ],
       "profile": "design-system/components/profiles/organisms/saves-dashboard.md",
       "consumers": [
-        "src/app/dashboard/page.tsx"
+        "src/app/navigation/useSaveManagement.tsx"
       ],
       "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",

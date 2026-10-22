@@ -16,7 +16,7 @@ function renderDashboard(overrides: Partial<SavesDashboardProps> = {}) {
     actionBusy: null,
     protectedCopyRequired: false,
     onPageChange: vi.fn(),
-    onCreate: vi.fn(async () => undefined),
+    onCreateRequest: vi.fn(),
     onImport: vi.fn(async () => undefined),
     onSignOut: vi.fn(async () => undefined),
     onOpen: vi.fn(async () => undefined),
@@ -82,6 +82,8 @@ describe('SavesDashboard', () => {
     expect(screen.getByRole('button', { name: 'Proteger cópia importada' })).toBeInTheDocument();
     expect(screen.getByText(/53 saves/)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole('button', { name: 'Criar save' }));
+    expect(props.onCreateRequest).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole('button', { name: 'Importar arquivo' }));
     await waitFor(() => expect(props.onImport).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: 'Proteger cópia importada' }));

@@ -38,6 +38,7 @@ vi.mock('@/lib/application/professional-profile-store', () => ({
 
 vi.mock('next/navigation', () => ({
   usePathname: () => routeState.pathname,
+  useRouter: () => ({ replace: vi.fn() }),
 }));
 
 vi.mock('@/lib/application/browser-composition', () => ({
@@ -106,12 +107,12 @@ describe('SidebarNavigationAdapter boundary', () => {
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
-    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Save']);
+    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Saves']);
     expect(within(dialog).getByLabelText(/^Nome/)).toHaveValue('Ana');
     expect(within(dialog).getByLabelText(/CRN/)).toHaveValue('CRN-3 12345');
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
 
-    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Save' }), { button: 0 });
+    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Saves' }), { button: 0 });
     expect(await within(dialog).findByText('Nenhum save está aberto nesta sessão.')).toBeInTheDocument();
 
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
