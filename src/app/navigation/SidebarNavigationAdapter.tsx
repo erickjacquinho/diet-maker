@@ -135,6 +135,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         profile={professionalProfile}
         onRetryProfile={() => void professionalProfileStore.load({ force: true })}
         onSaveProfile={handleSaveProfessionalProfile}
+        onResetPassword={() => professionalProfileStore.requestPasswordReset()}
         save={{
           details: profileSnapshot.account
             ? { displayName: profileSnapshot.account.displayName, phone: profileSnapshot.account.phone ?? null }

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DietPdfTemplate } from '@/components/templates/DietPdfTemplate';
 import type { DietPdfViewModel } from '@/lib/application/diets/diet-pdf-view';
+import { clinicLogo } from '../../fixtures/clinic-logo';
 
 const document: DietPdfViewModel = {
   patientName: 'Maria Lima',
@@ -31,5 +32,11 @@ describe('DietPdfTemplate professional block', () => {
 
     expect(container.querySelector('[data-diet-pdf-professional]')).toBeNull();
     expect(screen.queryByText('Responsável')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('renders the persisted clinic logo in the PDF header', () => {
+    render(<DietPdfTemplate document={document} professional={{ name: 'Ana Souza', title: 'Nutricionista', crn: null, contact: null, logo: clinicLogo }} />);
+    expect(screen.getByRole('img', { name: 'Logotipo do consultório' })).toHaveAttribute('src', clinicLogo);
   });
 });

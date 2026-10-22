@@ -8,7 +8,7 @@ import {
 } from '@/lib/server/request-security';
 import { applyAuthResponseState, validateRequestSession, type RequestSessionResult } from '@/lib/server/auth/session';
 import { readProfessionalProfile, writeProfessionalProfile } from '@/lib/server/professional-profile';
-import { PROFESSIONAL_PROFILE_KEYS, parseProfessionalProfile, type ProfessionalProfile } from '@/lib/domain/professional-profile';
+import { DOCUMENT_LOGO_MAX_LENGTH, PROFESSIONAL_PROFILE_KEYS, parseProfessionalProfile, type ProfessionalProfile } from '@/lib/domain/professional-profile';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +30,7 @@ export async function PUT(request: Request): Promise<Response> {
   let session: RequestSessionResult | undefined;
   try {
     assertSameOrigin(request);
-    const input = await parseJsonBody(request, 16 * 1024, { parse: parseUpdateProfileInput });
+    const input = await parseJsonBody(request, DOCUMENT_LOGO_MAX_LENGTH + 16 * 1024, { parse: parseUpdateProfileInput });
     assertCsrf(request, input.csrfToken);
     session = await validateRequestSession(request);
     if (!session.user) throw new RequestSecurityError(401, 'AUTH_REQUIRED');

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { clinicLogo } from '../fixtures/clinic-logo';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -109,21 +110,25 @@ describe('professional profile routes', () => {
       crn: 'CRN-3 12345',
       instagram: 'ana.nutri',
       showOnDocuments: false,
+      documentLogo: clinicLogo,
+      agendaRemindersEnabled: false,
       csrfToken,
     }));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      profile: { crn: 'CRN-3 12345', instagram: '@ana.nutri', showOnDocuments: false },
+      profile: { crn: 'CRN-3 12345', instagram: '@ana.nutri', showOnDocuments: false, documentLogo: clinicLogo, agendaRemindersEnabled: false },
     });
     const stored = mocks.updateProfessionalProfile.mock.calls[0][0];
     expect(stored.ownerId).toBe(ownerId);
     expect(stored.profileCipher.toString('utf8')).not.toContain('CRN-3');
+    expect(stored.profileCipher.toString('utf8')).not.toContain('data:image/png');
   });
 
   it('rejects invalid fields, unknown keys and a missing CSRF token without writing', async () => {
     for (const body of [
       { ...signupProfile, contactEmail: 'ana@', csrfToken },
+      { ...signupProfile, documentLogo: 'https://example.invalid/logo.png', csrfToken },
       { ...signupProfile, ownerId: randomUUID(), csrfToken },
       { ...signupProfile },
     ]) {
@@ -134,6 +139,20 @@ describe('professional profile routes', () => {
     crossSite.headers.set('origin', 'https://attacker.example');
     expect((await putProfile(crossSite)).status).toBe(403);
     expect(mocks.updateProfessionalProfile).not.toHaveBeenCalled();
+  });
+
+  it('accepts a valid PNG larger than the old body limit and rejects requests above the new bound', async () => {
+    const bytes = Buffer.alloc(20 * 1024);
+    Buffer.from(clinicLogo.slice(22), 'base64').copy(bytes);
+    const response = await putProfile(jsonRequest('http://localhost:3000/api/profile', 'PUT', {
+      ...signupProfile, documentLogo: `data:image/png;base64,${bytes.toString('base64')}`, csrfToken,
+    }));
+    expect(response.status).toBe(200);
+    const tooLarge = await putProfile(jsonRequest('http://localhost:3000/api/profile', 'PUT', {
+      ...signupProfile, documentLogo: 'A'.repeat(200 * 1024), csrfToken,
+    }));
+    expect(tooLarge.status).toBe(413);
+    expect(mocks.updateProfessionalProfile).toHaveBeenCalledOnce();
   });
 });
 

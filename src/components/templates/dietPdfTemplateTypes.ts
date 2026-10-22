@@ -6,6 +6,7 @@ export interface DietPdfProfessional {
   title: string;
   crn: string | null;
   contact: string | null;
+  logo?: string | null;
 }
 
 export interface DietPdfTemplateProps {

@@ -133,4 +133,4 @@ Não manter neste PRD outro schema, formato ou protocolo de restauração.
 ### 4.2 Roadmap de Lançamento (Fases)
 - **Fase 1 (MVP Local)**: Construtor por refeições, Tabela TACO, Metas Manuais, Escala %, Exportador WhatsApp/PDF, persistência relacional local, drafts separados e backup mestre `.nutridiet`. Execução conforme Decisões 04 e 14, após a prova técnica da Decisão 10.
 - **Fase 2 (Templates Avançados)**: Biblioteca expandida de protocolos nutricionais (Low Carb, Cetogênica, FODMAPs, Jejum Intermitente).
-- **Fase 3 (Impressão Personalizada)**: Suporte a inclusão de logotipo personalizado do consultório no cabeçalho do PDF.
+- **Fase 3 (Impressão Personalizada)**: Logotipo personalizado do consultório no cabeçalho do PDF disponível em Configurações → Perfil profissional → Documentos (PNG de até 128 KB e 1024 × 1024 px).

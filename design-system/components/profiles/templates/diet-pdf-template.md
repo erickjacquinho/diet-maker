@@ -22,7 +22,7 @@ Herda integralmente [structure](../../categories/structure.md). Traits autorizad
 
 ## Specific anatomy
 
-Cabeçalho com paciente, data e, quando `professional` é informado, o bloco "Responsável" com nome, título, CRN e contato do profissional. Na dieta simples, cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas. No ciclo, cada variação é numerada e contém suas refeições e quantidades; uma tabela ao final apresenta macros e kcal por dieta.
+Cabeçalho com paciente, data e, quando `professional` é informado, o logotipo local opcional e o bloco "Responsável" com nome, título, CRN e contato do profissional. Na dieta simples, cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas. No ciclo, cada variação é numerada e contém suas refeições e quantidades; uma tabela ao final apresenta macros e kcal por dieta.
 
 ## Allowed variants
 
@@ -34,7 +34,7 @@ Estados vazios de refeições/opções e macros ausentes são apresentados sem i
 
 ## Composition
 
-Recebe um modelo de visualização já calculado; não consulta persistência nem recalcula nutrientes. Compõe `DataTable` para alimentos e macros, usando `TableRow` e `TableCell` para agrupar cada opção e suas linhas de alimentos. O resumo de cada dieta usa apenas itens principais de seus snapshots. A rota controla prévia, navegação e download.
+Recebe um modelo de visualização já calculado; não consulta persistência nem recalcula nutrientes. Compõe `DataTable` para alimentos e macros, usando `TableRow` e `TableCell` para agrupar cada opção e suas linhas de alimentos. O resumo de cada dieta usa apenas itens principais de seus snapshots. A rota controla prévia, navegação e download; aguarda o perfil profissional e a decodificação das imagens antes de gerar o arquivo. Falha de carregamento permite tentar novamente.
 
 ## Content rules
 

@@ -19,7 +19,7 @@ const professionalProfile = vi.hoisted(() => ({
       firstName: 'Ana', lastName: 'Souza', averagePatientsPerMonth: 40, experience: { kind: 'years', value: 5 },
       professionalTitle: 'Nutricionista esportiva', crn: 'CRN-3 12345', specialties: null, bio: null,
       contactEmail: null, phone: null, instagram: null, website: null, clinicName: null, city: null,
-      state: null, serviceMode: null, showOnDocuments: true,
+      state: null, serviceMode: null, showOnDocuments: true, agendaRemindersEnabled: true, documentLogo: null,
     },
   },
   load: vi.fn(async () => undefined),
@@ -32,6 +32,7 @@ vi.mock('@/lib/application/professional-profile-store', () => ({
     getSnapshot: () => professionalProfile.snapshot,
     load: professionalProfile.load,
     save: professionalProfile.save,
+    requestPasswordReset: vi.fn(async () => undefined),
     reset: vi.fn(),
   }),
 }));

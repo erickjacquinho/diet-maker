@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SettingsDialog, type SettingsDialogProps } from '@/components/organisms/SettingsDialog';
 import { parseProfessionalProfile } from '@/lib/domain/professional-profile';
+import { clinicLogo } from '../../fixtures/clinic-logo';
 
 const profile = parseProfessionalProfile({
   firstName: 'Ana',
@@ -19,6 +20,7 @@ function renderDialog(overrides: Partial<SettingsDialogProps> = {}) {
     profile: { status: 'ready', profile, accountEmail: 'ana@example.invalid', error: null },
     onRetryProfile: vi.fn(),
     onSaveProfile: vi.fn(async () => undefined),
+    onResetPassword: vi.fn(async () => undefined),
     save: { details: { displayName: 'Consultório Centro', phone: '11999998888' }, fileName: 'centro.dietmaker', syncState: 'synced', editable: true },
     onSaveSettings: vi.fn(async () => undefined),
     onSyncSave: vi.fn(async () => undefined),
@@ -108,5 +110,35 @@ describe('SettingsDialog', () => {
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
     expect(props.onOpenChange).not.toHaveBeenCalled();
     expect(within(dialog).getByLabelText(/^Nome do save/)).toBeDisabled();
+  });
+
+  it('requests password recovery and surfaces a failure for retry', async () => {
+    const { props, dialog } = renderDialog();
+    vi.mocked(props.onResetPassword).mockRejectedValueOnce(new Error('Muitas tentativas.'));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Redefinir senha' }));
+    expect(await within(dialog).findByText('Muitas tentativas.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Redefinir senha' }));
+    expect(await within(dialog).findByText('Se o endereço puder receber uma recuperação, as instruções serão enviadas.')).toBeInTheDocument();
+    expect(props.onResetPassword).toHaveBeenCalledTimes(2);
+  });
+
+  it('saves the reminder preference and removal of the persisted logo', async () => {
+    const { props, dialog } = renderDialog({ profile: {
+      status: 'ready', profile: { ...profile, documentLogo: clinicLogo }, accountEmail: 'ana@example.invalid', error: null,
+    } });
+    expect(within(dialog).getByRole('img', { name: 'Prévia do logotipo do consultório' })).toHaveAttribute('src', clinicLogo);
+    fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Exibir lembretes da agenda' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remover logotipo' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Salvar perfil' }));
+    await waitFor(() => expect(props.onSaveProfile).toHaveBeenCalledWith(expect.objectContaining({ agendaRemindersEnabled: false, documentLogo: null })));
+  });
+
+  it('rejects an unsupported logo file while preserving the previous one', async () => {
+    const { dialog } = renderDialog({ profile: {
+      status: 'ready', profile: { ...profile, documentLogo: clinicLogo }, accountEmail: 'ana@example.invalid', error: null,
+    } });
+    fireEvent.change(within(dialog).getByLabelText('Logotipo do consultório'), { target: { files: [new File(['<svg/>'], 'logo.svg', { type: 'image/svg+xml' })] } });
+    expect(await within(dialog).findByText(/Selecione um PNG válido/)).toBeInTheDocument();
+    expect(within(dialog).getByRole('img', { name: 'Prévia do logotipo do consultório' })).toHaveAttribute('src', clinicLogo);
   });
 });

@@ -37,9 +37,14 @@ export interface ProfessionalProfile {
   state: BrazilianState | null;
   serviceMode: ProfessionalServiceMode | null;
   showOnDocuments: boolean;
+  agendaRemindersEnabled: boolean;
+  documentLogo: string | null;
 }
 
 export const DEFAULT_PROFESSIONAL_TITLE = 'Nutricionista';
+export const DOCUMENT_LOGO_MAX_BYTES = 128 * 1024;
+export const DOCUMENT_LOGO_MAX_DIMENSION = 1024;
+export const DOCUMENT_LOGO_MAX_LENGTH = Math.ceil(DOCUMENT_LOGO_MAX_BYTES / 3) * 4 + 22;
 
 export const PROFESSIONAL_PROFILE_LIMITS = {
   name: 100,
@@ -68,6 +73,7 @@ const OPTIONAL_TEXT_FIELDS = [
 export const PROFESSIONAL_PROFILE_KEYS = [
   'firstName', 'lastName', 'averagePatientsPerMonth', 'experience',
   ...OPTIONAL_TEXT_FIELDS, 'contactEmail', 'instagram', 'website', 'state', 'serviceMode', 'showOnDocuments',
+  'agendaRemindersEnabled', 'documentLogo',
 ] as const satisfies readonly (keyof ProfessionalProfile)[];
 
 /** Validates and normalizes any stored or submitted profile; throws TypeError on invalid input. */
@@ -95,7 +101,30 @@ export function parseProfessionalProfile(value: unknown): ProfessionalProfile {
     state: parseState(input.state),
     serviceMode: parseServiceMode(input.serviceMode),
     showOnDocuments: input.showOnDocuments === undefined ? true : parseBoolean(input.showOnDocuments),
+    agendaRemindersEnabled: input.agendaRemindersEnabled === undefined ? true : parseBoolean(input.agendaRemindersEnabled),
+    documentLogo: parseDocumentLogo(input.documentLogo),
   };
+}
+
+/** Bounds the PNG payload before decoding and rejects external URLs and executable image formats. */
+export function parseDocumentLogo(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || value.length > DOCUMENT_LOGO_MAX_LENGTH
+    || !/^data:image\/png;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) {
+    throw new TypeError('Document logo is invalid.');
+  }
+  const bytes = Uint8Array.from(atob(value.slice(22)), (char) => char.charCodeAt(0));
+  const signature = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82];
+  if (bytes.length < 33 || bytes.length > DOCUMENT_LOGO_MAX_BYTES || signature.some((byte, index) => bytes[index] !== byte)) {
+    throw new TypeError('Document logo is invalid.');
+  }
+  const header = new DataView(bytes.buffer);
+  const width = header.getUint32(16);
+  const height = header.getUint32(20);
+  if (!width || !height || width > DOCUMENT_LOGO_MAX_DIMENSION || height > DOCUMENT_LOGO_MAX_DIMENSION) {
+    throw new TypeError('Document logo dimensions are invalid.');
+  }
+  return value;
 }
 
 export function getProfessionalFullName(profile: Pick<ProfessionalProfile, 'firstName' | 'lastName'>): string {

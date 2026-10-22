@@ -15,6 +15,7 @@ export interface ProfessionalProfileStore {
   /** Loads once; concurrent and later calls reuse the result unless `force` is set. */
   load(options?: { force?: boolean }): Promise<void>;
   save(profile: ProfessionalProfile): Promise<ProfessionalProfile>;
+  requestPasswordReset(): Promise<void>;
   reset(): void;
 }
 
@@ -92,6 +93,23 @@ export function createProfessionalProfileStore(fetcher: typeof fetch = (...args)
       });
       update({ status: 'ready', profile: result.profile, accountEmail: result.accountEmail ?? snapshot.accountEmail, error: null });
       return result.profile;
+    },
+    async requestPasswordReset() {
+      const email = snapshot.accountEmail;
+      if (!email) throw new ProfessionalProfileError('AUTH_REQUIRED', 'Não foi possível identificar o e-mail da conta.');
+      const csrfToken = await getCsrfToken(fetcher);
+      let response: Response;
+      try {
+        response = await fetcher('/api/auth/recovery', {
+          method: 'POST', cache: 'no-store', credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, csrfToken }),
+        });
+      } catch {
+        throw new ProfessionalProfileError('UNAVAILABLE', 'Não foi possível solicitar a recuperação agora. Tente novamente.');
+      }
+      if (response.status === 429) throw new ProfessionalProfileError('UNAVAILABLE', 'Muitas tentativas. Aguarde antes de solicitar outro link.');
+      if (response.status !== 202) throw new ProfessionalProfileError('UNAVAILABLE', 'Não foi possível solicitar a recuperação agora. Tente novamente.');
     },
     reset() {
       pending = null;

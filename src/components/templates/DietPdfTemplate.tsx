@@ -152,6 +152,11 @@ export function DietPdfTemplate({ document, professional = null }: DietPdfTempla
       className="mx-auto flex max-w-container-reading flex-col gap-6 border border-border-subtle bg-surface p-6 text-text-primary"
     >
       <header className="flex flex-col gap-3 border-b border-border-divider pb-4">
+        {professional?.logo && (
+          // Local PNG data is kept inline so the exported document needs no remote image request.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={professional.logo} alt="Logotipo do consultório" className="h-16 w-32 object-contain object-left" />
+        )}
         <h1 className={textStyle('page-title')}>Prescrição alimentar</h1>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1">

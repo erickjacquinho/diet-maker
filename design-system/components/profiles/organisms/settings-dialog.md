@@ -24,7 +24,7 @@ Herda [overlays](../../categories/overlays.md). Trait autorizado: `async`.
 
 Dialog com título "Configurações", descrição de escopo e `Tabs` com duas abas:
 
-- **Perfil profissional**: seções Identificação (nome, sobrenome, título, CRN), Atuação (experiência, média de pacientes, modalidade, especialidades, apresentação), Contato e consultório (e-mail de acesso somente leitura, e-mail de contato, telefone, Instagram, site, consultório, cidade, UF) e Documentos (exibição nos PDFs com prévia da assinatura). Rodapé com "Descartar alterações" e "Salvar perfil".
+- **Perfil profissional**: seções Conta e acesso (e-mail de acesso somente leitura e redefinição de senha pelo fluxo existente), Identificação (nome, sobrenome, título, CRN), Atuação (experiência, média de pacientes, modalidade, especialidades, apresentação), Contato e consultório (e-mail de contato, telefone, Instagram, site, consultório, cidade, UF) Lembretes da agenda (ativar ou silenciar avisos sem remover agendamentos) e Documentos (envio/remoção de logotipo PNG e exibição nos PDFs com prévia da assinatura). Rodapé com "Descartar alterações" e "Salvar perfil".
 - **Saves**: catálogo da conta e ações de criar, importar, abrir, localizar, proteger cópia legada e exportar/restaurar backup; nome do save e telefone do consultório, arquivo e estado de sincronização em lista descritiva, ação "Sincronizar agora" e rodapé com "Descartar alterações" e "Salvar configurações do save".
 
 ## Allowed variants
@@ -39,6 +39,9 @@ Dialog com título "Configurações", descrição de escopo e `Tabs` com duas ab
 - aba Saves sem save aberto mantém o catálogo e as ações de criar/abrir disponíveis; save não editável desabilita campos e ações;
 - `savesContent` recebe o gerenciamento do consumidor; ações ficam bloqueadas enquanto houver configurações pendentes;
 - `suspended` pausa o modal durante criação/restauração, retomando a mesma aba sem empilhar overlays; `busy` impede fechamento durante operações;
+- redefinição de senha anuncia envio ou erro e permite repetir; a ação não altera a senha no modal;
+- logotipo aceita PNG de até 128 KB e 1024 × 1024 px; erro de leitura preserva o logotipo anterior;
+- preferência de lembretes e logotipo são persistidos no perfil cifrado da conta por "Salvar perfil";
 - fechar com alterações não salvas abre `ConfirmationAlertDialog` destrutivo antes de descartar.
 
 ## Composition

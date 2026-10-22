@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import { HardDrive, RefreshCw, UserRound } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/atoms/Button';
@@ -14,9 +14,11 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   BRAZILIAN_STATES,
   DEFAULT_PROFESSIONAL_TITLE,
+  DOCUMENT_LOGO_MAX_BYTES,
   PROFESSIONAL_PROFILE_LIMITS,
   SERVICE_MODE_LABELS,
   getProfessionalSignature,
+  parseDocumentLogo,
   parseProfessionalProfile,
   type ProfessionalProfile,
   type ProfessionalServiceMode,
@@ -54,6 +56,7 @@ export interface SettingsDialogProps {
   profile: SettingsProfileState;
   onRetryProfile: () => void;
   onSaveProfile: (profile: ProfessionalProfile) => Promise<void>;
+  onResetPassword: () => Promise<void>;
   save: SettingsSaveState;
   onSaveSettings: (input: SaveSettingsInput) => Promise<void>;
   onSyncSave: () => Promise<void>;
@@ -91,6 +94,8 @@ type ProfileDraft = Record<
   state: string;
   serviceMode: ProfessionalServiceMode | '';
   showOnDocuments: boolean;
+  agendaRemindersEnabled: boolean;
+  documentLogo: string | null;
 };
 
 function toDraft(profile: ProfessionalProfile): ProfileDraft {
@@ -113,6 +118,8 @@ function toDraft(profile: ProfessionalProfile): ProfileDraft {
     state: profile.state ?? '',
     serviceMode: profile.serviceMode ?? '',
     showOnDocuments: profile.showOnDocuments,
+    agendaRemindersEnabled: profile.agendaRemindersEnabled,
+    documentLogo: profile.documentLogo,
   };
 }
 
@@ -154,6 +161,8 @@ function validateDraft(draft: ProfileDraft): { profile: ProfessionalProfile | nu
       state: draft.state || null,
       serviceMode: draft.serviceMode || null,
       showOnDocuments: draft.showOnDocuments,
+      agendaRemindersEnabled: draft.agendaRemindersEnabled,
+      documentLogo: draft.documentLogo,
     });
     return { profile, errors };
   } catch (error) {
@@ -175,6 +184,7 @@ export function SettingsDialog({
   profile,
   onRetryProfile,
   onSaveProfile,
+  onResetPassword,
   save,
   onSaveSettings,
   onSyncSave,
@@ -189,6 +199,10 @@ export function SettingsDialog({
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [profileFeedback, setProfileFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [readingLogo, setReadingLogo] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const saveBaseline = useMemo(() => ({
     displayName: save.details?.displayName ?? '',
@@ -210,6 +224,7 @@ export function SettingsDialog({
     setProfileFeedback(null);
     setSaveError(null);
     setSaveFeedback(null);
+    setPasswordFeedback(null);
     // Runs only when the dialog opens so a later defaultTab change does not switch tabs mid-edit.
   }, [open]);
 
@@ -221,7 +236,7 @@ export function SettingsDialog({
     && (saveDraft.displayName !== saveBaseline.displayName || saveDraft.phone !== saveBaseline.phone);
 
   const requestOpenChange = (next: boolean) => {
-    if (!next && (busy || savingProfile || savingSave || syncing)) return;
+    if (!next && (busy || savingProfile || savingSave || syncing || readingLogo || resettingPassword)) return;
     if (!next && (profileDirty || saveDirty) && !savingProfile && !savingSave) {
       setDiscardOpen(true);
       return;
@@ -250,7 +265,7 @@ export function SettingsDialog({
 
   const submitProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!draft || savingProfile) return;
+    if (!draft || savingProfile || readingLogo) return;
     const { profile: next, errors } = validateDraft(draft);
     setProfileErrors(errors);
     if (!next) {
@@ -267,6 +282,46 @@ export function SettingsDialog({
       setProfileFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Não foi possível salvar o perfil.' });
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const readLogo = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || readingLogo) return;
+    setReadingLogo(true);
+    setProfileErrors((current) => ({ ...current, documentLogo: '' }));
+    try {
+      if (file.type !== 'image/png' || file.size > DOCUMENT_LOGO_MAX_BYTES) throw new Error();
+      const content = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error());
+        reader.readAsDataURL(file);
+      });
+      const logo = parseDocumentLogo(content);
+      const preview = new Image();
+      preview.src = content;
+      await preview.decode();
+      setField('documentLogo', logo);
+    } catch {
+      setProfileErrors((current) => ({ ...current, documentLogo: 'Selecione um PNG válido de até 128 KB e 1024 × 1024 pixels.' }));
+    } finally {
+      setReadingLogo(false);
+    }
+  };
+
+  const resetPassword = async () => {
+    if (resettingPassword) return;
+    setResettingPassword(true);
+    setPasswordFeedback(null);
+    try {
+      await onResetPassword();
+      setPasswordFeedback({ kind: 'status', message: 'Se o endereço puder receber uma recuperação, as instruções serão enviadas.' });
+    } catch (error) {
+      setPasswordFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Não foi possível solicitar a recuperação agora. Tente novamente.' });
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -359,7 +414,24 @@ export function SettingsDialog({
                     )}
                   </div>
                 ) : (
-                  <form onSubmit={submitProfile} noValidate aria-busy={savingProfile} aria-label="Perfil profissional" className="flex flex-col gap-6">
+                  <form onSubmit={submitProfile} noValidate aria-busy={savingProfile || readingLogo || resettingPassword} aria-label="Perfil profissional" className="flex flex-col gap-6">
+                    <Section title="Conta e acesso">
+                      <Field id={`${id}-accountEmail`} label="E-mail de acesso" hint="Usado para entrar na conta; não pode ser alterado aqui.">
+                        <Input id={`${id}-accountEmail`} value={profile.accountEmail ?? ''} readOnly />
+                      </Field>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button type="button" variant="secondary" size="compact" onClick={() => void resetPassword()}
+                          disabled={!profile.accountEmail || resettingPassword} loading={resettingPassword}>
+                          Redefinir senha
+                        </Button>
+                        <p className={textStyle('helper')}>Receba no e-mail de acesso as instruções para escolher uma nova senha.</p>
+                      </div>
+                      {passwordFeedback && <p role={passwordFeedback.kind === 'error' ? 'alert' : 'status'}
+                        className={textStyle(passwordFeedback.kind === 'error' ? 'validation-error' : 'validation-success')}>
+                        {passwordFeedback.message}
+                      </p>}
+                    </Section>
+
                     <Section title="Identificação">
                       <div className="grid grid-cols-2 gap-4">
                         <Field id={`${id}-firstName`} label="Nome" error={profileErrors.firstName} required>
@@ -427,9 +499,6 @@ export function SettingsDialog({
 
                     <Section title="Contato e consultório">
                       <div className="grid grid-cols-2 gap-4">
-                        <Field id={`${id}-accountEmail`} label="E-mail de acesso" hint="Usado para entrar na conta; não pode ser alterado aqui.">
-                          <Input id={`${id}-accountEmail`} value={profile.accountEmail ?? ''} readOnly />
-                        </Field>
                         <Field id={`${id}-contactEmail`} label="E-mail de contato" error={profileErrors.contactEmail}>
                           <Input {...fieldProps('contactEmail')} type="email" autoComplete="email" maxLength={PROFESSIONAL_PROFILE_LIMITS.contactEmail}
                             value={draft.contactEmail} onChange={(event) => setField('contactEmail', event.target.value)} />
@@ -466,7 +535,40 @@ export function SettingsDialog({
                       </div>
                     </Section>
 
+                    <Section title="Lembretes da agenda">
+                      <div className="flex items-start gap-2">
+                        <Checkbox id={`${id}-agendaRemindersEnabled`} checked={draft.agendaRemindersEnabled}
+                          onCheckedChange={(checked) => setField('agendaRemindersEnabled', checked)}
+                          aria-label="Exibir lembretes da agenda" className="-m-2 shrink-0" />
+                        <label htmlFor={`${id}-agendaRemindersEnabled`} className={textStyle('body')}>Exibir lembretes da agenda</label>
+                      </div>
+                      <p className={textStyle('helper')}>Os avisos aparecem com a aplicação aberta. Desativar silencia os avisos e preserva os lembretes agendados.</p>
+                    </Section>
+
                     <Section title="Documentos">
+                      <Field id={`${id}-documentLogo`} label="Logotipo do consultório" error={profileErrors.documentLogo}
+                        hint="PNG de até 128 KB e 1024 × 1024 pixels. O logotipo acompanha a identificação do profissional nos PDFs.">
+                        <Input ref={logoInputRef} id={`${id}-documentLogo`} type="file" accept="image/png" disabled={readingLogo || savingProfile}
+                          className="hidden" tabIndex={-1}
+                          aria-invalid={profileErrors.documentLogo ? true : undefined}
+                          aria-describedby={profileErrors.documentLogo ? `${id}-documentLogo-error` : undefined}
+                          onChange={(event) => void readLogo(event)} />
+                        <Button type="button" variant="secondary" size="compact" disabled={readingLogo || savingProfile}
+                          onClick={() => logoInputRef.current?.click()}>
+                          Selecionar logotipo
+                        </Button>
+                      </Field>
+                      {readingLogo && <p role="status" className={textStyle('helper')}>Carregando logotipo…</p>}
+                      {draft.documentLogo && <div className="flex items-center gap-4">
+                        {/* Inline PNG preview uses the same bytes persisted for the PDF. */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={draft.documentLogo} alt="Prévia do logotipo do consultório" className="h-16 w-32 object-contain object-left" />
+                        <Button type="button" variant="quiet" size="compact" disabled={readingLogo || savingProfile}
+                          onClick={() => { setField('documentLogo', null); if (logoInputRef.current) logoInputRef.current.value = ''; }}>
+                          Remover logotipo
+                        </Button>
+                      </div>}
+
                       <div className="flex items-start gap-2">
                         <Checkbox
                           id={`${id}-showOnDocuments`}
@@ -485,11 +587,11 @@ export function SettingsDialog({
                     </Section>
 
                     <FormFooter feedback={profileFeedback} formError={profileErrors.form}>
-                      <Button type="button" variant="secondary" size="standard" disabled={!profileDirty || savingProfile}
+                      <Button type="button" variant="secondary" size="standard" disabled={!profileDirty || savingProfile || readingLogo}
                         onClick={() => { setDraft(baseline); setProfileErrors({}); setProfileFeedback(null); }}>
                         Descartar alterações
                       </Button>
-                      <Button type="submit" variant="primary" size="standard" disabled={!profileDirty || savingProfile} loading={savingProfile}>
+                      <Button type="submit" variant="primary" size="standard" disabled={!profileDirty || savingProfile || readingLogo} loading={savingProfile}>
                         Salvar perfil
                       </Button>
                     </FormFooter>
@@ -498,7 +600,7 @@ export function SettingsDialog({
               </TabsContent>
 
               <TabsContent value="save" className="space-y-6">
-                <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing} className="min-w-0">
+                <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing || readingLogo || resettingPassword} className="min-w-0">
                   <legend className="sr-only">Gerenciar saves e backups</legend>
                   {savesContent}
                 </fieldset>
