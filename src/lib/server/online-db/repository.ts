@@ -53,6 +53,44 @@ export async function getProfessionalProfile(ownerId: string) {
   });
 }
 
+export async function updateProfessionalProfile(input: {
+  ownerId: string;
+  profileCipher: Buffer;
+  profileIv: Buffer;
+  profileKekId: string;
+}): Promise<boolean> {
+  return withOwnerTransaction(input.ownerId, async (transaction) => {
+    const updated = await transaction.execute(sql`
+      UPDATE private.professional_profiles
+      SET profile_cipher = ${input.profileCipher}, profile_iv = ${input.profileIv}, profile_kek_id = ${input.profileKekId}
+      WHERE owner_id = ${input.ownerId}
+      RETURNING owner_id
+    `);
+
+    return updated.rows.length === 1;
+  });
+}
+
+export async function updateSaveLabel(input: {
+  ownerId: string;
+  saveId: string;
+  labelCipher: Buffer;
+  labelIv: Buffer;
+  labelKekId: string;
+}): Promise<boolean> {
+  assertUuid(input.saveId);
+  return withOwnerTransaction(input.ownerId, async (transaction) => {
+    const updated = await transaction.execute(sql`
+      UPDATE private.saves
+      SET label_cipher = ${input.labelCipher}, label_iv = ${input.labelIv}, label_kek_id = ${input.labelKekId}
+      WHERE id = ${input.saveId} AND owner_id = ${input.ownerId}
+      RETURNING id
+    `);
+
+    return updated.rows.length === 1;
+  });
+}
+
 export async function findAuthSessionOwner(sessionId: string): Promise<string | null> {
   assertUuid(sessionId);
   const [session] = await onlineDatabase()

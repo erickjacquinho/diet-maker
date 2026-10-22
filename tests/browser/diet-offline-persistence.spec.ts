@@ -10,10 +10,10 @@ test('mantém o workspace local IndexedDB após reload e exige abertura por uma 
   const first = await context.newPage();
 
   await createProfileSession(first, 'Sessão offline');
-  await expect(first.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
+  await expect(first.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible({ timeout: 120_000 });
 
   await first.reload({ waitUntil: 'domcontentloaded', timeout: 120_000 });
-  await expect(first).toHaveURL(/\/saves$/, { timeout: 120_000 });
+  await expect(first).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   await expect(first.getByRole('button', { name: 'Criar save' })).toBeVisible({ timeout: 120_000 });
 
   const hostDatabases = await first.evaluate(async () => {
@@ -28,7 +28,7 @@ test('mantém o workspace local IndexedDB após reload e exige abertura por uma 
 
   const second = await context.newPage();
   await second.goto(`${baseURL ?? 'http://127.0.0.1:3000'}/pacientes`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  await expect(second).toHaveURL(/\/saves$/, { timeout: 120_000 });
+  await expect(second).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   await expect(second.getByRole('button', { name: 'Criar save' })).toBeVisible({ timeout: 120_000 });
   await expect(second.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 30_000 });
   await expect(second.getByText('Sincronizado', { exact: true })).toBeVisible({ timeout: 30_000 });
@@ -36,8 +36,8 @@ test('mantém o workspace local IndexedDB após reload e exige abertura por uma 
   await context.setOffline(true);
   await expect(second.evaluate(() => navigator.onLine)).resolves.toBe(false);
   await second.getByRole('button', { name: /^Abrir save / }).click();
-  await expect(second).toHaveURL(/\/saves$/);
-  await expect(second.getByRole('heading', { name: 'Seus saves' })).toBeVisible();
+  await expect(second).toHaveURL(/\/dashboard$/);
+  await expect(second.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
   await context.setOffline(false);
   await context.close();
 });

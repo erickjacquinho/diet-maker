@@ -48,17 +48,13 @@ describe('SidebarUserProfile', () => {
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
   });
 
-  it('renders dropdown menu with backup actions and account option when callbacks are provided', async () => {
-    const onExportBackup = vi.fn();
-    const onRestoreBackup = vi.fn();
+  it('renders only settings and sign out', async () => {
     const onOpenAccount = vi.fn();
     const onSignOut = vi.fn();
 
     renderProfile({
       doctorName: 'Dr. Alice',
       doctorRole: 'Nutricionista',
-      onExportBackup,
-      onRestoreBackup,
       onOpenAccount,
       onSignOut,
     });
@@ -69,19 +65,12 @@ describe('SidebarUserProfile', () => {
 
     fireEvent.pointerDown(trigger, { button: 0 });
 
-    const exportItem = await screen.findByRole('menuitem', { name: /Exportar backup/i });
-    const restoreItem = screen.getByRole('menuitem', { name: /Importar backup/i });
-    const overviewItem = screen.getByRole('menuitem', { name: 'Visão geral' });
-    const accountItem = screen.getByRole('menuitem', { name: 'Configurações' });
+    const accountItem = await screen.findByRole('menuitem', { name: 'Configurações' });
     const signOutItem = screen.getByRole('menuitem', { name: 'Sair' });
 
-    expect(exportItem).toBeInTheDocument();
-    expect(restoreItem).toBeInTheDocument();
-    expect(overviewItem).toBeInTheDocument();
     expect(accountItem).toBeInTheDocument();
     expect(signOutItem).toBeInTheDocument();
-
-    fireEvent.click(exportItem);
-    expect(onExportBackup).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    expect(screen.queryByRole('menuitem', { name: 'Visão geral' })).not.toBeInTheDocument();
   });
 });

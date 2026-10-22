@@ -43,3 +43,11 @@ Adotar o **Mapa de Arquitetura de Telas e Navegação Rasa (Flat UX)** com as se
 - Acesso instantâneo e previsível a qualquer funcionalidade do sistema.
 - Maximização da área útil de trabalho em notebooks e telas de consultório.
 - Acompanhamento clínico ágil ao visualizar históricos de peso e macronutrientes lado a lado na tela do paciente.
+
+## Atualização — dashboard e entrada do produto (2026-10-20)
+
+A rota `/dashboard` passa a ser a entrada das contas completas e reúne o catálogo de arquivos locais e seus comandos de backup. `/home` e `/saves` redirecionam para essa rota preservando os parâmetros recebidos. A mudança substitui o destino inicial e a antiga página de saves; os módulos clínicos e as rotas detalhadas deste ADR permanecem disponíveis.
+
+A sidebar mantém sete destinos diretos nesta ordem: Início (`/dashboard`), Pacientes (`/pacientes`), Agenda (`/agenda`), Dietas prontas (`/presets`), Refeições (`/refeicoes`), Receitas (`/receitas`) e Alimentos (`/alimentos`). O menu de perfil contém Configurações e Sair. Configurações abre o `SettingsDialog`, com abas de perfil profissional (dados da conta online, refletidos na sidebar e nos PDFs) e de configurações do save aberto; a recuperação de alterações pendentes continua acessível globalmente na sidebar.
+
+Renderizar o dashboard não autoriza operações clínicas. Elas continuam condicionadas a um runtime local utilizável e a um arquivo autorizado. Esta atualização não altera o formato dos saves nem aprova uma migração online.

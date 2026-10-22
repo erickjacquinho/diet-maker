@@ -10,6 +10,32 @@ const profileSnapshot = vi.hoisted(() => ({
   hydration: 'ready', resumeFileName: null, error: null, protectedCopyRequired: false,
 }));
 
+const professionalProfile = vi.hoisted(() => ({
+  snapshot: {
+    status: 'ready',
+    accountEmail: 'ana@example.invalid',
+    error: null,
+    profile: {
+      firstName: 'Ana', lastName: 'Souza', averagePatientsPerMonth: 40, experience: { kind: 'years', value: 5 },
+      professionalTitle: 'Nutricionista esportiva', crn: 'CRN-3 12345', specialties: null, bio: null,
+      contactEmail: null, phone: null, instagram: null, website: null, clinicName: null, city: null,
+      state: null, serviceMode: null, showOnDocuments: true,
+    },
+  },
+  load: vi.fn(async () => undefined),
+  save: vi.fn(),
+}));
+
+vi.mock('@/lib/application/professional-profile-store', () => ({
+  getBrowserProfessionalProfileStore: () => ({
+    subscribe: () => () => undefined,
+    getSnapshot: () => professionalProfile.snapshot,
+    load: professionalProfile.load,
+    save: professionalProfile.save,
+    reset: vi.fn(),
+  }),
+}));
+
 vi.mock('next/navigation', () => ({
   usePathname: () => routeState.pathname,
 }));
@@ -25,7 +51,7 @@ vi.mock('@/lib/application/browser-composition', () => ({
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
 
 describe('SidebarNavigationAdapter boundary', () => {
-  it('supplies the application pathname and six production destinations to SidebarNav', () => {
+  it('supplies the application pathname and seven production destinations to SidebarNav', () => {
     render(<SidebarNavigationAdapter />);
 
     expect(screen.getByRole('link', { name: /Pacientes/ })).toHaveAttribute('aria-current', 'page');
@@ -38,6 +64,7 @@ describe('SidebarNavigationAdapter boundary', () => {
         .getAllByRole('link')
         .map((link) => link.getAttribute('href')),
     ).toEqual([
+      '/dashboard',
       '/pacientes',
       '/agenda',
       '/presets',
@@ -45,6 +72,11 @@ describe('SidebarNavigationAdapter boundary', () => {
       '/receitas',
       '/alimentos',
     ]);
+    expect(
+      within(screen.getByRole('navigation'))
+        .getAllByRole('link')
+        .map((link) => link.textContent?.trim()),
+    ).toEqual(['Início', 'Pacientes', 'Agenda', 'Dietas prontas', 'Refeições', 'Receitas', 'Alimentos']);
   });
 
   it('keeps route context out of the SidebarNav organism', () => {
@@ -54,36 +86,45 @@ describe('SidebarNavigationAdapter boundary', () => {
     expect(source).not.toContain('usePathname');
   });
 
-  it.each([false, true])('opens empty settings and restores focus (collapsed=%s)', async (initialCollapsed) => {
+  it('shows the professional profile in the account trigger', () => {
+    render(<SidebarNavigationAdapter />);
+
+    expect(screen.getByRole('button', { name: 'Abrir menu de conta de Ana Souza' })).toHaveTextContent('Nutricionista esportiva');
+    expect(professionalProfile.load).toHaveBeenCalled();
+  });
+
+  it.each([false, true])('opens profile and save settings and restores focus (collapsed=%s)', async (initialCollapsed) => {
     render(<SidebarNavigationAdapter initialCollapsed={initialCollapsed} />);
     const trigger = screen.getByRole('button', { name: /^Abrir menu de conta/ });
-    const fetchSpy = vi.spyOn(globalThis, 'fetch');
 
-    try {
-      act(() => trigger.focus());
-      fireEvent.keyDown(trigger, { key: 'Enter', code: 'Enter' });
-      fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
+    act(() => trigger.focus());
+    fireEvent.keyDown(trigger, { key: 'Enter', code: 'Enter' });
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent?.trim())).toEqual([
+      'Configurações',
+      'Sair',
+    ]);
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
 
-      const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
-      expect(within(dialog).getByRole('heading', { name: 'Configurações' })).toBeInTheDocument();
-      expect(within(dialog).getAllByRole('button')).toHaveLength(1);
-      expect(dialog.querySelector('input, select, textarea, form, [role="tablist"]')).toBeNull();
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
+    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Save']);
+    expect(within(dialog).getByLabelText(/^Nome/)).toHaveValue('Ana');
+    expect(within(dialog).getByLabelText(/CRN/)).toHaveValue('CRN-3 12345');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
 
-      fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
-      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      await waitFor(() => expect(trigger).toHaveFocus());
+    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Save' }), { button: 0 });
+    expect(await within(dialog).findByText('Nenhum save está aberto nesta sessão.')).toBeInTheDocument();
 
-      fireEvent.pointerDown(trigger, { button: 0 });
-      fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
-      fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Fechar' }));
-      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      await waitFor(() => expect(trigger).toHaveFocus());
-      expect(routeState.pathname).toBe('/pacientes');
-      expect(fetchSpy).not.toHaveBeenCalled();
-    } finally {
-      fetchSpy.mockRestore();
-    }
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+
+    fireEvent.pointerDown(trigger, { button: 0 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Fechar' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(routeState.pathname).toBe('/pacientes');
+    expect(professionalProfile.save).not.toHaveBeenCalled();
   });
 
   it('preserves an explicit account action supplied by a consumer', async () => {

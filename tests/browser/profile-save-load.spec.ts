@@ -20,7 +20,7 @@ async function fillPatientForm(page: import('@playwright/test').Page, name: stri
   return dialog;
 }
 
-test('creates a protected save with schema 11 before entering the internal app', async ({ page }) => {
+test('creates a protected save before entering clinical modules', async ({ page }) => {
   await createProfileSession(page);
   const written = await decryptBrowserSave(page, (await readPrimarySave(page)).content);
   expect(written.schemaVersion).toBe('11');
@@ -31,6 +31,7 @@ test('creates a protected save with schema 11 before entering the internal app',
 test('loads the portable fixture and makes Jacques Regiani patient data visible', async ({ page }) => {
   const source = await loadLegacyProfileSession(page, fixture);
   expect(await page.evaluate(() => (window as unknown as { __nutridietReadSource(): Promise<string> }).__nutridietReadSource())).toBe(source);
+  await page.goto('/pacientes');
   await expect(page.getByText('Paciente de Jacques')).toBeVisible({ timeout: 30_000 });
 });
 
@@ -38,13 +39,14 @@ test('keeps the save dashboard available when the selected file is invalid', asy
   await installProfileFileSystemFakes(page, invalidFixture);
   await enterSaveDashboard(page);
   await page.getByRole('button', { name: 'Importar arquivo' }).click();
-  await expect(page).toHaveURL(/\/saves$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole('button', { name: 'Criar save' })).toBeVisible();
   await expect(page.locator('p[role="alert"]')).toContainText('aplicação');
 });
 
 test('field edits stay local; explicit save and Ctrl+S write only confirmed changes', async ({ page }) => {
   await createProfileSession(page, 'Confirmações');
+  await page.goto('/pacientes');
 
   const firstDialog = await fillPatientForm(page, 'Ana Botão');
   await expect.poll(async () => (await readPrimarySave(page)).attempts).toBe(1);
@@ -61,13 +63,14 @@ test('field edits stay local; explicit save and Ctrl+S write only confirmed chan
   await expect(secondDialog).toBeHidden();
 
   const attemptsBeforeNavigation = (await readPrimarySave(page)).attempts;
-  await page.getByRole('link', { name: 'Receitas Culinárias' }).click();
+  await page.getByRole('link', { name: 'Receitas' }).click();
   await expect(page).toHaveURL(/\/receitas$/, { timeout: 60_000 });
   await expect.poll(async () => (await readPrimarySave(page)).attempts).toBe(attemptsBeforeNavigation);
 });
 
 test('keeps a failed checkpoint across reload, retries after route change, and exposes manual retry', async ({ page }) => {
   await createProfileSession(page, 'Recuperação');
+  await page.goto('/pacientes');
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-fail-next-write', '1'));
 
   const dialog = await fillPatientForm(page, 'Paciente Recuperado');
@@ -77,9 +80,10 @@ test('keeps a failed checkpoint across reload, retries after route change, and e
   await expect.poll(async () => (await readPrimarySave(page)).successes).toBe(1);
 
   await page.reload();
-  await expect(page).toHaveURL(/\/saves$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-fail-next-write', '1'));
   await openRememberedSave(page);
+  await page.goto('/pacientes');
   await expect(page.getByText('Paciente Recuperado')).toBeVisible();
   await expect(page.locator('[data-profile-sync-state="paused"]')).toBeVisible();
   await expect.poll(async () => (await readPrimarySave(page)).successes).toBe(1);
@@ -92,6 +96,7 @@ test('keeps a failed checkpoint across reload, retries after route change, and e
 
 test('a pathname change during a checkpoint shares the in-flight file write', async ({ page }) => {
   await createProfileSession(page, 'Checkpoint simultâneo');
+  await page.goto('/pacientes');
   const dialog = await fillPatientForm(page, 'Paciente Concorrente');
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-delay-next-write', '1'));
 

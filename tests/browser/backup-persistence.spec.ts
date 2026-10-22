@@ -12,14 +12,13 @@ async function downloadContent(download: Download): Promise<string> {
   return readFile(path as string, 'utf8');
 }
 
-async function openAccountAction(page: Page, action: 'Exportar backup' | 'Importar backup'): Promise<void> {
-  await page.getByRole('button', { name: /Abrir menu de conta/ }).click();
-  await page.getByRole('menuitem', { name: action }).click();
+async function openDashboardAction(page: Page, action: 'Exportar backup' | 'Importar backup'): Promise<void> {
+  await page.getByRole('button', { name: action, exact: true }).click();
 }
 
 async function exportBackup(page: Page): Promise<string> {
   const downloadPromise = page.waitForEvent('download');
-  await openAccountAction(page, 'Exportar backup');
+  await openDashboardAction(page, 'Exportar backup');
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^nutridiet-backup-\d{4}-\d{2}-\d{2}\.nutridiet$/);
   return downloadContent(download);
@@ -27,7 +26,7 @@ async function exportBackup(page: Page): Promise<string> {
 
 async function openRestoreDialog(page: Page, content: string): Promise<void> {
   const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-  await openAccountAction(page, 'Importar backup');
+  await openDashboardAction(page, 'Importar backup');
   await input.setInputFiles({
     name: 'nutridiet-backup.nutridiet',
     mimeType: 'application/json',
@@ -71,7 +70,13 @@ async function seedEditableDraft(page: Page): Promise<void> {
 test.describe('backup manual local', () => {
   test.beforeEach(async ({ page }) => {
     await createProfileSession(page, 'Backup browser');
-    await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByRole('button', { name: 'Exportar backup', exact: true })).toBeVisible();
+    const accountMenu = page.getByRole('button', { name: /Abrir menu de conta/ });
+    await accountMenu.focus();
+    await accountMenu.press('Enter');
+    expect(await page.getByRole('menuitem').allTextContents()).toEqual(['Configurações', 'Sair']);
+    await page.keyboard.press('Escape');
     await page.waitForLoadState('networkidle');
   });
 
@@ -101,7 +106,7 @@ test.describe('backup manual local', () => {
     const content = await exportBackup(page);
 
     const input = page.locator('input[type="file"][accept*=".nutridiet"]');
-    await openAccountAction(page, 'Importar backup');
+    await openDashboardAction(page, 'Importar backup');
     await input.setInputFiles({
       name: 'backup-invalido.nutridiet',
       mimeType: 'application/json',
@@ -131,7 +136,7 @@ test.describe('backup manual local', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Importar backup' });
     await dialog.getByRole('button', { name: 'Importar backup', exact: true }).click();
-    await expect(page).toHaveURL(/\/saves$/, { timeout: 120_000 });
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   });
 
   test('preserva a base anterior quando a transação de importação falha', async ({ page }) => {

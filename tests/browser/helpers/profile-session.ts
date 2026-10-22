@@ -90,10 +90,13 @@ export async function createProfileSession(page: Page, displayName = 'Perfil de 
   await installProfileFileSystemFakes(page);
   await enterSaveDashboard(page);
   await page.getByRole('button', { name: 'Criar save' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible({ timeout: 120_000 });
+  const dialog = page.getByRole('dialog', { name: 'Criar profile' });
+  await expect(dialog).toBeVisible({ timeout: 120_000 });
   await page.getByLabel('Nome', { exact: true }).fill(displayName);
   await page.getByRole('button', { name: 'Salvar profile' }).click();
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
+  await expect(dialog).toBeHidden({ timeout: 120_000 });
+  await expect(page.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
 }
 
 export async function enterSaveDashboard(page: Page): Promise<void> {
@@ -108,15 +111,18 @@ export async function loadLegacyProfileSession(page: Page, content: string): Pro
   await installProfileFileSystemFakes(page, source);
   await enterSaveDashboard(page);
   await page.getByRole('button', { name: 'Importar arquivo' }).click();
-  await page.getByRole('button', { name: 'Proteger cópia importada' }).click();
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
+  const protectCopy = page.getByRole('button', { name: 'Proteger cópia importada' });
+  await protectCopy.click();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
+  await expect(protectCopy).toBeHidden({ timeout: 120_000 });
+  await expect(page.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
   return source;
 }
 
 export async function openRememberedSave(page: Page): Promise<void> {
-  await expect(page).toHaveURL(/\/saves$/, { timeout: 120_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   await page.getByRole('button', { name: /^Abrir save / }).click();
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
 }
 
 export async function readPrimarySave(page: Page): Promise<{ content: string; attempts: number; successes: number }> {

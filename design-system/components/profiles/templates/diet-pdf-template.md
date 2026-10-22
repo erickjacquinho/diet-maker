@@ -10,7 +10,7 @@
 | Current layer | `template` |
 | Target layer | `template` |
 | Sources | `src/components/templates/DietPdfTemplate.tsx` |
-| Public exports | `DietPdfTemplateProps` (type), `DietPdfTemplate` (component) |
+| Public exports | `DietPdfTemplateProps`, `DietPdfProfessional` (types), `DietPdfTemplate` (component) |
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Herda integralmente [structure](../../categories/structure.md). Traits autorizad
 
 ## Specific anatomy
 
-Cabeçalho com paciente e data. Na dieta simples, cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas. No ciclo, cada variação é numerada e contém suas refeições e quantidades; uma tabela ao final apresenta macros e kcal por dieta.
+Cabeçalho com paciente, data e, quando `professional` é informado, o bloco "Responsável" com nome, título, CRN e contato do profissional. Na dieta simples, cada refeição usa seu nome e horário como título, seguido por uma `DataTable` de alimentos e quantidades com opções agrupadas. No ciclo, cada variação é numerada e contém suas refeições e quantidades; uma tabela ao final apresenta macros e kcal por dieta.
 
 ## Allowed variants
 

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `main` (artefatos locais; sem criar branch ou publicar)
 **Created**: 2026-10-20
-**Status**: SDD pronto para validação humana; modal vazio implementado (US1), remanejamento proposto (US2/US3). Evidências em [validation-report.md](validation-report.md).
+**Status**: SDD aprovado para implementação em 2026-10-20; US1–US3 implementadas, validação final em execução. Evidências em [validation-report.md](validation-report.md) e [implementation-log.md](implementation-log.md).
 **Input**: Criar o SDD do remanejamento para `/dashboard`, simplificar a barra lateral e criar agora Configurações em modal sem conteúdo.
 
 ## Contexto e limites

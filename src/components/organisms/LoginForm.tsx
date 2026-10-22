@@ -62,7 +62,7 @@ export function LoginForm() {
         return;
       }
       const destination = body.destination;
-      router.replace(destination === '/criar-conta?completar=1' ? destination : '/saves');
+      router.replace(destination === '/criar-conta?completar=1' ? destination : '/dashboard');
     } catch {
       setError('Não foi possível entrar agora. Tente novamente.');
     } finally {

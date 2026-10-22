@@ -22,7 +22,7 @@ Herda integralmente [navigation](../../categories/navigation.md). Traits autoriz
 
 ## Specific anatomy
 
-Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed. O organismo recebe `pathname` e `navigationItems` explicitamente; a configuração flat das seis rotas de produção pertence ao adapter da aplicação. Grupos só aparecem quando fornecidos por `navigationItems`.
+Slots concretos: brand, nav groups/items, quick actions, spacer e user profile; root controla expanded/collapsed. O organismo recebe `pathname` e `navigationItems` explicitamente; a configuração flat das sete rotas de produção pertence ao adapter da aplicação. Grupos só aparecem quando fornecidos por `navigationItems`.
 
 ## Allowed variants
 
@@ -42,7 +42,7 @@ Primitive base: `ui-sidebar`. Compõe somente dependências permitidas pela laye
 
 Labels nomeiam destinos; estado current é programático; collapsed conserva nome completo.
 
-`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSignOut`, `onExportBackup`, `onRestoreBackup`, estados assíncronos de backup, `profileSyncState`, `onRetryProfileSync`, `initialCollapsed` e composição opcional via `children`. O organismo não importa contexto de rota nem escolhe configuração de produção.
+`SidebarNavProps` exige `pathname` e `navigationItems` e aceita `onOpenAccount`, `onSignOut`, `profileSyncState`, `onRetryProfileSync`, `isRetryingProfileSync`, `initialCollapsed` e composição opcional via `children`. Comandos de backup pertencem ao dashboard; o organismo não os injeta no menu de perfil. `SidebarQuickActions` mantém seus próprios callbacks genéricos para consumidores que a compõem diretamente. O organismo não importa contexto de rota nem escolhe configuração de produção.
 
 `onOpenAccount` pode receber opcionalmente o botão do perfil para retorno de foco; callbacks sem argumentos permanecem compatíveis. O organismo repassa essa origem sem controlar o modal da aplicação.
 
@@ -64,5 +64,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `organism`; perfil homologado documentalmente. A migração estrutural está implementada; a conformidade visual final depende da aceitação manual desktop e não é declarada por este perfil.
+Implementado em `organism`. O perfil descreve o contrato visual homologado; a conformidade visual desta versão aguarda aceitação manual desktop e não é declarada por este documento.
 

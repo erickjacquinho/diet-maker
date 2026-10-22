@@ -217,6 +217,14 @@ export async function exportBrowserPatientSnapshot(runtime: BrowserPatientRuntim
   return createBrowserBackupRepository(runtime.handle).readAccountSnapshot(runtime.account.id);
 }
 
+export async function updateBrowserPatientAccount(runtime: BrowserPatientRuntime, account: Account): Promise<Account> {
+  if (account.id !== runtime.account.id) throw new Error('A Conta editada não pertence ao save aberto.');
+  const stored = await new LocalAccountContextRepository(runtime.handle).saveAccount(account);
+  // Runtime copies share this object, so open applications read the new name without rebuilding.
+  Object.assign(runtime.account, stored);
+  return stored;
+}
+
 export function activateBrowserPatientRuntime(runtime: BrowserPatientRuntime): BrowserPatientRuntime {
   activeRuntime = runtime;
   setActiveFavoritesAccountId(runtime.account.id);
@@ -405,6 +413,15 @@ function createBrowserOnlineSaveGateway(): ProfileSessionOnlineSaveGateway {
         rawKey.fill(0);
       }
     },
+    async renameSave(saveId, label) {
+      const csrfToken = await getCsrfToken();
+      const body = await fetchJson(`/api/saves/${encodeURIComponent(saveId)}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ label, csrfToken }),
+      });
+      if (body.saveId !== saveId) throw new Error('A resposta da renomeação não corresponde ao save aberto.');
+    },
   };
 }
 
@@ -417,6 +434,7 @@ export function getBrowserProfileSession(): ProfileSession<BrowserPatientRuntime
       createRuntime: createBrowserPatientRuntime,
       importSnapshot: importBrowserPatientSnapshot,
       exportSnapshot: exportBrowserPatientSnapshot,
+      updateAccount: updateBrowserPatientAccount,
       disposeRuntime: disposeBrowserPatientRuntime,
       activateRuntime: (runtime) => {
         runtime.bindSync(() => session.sync());

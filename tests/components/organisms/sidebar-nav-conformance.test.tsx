@@ -30,7 +30,7 @@ describe('SidebarNav Design System conformance', () => {
       <SidebarNav pathname="/alimentos" navigationItems={[sidebarFutureGroup]} />,
     );
 
-    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' }).closest('[data-sidebar="menu-sub-button"]')).toHaveClass(
+    expect(screen.getByRole('link', { name: 'Alimentos' }).closest('[data-sidebar="menu-sub-button"]')).toHaveClass(
       'h-control-standard',
       '[&>svg]:size-4',
     );

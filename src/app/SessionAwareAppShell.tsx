@@ -11,10 +11,9 @@ import { AppLayoutShell } from '@/components/templates';
 import { Button } from '@/components/atoms';
 import { toast } from 'sonner';
 import { signOutBrowserAccount } from '@/lib/application/browser-composition';
+import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
 
-const DEFAULT_INTERNAL_ROUTE = '/pacientes';
-const SAVES_ROUTE = '/saves';
-const HOME_ROUTE = '/home';
+const DEFAULT_INTERNAL_ROUTE = '/dashboard';
 const PUBLIC_ROUTES = new Set(['/', '/login', '/criar-conta', '/recuperar-senha', '/redefinir-senha']);
 const EMPTY_PROFILE_SNAPSHOT: ProfileSessionSnapshot<BrowserPatientRuntime> = {
   status: 'empty',
@@ -52,8 +51,8 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const isPublicRoute = PUBLIC_ROUTES.has(pathname);
-  const isSavesRoute = pathname === SAVES_ROUTE;
-  const isHomeRoute = pathname === HOME_ROUTE;
+  const isDashboardRoute = pathname === DEFAULT_INTERNAL_ROUTE;
+  const isLegacyRoute = pathname === '/home' || pathname === '/saves';
   const session = isPublicRoute ? null : getBrowserProfileSession();
   const subscribe = session?.subscribe ?? subscribeToNoProfile;
   const getSnapshot = session?.getSnapshot ?? getEmptyProfileSnapshot;
@@ -120,21 +119,18 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
       if (pathname !== '/criar-conta') router.replace('/criar-conta?completar=1');
       return;
     }
-    if (isHomeRoute) {
-      router.replace(hasUsableSession ? DEFAULT_INTERNAL_ROUTE : SAVES_ROUTE);
+    if (isLegacyRoute) {
+      router.replace(DEFAULT_INTERNAL_ROUTE);
       return;
     }
-    if (isSavesRoute) {
-      if (hasUsableSession) router.replace(DEFAULT_INTERNAL_ROUTE);
-      return;
-    }
-    if (!hasUsableSession) router.replace(SAVES_ROUTE);
-  }, [accountGate, hasUsableSession, isHomeRoute, isPreservingLockedSave, isPublicRoute, isSavesRoute, pathname, router]);
+    if (!hasUsableSession && !isDashboardRoute) router.replace(DEFAULT_INTERNAL_ROUTE);
+  }, [accountGate, hasUsableSession, isDashboardRoute, isLegacyRoute, isPreservingLockedSave, isPublicRoute, pathname, router]);
 
   const handleSignOut = async (): Promise<void> => {
     try {
       await session?.signOut();
       await signOutBrowserAccount();
+      getBrowserProfessionalProfileStore().reset();
       router.replace('/login');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Não foi possível encerrar a sessão da conta.');
@@ -168,15 +164,8 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   if (accountGate !== 'ready') {
     return <div role="status" aria-live="polite" data-session-gate="redirecting">Encaminhando para o acesso da conta…</div>;
   }
-  if (isHomeRoute) {
-    return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo seus saves…</div>;
-  }
-  if (isSavesRoute) {
-    if (hasUsableSession) return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo o save atual…</div>;
-    return <>{children}</>;
-  }
-  if (!hasUsableSession) {
-    return <div role="status" aria-live="polite" data-session-gate="redirecting">Selecione um save para continuar.</div>;
+  if (isLegacyRoute || (!hasUsableSession && !isDashboardRoute)) {
+    return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo o dashboard…</div>;
   }
   }
 
@@ -184,7 +173,7 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
     <>
       {lockedGate}
       <div hidden={isPreservingLockedSave} aria-hidden={isPreservingLockedSave || undefined} inert={isPreservingLockedSave || undefined}>
-      <AgendaReminderScheduler accountId={snapshot.accountId ?? snapshot.runtime?.account.id ?? null} />
+      <AgendaReminderScheduler accountId={hasUsableSession ? snapshot.accountId ?? snapshot.runtime?.account.id ?? null : null} />
       <AppLayoutShell sidebar={<SidebarNavigationAdapter onSignOut={handleSignOut} />}>
         {children}
       </AppLayoutShell>

@@ -21,7 +21,7 @@ export async function GET(request: Request): Promise<Response> {
       NextResponse.json({
         user: session.user,
         profileComplete,
-        destination: profileComplete ? '/saves' : '/criar-conta?completar=1',
+        destination: profileComplete ? '/dashboard' : '/criar-conta?completar=1',
       }),
       session,
     );

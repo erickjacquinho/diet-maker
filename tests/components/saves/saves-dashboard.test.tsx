@@ -31,8 +31,8 @@ describe('SavesDashboard', () => {
   it('shows catalog rows, recognized local synchronization, and targeted open/locate actions', async () => {
     const { props } = renderDashboard();
 
-    expect(screen.getByRole('heading', { name: 'Seus saves' })).toBeInTheDocument();
-    expect(screen.getByRole('table', { name: 'Seus saves' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Arquivos locais' })).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Arquivos locais' })).toBeInTheDocument();
     expect(screen.getByText('Sincronizado')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Abrir save Clínica Ana (save-a)' }));
@@ -106,7 +106,7 @@ describe('SavesDashboard', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Carregando dados.');
 
     rerender(<SavesDashboard {...props} loading={false} />);
-    expect(screen.getByRole('status')).toHaveTextContent('Nenhum save online ainda.');
+    expect(screen.getByRole('status')).toHaveTextContent('Nenhum arquivo associado');
 
     rerender(<SavesDashboard {...props} loading={false} items={[save]} error="Catálogo indisponível." />);
     expect(screen.getByRole('alert')).toHaveTextContent('Catálogo indisponível.');

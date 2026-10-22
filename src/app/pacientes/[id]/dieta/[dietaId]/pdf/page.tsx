@@ -1,16 +1,29 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Download } from 'lucide-react';
-import { DietPdfTemplate } from '@/components/templates';
+import { DietPdfTemplate, type DietPdfProfessional } from '@/components/templates';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
+import { getProfessionalFullName, getProfessionalTitle, type ProfessionalProfile } from '@/lib/domain/professional-profile';
 import { buildDietCyclePdfViewModel, buildDietPdfViewModel, createDietPdfFilename, type DietPdfDocumentViewModel } from '@/lib/application/diets/diet-pdf-view';
 import { normalizeDateToISO, serializeDateOnly } from '@/lib/date-only';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { textStyle } from '@/design-system';
+
+function toPdfProfessional(profile: ProfessionalProfile | null): DietPdfProfessional | null {
+  if (!profile?.showOnDocuments) return null;
+  const contact = [profile.phone, profile.contactEmail, profile.instagram].filter(Boolean).join(' · ');
+  return {
+    name: getProfessionalFullName(profile),
+    title: getProfessionalTitle(profile),
+    crn: profile.crn,
+    contact: contact || null,
+  };
+}
 
 interface PageState {
   document: DietPdfDocumentViewModel | null;
@@ -29,6 +42,16 @@ export default function DietPdfPreviewPage() {
   const [pageState, setPageState] = useState<PageState>({ document: null, error: null, isLoading: true });
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const professionalProfileStore = getBrowserProfessionalProfileStore();
+  const professionalProfile = useSyncExternalStore(
+    professionalProfileStore.subscribe,
+    professionalProfileStore.getSnapshot,
+    professionalProfileStore.getSnapshot,
+  );
+
+  useEffect(() => {
+    void professionalProfileStore.load();
+  }, [professionalProfileStore]);
 
   useEffect(() => {
     if (!patientId || !dietaId) return;
@@ -165,7 +188,7 @@ export default function DietPdfPreviewPage() {
 
       {downloadError && <p role="alert" className={`${textStyle('body-small')} text-error`}>{downloadError}</p>}
       <div ref={documentRef} aria-busy={isDownloading}>
-        <DietPdfTemplate document={pageState.document} />
+        <DietPdfTemplate document={pageState.document} professional={toPdfProfessional(professionalProfile.profile)} />
       </div>
     </main>
   );

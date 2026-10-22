@@ -41,10 +41,6 @@ export interface SidebarNavProps {
   navigationItems: SidebarNavigationItem[];
   doctorName?: string;
   doctorRole?: string;
-  onExportBackup?: () => void | Promise<void>;
-  onRestoreBackup?: () => void | Promise<void>;
-  isExporting?: boolean;
-  isRestoring?: boolean;
   profileSyncState?: 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
   onRetryProfileSync?: () => void | Promise<void>;
   isRetryingProfileSync?: boolean;
@@ -58,10 +54,6 @@ function SidebarNavContent({
   doctorName,
   doctorRole,
   pathname,
-  onExportBackup,
-  onRestoreBackup,
-  isExporting,
-  isRestoring,
   profileSyncState,
   onRetryProfileSync,
   isRetryingProfileSync,
@@ -70,7 +62,7 @@ function SidebarNavContent({
   navigationItems,
   children,
 }: Required<Pick<SidebarNavProps, 'doctorName' | 'doctorRole' | 'navigationItems'>> &
-  Pick<SidebarNavProps, 'pathname' | 'onExportBackup' | 'onRestoreBackup' | 'isExporting' | 'isRestoring' | 'profileSyncState' | 'onRetryProfileSync' | 'isRetryingProfileSync' | 'onOpenAccount' | 'onSignOut' | 'children'>) {
+  Pick<SidebarNavProps, 'pathname' | 'profileSyncState' | 'onRetryProfileSync' | 'isRetryingProfileSync' | 'onOpenAccount' | 'onSignOut' | 'children'>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -128,10 +120,6 @@ function SidebarNavContent({
                 doctorRole={doctorRole}
                 isCollapsed={isCollapsed}
                 onOpenAccount={onOpenAccount}
-                onExportBackup={onExportBackup}
-                onRestoreBackup={onRestoreBackup}
-                isExporting={isExporting}
-                isRestoring={isRestoring}
                 onSignOut={onSignOut}
               />
             </SidebarFooter>
@@ -152,10 +140,6 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
   navigationItems,
   doctorName = 'Dr. Lucas',
   doctorRole = 'Nutricionista',
-  onExportBackup,
-  onRestoreBackup,
-  isExporting,
-  isRestoring,
   profileSyncState,
   onRetryProfileSync,
   isRetryingProfileSync,
@@ -170,10 +154,6 @@ export const SidebarNavComponent: React.FC<SidebarNavProps> & {
         doctorName={doctorName}
         doctorRole={doctorRole}
         pathname={pathname}
-        onExportBackup={onExportBackup}
-        onRestoreBackup={onRestoreBackup}
-        isExporting={isExporting}
-        isRestoring={isRestoring}
         profileSyncState={profileSyncState}
         onRetryProfileSync={onRetryProfileSync}
         isRetryingProfileSync={isRetryingProfileSync}

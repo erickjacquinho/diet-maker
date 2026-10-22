@@ -2,26 +2,40 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BackupApplicationError } from '@/lib/application/backup-application';
-import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
+import DashboardPage from '@/app/dashboard/page';
 
 const mocks = vi.hoisted(() => ({
   exportBackup: vi.fn(),
   validateBackup: vi.fn(),
   restoreBackup: vi.fn(),
+  getBrowserPatientRuntime: vi.fn(),
+  snapshot: {
+    status: 'active', authorizationExpiresAt: null, syncState: 'synced',
+    account: { displayName: 'Ana Lima' }, accountId: 'local-account',
+    runtime: {}, fileName: 'profile.nutridiet', hydration: 'ready',
+    resumeFileName: null, error: null, protectedCopyRequired: false,
+  } as Record<string, unknown>,
+  signOut: vi.fn(async () => undefined),
+  replace: vi.fn(),
 }));
 
 vi.mock('@/lib/application/browser-composition', () => ({
-  getBrowserPatientRuntime: vi.fn(async () => ({
-    backupApplication: {
-      exportBackup: mocks.exportBackup,
-      validateBackup: mocks.validateBackup,
-      restoreBackup: mocks.restoreBackup,
-    },
-  })),
+  getBrowserProfileSession: () => ({
+    getSnapshot: () => mocks.snapshot,
+    subscribe: () => () => undefined,
+    signOut: mocks.signOut,
+  }),
+  getBrowserPatientRuntime: mocks.getBrowserPatientRuntime,
+  signOutBrowserAccount: vi.fn(async () => undefined),
+}));
+
+vi.mock('@/lib/infrastructure/file-system-access/browser-save-file', () => ({
+  createBrowserSaveFilePort: () => ({ restoreFileAssociation: vi.fn(async () => null) }),
+  inspectAssociatedSaveFile: vi.fn(async () => 'not-located'),
 }));
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/pacientes',
+  useRouter: () => ({ replace: mocks.replace }),
 }));
 
 function createFile(content: string, name = 'backup.nutridiet'): File {
@@ -30,9 +44,29 @@ function createFile(content: string, name = 'backup.nutridiet'): File {
   return file;
 }
 
-describe('SidebarNavigationAdapter backup actions', () => {
+describe('Dashboard backup actions', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mocks.snapshot = {
+      status: 'active', authorizationExpiresAt: null, syncState: 'synced',
+      account: { displayName: 'Ana Lima' }, accountId: 'local-account',
+      runtime: {}, fileName: 'profile.nutridiet', hydration: 'ready',
+      resumeFileName: null, error: null, protectedCopyRequired: false,
+    };
+    mocks.getBrowserPatientRuntime.mockResolvedValue({
+      backupApplication: {
+        exportBackup: mocks.exportBackup,
+        validateBackup: mocks.validateBackup,
+        restoreBackup: mocks.restoreBackup,
+      },
+      markWorkspaceDirty: vi.fn(async () => undefined),
+    });
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith('/api/saves?')) return Response.json({ items: [], totalRows: 0 });
+      if (url === '/api/auth/session') return Response.json({ user: { id: 'owner-1' } });
+      throw new Error(`Unexpected request: ${url}`);
+    }));
   });
 
   afterEach(() => {
@@ -63,9 +97,9 @@ describe('SidebarNavigationAdapter backup actions', () => {
     vi.spyOn(window.URL, 'revokeObjectURL').mockImplementation(revokeObjectURL);
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
-    render(<SidebarNavigationAdapter />);
-    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' }), { button: 0 });
-    fireEvent.click(await screen.findByRole('menuitem', { name: 'Exportar backup' }));
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Exportar backup' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar backup' }));
 
     await waitFor(() => expect(mocks.exportBackup).toHaveBeenCalledTimes(1));
     expect(createObjectURL).toHaveBeenCalledTimes(1);
@@ -73,15 +107,15 @@ describe('SidebarNavigationAdapter backup actions', () => {
     expect(encryptedContent).not.toContain('Paciente');
     expect(click).toHaveBeenCalledTimes(1);
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:backup');
-    expect(screen.getByRole('status')).toHaveTextContent('Backup exportado como nutridiet-backup-2026-09-12.nutridiet.');
+    await waitFor(() => expect(document.querySelector('[data-backup-feedback="status"]')).toHaveTextContent('Backup exportado como nutridiet-backup-2026-09-12.nutridiet.'));
   });
 
   it('validates the selected file before opening the replacement confirmation', async () => {
     mocks.validateBackup.mockResolvedValue({});
-    render(<SidebarNavigationAdapter />);
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
-    fireEvent.pointerDown(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' }), { button: 0 });
-    fireEvent.click(await screen.findByRole('menuitem', { name: 'Importar backup' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
     fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
       target: { files: [createFile('{"valid":true}')] },
     });
@@ -90,6 +124,23 @@ describe('SidebarNavigationAdapter backup actions', () => {
     expect(mocks.validateBackup).toHaveBeenCalledWith('{"valid":true}');
     expect(screen.getByText(/Não haverá mesclagem\./)).toBeInTheDocument();
     expect(screen.getByText('Este arquivo é cifrado para o save autorizado e exige a conta vinculada para ser aberto.')).toBeInTheDocument();
+  });
+
+  it('cancels restoration without applying the selected backup', async () => {
+    mocks.validateBackup.mockResolvedValue({});
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
+    fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
+      target: { files: [createFile('{"valid":true}')] },
+    });
+    const dialog = await screen.findByRole('dialog', { name: 'Importar backup' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancelar' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(document.querySelector('[data-backup-feedback="status"]')).toHaveTextContent('A importação foi cancelada; a base local não foi alterada.'));
+    expect(mocks.restoreBackup).not.toHaveBeenCalled();
   });
 
   it('exposes loading, disabled and keyboard-operable states without logging clinical content', async () => {
@@ -103,24 +154,20 @@ describe('SidebarNavigationAdapter backup actions', () => {
       finishExport = () => resolve(result);
     }));
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    render(<SidebarNavigationAdapter />);
+    render(<DashboardPage />);
 
-    const accountButton = screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' });
-    accountButton.focus();
-    expect(document.activeElement).toBe(accountButton);
-    fireEvent.pointerDown(accountButton, { button: 0 });
-    const exportItem = await screen.findByRole('menuitem', { name: 'Exportar backup' });
-    fireEvent.click(exportItem);
+    const exportButton = screen.getByRole('button', { name: 'Exportar backup' });
+    await waitFor(() => expect(exportButton).toBeEnabled());
+    exportButton.focus();
+    expect(document.activeElement).toBe(exportButton);
+    fireEvent.click(exportButton);
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Abrir menu de conta de Profile ativo' })).toBeInTheDocument());
-    fireEvent.pointerDown(accountButton, { button: 0 });
-    const pendingMenu = await screen.findByRole('menu');
-    expect(within(pendingMenu).getByRole('menuitem', { name: 'Exportar backup' })).toHaveAttribute('data-disabled');
-    expect(within(pendingMenu).getByRole('menuitem', { name: 'Importar backup' })).toHaveAttribute('data-disabled');
+    await waitFor(() => expect(exportButton).toBeDisabled());
+    expect(screen.getByRole('button', { name: 'Importar backup' })).toBeDisabled();
     expect(log).not.toHaveBeenCalled();
 
     finishExport();
-    await waitFor(() => expect(within(pendingMenu).getByRole('menuitem', { name: 'Exportar backup' })).not.toHaveAttribute('data-disabled'));
+    await waitFor(() => expect(exportButton).toBeEnabled());
   });
 
   it('announces invalid files without opening the confirmation dialog', async () => {
@@ -128,8 +175,10 @@ describe('SidebarNavigationAdapter backup actions', () => {
       'BACKUP_FORMAT_INVALID',
       'invalid',
     ));
-    render(<SidebarNavigationAdapter />);
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
+    fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
     fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
       target: { files: [createFile('not-json')] },
     });
@@ -144,8 +193,10 @@ describe('SidebarNavigationAdapter backup actions', () => {
       'BACKUP_PENDING_EDITS',
       'pending',
     ));
-    render(<SidebarNavigationAdapter />);
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
+    fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
     fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
       target: { files: [createFile('{"valid":true}')] },
     });
@@ -162,8 +213,10 @@ describe('SidebarNavigationAdapter backup actions', () => {
   it('requires a save-or-discard choice when the workspace has a pending checkpoint', async () => {
     mocks.validateBackup.mockResolvedValue({});
     mocks.restoreBackup.mockRejectedValueOnce(new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'pending'));
-    render(<SidebarNavigationAdapter />);
+    render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Importar backup' })).toBeEnabled());
 
+    fireEvent.click(screen.getByRole('button', { name: 'Importar backup' }));
     fireEvent.change(screen.getByLabelText('Selecionar arquivo de backup NutriDiet'), {
       target: { files: [createFile('{"valid":true}')] },
     });
@@ -174,5 +227,16 @@ describe('SidebarNavigationAdapter backup actions', () => {
     expect(screen.getByRole('button', { name: 'Salvar pendências e restaurar' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Descartar e restaurar' })).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-backup-restore-state', 'pending-checkpoint');
+  });
+
+  it('does not request a runtime or enable backup without an authorized file', async () => {
+    mocks.snapshot = { ...mocks.snapshot, status: 'empty', runtime: null, fileName: null };
+    render(<DashboardPage />);
+
+    expect(await screen.findByRole('heading', { name: 'Início' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Exportar backup' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Importar backup' })).toBeDisabled();
+    expect(screen.getByText(/Abra um arquivo autorizado/)).toBeInTheDocument();
+    expect(mocks.getBrowserPatientRuntime).not.toHaveBeenCalled();
   });
 });

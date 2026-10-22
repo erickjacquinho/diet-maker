@@ -36,9 +36,9 @@ Nenhum estado adicional; todos os estados aplicáveis e seus N/A justificados s�
 
 The molecule owns identity fallback rendering and receives doctor metadata and collapse state by props. It does not depend on the `SidebarNav` organism; the organism supplies only product data and presentation state.
 
-`onOpenAccount` and `onSignOut` are optional callbacks for account actions. When account actions or backup actions are supplied, expanded and collapsed identity render a keyboard-operable Button/IconButton with a dropdown containing `Visão geral`, `Configurações`, `Sair` and the available backup commands. Without any callback, the profile is informational and has no button role, action cursor or action hover.
+`onOpenAccount` and `onSignOut` are optional callbacks for account actions. When either is supplied, expanded and collapsed identity render a keyboard-operable Button/IconButton with a dropdown containing only `Configurações` and `Sair`. Without either callback, the profile is informational and has no button role, action cursor or action hover. Backup commands belong to the dashboard and are not part of this molecule's props or menu.
 
-Na integração de produção, `SidebarNavigationAdapter` fornece a abertura de Configurações como Dialog vazio, com título acessível e fechamento padrão, sem mudar a rota. Um `onOpenAccount` explícito do consumidor permanece respeitado. O conteúdo e o estado desse modal pertencem à integração da aplicação, sem alterar o contrato visual desta molécula.
+Na integração de produção, `SidebarNavigationAdapter` abre o `SettingsDialog` (perfil profissional e save) sem mudar a rota e fornece `doctorName` e `doctorRole` a partir do perfil profissional da conta. As iniciais do avatar derivam de `doctorName` (primeira e última palavra), com `DR` como fallback. Um `onOpenAccount` explícito do consumidor permanece respeitado. O conteúdo e o estado desse modal pertencem à integração da aplicação, sem alterar o contrato visual desta molécula.
 
 `onOpenAccount` recebe opcionalmente o botão do perfil como origem para restaurar foco após um modal. Consumidores sem parâmetros continuam compatíveis; a referência não altera os controles nem o fechamento do menu.
 
@@ -66,5 +66,5 @@ A lista canônica de rotas e componentes consumidores é o campo `consumers` de 
 
 ## Implementation status
 
-Implementado em `molecule`; perfil homologado. Expanded exibe nome e função; collapsed preserva identidade e tooltip.
+Implementado em `molecule`. O perfil descreve o contrato visual homologado; expanded exibe nome e função, collapsed preserva identidade e tooltip. A conformidade visual desta versão aguarda aceitação manual desktop.
 

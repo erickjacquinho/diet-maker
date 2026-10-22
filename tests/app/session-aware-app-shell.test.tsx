@@ -11,6 +11,7 @@ const testState = vi.hoisted(() => ({
   restoreActiveProfile: vi.fn(),
   onResume: vi.fn(),
   retryLockedSave: vi.fn(async () => undefined),
+  schedulerAccountIds: [] as Array<string | null>,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -33,6 +34,13 @@ vi.mock('@/lib/application/browser-composition', () => ({
   }),
 }));
 
+vi.mock('@/app/AgendaReminderScheduler', () => ({
+  AgendaReminderScheduler: ({ accountId }: { accountId: string | null }) => {
+    testState.schedulerAccountIds.push(accountId);
+    return null;
+  },
+}));
+
 vi.mock('@/app/navigation/SidebarNavigationAdapter', () => ({
   SidebarNavigationAdapter: ({ onSignOut }: { onSignOut?: () => void | Promise<void> }) => (
     <aside data-testid="session-sidebar"><button onClick={() => void onSignOut?.()}>Sair</button></aside>
@@ -53,6 +61,7 @@ describe('SessionAwareAppShell', () => {
     testState.restoreActiveProfile.mockReset();
     testState.onResume.mockReset();
     testState.retryLockedSave.mockReset();
+    testState.schedulerAccountIds.length = 0;
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: null, profileComplete: false }, { status: 401 })));
   });
 
@@ -65,7 +74,7 @@ describe('SessionAwareAppShell', () => {
     expect(testState.restoreActiveProfile).not.toHaveBeenCalled();
   });
 
-  it('routes a completed account from Home to saves when no grant/runtime is active', async () => {
+  it('routes a completed account from Home to the dashboard when no file/runtime is active', async () => {
     testState.pathname = '/home';
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
 
@@ -73,10 +82,10 @@ describe('SessionAwareAppShell', () => {
 
     expect(screen.queryByTestId('onboarding')).not.toBeInTheDocument();
     expect(screen.queryByTestId('session-sidebar')).not.toBeInTheDocument();
-    await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/saves'));
+    await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/dashboard'));
   });
 
-  it('renders the existing shell for active sessions and redirects Home to the default route', async () => {
+  it('keeps the dashboard visible with an active file and redirects Home to the dashboard', async () => {
     testState.snapshot = { status: 'active', authorizationExpiresAt: null, syncState: 'synced', account: { displayName: 'Jacques Regiani' }, accountId: 'account-1', runtime: {}, fileName: 'profile.nutridiet', error: null };
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
 
@@ -87,7 +96,43 @@ describe('SessionAwareAppShell', () => {
 
     testState.pathname = '/home';
     render(<SessionAwareAppShell><div data-testid="home-content">Home</div></SessionAwareAppShell>);
-    await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/pacientes'));
+    await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/dashboard'));
+  });
+
+  it('renders the dashboard shell for a complete account without a file', async () => {
+    testState.pathname = '/dashboard';
+    testState.snapshot = { status: 'empty', authorizationExpiresAt: null, syncState: 'unbound', account: null, accountId: 'stale-local-account', runtime: null, fileName: null, error: null };
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
+
+    render(<SessionAwareAppShell><div data-testid="dashboard-content">Dashboard sem arquivo</div></SessionAwareAppShell>);
+
+    await waitFor(() => expect(screen.getByTestId('dashboard-content')).toBeInTheDocument());
+    expect(screen.getByTestId('session-sidebar')).toBeInTheDocument();
+    expect(testState.replace).not.toHaveBeenCalled();
+    expect(testState.schedulerAccountIds.at(-1)).toBeNull();
+  });
+
+  it('keeps the dashboard visible when an authorized file is already active', async () => {
+    testState.pathname = '/dashboard';
+    testState.snapshot = { status: 'active', authorizationExpiresAt: null, syncState: 'synced', account: { displayName: 'Ana Lima' }, accountId: 'local-account', runtime: { account: { id: 'local-account' } }, fileName: 'profile.nutridiet', error: null };
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
+
+    render(<SessionAwareAppShell><div data-testid="dashboard-content">Dashboard com arquivo</div></SessionAwareAppShell>);
+
+    await waitFor(() => expect(screen.getByTestId('dashboard-content')).toBeInTheDocument());
+    expect(testState.replace).not.toHaveBeenCalled();
+    expect(testState.schedulerAccountIds.at(-1)).toBe('local-account');
+  });
+
+  it('sends a clinical module without an authorized file back to the dashboard', async () => {
+    testState.pathname = '/pacientes';
+    testState.snapshot = { status: 'empty', authorizationExpiresAt: null, syncState: 'unbound', account: null, accountId: null, runtime: null, fileName: null, error: null };
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
+
+    render(<SessionAwareAppShell><div data-testid="clinical-content">Paciente</div></SessionAwareAppShell>);
+
+    expect(screen.queryByTestId('clinical-content')).not.toBeInTheDocument();
+    await waitFor(() => expect(testState.replace).toHaveBeenCalledWith('/dashboard'));
   });
 
   it('preserves a paused runtime inside the app shell without restoring a file automatically', async () => {

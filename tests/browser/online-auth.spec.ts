@@ -39,9 +39,9 @@ test('confirms an account, logs in, recovers and resets the password, rejects OT
   await page.getByLabel('Senha', { exact: true }).fill(password);
   const loginResponse = await submitAndWait(page, 'Entrar', '/api/auth/login');
   expect(loginResponse.status()).toBe(200);
-  await expect(page).toHaveURL(/\/saves$/, { timeout: 30_000 });
-  await expect(page.getByRole('heading', { name: 'Seus saves' })).toBeVisible();
-  await expect(page.getByRole('navigation')).not.toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Navegação principal' })).toBeVisible();
 
   const sessionResponse = await page.request.get('/api/auth/session');
   expect(sessionResponse.ok()).toBe(true);
@@ -81,7 +81,7 @@ test('confirms an account, logs in, recovers and resets the password, rejects OT
   await page.getByLabel('Senha', { exact: true }).fill(resetPassword);
   const updatedPasswordResponse = await submitAndWait(page, 'Entrar', '/api/auth/login');
   expect(updatedPasswordResponse.status()).toBe(200);
-  await expect(page).toHaveURL(/\/saves$/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
   const logoutResponse = await submitAndWait(page, 'Sair', '/api/auth/logout');
   expect(logoutResponse.status()).toBe(204);
   await expect(page).toHaveURL(/\/login$/);
