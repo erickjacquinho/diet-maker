@@ -106,6 +106,8 @@ export async function registerSaveRecord(
   input: SaveRegistryInsert,
 ): Promise<{ record: SaveRegistryRecord; created: boolean } | null> {
   return withOwnerTransaction(input.ownerId, async (transaction) => {
+    // Serialize registrations for the owner so concurrent requests cannot create a second save.
+    await transaction.execute(sql`SELECT owner_id FROM private.professional_profiles WHERE owner_id = ${input.ownerId} FOR UPDATE`);
     const findByIdempotencyKey = () => transaction
       .select()
       .from(saves)
@@ -122,6 +124,10 @@ export async function registerSaveRecord(
 
     const [byLocalAccountId] = await findByLocalAccountId();
     if (byLocalAccountId) return { record: byLocalAccountId, created: false };
+
+    const [existingSave] = await transaction.select({ id: saves.id }).from(saves)
+      .where(eq(saves.ownerId, input.ownerId)).limit(1);
+    if (existingSave) return null;
 
     const { rows } = await transaction.execute(sql`
       INSERT INTO private.saves (

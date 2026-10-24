@@ -5,7 +5,7 @@ import { BackupApplicationError } from '@/lib/application/backup-application';
 import { useSaveManagement } from '@/app/navigation/useSaveManagement';
 
 function SaveManagementTest() {
-  const management = useSaveManagement(true, async () => undefined);
+  const management = useSaveManagement(true);
   return <>{management.content}{management.dialogs}</>;
 }
 
@@ -68,7 +68,7 @@ describe('Settings saves backup actions', () => {
     });
     vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith('/api/saves?')) return Response.json({ items: [], totalRows: 0 });
+      if (url.startsWith('/api/saves?')) return Response.json({ items: [], totalRows: 0, canCreate: true });
       if (url === '/api/auth/session') return Response.json({ user: { id: 'owner-1' } });
       throw new Error(`Unexpected request: ${url}`);
     }));

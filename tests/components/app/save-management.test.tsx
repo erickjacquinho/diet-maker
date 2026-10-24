@@ -51,7 +51,7 @@ vi.mock('@/lib/infrastructure/file-system-access/browser-save-file', () => ({
 import { useSaveManagement } from '@/app/navigation/useSaveManagement';
 
 function SaveManagementTest() {
-  const management = useSaveManagement(true, async () => undefined);
+  const management = useSaveManagement(true);
   return <>{management.content}{management.dialogs}</>;
 }
 
@@ -59,7 +59,7 @@ function stubFetch(items: unknown[] = [], totalRows = items.length) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.startsWith('/api/saves?')) {
-      return Response.json({ items, totalRows, pageIndex: 0, pageSize: 50 });
+      return Response.json({ items, totalRows, canCreate: totalRows === 0, pageIndex: 0, pageSize: 50 });
     }
     if (url === '/api/auth/session') return Response.json({ user: { id: ownerId } });
     throw new Error(`Unexpected request: ${url}`);
@@ -104,15 +104,22 @@ describe('SaveManagementTest', () => {
     expect(screen.queryByText(/Nenhum arquivo associado/)).not.toBeInTheDocument();
   });
 
-  it('routes create, import, open, locate and legacy adoption through the existing profile session', async () => {
-    testState.snapshot = { ...testState.snapshot, protectedCopyRequired: true };
-    stubFetch([{ saveId, label: 'Clínica Ana', createdAt: '2026-10-10T12:00:00.000Z' }]);
+  it('creates a save only after the backend enables creation', async () => {
+    stubFetch();
     render(<SaveManagementTest />);
-
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Criar save' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Criar save' }));
     fireEvent.change(await screen.findByLabelText('Nome'), { target: { value: 'Consultório Ana' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar profile' }));
     await waitFor(() => expect(testState.createProfile).toHaveBeenCalledWith({ displayName: 'Consultório Ana', phone: '' }));
+  });
+
+  it('routes import, open, locate and legacy adoption through the existing profile session', async () => {
+    testState.snapshot = { ...testState.snapshot, protectedCopyRequired: true };
+    stubFetch([{ saveId, label: 'Clínica Ana', createdAt: '2026-10-10T12:00:00.000Z' }]);
+    render(<SaveManagementTest />);
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled());
 
     fireEvent.click(screen.getByRole('button', { name: 'Importar arquivo' }));
     await waitFor(() => expect(testState.loadProfile).toHaveBeenCalledOnce());

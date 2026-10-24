@@ -24,6 +24,7 @@ const saveIdPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
 interface SaveCatalogPage {
   items: SaveCatalogItem[];
   totalRows: number;
+  canCreate: boolean;
 }
 
 type ExportState = 'idle' | 'loading' | 'error';
@@ -62,7 +63,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseCatalogPage(value: unknown): SaveCatalogPage {
-  if (!isRecord(value) || !Array.isArray(value.items) || !Number.isSafeInteger(value.totalRows) || (value.totalRows as number) < 0) {
+  if (!isRecord(value) || !Array.isArray(value.items) || typeof value.canCreate !== 'boolean' || !Number.isSafeInteger(value.totalRows) || (value.totalRows as number) < 0) {
     throw new Error('O catálogo de saves retornou uma resposta inválida.');
   }
   const items = value.items.map((row): SaveCatalogItem => {
@@ -75,7 +76,7 @@ function parseCatalogPage(value: unknown): SaveCatalogPage {
     return { saveId: row.saveId, label: row.label, createdAt: row.createdAt };
   });
   if (items.length > pageSize) throw new Error('O catálogo de saves excedeu o limite da página.');
-  return { items, totalRows: value.totalRows as number };
+  return { items, totalRows: value.totalRows as number, canCreate: value.canCreate };
 }
 
 function catalogError(response: Response, body: unknown): string {
@@ -95,15 +96,17 @@ function locationErrorState(error: unknown): SaveLocationState | null {
   return null;
 }
 
-export function useSaveManagement(enabled: boolean, onSignOut: () => Promise<void>) {
+export function useSaveManagement(enabled: boolean) {
   const session = getBrowserProfileSession();
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const autoOpenAttemptRef = useRef<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [items, setItems] = useState<SaveCatalogItem[]>([]);
   const [totalRows, setTotalRows] = useState(0);
+  const [canCreate, setCanCreate] = useState(false);
   const [locations, setLocations] = useState<Record<string, SaveLocationState>>({});
   const [associations, setAssociations] = useState<Record<string, SaveFileAssociation>>({});
   const [loading, setLoading] = useState(true);
@@ -260,6 +263,7 @@ export function useSaveManagement(enabled: boolean, onSignOut: () => Promise<voi
         if (cancelled) return;
         setItems(page.items);
         setTotalRows(page.totalRows);
+        setCanCreate(page.canCreate);
         setLocations(Object.fromEntries(page.items.map(({ saveId }) => [saveId, 'checking'])));
 
         const authResponse = await fetch('/api/auth/session', { cache: 'no-store', signal: controller.signal });
@@ -325,6 +329,32 @@ export function useSaveManagement(enabled: boolean, onSignOut: () => Promise<voi
     }
   };
 
+  useEffect(() => {
+    if (
+      !enabled || loading || catalogErrorMessage || pageIndex !== 0 || totalRows > pageSize
+      || snapshot.status !== 'empty' || snapshot.protectedCopyRequired || snapshot.error
+    ) return;
+
+    const locatedSaveIds = items.filter(({ saveId }) => locations[saveId] === 'located').map(({ saveId }) => saveId);
+    if (locatedSaveIds.length !== 1) return;
+    const [saveId] = locatedSaveIds;
+    const association = associations[saveId];
+    const attemptKey = association ? `${association.ownerId}:${saveId}` : null;
+    if (!association || locations[saveId] !== 'located' || autoOpenAttemptRef.current === attemptKey) return;
+    autoOpenAttemptRef.current = attemptKey;
+
+    void (async () => {
+      try {
+        await session.openSave(saveId, association);
+        if (session.getSnapshot().syncState === 'pending') await session.sync();
+      } catch (error) {
+        const state = locationErrorState(error);
+        if (state) setLocations((current) => ({ ...current, [saveId]: state }));
+        toast.error(error instanceof Error ? error.message : 'O arquivo associado não pôde ser sincronizado automaticamente.');
+      }
+    })();
+  }, [enabled, loading, catalogErrorMessage, pageIndex, totalRows, items, snapshot.status, snapshot.protectedCopyRequired, snapshot.error, associations, locations, session]);
+
   return {
     overlayOpen: createOpen || restoreDialogOpen,
     busy: snapshot.status === 'busy' || isExporting || isRestoring,
@@ -332,6 +362,7 @@ export function useSaveManagement(enabled: boolean, onSignOut: () => Promise<voi
       <SavesDashboard
         items={items}
         totalRows={totalRows}
+        canCreate={canCreate}
         pageIndex={pageIndex}
         pageSize={pageSize}
         locations={locations}
@@ -344,7 +375,6 @@ export function useSaveManagement(enabled: boolean, onSignOut: () => Promise<voi
         onPageChange={setPageIndex}
         onCreateRequest={() => setCreateOpen(true)}
         onImport={() => runSessionAction(() => session.loadProfile())}
-        onSignOut={onSignOut}
         onOpen={(saveId) => runSessionAction(() => session.openSave(saveId, associations[saveId]), saveId)}
         onLocate={(saveId) => runSessionAction(() => session.locateSave(saveId), saveId)}
         onAdoptLegacy={() => runSessionAction(() => session.adoptLegacyProfile())}

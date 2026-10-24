@@ -22,7 +22,7 @@ Herda [overlays](../../categories/overlays.md). Trait autorizado: `async`.
 
 ## Specific anatomy
 
-Dialog com título "Configurações", descrição de escopo e `Tabs` com duas abas:
+Dialog com título "Configurações", descrição de escopo e `Tabs` com duas abas. A altura usa `--cmp-dialog-max-height` e permanece igual ao alternar abas; cabeçalho e navegação ficam fixos, com rolagem no conteúdo da aba:
 
 - **Perfil profissional**: seções Conta e acesso (e-mail de acesso somente leitura e redefinição de senha pelo fluxo existente), Identificação (nome, sobrenome, título, CRN), Atuação (experiência, média de pacientes, modalidade, especialidades, apresentação), Contato e consultório (e-mail de contato, telefone, Instagram, site, consultório, cidade, UF) Lembretes da agenda (ativar ou silenciar avisos sem remover agendamentos) e Documentos (envio/remoção de logotipo PNG e exibição nos PDFs com prévia da assinatura). Rodapé com "Descartar alterações" e "Salvar perfil".
 - **Saves**: catálogo da conta e ações de criar, importar, abrir, localizar, proteger cópia legada e exportar/restaurar backup; nome do save e telefone do consultório, arquivo e estado de sincronização em lista descritiva, ação "Sincronizar agora" e rodapé com "Descartar alterações" e "Salvar configurações do save".
@@ -36,7 +36,7 @@ Dialog com título "Configurações", descrição de escopo e `Tabs` com duas ab
 - perfil carregando, com erro recuperável ("Tentar novamente") ou pronto;
 - erros de validação por campo com `aria-invalid`, mensagem associada e foco no primeiro campo inválido;
 - salvamento em andamento com `aria-busy` e botão em `loading`; retorno de sucesso em `status` e de falha em `alert`;
-- aba Saves sem save aberto mantém o catálogo e as ações de criar/abrir disponíveis; save não editável desabilita campos e ações;
+- aba Saves sem save aberto mantém o catálogo e a ação de abrir disponíveis; criar depende da permissão do backend; save não editável desabilita campos e ações;
 - `savesContent` recebe o gerenciamento do consumidor; ações ficam bloqueadas enquanto houver configurações pendentes;
 - `suspended` pausa o modal durante criação/restauração, retomando a mesma aba sem empilhar overlays; `busy` impede fechamento durante operações;
 - redefinição de senha anuncia envio ou erro e permite repetir; a ação não altera a senha no modal;

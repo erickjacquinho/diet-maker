@@ -12,7 +12,7 @@ test('manages saves inside Settings and returns from creation without stacking d
         profile: { firstName: 'Ana', lastName: 'Souza', averagePatientsPerMonth: 40, experience: { kind: 'years', value: 5 } },
       } });
     } else if (path === '/api/saves') {
-      await route.fulfill({ json: { items: [], totalRows: 0 } });
+      await route.fulfill({ json: { items: [], totalRows: 0, canCreate: true } });
     } else {
       await route.fulfill({ status: 503, json: { code: 'UNAVAILABLE' } });
     }
@@ -32,6 +32,11 @@ test('manages saves inside Settings and returns from creation without stacking d
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const box = await settings.boundingBox();
     expect(box).not.toBeNull();
+    await expect(settings.getByRole('button', { name: 'Sair', exact: true })).toHaveCount(0);
+    await settings.getByRole('tab', { name: 'Perfil profissional', exact: true }).click();
+    await expect.poll(async () => (await settings.boundingBox())!.height).toBeCloseTo(box!.height, 0);
+    await settings.getByRole('tab', { name: 'Saves', exact: true }).click();
+    await expect.poll(async () => (await settings.boundingBox())!.height).toBeCloseTo(box!.height, 0);
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(width);
     await page.screenshot({ path: test.info().outputPath(`${width}-settings-saves.png`) });
@@ -68,7 +73,7 @@ test('persists reminder preferences and logo through the profile API and request
       recovery = route.request().postDataJSON();
       await route.fulfill({ status: 202, json: {} });
     } else if (path === '/api/saves') {
-      await route.fulfill({ json: { items: [], totalRows: 0 } });
+      await route.fulfill({ json: { items: [], totalRows: 0, canCreate: true } });
     } else {
       await route.fulfill({ status: 503, json: { code: 'UNAVAILABLE' } });
     }

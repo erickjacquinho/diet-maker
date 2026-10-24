@@ -8,6 +8,7 @@ function renderDashboard(overrides: Partial<SavesDashboardProps> = {}) {
   const props: SavesDashboardProps = {
     items: [save],
     totalRows: 1,
+    canCreate: true,
     pageIndex: 0,
     pageSize: 50,
     locations: { 'save-a': 'located' },
@@ -18,7 +19,6 @@ function renderDashboard(overrides: Partial<SavesDashboardProps> = {}) {
     onPageChange: vi.fn(),
     onCreateRequest: vi.fn(),
     onImport: vi.fn(async () => undefined),
-    onSignOut: vi.fn(async () => undefined),
     onOpen: vi.fn(async () => undefined),
     onLocate: vi.fn(async () => undefined),
     onAdoptLegacy: vi.fn(async () => undefined),
@@ -78,7 +78,6 @@ describe('SavesDashboard', () => {
 
     expect(screen.getByRole('button', { name: 'Criar save' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Importar arquivo' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sair' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Proteger cÃ³pia importada' })).toBeInTheDocument();
     expect(screen.getByText(/53 saves/)).toBeInTheDocument();
 
@@ -95,12 +94,14 @@ describe('SavesDashboard', () => {
     expect(props.onPageChange).toHaveBeenCalledWith(1);
   });
 
-  it('lets an account with no local saves sign out from the dashboard', async () => {
-    const { props } = renderDashboard({ items: [], totalRows: 0 });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
-
-    await waitFor(() => expect(props.onSignOut).toHaveBeenCalledOnce());
+  it('disables creation when the backend denies it and has no logout action', () => {
+    const { props, rerender } = renderDashboard({ canCreate: false });
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Sair' })).not.toBeInTheDocument();
+    rerender(<SavesDashboard {...props} canCreate loading />);
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
+    rerender(<SavesDashboard {...props} canCreate error="Catálogo indisponível" />);
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
   });
 
   it('announces loading, empty and error states and surfaces action failures', async () => {

@@ -21,6 +21,7 @@
 }
 
 @layer components {
+  .settings-dialog { height: var(--cmp-dialog-max-height); }
   .meal-time-options {
     scrollbar-color: transparent transparent;
     scrollbar-width: thin;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, FolderOpen, LogOut, MapPin, Plus, Upload } from 'lucide-react';
+import { Download, FolderOpen, MapPin, Plus, Upload } from 'lucide-react';
 import { Badge, Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
 import { Card } from '@/components/ui/card';
@@ -17,6 +17,7 @@ export type SaveLocationState = 'checking' | 'located' | 'not-located' | 'permis
 export interface SavesDashboardProps {
   items: SaveCatalogItem[];
   totalRows: number;
+  canCreate: boolean;
   pageIndex: number;
   pageSize: number;
   locations: Record<string, SaveLocationState>;
@@ -29,7 +30,6 @@ export interface SavesDashboardProps {
   onPageChange(pageIndex: number): void;
   onCreateRequest(): void;
   onImport(): Promise<void>;
-  onSignOut(): Promise<void>;
   onOpen(saveId: string): Promise<void>;
   onLocate(saveId: string): Promise<void>;
   onAdoptLegacy(): Promise<void>;
@@ -53,6 +53,7 @@ function formatCreatedAt(value: string): string {
 export function SavesDashboard({
   items,
   totalRows,
+  canCreate,
   pageIndex,
   pageSize,
   locations,
@@ -65,7 +66,6 @@ export function SavesDashboard({
   onPageChange,
   onCreateRequest,
   onImport,
-  onSignOut,
   onOpen,
   onLocate,
   onAdoptLegacy,
@@ -139,15 +139,11 @@ export function SavesDashboard({
           <p className="text-style-body-small text-text-secondary">Crie, importe ou abra os arquivos associados à sua conta.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="button" variant="quiet" disabled={Boolean(busy)} onClick={() => void runAction('sign-out', onSignOut)}>
-            <LogOut size={16} aria-hidden="true" />
-            Sair
-          </Button>
           <Button type="button" variant="secondary" disabled={Boolean(busy)} onClick={() => void runAction('import', onImport)}>
             <FolderOpen size={16} aria-hidden="true" />
             Importar arquivo
           </Button>
-          <Button type="button" variant="primary" disabled={Boolean(busy)} onClick={onCreateRequest}>
+          <Button type="button" variant="primary" disabled={Boolean(busy) || loading || Boolean(error) || !canCreate} onClick={onCreateRequest}>
             <Plus size={16} aria-hidden="true" />
             Criar save
           </Button>

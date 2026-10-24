@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { SidebarNav, type SidebarNavProps } from '@/components/organisms/SidebarNav';
@@ -26,7 +26,6 @@ const EMPTY_PROFILE_SESSION = {
 
 export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> = (props) => {
   const pathname = usePathname() ?? '';
-  const router = useRouter();
   let getProfileSession: typeof browserComposition.getBrowserProfileSession | undefined;
   try {
     getProfileSession = browserComposition.getBrowserProfileSession;
@@ -44,13 +43,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<'profile' | 'save'>('profile');
-  const saveManagement = useSaveManagement(settingsOpen, async () => {
-    if (props.onSignOut) { await props.onSignOut(); return; }
-    await browserComposition.getBrowserProfileSession().signOut();
-    await browserComposition.signOutBrowserAccount();
-    professionalProfileStore.reset();
-    router.replace('/login');
-  });
+  const saveManagement = useSaveManagement(settingsOpen || pathname === '/dashboard');
   const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: 'status' | 'error'; message: string }>();

@@ -377,7 +377,7 @@ export function SettingsDialog({
   return (
     <>
       <Dialog open={open && !suspended && !discardOpen} onOpenChange={requestOpenChange}>
-        <DialogContent className="max-h-screen max-w-3xl overflow-y-auto" onCloseAutoFocus={(event) => {
+        <DialogContent className="settings-dialog flex max-h-screen max-w-3xl flex-col overflow-hidden" onCloseAutoFocus={(event) => {
           if (suspended || discardOpen) event.preventDefault();
           else onCloseAutoFocus?.(event);
         }}>
@@ -388,9 +388,9 @@ export function SettingsDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <fieldset disabled={busy} className="min-w-0">
-            <Tabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)} className="flex flex-col gap-4">
-              <TabsList className="self-start">
+          <fieldset disabled={busy} className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <Tabs value={tab} onValueChange={(value) => setTab(value as SettingsTab)} className="flex min-h-0 flex-1 flex-col gap-4">
+              <TabsList className="shrink-0 self-start">
                 <TabsTrigger value="profile" className="gap-2">
                   <UserRound className="size-4" aria-hidden="true" />
                   Perfil profissional
@@ -401,7 +401,7 @@ export function SettingsDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="profile">
+              <TabsContent value="profile" className="min-h-0 flex-1 overflow-y-auto">
                 {!draft ? (
                   <div className="flex flex-col items-start gap-3 py-4">
                     {profile.status === 'error' ? (
@@ -599,7 +599,7 @@ export function SettingsDialog({
                 )}
               </TabsContent>
 
-              <TabsContent value="save" className="space-y-6">
+              <TabsContent value="save" className="min-h-0 flex-1 space-y-6 overflow-y-auto">
                 <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing || readingLogo || resettingPassword} className="min-w-0">
                   <legend className="sr-only">Gerenciar saves e backups</legend>
                   {savesContent}
