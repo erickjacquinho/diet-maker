@@ -105,6 +105,39 @@ describe('SettingsDialog', () => {
     expect(openFile).toBeEnabled();
   });
 
+  it('shows subscription as an informational tab without save controls', () => {
+    const { dialog } = renderDialog({ defaultTab: 'subscription' });
+
+    expect(within(dialog).getByRole('tab', { name: 'Assinatura' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(dialog).getByText('A gestão da assinatura estará disponível em breve.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Aqui você poderá gerenciar plano, ciclo de cobrança, renovação automática, pagamento, faturas e cancelamento.')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('form')).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: /Salvar|Descartar alterações/ })).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(/R\$|vencimento|pagamento pendente/i)).not.toBeInTheDocument();
+  });
+
+  it('preserves a profile draft while switching to subscription and keeps the discard guard', async () => {
+    const { props, dialog } = renderDialog();
+
+    fireEvent.change(within(dialog).getByLabelText(/^Nome/), { target: { value: 'Ana Maria' } });
+    fireEvent.mouseDown(await within(dialog).findByRole('tab', { name: 'Assinatura' }), { button: 0 });
+    expect(within(dialog).getByText('A gestão da assinatura estará disponível em breve.')).toBeInTheDocument();
+    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Perfil profissional' }), { button: 0 });
+    expect(within(dialog).getByLabelText(/^Nome/)).toHaveValue('Ana Maria');
+
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    expect(await screen.findByRole('alertdialog', { name: 'Descartar alterações?' })).toBeInTheDocument();
+    expect(props.onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps subscription informational while a modal operation is busy', () => {
+    const { props, dialog } = renderDialog({ busy: true, defaultTab: 'subscription' });
+
+    expect(within(dialog).getByText('A gestão da assinatura estará disponível em breve.')).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    expect(props.onOpenChange).not.toHaveBeenCalled();
+  });
+
   it('keeps Settings open while a file operation is busy', () => {
     const { props, dialog } = renderDialog({ busy: true, defaultTab: 'save' });
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });

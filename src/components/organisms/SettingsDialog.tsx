@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
-import { HardDrive, RefreshCw, UserRound } from 'lucide-react';
+import { CreditCard, HardDrive, RefreshCw, UserRound } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/atoms/Button';
 import { Checkbox } from '@/components/atoms/Checkbox';
@@ -25,7 +25,7 @@ import {
 } from '@/lib/domain/professional-profile';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 
-export type SettingsTab = 'profile' | 'save';
+export type SettingsTab = 'profile' | 'save' | 'subscription';
 export type SettingsSaveSyncState = 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
 
 export interface SettingsProfileState {
@@ -384,7 +384,7 @@ export function SettingsDialog({
           <DialogHeader>
             <DialogTitle className={textStyle('dialog-title')}>Configurações</DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Gerencie seu perfil profissional, os saves da conta e os backups dos arquivos locais.
+              Gerencie seu perfil profissional, sua assinatura e os saves da conta.
             </DialogDescription>
           </DialogHeader>
 
@@ -398,6 +398,10 @@ export function SettingsDialog({
                 <TabsTrigger value="save" className="gap-2">
                   <HardDrive className="size-4" aria-hidden="true" />
                   Saves
+                </TabsTrigger>
+                <TabsTrigger value="subscription" className="gap-2">
+                  <CreditCard className="size-4" aria-hidden="true" />
+                  Assinatura
                 </TabsTrigger>
               </TabsList>
 
@@ -597,6 +601,15 @@ export function SettingsDialog({
                     </FormFooter>
                   </form>
                 )}
+              </TabsContent>
+
+              <TabsContent value="subscription" className="min-h-0 flex-1 overflow-y-auto">
+                <div className="flex flex-col gap-2 py-4">
+                  <p className={textStyle('body')}>A gestão da assinatura estará disponível em breve.</p>
+                  <p className={textStyle('body-secondary')}>
+                    Aqui você poderá gerenciar plano, ciclo de cobrança, renovação automática, pagamento, faturas e cancelamento.
+                  </p>
+                </div>
               </TabsContent>
 
               <TabsContent value="save" className="min-h-0 flex-1 space-y-6 overflow-y-auto">

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const routeState = vi.hoisted(() => ({ pathname: '/pacientes' }));
 const profileSnapshot = vi.hoisted(() => ({
@@ -9,6 +9,8 @@ const profileSnapshot = vi.hoisted(() => ({
   account: null, accountId: null, runtime: null, fileName: null,
   hydration: 'ready', resumeFileName: null, error: null, protectedCopyRequired: false,
 }));
+
+const saveManagement = vi.hoisted(() => ({ overlayOpen: false, busy: false, content: null as any, dialogs: null as any }));
 
 const professionalProfile = vi.hoisted(() => ({
   snapshot: {
@@ -50,7 +52,20 @@ vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientRuntime: vi.fn(),
 }));
 
+vi.mock('@/app/navigation/useSaveManagement', () => ({
+  useSaveManagement: () => saveManagement,
+}));
+
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
+
+beforeEach(() => {
+  routeState.pathname = '/pacientes';
+  saveManagement.overlayOpen = false;
+  saveManagement.busy = false;
+  saveManagement.content = null;
+  saveManagement.dialogs = null;
+  profileSnapshot.status = 'empty';
+});
 
 describe('SidebarNavigationAdapter boundary', () => {
   it('supplies the application pathname and seven production destinations to SidebarNav', () => {
@@ -108,7 +123,7 @@ describe('SidebarNavigationAdapter boundary', () => {
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
-    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Saves']);
+    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Saves', 'Assinatura']);
     expect(within(dialog).getByLabelText(/^Nome/)).toHaveValue('Ana');
     expect(within(dialog).getByLabelText(/CRN/)).toHaveValue('CRN-3 12345');
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -138,5 +153,41 @@ describe('SidebarNavigationAdapter boundary', () => {
 
     expect(onOpenAccount).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('opens subscription directly from its event and restores focus to the trigger', async () => {
+    render(<SidebarNavigationAdapter />);
+    const trigger = document.createElement('button');
+    trigger.textContent = 'Gerenciar assinatura';
+    document.body.append(trigger);
+    trigger.focus();
+
+    act(() => window.dispatchEvent(new Event('nutridiet:open-subscription')));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
+    expect(within(dialog).getByRole('tab', { name: 'Assinatura' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(dialog).getByText('A gestão da assinatura estará disponível em breve.')).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
+    trigger.remove();
+  });
+
+  it.each(['busy', 'overlayOpen'] as const)('ignores the subscription event while %s', async (guard) => {
+    const view = render(<SidebarNavigationAdapter />);
+    const accountTrigger = screen.getByRole('button', { name: /^Abrir menu de conta/ });
+    fireEvent.pointerDown(accountTrigger, { button: 0 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
+    expect(await screen.findByRole('dialog', { name: 'Configurações' })).toBeInTheDocument();
+
+    saveManagement[guard] = true;
+    view.rerender(<SidebarNavigationAdapter />);
+    act(() => window.dispatchEvent(new Event('nutridiet:open-subscription')));
+    saveManagement[guard] = false;
+    view.rerender(<SidebarNavigationAdapter />);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
+    expect(within(dialog).getByRole('tab', { name: 'Perfil profissional' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(dialog).getByRole('tab', { name: 'Assinatura' })).toHaveAttribute('aria-selected', 'false');
   });
 });

@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Reunir em um único modal as configurações do perfil profissional (válido para toda a conta) e as configurações do save aberto (válidas apenas para o arquivo atual).
+Reunir em um único modal as configurações do perfil profissional (válido para toda a conta), a informação sobre gestão de assinatura e as configurações do save aberto (válidas apenas para o arquivo atual).
 
 ## Category inheritance
 
@@ -22,14 +22,15 @@ Herda [overlays](../../categories/overlays.md). Trait autorizado: `async`.
 
 ## Specific anatomy
 
-Dialog com título "Configurações", descrição de escopo e `Tabs` com duas abas. A altura usa `--cmp-dialog-max-height` e permanece igual ao alternar abas; cabeçalho e navegação ficam fixos, com rolagem no conteúdo da aba:
+Dialog com título "Configurações", descrição de escopo e `Tabs` com três abas. A altura usa `--cmp-dialog-max-height` e permanece igual ao alternar abas; cabeçalho e navegação ficam fixos, com rolagem no conteúdo da aba:
 
 - **Perfil profissional**: seções Conta e acesso (e-mail de acesso somente leitura e redefinição de senha pelo fluxo existente), Identificação (nome, sobrenome, título, CRN), Atuação (experiência, média de pacientes, modalidade, especialidades, apresentação), Contato e consultório (e-mail de contato, telefone, Instagram, site, consultório, cidade, UF) Lembretes da agenda (ativar ou silenciar avisos sem remover agendamentos) e Documentos (envio/remoção de logotipo PNG e exibição nos PDFs com prévia da assinatura). Rodapé com "Descartar alterações" e "Salvar perfil".
 - **Saves**: catálogo da conta e ações de criar, importar, abrir, localizar, proteger cópia legada e exportar/restaurar backup; nome do save e telefone do consultório, arquivo e estado de sincronização em lista descritiva, ação "Sincronizar agora" e rodapé com "Descartar alterações" e "Salvar configurações do save".
+- **Assinatura**: conteúdo informativo indicando disponibilidade futura da gestão de plano, ciclo de cobrança, renovação, pagamento, faturas e cancelamento; sem formulário, estado financeiro, dados de cobrança ou ações de salvar.
 
 ## Allowed variants
 
-`defaultTab` escolhe a aba inicial (`profile` ou `save`). Não há variantes visuais próprias.
+`defaultTab` escolhe a aba inicial (`profile`, `save` ou `subscription`). Não há variantes visuais próprias.
 
 ## Particular states
 

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { SidebarNav, type SidebarNavProps } from '@/components/organisms/SidebarNav';
-import { SettingsDialog, type SaveSettingsInput } from '@/components/organisms/SettingsDialog';
+import { SettingsDialog, type SaveSettingsInput, type SettingsTab } from '@/components/organisms/SettingsDialog';
 import type { ProfileSessionSnapshot } from '@/lib/application/profile-session';
 import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
 import { getProfessionalFullName, getProfessionalTitle, type ProfessionalProfile } from '@/lib/domain/professional-profile';
@@ -42,7 +42,7 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     professionalProfileStore.getSnapshot,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<'profile' | 'save'>('profile');
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
   const saveManagement = useSaveManagement(settingsOpen || pathname === '/dashboard');
   const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
@@ -57,6 +57,17 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     window.addEventListener('nutridiet:open-saves', openSaves);
     return () => window.removeEventListener('nutridiet:open-saves', openSaves);
   }, []);
+
+  useEffect(() => {
+    const openSubscription = () => {
+      if (saveManagement.overlayOpen || saveManagement.busy) return;
+      settingsTriggerRef.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
+      setSettingsTab('subscription');
+      setSettingsOpen(true);
+    };
+    window.addEventListener('nutridiet:open-subscription', openSubscription);
+    return () => window.removeEventListener('nutridiet:open-subscription', openSubscription);
+  }, [saveManagement.busy, saveManagement.overlayOpen]);
 
   useEffect(() => {
     void professionalProfileStore.load();
