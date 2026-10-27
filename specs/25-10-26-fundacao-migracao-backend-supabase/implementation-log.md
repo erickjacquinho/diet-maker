@@ -106,3 +106,13 @@ Escopo: o checklist da tarefa, aplicado ao diff (a skill `security-audit` comple
 ## T030
 
 `refs/dieta-db/15-esquema-transferencia-backend-supabase.md` e `refs/dieta-db/index.md` registram a F0 como implementada na branch (sem merge) e **não validada** no remoto, citando `validation-report.md` (todo "proposto"). `npm run verify:links` limpo.
+
+## Convergência (speckit-converge), iteração 1
+
+Auditoria final (Estado 5) concluída antes: suíte completa, lint, type-check, build, varredura, integração e browser verdes (T024); rastreabilidade FR/SC → tarefa → arquivo/teste conferida; segurança do diff sem achado (T026).
+
+Achado único, `contradicts`, FR-018: o texto do requisito é inatingível com o código existente (ver T031 e a seção T015). Não é corrigível dentro do escopo sem alterar requisito/contrato, que exige decisão humana; `spec.md` e `plan.md` não foram tocados (append-only). Demais itens verificados sem lacuna: FR-001–FR-017, FR-019–FR-021, FR-023, NFR-001, NFR-003, NFR-004, SC-001–SC-005.
+
+Itens que dependem de ação externa e continuam abertos por regra (não são achados de código): T025 (push/PR e duração da CI, NFR-002/SC-006 — pendente do OK do usuário) e T027–T029 (mantenedor; FR-022/FR-022a/FR-022b, SC-007).
+
+Status: **iteração com achado; passada limpa ainda não obtida** (bloqueada por T031).

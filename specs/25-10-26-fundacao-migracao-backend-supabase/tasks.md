@@ -443,3 +443,7 @@ T015 tests/architecture/server-boundaries.test.ts
 | SC-005 | T024 |
 | SC-006 | T025 |
 | SC-007 | T028 |
+
+## Phase 12: Convergence
+
+- [ ] T031 CRITICAL-ADJACENT: Reconciliar FR-018, contracts/ci-checks.md §K3/§K4 e research R7 com o código do cliente: o grafo transitivo a partir de `src/components/**`, `src/hooks/**` e arquivos `use client` alcança `drizzle-orm` e `drizzle-orm/pglite` pelo banco local PGlite (`src/lib/infrastructure/local-db/**`), então "falhar se qualquer módulo de K3 for alcançável" é inatingível sem remover o banco local. O teste implementado proíbe transitivamente `@supabase/*`, `pg`, `drizzle-orm/node-postgres`, `src/lib/server/**` e `server-only`, e mantém a proibição de import direto de `drizzle-orm` (lint). Requer decisão do mantenedor para alterar o texto do requisito per FR-018 (contradicts)
