@@ -133,3 +133,7 @@ Status: **iteração com achado; passada limpa ainda não obtida** (bloqueada po
   - Diferença: **−1 min 09 s** (≤ 5 min; NFR-002 e SC-006 atendidos). Não foi preciso criar job paralelo (R5).
 - Custo dos passos novos no PR: `verify:client-isolation` 3 s; setup da CLI 2 s; `supabase start -x …` 1 min 13 s; senha local, advisors de segurança e de desempenho ≈ 3 s; testes de integração 13 s. Total ≈ 1 min 34 s. Os testes unitários dominam o job (≈ 7 min 48 s) e já existiam.
 - Advisors de segurança passaram sem alerta; a integração rodou (não foi pulada) com `app_runtime` local.
+
+## T027 (leituras dos passos 0–2, autorizadas)
+
+Rodadas só leituras: `supabase projects list`, `db push --linked --dry-run`, `ssl-enforcement get` e probes `curl`; copiado `supabase/.temp` do checkout principal (arquivos locais, ignorados pelo git) para o worktree. Resultado: região `sa-east-1` confere, mas o projeto `diet-maker` está **INACTIVE (pausado)**; dry-run falhou por IPv6/link e `ssl-enforcement` retornou 500; os probes deram `000`. Nada foi escrito no remoto e não foram usados db push, KEK, senha nem Vercel. T027 permanece aberta (evidência inválida) até o mantenedor restaurar o projeto. Registrado em `validation-report.md`.
