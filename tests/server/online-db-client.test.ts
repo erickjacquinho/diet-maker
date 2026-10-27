@@ -19,7 +19,7 @@ import { closeOnlineDatabase, getOnlineDatabase } from '../../src/lib/server/onl
 describe('online database TLS configuration', () => {
   beforeEach(() => {
     mocks.poolOptions.length = 0;
-    vi.stubEnv('ONLINE_DATABASE_URL', 'postgresql://online_runtime@pooler.example.com:6543/postgres');
+    vi.stubEnv('ONLINE_DATABASE_URL', 'postgresql://app_runtime@pooler.example.com:6543/postgres');
     vi.stubEnv('ONLINE_DATABASE_SSL_CA_B64', '');
   });
 
@@ -47,7 +47,7 @@ describe('online database TLS configuration', () => {
   });
 
   it('keeps local Supabase connections on the existing non-TLS path', () => {
-    vi.stubEnv('ONLINE_DATABASE_URL', 'postgresql://online_runtime@127.0.0.1:54322/postgres');
+    vi.stubEnv('ONLINE_DATABASE_URL', 'postgresql://app_runtime@127.0.0.1:54322/postgres');
     getOnlineDatabase();
     expect(mocks.poolOptions[0].ssl).toBe(false);
   });

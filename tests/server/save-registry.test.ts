@@ -31,7 +31,7 @@ describeLocal('private save registration and authorization routes', () => {
       || adminUrl.port !== '54322'
       || !['127.0.0.1', 'localhost', '::1'].includes(runtimeUrl.hostname)
       || runtimeUrl.port !== '54322'
-      || runtimeUrl.username !== 'online_runtime'
+      || runtimeUrl.username !== 'app_runtime'
     ) throw new Error('Save registry tests must use the local restricted Supabase runtime.');
 
     admin = new Pool({ connectionString: localDatabaseUrl!, max: 2 });

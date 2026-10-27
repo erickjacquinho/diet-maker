@@ -49,6 +49,23 @@ export default [
     },
   },
   {
+    // Browser-facing code must not reach database clients or server-only modules (FR-018)
+    files: ["src/components/**/*.{ts,tsx}", "src/hooks/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@supabase/*", "pg", "pg/*", "drizzle-orm", "drizzle-orm/*", "@/lib/server/**"],
+              message: "Browser-facing code must not import database clients or server modules. Move the access to src/lib/server.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       ".next/**",
       "node_modules/**",

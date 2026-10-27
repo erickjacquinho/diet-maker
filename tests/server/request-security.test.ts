@@ -185,7 +185,7 @@ describeLocalDatabase('durable request rate limits', () => {
       || adminConnection.port !== '54322'
       || !['127.0.0.1', 'localhost', '::1'].includes(runtimeConnection.hostname)
       || runtimeConnection.port !== '54322'
-      || runtimeConnection.username !== 'online_runtime'
+      || runtimeConnection.username !== 'app_runtime'
     ) {
       throw new Error('Rate-limit integration tests must use the local restricted runtime role.');
     }

@@ -31,7 +31,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Purpose**: Isolar a execução e comprovar o ambiente local.
 
-- [ ] T001 [skill: general] Criar o worktree `../diet-maker-f0` com a branch `feat/backend-foundation-f0` a partir de `main`:
+- [X] T001 [skill: general] Criar o worktree `../diet-maker-f0` com a branch `feat/backend-foundation-f0` a partir de `main`:
 
   ```bash
   git worktree add ../diet-maker-f0 -b feat/backend-foundation-f0 main
@@ -40,7 +40,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Copiar para ele `specs/25-10-26-fundacao-migracao-backend-supabase/` e apontar `.specify/feature.json` para esse diretório (R11).
 
   Verificação: `git -C ../diet-maker-f0 status --short` mostra só o diretório do SDD e `.specify/feature.json`, e a branch atual `feat/configuracoes-perfil-save` fica intacta.
-- [ ] T002 [skill: $supabase] Spike do Supabase local (R5), com o Docker ativo:
+- [X] T002 [skill: $supabase] Spike do Supabase local (R5), com o Docker ativo:
   1. Rodar `npx supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor` e `npx supabase db reset --local`.
   2. Confirmar que `auth.sessions` existe e medir o tempo de subida.
   3. Rodar `npx supabase db advisors --local --type security --level warn` sobre as migrations atuais, para ter a linha de base.
@@ -48,7 +48,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Registrar em `specs/25-10-26-fundacao-migracao-backend-supabase/implementation-log.md` o comando final, o tempo e os achados de baseline, com a decisão de cada um segundo a regra de R5.
 
   Verificação: o log tem as três medições. Se houver achado legado que exija alterar grants ou policies, parar e pedir decisão ao mantenedor.
-- [ ] T003 [skill: general] Acrescentar ao `package.json` o script `verify:client-isolation` (`node scripts/verify-client-isolation.mjs`), conforme contracts/ci-checks.md §K2. Verificação: `npm run` lista o script.
+- [X] T003 [skill: general] Acrescentar ao `package.json` o script `verify:client-isolation` (`node scripts/verify-client-isolation.mjs`), conforme contracts/ci-checks.md §K2. Verificação: `npm run` lista o script.
 
 ---
 
@@ -58,7 +58,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **⚠️ CRITICAL**: As fases US1, US3, US4 e US6 só começam depois desta.
 
-- [ ] T004 [skill: $tdd] RED: trocar `online_runtime` por `app_runtime` em seis testes (FR-010a, R9):
+- [X] T004 [skill: $tdd] RED: trocar `online_runtime` por `app_runtime` em seis testes (FR-010a, R9):
   - `tests/server/online-db.integration.test.ts`;
   - `online-db.repository.test.ts`;
   - `request-security.test.ts`;
@@ -69,7 +69,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Isso inclui a checagem de usuário da guarda `describeLocal` existente, que continua igual no resto.
 
   Verificação: com o banco de T002, `INTEGRAÇÃO` falha porque o papel `app_runtime` não existe.
-- [ ] T005 [skill: $database-migrations-pro] GREEN: criar a migration com `npx supabase migration new backend_foundation`. Escrever em `supabase/migrations/<timestamp>_backend_foundation.sql`:
+- [X] T005 [skill: $database-migrations-pro] GREEN: criar a migration com `npx supabase migration new backend_foundation`. Escrever em `supabase/migrations/<timestamp>_backend_foundation.sql`:
   - o bloco `DO` do rename, com os quatro estados de data-model.md §3;
   - `ALTER ROLE app_runtime SET statement_timeout = '5s'`;
   - `ALTER ROLE app_runtime SET idle_in_transaction_session_timeout = '10s'`.
@@ -77,7 +77,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Referências: FR-001, FR-005, contracts/database.md §D1.
 
   Verificação: depois de `npx supabase db reset --local` e da senha local (quickstart §1), `INTEGRAÇÃO` fica verde para os testes existentes de `private`.
-- [ ] T006 [skill: general] [P] Atualizar `online_runtime` → `app_runtime` em `.env.example`, `docs/setup/online-auth.md` e `refs/dieta-db/15-esquema-transferencia-backend-supabase.md`, sem tocar migrations aplicadas nem outros SDDs (FR-010a). Verificação: o comando abaixo só encontra o bloco de rename da nova migration e as menções históricas explícitas no texto.
+- [X] T006 [skill: general] [P] Atualizar `online_runtime` → `app_runtime` em `.env.example`, `docs/setup/online-auth.md` e `refs/dieta-db/15-esquema-transferencia-backend-supabase.md`, sem tocar migrations aplicadas nem outros SDDs (FR-010a). Verificação: o comando abaixo só encontra o bloco de rename da nova migration e as menções históricas explícitas no texto.
 
   ```bash
   git grep -n online_runtime -- . ':!supabase/migrations/20261011002435_online_account_saves.sql' ':!supabase/migrations/20261022120000_professional_profile_and_save_label_updates.sql' ':!specs/'
@@ -93,23 +93,23 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: `INTEGRAÇÃO` contra o Supabase local, filtrado para `backend-foundation`.
 
-- [ ] T007 [skill: $supabase] [US1] RED: criar `tests/server/backend-foundation.integration.test.ts` com a guarda `describeLocal` dos testes existentes (R9, NFR-001).
+- [X] T007 [skill: $supabase] [US1] RED: criar `tests/server/backend-foundation.integration.test.ts` com a guarda `describeLocal` dos testes existentes (R9, NFR-001).
   - O teste cria dois usuários em `auth.users` pela conexão `postgres` local.
   - Ele cobre as invariantes C1–C9 e a matriz M1–M14, com M6a, de contracts/database.md §D4–§D5.
   - Para M13, reaplica o SQL da migration como `postgres`.
   - Para M14, roda os dois casos numa transação desfeita.
 
   Verificação: o teste falha porque o schema `app` não existe.
-- [ ] T008 [skill: $database-migrations-pro] [US1] Na migration de T005, acrescentar (FR-003, FR-004, R4):
+- [X] T008 [skill: $database-migrations-pro] [US1] Na migration de T005, acrescentar (FR-003, FR-004, R4):
   - o schema `app`, com dono `postgres`;
   - `REVOKE ALL` de `PUBLIC`, `anon` e `authenticated` em `app` e `private`;
   - `GRANT USAGE ON SCHEMA app TO app_runtime`;
   - o `ALTER DEFAULT PRIVILEGES` de §D2.
 
   Verificação: C4 e C8 de T007 ficam verdes.
-- [ ] T009 [skill: $database-migrations-pro] [US1] Na mesma migration, criar `app.accounts` conforme data-model.md §1, com FK `ON DELETE RESTRICT` e `ENABLE` + `FORCE ROW LEVEL SECURITY` (FR-006). Verificação: C5, C7 e M11 ficam verdes.
-- [ ] T010 [skill: $database-migrations-pro] [US1] Na mesma migration, criar `app.current_account_id()` (`LANGUAGE sql STABLE SECURITY INVOKER SET search_path = ''`) com `REVOKE EXECUTE … FROM PUBLIC` e `GRANT EXECUTE … TO app_runtime` (FR-007). Verificação: C6, M8 e M9 ficam verdes.
-- [ ] T011 [skill: $database-migrations-pro] [US1] Na mesma migration, criar as policies `accounts_select` e `accounts_insert` de §D3, com o predicado `<P>` e `DROP POLICY IF EXISTS` + `CREATE POLICY`. Acrescentar os grants `SELECT` e `INSERT (owner_user_id)` (FR-002, FR-008, FR-009a).
+- [X] T009 [skill: $database-migrations-pro] [US1] Na mesma migration, criar `app.accounts` conforme data-model.md §1, com FK `ON DELETE RESTRICT` e `ENABLE` + `FORCE ROW LEVEL SECURITY` (FR-006). Verificação: C5, C7 e M11 ficam verdes.
+- [X] T010 [skill: $database-migrations-pro] [US1] Na mesma migration, criar `app.current_account_id()` (`LANGUAGE sql STABLE SECURITY INVOKER SET search_path = ''`) com `REVOKE EXECUTE … FROM PUBLIC` e `GRANT EXECUTE … TO app_runtime` (FR-007). Verificação: C6, M8 e M9 ficam verdes.
+- [X] T011 [skill: $database-migrations-pro] [US1] Na mesma migration, criar as policies `accounts_select` e `accounts_insert` de §D3, com o predicado `<P>` e `DROP POLICY IF EXISTS` + `CREATE POLICY`. Acrescentar os grants `SELECT` e `INSERT (owner_user_id)` (FR-002, FR-008, FR-009a).
 
   Verificação: todo `tests/server/backend-foundation.integration.test.ts` fica verde, incluindo M13 e M14, e `npx supabase db reset --local` roda duas vezes seguidas sem erro (FR-010).
 
@@ -123,7 +123,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: `npx vitest run tests/tooling/verify-client-isolation.test.ts tests/architecture/server-boundaries.test.ts`, depois `npm run build && npm run verify:client-isolation`.
 
-- [ ] T012 [skill: $tdd] [P] [US2] RED: criar `tests/tooling/verify-client-isolation.test.ts`. O teste roda o script com `--root` sobre fixtures num diretório temporário, inicializado com `git init` + `git add` para que os `.env*` contem como versionados. Casos (contracts/ci-checks.md §K2, US2-2, US2-4):
+- [X] T012 [skill: $tdd] [P] [US2] RED: criar `tests/tooling/verify-client-isolation.test.ts`. O teste roda o script com `--root` sobre fixtures num diretório temporário, inicializado com `git init` + `git add` para que os `.env*` contem como versionados. Casos (contracts/ci-checks.md §K2, US2-2, US2-4):
   - **prefixo público**:
     - `NEXT_PUBLIC_SUPABASE_SECRET_KEY` em `.env.example`, `next.config.ts`, num workflow e num arquivo de `src/` gera código 1;
     - `NEXT_PUBLIC_STRIPE_TOKEN` é detectado pela regra de fragmento;
@@ -139,10 +139,10 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
     - o trecho encontrado nunca aparece na saída.
 
   Verificação: o teste falha por script inexistente.
-- [ ] T013 [skill: $tdd] [US2] GREEN: implementar `scripts/verify-client-isolation.mjs` conforme §K2 (FR-017, FR-019, NFR-003). Se o build real tiver um falso positivo, acrescentar ao script uma exceção nominal (id do padrão, arquivo e motivo) e o caso correspondente em T012, e registrar no `implementation-log.md`.
+- [X] T013 [skill: $tdd] [US2] GREEN: implementar `scripts/verify-client-isolation.mjs` conforme §K2 (FR-017, FR-019, NFR-003). Se o build real tiver um falso positivo, acrescentar ao script uma exceção nominal (id do padrão, arquivo e motivo) e o caso correspondente em T012, e registrar no `implementation-log.md`.
 
   Verificação: T012 fica verde, e `npm run build && npm run verify:client-isolation` na raiz sai com código 0 (US2-1, US2-5, SC-002).
-- [ ] T014 [skill: $nextjs-fullstack-master] [P] [US2] RED → GREEN da regra de lint de §K3 (FR-018, US2-3, US2-5). Os cenários são estes três comandos:
+- [X] T014 [skill: $nextjs-fullstack-master] [P] [US2] RED → GREEN da regra de lint de §K3 (FR-018, US2-3, US2-5). Os cenários são estes três comandos:
 
   ```bash
   echo "import { createServerClient } from '@supabase/ssr';" | npx eslint --stdin --stdin-filename src/components/x.tsx
@@ -157,7 +157,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   - os dois primeiros comandos citam `no-restricted-imports`;
   - o terceiro não cita essa regra;
   - `npm run lint` sai sem erro novo.
-- [ ] T015 [skill: $nextjs-fullstack-master] [P] [US2] Criar `tests/architecture/server-boundaries.test.ts` com as partes 1, 2 e 4 de §K4 (FR-012, FR-018, US4-4):
+- [X] T015 [skill: $nextjs-fullstack-master] [P] [US2] Criar `tests/architecture/server-boundaries.test.ts` com as partes 1, 2 e 4 de §K4 (FR-012, FR-018, US4-4):
   - o grafo do cliente sobre `src/`;
   - a allowlist do pool (`client.ts`, `accounts.ts`, `repository.ts`);
   - os fixtures em memória para uma cadeia transitiva `componente → lib → lib/server` e para um import de pool fora da allowlist, com a cadeia ou o arquivo na mensagem.
@@ -174,7 +174,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: A prova negativa local de T016 e o job `ci` verde no PR.
 
-- [ ] T016 [skill: $supabase] [US3] RED: prova negativa local do gate de advisors, antes de ligá-lo na CI (US3-2, US3-3):
+- [X] T016 [skill: $supabase] [US3] RED: prova negativa local do gate de advisors, antes de ligá-lo na CI (US3-2, US3-3):
   1. criar uma migration temporária com `CREATE TABLE public.advisor_probe (id int)`, sem RLS;
   2. rodar `npx supabase db reset --local` e o advisor de segurança com `--fail-on warn`; o esperado é código ≠ 0;
   3. remover a migration e repetir; o esperado é código 0;
@@ -183,7 +183,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Registrar as saídas resumidas, sem segredos, no `implementation-log.md`.
 
   Verificação: o log tem os quatro resultados, e a migration temporária não aparece no `git status`.
-- [ ] T017 [skill: $supabase] [US3] GREEN: no job `ci` de `.github/workflows/ci-cd.yml`, acrescentar os passos 6–12 de §K1 (FR-017, FR-020, FR-020a, FR-021, US3-1):
+- [X] T017 [skill: $supabase] [US3] GREEN: no job `ci` de `.github/workflows/ci-cd.yml`, acrescentar os passos 6–12 de §K1 (FR-017, FR-020, FR-020a, FR-021, US3-1):
   - `npm run verify:client-isolation` depois do build;
   - setup da CLI 2.122.0;
   - `supabase start -x …` com o comando final de T002;
@@ -203,7 +203,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: `npx vitest run tests/server/accounts.test.ts tests/architecture/server-boundaries.test.ts` e `INTEGRAÇÃO`.
 
-- [ ] T018 [skill: $tdd] [US4] RED, em três arquivos (S1, FR-009, FR-011, FR-013, US4-1–US4-3):
+- [X] T018 [skill: $tdd] [US4] RED, em três arquivos (S1, FR-009, FR-011, FR-013, US4-1–US4-3):
   - **`tests/server/accounts.test.ts`**, com `getOnlineDatabase` simulado como em `tests/server/single-save-policy.test.ts`:
     - um UUID inválido lança erro antes de obter o banco, nas duas funções;
     - o primeiro comando é o `set_config` da chave correta, com `true`;
@@ -218,7 +218,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   - **`tests/architecture/server-boundaries.test.ts`**: a parte 3 de §K4, que exige `import 'server-only'` como primeira instrução de `accounts.ts`.
 
   Verificação: os três falham por módulo inexistente.
-- [ ] T019 [skill: $backend-patterns] [US4] GREEN: implementar `src/lib/server/online-db/accounts.ts` conforme S1.
+- [X] T019 [skill: $backend-patterns] [US4] GREEN: implementar `src/lib/server/online-db/accounts.ts` conforme S1.
   - Exportar o `uuidPattern` existente de `repository.ts`, que não tem outra mudança, e reutilizá-lo.
   - A transação de resolução fica interna ao módulo.
 
@@ -232,7 +232,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: `npx vitest run tests/server/account-kek.test.ts tests/architecture/server-boundaries.test.ts`.
 
-- [ ] T020 [skill: $tdd] [US5] RED (FR-014, US5-1, US5-2, NFR-003):
+- [X] T020 [skill: $tdd] [US5] RED (FR-014, US5-1, US5-2, NFR-003):
   - Criar `tests/server/account-kek.test.ts` com todas as linhas da tabela de S3, usando material gerado no próprio teste. Ele cobre:
     - mensagens sem o valor;
     - `JSON.stringify` e `util.inspect` do resultado sem o material;
@@ -243,8 +243,8 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   - Acrescentar `account-kek.ts` à lista `server-only` de `tests/architecture/server-boundaries.test.ts`.
 
   Verificação: os dois falham por módulo inexistente.
-- [ ] T021 [skill: $backend-patterns] [US5] GREEN: implementar `src/lib/server/crypto/account-kek.ts` conforme S3 e R8. Verificação: T020 fica verde.
-- [ ] T022 [skill: general] [US5] Acrescentar a `.env.example` as linhas vazias `ACCOUNT_KEK_ACTIVE_ID=` e `ACCOUNT_KEK_V1=`, com o comentário de contracts/environment.md. Verificação:
+- [X] T021 [skill: $backend-patterns] [US5] GREEN: implementar `src/lib/server/crypto/account-kek.ts` conforme S3 e R8. Verificação: T020 fica verde.
+- [X] T022 [skill: general] [US5] Acrescentar a `.env.example` as linhas vazias `ACCOUNT_KEK_ACTIVE_ID=` e `ACCOUNT_KEK_V1=`, com o comentário de contracts/environment.md. Verificação:
   - `npm run build && npm run verify:client-isolation` sai com código 0;
   - `git grep -n "ACCOUNT_KEK" .env.example` mostra as duas linhas vazias.
 
@@ -256,7 +256,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Independent Test**: `npm run verify:links`.
 
-- [ ] T023 [skill: $supabase] [US6] Escrever `docs/setup/backend-foundation.md` (FR-015, FR-016, FR-022, FR-022a, NFR-004):
+- [X] T023 [skill: $supabase] [US6] Escrever `docs/setup/backend-foundation.md` (FR-015, FR-016, FR-022, FR-022a, NFR-004):
   - **Seção KEK**:
     - geração com `openssl rand -base64 32`;
     - cadastro como Sensitive somente em Production;
