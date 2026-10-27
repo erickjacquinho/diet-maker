@@ -14,7 +14,7 @@ async function load() {
 describe('loadAccountKeyring', () => {
   it.each([undefined, '', 'V1', 'v0', 'v10000', 'v01', 'latest'])('rejects ACCOUNT_KEK_ACTIVE_ID %j', async (activeId) => {
     const { loadAccountKeyring } = await load();
-    const env: NodeJS.ProcessEnv = { ACCOUNT_KEK_V1: b64(material()) };
+    const env: Record<string, string | undefined> = { ACCOUNT_KEK_V1: b64(material()) };
     if (activeId !== undefined) env.ACCOUNT_KEK_ACTIVE_ID = activeId;
     expect(() => loadAccountKeyring(env)).toThrow(new Error('ACCOUNT_KEK_ACTIVE_ID must name a key version such as v1.'));
   });

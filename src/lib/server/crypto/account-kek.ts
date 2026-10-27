@@ -12,7 +12,7 @@ function decodeCanonical(value: string | undefined): Buffer | undefined {
   return bytes.length === keyBytes && bytes.toString('base64') === value ? bytes : undefined;
 }
 
-export function loadAccountKeyring(env: NodeJS.ProcessEnv = process.env): {
+export function loadAccountKeyring(env: Readonly<Record<string, string | undefined>> = process.env): {
   activeId: string;
   keys: ReadonlyMap<string, KeyObject>;
 } {

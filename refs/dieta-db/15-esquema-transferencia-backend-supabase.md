@@ -2,6 +2,11 @@
 
 - **Status:** Proposta técnica. Não autoriza implementação, migration remota,
   criação de chaves ou publicação; a execução segue o fluxo SDD e `/speckit-implement`.
+- **Estado da F0 (2026-10-26):** implementada na branch `feat/backend-foundation-f0`
+  (código, testes locais e passos de CI), ainda sem merge. A validação no projeto
+  remoto `diet-maker` **não foi feita**; só vale quando
+  [`validation-report.md`](../../specs/25-10-26-fundacao-migracao-backend-supabase/validation-report.md)
+  estiver completo. As demais fases continuam propostas.
 - **Data:** 2026-10-25
 - **Escopo:** Topologia, comunicação navegador ↔ servidor, isolamento por conta,
   criptografia de dados sensíveis, chaves, transferência dos dados locais e validação.

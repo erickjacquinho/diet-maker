@@ -281,7 +281,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 **Purpose**: Comprovar a fundação inteira localmente e na CI antes de tocar o projeto remoto (FR-022a: "depois da validação local completa").
 
-- [ ] T024 [skill: general] Regressão completa (FR-023, SC-005). Rodar:
+- [X] T024 [skill: general] Regressão completa (FR-023, SC-005). Rodar:
   - `npm run test`;
   - `INTEGRAÇÃO`;
   - `npm run lint`;
@@ -294,7 +294,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 - [ ] T025 [skill: general] Abrir o PR de `feat/backend-foundation-f0` para `main` e confirmar o job `ci` verde, incluindo os passos novos. Comparar a duração com a última execução de `main` (NFR-002, SC-006). Se a diferença passar de 5 min, mover os passos de banco para um job paralelo (R5) e medir de novo.
 
   Verificação: o `implementation-log.md` registra as duas durações, com diferença ≤ 5 min.
-- [ ] T026 [skill: $security-audit] Auditar a segurança do diff. Conferir que:
+- [X] T026 [skill: $security-audit] Auditar a segurança do diff. Conferir que:
   - não há segredo versionado;
   - todo módulo novo tem `server-only`;
   - nenhum log imprime valor;
@@ -352,7 +352,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
 
 ## Phase 11: Polish & Cross-Cutting Concerns
 
-- [ ] T030 [skill: general] Atualizar o status da F0 em `refs/dieta-db/15-esquema-transferencia-backend-supabase.md` e em `refs/dieta-db/index.md`, distinguindo o implementado (merge) do validado (`validation-report.md`) (NFR-004). Verificação: o texto cita a evidência e não declara validação sem relatório.
+- [X] T030 [skill: general] Atualizar o status da F0 em `refs/dieta-db/15-esquema-transferencia-backend-supabase.md` e em `refs/dieta-db/index.md`, distinguindo o implementado (merge) do validado (`validation-report.md`) (NFR-004). Verificação: o texto cita a evidência e não declara validação sem relatório.
 
 ---
 

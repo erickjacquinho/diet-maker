@@ -82,3 +82,27 @@ Os seis testes usam `app_runtime`. Com o banco de T002 (papel ainda `online_runt
 ## T023
 
 `docs/setup/backend-foundation.md` (KEK, passos 0–8, evidência R10, rollback com `migration repair`, R12, modelo de registro), linkado em `docs/setup/online-auth.md`; `validation-report.md` criado com uma seção por passo, status "proposto". `npm run verify:links` → 414 arquivos, 573 links, zero quebrados (o diretório `specs/` é ignorado pelo verificador).
+
+## T026 (auditoria de segurança do diff `main..HEAD`)
+
+Escopo: o checklist da tarefa, aplicado ao diff (a skill `security-audit` completa, com subagentes, não se justifica para ~600 linhas de migration, dois módulos e um script).
+
+- Segredos versionados: busca por prefixos de chave Supabase, JWTs, chaves privadas e connection strings com senha → só ocorrências legítimas (credencial padrão do banco descartável local `postgres:postgres@127.0.0.1:54322` e literais de padrão do script). Nenhum segredo real.
+- `server-only` como primeira instrução em `accounts.ts` e `account-kek.ts` (também imposto pelo teste de arquitetura).
+- Logs: os módulos novos não logam; o script imprime só arquivo, id do padrão e contagem (testado: o trecho nunca aparece).
+- `SECURITY DEFINER`: nenhuma função (C6 verifica no catálogo; a única menção é um comentário).
+- KEK: só `ACCOUNT_KEK_ACTIVE_ID=`/`ACCOUNT_KEK_V1=` vazias em `.env.example`; nada nas migrations nem no código. O material fica em `KeyObject`; mensagens de erro não ecoam valores (testado).
+- Workflow: nenhum `secrets.*`; senha local gerada no job e mascarada.
+- Achados abertos: nenhum.
+
+## T024 (regressão completa)
+
+- `npm run test` → 257 arquivos passed / 5 skipped; 1153 tests passed / 45 skipped.
+- `npm run lint` → exit 0. `npm run type-check` → o primeiro run acusou `NodeJS.ProcessEnv` (exige `NODE_ENV`) nos testes de `account-kek`; corrigido relaxando o parâmetro de `loadAccountKeyring` para `Readonly<Record<string, string | undefined>>` (compatível com `process.env`) → exit 0, `account-kek.test.ts` 17/17.
+- `npm run build` → exit 0; `npm run verify:client-isolation` → `checked 7 patterns in 540 files (project-ref: skipped)`, exit 0.
+- INTEGRAÇÃO (`npx vitest run tests/server --pool=forks`, banco local) → 13 arquivos, 111 passed, 1 skipped.
+- Browser: `tests/browser/settings-saves.spec.ts` não existe nesta base (pertence à outra branch). Rodados `online-auth.spec.ts` e `online-saves.spec.ts` contra o Supabase local completo (sem studio/realtime/storage etc.; `.env.local` ignorado pelo git, com valores locais) em `PLAYWRIGHT_PORT=3000` → 2 passed (3.4 min). Um dev server órfão de uma tentativa anterior bloqueou a porta e foi encerrado.
+
+## T030
+
+`refs/dieta-db/15-esquema-transferencia-backend-supabase.md` e `refs/dieta-db/index.md` registram a F0 como implementada na branch (sem merge) e **não validada** no remoto, citando `validation-report.md` (todo "proposto"). `npm run verify:links` limpo.
