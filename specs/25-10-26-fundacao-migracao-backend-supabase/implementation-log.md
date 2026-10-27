@@ -137,3 +137,7 @@ Status: **iteração com achado; passada limpa ainda não obtida** (bloqueada po
 ## T027 (leituras dos passos 0–2, autorizadas)
 
 Rodadas só leituras: `supabase projects list`, `db push --linked --dry-run`, `ssl-enforcement get` e probes `curl`; copiado `supabase/.temp` do checkout principal (arquivos locais, ignorados pelo git) para o worktree. Resultado: região `sa-east-1` confere, mas o projeto `diet-maker` está **INACTIVE (pausado)**; dry-run falhou por IPv6/link e `ssl-enforcement` retornou 500; os probes deram `000`. Nada foi escrito no remoto e não foram usados db push, KEK, senha nem Vercel. T027 permanece aberta (evidência inválida) até o mantenedor restaurar o projeto. Registrado em `validation-report.md`.
+
+## T027 (releitura dos passos 0–2 com o projeto ativo; via CLI e MCP somente-leitura)
+
+Projeto restaurado pelo mantenedor (`ACTIVE_HEALTHY`, `sa-east-1`). Leituras: `get_project`, `list_migrations` (remoto só tem `online_account_saves`; pendente seria só a fundação), `get_advisors` security (1 WARN de Auth, fora de escopo), `ssl-enforcement get` (**`database:false`: SSL não exigido**) e probes `curl` (**401** em `/rest/v1/` e `/graphql/v1`, inconclusivo). Dry-run da CLI segue bloqueado por IPv6/link. Nenhuma escrita; MCP usado só para leitura. T027 permanece aberta até: ativar a exigência de SSL, conferir/desligar a Data API no painel, refazer o link e o dry-run, e rodar o smoke. Registrado em `validation-report.md`.
