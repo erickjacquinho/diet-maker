@@ -68,13 +68,13 @@ Fontes consultadas em 2026-10-26: [Securing your API](https://supabase.com/docs/
 ## R7. Restrição de imports do cliente
 
 - **Decision**:
-  1. Uma regra ESLint `no-restricted-imports`, com nível `error`, em `src/components/**` e `src/hooks/**`, para `@supabase/*`, `pg`, `pg/*`, `drizzle-orm`, `drizzle-orm/*` e `@/lib/server/**`.
+  1. Uma regra ESLint `no-restricted-imports`, com nível `error`, em `src/components/**` e `src/hooks/**`, para `@supabase/*`, `pg`, `pg/*`, `drizzle-orm`, `drizzle-orm/*` e `@/lib/server/**` (import direto).
   2. Um teste de arquitetura, `tests/architecture/server-boundaries.test.ts`:
      - percorre o grafo a partir dos arquivos `'use client'`, de `src/components/**` e de `src/hooks/**`;
      - resolve o alias `@/`, os imports relativos e o `import()` literal;
      - falha mostrando a cadeia até o módulo proibido;
      - impõe também o FR-012 (acesso ao pool) e o FR-013 (`server-only`).
-- **Rationale**: O lint pega o caso direto no editor, e o grafo pega o caso transitivo (por exemplo, `src/lib/**` importado por um componente). As três regras compartilham a mesma leitura de `src/`, então ficam num arquivo só, no estilo dos testes de fronteira existentes (`readdirSync` + regex). O `server-only` continua como barreira no build, mas não cobre `pg` nem `drizzle-orm`.
+- **Rationale**: O lint pega o caso direto no editor, e o grafo pega o caso transitivo (por exemplo, `src/lib/**` importado por um componente). As três regras compartilham a mesma leitura de `src/`, então ficam num arquivo só, no estilo dos testes de fronteira existentes (`readdirSync` + regex). O `server-only` continua como barreira no build, mas não cobre `pg` nem `drizzle-orm`. **Emenda (T031):** o grafo transitivo proíbe `@supabase/*`, `pg`, `drizzle-orm/node-postgres`, `src/lib/server/**` e `server-only`, mas permite `drizzle-orm` núcleo e `drizzle-orm/pglite`, porque o banco local PGlite do cliente (`src/lib/infrastructure/local-db/**`) os usa no navegador; o teste real acusou centenas de cadeias legítimas até esses módulos.
 
 ## R8. Chaveiro da KEK das contas
 

@@ -60,7 +60,7 @@ O código de saída é `0` sem achados, `1` com achados e `2` com entrada invál
 
 ## K3. Lint (FR-018)
 
-Bloco em `eslint.config.mjs` para `src/components/**/*.{ts,tsx}` e `src/hooks/**/*.{ts,tsx}`: `no-restricted-imports` como `error` para `@supabase/*`, `pg`, `pg/*`, `drizzle-orm`, `drizzle-orm/*` e `@/lib/server/**`.
+Bloco em `eslint.config.mjs` para `src/components/**/*.{ts,tsx}` e `src/hooks/**/*.{ts,tsx}`: `no-restricted-imports` como `error` para `@supabase/*`, `pg`, `pg/*`, `drizzle-orm`, `drizzle-orm/*` e `@/lib/server/**`. A regra vale para import direto; o alcance transitivo é tratado em K4.
 
 ## K4. Teste de fronteiras (FR-012, FR-013, FR-018)
 
@@ -69,7 +69,7 @@ Bloco em `eslint.config.mjs` para `src/components/**/*.{ts,tsx}` e `src/hooks/**
 1. **Cliente**:
    - as raízes são os arquivos com `'use client'`, `src/components/**` e `src/hooks/**`;
    - o teste segue imports estáticos, `export … from` e `import()` literal, resolvendo `@/` e caminhos relativos e ignorando `import type`;
-   - ele falha se alcançar um módulo de K3, `src/lib/server/**` ou um arquivo com `import 'server-only'`, mostrando a cadeia.
+   - ele falha se alcançar `@supabase/*`, `pg`, `drizzle-orm/node-postgres`, `src/lib/server/**` ou um arquivo com `import 'server-only'`, mostrando a cadeia. `drizzle-orm` núcleo e `drizzle-orm/pglite` são permitidos transitivamente (banco local PGlite no navegador).
 2. **Pool**: só os arquivos de [server-modules.md §S2](./server-modules.md#s2-regra-de-acesso-ao-pool-fr-012) importam o cliente do banco, `pg` ou `drizzle-orm/node-postgres`.
 3. **`server-only`**: `accounts.ts` e `account-kek.ts` começam com `import 'server-only'`.
 4. **Fixture**: um caso em memória com a cadeia `componente → lib → lib/server` precisa ser detectado. Esse é o cenário de falha que antecede o validador (Princípio IV).

@@ -116,3 +116,10 @@ Achado único, `contradicts`, FR-018: o texto do requisito é inatingível com o
 Itens que dependem de ação externa e continuam abertos por regra (não são achados de código): T025 (push/PR e duração da CI, NFR-002/SC-006 — pendente do OK do usuário) e T027–T029 (mantenedor; FR-022/FR-022a/FR-022b, SC-007).
 
 Status: **iteração com achado; passada limpa ainda não obtida** (bloqueada por T031).
+
+## T031 e convergência, iteração 2 (passada limpa)
+
+- T031: com a aprovação do mantenedor, FR-018 e a US2-3 em `spec.md`, `contracts/ci-checks.md` (K3/K4) e `research.md` (R7) foram emendados: o grafo transitivo proíbe `@supabase/*`, `pg`, `drizzle-orm/node-postgres`, `src/lib/server/**` e `server-only`; `drizzle-orm` núcleo e `drizzle-orm/pglite` ficam permitidos (banco local PGlite no navegador); o import direto continua proibido pelo lint. O código e os testes já implementavam essa regra.
+- Revalidação após a emenda: `check-prerequisites` com `SPECIFY_FEATURE_DIRECTORY` ok; `tests/architecture/server-boundaries.test.ts` + `tests/tooling/verify-client-isolation.test.ts` + `tests/server --pool=forks` → 15 arquivos, 150 passed, 1 skipped; `npm run type-check` exit 0; `npm run verify:client-isolation` → `checked 7 patterns in 480 files`, exit 0; `npm run lint` sem erro.
+- `speckit-converge` (iteração 2): spec, plan, tasks e constituição reconfrontados com o código; **zero achados** de código (nenhuma tarefa anexada, `tasks.md` sem nova fase). Restam abertas só por regra: T025 (push/PR e duração da CI, depende do OK do usuário) e T027–T029 (mantenedor, remoto).
+- **Passada limpa registrada.**
