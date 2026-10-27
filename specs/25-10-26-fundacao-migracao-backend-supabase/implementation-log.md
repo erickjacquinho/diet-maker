@@ -123,3 +123,13 @@ Status: **iteração com achado; passada limpa ainda não obtida** (bloqueada po
 - Revalidação após a emenda: `check-prerequisites` com `SPECIFY_FEATURE_DIRECTORY` ok; `tests/architecture/server-boundaries.test.ts` + `tests/tooling/verify-client-isolation.test.ts` + `tests/server --pool=forks` → 15 arquivos, 150 passed, 1 skipped; `npm run type-check` exit 0; `npm run verify:client-isolation` → `checked 7 patterns in 480 files`, exit 0; `npm run lint` sem erro.
 - `speckit-converge` (iteração 2): spec, plan, tasks e constituição reconfrontados com o código; **zero achados** de código (nenhuma tarefa anexada, `tasks.md` sem nova fase). Restam abertas só por regra: T025 (push/PR e duração da CI, depende do OK do usuário) e T027–T029 (mantenedor, remoto).
 - **Passada limpa registrada.**
+
+## T025 (PR e duração da CI)
+
+- Branch enviada e PR aberto: https://github.com/erickjacquinho/diet-maker/pull/11 (`feat/backend-foundation-f0` → `main`), `MERGEABLE`, job `ci` **success** com os passos novos; `cd` ignorado (só roda em push para `main`).
+- Duração do job `ci` (início do primeiro passo → fim do último):
+  - PR #11 (execução 40442356406): 03:07:08 → 03:17:44 = **10 min 36 s**;
+  - última execução de `main` (38182188257, 2026-10-11): 22:53:27 → 23:05:12 = **11 min 45 s**.
+  - Diferença: **−1 min 09 s** (≤ 5 min; NFR-002 e SC-006 atendidos). Não foi preciso criar job paralelo (R5).
+- Custo dos passos novos no PR: `verify:client-isolation` 3 s; setup da CLI 2 s; `supabase start -x …` 1 min 13 s; senha local, advisors de segurança e de desempenho ≈ 3 s; testes de integração 13 s. Total ≈ 1 min 34 s. Os testes unitários dominam o job (≈ 7 min 48 s) e já existiam.
+- Advisors de segurança passaram sem alerta; a integração rodou (não foi pulada) com `app_runtime` local.

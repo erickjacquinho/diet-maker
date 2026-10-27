@@ -291,7 +291,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   - `npm run test:browser -- tests/browser/online-auth.spec.ts tests/browser/settings-saves.spec.ts`.
 
   Verificação: tudo verde, com a saída resumida no `implementation-log.md`.
-- [ ] T025 [skill: general] Abrir o PR de `feat/backend-foundation-f0` para `main` e confirmar o job `ci` verde, incluindo os passos novos. Comparar a duração com a última execução de `main` (NFR-002, SC-006). Se a diferença passar de 5 min, mover os passos de banco para um job paralelo (R5) e medir de novo.
+- [X] T025 [skill: general] Abrir o PR de `feat/backend-foundation-f0` para `main` e confirmar o job `ci` verde, incluindo os passos novos. Comparar a duração com a última execução de `main` (NFR-002, SC-006). Se a diferença passar de 5 min, mover os passos de banco para um job paralelo (R5) e medir de novo.
 
   Verificação: o `implementation-log.md` registra as duas durações, com diferença ≤ 5 min.
 - [X] T026 [skill: $security-audit] Auditar a segurança do diff. Conferir que:
