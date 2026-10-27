@@ -141,3 +141,7 @@ Rodadas só leituras: `supabase projects list`, `db push --linked --dry-run`, `s
 ## T027 (releitura dos passos 0–2 com o projeto ativo; via CLI e MCP somente-leitura)
 
 Projeto restaurado pelo mantenedor (`ACTIVE_HEALTHY`, `sa-east-1`). Leituras: `get_project`, `list_migrations` (remoto só tem `online_account_saves`; pendente seria só a fundação), `get_advisors` security (1 WARN de Auth, fora de escopo), `ssl-enforcement get` (**`database:false`: SSL não exigido**) e probes `curl` (**401** em `/rest/v1/` e `/graphql/v1`, inconclusivo). Dry-run da CLI segue bloqueado por IPv6/link. Nenhuma escrita; MCP usado só para leitura. T027 permanece aberta até: ativar a exigência de SSL, conferir/desligar a Data API no painel, refazer o link e o dry-run, e rodar o smoke. Registrado em `validation-report.md`.
+
+## T027 (passo 2: exigência de SSL, escrita autorizada)
+
+Com autorização explícita do mantenedor, `npx supabase --experimental ssl-enforcement update --enable-db-ssl-enforcement --project-ref <ref>` → `database:true`; `ssl-enforcement get` confirmou `database:true`. Nenhum `db push`, KEK, senha ou Vercel. Restam em T027: conferir a Data API no painel, refazer o link/dry-run (IPv4) e o smoke.

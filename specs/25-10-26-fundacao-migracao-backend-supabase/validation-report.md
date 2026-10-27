@@ -1,6 +1,6 @@
 # Validation Report: Fundação do backend Supabase (F0), projeto remoto `diet-maker`
 
-Status geral: **proposto**. Foram feitas apenas **leituras** dos passos 0–2 (autorizadas pelo mantenedor, via CLI e via MCP do Supabase somente-leitura), com o projeto já `ACTIVE_HEALTHY`; **nenhuma escrita** no remoto e nenhum passo validado. Leituras expuseram dois pontos que o mantenedor precisa tratar (passo 2). Só o mantenedor preenche este relatório, com confirmação explícita a cada ação (FR-022b). Nunca registre valores secretos: apenas horários, resultados, nomes de variáveis e impressões digitais truncadas. Procedimento: [`docs/setup/backend-foundation.md`](../../docs/setup/backend-foundation.md).
+Status geral: **proposto**. Foram feitas apenas **leituras** dos passos 0–2 (autorizadas pelo mantenedor, via CLI e via MCP do Supabase somente-leitura), com o projeto já `ACTIVE_HEALTHY`; a **única escrita** no remoto foi ativar a exigência de SSL do banco (passo 2, autorizada) e nenhum passo foi validado por completo; a Data API ainda precisa ser conferida no painel. Só o mantenedor preenche este relatório, com confirmação explícita a cada ação (FR-022b). Nunca registre valores secretos: apenas horários, resultados, nomes de variáveis e impressões digitais truncadas. Procedimento: [`docs/setup/backend-foundation.md`](../../docs/setup/backend-foundation.md).
 
 Evidência local e de CI (não substitui o remoto): ver [`implementation-log.md`](./implementation-log.md).
 
@@ -14,9 +14,9 @@ Status: **equivalente por leitura; dry-run da CLI não obtido**. `npx supabase d
 
 ## Passo 2 — Data API desligada e SSL
 
-Status: **leitura feita; dois pontos NÃO conformes/inconclusivos**.
+Status: **SSL ok (ativado e confirmado); Data API inconclusiva (pendente do painel)**.
 
-- **SSL**: `npx supabase --experimental ssl-enforcement get --project-ref <ref>` → `{"currentConfig":{"database":false}}`: a exigência de SSL **não está ativa**. O runbook exige `enforced`; ativar é uma escrita (mantenedor).
+- **SSL — corrigido**: a leitura inicial (`ssl-enforcement get`) deu `{"currentConfig":{"database":false}}` (exigência **não** ativa). Com autorização explícita do mantenedor, foi executado `npx supabase --experimental ssl-enforcement update --enable-db-ssl-enforcement --project-ref <ref>` (única escrita feita no remoto) e a releitura `ssl-enforcement get` retornou `{"currentConfig":{"database":true},"appliedSuccessfully":true}`: **exigência de SSL ativa**.
 - **Data API / GraphQL**: probes `curl` sem chave em `/rest/v1/` e `/graphql/v1` → **401** (≠ 200, sem documento OpenAPI). Com a Data API ligada, esse mesmo 401 ocorreria sem apikey, então o resultado é **inconclusivo**: conferir o painel (**Enable Data API** desligado) e esperar um status diferente de 401 (por exemplo 404) quando estiver desligada.
 - Advisor de segurança do remoto (MCP `get_advisors`): 1 WARN `auth_leaked_password_protection` (Auth, fora do escopo da F0; informativo, a CI só aplica o gate às migrations locais).
 
