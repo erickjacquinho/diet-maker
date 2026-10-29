@@ -10,7 +10,7 @@ type OnlineTransaction = Parameters<Parameters<ReturnType<typeof getOnlineDataba
 export type SaveRegistryRecord = typeof saves.$inferSelect;
 export type SaveRegistryInsert = typeof saves.$inferInsert;
 
-const uuidPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
+export const uuidPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
 
 export async function withOwnerTransaction<T>(
   ownerId: string,

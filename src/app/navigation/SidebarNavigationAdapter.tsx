@@ -73,6 +73,8 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
   const profileSession = getProfileSession?.() ?? EMPTY_PROFILE_SESSION;
   const profileSnapshot = useSyncExternalStore(profileSession.subscribe, profileSession.getSnapshot, profileSession.getSnapshot);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [exportState, setExportState] = useState<ExportState>('idle');
   const [restoreState, setRestoreState] = useState<RestoreState>('idle');
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
@@ -225,6 +227,10 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         {...props}
         pathname={pathname}
         navigationItems={SIDEBAR_NAVIGATION_ITEMS}
+        onOpenAccount={props.onOpenAccount ?? ((trigger) => {
+          settingsTriggerRef.current = trigger ?? null;
+          setSettingsOpen(true);
+        })}
         doctorName={profileSnapshot.account?.displayName ?? 'Profile ativo'}
         profileSyncState={hasProfileSession ? profileSnapshot.syncState : undefined}
         onRetryProfileSync={hasProfileSession ? handleRetryProfileSync : undefined}
@@ -234,6 +240,20 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         isExporting={isExporting}
         isRestoring={isRestoring}
       />
+
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent
+          aria-describedby={undefined}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            settingsTriggerRef.current?.focus();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Configurações</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
 
       <Input
         ref={fileInputRef}

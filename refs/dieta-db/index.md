@@ -9,6 +9,17 @@ recompor os contratos de armazenamento.
 [divisão em SDDs](./14-consolidacao-e-portao-de-execucao.md) para planejar a
 execução e abra as decisões de cada etapa para os detalhes.
 
+**Direção futura acordada, ainda não implementada:** [MVP online com Supabase e
+dados por conta](./proposta-mvp-online-supabase.md). Retomar após estabilizar o
+núcleo e antes do lançamento do MVP; os contratos locais abaixo continuam vigentes.
+
+**Fase F0 da [Decisão 15](./15-esquema-transferencia-backend-supabase.md):**
+implementada na branch `feat/backend-foundation-f0` (papel `app_runtime`, schema
+`app`, módulos de servidor, gates de CI e runbook), ainda sem merge. **Não validada
+no projeto remoto**: a evidência dos passos 0–8 vai em
+[`validation-report.md`](../../specs/25-10-26-fundacao-migracao-backend-supabase/validation-report.md),
+hoje todo "proposto". Runbook: [backend-foundation.md](../../docs/setup/backend-foundation.md).
+
 ## Proposta preservada
 
 Manter os dados do consultório em uma área de trabalho local no navegador, com

@@ -38,6 +38,36 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: 1
 
+      - name: Verify the browser bundle does not know the database
+        run: npm run verify:client-isolation
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Start local Supabase (Postgres and Auth only)
+        run: supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Set the local runtime role password
+        run: |
+          LOCAL_RUNTIME_PASSWORD="$(openssl rand -hex 24)"
+          echo "::add-mask::$LOCAL_RUNTIME_PASSWORD"
+          echo "LOCAL_RUNTIME_PASSWORD=$LOCAL_RUNTIME_PASSWORD" >> "$GITHUB_ENV"
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1             -c "ALTER ROLE app_runtime PASSWORD '$LOCAL_RUNTIME_PASSWORD'"
+
+      - name: Database security advisors (blocking)
+        run: supabase db advisors --local --type security --level warn --fail-on warn
+
+      - name: Database performance advisors (informational)
+        run: supabase db advisors --local --type performance --fail-on none
+
+      - name: Run database integration tests
+        run: npx vitest run tests/server --pool=forks
+        env:
+          LOCAL_SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          ONLINE_DATABASE_URL: postgresql://app_runtime:${{ env.LOCAL_RUNTIME_PASSWORD }}@127.0.0.1:54322/postgres
+
   cd:
     name: Continuous Deployment (Production Delivery)
     needs: ci

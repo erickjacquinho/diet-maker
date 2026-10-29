@@ -281,6 +281,7 @@
         "organism-food-search-modal",
         "organism-read-only-diet-modal",
         "molecule-edit-assessment-modal",
+        "src/app/navigation/SidebarNavigationAdapter.tsx",
         "src/app/alimentos/page.tsx",
         "src/app/pacientes/page.tsx"
       ]
@@ -1957,6 +1958,7 @@
       ],
       "profile": "design-system/components/profiles/ui/dialog.md",
       "consumers": [
+        "src/app/navigation/SidebarNavigationAdapter.tsx",
         "organism-food-search-modal",
         "organism-read-only-diet-modal",
         "src/app/alimentos/page.tsx",
