@@ -1,0 +1,8 @@
+- [x] Migration `app.patients` + RLS
+- [x] Contratos estritos e DTO por allowlist
+- [x] Repositório do servidor (cifra S1, versão, arquivar/restaurar, busca em memória)
+- [x] Rotas `/api/v1/patients*` e cliente
+- [x] Testes PGlite (RLS/entre contas/cifra) e de contrato
+- [ ] Validar migrations no Supabase local (Docker) e remoto (confirmação)
+- [ ] Migrar avaliações/acompanhamento, depois dietas, biblioteca, agenda/favoritos
+- [ ] Trocar telas de pacientes para `patientsApi` junto com os módulos dependentes

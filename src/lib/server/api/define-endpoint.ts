@@ -45,7 +45,8 @@ export interface EndpointDefinition<Input, Output> {
   rateLimit: RateLimitClass;
   maxBodyBytes?: number;
   status?: 200 | 201;
-  handler(context: EndpointContext<Input>): Promise<Output>;
+  /** Anything is accepted here; `output` is the only thing that reaches the client. */
+  handler(context: EndpointContext<Input>): Promise<unknown>;
 }
 
 export interface EndpointDependencies {
