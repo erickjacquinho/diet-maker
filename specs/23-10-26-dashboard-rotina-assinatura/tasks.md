@@ -1,7 +1,7 @@
 # Tasks: Início semanal e assinatura informativa
 
 **Input**: [spec](spec.md), [plan](plan.md), [modelo](data-model.md), [contrato](contracts/dashboard-settings.md) e [validação](quickstart.md).
-**Estado**: 7/8 executadas; T008 bloqueada pela permissão INSERT ausente na base local de teste.
+**Estado**: 8/8 executadas; T008 validada localmente em25-10 com arquivo físico de teste, APIs reais, paridade com Agenda, reabertura, foco, bloqueio por prazo e isolamento entre contas. Evidências no complemento do implementation-log e em specs/25-10-26-corrigir-inconsistencias-fluxos/validation-report.md; paridade remota não verificada.
 **Âncora**: SPECIFY_FEATURE_DIRECTORY=specs/23-10-26-dashboard-rotina-assinatura.
 **Regras de execução**: testes/casos de falha antes da lógica; fixtures pequenas junto dos testes, sem dados pessoais; preservar dirty work e processos. Nenhuma dependência/infraestrutura nova.
 
@@ -24,7 +24,7 @@
 
 - [X] T006 [skill: $webapp-testing] Ampliar tests/browser/settings-saves.spec.ts com dashboard, assinatura e três abas, aproveitando o setup existente: 1024/1280/1600px, zoom 200%, teclado, foco, altura fixa, drafts, saves/logout, placeholders, sem overflow e rotina com dados controlados. Verificação: cenários executáveis de quickstart.md definidos, mocks identificados; sem spec/harness separado de navegador. [FR-001, FR-005, FR-006, FR-007, FR-008, FR-009, FR-010, NFR-001, NFR-004, SC-002, SC-003, SC-004, SC-005]
 - [X] T007 [skill: $ponytail:ponytail] Executar uma vez os checks e o smoke controlado de specs/23-10-26-dashboard-rotina-assinatura/quickstart.md após o diff final: type-check, testes focados e regressões, lint tocado, catálogo/atomic design, Playwright e diff-check. Registrar comandos, screenshots e resultados em implementation-log.md. Verificação: requisitos cobertos; falhas preexistentes isoladas com evidência, sem refatorações alheias; repetir somente se houver nova mudança/falha. [FR-004, FR-010, FR-011, NFR-001, NFR-002, NFR-003, NFR-004, SC-001, SC-002, SC-003, SC-004, SC-005]
-- [ ] T008 [skill: $webapp-testing] Executar os cenários de sessão real de specs/23-10-26-dashboard-rotina-assinatura/quickstart.md com conta/save de teste autorizados e dados preexistentes, registrando em implementation-log.md paridade com Agenda, isolamento e navegação/ausência de gravação. Verificação: diferenciar fixtures, browser mockado e integração real; se acesso estiver indisponível, registrar bloqueio e manter esta tarefa pendente. [FR-002, FR-003, FR-005, FR-006, FR-011, NFR-004, SC-001, SC-002, SC-003, SC-004, SC-005]
+- [X] T008 [skill: $webapp-testing] Executar os cenários de sessão real de specs/23-10-26-dashboard-rotina-assinatura/quickstart.md com conta/save de teste autorizados e dados preexistentes, registrando em implementation-log.md paridade com Agenda, isolamento e navegação/ausência de gravação. Verificação: diferenciar fixtures, browser mockado e integração real; se acesso estiver indisponível, registrar bloqueio e manter esta tarefa pendente. [FR-002, FR-003, FR-005, FR-006, FR-011, NFR-004, SC-001, SC-002, SC-003, SC-004, SC-005]
 
 ## Dependências e entrega
 

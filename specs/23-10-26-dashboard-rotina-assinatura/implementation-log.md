@@ -81,3 +81,17 @@ Executar T001–T008 na ordem declarada. Preservar o estado anterior do usuário
 
 - `check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` resolveu esta feature. Extensões não definem hooks `before_converge` ou `after_converge`.
 - Inventário verificado: 11 FR, 4 NFR, 5 SC, 11 cenários de aceite, decisões técnicas do plano e princípios I–V da constituição. Zero lacunas de implementação não rastreadas; T008 continua como única validação real pendente e já tem tarefa própria, sem duplicação.
+
+### Complemento do diagnóstico — 2026-10-25
+
+A execução de `25-10-26-corrigir-inconsistencias-fluxos` revalidou a hipótese anterior: todas as13colunas de INSERT do save já tinham concessão. A falha42501 ocorria no lock de `private.professional_profiles`, antes da inserção, por ausência da migration local20261022120000. Essa migration existente foi aplicada somente localmente;5arquivos/22testes de servidor passaram. O relato original acima é preservado, mas a atribuição de INSERT ausente fica corrigida por esta evidência. T008 continua pendente de sessão/arquivo real e comparação completa com Agenda.
+
+## Aceite T008 concluído localmente —2026-10-25
+
+O operador criou um novo save externo pela interface após o importador rejeitar a fonte de preparação inválida. A rejeição foi reproduzida: duas linhas nextFollowUps para o mesmo paciente. Corrigida somente a fixture para uma linha BOTH com datas independentes; validador e teste de backup13casos passaram. Nenhuma flexibilização no produto.
+
+Na sessão nativa existente, sem mocks/pickers substituídos, o arquivo do operador nutridiet-profile.nutridiet foi reaberto/decifrado e confirmado vazio antes da preparação. Foi adicionado pela interface um paciente sintético, Paciente externo SDD1, com dieta25-10/avaliação26-10; envelopev2/cifra e conteúdo confirmados pelo handle externo, distinto de OPFS. Janela de observação começou após os checkpoints.
+
+Aceite passou: sete dias Início/Agenda [1,1,0,0,0,0,0], pendências corretas, navegação e foco de Assinatura, reload/reabertura, quatro autorizações reais, hash externo imutável durante leitura, zero mutações API (authorize separado), bloqueio/limpeza por deadline com relógio browser controlado, logout/fechamento e troca real para outro owner sem itens anteriores, retorno à conta inicial. Não se alega expiração de oito horas em tempo real; somente o estímulo do relógio foi controlado, sem interceptar Auth/saves.
+
+Hash final69e9bef5939d83a83aab96c6c87c4dff23f47d73b14f8a0c9d657d9f0cc3398c; evidência sanitizada versionada em ../25-10-26-corrigir-inconsistencias-fluxos/external-file-evidence.json. Cadastro real201 foi observado nos testes de rotina/online-saves; criação manual deste arquivo precedeu o observador. Sem deploy ou validação remota. T008 marcada somente após EXTERNAL_ACCEPTANCE_PASSED.

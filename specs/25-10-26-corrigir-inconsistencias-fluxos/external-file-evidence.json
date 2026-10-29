@@ -1,0 +1,59 @@
+{
+  "origin": "http://localhost:3000",
+  "fileName": "nutridiet-profile.nutridiet",
+  "hash": "69e9bef5939d83a83aab96c6c87c4dff23f47d73b14f8a0c9d657d9f0cc3398c",
+  "formatVersion": 2,
+  "nativePicker": true,
+  "opfs": false,
+  "apiInterceptions": false,
+  "realAuthorizations": 4,
+  "initialEmptyFileReopened": true,
+  "syntheticPatientAdded": true,
+  "independentDates": [
+    "2026-10-25",
+    "2026-10-26"
+  ],
+  "week": [
+    {
+      "date": "2026-10-25",
+      "count": 1
+    },
+    {
+      "date": "2026-10-26",
+      "count": 1
+    },
+    {
+      "date": "2026-10-27",
+      "count": 0
+    },
+    {
+      "date": "2026-10-28",
+      "count": 0
+    },
+    {
+      "date": "2026-10-29",
+      "count": 0
+    },
+    {
+      "date": "2026-10-30",
+      "count": 0
+    },
+    {
+      "date": "2026-10-31",
+      "count": 0
+    }
+  ],
+  "agendaCounts": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "mutations": [],
+  "reopened": true,
+  "expiryClockControlled": true,
+  "accountIsolation": true
+}

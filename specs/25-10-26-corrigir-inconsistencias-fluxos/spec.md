@@ -2,7 +2,7 @@
 
 **Feature Branch**: checkout existente preservado; nenhuma branch criada.
 **Created**: 2026-10-25
-**Status**: Especificação pronta para validação humana; implementação não iniciada.
+**Status**: Implementada e verificada localmente em2026-10-25. Evidências e resultado de convergência em [validation-report.md](validation-report.md); contexto de elaboração abaixo preservado como histórico.
 **Input**: “crie o $sdd de correção de 100% dos problemas”, após auditoria Jev das páginas.
 
 ## Contexto, atores e limites

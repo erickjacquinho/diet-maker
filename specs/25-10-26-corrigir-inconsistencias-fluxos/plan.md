@@ -1,7 +1,7 @@
 # Implementation Plan: Corrigir inconsistências dos fluxos auditados
 
 **Branch**: checkout preservado; nenhuma criada · **Date**: 2026-10-25 · **Spec**: [spec.md](spec.md)
-**Status**: planejado, aguardando validação humana; nenhuma tarefa executada.
+**Status**: Implementada e verificada localmente em2026-10-25; tarefas em [tasks.md](tasks.md), evidências e convergência em [validation-report.md](validation-report.md). O plano abaixo preserva as decisões aprovadas.
 
 ## Summary
 
