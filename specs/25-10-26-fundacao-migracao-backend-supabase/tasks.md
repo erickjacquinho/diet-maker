@@ -326,7 +326,7 @@ LOCAL_SUPABASE_DB_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres" 
   Registrar tudo em `validation-report.md`.
 
   Verificação: o relatório tem a região, a lista do dry-run e os três resultados de exposição.
-- [ ] T028 [skill: $supabase] [US6] **[mantenedor]** Passos 3–4 (FR-001, FR-015, FR-016, SC-007, US5-4):
+- [X] T028 [skill: $supabase] [US6] **[mantenedor]** Passos 3–4 (FR-001, FR-015, FR-016, SC-007, US5-4):
   - Provisionar `ACCOUNT_KEK_ACTIVE_ID` e `ACCOUNT_KEK_V1` como Sensitive, só em Production.
   - Fazer o backup DPAPI, restaurá-lo num shell isolado e comparar as impressões digitais do original e do restaurado.
   - Gerar a senha nova do runtime, fazer o backup DPAPI e atualizar `ONLINE_DATABASE_URL` de Production com o usuário `app_runtime.<ref>`.

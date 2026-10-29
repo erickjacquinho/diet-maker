@@ -1,6 +1,6 @@
 # Validation Report: Fundação do backend Supabase (F0), projeto remoto `diet-maker`
 
-Status geral: **proposto**. Foram feitas apenas **leituras** dos passos 0–2 (autorizadas pelo mantenedor, via CLI e via MCP do Supabase somente-leitura), com o projeto já `ACTIVE_HEALTHY`; a **única escrita** no remoto foi ativar a exigência de SSL do banco (passo 2, autorizada) e nenhum passo foi validado por completo; a Data API ainda precisa ser conferida no painel. Só o mantenedor preenche este relatório, com confirmação explícita a cada ação (FR-022b). Nunca registre valores secretos: apenas horários, resultados, nomes de variáveis e impressões digitais truncadas. Procedimento: [`docs/setup/backend-foundation.md`](../../docs/setup/backend-foundation.md).
+Status geral: **passos 0–8 executados em 2026-10-28/29; pendências: Data API no painel, marcação `Sensitive` e duração da janela**. Foram feitas apenas **leituras** dos passos 0–2 (autorizadas pelo mantenedor, via CLI e via MCP do Supabase somente-leitura), com o projeto já `ACTIVE_HEALTHY`; a **única escrita** no remoto foi ativar a exigência de SSL do banco (passo 2, autorizada) e nenhum passo foi validado por completo; a Data API ainda precisa ser conferida no painel. Só o mantenedor preenche este relatório, com confirmação explícita a cada ação (FR-022b). Nunca registre valores secretos: apenas horários, resultados, nomes de variáveis e impressões digitais truncadas. Procedimento: [`docs/setup/backend-foundation.md`](../../docs/setup/backend-foundation.md).
 
 Evidência local e de CI (não substitui o remoto): ver [`implementation-log.md`](./implementation-log.md).
 
@@ -10,7 +10,7 @@ Status: **leitura feita (região e estado ok); smoke pendente**. Leitura via MCP
 
 ## Passo 1 — Dry-run da migration
 
-Status: **equivalente por leitura; dry-run da CLI não obtido**. `npx supabase db push --linked --dry-run` falhou com `DbConfigIpv6Error` (rede local sem IPv6; exige `supabase link` pelo pooler IPv4, ação do mantenedor). Pela comparação de `list_migrations` (MCP) com `supabase/migrations/`, a única migration pendente seria `20261026220111_backend_foundation.sql`, sem comando destrutivo no arquivo. Isso **não substitui** o dry-run: refazê-lo após o link.
+Status: **executado pelo mantenedor (2026-10-29), ok**. Após `supabase link --project-ref <ref>` (a primeira tentativa de `--dry-run` falhou com `DbConfigIpv6Error`, rede local sem IPv6), `npx supabase db push --linked --dry-run` listou como pendente apenas `20261026220111_backend_foundation.sql`, em acordo com `list_migrations` (MCP) e sem comando destrutivo no arquivo.
 
 ## Passo 2 — Data API desligada e SSL
 
@@ -22,37 +22,37 @@ Status: **SSL ok (ativado e confirmado); Data API inconclusiva (pendente do pain
 
 ## Passo 3 — KEK (Production, Sensitive, backup DPAPI)
 
-Status: proposto. Início/fim: — . Resultado: — . Evidência (impressão digital do original e do restaurado, igualdade, `vercel env ls production`): — .
+Status: **executado pelo mantenedor (2026-10-28)**. Resultado: KEK gerada fora do repositório, cadastrada como `ACCOUNT_KEK_V1` e `ACCOUNT_KEK_ACTIVE_ID` em Production (Sensitive) via CLI, com backup DPAPI em `~/`; o mantenedor relatou impressões digitais do original e do restaurado **iguais** (valores não registrados). Evidência: `vercel env ls --environment preview` e `--environment development` (projeto `nutridiet`) → "No Environment Variables found" (sem `ACCOUNT_KEK_*` fora de Production). `vercel env ls --environment production` lista `ACCOUNT_KEK_V1` e `ACCOUNT_KEK_ACTIVE_ID` só em Production; a CLI exibe o tipo como `Secret` e **não distingue `Sensitive`**: conferir a marcação no painel. `ACCOUNT_KEK_ACTIVE_ID` foi cadastrada numa segunda tentativa (2026-10-29), pois a primeira execução registrou só a `ACCOUNT_KEK_V1`.
 
 ## Passo 4 — Senha nova do runtime e `ONLINE_DATABASE_URL`
 
-Status: proposto. Início/fim: — . Resultado: — . Evidência (backup DPAPI feito; usuário `app_runtime.<ref>` configurado; sem valores): — .
+Status: **executado pelo mantenedor (2026-10-29)**. Resultado: senha gerada fora do repositório; backup DPAPI criado em `~/runtime-pass.dpapi`; `ONLINE_DATABASE_URL` regravada em Production (Sensitive) com usuário `app_runtime.<ref>` no pooler de transação (porta 6543). Evidência: saída da CLI `✓ Overrode ONLINE_DATABASE_URL` (Production, sem valores). O deploy em produção não foi trocado: continua com o ambiente anterior até o passo 7, e a senha no banco só muda no passo 6.
 
 ## Passo 5 — Migration (`db push --linked`)
 
-Status: proposto. Início da janela: — . Resultado: — . Evidência: — .
+Status: **executado pelo mantenedor (2026-10-29), ok**. Início da janela: não registrado. Resultado: `npx supabase db push --linked` aplicou `20261026220111_backend_foundation.sql`. Evidência: `list_migrations` (MCP) mostra `20261011002435` e `20261026220111` aplicadas; a role `app_runtime` existe com `rolcanlogin = true` e `online_runtime` não existe mais.
 
 ## Passo 6 — Senha no banco
 
-Status: proposto. Horário: — . Resultado: — .
+Status: **executado pelo mantenedor (2026-10-29), ok**. Horário: não registrado. Resultado: `ALTER ROLE app_runtime PASSWORD` rodado no SQL editor com retorno "Success" (duas tentativas anteriores foram digitadas por engano no shell e falharam com `ALTER: command not found`, sem efeito). Observação de segurança: parte da senha apareceu mascarada no chat; recomenda-se rotacioná-la (repetir o passo 4 e este passo).
 
 ## Passo 7 — Republicação
 
-Status: proposto. Fim da janela: — . Duração total da janela (meta < 10 min): — . Resultado: — .
+Status: **executado pelo mantenedor (2026-10-29), ok**. Fim da janela e duração total (meta < 10 min): **não registrados**; o primeiro `redeploy` falhou por `--project` inválido e foi refeito com `--scope`, então a janela provavelmente passou da meta. Resultado: `npx vercel redeploy` do deploy de produção atual gerou `dpl_7bMBZkWksEb5oyuW4kL8XQSQ4vWs` (READY, production, commit `ac8b9c9`).
 
 ## Passo 8 — Smoke e conferências
 
-Status: proposto. Evidência:
+Status: **executado (2026-10-29), ok**. Evidência:
 
-- smoke (login, perfil, catálogo, autorização de saves): — ;
-- `npx vitest run tests/server/online-db-client.test.ts` (R10): — ;
-- `pg_stat_activity` com `app_runtime` > 0: — ;
-- `vault.secrets` sem entrada da KEK: — ;
-- `vercel env ls` de production, preview e development: — .
+- smoke (login, perfil, catálogo, autorização de saves): login e saves funcionando em produção após o redeploy, segundo o mantenedor; perfil e catálogo não registrados individualmente;
+- `npx vitest run tests/server/online-db-client.test.ts` (R10): verde, 2 testes passaram (2026-10-29);
+- `pg_stat_activity` com `app_runtime` > 0: 0 logo após o redeploy e **1** após o uso do app em produção;
+- `vault.secrets` sem entrada da KEK: lista vazia;
+- `vercel env ls` de production, preview e development: production com as 9 variáveis esperadas (incluindo as duas `ACCOUNT_KEK_*`); preview e development sem variáveis (sem `ACCOUNT_KEK_*` fora de Production).
 
 ## Restrição de rede (R12)
 
-Não aplicável no plano Hobby (sem IPs de saída fixos). Registrado em: — .
+Não aplicável no plano Hobby (sem IPs de saída fixos). Registrado em: este relatório (nenhum IP de saída fixo no plano Hobby).
 
 ## Rollback
 
