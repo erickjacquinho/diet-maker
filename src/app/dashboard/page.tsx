@@ -14,6 +14,11 @@ import { formatEventType } from '@/lib/patientListDateUtils';
 const runtimeKeys = new WeakMap<BrowserPatientRuntime, number>();
 let nextRuntimeKey = 0;
 
+function weekdayLabel(date: Date) {
+  const label = format(date, 'EEEE', { locale: ptBR });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 function getRuntimeKey(runtime: BrowserPatientRuntime) {
   let key = runtimeKeys.get(runtime);
   if (key === undefined) {
@@ -48,7 +53,7 @@ function DashboardAgenda() {
   }
   if (error) {
     return (
-      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-error-border bg-error-soft p-4 text-style-body text-text-primary">
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-control border border-error-border bg-error-soft p-4 text-style-body text-text-primary">
         <p>Não foi possível carregar sua rotina.</p>
         <p>{error}</p>
         <Button type="button" variant="secondary" onClick={() => void retry()}>Tentar novamente</Button>
@@ -76,9 +81,9 @@ function DashboardAgenda() {
               <li
                 key={day.dateKey}
                 aria-current={day.isToday ? 'date' : undefined}
-                className={`flex min-h-24 min-w-0 flex-col gap-2 rounded-lg border p-3 ${day.isToday ? 'border-primary bg-primary-soft' : 'border-border-divider bg-card'}`}
+                className={`flex min-h-24 min-w-0 flex-col gap-2 rounded-control border p-3 ${day.isToday ? 'border-primary bg-primary-soft' : 'border-border-divider bg-card'}`}
               >
-                <span className="text-style-body-small capitalize text-text-secondary">{format(date, 'EEEE', { locale: ptBR })}</span>
+                <span className="text-style-body-small text-text-secondary">{weekdayLabel(date)}</span>
                 <time className="text-style-body font-semibold text-text-primary" dateTime={day.dateKey}>
                   {format(date, 'd MMM', { locale: ptBR })}
                 </time>
@@ -89,14 +94,14 @@ function DashboardAgenda() {
           })}
         </ol>
         {summary.days.every(({ count }) => count === 0) ? (
-          <p className="rounded-lg bg-surface-subtle p-4 text-style-body text-text-secondary">Nenhum acompanhamento nesta semana.</p>
+          <p className="rounded-control bg-surface-subtle p-4 text-style-body text-text-secondary">Nenhum acompanhamento nesta semana.</p>
         ) : null}
       </section>
 
       <section aria-labelledby="dashboard-actions-title" className="flex flex-col gap-4">
         <h2 id="dashboard-actions-title" className="text-style-section-title font-semibold text-text-primary">Próximas ações</h2>
         {summary.actions.length === 0 ? (
-          <p className="rounded-lg bg-surface-subtle p-4 text-style-body text-text-secondary">Nenhuma próxima ação nesta semana.</p>
+          <p className="rounded-control bg-surface-subtle p-4 text-style-body text-text-secondary">Nenhuma próxima ação nesta semana.</p>
         ) : (
           <ul aria-label="Próximas ações" className="flex flex-col gap-2">
             {summary.actions.map((action) => {
@@ -143,7 +148,7 @@ export default function DashboardPage() {
       {runtime ? (
         <DashboardAgenda key={getRuntimeKey(runtime)} />
       ) : (
-        <div className="flex w-full flex-col items-start gap-4 rounded-lg border border-border-divider bg-card p-6">
+        <div className="flex w-full flex-col items-start gap-4 rounded-surface border border-border-divider bg-card p-6">
           <p className="text-style-body text-text-secondary">Abra um save para consultar sua semana e próximas ações.</p>
           <Button type="button" onClick={() => window.dispatchEvent(new Event('nutridiet:open-saves'))}>
             Abrir configurações de saves

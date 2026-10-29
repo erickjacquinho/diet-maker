@@ -612,7 +612,7 @@ export function SettingsDialog({
                 </div>
               </TabsContent>
 
-              <TabsContent value="save" className="min-h-0 flex-1 space-y-6 overflow-y-auto">
+              <TabsContent value="save" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
                 <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing || readingLogo || resettingPassword} className="min-w-0">
                   <legend className="sr-only">Gerenciar saves e backups</legend>
                   {savesContent}
