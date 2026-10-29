@@ -54,9 +54,12 @@ export function useFoodSearchPage() {
   }, [refreshFoods]);
 
   const handleToggleFavorite = useCallback((id: string) => {
-    void toggleFavoriteFoodPersisted(id)
-      .catch(() => toast.error('Não foi possível salvar o favorito.'))
-      .finally(() => { void refreshFoods(); });
+    const saved = toggleFavoriteFoodPersisted(id);
+    void refreshFoods();
+    void saved.catch(() => {
+      toast.error('Não foi possível salvar o favorito.');
+      void refreshFoods();
+    });
   }, [refreshFoods]);
 
   const handleOpenCreateModal = useCallback(() => {

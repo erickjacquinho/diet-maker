@@ -68,9 +68,12 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
   }, [deferredQuery, allFoods, onlyFavorites]);
 
   const handleToggleFavorite = useCallback((foodId: string) => {
-    void toggleFavoriteFoodPersisted(foodId)
-      .catch(() => toast.error('Não foi possível salvar o favorito.'))
-      .finally(() => setRefreshKey((k) => k + 1));
+    const saved = toggleFavoriteFoodPersisted(foodId);
+    setRefreshKey((k) => k + 1);
+    void saved.catch(() => {
+      toast.error('Não foi possível salvar o favorito.');
+      setRefreshKey((k) => k + 1);
+    });
   }, []);
 
   const handleSelectFood = useCallback((food: FoodItem) => {

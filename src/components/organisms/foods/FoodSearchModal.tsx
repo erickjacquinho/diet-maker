@@ -191,9 +191,12 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   };
 
   const handleToggleFavorite = (foodId: string) => {
-    void toggleFavoriteFoodPersisted(foodId)
-      .catch(() => toast.error('Não foi possível salvar o favorito.'))
-      .finally(() => setFavoriteVersion((version) => version + 1));
+    const saved = toggleFavoriteFoodPersisted(foodId);
+    setFavoriteVersion((version) => version + 1);
+    void saved.catch(() => {
+      toast.error('Não foi possível salvar o favorito.');
+      setFavoriteVersion((version) => version + 1);
+    });
   };
 
   const handleClearAllSelections = () => {

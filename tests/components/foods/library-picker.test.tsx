@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 
 const getBrowserLibraryApplication = vi.hoisted(() => vi.fn());
-vi.mock('@/lib/application/browser-composition', () => ({ getBrowserLibraryApplication }));
+vi.mock('@/lib/application/browser-composition', () => ({
+  getBrowserLibraryApplication,
+  getBrowserPatientRuntimeIfActive: () => null,
+  persistAgendaReminderChange: vi.fn(),
+}));
 
 const recipe = {
   id: 'recipe-picker',
