@@ -6,6 +6,9 @@ setup”; ele é evidência histórica, não confirmação da disponibilidade ou
 paridade remota atual. Esta revisão documental de 2026-10-25 não executou
 publicação, smoke remoto ou alterações de produção.
 
+A fundação do backend (papel `app_runtime`, schema `app`, KEK das contas e runbook
+remoto) está descrita em [backend-foundation.md](./backend-foundation.md).
+
 ## Limites de dados
 
 Supabase Auth guarda identidade, credenciais, confirmação de e-mail e sessões.
@@ -26,7 +29,7 @@ com `Origin` para CSRF e monta os callbacks de Auth a partir dela.
 | `APP_ORIGIN` | Origem exata, por exemplo `http://localhost:3000` local; em produção exige origem HTTPS estável e aprovada. |
 | `SUPABASE_URL` | URL do Auth/Data API do projeto. |
 | `SUPABASE_PUBLISHABLE_KEY` | Chave pública usada pelo cliente server-side; permanece em variável de servidor e não habilita consultas no browser. |
-| `ONLINE_DATABASE_URL` | Conexão Postgres exclusivamente da role restrita `online_runtime`, após aplicar a migration. Nunca usar `postgres`, `service_role` ou URL admin no runtime. |
+| `ONLINE_DATABASE_URL` | Conexão Postgres exclusivamente da role restrita `app_runtime` (antes da F0, `online_runtime`), após aplicar a migration. Nunca usar `postgres`, `service_role` ou URL admin no runtime. |
 | `ONLINE_DATABASE_SSL_CA_B64` | Certificado PEM da CA oficial do Supabase codificado em Base64 de uma linha; obrigatório para conexões remotas e usado com verificação de certificado habilitada. Conexões Supabase locais em `127.0.0.1:54322` não precisam dele. |
 | `SERVER_MASTER_KEY` | 32 bytes em Base64 canônico, usada para cifrar perfil profissional e envolver DEKs. Gere fora do repositório e armazene em secret manager. |
 | `SERVER_MASTER_KEY_ID` | ID versionado, sem segredo, que acompanha ciphertexts e envelopes protegidos. |
@@ -79,13 +82,13 @@ Valide migrations com Docker e Postgres local antes de qualquer destino remoto.
 Confira o projeto linkado e revise `supabase db push --dry-run` antes de aplicar;
 `supabase db reset --linked` apaga schema e dados remotos e não deve ser usado
 como rotina. A migration `20261011002435_online_account_saves.sql` já foi
-aplicada ao projeto dedicado `diet-maker`; `online_runtime` tem login sem
+aplicada ao projeto dedicado `diet-maker`; o papel `online_runtime` (renomeado para `app_runtime` pela F0) tem login sem
 superuser/BYPASSRLS e grants limitados às operações previstas.
 
 A Vercel usa o pooler de transações Supavisor confirmado no painel: host
 `aws-1-sa-east-1.pooler.supabase.com`, porta `6543`, database `postgres` e nome
 de usuário qualificado para o projeto. A senha exclusiva da role fica em backup
-DPAPI fora do repositório. Uma consulta real com `online_runtime` confirmou o
+DPAPI fora do repositório. Uma consulta real com `online_runtime` (nome anterior à F0) confirmou o
 acesso usando a CA oficial e verificação TLS habilitada. Não desative a
 validação de hostname/certificado nem use `postgres` ou `service_role` no
 runtime. Veja [modos de conexão Postgres](https://supabase.com/docs/guides/database/connecting-to-postgres),
@@ -119,7 +122,7 @@ limite de uma região do plano Hobby.
 O projeto Supabase dedicado `diet-maker` foi criado no usuário atualmente
 autenticado e está linkado ao diretório. Migration, grants, RLS/`FORCE RLS`,
 SMTP Gmail, templates e callbacks foram aplicados; o recebimento do e-mail
-sintético foi confirmado pelo usuário. A senha de `online_runtime` e
+sintético foi confirmado pelo usuário. A senha de `online_runtime` (nome anterior à F0) e
 `SERVER_MASTER_KEY` foram geradas e guardadas em backup DPAPI fora do
 repositório; o login real no pooler com certificado verificado passou. Quatro
 avisos `auth_rls_initplan` do advisor são de desempenho e estão explicados no

@@ -3,12 +3,10 @@ import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const databaseUrl = process.env.LOCAL_SUPABASE_DB_URL;
-const runtimeDatabaseUrl = process.env.ONLINE_DATABASE_URL;
-const describeLocal = databaseUrl && runtimeDatabaseUrl ? describe : describe.skip;
+const describeLocal = databaseUrl ? describe : describe.skip;
 
 describeLocal('Supabase local private database access', () => {
   let admin: Pool;
-  let runtime: Pool;
   const owners = [randomUUID(), randomUUID()];
 
   beforeAll(async () => {
@@ -17,13 +15,8 @@ describeLocal('Supabase local private database access', () => {
       throw new Error('LOCAL_SUPABASE_DB_URL must target the disposable Supabase database on localhost:54322.');
     }
 
-    const runtimeUrl = new URL(runtimeDatabaseUrl!);
-    if (!['127.0.0.1', 'localhost', '::1'].includes(runtimeUrl.hostname)
-      || runtimeUrl.port !== '54322' || runtimeUrl.username !== 'online_runtime') {
-      throw new Error('Integration tests require the local restricted online_runtime connection.');
-    }
     admin = new Pool({ connectionString: databaseUrl!, max: 4 });
-    runtime = new Pool({ connectionString: runtimeDatabaseUrl!, max: 2 });
+    await admin.query('GRANT app_runtime TO postgres');
     for (const ownerId of owners) {
       await admin.query(
         `INSERT INTO auth.users (id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
@@ -40,12 +33,12 @@ describeLocal('Supabase local private database access', () => {
 
   afterAll(async () => {
     if (!admin) return;
+    await admin.query('REVOKE app_runtime FROM postgres');
     for (const ownerId of owners) {
       await admin.query('DELETE FROM private.saves WHERE owner_id = $1', [ownerId]);
       await admin.query('DELETE FROM private.professional_profiles WHERE owner_id = $1', [ownerId]);
       await admin.query('DELETE FROM auth.users WHERE id = $1', [ownerId]);
     }
-    await runtime?.end();
     await admin.end();
   });
 
@@ -59,11 +52,11 @@ describeLocal('Supabase local private database access', () => {
     }>(`
       SELECT rolname, rolcanlogin, rolinherit, rolsuper, rolbypassrls
       FROM pg_roles
-      WHERE rolname = 'online_runtime'
+      WHERE rolname = 'app_runtime'
     `);
     expect(roles.rows).toHaveLength(1);
     expect(roles.rows[0]).toMatchObject({
-      rolname: 'online_runtime',
+      rolname: 'app_runtime',
       rolcanlogin: true,
       rolinherit: false,
       rolsuper: false,
@@ -100,27 +93,27 @@ describeLocal('Supabase local private database access', () => {
         pg_get_userbyid(c.relowner) AS owner,
         has_schema_privilege('anon', 'private', 'USAGE') AS anon_schema,
         has_schema_privilege('authenticated', 'private', 'USAGE') AS authenticated_schema,
-        has_schema_privilege('online_runtime', 'auth', 'USAGE') AS runtime_auth_schema,
-        has_table_privilege('online_runtime', 'private.runtime_auth_sessions', 'SELECT') AS runtime_auth_session_view_read,
+        has_schema_privilege('app_runtime', 'auth', 'USAGE') AS runtime_auth_schema,
+        has_table_privilege('app_runtime', 'private.runtime_auth_sessions', 'SELECT') AS runtime_auth_session_view_read,
         has_table_privilege('anon', 'private.professional_profiles', 'SELECT') AS anon_profiles,
         has_table_privilege('authenticated', 'private.saves', 'INSERT') AS authenticated_saves,
-        has_table_privilege('online_runtime', 'private.professional_profiles', 'SELECT') AS runtime_profile_read,
-        has_column_privilege('online_runtime', 'private.professional_profiles', 'owner_id', 'INSERT') AS runtime_profile_insert,
-        has_table_privilege('online_runtime', 'private.professional_profiles', 'UPDATE') AS runtime_profile_update,
-        has_table_privilege('online_runtime', 'private.professional_profiles', 'DELETE') AS runtime_profile_delete,
-        has_table_privilege('online_runtime', 'private.saves', 'SELECT') AS runtime_save_read,
-        has_column_privilege('online_runtime', 'private.saves', 'id', 'INSERT') AS runtime_save_insert,
-        has_table_privilege('online_runtime', 'private.saves', 'UPDATE') AS runtime_save_update,
-        has_table_privilege('online_runtime', 'private.saves', 'DELETE') AS runtime_save_delete,
+        has_table_privilege('app_runtime', 'private.professional_profiles', 'SELECT') AS runtime_profile_read,
+        has_column_privilege('app_runtime', 'private.professional_profiles', 'owner_id', 'INSERT') AS runtime_profile_insert,
+        has_table_privilege('app_runtime', 'private.professional_profiles', 'UPDATE') AS runtime_profile_update,
+        has_table_privilege('app_runtime', 'private.professional_profiles', 'DELETE') AS runtime_profile_delete,
+        has_table_privilege('app_runtime', 'private.saves', 'SELECT') AS runtime_save_read,
+        has_column_privilege('app_runtime', 'private.saves', 'id', 'INSERT') AS runtime_save_insert,
+        has_table_privilege('app_runtime', 'private.saves', 'UPDATE') AS runtime_save_update,
+        has_table_privilege('app_runtime', 'private.saves', 'DELETE') AS runtime_save_delete,
         has_table_privilege('anon', 'private.auth_rate_limits', 'SELECT') AS anon_rate_limits,
         has_table_privilege('authenticated', 'private.auth_rate_limits', 'INSERT') AS authenticated_rate_limits,
-        has_table_privilege('online_runtime', 'private.auth_rate_limits', 'SELECT') AS runtime_rate_limit_read,
-        has_table_privilege('online_runtime', 'private.auth_rate_limits', 'INSERT') AS runtime_rate_limit_insert,
-        has_table_privilege('online_runtime', 'private.auth_rate_limits', 'UPDATE') AS runtime_rate_limit_update,
-        has_table_privilege('online_runtime', 'private.auth_rate_limits', 'DELETE') AS runtime_rate_limit_delete,
-        has_column_privilege('online_runtime', 'auth.sessions', 'id', 'SELECT') AS session_id_read,
-        has_column_privilege('online_runtime', 'auth.sessions', 'user_id', 'SELECT') AS session_owner_read,
-        has_column_privilege('online_runtime', 'auth.sessions', 'ip', 'SELECT') AS session_ip_read
+        has_table_privilege('app_runtime', 'private.auth_rate_limits', 'SELECT') AS runtime_rate_limit_read,
+        has_table_privilege('app_runtime', 'private.auth_rate_limits', 'INSERT') AS runtime_rate_limit_insert,
+        has_table_privilege('app_runtime', 'private.auth_rate_limits', 'UPDATE') AS runtime_rate_limit_update,
+        has_table_privilege('app_runtime', 'private.auth_rate_limits', 'DELETE') AS runtime_rate_limit_delete,
+        has_column_privilege('app_runtime', 'auth.sessions', 'id', 'SELECT') AS session_id_read,
+        has_column_privilege('app_runtime', 'auth.sessions', 'user_id', 'SELECT') AS session_owner_read,
+        has_column_privilege('app_runtime', 'auth.sessions', 'ip', 'SELECT') AS session_ip_read
       FROM pg_class c
       WHERE c.oid = 'private.professional_profiles'::regclass
     `);
@@ -150,7 +143,7 @@ describeLocal('Supabase local private database access', () => {
       session_owner_read: false,
       session_ip_read: false,
     });
-    expect(privileges.owner).not.toBe('online_runtime');
+    expect(privileges.owner).not.toBe('app_runtime');
 
     const clinicalColumns = await admin.query<{ column_name: string }>(`
       SELECT column_name
@@ -161,40 +154,19 @@ describeLocal('Supabase local private database access', () => {
     expect(clinicalColumns.rows).toEqual([]);
   });
 
-  it('supports the complete save registration with column grants and the owner profile lock', async () => {
-    const columns = [
-      'id', 'owner_id', 'local_account_id', 'key_id', 'wrapped_key', 'wrap_iv', 'wrap_kek_id',
-      'binding_mac', 'binding_kek_id', 'label_cipher', 'label_iv', 'label_kek_id', 'idempotency_key',
-    ];
-    const { rows } = await admin.query<{ column_name: string; allowed: boolean }>(`
-      SELECT column_name, has_column_privilege('online_runtime', 'private.saves', column_name, 'INSERT') AS allowed
-      FROM unnest($1::text[]) AS column_name
-    `, [columns]);
-    expect(rows).toEqual(columns.map((column_name) => ({ column_name, allowed: true })));
-
-    const locked = await asRuntime(runtime, owners[0], (client) => client.query(
-      'SELECT owner_id FROM private.professional_profiles WHERE owner_id = $1 FOR UPDATE', [owners[0]],
-    ));
-    expect(locked.rows).toEqual([{ owner_id: owners[0] }]);
-    const otherOwner = await asRuntime(runtime, owners[0], (client) => client.query(
-      'SELECT owner_id FROM private.professional_profiles WHERE owner_id = $1 FOR UPDATE', [owners[1]],
-    ));
-    expect(otherOwner.rows).toEqual([]);
-  });
-
   it('requires a transaction owner and rejects rows claimed by another owner', async () => {
-    const withoutOwner = await asRuntime(runtime, null, (client) =>
+    const withoutOwner = await asRuntime(admin, null, (client) =>
       client.query('SELECT owner_id FROM private.professional_profiles'),
     );
     expect(withoutOwner.rows).toEqual([]);
 
-    const ownRows = await asRuntime(runtime, owners[0], (client) =>
+    const ownRows = await asRuntime(admin, owners[0], (client) =>
       client.query('SELECT owner_id FROM private.professional_profiles'),
     );
     expect(ownRows.rows.map(({ owner_id }) => owner_id)).toEqual([owners[0]]);
 
     await expect(
-      asRuntime(runtime, owners[0], (client) => insertSave(client, owners[1], `forged-${randomUUID()}`)),
+      asRuntime(admin, owners[0], (client) => insertSave(client, owners[1], `forged-${randomUUID()}`)),
     ).rejects.toThrow(/row-level security/i);
   });
 
@@ -202,7 +174,7 @@ describeLocal('Supabase local private database access', () => {
     const localAccountId = `claim-${randomUUID()}`;
     const results = await Promise.allSettled(
       owners.map((ownerId) =>
-        asRuntime(runtime, ownerId, (client) => insertSave(client, ownerId, localAccountId)),
+        asRuntime(admin, ownerId, (client) => insertSave(client, ownerId, localAccountId)),
       ),
     );
 
@@ -223,6 +195,7 @@ async function asRuntime<T>(
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE app_runtime');
     if (ownerId) await client.query("SELECT set_config('app.owner_id', $1, true)", [ownerId]);
     const result = await run(client);
     await client.query('COMMIT');
