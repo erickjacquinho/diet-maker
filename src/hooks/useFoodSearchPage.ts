@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
-import { listTacoFoodItems, toggleFavoriteFood, scoreFoodItem, toFoodItem, type FoodItem } from '@/lib/library-ui-adapter';
+import { toggleFavoriteFoodPersisted } from '@/lib/favorite-foods-persistence';
+import { toast } from 'sonner';
+import { listTacoFoodItems, scoreFoodItem, toFoodItem, type FoodItem } from '@/lib/library-ui-adapter';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
 import { CustomFoodPayload } from '@/components/molecules/CustomFoodModal';
 
@@ -52,8 +54,9 @@ export function useFoodSearchPage() {
   }, [refreshFoods]);
 
   const handleToggleFavorite = useCallback((id: string) => {
-    toggleFavoriteFood(id);
-    void refreshFoods();
+    void toggleFavoriteFoodPersisted(id)
+      .catch(() => toast.error('Não foi possível salvar o favorito.'))
+      .finally(() => { void refreshFoods(); });
   }, [refreshFoods]);
 
   const handleOpenCreateModal = useCallback(() => {

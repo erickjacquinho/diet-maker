@@ -12,7 +12,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button, Badge } from '@/components/atoms';
 import { Search, ArrowLeftRight, X, Star } from 'lucide-react';
-import { listTacoFoodItems, searchTacoFoods, toggleFavoriteFood, type FoodItem } from '@/lib/library-ui-adapter';
+import { toggleFavoriteFoodPersisted } from '@/lib/favorite-foods-persistence';
+import { toast } from 'sonner';
+import { listTacoFoodItems, searchTacoFoods, type FoodItem } from '@/lib/library-ui-adapter';
 import type { DataTableSortState } from '@/components/molecules/DataTable';
 import { FoodSearchResultsList } from '@/components/molecules/food-search/FoodSearchResultsList';
 import { cn } from '@/lib/utils';
@@ -66,8 +68,9 @@ export const SubstituteFoodModal: React.FC<SubstituteFoodModalProps> = ({
   }, [deferredQuery, allFoods, onlyFavorites]);
 
   const handleToggleFavorite = useCallback((foodId: string) => {
-    toggleFavoriteFood(foodId);
-    setRefreshKey((k) => k + 1);
+    void toggleFavoriteFoodPersisted(foodId)
+      .catch(() => toast.error('Não foi possível salvar o favorito.'))
+      .finally(() => setRefreshKey((k) => k + 1));
   }, []);
 
   const handleSelectFood = useCallback((food: FoodItem) => {

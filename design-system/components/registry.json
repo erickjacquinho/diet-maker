@@ -4877,49 +4877,6 @@
       "exceptions": []
     },
     {
-      "id": "molecule-create-preset-modal",
-      "name": "CreatePresetModal",
-      "nature": "domain",
-      "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
-      "primaryCategory": "overlays",
-      "traits": [
-        "nutrition-context"
-      ],
-      "sourceFiles": [
-        {
-          "path": "src/components/molecules/CreatePresetModal.tsx",
-          "role": "implementation",
-          "discoveredLayer": "molecule"
-        }
-      ],
-      "publicExports": [
-        {
-          "name": "CreatePresetData",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "CreatePresetModalProps",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "CreatePresetModal",
-          "kind": "component",
-          "documentedBy": "profile"
-        }
-      ],
-      "profile": "design-system/components/profiles/molecules/create-preset-modal.md",
-      "consumers": [
-        "src/app/presets/page.tsx"
-      ],
-      "primitiveBase": "ui-dialog",
-      "specStatus": "homologated",
-      "exceptions": []
-    },
-    {
       "id": "organism-create-recipe-modal",
       "name": "CreateRecipeModal",
       "nature": "domain",
