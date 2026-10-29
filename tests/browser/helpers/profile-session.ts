@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { confirmAndLogin, registerSyntheticAccount } from './online-account';
 import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
 import type { ProtectedSaveGrant } from '@/lib/domain/protected-save';
@@ -86,17 +86,36 @@ export async function installProfileFileSystemFakes(page: Page, initialContent =
   }, { openContent: initialContent });
 }
 
+async function closeSaveSettings(settings: Locator): Promise<void> {
+  await expect(settings.locator('fieldset').first()).not.toHaveAttribute('disabled', { timeout: 120_000 });
+  await settings.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(settings.page().locator('[role="dialog"]')).toHaveCount(0, { timeout: 120_000 });
+}
+
 export async function createProfileSession(page: Page, displayName = 'Perfil de teste'): Promise<void> {
   await installProfileFileSystemFakes(page);
   await enterSaveDashboard(page);
-  await page.getByRole('button', { name: 'Criar save' }).click();
+  const settings = await openSaveSettings(page);
+  await settings.getByRole('button', { name: 'Criar save' }).click();
   const dialog = page.getByRole('dialog', { name: 'Criar profile' });
   await expect(dialog).toBeVisible({ timeout: 120_000 });
   await page.getByLabel('Nome', { exact: true }).fill(displayName);
   await page.getByRole('button', { name: 'Salvar profile' }).click();
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   await expect(dialog).toBeHidden({ timeout: 120_000 });
-  await expect(page.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
+  await expect(settings.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
+  await closeSaveSettings(settings);
+  await expect(page.locator('[data-profile-sync-state]')).toBeVisible();
+}
+
+export async function openSaveSettings(page: Page): Promise<Locator> {
+  const settings = page.getByRole('dialog', { name: 'Configurações', exact: true });
+  if (!await settings.isVisible()) {
+    await page.getByRole('button', { name: /Abrir menu de conta/ }).click();
+    await page.getByRole('menuitem', { name: 'Configurações', exact: true }).click();
+  }
+  await settings.getByRole('tab', { name: 'Saves', exact: true }).click();
+  return settings;
 }
 
 export async function enterSaveDashboard(page: Page): Promise<void> {
@@ -110,18 +129,27 @@ export async function loadLegacyProfileSession(page: Page, content: string): Pro
   const source = content.replaceAll(JSON.stringify(originalAccountId), JSON.stringify(`legacy-${crypto.randomUUID()}`));
   await installProfileFileSystemFakes(page, source);
   await enterSaveDashboard(page);
-  await page.getByRole('button', { name: 'Importar arquivo' }).click();
-  const protectCopy = page.getByRole('button', { name: 'Proteger cópia importada' });
+  const settings = await openSaveSettings(page);
+  await settings.getByRole('button', { name: 'Importar arquivo' }).click();
+  const protectCopy = settings.getByRole('button', { name: 'Proteger cópia importada' });
   await protectCopy.click();
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
   await expect(protectCopy).toBeHidden({ timeout: 120_000 });
-  await expect(page.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
+  await expect(settings.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
+  await closeSaveSettings(settings);
+  await expect(page.locator('[data-profile-sync-state]')).toBeVisible();
   return source;
 }
 
 export async function openRememberedSave(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
-  await page.getByRole('button', { name: /^Abrir save / }).click();
+  const settings = await openSaveSettings(page);
+  await expect(settings.getByRole('button', { name: /^Abrir save / })).toBeVisible({ timeout: 120_000 });
+  if (!await page.locator('[data-profile-sync-state]').count()) {
+    await settings.getByRole('button', { name: /^Abrir save / }).click();
+  }
+  await expect(page.locator('[data-profile-sync-state]')).toBeVisible({ timeout: 120_000 });
+  await closeSaveSettings(settings);
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 120_000 });
 }
 

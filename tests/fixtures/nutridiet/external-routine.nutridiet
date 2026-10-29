@@ -1,0 +1,69 @@
+{
+  "appId": "nutridiet-local-pro",
+  "formatVersion": 1,
+  "schemaVersion": "5",
+  "exportedAt": "2026-09-12T12:00:00.000Z",
+  "account": [
+    {
+      "id": "external-sdd-a53a1e4f-54d7-4e79-bff7-540b2d3b7ba3",
+      "displayName": "Rotina externa SDD",
+      "phone": null,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-12T12:00:00.000Z"
+    }
+  ],
+  "objectiveOptions": [],
+  "patients": [
+    {
+      "id": "fixture-jacques-patient",
+      "accountId": "external-sdd-a53a1e4f-54d7-4e79-bff7-540b2d3b7ba3",
+      "displayCode": "P-0001",
+      "name": "Paciente externo SDD 1",
+      "age": null,
+      "gender": "",
+      "heightCm": null,
+      "weightKg": null,
+      "maritalStatus": null,
+      "phone": null,
+      "whatsapp": null,
+      "currentObjective": null,
+      "targetProtein": null,
+      "targetCarbs": null,
+      "targetFats": null,
+      "targetKcal": null,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-12T12:00:00.000Z",
+      "version": 1,
+      "archivedAt": null,
+      "birthDate": null,
+      "pregnancyDueDate": null,
+      "isPregnant": false
+    }
+  ],
+  "bodyAssessments": [],
+  "nextFollowUps": [
+    {
+      "accountId": "external-sdd-a53a1e4f-54d7-4e79-bff7-540b2d3b7ba3",
+      "patientId": "fixture-jacques-patient",
+      "dueDate": "2026-10-25",
+      "type": "BOTH",
+      "version": 1,
+      "createdAt": "2026-10-25T12:00:00.000Z",
+      "updatedAt": "2026-10-25T12:00:00.000Z",
+      "dietDueDate": "2026-10-25",
+      "assessmentDueDate": "2026-10-26"
+    }
+  ],
+  "dietPlans": [],
+  "dietVariations": [],
+  "dietVariationDays": [],
+  "dietMeals": [],
+  "dietMealOptions": [],
+  "dietMealItems": [],
+  "dietItemSnapshots": [],
+  "foodCatalogItems": [],
+  "recipes": [],
+  "recipeIngredients": [],
+  "readyMeals": [],
+  "readyMealItems": []
+}

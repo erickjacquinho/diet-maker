@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { createProfileSession, decryptBrowserSave, enterSaveDashboard, installProfileFileSystemFakes, loadLegacyProfileSession, openRememberedSave, readPrimarySave } from './helpers/profile-session';
+import { createProfileSession, decryptBrowserSave, enterSaveDashboard, installProfileFileSystemFakes, loadLegacyProfileSession, navigateWithinSession, openRememberedSave, openSaveSettings, readPrimarySave } from './helpers/profile-session';
 
 test.use({ trace: 'off' });
 test.setTimeout(300_000);
@@ -31,13 +31,14 @@ test('creates a protected save before entering clinical modules', async ({ page 
 test('loads the portable fixture and makes Jacques Regiani patient data visible', async ({ page }) => {
   const source = await loadLegacyProfileSession(page, fixture);
   expect(await page.evaluate(() => (window as unknown as { __nutridietReadSource(): Promise<string> }).__nutridietReadSource())).toBe(source);
-  await page.goto('/pacientes');
+  await navigateWithinSession(page, '/pacientes');
   await expect(page.getByText('Paciente de Jacques')).toBeVisible({ timeout: 30_000 });
 });
 
 test('keeps the save dashboard available when the selected file is invalid', async ({ page }) => {
   await installProfileFileSystemFakes(page, invalidFixture);
   await enterSaveDashboard(page);
+  await openSaveSettings(page);
   await page.getByRole('button', { name: 'Importar arquivo' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole('button', { name: 'Criar save' })).toBeVisible();
@@ -46,7 +47,7 @@ test('keeps the save dashboard available when the selected file is invalid', asy
 
 test('field edits stay local; explicit save and Ctrl+S write only confirmed changes', async ({ page }) => {
   await createProfileSession(page, 'Confirmações');
-  await page.goto('/pacientes');
+  await navigateWithinSession(page, '/pacientes');
 
   const firstDialog = await fillPatientForm(page, 'Ana Botão');
   await expect.poll(async () => (await readPrimarySave(page)).attempts).toBe(1);
@@ -70,7 +71,7 @@ test('field edits stay local; explicit save and Ctrl+S write only confirmed chan
 
 test('keeps a failed checkpoint across reload, retries after route change, and exposes manual retry', async ({ page }) => {
   await createProfileSession(page, 'Recuperação');
-  await page.goto('/pacientes');
+  await navigateWithinSession(page, '/pacientes');
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-fail-next-write', '1'));
 
   const dialog = await fillPatientForm(page, 'Paciente Recuperado');
@@ -79,11 +80,12 @@ test('keeps a failed checkpoint across reload, retries after route change, and e
   await expect(page.locator('[data-profile-sync-state="paused"]')).toBeVisible();
   await expect.poll(async () => (await readPrimarySave(page)).successes).toBe(1);
 
-  await page.reload();
-  await expect(page).toHaveURL(/\/dashboard$/);
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-fail-next-write', '1'));
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 120_000 });
   await openRememberedSave(page);
-  await page.goto('/pacientes');
+  await expect(page.locator('[data-profile-sync-state="paused"]')).toBeVisible();
+  await page.evaluate(() => localStorage.setItem('nutridiet-e2e-fail-next-write', '1'));
+  await navigateWithinSession(page, '/pacientes');
   await expect(page.getByText('Paciente Recuperado')).toBeVisible();
   await expect(page.locator('[data-profile-sync-state="paused"]')).toBeVisible();
   await expect.poll(async () => (await readPrimarySave(page)).successes).toBe(1);
@@ -96,7 +98,7 @@ test('keeps a failed checkpoint across reload, retries after route change, and e
 
 test('a pathname change during a checkpoint shares the in-flight file write', async ({ page }) => {
   await createProfileSession(page, 'Checkpoint simultâneo');
-  await page.goto('/pacientes');
+  await navigateWithinSession(page, '/pacientes');
   const dialog = await fillPatientForm(page, 'Paciente Concorrente');
   await page.evaluate(() => localStorage.setItem('nutridiet-e2e-delay-next-write', '1'));
 

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 import { expect, test, type Download, type Page } from '@playwright/test';
-import { createProfileSession, decryptBrowserSave, encryptBrowserSave, openRememberedSave } from './helpers/profile-session';
+import { createProfileSession, decryptBrowserSave, encryptBrowserSave, openRememberedSave, openSaveSettings } from './helpers/profile-session';
 
 test.use({ trace: 'off' });
 test.setTimeout(300_000);
@@ -13,7 +13,8 @@ async function downloadContent(download: Download): Promise<string> {
 }
 
 async function openDashboardAction(page: Page, action: 'Exportar backup' | 'Importar backup'): Promise<void> {
-  await page.getByRole('button', { name: action, exact: true }).click();
+  const settings = await openSaveSettings(page);
+  await settings.getByRole('button', { name: action, exact: true }).click();
 }
 
 async function exportBackup(page: Page): Promise<string> {
@@ -71,7 +72,9 @@ test.describe('backup manual local', () => {
   test.beforeEach(async ({ page }) => {
     await createProfileSession(page, 'Backup browser');
     await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible({ timeout: 120_000 });
-    await expect(page.getByRole('button', { name: 'Exportar backup', exact: true })).toBeVisible();
+    const settings = await openSaveSettings(page);
+    await expect(settings.getByRole('button', { name: 'Exportar backup', exact: true })).toBeVisible();
+    await settings.getByRole('button', { name: 'Fechar', exact: true }).click();
     const accountMenu = page.getByRole('button', { name: /Abrir menu de conta/ });
     await accountMenu.focus();
     await accountMenu.press('Enter');
@@ -113,7 +116,7 @@ test.describe('backup manual local', () => {
       buffer: Buffer.from('{invalid', 'utf8'),
     });
     await expect(page.locator('[data-backup-feedback="error"]')).toContainText('O arquivo não é um backup NutriDiet válido.');
-    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByRole('dialog', { name: 'Importar backup', exact: true })).toHaveCount(0);
 
     await openRestoreDialog(page, content);
     const dialog = page.getByRole('dialog', { name: 'Importar backup' });

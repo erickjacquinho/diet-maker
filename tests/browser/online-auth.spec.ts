@@ -82,7 +82,10 @@ test('confirms an account, logs in, recovers and resets the password, rejects OT
   const updatedPasswordResponse = await submitAndWait(page, 'Entrar', '/api/auth/login');
   expect(updatedPasswordResponse.status()).toBe(200);
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
-  const logoutResponse = await submitAndWait(page, 'Sair', '/api/auth/logout');
+  await page.getByRole('button', { name: /Abrir menu de conta/ }).click();
+  const logoutResponsePromise = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/auth/logout');
+  await page.getByRole('menuitem', { name: 'Sair', exact: true }).click();
+  const logoutResponse = await logoutResponsePromise;
   expect(logoutResponse.status()).toBe(204);
   await expect(page).toHaveURL(/\/login$/);
   expect((await page.request.get('/api/auth/session')).status()).toBe(401);

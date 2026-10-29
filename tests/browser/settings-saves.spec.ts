@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { clinicLogo } from '../fixtures/clinic-logo';
-import { enterSaveDashboard, installProfileFileSystemFakes } from './helpers/profile-session';
+import { enterSaveDashboard, installProfileFileSystemFakes, openRememberedSave, readPrimarySave } from './helpers/profile-session';
 
 test.setTimeout(300_000);
 
@@ -147,26 +146,6 @@ test('manages saves inside Settings and returns from creation without stacking d
 
 test('projects a synthetic imported profile into the weekly dashboard', async ({ page }) => {
   const saveApiResponses: string[] = [];
-  const registration = { saveId: randomUUID(), localAccountId: '', keyId: randomUUID(), bindingProof: '' };
-  const rawKey = Buffer.alloc(32, 7).toString('base64url');
-  let ownerId = '';
-  await page.route('**/api/saves', async (route) => {
-    if (route.request().method() !== 'POST') return route.continue();
-    const input = route.request().postDataJSON() as { localAccountId: string };
-    registration.localAccountId = input.localAccountId;
-    registration.bindingProof = `v1:${registration.keyId}:${Buffer.alloc(32, 9).toString('base64url')}`;
-    await route.fulfill({ status: 201, json: registration });
-  });
-  await page.route(/\/api\/saves\/[^/]+\/authorize$/, async (route) => {
-    if (route.request().method() !== 'POST') return route.continue();
-    await route.fulfill({ status: 200, json: {
-      ...registration,
-      ownerId,
-      authorizedAt: Date.now(),
-      expiresAt: Date.now() + 3_600_000,
-      key: rawKey,
-    } });
-  });
   page.on('response', (response) => {
     const pathname = new URL(response.url()).pathname;
     if (pathname.startsWith('/api/saves')) saveApiResponses.push(`${response.request().method()} ${pathname} ${response.status()}`);
@@ -178,11 +157,6 @@ test('projects a synthetic imported profile into the weekly dashboard', async ({
   const fixture = syntheticRoutineFixture(today);
   await installProfileFileSystemFakes(page, fixture.content);
   await enterSaveDashboard(page);
-  ownerId = await page.evaluate(async () => {
-    const response = await fetch('/api/auth/session');
-    const body = await response.json() as { user: { id: string } };
-    return body.user.id;
-  });
   await page.getByRole('button', { name: 'Abrir configurações de saves' }).click();
   const settings = page.getByRole('dialog', { name: 'Configurações', exact: true });
   await expect(settings.getByRole('tab', { name: 'Saves', exact: true })).toHaveAttribute('aria-selected', 'true');
@@ -198,7 +172,38 @@ test('projects a synthetic imported profile into the weekly dashboard', async ({
   await expect(page.getByRole('list', { name: 'Próximas ações' })).toContainText('Paciente da rotina');
   await expect(page.getByRole('list', { name: 'Próximas ações' })).toContainText('Atualização de dieta');
   await expect(page.getByRole('list', { name: 'Semana corrente' }).getByLabel('1 acompanhamento')).toBeVisible();
+  expect(saveApiResponses).toContain('POST /api/saves 201');
+  expect(saveApiResponses.some((entry) => /^POST \/api\/saves\/[^/]+\/authorize 200$/.test(entry))).toBe(true);
 
+  // Real Auth/save APIs; only file pickers are controlled OPFS handles.
+  const checkpoint = await readPrimarySave(page);
+  const mutations: string[] = [];
+  page.on('request', (request) => {
+    const path = new URL(request.url()).pathname;
+    if (path.startsWith('/api/') && !['GET', 'HEAD'].includes(request.method()) && !path.endsWith('/authorize')) {
+      mutations.push(`${request.method()} ${path}`);
+    }
+  });
+  await page.getByRole('link', { name: 'Abrir agenda', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible({ timeout: 120_000 });
+  await page.getByRole('button', { name: /^Abrir pendências: 1 atualização de dieta em / }).click();
+  const appointments = page.getByRole('dialog', { name: 'Acompanhamentos pendentes' });
+  await expect(appointments).toContainText('Paciente da rotina');
+  await expect(appointments).toContainText('Atualizações de dieta');
+  await page.keyboard.press('Escape');
+  await page.getByRole('link', { name: 'Início', exact: true }).click();
+  await expect(page.getByRole('list', { name: 'Próximas ações' })).toContainText('Paciente da rotina');
+  const subscription = page.getByRole('button', { name: 'Gerenciar assinatura' });
+  await subscription.click();
+  await expect(settings.getByRole('tab', { name: 'Assinatura', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Escape');
+  await expect(subscription).toBeFocused();
+  await page.reload();
+  await openRememberedSave(page);
+  await expect(page.getByRole('list', { name: 'Próximas ações' })).toContainText('Paciente da rotina');
+  expect((await readPrimarySave(page)).content).toBe(checkpoint.content);
+  expect((await readPrimarySave(page)).attempts).toBe(checkpoint.attempts);
+  expect(mutations).toEqual([]);
 });
 
 test('persists reminder preferences and logo through the profile API and requests password recovery', async ({ page }) => {
