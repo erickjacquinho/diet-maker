@@ -1,16 +1,30 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Download } from 'lucide-react';
-import { DietPdfTemplate } from '@/components/templates';
+import { DietPdfTemplate, type DietPdfProfessional } from '@/components/templates';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { getBrowserDietApplication, getBrowserPatientApplication } from '@/lib/application/browser-composition';
+import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
+import { getProfessionalFullName, getProfessionalTitle, type ProfessionalProfile } from '@/lib/domain/professional-profile';
 import { buildDietCyclePdfViewModel, buildDietPdfViewModel, createDietPdfFilename, type DietPdfDocumentViewModel } from '@/lib/application/diets/diet-pdf-view';
 import { normalizeDateToISO, serializeDateOnly } from '@/lib/date-only';
 import { toPatientViewModel } from '@/lib/patientViewModel';
 import { textStyle } from '@/design-system';
+
+function toPdfProfessional(profile: ProfessionalProfile | null): DietPdfProfessional | null {
+  if (!profile?.showOnDocuments) return null;
+  const contact = [profile.phone, profile.contactEmail, profile.instagram].filter(Boolean).join(' · ');
+  return {
+    name: getProfessionalFullName(profile),
+    title: getProfessionalTitle(profile),
+    crn: profile.crn,
+    contact: contact || null,
+    logo: profile.documentLogo,
+  };
+}
 
 interface PageState {
   document: DietPdfDocumentViewModel | null;
@@ -29,6 +43,16 @@ export default function DietPdfPreviewPage() {
   const [pageState, setPageState] = useState<PageState>({ document: null, error: null, isLoading: true });
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const professionalProfileStore = getBrowserProfessionalProfileStore();
+  const professionalProfile = useSyncExternalStore(
+    professionalProfileStore.subscribe,
+    professionalProfileStore.getSnapshot,
+    professionalProfileStore.getSnapshot,
+  );
+
+  useEffect(() => {
+    void professionalProfileStore.load();
+  }, [professionalProfileStore]);
 
   useEffect(() => {
     if (!patientId || !dietaId) return;
@@ -101,12 +125,13 @@ export default function DietPdfPreviewPage() {
   const handleDownload = useCallback(async () => {
     const documentElement = documentRef.current?.querySelector<HTMLElement>('[data-diet-pdf-document]');
     const view = pageState.document;
-    if (!documentElement || !view || isDownloading) return;
+    if (!documentElement || !view || isDownloading || professionalProfile.status !== 'ready') return;
 
     setIsDownloading(true);
     setDownloadError(null);
     try {
       await document.fonts?.ready;
+      await Promise.all(Array.from(documentElement.querySelectorAll('img')).map((image) => image.decode()));
       const { default: html2pdf } = await import('html2pdf.js');
       const worker = html2pdf();
       const options = {
@@ -125,7 +150,7 @@ export default function DietPdfPreviewPage() {
     } finally {
       setIsDownloading(false);
     }
-  }, [isDownloading, pageState.document]);
+  }, [isDownloading, pageState.document, professionalProfile.status]);
 
   if (pageState.isLoading) {
     return (
@@ -157,15 +182,21 @@ export default function DietPdfPreviewPage() {
           <ArrowLeft size={16} aria-hidden="true" />
           {isHistoricalExport ? 'Voltar para o perfil' : 'Voltar para a dieta'}
         </Button>
-        <Button type="button" variant="primary" size="compact" onClick={handleDownload} disabled={isDownloading}>
+        <Button type="button" variant="primary" size="compact" onClick={handleDownload} disabled={isDownloading || professionalProfile.status !== 'ready'}>
           <Download size={16} aria-hidden="true" />
           {isDownloading ? 'Gerando PDF…' : 'Baixar PDF'}
         </Button>
       </div>
 
       {downloadError && <p role="alert" className={`${textStyle('body-small')} text-error`}>{downloadError}</p>}
+      {professionalProfile.status === 'error' ? (
+        <div role="alert" className="flex items-center gap-3">
+          <p className={textStyle('body-small')}>Não foi possível carregar a identificação e o logotipo do profissional.</p>
+          <Button type="button" variant="secondary" size="compact" onClick={() => void professionalProfileStore.load({ force: true })}>Tentar novamente</Button>
+        </div>
+      ) : professionalProfile.status !== 'ready' && <p role="status" className={textStyle('helper')}>Carregando identificação e logotipo do profissional…</p>}
       <div ref={documentRef} aria-busy={isDownloading}>
-        <DietPdfTemplate document={pageState.document} />
+        <DietPdfTemplate document={pageState.document} professional={toPdfProfessional(professionalProfile.profile)} />
       </div>
     </main>
   );

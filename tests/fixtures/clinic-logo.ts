@@ -1,0 +1,1 @@
+export const clinicLogo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAQCAIAAAD4YuoOAAAAHklEQVR4nGNQd9tMU8QwasGoBaMWjFowasHmIWABAFRPQB/jgHQRAAAAAElFTkSuQmCC';

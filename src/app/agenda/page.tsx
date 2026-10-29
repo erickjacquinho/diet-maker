@@ -54,6 +54,7 @@ import {
   type PatientNextEventType,
 } from '@/lib/application/patients/clinical-ui-adapter';
 import { getTodayDateKey, normalizeDateKey } from '@/lib/patientListDateUtils';
+import { patientAppointmentDates } from '@/lib/agenda-summary';
 import type { FollowUpType, NextFollowUpDateChange } from '@/lib/domain/clinical';
 import {
   addAgendaReminder,
@@ -78,14 +79,6 @@ type AgendaSelection = Pick<AgendaAppointment, 'type'> & { patientId: string };
 
 function appointmentKey(appointment: AgendaSelection) {
   return `${appointment.patientId}:${appointment.type}`;
-}
-
-function patientAppointmentDates(patient: PatientViewModel): Partial<Record<PatientNextEventType, string>> {
-  const nextEvent = patient.nextEvent;
-  if (!nextEvent) return {};
-  if (nextEvent.dates) return nextEvent.dates;
-  const types = Array.isArray(nextEvent.type) ? nextEvent.type : [nextEvent.type];
-  return Object.fromEntries(types.map((type) => [type, nextEvent.date])) as Partial<Record<PatientNextEventType, string>>;
 }
 
 function toFollowUpType(type: PatientNextEventType): FollowUpType {

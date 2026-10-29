@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, LayoutDashboard, Sparkles, Utensils, UtensilsCrossed, Users } from 'lucide-react';
 
 import type {
   SidebarGroupItem,
@@ -7,18 +7,19 @@ import type {
 } from '@/components/organisms/sidebar-navigation-model';
 
 export const sidebarProductionRoutes: SidebarRouteItem[] = [
+  { kind: 'route', href: '/dashboard', label: 'Início', icon: LayoutDashboard, match: 'prefix' },
   { kind: 'route', href: '/pacientes', label: 'Pacientes', icon: Users, match: 'patients-prefix' },
   { kind: 'route', href: '/agenda', label: 'Agenda', icon: CalendarDays, match: 'prefix' },
-  { kind: 'route', href: '/presets', label: 'Presets de Dietas', icon: Sparkles, match: 'prefix' },
+  { kind: 'route', href: '/presets', label: 'Dietas prontas', icon: Sparkles, match: 'prefix' },
   {
     kind: 'route',
     href: '/refeicoes',
-    label: 'Refeições Prontas',
+    label: 'Refeições',
     icon: UtensilsCrossed,
     match: 'prefix',
   },
-  { kind: 'route', href: '/receitas', label: 'Receitas Culinárias', icon: Utensils, match: 'prefix' },
-  { kind: 'route', href: '/alimentos', label: 'Planilha de Alimentos', icon: BookOpen, match: 'prefix' },
+  { kind: 'route', href: '/receitas', label: 'Receitas', icon: Utensils, match: 'prefix' },
+  { kind: 'route', href: '/alimentos', label: 'Alimentos', icon: BookOpen, match: 'prefix' },
 ];
 
 export const sidebarFutureGroup: SidebarGroupItem = {
@@ -26,7 +27,7 @@ export const sidebarFutureGroup: SidebarGroupItem = {
   id: 'library',
   label: 'Biblioteca',
   icon: BookOpen,
-  children: [sidebarProductionRoutes[5]],
+  children: [sidebarProductionRoutes[6]],
 };
 
 export const sidebarEmptyGroup: SidebarGroupItem = {

@@ -20,6 +20,7 @@ vi.mock('../../src/lib/server/online-db/repository', () => ({
 
 import { createRequestSupabaseClient } from '../../src/lib/server/auth/supabase';
 import { applyAuthResponseState, validateProfileRequestSession, validateRequestSession } from '../../src/lib/server/auth/session';
+import { GET as getSessionRoute } from '../../src/app/api/auth/session/route';
 
 const ownerId = randomUUID();
 const sessionId = randomUUID();
@@ -78,6 +79,23 @@ describe('request-scoped Supabase Auth session', () => {
     mocks.getProfessionalProfile.mockResolvedValueOnce(null);
     const incomplete = await validateProfileRequestSession(request);
     expect(incomplete).toMatchObject({ user: { id: ownerId }, profileExists: false });
+  });
+
+  it('returns dashboard as the complete-account destination and keeps profile completion gated', async () => {
+    const complete = await getSessionRoute(new Request('http://localhost:3000/api/auth/session'));
+    expect(await complete.json()).toMatchObject({
+      user: { id: ownerId },
+      profileComplete: true,
+      destination: '/dashboard',
+    });
+
+    mocks.getProfessionalProfile.mockResolvedValueOnce(null);
+    const incomplete = await getSessionRoute(new Request('http://localhost:3000/api/auth/session'));
+    expect(await incomplete.json()).toMatchObject({
+      user: { id: ownerId },
+      profileComplete: false,
+      destination: '/criar-conta?completar=1',
+    });
   });
 
   it('rejects anonymous and unverified users before checking the session owner', async () => {

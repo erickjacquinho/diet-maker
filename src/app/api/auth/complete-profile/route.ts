@@ -24,7 +24,7 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
     return applyAuthResponseState(
-      NextResponse.json({ destination: '/saves' }),
+      NextResponse.json({ destination: '/dashboard' }),
       result,
     );
   } catch (error) {

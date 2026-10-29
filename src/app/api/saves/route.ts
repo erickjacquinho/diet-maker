@@ -29,7 +29,7 @@ export async function GET(request: Request): Promise<Response> {
       label: readSaveLabel(record, session!.user!.id),
       createdAt: record.createdAt.toISOString(),
     }));
-    const response = NextResponse.json({ items, totalRows: page.totalRows, pageIndex, pageSize }, {
+    const response = NextResponse.json({ items, totalRows: page.totalRows, canCreate: page.totalRows === 0, pageIndex, pageSize }, {
       headers: { 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' },
     });
     return applyAuthResponseState(response, session);

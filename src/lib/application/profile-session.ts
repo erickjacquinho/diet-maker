@@ -59,6 +59,8 @@ export interface ProfileSessionOnlineSaveGateway {
   createIdempotencyKey(): string;
   registerSave(input: { localAccountId: string; idempotencyKey: string; label: string }): Promise<OnlineSaveRegistration>;
   authorizeSave(saveId: string, bindingProof: string): Promise<ProtectedSaveGrant>;
+  /** Updates the save label shown in the account catalog. */
+  renameSave?(saveId: string, label: string): Promise<void>;
 }
 
 export interface CreateProfileInput {
@@ -78,6 +80,7 @@ export type ProfileSessionErrorCode =
   | 'SAVE_NOT_LOCATED'
   | 'SAVE_REFERENCE_LOST'
   | 'DRAFT_PRESERVATION_FAILED'
+  | 'SAVE_RENAME_FAILED'
   | 'SESSION_UNAVAILABLE';
 
 export class ProfileSessionError extends Error {
@@ -100,6 +103,8 @@ export interface ProfileSessionDependencies<TRuntime extends ProfileSessionRunti
   createRuntime(account: Account, scope?: OnlineSaveScope): Promise<TRuntime>;
   importSnapshot(runtime: TRuntime, envelope: BackupEnvelope): Promise<void>;
   exportSnapshot(runtime: TRuntime): Promise<BackupEnvelope>;
+  /** Persists the edited account row inside the runtime workspace and returns the stored account. */
+  updateAccount?(runtime: TRuntime, account: Account): Promise<Account>;
   disposeRuntime?(runtime: TRuntime): Promise<void>;
   activateRuntime?(runtime: TRuntime): void | Promise<void>;
   deactivateRuntime?(runtime: TRuntime): void | Promise<void>;
@@ -113,6 +118,7 @@ export interface ProfileSession<TRuntime extends ProfileSessionRuntime> {
   registerPendingDraftFlush(flush: () => Promise<void>): () => void;
   retryLockedSave(): Promise<void>;
   createProfile(input: CreateProfileInput): Promise<void>;
+  updateProfileDetails(input: CreateProfileInput): Promise<void>;
   adoptLegacyProfile(): Promise<void>;
   listPendingRegistrations(): Promise<Array<{ localAccountId: string; fileName: string; hasSourceFile: boolean }>>;
   resumePendingProfile(localAccountId: string, input: CreateProfileInput): Promise<void>;
@@ -187,6 +193,8 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
   };
   let associatedFile: SaveFile | null = null;
   let onlineIdentity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'> | null = null;
+  /** Label already written to the file but not yet to the account catalog, so resubmitting it retries the rename. */
+  let pendingCatalogLabel: { saveId: string; label: string } | null = null;
   let pendingLegacy: { file: SaveFile; envelope: BackupEnvelope; sourceSchemaVersion: unknown } | null = null;
   let rememberedFile: SaveFile | null | undefined;
   let restorePromise: Promise<void> | null = null;
@@ -918,6 +926,49 @@ export function createProfileSession<TRuntime extends ProfileSessionRuntime>(
         update({ ...previous, hydration: 'ready', error: error instanceof Error ? error.message : 'O arquivo não pôde ser associado a este save.' });
         if (error instanceof ProfileSessionError) throw error;
         throw profileError('LOAD_INVALID', loadValidationMessage(error), error);
+      }
+    },
+    async updateProfileDetails(input) {
+      const displayName = normalizeAccountDisplayName(input.displayName);
+      if (!displayName) throw profileError('PROFILE_NAME_REQUIRED', 'Informe o nome do profile.');
+      const runtime = snapshot.runtime;
+      const current = snapshot.account;
+      if (!runtime || !current || (snapshot.status !== 'active' && snapshot.status !== 'paused') || !dependencies.updateAccount) {
+        throw profileError('SESSION_UNAVAILABLE', 'Abra um save para editar as configurações dele.');
+      }
+      if (dependencies.onlineSave && (!onlineIdentity || !dependencies.onlineSave.session.isAuthorizedFor(onlineIdentity))) {
+        throw profileError('SESSION_UNAVAILABLE', 'A autorização do save expirou ou foi bloqueada.');
+      }
+      const phone = normalizePhone(input.phone);
+      const renamed = current.displayName !== displayName;
+      const changed = renamed || (current.phone ?? null) !== phone;
+      const saveId = onlineIdentity?.saveId ?? null;
+      const retryCatalog = pendingCatalogLabel !== null
+        && pendingCatalogLabel.saveId === saveId
+        && pendingCatalogLabel.label === displayName;
+      if (!changed && !retryCatalog) return;
+
+      let stored = current;
+      try {
+        if (changed) {
+          stored = await dependencies.updateAccount(runtime, { ...current, displayName, phone, updatedAt: now() });
+          await runtime.markWorkspaceDirty();
+          await sync();
+        }
+
+        const onlineSave = dependencies.onlineSave;
+        if ((renamed || retryCatalog) && onlineSave?.renameSave && saveId) {
+          try {
+            await onlineSave.renameSave(saveId, displayName);
+            pendingCatalogLabel = null;
+          } catch (cause) {
+            pendingCatalogLabel = { saveId, label: displayName };
+            throw profileError('SAVE_RENAME_FAILED', 'O nome foi salvo no arquivo, mas a lista de saves da conta não foi atualizada. Salve novamente para tentar outra vez.', cause);
+          }
+        }
+      } finally {
+        // Published after the catalog rename so consumers that refetch the catalog on a name change see the new label.
+        if (stored !== current) update({ account: cloneAccount(stored) });
       }
     },
     async adoptLegacyProfile() {

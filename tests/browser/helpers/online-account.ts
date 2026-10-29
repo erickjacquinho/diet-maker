@@ -58,7 +58,7 @@ export async function confirmAndLogin(page: Page, email: string, password: strin
   await page.getByLabel('E-mail', { exact: true }).fill(email);
   await page.getByLabel('Senha', { exact: true }).fill(password);
   expect((await submitAndWait(page, 'Entrar', '/api/auth/login')).status()).toBe(200);
-  await expect(page).toHaveURL(/\/saves$/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
 }
 
 export async function loginSyntheticAccount(page: Page, email: string, password: string): Promise<void> {
@@ -66,7 +66,7 @@ export async function loginSyntheticAccount(page: Page, email: string, password:
   await page.getByLabel('E-mail', { exact: true }).fill(email);
   await page.getByLabel('Senha', { exact: true }).fill(password);
   expect((await submitAndWait(page, 'Entrar', '/api/auth/login')).status()).toBe(200);
-  await expect(page).toHaveURL(/\/saves$/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
 }
 
 export async function submitAndWait(page: Page, buttonName: string, route: string) {

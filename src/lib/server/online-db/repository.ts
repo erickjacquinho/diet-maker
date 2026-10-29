@@ -53,6 +53,44 @@ export async function getProfessionalProfile(ownerId: string) {
   });
 }
 
+export async function updateProfessionalProfile(input: {
+  ownerId: string;
+  profileCipher: Buffer;
+  profileIv: Buffer;
+  profileKekId: string;
+}): Promise<boolean> {
+  return withOwnerTransaction(input.ownerId, async (transaction) => {
+    const updated = await transaction.execute(sql`
+      UPDATE private.professional_profiles
+      SET profile_cipher = ${input.profileCipher}, profile_iv = ${input.profileIv}, profile_kek_id = ${input.profileKekId}
+      WHERE owner_id = ${input.ownerId}
+      RETURNING owner_id
+    `);
+
+    return updated.rows.length === 1;
+  });
+}
+
+export async function updateSaveLabel(input: {
+  ownerId: string;
+  saveId: string;
+  labelCipher: Buffer;
+  labelIv: Buffer;
+  labelKekId: string;
+}): Promise<boolean> {
+  assertUuid(input.saveId);
+  return withOwnerTransaction(input.ownerId, async (transaction) => {
+    const updated = await transaction.execute(sql`
+      UPDATE private.saves
+      SET label_cipher = ${input.labelCipher}, label_iv = ${input.labelIv}, label_kek_id = ${input.labelKekId}
+      WHERE id = ${input.saveId} AND owner_id = ${input.ownerId}
+      RETURNING id
+    `);
+
+    return updated.rows.length === 1;
+  });
+}
+
 export async function findAuthSessionOwner(sessionId: string): Promise<string | null> {
   assertUuid(sessionId);
   const [session] = await onlineDatabase()
@@ -68,6 +106,8 @@ export async function registerSaveRecord(
   input: SaveRegistryInsert,
 ): Promise<{ record: SaveRegistryRecord; created: boolean } | null> {
   return withOwnerTransaction(input.ownerId, async (transaction) => {
+    // Serialize registrations for the owner so concurrent requests cannot create a second save.
+    await transaction.execute(sql`SELECT owner_id FROM private.professional_profiles WHERE owner_id = ${input.ownerId} FOR UPDATE`);
     const findByIdempotencyKey = () => transaction
       .select()
       .from(saves)
@@ -84,6 +124,10 @@ export async function registerSaveRecord(
 
     const [byLocalAccountId] = await findByLocalAccountId();
     if (byLocalAccountId) return { record: byLocalAccountId, created: false };
+
+    const [existingSave] = await transaction.select({ id: saves.id }).from(saves)
+      .where(eq(saves.ownerId, input.ownerId)).limit(1);
+    if (existingSave) return null;
 
     const { rows } = await transaction.execute(sql`
       INSERT INTO private.saves (

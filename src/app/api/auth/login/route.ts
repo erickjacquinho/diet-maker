@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
     return applyAuthResponseState(
       NextResponse.json({
         user: result.user,
-        destination: result.profileComplete ? '/saves' : '/criar-conta?completar=1',
+        destination: result.profileComplete ? '/dashboard' : '/criar-conta?completar=1',
       }),
       result,
     );

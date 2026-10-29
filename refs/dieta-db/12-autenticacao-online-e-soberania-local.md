@@ -7,7 +7,7 @@
 ## 1. Identidade e responsabilidades
 
 Supabase Auth valida a identidade online do profissional, confirmação de e-mail,
-credenciais e sessão. O perfil profissional é cifrado no banco remoto. O catálogo
+credenciais e sessão. O perfil profissional é cifrado no banco remoto, incluindo a preferência de avisos da agenda e o logotipo PNG opcional para documentos. Perfis anteriores assumem avisos ativos e nenhum logotipo. Essas preferências não alteram o schema clínico dos saves. O catálogo
 remoto conserva apenas proprietário, IDs necessários ao vínculo, rótulo cifrado,
 datas e material de chave cifrado. O `ownerId` vem do guard de sessão do backend;
 parâmetros, UUIDs isolados, estado da interface e `user_metadata` não concedem

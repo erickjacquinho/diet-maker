@@ -2,10 +2,13 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { routeAcceptanceMatrix } from "./route-acceptance-matrix";
 
-describe("route behavior preservation", () => {
-  it("keeps interactive routes wired to domain stores and navigation", () => {
-    const source = routeAcceptanceMatrix.map((route) => readFileSync(route.file, "utf8")).join("\n");
-    expect(source).toMatch(/next\/navigation|next\/link/);
-    expect(source).toMatch(/localStorage|Store|set[A-Z]|onClick/);
+describe("static alias implementation inspection (not browser navigation)", () => {
+  it("inspects redirects and the dashboard aliases' query forwarding", () => {
+    for (const route of routeAcceptanceMatrix.filter((entry) => entry.kind === 'alias')) {
+      const source = readFileSync(route.file, 'utf8');
+      expect(source).toMatch(/redirect\(/);
+      if (route.destination === '/dashboard') expect(source).toMatch(/searchParams/);
+      else expect(source).toContain(`redirect('${route.destination}')`);
+    }
   });
 });

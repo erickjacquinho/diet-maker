@@ -5,11 +5,9 @@ import { encryptProfessionalProfile } from '../save-keys';
 import { RequestSecurityError, getConfiguredAppOrigin } from '../request-security';
 import { validateRequestSession, validateSupabaseIdentity } from './session';
 import { createRequestSupabaseClient } from './supabase';
+import type { ProfessionalExperience } from '@/lib/domain/professional-profile';
 
-export type ProfessionalExperience =
-  | { kind: 'months_1_6' }
-  | { kind: 'months_6_12' }
-  | { kind: 'years'; value: number };
+export type { ProfessionalExperience };
 
 export interface ProfessionalProfileInput {
   firstName: string;

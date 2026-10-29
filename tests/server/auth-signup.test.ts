@@ -196,6 +196,17 @@ describe('Supabase registration and login endpoints', () => {
     expect(mocks.validateSupabaseIdentity).toHaveBeenCalledWith(expect.any(Object), 'server-only-access-token');
   });
 
+  it('sends a complete account to the dashboard after login', async () => {
+    const response = await login(jsonRequest('/api/auth/login', {
+      email: 'professional@example.invalid',
+      password: signupBody().password,
+      csrfToken,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ user: verifiedUser, destination: '/dashboard' });
+  });
+
   it('requires verified identity before inserting a missing profile and does not create saves', async () => {
     mocks.validateRequestSession.mockResolvedValueOnce({ user: null, cookiesToSet: [], responseHeaders: {} });
     const response = await completeProfile(jsonRequest('/api/auth/complete-profile', completeProfileBody()));
@@ -210,7 +221,8 @@ describe('Supabase registration and login endpoints', () => {
     const body = await response.text();
 
     expect(response.status).toBe(200);
-    expect(body).toContain('/saves');
+    expect(body).toContain('/dashboard');
+    expect(body).not.toContain('/saves');
     expect(mocks.encryptProfessionalProfile).toHaveBeenCalledWith(ownerId, {
       firstName: 'Nome',
       lastName: 'Sobrenome',
@@ -288,6 +300,7 @@ describe('Supabase registration and login endpoints', () => {
     expect(response.status).toBe(200);
     expect(body).not.toMatch(/access_token|refresh_token/);
     expect(body).toContain(ownerId);
+    expect(body).toContain('/dashboard');
   });
 });
 

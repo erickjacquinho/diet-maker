@@ -80,7 +80,7 @@ describe('landing, cadastro e login', () => {
   });
 
   it('liga os campos de login, envia CSRF e navega para o destino permitido', async () => {
-    const fetchMock = queueFetch(csrfResponse(), Response.json({ destination: '/saves' }));
+    const fetchMock = queueFetch(csrfResponse(), Response.json({ destination: '/dashboard' }));
     render(<LoginForm />);
 
     const email = await screen.findByLabelText('E-mail');
@@ -94,7 +94,7 @@ describe('landing, cadastro e login', () => {
     await waitForReady('Entrar');
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/saves'));
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/dashboard'));
     expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/login', expect.objectContaining({ method: 'POST' }));
     expect(JSON.parse(fetchMock.mock.calls[1][1].body as string)).toEqual({
       email: 'ana@example.test',
@@ -116,6 +116,18 @@ describe('landing, cadastro e login', () => {
     expect(mocks.replace).not.toHaveBeenCalled();
   });
 
+  it('routes an unrecognized login destination to the safe dashboard default', async () => {
+    queueFetch(csrfResponse(), Response.json({ destination: 'https://attacker.example/collect' }));
+    render(<LoginForm />);
+
+    fireEvent.change(await screen.findByLabelText('E-mail'), { target: { value: 'ana@example.test' } });
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha de teste' } });
+    await waitForReady('Entrar');
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/dashboard'));
+  });
+
   it('anuncia login pendente e impede submissões concorrentes', async () => {
     let finishLogin!: (response: Response) => void;
     const fetchMock = vi.fn()
@@ -132,8 +144,8 @@ describe('landing, cadastro e login', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Entrar' })).toBeDisabled());
     expect(screen.getByRole('form')).toHaveAttribute('aria-busy', 'true');
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    finishLogin(Response.json({ destination: '/saves' }));
-    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/saves'));
+    finishLogin(Response.json({ destination: '/dashboard' }));
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/dashboard'));
   });
 
   it('renderiza cadastro, confirmação e conclusão conforme a rota e seus parâmetros', async () => {
@@ -223,7 +235,7 @@ describe('landing, cadastro e login', () => {
   });
 
   it('conclui somente os dados profissionais após login verificado', async () => {
-    const fetchMock = queueFetch(csrfResponse(), Response.json({ destination: '/saves' }));
+    const fetchMock = queueFetch(csrfResponse(), Response.json({ destination: '/dashboard' }));
     render(<RegistrationForm mode="complete" />);
 
     fillProfessionalProfile();
@@ -233,7 +245,7 @@ describe('landing, cadastro e login', () => {
     await waitForReady('Concluir cadastro');
     fireEvent.click(screen.getByRole('button', { name: 'Concluir cadastro' }));
 
-    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/saves'));
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/dashboard'));
     expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/complete-profile', expect.objectContaining({ method: 'POST' }));
     expect(JSON.parse(fetchMock.mock.calls[1][1].body as string)).toMatchObject({
       firstName: 'Ana',

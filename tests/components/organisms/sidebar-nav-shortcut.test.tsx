@@ -24,14 +24,14 @@ describe('SidebarNav shortcut readiness', () => {
     render(<SidebarNav pathname="/alimentos" navigationItems={sidebarProductionRoutes} />);
 
     const toggle = screen.getByRole('button', { name: 'Recolher Menu' });
-    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Alimentos' })).toHaveAttribute(
       'aria-current',
       'page',
     );
 
     fireEvent.click(toggle);
     expect(screen.getByRole('button', { name: 'Expandir Menu' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Planilha de Alimentos' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Alimentos' })).toHaveAttribute(
       'aria-current',
       'page',
     );

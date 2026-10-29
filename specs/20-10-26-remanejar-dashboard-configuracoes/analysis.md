@@ -35,21 +35,21 @@ Nenhum conflito crítico, requisito descoberto, ambiguidade de produto aberta ou
 
 ## Constitution Alignment
 
-Sem violações: composição descendente em app; primitivos preservados; categoria antes de perfil; sem tokens novos ou dependências; testes/contratos antes do código; desktop/teclado/foco explícitos. Documentação distingue proposta e execução. US1 tem autorização específica na conversa; o restante exige validação humana e `/speckit-implement`.
+Sem violações: composição descendente em app; primitivos preservados; categoria antes de perfil; sem tokens novos ou dependências; testes/contratos antes do código; desktop/teclado/foco explícitos. Em 2026-10-20, a invocação explícita de `$sdd-implement` validou e autorizou US1–US3; a migração online continua fora do escopo.
 
 Não há tarefas órfãs. Skills atribuídas: general (sem skill especializada), shadcn, nextjs-fullstack-master e webapp-testing, conforme catálogo existente.
 
 ## Metrics
 
 - Requisitos: 13 FR + 4 NFR + 5 SC = 22.
-- Tarefas: 11 (US1 4 concluídas, US2 3 propostas, US3 2 propostas, validação final 2 propostas).
+- Tarefas: 11 (T001–T010 concluídas; T011 pendente de validação autenticada e visual).
 - Cobertura documental: 22/22, 100%.
 - Checklists: 2, com 28 itens de qualidade dos requisitos avaliados.
 - Ambiguidades abertas: 0; duplicações que exijam correção: 0; críticos: 0.
 
 ## Próximas ações
 
-T001–T004 já concluídas. Remanejamento US2/US3 permanece proposto para revisão humana e `/speckit-implement`. Testes e cobertura documental não comprovam persistência autenticada ou migração online.
+T001–T010 concluídas nesta execução; T011 permanece pendente. Testes automatizados e cobertura documental não comprovam, por si, a persistência autenticada ou a aceitação visual manual; nenhuma migração online foi executada.
 
 ## Redução de complexidade
 

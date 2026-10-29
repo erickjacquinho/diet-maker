@@ -1,6 +1,6 @@
 # Contrato HTTP do backend
 
-Proposto; não há endpoint implementado por esta entrega. UI usa somente mesma origem. Runtime Node, Content-Type JSON nos POST, corpo máximo 16KiB para identidade e 8KiB para metadados (nenhum arquivo/backup). Schema rejeita campos desconhecidos como `ownerId`, `patients`, `snapshot`, `drafts`, `key` e `ciphertext` clínico. Respostas privadas e de tokens usam no-store.
+Contrato da entrega original, posteriormente implementada. Destinos de autenticação atualizados em 2026-10-25 conforme a navegação de 20/23-10; esta revisão não revalida implantação remota. UI usa somente mesma origem. Runtime Node, Content-Type JSON nos POST, corpo máximo 16KiB para identidade e 8KiB para metadados (nenhum arquivo/backup). Schema rejeita campos desconhecidos como `ownerId`, `patients`, `snapshot`, `drafts`, `key` e `ciphertext` clínico. Respostas privadas e de tokens usam no-store.
 
 ## Autorização comum
 
@@ -24,8 +24,8 @@ Erro JSON: `{code,message,fieldErrors?,requestId}`. Sem stack, token, senha, e-m
 | --- | --- | --- |
 | GET /api/auth/csrf | Nenhuma | Token selado curto de formulário; cookie HttpOnly de contexto, no-store |
 | POST /api/auth/signup | firstName,lastName,email,emailConfirmation,password,passwordConfirmation,averagePatientsPerMonth,experience,csrfToken | 202 genérico após tentativa aceita; validação 400; nunca sessão pelo retorno de signUp |
-| POST /api/auth/login | email,password,csrfToken | 200 com destino /saves após guard; perfil ausente de identidade verificada encaminha /criar-conta?completar=1 sem acesso a saves; cookies somente HttpOnly, credenciais inválidas apresentam mensagem genérica |
-| POST /api/auth/complete-profile | firstName,lastName,averagePatientsPerMonth,experience,csrfToken | Exige getUser/e-mail confirmado/session_id válidos sem exigir perfil; INSERT-only do próprio owner, conflito não altera perfil; destino /saves depois de guard completo |
+| POST /api/auth/login | email,password,csrfToken | 200 com destino /dashboard após guard; perfil ausente de identidade verificada encaminha /criar-conta?completar=1 sem acesso a saves; cookies somente HttpOnly, credenciais inválidas apresentam mensagem genérica |
+| POST /api/auth/complete-profile | firstName,lastName,averagePatientsPerMonth,experience,csrfToken | Exige getUser/e-mail confirmado/session_id válidos sem exigir perfil; INSERT-only do próprio owner, conflito não altera perfil; destino /dashboard depois de guard completo |
 | GET /api/auth/session | Cookies somente | Sessão/profissional mínimo autorizado ou 401; refresh só servidor, sem tokens Auth em JSON |
 | POST /api/auth/logout | csrfToken | Revoga sessão corrente, apaga cookies e devolve 204; cliente bloqueia/conserva mesmo em falha de rede e executa revogação pendente antes da próxima autorização |
 | POST /api/auth/recovery | email,csrfToken | 202 genérico; não concede sessão |

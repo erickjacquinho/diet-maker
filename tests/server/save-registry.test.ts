@@ -51,7 +51,8 @@ describeLocal('private save registration and authorization routes', () => {
     }
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await admin.query('DELETE FROM private.saves WHERE owner_id = ANY($1::uuid[])', [owners]);
     vi.stubEnv('APP_ORIGIN', 'http://localhost:3000');
     vi.stubEnv('SERVER_MASTER_KEY', Buffer.alloc(32, 0x35).toString('base64'));
     vi.stubEnv('SERVER_MASTER_KEY_ID', 'registry-test-v1');
@@ -138,6 +139,16 @@ describeLocal('private save registration and authorization routes', () => {
     const reopened = await sameOwnerReopen.json();
     expect(sameOwnerReopen.status).toBe(200);
     expect(reopened).toMatchObject({ saveId: first.saveId, keyId: first.keyId, bindingProof: first.bindingProof, label: 'Stable label' });
+  });
+
+  it('rejects a second save for the same owner even when registrations overlap', async () => {
+    const responses = await Promise.all([
+      registerSave(postRequest('/api/saves', createInput())),
+      registerSave(postRequest('/api/saves', createInput())),
+    ]);
+    expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
+    const { rows } = await admin.query('SELECT id FROM private.saves WHERE owner_id = $1', [owners[0]]);
+    expect(rows).toHaveLength(1);
   });
 
   it('allows only one concurrent owner to claim a clinical account identity', async () => {

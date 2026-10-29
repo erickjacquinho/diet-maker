@@ -8,6 +8,7 @@ function renderDashboard(overrides: Partial<SavesDashboardProps> = {}) {
   const props: SavesDashboardProps = {
     items: [save],
     totalRows: 1,
+    canCreate: true,
     pageIndex: 0,
     pageSize: 50,
     locations: { 'save-a': 'located' },
@@ -16,9 +17,8 @@ function renderDashboard(overrides: Partial<SavesDashboardProps> = {}) {
     actionBusy: null,
     protectedCopyRequired: false,
     onPageChange: vi.fn(),
-    onCreate: vi.fn(async () => undefined),
+    onCreateRequest: vi.fn(),
     onImport: vi.fn(async () => undefined),
-    onSignOut: vi.fn(async () => undefined),
     onOpen: vi.fn(async () => undefined),
     onLocate: vi.fn(async () => undefined),
     onAdoptLegacy: vi.fn(async () => undefined),
@@ -31,8 +31,8 @@ describe('SavesDashboard', () => {
   it('shows catalog rows, recognized local synchronization, and targeted open/locate actions', async () => {
     const { props } = renderDashboard();
 
-    expect(screen.getByRole('heading', { name: 'Seus saves' })).toBeInTheDocument();
-    expect(screen.getByRole('table', { name: 'Seus saves' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Arquivos locais' })).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Arquivos locais' })).toBeInTheDocument();
     expect(screen.getByText('Sincronizado')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Abrir save Clínica Ana (save-a)' }));
@@ -78,10 +78,11 @@ describe('SavesDashboard', () => {
 
     expect(screen.getByRole('button', { name: 'Criar save' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Importar arquivo' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sair' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Proteger cópia importada' })).toBeInTheDocument();
     expect(screen.getByText(/53 saves/)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole('button', { name: 'Criar save' }));
+    expect(props.onCreateRequest).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole('button', { name: 'Importar arquivo' }));
     await waitFor(() => expect(props.onImport).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: 'Proteger cópia importada' }));
@@ -93,12 +94,14 @@ describe('SavesDashboard', () => {
     expect(props.onPageChange).toHaveBeenCalledWith(1);
   });
 
-  it('lets an account with no local saves sign out from the dashboard', async () => {
-    const { props } = renderDashboard({ items: [], totalRows: 0 });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
-
-    await waitFor(() => expect(props.onSignOut).toHaveBeenCalledOnce());
+  it('disables creation when the backend denies it and has no logout action', () => {
+    const { props, rerender } = renderDashboard({ canCreate: false });
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Sair' })).not.toBeInTheDocument();
+    rerender(<SavesDashboard {...props} canCreate loading />);
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
+    rerender(<SavesDashboard {...props} canCreate error="Cat�logo indispon�vel" />);
+    expect(screen.getByRole('button', { name: 'Criar save' })).toBeDisabled();
   });
 
   it('announces loading, empty and error states and surfaces action failures', async () => {
@@ -106,7 +109,7 @@ describe('SavesDashboard', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Carregando dados.');
 
     rerender(<SavesDashboard {...props} loading={false} />);
-    expect(screen.getByRole('status')).toHaveTextContent('Nenhum save online ainda.');
+    expect(screen.getByRole('status')).toHaveTextContent('Nenhum arquivo associado');
 
     rerender(<SavesDashboard {...props} loading={false} items={[save]} error="Catálogo indisponível." />);
     expect(screen.getByRole('alert')).toHaveTextContent('Catálogo indisponível.');

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import type { DietPdfItemView, DietPdfMacrosView, DietPdfMealView } from '@/lib/application/diets/diet-pdf-view';
 import type { DietPdfTemplateProps } from './dietPdfTemplateTypes';
 
-export type { DietPdfTemplateProps } from './dietPdfTemplateTypes';
+export type { DietPdfProfessional, DietPdfTemplateProps } from './dietPdfTemplateTypes';
 
 interface DietPdfMacroRow {
   id: string;
@@ -108,7 +108,7 @@ function MealSection({ meal, headingLevel = 2 }: { meal: DietPdfMealView; headin
   );
 }
 
-export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
+export function DietPdfTemplate({ document, professional = null }: DietPdfTemplateProps) {
   const isCycle = 'diets' in document;
   const macroRows: DietPdfMacroRow[] = isCycle
     ? document.diets.map((diet) => ({
@@ -152,6 +152,11 @@ export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
       className="mx-auto flex max-w-container-reading flex-col gap-6 border border-border-subtle bg-surface p-6 text-text-primary"
     >
       <header className="flex flex-col gap-3 border-b border-border-divider pb-4">
+        {professional?.logo && (
+          // Local PNG data is kept inline so the exported document needs no remote image request.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={professional.logo} alt="Logotipo do consultório" className="h-16 w-32 object-contain object-left" />
+        )}
         <h1 className={textStyle('page-title')}>Prescrição alimentar</h1>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
@@ -165,6 +170,15 @@ export function DietPdfTemplate({ document }: DietPdfTemplateProps) {
             </time>
           </div>
         </div>
+        {professional && (
+          <div className="flex flex-col gap-1" data-diet-pdf-professional>
+            <span className={textStyle('metadata')}>Responsável</span>
+            <p className={textStyle('body-strong')}>
+              {[professional.name, professional.title, professional.crn].filter(Boolean).join(' · ')}
+            </p>
+            {professional.contact && <p className={textStyle('body-secondary')}>{professional.contact}</p>}
+          </div>
+        )}
       </header>
 
       {isCycle ? (

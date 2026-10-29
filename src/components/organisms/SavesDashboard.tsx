@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { FolderOpen, LogOut, MapPin, Plus } from 'lucide-react';
+import { Download, FolderOpen, MapPin, Plus, Upload } from 'lucide-react';
 import { Badge, Button } from '@/components/atoms';
 import { DataTable, type DataTableColumnDef } from '@/components/molecules/DataTable';
-import { ProfileCreateDialog } from '@/components/molecules/profile-create-dialog';
 import { Card } from '@/components/ui/card';
-import type { CreateProfileInput } from '@/lib/application/profile-session';
 
 export interface SaveCatalogItem {
   saveId: string;
@@ -19,6 +17,7 @@ export type SaveLocationState = 'checking' | 'located' | 'not-located' | 'permis
 export interface SavesDashboardProps {
   items: SaveCatalogItem[];
   totalRows: number;
+  canCreate: boolean;
   pageIndex: number;
   pageSize: number;
   locations: Record<string, SaveLocationState>;
@@ -26,13 +25,16 @@ export interface SavesDashboardProps {
   error: string | null;
   actionBusy: string | null;
   protectedCopyRequired: boolean;
+  backupState?: 'idle' | 'exporting' | 'restoring';
+  backupUnavailableReason?: string;
   onPageChange(pageIndex: number): void;
-  onCreate(input: CreateProfileInput): Promise<void>;
+  onCreateRequest(): void;
   onImport(): Promise<void>;
-  onSignOut(): Promise<void>;
   onOpen(saveId: string): Promise<void>;
   onLocate(saveId: string): Promise<void>;
   onAdoptLegacy(): Promise<void>;
+  onExportBackup?: () => Promise<void>;
+  onRestoreBackup?: () => void;
 }
 
 const locationCopy: Record<SaveLocationState, { label: string; variant: 'neutral' | 'info' | 'warning' | 'error' }> = {
@@ -51,6 +53,7 @@ function formatCreatedAt(value: string): string {
 export function SavesDashboard({
   items,
   totalRows,
+  canCreate,
   pageIndex,
   pageSize,
   locations,
@@ -58,15 +61,17 @@ export function SavesDashboard({
   error,
   actionBusy,
   protectedCopyRequired,
+  backupState = 'idle',
+  backupUnavailableReason,
   onPageChange,
-  onCreate,
+  onCreateRequest,
   onImport,
-  onSignOut,
   onOpen,
   onLocate,
   onAdoptLegacy,
+  onExportBackup,
+  onRestoreBackup,
 }: SavesDashboardProps) {
-  const [createOpen, setCreateOpen] = useState(false);
   const [localAction, setLocalAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const busy = actionBusy ?? localAction;
@@ -127,44 +132,66 @@ export function SavesDashboard({
   ];
 
   return (
-    <main className="mx-auto flex w-full max-w-screen-xl flex-col gap-6 p-8" data-route="saves-dashboard">
-      <header className="flex items-end justify-between gap-6">
+    <section className="flex min-w-0 flex-col gap-4" aria-label="Gerenciar saves">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <p className="text-style-overline font-semibold text-primary">NutriDiet Local Pro</p>
-          <h1 className="text-style-page-title font-bold text-text-primary">Seus saves</h1>
-          <p className="text-style-body-large text-text-secondary">Escolha um arquivo local para abrir ou associe novamente um save da sua conta.</p>
+          <h2 className="text-style-section-title font-semibold text-text-primary">Saves da conta</h2>
+          <p className="text-style-body-small text-text-secondary">Crie, importe ou abra os arquivos associados à sua conta.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="button" variant="quiet" disabled={Boolean(busy)} onClick={() => void runAction('sign-out', onSignOut)}>
-            <LogOut size={16} aria-hidden="true" />
-            Sair
-          </Button>
           <Button type="button" variant="secondary" disabled={Boolean(busy)} onClick={() => void runAction('import', onImport)}>
             <FolderOpen size={16} aria-hidden="true" />
             Importar arquivo
           </Button>
-          <Button type="button" variant="primary" disabled={Boolean(busy)} onClick={() => setCreateOpen(true)}>
+          <Button type="button" variant="primary" disabled={Boolean(busy) || loading || Boolean(error) || !canCreate} onClick={onCreateRequest}>
             <Plus size={16} aria-hidden="true" />
             Criar save
           </Button>
         </div>
       </header>
 
-      <Card className="flex flex-col gap-4 p-6" aria-busy={loading || Boolean(busy) || undefined}>
+      <Card className="flex min-w-0 flex-col gap-4 p-4" aria-busy={loading || Boolean(busy) || undefined}>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-style-section-title font-semibold text-text-primary">Catálogo da conta</h2>
+          <h2 className="text-style-section-title font-semibold text-text-primary">Arquivos locais</h2>
           <p className="text-style-body-small text-text-secondary" aria-live="polite">
             {totalRows} {totalRows === 1 ? 'save' : 'saves'}
           </p>
         </div>
-        <p className="text-style-body-small text-text-secondary">Sincronizado indica que o arquivo local foi encontrado e reconhecido; não há cópia dos dados clínicos na nuvem.</p>
+        <p className="text-style-body-small text-text-secondary">Sincronizado indica que o arquivo foi encontrado neste navegador; os dados clínicos continuam no save local.</p>
+        {onExportBackup && onRestoreBackup ? (
+          <div className="flex flex-wrap items-center gap-3" aria-busy={backupState !== 'idle' || undefined}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={Boolean(busy) || backupState !== 'idle' || loading || Boolean(backupUnavailableReason)}
+              loading={backupState === 'exporting'}
+              aria-describedby={backupUnavailableReason ? 'dashboard-backup-unavailable' : undefined}
+              onClick={() => void onExportBackup()}
+            >
+              <Download size={16} aria-hidden="true" />
+              Exportar backup
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={Boolean(busy) || backupState !== 'idle' || loading || Boolean(backupUnavailableReason)}
+              loading={backupState === 'restoring'}
+              aria-describedby={backupUnavailableReason ? 'dashboard-backup-unavailable' : undefined}
+              onClick={onRestoreBackup}
+            >
+              <Upload size={16} aria-hidden="true" />
+              Importar backup
+            </Button>
+            {backupUnavailableReason ? <p id="dashboard-backup-unavailable" role="status" className="text-style-body-small text-text-secondary">{backupUnavailableReason}</p> : null}
+          </div>
+        ) : null}
         <DataTable
-          ariaLabel="Seus saves"
+          ariaLabel="Arquivos locais"
           caption="Saves vinculados à sua conta e sua disponibilidade neste navegador."
           data={items}
           columns={columns}
           getRowId={(row) => row.saveId}
-          emptyMessage="Nenhum save online ainda. Crie um save ou importe um arquivo existente."
+          emptyMessage="Nenhum arquivo associado ainda. Crie um save ou importe um arquivo existente."
           loading={loading}
           errorMessage={error}
           pagination={{ pageIndex, pageSize, totalRows, onPageChange }}
@@ -180,7 +207,6 @@ export function SavesDashboard({
         {actionError ? <p role="alert" className="text-style-body-small text-error">{actionError}</p> : null}
       </Card>
 
-      <ProfileCreateDialog open={createOpen} onOpenChange={setCreateOpen} onSubmit={onCreate} />
-    </main>
+    </section>
   );
 }

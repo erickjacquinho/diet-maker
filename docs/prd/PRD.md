@@ -17,10 +17,10 @@
 ## 1. Executive Summary
 
 ### 1.1 Problem Statement
-Nutricionistas clínicos e esportivos perdem tempo precioso durante e após as consultas utilizando softwares genéricos lentos, dependentes de conexão de internet ou planilhas complexas com cálculos manuais de macronutrientes. A adaptação rápida de gramaturas, o envio de orientações pelo WhatsApp e o ajuste de escala de porções consomem minutos excessivos, reduzindo a atenção dedicada ao paciente e limitando a capacidade de atendimento.
+Nutricionistas clínicos e esportivos perdem tempo precioso durante e após as consultas utilizando softwares genéricos lentos, dependentes de conexão de internet ou planilhas complexas com cálculos manuais de macronutrientes. A adaptação rápida de gramaturas, o envio de orientações pelo WhatsApp e o ajuste individual de porções consomem minutos excessivos, reduzindo a atenção dedicada ao paciente e limitando a capacidade de atendimento.
 
 ### 1.2 Proposed Solution
-O **NutriDiet Local Pro** é um aplicativo web com dados clínicos locais, desenvolvido para centralizar a criação, adequação, cópia/cola e escala de dietas em ambiente visual. Ele une a base oficial brasileira de alimentos (TACO) a um construtor de refeições com recalculo instantâneo de macronutrientes, controle de metas manuais estritas (g/kg e Kcal), exportação para PDF/WhatsApp e banco relacional local. Contas e autorização de saves usam Supabase; os arquivos `.nutridiet` atuais são cifrados e vinculados à conta. O save já aberto pode continuar offline dentro do grant de até oito horas. Arquivos legados JSON sem cifra exigem adoção em cópia protegida. Os contratos completos e os limites do armazenamento local estão em [dieta-db](../../refs/dieta-db/index.md).
+O **NutriDiet Local Pro** é um aplicativo web com dados clínicos locais, desenvolvido para centralizar a criação, adequação, cópia/cola e edição individual de porções em ambiente visual. Ele une a base oficial brasileira de alimentos (TACO) a um construtor de refeições com recalculo instantâneo de macronutrientes, controle de metas manuais estritas (g/kg e Kcal), exportação para PDF/WhatsApp e banco relacional local. Contas e autorização de saves usam Supabase; os arquivos `.nutridiet` atuais são cifrados e vinculados à conta. O save já aberto pode continuar offline dentro do grant de até oito horas. Arquivos legados JSON sem cifra exigem adoção em cópia protegida. Os contratos completos e os limites do armazenamento local estão em [dieta-db](../../refs/dieta-db/index.md).
 
 ### 1.3 Platform Scope
 O projeto será desenvolvido exclusivamente para visualização e uso em **desktop**, considerando a faixa oficial a partir de `1024px`.
@@ -45,7 +45,7 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
 ## 2. User Experience & Functionality
 
 ### 2.1 User Personas
-- **Dr. Lucas (Nutricionista Esportivo/Clínico)**: Atende de 6 a 10 pacientes por dia no consultório. Precisa ajustar dietas em tempo real enquanto conversa com o paciente, duplicar refeições de templates anteriores, alterar a escala de carboidratos/proteínas em porcentagem e enviar a dieta imediatamente no WhatsApp do paciente ao encerrar a consulta.
+- **Dr. Lucas (Nutricionista Esportivo/Clínico)**: Atende de 6 a 10 pacientes por dia no consultório. Precisa ajustar dietas em tempo real enquanto conversa com o paciente, duplicar refeições de templates anteriores, editar metas de carboidratos/proteínas manualmente e porções por alimento e enviar a dieta imediatamente no WhatsApp do paciente ao encerrar a consulta.
 
 ### 2.2 User Stories & Acceptance Criteria
 
@@ -80,11 +80,11 @@ Variações de largura dentro da faixa desktop devem preservar a usabilidade, ma
   - Gerar texto estruturado por refeições, quantidades, horários e orientações de hidratação com botão "Copiar Texto".
   - Gerar arquivo PDF com cabeçalho clínico, dados do paciente, tabela de refeições, metas e observações.
 
-#### User Story 5: Persistência Local e Backup Mestre (.nutridiet)
+#### User Story 5: Área Local e Save Principal (.nutridiet)
 
 - **Como** nutricionista,
-- **Eu quero** salvar os dados confirmados no banco local, proteger a edição
-  com autosave e exportar/restaurar manualmente o arquivo mestre da Conta,
+- **Eu quero** confirmar dados na área local, proteger a edição com autosave de drafts
+  e concluir checkpoints/restaurar o save principal da Conta,
 - **Para que** eu possa trabalhar offline e manter uma cópia portável sob meu controle.
 
 Os critérios de aceite e limites desta história estão nos
@@ -107,7 +107,7 @@ organiza sua implementação sem acrescentar funcionalidades.
 - **Frontend Core**: React 19 + Next.js App Router, conforme ADR-006.
 - **Estilização**: TailwindCSS v4 + Lucide React Icons.
 - **Manipulação de PDF**: `jspdf` + `html2canvas`.
-- **Persistência**: Repositórios tipados e banco relacional local; PGlite + Drizzle sujeitos à prova técnica. IndexedDB separado para drafts; File API para backup manual `.nutridiet` em JSON, sem criptografia ou senha.
+- **Persistência**: PGlite + Drizzle adotados como área de trabalho local, com repositórios tipados e IndexedDB separado para drafts. O `.nutridiet` é o save principal conforme ADR-009: payload JSON versionado, envelope v2 cifrado nos saves vinculados e legado v1 sem cifra até adoção em cópia protegida. Não há senha de arquivo nem cifra em repouso da área local/drafts; contratos completos em dieta-db.
 
 ### 3.2 Contrato do Arquivo Mestre (`.nutridiet`)
 
@@ -131,6 +131,6 @@ Não manter neste PRD outro schema, formato ou protocolo de restauração.
   - **Mitigação**: Renderização de página dupla adaptativa via `html2canvas` com tratamento de quebra de página A4.
 
 ### 4.2 Roadmap de Lançamento (Fases)
-- **Fase 1 (MVP Local)**: Construtor por refeições, Tabela TACO, Metas Manuais, Escala %, Exportador WhatsApp/PDF, persistência relacional local, drafts separados e backup mestre `.nutridiet`. Execução conforme Decisões 04 e 14, após a prova técnica da Decisão 10.
+- **Fase 1 (MVP Local)**: Construtor por refeições, Tabela TACO, Metas Manuais, edição de porções por alimento, Exportador WhatsApp/PDF, persistência relacional local, drafts separados e save principal `.nutridiet`. Execução conforme Decisões 04 e 14; motor local aprovado na prova técnica da Decisão 10.
 - **Fase 2 (Templates Avançados)**: Biblioteca expandida de protocolos nutricionais (Low Carb, Cetogênica, FODMAPs, Jejum Intermitente).
-- **Fase 3 (Impressão Personalizada)**: Suporte a inclusão de logotipo personalizado do consultório no cabeçalho do PDF.
+- **Fase 3 (Impressão Personalizada)**: Logotipo personalizado do consultório no cabeçalho do PDF disponível em Configurações → Perfil profissional → Documentos (PNG de até 128 KB e 1024 × 1024 px).

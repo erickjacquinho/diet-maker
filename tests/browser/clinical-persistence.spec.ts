@@ -103,6 +103,7 @@ test('persiste o ciclo clínico local completo e mantém a fronteira sem chaves 
   clinicalBackup.patients[0].name = patientOneName;
   clinicalBackup.patients[0].gender = 'Masculino';
   await loadLegacyProfileSession(page, JSON.stringify(clinicalBackup));
+  await navigateWithinSession(page, '/pacientes');
   await expect(page).toHaveURL(/\/pacientes$/, { timeout: 120_000 });
   await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible({ timeout: 120_000 });
 

@@ -22,13 +22,14 @@ const patients: SidebarRouteItem = {
 const foods: SidebarRouteItem = {
   kind: 'route',
   href: '/alimentos',
-  label: 'Planilha de Alimentos',
+  label: 'Alimentos',
   icon: BookOpen,
 };
 
 describe('sidebar navigation model', () => {
-  it('keeps the six current destinations flat and ordered', () => {
+  it('keeps the seven current destinations flat and ordered', () => {
     expect(sidebarProductionRoutes.map((item) => item.kind)).toEqual([
+      'route',
       'route',
       'route',
       'route',
@@ -37,6 +38,7 @@ describe('sidebar navigation model', () => {
       'route',
     ]);
     expect(sidebarProductionRoutes.map((item) => item.href)).toEqual([
+      '/dashboard',
       '/pacientes',
       '/agenda',
       '/presets',
@@ -50,7 +52,7 @@ describe('sidebar navigation model', () => {
     expect(isSidebarRouteActive('/alimentos', foods)).toBe(true);
     expect(isSidebarRouteActive('/alimentos/tabela', foods)).toBe(false);
     expect(isSidebarRouteActive('/pacientes/123/dieta/1', patients)).toBe(true);
-    expect(isSidebarRouteActive('/presets-extra', sidebarProductionRoutes[2])).toBe(false);
+    expect(isSidebarRouteActive('/presets-extra', sidebarProductionRoutes[3])).toBe(false);
     expect(isSidebarRouteActive('/unknown', patients)).toBe(false);
   });
 

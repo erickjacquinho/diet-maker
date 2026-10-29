@@ -1,0 +1,6 @@
+{
+  "task": "Dashboard Inicio como visao geral da rotina e conta, calendario compacto da semana e proximas acoes sem detalhes clinicos. Gestao completa da assinatura e recorrencia de cobranca em Configuracoes > Assinatura; no dashboard apenas resumo discreto ou aviso acionavel com atalho. Reaproveitar recursos existentes e usar placeholders simples e honestos para tudo ainda nao implementado, sem cobranca real. Criar SDD completo sem implementar.",
+  "slug": "dashboard-rotina-assinatura",
+  "feature_dir": "specs/23-10-26-dashboard-rotina-assinatura",
+  "date": "2026-10-23"
+}

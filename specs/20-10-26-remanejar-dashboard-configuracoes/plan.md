@@ -1,13 +1,13 @@
 # Implementation Plan: Dashboard, navegação e Configurações
 
-**Branch atual**: `main` (sem commits/publicação) | **Date**: 2026-10-20 | **Spec**: [spec.md](spec.md)
+**Branch atual**: `main` (checkpoint local; sem publicação) | **Date**: 2026-10-20 | **Spec**: [spec.md](spec.md)
 **Input**: `specs/20-10-26-remanejar-dashboard-configuracoes/spec.md`
 
 ## Summary
 
 Reorganizar rotas e apresentação mantendo os saves locais. `/dashboard` recebe o controlador de `/saves`, sem sair automaticamente para Pacientes quando há arquivo ativo. O shell pode renderizar com conta válida sem arquivo; operações clínicas continuam protegidas. Configurações é um Dialog vazio na composição do adapter existente, sem nova família pública.
 
-**Autorizado agora**: somente US1 (modal e validação). US2/US3 aguardam validação humana e execução por `/speckit-implement`. A autorização explícita do modal não autoriza executar as demais histórias ou migrar persistência.
+**Autorizado para execução**: US1–US3 após validação humana pela invocação explícita de `$sdd-implement` em 2026-10-20. A autorização cobre o remanejamento local descrito neste plano; não inclui migração online ou alteração de persistência.
 
 ## Technical Context
 
@@ -29,7 +29,7 @@ Reorganizar rotas e apresentação mantendo os saves locais. `/dashboard` recebe
 | Design system canônico | PASS | Navigation/overlays antes dos perfis; primitivos preservados |
 | Desktop e acessibilidade | PASS | Nome, foco, teclado e dismissal no contrato |
 | Contratos antes do código; testes em tests/ | PASS | Cenários negativos e regressões especificados |
-| Execução guiada e evidência | PASS | Só US1 autorizada; restante proposto |
+| Execução guiada e evidência | PASS | US1–US3 aprovadas nesta execução; evidência por tarefa e validação final preservadas |
 
 Nenhuma violação exige exceção.
 
@@ -55,7 +55,7 @@ Nenhuma violação exige exceção.
 2. Estado local no adapter, callback padrão e Dialog/Content/Header/Title. Omitir descrição quando ausente, usar close do primitivo e nenhuma ação de arquivo. O callback `onOpenAccount` recebe opcionalmente o botão de origem na molécula/organismo para retorno de foco, preservando consumidores sem argumentos. Não alterar `ui/dialog.tsx`.
 3. Rodar teste novo/conectados, tipos e lint direcionado. Documentar integração sem alegar homologação visual não observada.
 
-## Fase B — US2 após validação humana
+## Fase B — US2 aprovada para execução
 
 1. Mover controlador de `src/app/saves/page.tsx` e fluxo de backup do adapter diretamente para `src/app/dashboard/page.tsx`, preservando parse, paginação, cancelamento, associação owner/save, handlers, estados, erros, confirmação e BackupApplication. Retirar o efeito que redireciona arquivo ativo para Pacientes; apresentar Início/Arquivos locais. Backup fica indisponível com explicação sem runtime/arquivo autorizado.
 2. Separar gate de conta e gate de arquivo em SessionAwareAppShell. Dashboard usa AppLayoutShell/SidebarNavigationAdapter sem runtime; scheduler não inicia operação clínica sem conta local. Módulos mantêm gate de arquivo. Estado locked preserva o fluxo de proteção antes de nova navegação clínica.

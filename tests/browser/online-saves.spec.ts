@@ -27,26 +27,41 @@ async function installOriginPrivateFilePickers(page: Page): Promise<void> {
   });
 }
 
+async function showSaves(page: Page): Promise<void> {
+  if (await page.getByRole('dialog', { name: 'Configurações', exact: true }).isVisible()) return;
+  await page.getByRole('button', { name: 'Abrir configurações de saves' }).click();
+  await expect(page.getByRole('tab', { name: 'Saves', exact: true })).toHaveAttribute('aria-selected', 'true');
+}
+
+async function closeSettings(page: Page): Promise<void> {
+  const settings = page.getByRole('dialog', { name: 'Configurações', exact: true });
+  if (await settings.isVisible()) await settings.getByRole('button', { name: 'Fechar', exact: true }).click();
+}
+
 async function createSave(page: Page, label: string): Promise<void> {
+  await showSaves(page);
   await page.getByRole('button', { name: 'Criar save' }).click();
   await page.getByLabel('Nome', { exact: true }).fill(label);
   const response = page.waitForResponse((item) => new URL(item.url()).pathname === '/api/saves' && item.request().method() === 'POST');
   await page.getByRole('button', { name: 'Salvar profile' }).click();
   expect((await response).status()).toBe(201);
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 60_000 });
-  await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 60_000 });
+  await expect(page.getByRole('dialog', { name: 'Criar profile' })).toBeHidden({ timeout: 120_000 });
+  await expect(page.getByRole('dialog', { name: 'Configurações', exact: true })).toBeVisible();
 }
 
 async function openSave(page: Page, label: string): Promise<void> {
-  await page.goto('/saves');
+  await page.goto('/dashboard');
+  await showSaves(page);
   const open = page.getByRole('button', { name: new RegExp(`Abrir save ${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) });
   await expect(open).toBeVisible({ timeout: 30_000 });
   await open.click();
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 30_000 });
-  await expect(page.getByRole('heading', { level: 1, name: 'Pacientes' })).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+  await expect(page.getByRole('dialog', { name: 'Configurações', exact: true })).toBeVisible();
 }
 
 async function logout(page: Page): Promise<void> {
+  await closeSettings(page);
   const response = page.waitForResponse((item) => new URL(item.url()).pathname === '/api/auth/logout', { timeout: 30_000 });
   await page.getByRole('button', { name: /Abrir menu de conta de/ }).click();
   await page.getByRole('menuitem', { name: 'Sair', exact: true }).click();
@@ -74,6 +89,7 @@ test('keeps one encrypted save openable after re-login and password reset, and i
   await loginSyntheticAccount(page, ownerOne.email, ownerOne.password);
   for (const width of [1024, 1280, 1600]) {
     await page.setViewportSize({ width, height: 900 });
+    await showSaves(page);
     await expect(page.getByText('Sincronizado', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: test.info().outputPath(`${width}-saves-dashboard.png`), fullPage: true });
@@ -91,8 +107,9 @@ test('keeps one encrypted save openable after re-login and password reset, and i
     await stream.close();
     (window as unknown as { __nutridietSetSaveName(name: string): void }).__nutridietSetSaveName('owner-one-relocated.nutridiet');
   }, originalText);
+  await showSaves(page);
   await page.getByRole('button', { name: /Localizar save Conta Protegida/ }).click();
-  await expect(page).toHaveURL(/\/pacientes$/, { timeout: 60_000 });
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 60_000 });
   expect(await page.evaluate(() => (window as unknown as { __nutridietReadSave: () => Promise<string> }).__nutridietReadSave())).toBe(originalText);
 
   await logout(page);
@@ -114,7 +131,8 @@ test('keeps one encrypted save openable after re-login and password reset, and i
 
   const ownerTwo = await registerSyntheticAccount(page);
   await confirmAndLogin(page, ownerTwo.email, ownerTwo.password);
-  await expect(page.getByRole('heading', { name: 'Seus saves' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
+  await showSaves(page);
   await expect(page.getByRole('button', { name: /Abrir save Conta Protegida/ })).toHaveCount(0);
   await page.evaluate(() => (window as unknown as { __nutridietSetSaveName: (name: string) => void }).__nutridietSetSaveName('owner-two.nutridiet'));
   await createSave(page, 'Outro Save');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
 import { toast } from 'sonner';
@@ -11,12 +11,20 @@ import {
   removeAgendaReminder,
 } from '@/lib/agenda-reminders';
 import { persistAgendaReminderChange } from '@/lib/application/browser-composition';
+import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
 
 const MAX_TIMEOUT = 2_147_483_647;
 
 export function AgendaReminderScheduler({ accountId }: { accountId: string | null }) {
+  const profileStore = getBrowserProfessionalProfileStore();
+  const profile = useSyncExternalStore(profileStore.subscribe, profileStore.getSnapshot, profileStore.getSnapshot);
+  const enabled = profile.status === 'ready' && profile.profile?.agendaRemindersEnabled === true;
   useEffect(() => {
-    if (!accountId) return undefined;
+    if (accountId) void profileStore.load();
+  }, [accountId, profileStore]);
+  useEffect(() => {
+    // Muting pauses delivery; pending reminders stay intact until the preference is enabled again.
+    if (!accountId || !enabled) return undefined;
 
     let disposed = false;
     const timers = new Map<string, number>();
@@ -78,7 +86,7 @@ export function AgendaReminderScheduler({ accountId }: { accountId: string | nul
       clearTimers();
       window.removeEventListener(AGENDA_REMINDERS_CHANGED, refresh);
     };
-  }, [accountId]);
+  }, [accountId, enabled]);
 
   return null;
 }

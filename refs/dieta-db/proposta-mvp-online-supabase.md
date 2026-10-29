@@ -38,6 +38,10 @@ e remota. Storage, Realtime, filas e um segundo backend não são necessários p
 esse escopo inicial. Backup operacional do banco continua necessário, mesmo sem
 exportação/importação para o usuário.
 
+O esquema técnico detalhado (comunicação, isolamento, RLS, criptografia de dados
+sensíveis, chaves e importação do `.nutridiet`) está na
+[Decisão 15](./15-esquema-transferencia-backend-supabase.md).
+
 ## Momento de retomada
 
 Primeiro estabilizar as entidades, relações e os fluxos principais de pacientes,

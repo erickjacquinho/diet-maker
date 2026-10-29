@@ -595,6 +595,78 @@ describe('online protected profile session', () => {
   });
 });
 
+describe('profile session details', () => {
+  const withAccountUpdates = (filePort: SaveFilePort) => {
+    const dependencies = createDependencies(filePort);
+    const updateAccount = vi.fn(async (runtime: FakeRuntime, account: Account) => Object.assign(runtime.account, account));
+    return { dependencies: { ...dependencies, updateAccount }, updateAccount };
+  };
+
+  it('stores the edited name and phone in the open save and writes a new checkpoint', async () => {
+    const file: FakeFile = { name: 'details.nutridiet', content: '' };
+    const filePort = createFilePort(file);
+    const { dependencies, updateAccount } = withAccountUpdates(filePort);
+    const session = createProfileSession(dependencies);
+    await session.createProfile({ displayName: 'Consultório antigo' });
+    vi.mocked(filePort.write).mockClear();
+
+    await session.updateProfileDetails({ displayName: '  Consultório   Centro ', phone: ' (11) 99999-0000 ' });
+
+    expect(updateAccount).toHaveBeenCalledWith(
+      session.getSnapshot().runtime,
+      expect.objectContaining({ id: 'account-1', displayName: 'Consultório Centro', phone: '(11) 99999-0000' }),
+    );
+    expect(session.getSnapshot()).toMatchObject({
+      status: 'active',
+      syncState: 'synced',
+      account: { displayName: 'Consultório Centro', phone: '(11) 99999-0000' },
+    });
+    expect(filePort.write).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips unchanged details and rejects an empty name or a missing save', async () => {
+    const file: FakeFile = { name: 'details.nutridiet', content: '' };
+    const filePort = createFilePort(file);
+    const { dependencies, updateAccount } = withAccountUpdates(filePort);
+    const session = createProfileSession(dependencies);
+
+    await expect(session.updateProfileDetails({ displayName: 'Sem save' })).rejects.toMatchObject({ code: 'SESSION_UNAVAILABLE' });
+    await session.createProfile({ displayName: 'Consultório', phone: '11 90000-0000' });
+    await expect(session.updateProfileDetails({ displayName: '   ' })).rejects.toMatchObject({ code: 'PROFILE_NAME_REQUIRED' });
+    await session.updateProfileDetails({ displayName: 'Consultório', phone: '11  90000-0000' });
+
+    expect(updateAccount).not.toHaveBeenCalled();
+  });
+
+  it('renames the catalog entry of a protected save after the file checkpoint', async () => {
+    const order: string[] = [];
+    const file = { name: 'renamed.nutridiet', content: '' };
+    const filePort = createOnlineFilePort(file, order);
+    const grant = await createOnlineGrant('account-1');
+    const { dependencies } = createOnlineDependencies(filePort, grant, order);
+    const renameSave = vi.fn(async () => { order.push('rename'); });
+    dependencies.onlineSave!.renameSave = renameSave;
+    const session = createProfileSession({ ...dependencies, updateAccount: async (runtime, account) => Object.assign(runtime.account, account) });
+    await session.createProfile({ displayName: 'Consultório protegido' });
+    vi.mocked(filePort.write).mockImplementation(async (selected, content) => {
+      order.push('write');
+      (selected as FakeFile).content = content;
+    });
+
+    await session.updateProfileDetails({ displayName: 'Consultório renomeado' });
+
+    expect(renameSave).toHaveBeenCalledWith(grant.saveId, 'Consultório renomeado');
+    expect(order.slice(-2)).toEqual(['write', 'rename']);
+    await expect(decryptProtectedSave(file.content, grant)).resolves.toMatchObject({
+      account: [{ id: 'account-1', displayName: 'Consultório renomeado' }],
+    });
+
+    renameSave.mockRejectedValueOnce(new Error('offline'));
+    await expect(session.updateProfileDetails({ displayName: 'Outro nome' })).rejects.toMatchObject({ code: 'SAVE_RENAME_FAILED' });
+    expect(session.getSnapshot().account).toMatchObject({ displayName: 'Outro nome' });
+  });
+});
+
 function createOnlineFilePort(file: FakeFile | null, order: string[] = []) {
   const port = createFilePort(file);
   const pending = new Map<string, PendingSaveRegistration>();

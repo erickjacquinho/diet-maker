@@ -5,12 +5,7 @@ import { createProfileSession, navigateWithinSession } from './helpers/profile-s
 const pageTimeout = 120_000;
 
 async function visit(page: Page, route: string, marker: Locator) {
-  const inAppLink = page.locator(`a[href="${route}"]`).first();
-  if (await inAppLink.count()) {
-    await navigateWithinSession(page, route);
-  } else {
-    await page.goto(route, { waitUntil: 'load', timeout: pageTimeout });
-  }
+  await navigateWithinSession(page, route);
   // O modo de desenvolvimento mantém conexões do HMR abertas; a espera é
   // limitada e o marcador funcional continua sendo a condição de prontidão.
   await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);

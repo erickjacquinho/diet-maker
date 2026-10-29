@@ -103,7 +103,7 @@ export function RegistrationForm({ mode }: { mode: RegistrationFormMode }) {
         return;
       }
       if (mode === 'complete') {
-        router.replace('/saves');
+        router.replace('/dashboard');
         return;
       }
       setStatus(successMessage ?? 'E-mail confirmado. Agora você já pode entrar.');
