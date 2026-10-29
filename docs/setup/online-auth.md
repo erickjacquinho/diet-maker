@@ -1,11 +1,10 @@
 # Ambiente de conta online e Supabase
 
-Este guia cobre o desenvolvimento local e a preparação do serviço online. A
-publicação na Vercel foi autorizada em 2026-10-11; o projeto `nutridiet` está
-criado e linkado, mas ainda não foi publicado. A migration, o Auth do Supabase,
-SMTP, callbacks e a role restrita de runtime estão configurados. A conexão
-remota foi validada com o certificado oficial do Supabase. A ativação aguarda o
-envio dos segredos ao ambiente Production da Vercel, o deploy e o smoke HTTPS.
+Este guia descreve o ambiente local e a configuração do serviço online.
+O registro de implantação de 2026-10-11 está preservado em “Estado deste
+setup”; ele é evidência histórica, não confirmação da disponibilidade ou da
+paridade remota atual. Esta revisão documental de 2026-10-25 não executou
+publicação, smoke remoto ou alterações de produção.
 
 ## Limites de dados
 
@@ -115,7 +114,7 @@ ambiente Production, como segredos server-side sem prefixos públicos.
 `vercel.json` fixa a região `gru1`, próxima ao banco em São Paulo e dentro do
 limite de uma região do plano Hobby.
 
-## Estado deste setup
+## Estado deste setup — registro histórico de 2026-10-11
 
 O projeto Supabase dedicado `diet-maker` foi criado no usuário atualmente
 autenticado e está linkado ao diretório. Migration, grants, RLS/`FORCE RLS`,

@@ -12,6 +12,8 @@ execução e abra as decisões de cada etapa para os detalhes.
 **Direção futura acordada, ainda não implementada:** [MVP online com Supabase e
 dados por conta](./proposta-mvp-online-supabase.md). Retomar após estabilizar o
 núcleo e antes do lançamento do MVP; os contratos locais abaixo continuam vigentes.
+O esquema técnico de segurança, comunicação, criptografia e transferência está na
+[Decisão 15](./15-esquema-transferencia-backend-supabase.md), ainda como proposta.
 
 ## Proposta preservada
 
@@ -149,6 +151,7 @@ que já foi validado.
 - [12 — Autenticação online futura e soberania dos dados locais](./12-autenticacao-online-e-soberania-local.md)
 - [13 — Proteção local e backup simples](./13-protecao-local-e-backup-simples.md)
 - [14 — Consolidação e divisão da implementação em SDDs](./14-consolidacao-e-portao-de-execucao.md)
+- [15 — Esquema de transferência para o backend Supabase (proposta)](./15-esquema-transferencia-backend-supabase.md)
 - [ADR-009 — `.nutridiet` como save principal](../../docs/adr/ADR-009-nutridiet-principal.md)
 - [Guia de setup Auth/Supabase](../../docs/setup/online-auth.md)
 

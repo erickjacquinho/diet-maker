@@ -20,7 +20,7 @@ Adotar o **Mapa de Arquitetura de Telas e Navegação Rasa (Flat UX)** com as se
        - **Histórico Corporal**: Cards com data, `Peso (kg)`, `% Gordura`, `Massa Magra` **visíveis diretamente na capa do card**.
 3. **`/pacientes/[id]/dieta/[dietaId]` (Construtor de Dieta)**:
    - Ocupa 100% da área de trabalho do workspace principal, mantendo a Sidebar/Navegação global visível.
-   - Inclui autocompletar TACO (<100ms), cálculo de metas g/kg em tempo real (tolerância ±5%), escala de porções (`+%`), exportador PDF/WhatsApp e salvamento `.diet`.
+   - Inclui autocompletar TACO (<100ms), cálculo de metas g/kg em tempo real (tolerância ±5%), edição individual de porções, exportador PDF/WhatsApp e checkpoint do save principal `.nutridiet` conforme ADR-009. A escala em lote foi removida em 2026-10-02; exportação isolada `.diet` não integra o contrato atual.
 4. **`/presets` (Biblioteca de Presets de Dietas)**:
    - Tela dedicada no menu principal com biblioteca centralizada de protocolos inteiros (ex: *Low Carb 1800kcal*, *Bulking 3000kcal*) prontos para cópia/duplicação para qualquer paciente.
 5. **`/refeicoes` (Biblioteca de Refeições Prontas)**:
@@ -44,10 +44,18 @@ Adotar o **Mapa de Arquitetura de Telas e Navegação Rasa (Flat UX)** com as se
 - Maximização da área útil de trabalho em notebooks e telas de consultório.
 - Acompanhamento clínico ágil ao visualizar históricos de peso e macronutrientes lado a lado na tela do paciente.
 
-## Atualização — dashboard e entrada do produto (2026-10-20)
+## Histórico — dashboard e entrada do produto (2026-10-20)
+
+> A organização de conteúdo descrita nesta atualização foi substituída pela atualização vigente de 2026-10-23 abaixo; destinos e guardas permanecem.
 
 A rota `/dashboard` passa a ser a entrada das contas completas e reúne o catálogo de arquivos locais e seus comandos de backup. `/home` e `/saves` redirecionam para essa rota preservando os parâmetros recebidos. A mudança substitui o destino inicial e a antiga página de saves; os módulos clínicos e as rotas detalhadas deste ADR permanecem disponíveis.
 
 A sidebar mantém sete destinos diretos nesta ordem: Início (`/dashboard`), Pacientes (`/pacientes`), Agenda (`/agenda`), Dietas prontas (`/presets`), Refeições (`/refeicoes`), Receitas (`/receitas`) e Alimentos (`/alimentos`). O menu de perfil contém Configurações e Sair. Configurações abre o `SettingsDialog`, com abas de perfil profissional (dados da conta online, refletidos na sidebar e nos PDFs) e de configurações do save aberto; a recuperação de alterações pendentes continua acessível globalmente na sidebar.
 
 Renderizar o dashboard não autoriza operações clínicas. Elas continuam condicionadas a um runtime local utilizável e a um arquivo autorizado. Esta atualização não altera o formato dos saves nem aprova uma migração online.
+
+## Atualização vigente — rotina e Configurações (2026-10-23)
+
+O Início (`/dashboard`) prioriza semana e próximas ações derivadas da Agenda, com estados próprios de arquivo fechado, carregamento, vazio e erro. Criar, importar, abrir, localizar e fazer backup de saves ficam em Configurações → Saves, acessíveis pelo atalho do Início e pelo menu de conta. O modal mantém abas Perfil profissional, Saves e Assinatura; esta última é informativa enquanto a integração não existe. Logout permanece exclusivamente na sidebar.
+
+Contas completas entram em `/dashboard`; `/home` e `/saves` continuam aliases preservando parâmetros. O Início funciona autenticado sem arquivo; conteúdo clínico exige runtime de save autorizado. Não há cobrança implementada, dados financeiros fictícios ou mudança de formato/persistência por esta atualização.
