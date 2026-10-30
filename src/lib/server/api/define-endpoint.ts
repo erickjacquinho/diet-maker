@@ -69,11 +69,11 @@ const defaultDependencies: EndpointDependencies = {
   subscriptionGate: async () => undefined,
 };
 
-type RouteContext = { params?: Promise<Record<string, string>> | Record<string, string> };
+type RouteContext = { params: Promise<Record<string, string>> };
 
 export function createEndpointFactory(dependencies: EndpointDependencies) {
   return function defineEndpoint<Input = undefined, Output = unknown>(definition: EndpointDefinition<Input, Output>) {
-    return async function endpoint(request: Request, routeContext?: RouteContext): Promise<Response> {
+    return async function endpoint(request: Request, routeContext: RouteContext): Promise<Response> {
       const requestId = randomUUID();
       let session: RequestSessionResult | undefined;
       try {
@@ -101,7 +101,7 @@ export function createEndpointFactory(dependencies: EndpointDependencies) {
         const account = await dependencies.resolveAccount(user.id);
         await dependencies.subscriptionGate(account);
         // 8. one transaction per use case → 9. handler
-        const params = routeContext?.params ? await routeContext.params : {};
+        const params = (await routeContext.params) ?? {};
         const result = await dependencies.withAccountTransaction(account.id, (tx) => definition.handler({
           request, params, requestId, user, account, input, version, tx,
         }));

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-import { createEndpointFactory, type EndpointDependencies } from '../../../src/lib/server/api/define-endpoint';
+import { createEndpointFactory as createFactory, type EndpointDependencies } from '../../../src/lib/server/api/define-endpoint';
 import { NotFoundError, VersionConflictError } from '../../../src/lib/server/api/api-errors';
 
 const csrf = randomBytes(32).toString('base64url');
@@ -46,6 +46,15 @@ function post(body: unknown, headers: Record<string, string> = {}) {
     body: JSON.stringify(body),
   });
 }
+
+/** Next always passes a route context; tests without dynamic segments pass an empty one. */
+const createEndpointFactory = (deps: EndpointDependencies) => {
+  const define = createFactory(deps);
+  return (definition: Parameters<typeof define>[0]) => {
+    const endpoint = define(definition);
+    return (request: Request) => endpoint(request, { params: Promise.resolve({}) });
+  };
+};
 
 beforeEach(() => vi.stubEnv('APP_ORIGIN', 'http://localhost:3000'));
 afterEach(() => vi.unstubAllEnvs());
