@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BackupApplicationError, parseBackupEnvelope } from '@/lib/application/backup-application';
+import { BackupApplicationError, parseBackupEnvelope } from '@/lib/server/imports/legacy-save/backup-format';
 import { createBackupEnvelope, createEmptyBackupFixture } from '../fixtures/backup';
 
 function expectBackupError(action: () => unknown, code: BackupApplicationError['code']): void {

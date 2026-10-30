@@ -31,10 +31,8 @@ vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(patientApplication),
   getBrowserDietApplication: () => Promise.resolve(dietApplication),
   getBrowserProfileSession: () => ({
-    isSaveAuthorized: () => true,
-    registerPendingDraftFlush: () => () => undefined,
+    isReady: () => true,
   }),
-  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => dietApplication.flushDraft(...args),
 }));
 
 const canonicalPatient = {

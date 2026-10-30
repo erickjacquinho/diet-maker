@@ -7,7 +7,6 @@ export * from './LoginForm';
 export * from './RegistrationForm';
 export * from './RecoveryPasswordForm';
 export * from './ResetPasswordForm';
-export * from './SavesDashboard';
 export * from './MacroTrackerHeader';
 export * from './MealCardContainer';
 export * from './MetricBoxGroup';

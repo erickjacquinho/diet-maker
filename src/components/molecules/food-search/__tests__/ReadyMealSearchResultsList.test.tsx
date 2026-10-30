@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ReadyMealSearchResultsList } from '../ReadyMealSearchResultsList';
-import type { ReadyMeal } from '@/lib/readyMealsStore';
+import type { ReadyMeal } from '@/lib/library-ui-adapter';
 
 const mockReadyMeals: ReadyMeal[] = [
   {

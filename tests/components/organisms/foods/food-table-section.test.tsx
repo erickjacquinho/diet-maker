@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { FoodTableSection } from '@/components/organisms/foods/FoodTableSection';
-import type { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 
 function buildFood(overrides: Partial<FoodItem> = {}): FoodItem {
   return {

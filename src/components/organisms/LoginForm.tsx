@@ -5,7 +5,6 @@ import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/ui/input';
 import { textStyle } from '@/design-system';
 import { useRouter } from 'next/navigation';
-import { revokePendingBrowserSession } from '@/lib/application/browser-composition';
 
 export function LoginForm() {
   const router = useRouter();
@@ -18,8 +17,7 @@ export function LoginForm() {
 
   useEffect(() => {
     let active = true;
-    void revokePendingBrowserSession()
-      .then(() => fetch('/api/auth/csrf', { cache: 'no-store', credentials: 'same-origin' }))
+    void fetch('/api/auth/csrf', { cache: 'no-store', credentials: 'same-origin' })
       .then(async (response) => {
         if (!response.ok) throw new Error();
         const body = await response.json() as { csrfToken?: unknown };

@@ -17,7 +17,9 @@ import { ReadyMealSearchResultsList } from '@/components/molecules/food-search/R
 import { createTacoSnapshot } from '@/lib/application/diets/taco-food-adapter';
 import type { NutritionSnapshot } from '@/lib/domain/diets/diet-model';
 import { getBrowserLibraryApplication } from '@/lib/application/browser-composition';
-import { createLibraryFoodSnapshot, getFavoritesFromStorage, listTacoFoodItems, searchTacoFoods, toggleFavoriteFood, toFoodItem, toReadyMeal, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
+import { toggleFavoriteFoodPersisted } from '@/lib/favorite-foods-persistence';
+import { toast } from 'sonner';
+import { createLibraryFoodSnapshot, getFavoritesFromStorage, listTacoFoodItems, searchTacoFoods, toFoodItem, toReadyMeal, toRecipe, type FoodItem, type ReadyMeal, type Recipe } from '@/lib/library-ui-adapter';
 
 type FoodAddPayload = {
   foodId?: string;
@@ -189,8 +191,12 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   };
 
   const handleToggleFavorite = (foodId: string) => {
-    toggleFavoriteFood(foodId);
+    const saved = toggleFavoriteFoodPersisted(foodId);
     setFavoriteVersion((version) => version + 1);
+    void saved.catch(() => {
+      toast.error('Não foi possível salvar o favorito.');
+      setFavoriteVersion((version) => version + 1);
+    });
   };
 
   const handleClearAllSelections = () => {

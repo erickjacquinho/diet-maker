@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SelectField } from '@/components/atoms';
-import type { FoodItem } from '@/lib/tacoStore';
+import type { FoodItem } from '@/lib/library-ui-adapter';
 import { textStyle } from '@/design-system';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import {

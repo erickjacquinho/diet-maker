@@ -1,8 +1,10 @@
 # Decisão 12 — Conta online, saves protegidos e soberania clínica
 
-- **Status:** Implementada no código local pelo SDD de contas e saves; ativação remota pendente
+- **Status:** Substituída (saves, grants e catálogo de saves removidos) — 2026-10-30
 - **Data da atualização:** 2026-10-11
 - **Escopo:** Identidade profissional, autorização dos saves e limites dos dados locais
+
+> **Substituída em 2026-10-30 pela [Decisão 15](./15-esquema-transferencia-backend-supabase.md).** O produto grava tudo na conta (Supabase) e não tem mais modo local nem save `.nutridiet`. Este texto fica como registro histórico; só o formato do arquivo segue válido, como entrada da importação (Decisão 15, F4).
 
 ## 1. Identidade e responsabilidades
 

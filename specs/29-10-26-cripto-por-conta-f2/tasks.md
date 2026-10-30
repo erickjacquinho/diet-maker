@@ -1,0 +1,6 @@
+- [x] Migration `private.account_keys`
+- [x] `field-codec` + testes (adulteração, troca de linha, rewrap)
+- [x] `account-keys` (cache, get/create, rewrap, sealer)
+- [ ] Teste de integração da migration no Supabase local (RLS sem `app.account_id` lê zero linhas)
+- [ ] Aplicar migration no `diet-maker` remoto (requer confirmação do usuário)
+- [ ] Rotação da DEK em lote; crypto-shredding administrativo

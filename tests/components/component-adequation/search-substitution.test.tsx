@@ -5,7 +5,7 @@ import { FoodSearchModal } from '@/components/organisms/foods/FoodSearchModal';
 import { SubstituteFoodModal, type MealFoodToSubstitute } from '@/components/organisms/foods/SubstituteFoodModal';
 import { ReadyMealSearchResultsList } from '@/components/molecules/food-search/ReadyMealSearchResultsList';
 import { RecipeSearchResultsList } from '@/components/molecules/food-search/RecipeSearchResultsList';
-import type { ReadyMeal } from '@/lib/readyMealsStore';
+import type { ReadyMeal } from '@/lib/library-ui-adapter';
 import type { Recipe } from '@/lib/library-ui-adapter';
 
 const readyMeal: ReadyMeal = {

@@ -1,8 +1,10 @@
 # Decisão 13 — Proteção local e limites do backup
 
-- **Status:** Implementada com limites explícitos
+- **Status:** Substituída (sem arquivo principal nem banco local) — 2026-10-30
 - **Data da atualização:** 2026-10-11
 - **Escopo:** Arquivo principal, backup, banco local e legados sem vínculo online
+
+> **Substituída em 2026-10-30 pela [Decisão 15](./15-esquema-transferencia-backend-supabase.md).** O produto grava tudo na conta (Supabase) e não tem mais modo local nem save `.nutridiet`. Este texto fica como registro histórico; só o formato do arquivo segue válido, como entrada da importação (Decisão 15, F4).
 
 ## 1. Formatos e proteção
 

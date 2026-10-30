@@ -2,38 +2,20 @@
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
-import { toast } from 'sonner';
 
 import { SidebarNav, type SidebarNavProps } from '@/components/organisms/SidebarNav';
-import { SettingsDialog, type SaveSettingsInput, type SettingsTab } from '@/components/organisms/SettingsDialog';
-import type { ProfileSessionSnapshot } from '@/lib/application/profile-session';
+import { SettingsDialog, type SettingsTab } from '@/components/organisms/SettingsDialog';
 import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
 import { getProfessionalFullName, getProfessionalTitle, type ProfessionalProfile } from '@/lib/domain/professional-profile';
-import * as browserComposition from '@/lib/application/browser-composition';
-import type { BrowserPatientRuntime } from '@/lib/application/browser-composition';
-import { useSaveManagement } from './useSaveManagement';
+import { getBrowserProfileSession } from '@/lib/application/browser-composition';
+import { importsApi } from '@/lib/api-client/imports';
 import { SIDEBAR_NAVIGATION_ITEMS } from './sidebar-navigation-config';
 
 export type SidebarNavigationAdapterProps = Omit<SidebarNavProps, 'pathname' | 'navigationItems'>;
 
-const EMPTY_PROFILE_SNAPSHOT: ProfileSessionSnapshot<BrowserPatientRuntime> = { status: 'empty', authorizationExpiresAt: null, syncState: 'unbound', account: null, accountId: null, runtime: null, fileName: null, hydration: 'ready', resumeFileName: null, error: null, protectedCopyRequired: false };
-const EMPTY_PROFILE_SESSION = {
-  getSnapshot: () => EMPTY_PROFILE_SNAPSHOT,
-  subscribe: (_listener: (snapshot: ProfileSessionSnapshot<BrowserPatientRuntime>) => void) => () => undefined,
-  sync: async () => undefined,
-  updateProfileDetails: async (_input: SaveSettingsInput) => undefined,
-};
-
 export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> = (props) => {
   const pathname = usePathname() ?? '';
-  let getProfileSession: typeof browserComposition.getBrowserProfileSession | undefined;
-  try {
-    getProfileSession = browserComposition.getBrowserProfileSession;
-  } catch {
-    // Older test adapters may only provide the backup application seam.
-  }
-  const hasProfileSession = typeof getProfileSession === 'function';
-  const profileSession = getProfileSession?.() ?? EMPTY_PROFILE_SESSION;
+  const profileSession = getBrowserProfileSession();
   const profileSnapshot = useSyncExternalStore(profileSession.subscribe, profileSession.getSnapshot, profileSession.getSnapshot);
   const professionalProfileStore = getBrowserProfessionalProfileStore();
   const professionalProfile = useSyncExternalStore(
@@ -43,31 +25,17 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
-  const saveManagement = useSaveManagement(settingsOpen || pathname === '/dashboard');
   const settingsTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isRetryingProfileSync, setIsRetryingProfileSync] = useState(false);
-  const [feedback, setFeedback] = useState<{ kind: 'status' | 'error'; message: string }>();
-
-  useEffect(() => {
-    const openSaves = () => {
-      settingsTriggerRef.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
-      setSettingsTab('save');
-      setSettingsOpen(true);
-    };
-    window.addEventListener('nutridiet:open-saves', openSaves);
-    return () => window.removeEventListener('nutridiet:open-saves', openSaves);
-  }, []);
 
   useEffect(() => {
     const openSubscription = () => {
-      if (saveManagement.overlayOpen || saveManagement.busy) return;
       settingsTriggerRef.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
       setSettingsTab('subscription');
       setSettingsOpen(true);
     };
     window.addEventListener('nutridiet:open-subscription', openSubscription);
     return () => window.removeEventListener('nutridiet:open-subscription', openSubscription);
-  }, [saveManagement.busy, saveManagement.overlayOpen]);
+  }, []);
 
   useEffect(() => {
     void professionalProfileStore.load();
@@ -77,32 +45,10 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
     await professionalProfileStore.save(profile);
   };
 
-  const handleSaveSettings = async (input: SaveSettingsInput): Promise<void> => {
-    await profileSession.updateProfileDetails(input);
-  };
-
   const loadedProfile = professionalProfile.profile;
   const doctorName = loadedProfile
     ? getProfessionalFullName(loadedProfile)
-    : profileSnapshot.account?.displayName ?? 'Profile ativo';
-  const saveEditable = Boolean(profileSnapshot.runtime)
-    && (profileSnapshot.status === 'active' || profileSnapshot.status === 'paused');
-
-  const handleRetryProfileSync = async (): Promise<void> => {
-    if (isRetryingProfileSync) return;
-    setIsRetryingProfileSync(true);
-    setFeedback(undefined);
-    try {
-      await profileSession.sync();
-      setFeedback({ kind: 'status', message: 'Profile sincronizado no arquivo.' });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'A sincronização continua pausada.';
-      setFeedback({ kind: 'error', message });
-      toast.error(message);
-    } finally {
-      setIsRetryingProfileSync(false);
-    }
-  };
+    : profileSnapshot.account?.displayName ?? 'Minha conta';
 
   return (
     <>
@@ -117,17 +63,11 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         })}
         doctorName={doctorName}
         doctorRole={loadedProfile ? getProfessionalTitle(loadedProfile) : undefined}
-        profileSyncState={hasProfileSession ? profileSnapshot.syncState : undefined}
-        onRetryProfileSync={hasProfileSession ? handleRetryProfileSync : undefined}
-        isRetryingProfileSync={hasProfileSession ? isRetryingProfileSync : undefined}
       />
 
       <SettingsDialog
         open={settingsOpen}
         defaultTab={settingsTab}
-        savesContent={saveManagement.content}
-        suspended={saveManagement.overlayOpen}
-        busy={saveManagement.busy}
         onOpenChange={(open) => {
           setSettingsOpen(open);
           if (open && professionalProfile.status !== 'ready') void professionalProfileStore.load();
@@ -140,28 +80,12 @@ export const SidebarNavigationAdapter: React.FC<SidebarNavigationAdapterProps> =
         onRetryProfile={() => void professionalProfileStore.load({ force: true })}
         onSaveProfile={handleSaveProfessionalProfile}
         onResetPassword={() => professionalProfileStore.requestPasswordReset()}
-        save={{
-          details: profileSnapshot.account
-            ? { displayName: profileSnapshot.account.displayName, phone: profileSnapshot.account.phone ?? null }
-            : null,
-          fileName: profileSnapshot.fileName,
-          syncState: profileSnapshot.syncState,
-          editable: saveEditable,
+        onImportNutridiet={async (fileText, options) => {
+          const result = await importsApi.nutridiet(fileText, options);
+          const { summary } = result;
+          return { replayed: result.replayed, patients: summary.patients, dietPlans: summary.dietPlans, foodCatalogItems: summary.foodCatalogItems, recipes: summary.recipes, readyMeals: summary.readyMeals };
         }}
-        onSaveSettings={handleSaveSettings}
-        onSyncSave={() => profileSession.sync()}
       />
-
-      {saveManagement.dialogs}
-
-      <div
-        aria-live="polite"
-        className="sr-only"
-        data-profile-sync-feedback={feedback?.kind ?? 'none'}
-        role={feedback?.kind === 'error' ? 'alert' : 'status'}
-      >
-        {feedback?.message ?? ''}
-      </div>
     </>
   );
 };

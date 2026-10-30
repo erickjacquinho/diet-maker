@@ -148,12 +148,7 @@ export default function DashboardPage() {
       {runtime ? (
         <DashboardAgenda key={getRuntimeKey(runtime)} />
       ) : (
-        <div className="flex w-full flex-col items-start gap-4 rounded-surface border border-border-divider bg-card p-6">
-          <p className="text-style-body text-text-secondary">Abra um save para consultar sua semana e próximas ações.</p>
-          <Button type="button" onClick={() => window.dispatchEvent(new Event('nutridiet:open-saves'))}>
-            Abrir configurações de saves
-          </Button>
-        </div>
+        <p role="status" className="text-style-body text-text-secondary">Carregando sua semana…</p>
       )}
       <section aria-label="Assinatura" className="flex w-full items-center justify-between gap-4 border-t border-border-divider pt-4">
         <p className="text-style-body text-text-secondary">Assinatura — Em breve</p>

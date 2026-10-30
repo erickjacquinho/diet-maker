@@ -1,8 +1,10 @@
 # Decisão 10 — Motor Local, Drizzle e Estratégia de Migrations
 
-- **Status:** Prova técnica autorizada; validação pendente
+- **Status:** Substituída (PGlite removido do runtime) — 2026-10-30
 - **Data:** 2026-08-30
 - **Escopo:** Implementação futura da persistência relacional local
+
+> **Substituída em 2026-10-30 pela [Decisão 15](./15-esquema-transferencia-backend-supabase.md).** O produto grava tudo na conta (Supabase) e não tem mais modo local nem save `.nutridiet`. Este texto fica como registro histórico; só o formato do arquivo segue válido, como entrada da importação (Decisão 15, F4).
 
 ## 1. Decisão arquitetural
 

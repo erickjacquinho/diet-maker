@@ -88,7 +88,7 @@ function patientSummary(
 }
 
 function makeRuntime(accountId: string, saveId = 'save-principal') {
-  return { account: { id: accountId }, onlineScope: { ownerId: accountId, saveId }, handle: {} };
+  return { account: { id: accountId } };
 }
 
 function queueApplication(listActivePatients: () => Promise<unknown[]>) {
@@ -137,26 +137,23 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('DashboardPage', () => {
-  it('works without an authorized save and opens Saves and subscription from the home page', () => {
-    const openSaves = vi.fn();
+  it('waits for the account data and opens the subscription from the home page', () => {
     const openSubscription = vi.fn();
-    window.addEventListener('nutridiet:open-saves', openSaves);
     window.addEventListener('nutridiet:open-subscription', openSubscription);
 
     render(<DashboardPage />);
 
     expect(screen.getByRole('heading', { name: 'Início' })).toBeInTheDocument();
-    expect(screen.getByText('Abra um save para consultar sua semana e próximas ações.')).toBeInTheDocument();
+    expect(screen.getByText('Carregando sua semana…')).toBeInTheDocument();
     expect(screen.getByText('Assinatura — Em breve')).toBeInTheDocument();
     expect(testState.getApplication).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir configurações de saves' }));
+    expect(screen.queryByRole('button', { name: /saves/i })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Gerenciar assinatura' }));
-    expect(openSaves).toHaveBeenCalledOnce();
     expect(openSubscription).toHaveBeenCalledOnce();
 
-    window.removeEventListener('nutridiet:open-saves', openSaves);
     window.removeEventListener('nutridiet:open-subscription', openSubscription);
   });
+
 
   it('loads one authorized patient collection and shows only the appointment projection', async () => {
     const tomorrow = new Date();

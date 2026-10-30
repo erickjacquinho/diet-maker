@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
+import { createPatientDietReader } from '@/lib/application/diets/patient-diet-reader';
 import type { DietRepository } from '@/lib/application/diets/diet-ports';
 import { activeDietFixture, historicalDietFixture } from '../fixtures/diets';
 

@@ -1,4 +1,4 @@
-import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import type { BackupEnvelope } from '@/lib/server/imports/legacy-save/logical-export-schema';
 
 export const BACKUP_FIXTURE_NOW = '2026-09-12T12:00:00.000Z';
 export const BACKUP_FIXTURE_ACCOUNT_ID = 'local-account';

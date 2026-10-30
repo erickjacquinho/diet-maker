@@ -2,7 +2,7 @@
 
 import { randomBytes, randomUUID } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BackupApplicationError, validateBackupEnvelope } from '@/lib/application/backup-application';
+import { BackupApplicationError, validateBackupEnvelope } from '@/lib/server/imports/legacy-save/backup-format';
 import {
   PROTECTED_SAVE_ALGORITHM,
   PROTECTED_SAVE_APP_ID,
@@ -11,7 +11,7 @@ import {
   parseProtectedSaveEnvelope,
   type ProtectedSaveGrant,
 } from '@/lib/domain/protected-save';
-import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
+import { decryptProtectedSave, encryptProtectedSave } from '@/lib/server/imports/legacy-save/protected-save';
 import { createBackupEnvelope } from '../fixtures/backup';
 
 const saveId = randomUUID();

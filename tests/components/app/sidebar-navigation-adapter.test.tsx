@@ -5,12 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const routeState = vi.hoisted(() => ({ pathname: '/pacientes' }));
 const profileSnapshot = vi.hoisted(() => ({
-  status: 'empty', authorizationExpiresAt: null, syncState: 'unbound',
-  account: null, accountId: null, runtime: null, fileName: null,
-  hydration: 'ready', resumeFileName: null, error: null, protectedCopyRequired: false,
+  status: 'empty', account: null, accountId: null, runtime: null, hydration: 'ready', error: null,
 }));
-
-const saveManagement = vi.hoisted(() => ({ overlayOpen: false, busy: false, content: null as any, dialogs: null as any }));
 
 const professionalProfile = vi.hoisted(() => ({
   snapshot: {
@@ -52,18 +48,10 @@ vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientRuntime: vi.fn(),
 }));
 
-vi.mock('@/app/navigation/useSaveManagement', () => ({
-  useSaveManagement: () => saveManagement,
-}));
-
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
 
 beforeEach(() => {
   routeState.pathname = '/pacientes';
-  saveManagement.overlayOpen = false;
-  saveManagement.busy = false;
-  saveManagement.content = null;
-  saveManagement.dialogs = null;
   profileSnapshot.status = 'empty';
 });
 
@@ -110,7 +98,7 @@ describe('SidebarNavigationAdapter boundary', () => {
     expect(professionalProfile.load).toHaveBeenCalled();
   });
 
-  it.each([false, true])('opens profile and save settings and restores focus (collapsed=%s)', async (initialCollapsed) => {
+  it.each([false, true])('opens profile settings and restores focus (collapsed=%s)', async (initialCollapsed) => {
     render(<SidebarNavigationAdapter initialCollapsed={initialCollapsed} />);
     const trigger = screen.getByRole('button', { name: /^Abrir menu de conta/ });
 
@@ -123,13 +111,13 @@ describe('SidebarNavigationAdapter boundary', () => {
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
-    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Saves', 'Assinatura']);
+    expect(within(dialog).getAllByRole('tab').map((tab) => tab.textContent?.trim())).toEqual(['Perfil profissional', 'Importar dados', 'Assinatura']);
     expect(within(dialog).getByLabelText(/^Nome/)).toHaveValue('Ana');
     expect(within(dialog).getByLabelText(/CRN/)).toHaveValue('CRN-3 12345');
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
 
-    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Saves' }), { button: 0 });
-    expect(await within(dialog).findByText('Nenhum save está aberto nesta sessão.')).toBeInTheDocument();
+    fireEvent.mouseDown(within(dialog).getByRole('tab', { name: 'Importar dados' }), { button: 0 });
+    expect(await within(dialog).findByLabelText('Arquivo .nutridiet')).toBeInTheDocument();
 
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -171,23 +159,5 @@ describe('SidebarNavigationAdapter boundary', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(trigger).toHaveFocus();
     trigger.remove();
-  });
-
-  it.each(['busy', 'overlayOpen'] as const)('ignores the subscription event while %s', async (guard) => {
-    const view = render(<SidebarNavigationAdapter />);
-    const accountTrigger = screen.getByRole('button', { name: /^Abrir menu de conta/ });
-    fireEvent.pointerDown(accountTrigger, { button: 0 });
-    fireEvent.click(await screen.findByRole('menuitem', { name: 'Configurações' }));
-    expect(await screen.findByRole('dialog', { name: 'Configurações' })).toBeInTheDocument();
-
-    saveManagement[guard] = true;
-    view.rerender(<SidebarNavigationAdapter />);
-    act(() => window.dispatchEvent(new Event('nutridiet:open-subscription')));
-    saveManagement[guard] = false;
-    view.rerender(<SidebarNavigationAdapter />);
-
-    const dialog = await screen.findByRole('dialog', { name: 'Configurações' });
-    expect(within(dialog).getByRole('tab', { name: 'Perfil profissional' })).toHaveAttribute('aria-selected', 'true');
-    expect(within(dialog).getByRole('tab', { name: 'Assinatura' })).toHaveAttribute('aria-selected', 'false');
   });
 });
