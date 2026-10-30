@@ -179,25 +179,6 @@ export function createServerLibraryRepository(tx: SqlExecutor, accountId: string
     return toFood(rows[0], accountId);
   }
 
-  /** A food is in use when a confirmed diet or a ready diet carries a snapshot of it. */
-  async function isFoodReferenced(id: string): Promise<boolean> {
-    const vars = sql`jsonb_build_object('id', ${id}::text)`;
-    const { rows } = await run<{ used: boolean }>(sql`
-      SELECT (
-        EXISTS (SELECT 1 FROM app.diet_plans WHERE account_id = ${accountId}
-          AND jsonb_path_exists(variations, '$.**.snapshot ? (@.sourceType == "ACCOUNT_CUSTOM" && @.sourceId == $id)', ${vars}))
-        OR EXISTS (SELECT 1 FROM app.ready_diets WHERE account_id = ${accountId}
-          AND jsonb_path_exists(document, '$.**.snapshot ? (@.sourceType == "ACCOUNT_CUSTOM" && @.sourceId == $id)', ${vars}))
-      ) AS used`);
-    return rows[0].used;
-  }
-
-  async function deleteFoodIfUnreferenced(id: string, expectedVersion: number): Promise<void> {
-    await requireVersion(id, expectedVersion);
-    if (await isFoodReferenced(id)) throw new ApiError(409, 'CONFLICT', { reason: 'IN_USE' });
-    await run(sql`DELETE FROM app.food_catalog_items WHERE account_id = ${accountId} AND id = ${id} AND version = ${expectedVersion}`);
-  }
-
   function toReadyDiet(row: ReadyDietRow): ReadyDiet {
     return { id: row.id, accountId, name: row.name, document: row.document, version: row.version, createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) };
   }
@@ -224,7 +205,7 @@ export function createServerLibraryRepository(tx: SqlExecutor, accountId: string
     listFoods, getFood, createFood, updateFood, duplicateFood,
     archiveFood: (id: string, version: number) => setFoodStatus(id, version, 'ARCHIVED'),
     restoreFood: (id: string, version: number) => setFoodStatus(id, version, 'ACTIVE'),
-    deleteFoodIfUnreferenced, createReadyDiet, listReadyDiets,
+    createReadyDiet, listReadyDiets,
   };
 }
 

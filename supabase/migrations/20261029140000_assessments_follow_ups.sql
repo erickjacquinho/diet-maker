@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS app.next_follow_ups (
   version                integer      NOT NULL CHECK (version > 0),
   created_at             timestamptz  NOT NULL DEFAULT now(),
   updated_at             timestamptz  NOT NULL DEFAULT now(),
+  cancelled_at           timestamptz,
   PRIMARY KEY (account_id, patient_id),
   FOREIGN KEY (account_id, patient_id) REFERENCES app.patients (account_id, id) ON DELETE RESTRICT,
   CHECK (assessment_due_date IS NOT NULL OR diet_due_date IS NOT NULL)
@@ -74,6 +75,5 @@ CREATE POLICY next_follow_ups_tenant ON app.next_follow_ups
   WITH CHECK (account_id = (SELECT app.current_account_id()));
 
 REVOKE ALL ON app.body_assessments, app.next_follow_ups FROM PUBLIC, anon, authenticated, app_runtime;
--- Avaliações são histórico clínico: sem DELETE. O acompanhamento é removido ao ser cancelado.
-GRANT SELECT, INSERT, UPDATE ON app.body_assessments TO app_runtime;
-GRANT SELECT, INSERT, UPDATE, DELETE ON app.next_follow_ups TO app_runtime;
+-- Sem DELETE para app_runtime em nenhuma tabela: cancelar o acompanhamento marca `cancelled_at`.
+GRANT SELECT, INSERT, UPDATE ON app.body_assessments, app.next_follow_ups TO app_runtime;

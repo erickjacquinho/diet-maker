@@ -133,34 +133,6 @@ describe('server library repository (foods + ready diets, RLS)', () => {
     })).rejects.toThrow();
   });
 
-  it('deletes only unreferenced foods', async () => {
-    const used = randomUUID();
-    await asAccount(accountA, (l) => l.createFood(used, food('Usado')));
-    await asAccount(accountA, (l) => l.createReadyDiet(randomUUID(), 'Pronta', dietUsing(used)));
-    await expect(asAccount(accountA, (l) => l.deleteFoodIfUnreferenced(used, 1))).rejects.toMatchObject({ status: 409, extra: { reason: 'IN_USE' } });
-
-    const free = randomUUID();
-    await asAccount(accountA, (l) => l.createFood(free, food('Livre')));
-    await expect(asAccount(accountA, (l) => l.deleteFoodIfUnreferenced(free, 7))).rejects.toMatchObject({ code: 'VERSION_CONFLICT' });
-    await asAccount(accountA, (l) => l.deleteFoodIfUnreferenced(free, 1));
-    await expect(asAccount(accountA, (l) => l.getFood(free))).rejects.toMatchObject({ status: 404 });
-  });
-
-  it('also treats a food in a confirmed diet as referenced', async () => {
-    const used = randomUUID();
-    const patient = randomUUID();
-    await asAccount(accountA, (l) => l.createFood(used, food('NaDieta')));
-    await client.exec(`SET ROLE postgres`).catch(() => undefined);
-    await client.query(
-      `INSERT INTO app.patients (account_id, id, display_code, sensitive, sensitive_key_version, gender, version)
-       VALUES ($1, $2, 'P-0001', decode(repeat('00', 64), 'hex'), 1, 'x', 1)`, [accountA, patient]);
-    await client.query(
-      `INSERT INTO app.diet_plans (account_id, id, patient_id, name, mode, status, variations, version)
-       VALUES ($1, $2, $3, 'D', 'SIMPLE', 'ACTIVE', $4::jsonb, 1)`,
-      [accountA, randomUUID(), patient, JSON.stringify(dietUsing(used).variations)]);
-    await expect(asAccount(accountA, (l) => l.deleteFoodIfUnreferenced(used, 1))).rejects.toMatchObject({ status: 409 });
-  });
-
   it('creates and lists ready diets, idempotently and per account', async () => {
     const id = randomUUID();
     const created = await asAccount(accountA, (l) => l.createReadyDiet(id, ' Low carb ', dietUsing(randomUUID())));
@@ -170,11 +142,16 @@ describe('server library repository (foods + ready diets, RLS)', () => {
     expect(await asAccount(accountB, (l) => l.listReadyDiets())).toEqual([]);
   });
 
-  it('keeps DELETE off ready diets', async () => {
+  it('grants no DELETE on foods or ready diets', async () => {
     await expect(db.transaction(async (tx) => {
       await tx.execute(sql`SET LOCAL ROLE app_runtime`);
       await tx.execute(sql`SELECT set_config('app.account_id', ${accountA}, true)`);
       await tx.execute(sql`DELETE FROM app.ready_diets`);
+    })).rejects.toThrow();
+    await expect(db.transaction(async (tx) => {
+      await tx.execute(sql`SET LOCAL ROLE app_runtime`);
+      await tx.execute(sql`SELECT set_config('app.account_id', ${accountA}, true)`);
+      await tx.execute(sql`DELETE FROM app.food_catalog_items`);
     })).rejects.toThrow();
   });
 });

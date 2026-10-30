@@ -3,7 +3,6 @@ import 'server-only';
 import {
   parseCreateFoodRequest,
   parseCreateReadyDietRequest,
-  parseDeletedDto,
   parseDuplicateRequest,
   parseFoodDto,
   parseFoodListDto,
@@ -85,16 +84,6 @@ export const restoreFoodEndpoint = defineEndpoint({
   requireVersion: true,
   rateLimit: 'mutation',
   handler: (context) => repository(context).restoreFood(foodId(context), context.version as number),
-});
-
-export const deleteFoodEndpoint = defineEndpoint({
-  output: { parse: parseDeletedDto },
-  requireVersion: true,
-  rateLimit: 'mutation',
-  async handler(context) {
-    await repository(context).deleteFoodIfUnreferenced(foodId(context), context.version as number);
-    return { deleted: true };
-  },
 });
 
 export const listReadyDietsEndpoint = defineEndpoint({

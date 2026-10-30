@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS app.diet_drafts (
   payload                 jsonb        NOT NULL,
   created_at              timestamptz  NOT NULL DEFAULT now(),
   updated_at              timestamptz  NOT NULL DEFAULT now(),
+  discarded_at            timestamptz,
   PRIMARY KEY (account_id, patient_id, route_diet_id),
   FOREIGN KEY (account_id, patient_id) REFERENCES app.patients (account_id, id) ON DELETE RESTRICT,
   CHECK ((base_diet_id IS NULL) = (base_diet_version IS NULL))
@@ -62,6 +63,5 @@ CREATE POLICY diet_drafts_tenant ON app.diet_drafts
   WITH CHECK (account_id = (SELECT app.current_account_id()));
 
 REVOKE ALL ON app.diet_plans, app.diet_drafts FROM PUBLIC, anon, authenticated, app_runtime;
--- Prescrições são histórico clínico: sem DELETE. Rascunhos são descartáveis.
-GRANT SELECT, INSERT, UPDATE ON app.diet_plans TO app_runtime;
-GRANT SELECT, INSERT, UPDATE, DELETE ON app.diet_drafts TO app_runtime;
+-- Sem DELETE para app_runtime em nenhuma tabela: descartar um rascunho marca `discarded_at` e limpa o payload.
+GRANT SELECT, INSERT, UPDATE ON app.diet_plans, app.diet_drafts TO app_runtime;

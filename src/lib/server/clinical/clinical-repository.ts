@@ -57,6 +57,7 @@ type FollowUpRow = {
   version: number;
   created_at: Date | string;
   updated_at: Date | string;
+  cancelled_at: Date | string | null;
 };
 
 type PatientContextRow = { gender: string; height_cm: string | null; archived_at: Date | string | null };
@@ -67,7 +68,7 @@ const ASSESSMENT_COLUMNS = sql`id, patient_id, clinical_date::text AS clinical_d
   right_distal_thigh_cm, left_calf_cm, right_calf_cm, auto_filled_fields, calculation_method, calculation_version,
   calculation_input, version, created_at, updated_at`;
 const FOLLOW_UP_COLUMNS = sql`patient_id, assessment_due_date::text AS assessment_due_date,
-  diet_due_date::text AS diet_due_date, comments, version, created_at, updated_at`;
+  diet_due_date::text AS diet_due_date, comments, version, created_at, updated_at, cancelled_at`;
 const COMMENTS_COLUMN = 'next_follow_ups.comments';
 
 const commentsSchema = {
@@ -253,7 +254,7 @@ export function createServerClinicalRepository(tx: SqlExecutor, sealer: FieldSea
   async function getFollowUp(patientId: string): Promise<NextFollowUp | null> {
     await patientContext(patientId);
     const row = await selectFollowUp(patientId);
-    return row ? toFollowUp(row) : null;
+    return row && row.cancelled_at === null ? toFollowUp(row) : null;
   }
 
   /** Without `expectedVersion` this creates; with it, it replaces the confirmed follow-up. */
@@ -266,36 +267,42 @@ export function createServerClinicalRepository(tx: SqlExecutor, sealer: FieldSea
     } catch (error) {
       throw asApiError(error);
     }
-    const current = await selectFollowUp(patientId);
-    if (expectedVersion === undefined && current) throw new VersionConflictError(current.version);
-    if (expectedVersion !== undefined && !current) throw new NotFoundError();
-    if (current && current.version !== expectedVersion) throw new VersionConflictError(current.version);
+    const row = await selectFollowUp(patientId);
+    const active = row !== undefined && row.cancelled_at === null;
+    if (expectedVersion === undefined && active) throw new VersionConflictError(row.version);
+    if (expectedVersion !== undefined && !active) throw new NotFoundError();
+    if (active && row.version !== expectedVersion) throw new VersionConflictError(row.version);
     const blob = await sealer.seal({ column: COMMENTS_COLUMN, rowId: patientId }, normalized.comments);
     const keyVersion = blob.readUInt32BE(1);
     const assessmentDue = normalized.dueDates.ASSESSMENT_UPDATE ?? null;
     const dietDue = normalized.dueDates.DIET_UPDATE ?? null;
-    const { rows } = current
+    // A cancelled follow-up is reactivated in place (rows are never deleted), continuing its version.
+    const { rows } = row
       ? await run<FollowUpRow>(sql`
           UPDATE app.next_follow_ups SET assessment_due_date = ${assessmentDue}, diet_due_date = ${dietDue},
-            comments = ${blob}, comments_key_version = ${keyVersion}, version = version + 1, updated_at = now()
-          WHERE account_id = ${accountId} AND patient_id = ${patientId} AND version = ${expectedVersion}
+            comments = ${blob}, comments_key_version = ${keyVersion}, cancelled_at = NULL,
+            version = version + 1, updated_at = now()
+          WHERE account_id = ${accountId} AND patient_id = ${patientId} AND version = ${row.version}
           RETURNING ${FOLLOW_UP_COLUMNS}`)
       : await run<FollowUpRow>(sql`
           INSERT INTO app.next_follow_ups (account_id, patient_id, assessment_due_date, diet_due_date, comments,
             comments_key_version, version)
           VALUES (${accountId}, ${patientId}, ${assessmentDue}, ${dietDue}, ${blob}, ${keyVersion}, 1)
           RETURNING ${FOLLOW_UP_COLUMNS}`);
-    if (!rows[0]) throw new VersionConflictError((expectedVersion ?? 0) + 1);
+    if (!rows[0]) throw new VersionConflictError((row?.version ?? 0) + 1);
     return toFollowUp(rows[0]);
   }
 
+  /** Cancels the confirmed follow-up: the row is kept with `cancelled_at` and its comments are wiped. */
   async function clearFollowUp(patientId: string, expectedVersion: number): Promise<void> {
     await patientContext(patientId);
     const current = await selectFollowUp(patientId);
-    if (!current) throw new NotFoundError();
+    if (!current || current.cancelled_at !== null) throw new NotFoundError();
     if (current.version !== expectedVersion) throw new VersionConflictError(current.version);
+    const blob = await sealer.seal({ column: COMMENTS_COLUMN, rowId: patientId }, '');
     await run(sql`
-      DELETE FROM app.next_follow_ups
+      UPDATE app.next_follow_ups SET cancelled_at = now(), comments = ${blob}, comments_key_version = ${blob.readUInt32BE(1)},
+        version = version + 1, updated_at = now()
       WHERE account_id = ${accountId} AND patient_id = ${patientId} AND version = ${expectedVersion}`);
   }
 

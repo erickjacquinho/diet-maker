@@ -123,11 +123,6 @@ export function parseFoodListDto(value: unknown): { items: FoodDto[] } {
   return { items: v.items.map(parseFoodDto) };
 }
 
-export function parseDeletedDto(value: unknown): { deleted: true } {
-  record(value, ['deleted']);
-  return { deleted: true };
-}
-
 export interface CreateReadyDietRequest {
   id: string;
   name: string;

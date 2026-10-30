@@ -187,6 +187,11 @@ describe('server diet repository (RLS + composite FK)', () => {
       await asAccount(accountA, (d) => d.confirmActive(patientA, { dietId: randomUUID(), draftRouteId: 'nova', document: doc('Dieta 3') }));
       expect(await asAccount(accountA, (d) => d.getDraft(patientA, 'nova'))).toBeNull();
       await asAccount(accountA, (d) => d.discardDraft(patientA, 'nova'));
+      const kept = await client.query<{ payload: unknown; discarded_at: unknown }>("SELECT payload, discarded_at FROM app.diet_drafts WHERE patient_id = $1", [patientA]);
+      expect(kept.rows[0].payload).toEqual({});
+      expect(kept.rows[0].discarded_at).not.toBeNull();
+      // A discarded draft starts over: a low revision is accepted again.
+      expect(await asAccount(accountA, (d) => d.putDraft(patientA, 'nova', request(1)))).toMatchObject({ status: 'SAVED', revision: 1 });
     });
 
     it('does not accept drafts for archived patients', async () => {

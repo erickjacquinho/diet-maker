@@ -145,11 +145,16 @@ describe('server clinical repository (RLS + composite FK)', () => {
     expect(count.rows[0].n).toBe(0);
   });
 
-  it('grants no DELETE on assessments', async () => {
+  it('grants no DELETE on assessments or follow-ups', async () => {
     await expect(db.transaction(async (tx) => {
       await tx.execute(sql`SET LOCAL ROLE app_runtime`);
       await tx.execute(sql`SELECT set_config('app.account_id', ${accountA}, true)`);
       await tx.execute(sql`DELETE FROM app.body_assessments`);
+    })).rejects.toThrow();
+    await expect(db.transaction(async (tx) => {
+      await tx.execute(sql`SET LOCAL ROLE app_runtime`);
+      await tx.execute(sql`SELECT set_config('app.account_id', ${accountA}, true)`);
+      await tx.execute(sql`DELETE FROM app.next_follow_ups`);
     })).rejects.toThrow();
   });
 
@@ -189,11 +194,16 @@ describe('server clinical repository (RLS + composite FK)', () => {
       await expect(asAccount(accountA, (c) => c.clearFollowUp(patientA, 1))).rejects.toMatchObject({ code: 'VERSION_CONFLICT' });
       await asAccount(accountA, (c) => c.clearFollowUp(patientA, 2));
       expect(await asAccount(accountA, (c) => c.getFollowUp(patientA))).toBeNull();
+      const kept = await client.query<{ version: number; cancelled_at: unknown }>('SELECT version, cancelled_at FROM app.next_follow_ups WHERE patient_id = $1', [patientA]);
+      expect(kept.rows[0]).toMatchObject({ version: 3 });
+      expect(kept.rows[0].cancelled_at).not.toBeNull();
+      await expect(asAccount(accountA, (c) => c.clearFollowUp(patientA, 3))).rejects.toMatchObject({ status: 404 });
     });
 
     it('fails closed when a comments ciphertext is moved to another patient', async () => {
       const other = (await asAccount(accountA, (_c, p) => p.searchActive('Outra', 0, 5))).items[0].id;
-      await asAccount(accountA, (c) => c.setFollowUp(patientA, undefined, { dueDate: '2026-08-01', type: 'DIET_UPDATE', comments: 'a' }));
+      const reactivated = await asAccount(accountA, (c) => c.setFollowUp(patientA, undefined, { dueDate: '2026-08-01', type: 'DIET_UPDATE', comments: 'a' }));
+      expect(reactivated.version).toBe(4);
       await asAccount(accountA, (c) => c.setFollowUp(other, undefined, { dueDate: '2026-08-01', type: 'DIET_UPDATE', comments: 'b' }));
       await client.query(
         `UPDATE app.next_follow_ups SET comments = (SELECT comments FROM app.next_follow_ups WHERE patient_id = $1) WHERE patient_id = $2`,

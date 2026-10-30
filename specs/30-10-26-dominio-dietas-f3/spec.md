@@ -4,7 +4,7 @@ Terceira parte da F3 (Decisão 15). A prescrição é S2 (em claro, ligada só a
 
 ## Dados
 - `app.diet_plans`: cabeçalho em colunas (nome, modo, status, versão, datas) e o documento (variações → refeições → opções → itens com snapshot nutricional) em `variations jsonb`. Índice único parcial garante uma dieta `ACTIVE` por paciente. FK composta `(account_id, patient_id)`. Sem `DELETE`.
-- `app.diet_drafts`: um rascunho por `(conta, paciente, rota)`, com revisão, estado e payload. Pode ser descartado (`DELETE`).
+- `app.diet_drafts`: um rascunho por `(conta, paciente, rota)`, com revisão, estado e payload. Descartar marca `discarded_at` e limpa o payload (sem `DELETE`).
 - RLS `FORCE` por conta nas duas tabelas.
 
 ## API (`/api/v1/patients/:id`)

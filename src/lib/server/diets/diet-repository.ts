@@ -43,12 +43,13 @@ type DraftRow = {
   payload: DietEditableDocument;
   created_at: Date | string;
   updated_at: Date | string;
+  discarded_at: Date | string | null;
 };
 
 const PLAN_COLUMNS = sql`id, patient_id, name, mode, status, weight_reference_kg, variations, version,
   created_at, updated_at, activated_at, superseded_at`;
 const DRAFT_COLUMNS = sql`patient_id, route_diet_id, draft_id, payload_schema_version, draft_revision, state,
-  base_diet_id, base_diet_version, target_diet_id, payload, created_at, updated_at`;
+  base_diet_id, base_diet_version, target_diet_id, payload, created_at, updated_at, discarded_at`;
 
 const iso = (value: Date | string): string => new Date(value).toISOString();
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
@@ -181,7 +182,7 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
   async function getDraft(patientId: string, routeId: string): Promise<DietDraft | null> {
     await patientState(patientId);
     const row = await selectDraft(patientId, routeId);
-    return row ? toDraft(row) : null;
+    return row && row.discarded_at === null ? toDraft(row) : null;
   }
 
   /** A lower revision than the stored one is superseded; equal revisions are accepted so retries are idempotent. */
@@ -189,13 +190,15 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
     await requireActivePatient(patientId);
     const existing = await selectDraft(patientId, routeId);
     if (existing) {
-      if (existing.state === 'INVALIDATED_BY_PATIENT_ARCHIVE') return { status: 'INVALIDATED' };
-      if (existing.draft_revision > request.draftRevision) return { status: 'SUPERSEDED', currentRevision: existing.draft_revision };
+      const discarded = existing.discarded_at !== null;
+      if (!discarded && existing.state === 'INVALIDATED_BY_PATIENT_ARCHIVE') return { status: 'INVALIDATED' };
+      // A discarded draft starts over, so its old revision no longer outranks the new one.
+      if (!discarded && existing.draft_revision > request.draftRevision) return { status: 'SUPERSEDED', currentRevision: existing.draft_revision };
       const { rows } = await run<{ updated_at: Date | string }>(sql`
         UPDATE app.diet_drafts SET draft_id = ${request.draftId}, payload_schema_version = ${request.payloadSchemaVersion},
           draft_revision = ${request.draftRevision}, base_diet_id = ${request.baseDietId ?? null},
           base_diet_version = ${request.baseDietVersion ?? null}, target_diet_id = ${request.targetDietId ?? null},
-          payload = ${json(request.payload)}, updated_at = now()
+          payload = ${json(request.payload)}, state = 'EDITABLE', discarded_at = NULL, updated_at = now()
         WHERE account_id = ${accountId} AND patient_id = ${patientId} AND route_diet_id = ${routeId}
         RETURNING updated_at`);
       return { status: 'SAVED', revision: request.draftRevision, updatedAt: iso(rows[0].updated_at) };
@@ -210,11 +213,12 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
     return { status: 'SAVED', revision: request.draftRevision, updatedAt: iso(rows[0].updated_at) };
   }
 
-  /** Idempotent: discarding a draft that no longer exists succeeds. */
+  /** Idempotent. Rows are never deleted: the draft is marked discarded and its payload wiped. */
   async function discardDraft(patientId: string, routeId: string): Promise<void> {
     await run(sql`
-      DELETE FROM app.diet_drafts
-      WHERE account_id = ${accountId} AND patient_id = ${patientId} AND route_diet_id = ${routeId}`);
+      UPDATE app.diet_drafts SET discarded_at = now(), payload = '{}'::jsonb, updated_at = now()
+      WHERE account_id = ${accountId} AND patient_id = ${patientId} AND route_diet_id = ${routeId}
+        AND discarded_at IS NULL`);
   }
 
   return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, patientState };

@@ -57,6 +57,5 @@ CREATE POLICY ready_diets_tenant ON app.ready_diets
   WITH CHECK (account_id = (SELECT app.current_account_id()));
 
 REVOKE ALL ON app.food_catalog_items, app.ready_diets FROM PUBLIC, anon, authenticated, app_runtime;
--- Alimento sem uso pode ser excluído; dieta pronta só é criada e listada nesta versão.
-GRANT SELECT, INSERT, UPDATE, DELETE ON app.food_catalog_items TO app_runtime;
-GRANT SELECT, INSERT, UPDATE ON app.ready_diets TO app_runtime;
+-- Sem DELETE para app_runtime: alimentos são arquivados; dieta pronta só é criada e listada nesta versão.
+GRANT SELECT, INSERT, UPDATE ON app.food_catalog_items, app.ready_diets TO app_runtime;

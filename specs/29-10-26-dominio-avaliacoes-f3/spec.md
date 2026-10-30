@@ -4,7 +4,7 @@ Segunda parte da F3 (Decisão 15). Reaproveita `buildBodyAssessment` e `normaliz
 
 ## Dados
 - `app.body_assessments`: medidas e resultados em claro (S2), FK composta `(account_id, patient_id)` para `app.patients`, sem `DELETE`.
-- `app.next_follow_ups`: datas em claro; `comments` (texto livre) cifrado como S1; pode ser removido (cancelar acompanhamento).
+- `app.next_follow_ups`: datas em claro; `comments` (texto livre) cifrado como S1; cancelar o acompanhamento marca `cancelled_at` e apaga os comentários (sem `DELETE`).
 - RLS `FORCE` por conta nas duas tabelas.
 
 ## API (`/api/v1`)

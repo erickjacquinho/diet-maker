@@ -23,7 +23,6 @@ export const libraryApi = {
     apiRequest<FoodDto>(`${foodPath(id)}/duplicate`, { method: 'POST', body: { id: newId } }),
   archiveFood: (id: string, version: number) => apiRequest<FoodDto>(`${foodPath(id)}/archive`, { method: 'POST', version }),
   restoreFood: (id: string, version: number) => apiRequest<FoodDto>(`${foodPath(id)}/restore`, { method: 'POST', version }),
-  deleteFood: (id: string, version: number) => apiRequest<{ deleted: true }>(foodPath(id), { method: 'DELETE', version }),
   listReadyDiets: () => apiRequest<{ items: ReadyDietDto[] }>('/api/v1/library/ready-diets'),
   createReadyDiet: (id: string, name: string, document: DietEditableDocument) =>
     apiRequest<ReadyDietDto>('/api/v1/library/ready-diets', { method: 'POST', body: { id, name, document } }),
