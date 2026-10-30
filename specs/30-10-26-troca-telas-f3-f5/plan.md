@@ -56,3 +56,9 @@ ADR-009, Decisões 09–13 e `AGENTS.md` atualizados para o modelo 100% online.
 - [x] Mantido só o necessário à importação: `src/lib/server/imports/legacy-save` (esquema lógico, validação/migração do envelope, mapeadores de dieta, decifra v2) e `private.saves` em leitura (`getSaveRecord`) para decifrar arquivos v2 até o fim da transição.
 - [x] Testes do modo local removidos; os do servidor (PGlite como emulador de Postgres e Postgres real) cobrem o domínio.
 - [ ] Pendente (não bloqueia): E2E Playwright dos fluxos online (os específicos de save foram removidos); desativar `private.saves` com uma migration própria ao fim da transição, após a importação dos saves reais; limpar o conceito de checkpoint ainda presente em `composition-root`/`diet-application` (sem efeito no modo online).
+
+## Migrations no Supabase `diet-maker` (2026-10-30)
+- [x] Aplicadas via MCP: `profile_updates_for_app_runtime` (o arquivo `20261022120000` nomeia o papel antigo `online_runtime`, que o remoto já renomeou para `app_runtime`; o novo `20261029110000` faz o mesmo efeito) e as 9 migrations F2-F4 (`20261029120000` a `20261030170000`).
+- [x] Histórico `supabase_migrations.schema_migrations` alinhado aos nomes de versão dos arquivos; `20261022120000` registrada como equivalente.
+- [x] Conferido: 14 tabelas `app` com RLS forçada e política, sem DELETE nem TRUNCATE para `app_runtime`; advisors de segurança só apontam a proteção de senha vazada do Auth (ajuste do painel).
+- [x] Vercel (produção) já tinha `ACCOUNT_KEK_ACTIVE_ID`, `ACCOUNT_KEK_V1`, `ONLINE_DATABASE_URL`, `SERVER_MASTER_KEY*`, `SUPABASE_*` e `APP_ORIGIN`; nada foi alterado.
