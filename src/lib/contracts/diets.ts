@@ -137,6 +137,8 @@ function snapshot(value: unknown): NutritionSnapshot {
   };
 }
 
+export { nutrition as parseNutritionValues, snapshot as parseNutritionSnapshot };
+
 function item(value: unknown): DietItem {
   const v = record(value, ['id', 'position', 'role', 'parentItemId', 'name', 'snapshot']);
   return {
