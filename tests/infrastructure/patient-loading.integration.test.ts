@@ -4,7 +4,7 @@ import { createBrowserPatientRuntime, disposeBrowserPatientRuntime, type Browser
 import { PGliteDietRepository } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
 import { patients } from '@/lib/infrastructure/local-db/schema';
 import { toDietHistoryViews } from '@/lib/application/diets/diet-history-view';
-import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
+import { createPatientDietReader } from '@/lib/application/diets/patient-diet-reader';
 import type { DietPlan } from '@/lib/domain/diets/diet-model';
 import { activeDietFixture, cycleDraftFixture, mealWithAlternativeAndSubstituteFixture } from '../fixtures/diets';
 
@@ -14,11 +14,12 @@ afterEach(async () => { vi.restoreAllMocks(); await disposeBrowserPatientRuntime
 async function setup(size = 1) {
   const timestamp = '2026-09-17T10:00:00.000Z';
   runtime = await createBrowserPatientRuntime({ id: 'account-a', displayName: 'Conta teste', phone: null, createdAt: timestamp, updatedAt: timestamp });
-  await runtime.handle.db.insert(patients).values(Array.from({ length: size }, (_, index) => ({
+  await runtime.handle!.db.insert(patients).values(Array.from({ length: size }, (_, index) => ({
     id: index === 0 ? 'patient-a' : `patient-${index}`, accountId: 'account-a', displayCode: `P-${index}`, name: `Paciente ${index}`,
     gender: 'Feminino', createdAt: timestamp, updatedAt: timestamp, version: 1,
   })));
-  return runtime;
+  // The local workspace always has a database handle; the type is optional only because online runtimes have none.
+  return Object.assign(runtime, { handle: runtime.handle! }) as typeof runtime & { handle: NonNullable<typeof runtime.handle> };
 }
 
 describe('patient loading with the real local database', () => {

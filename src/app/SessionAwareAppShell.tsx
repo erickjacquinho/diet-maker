@@ -12,6 +12,7 @@ import { Button } from '@/components/atoms';
 import { toast } from 'sonner';
 import { signOutBrowserAccount } from '@/lib/application/browser-composition';
 import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
+import { isOnlinePersistence } from '@/lib/application/persistence-mode';
 
 const DEFAULT_INTERNAL_ROUTE = '/dashboard';
 const PUBLIC_ROUTES = new Set(['/', '/login', '/criar-conta', '/recuperar-senha', '/redefinir-senha']);
@@ -59,6 +60,7 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const [accountGate, setAccountGate] = useState<AccountGateState>('checking');
   const previousPathname = useRef(pathname);
+  const online = isOnlinePersistence();
   const hasUsableSession = Boolean(snapshot.runtime) && ['active', 'paused', 'busy'].includes(snapshot.status);
   const isPreservingLockedSave = snapshot.status === 'locked' && Boolean(snapshot.runtime);
 
@@ -87,6 +89,13 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
       });
     return () => { current = false; };
   }, [isPublicRoute]);
+
+  // Online mode has no save to open: once the account is valid, its data opens by itself.
+  useEffect(() => {
+    if (!online || isPublicRoute || !session || accountGate !== 'ready') return;
+    if (snapshot.runtime || snapshot.status === 'busy' || snapshot.error) return;
+    void session.loadProfile().catch(() => undefined);
+  }, [accountGate, isPublicRoute, online, session, snapshot.error, snapshot.runtime, snapshot.status]);
 
   useEffect(() => {
     if (isPublicRoute || !session || typeof snapshot.authorizationExpiresAt !== 'number') return;
@@ -123,8 +132,8 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
       router.replace(DEFAULT_INTERNAL_ROUTE);
       return;
     }
-    if (!hasUsableSession && !isDashboardRoute) router.replace(DEFAULT_INTERNAL_ROUTE);
-  }, [accountGate, hasUsableSession, isDashboardRoute, isLegacyRoute, isPreservingLockedSave, isPublicRoute, pathname, router]);
+    if (!online && !hasUsableSession && !isDashboardRoute) router.replace(DEFAULT_INTERNAL_ROUTE);
+  }, [accountGate, hasUsableSession, isDashboardRoute, online, isLegacyRoute, isPreservingLockedSave, isPublicRoute, pathname, router]);
 
   const handleSignOut = async (): Promise<void> => {
     try {
@@ -163,6 +172,19 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   }
   if (accountGate !== 'ready') {
     return <div role="status" aria-live="polite" data-session-gate="redirecting">Encaminhando para o acesso da conta…</div>;
+  }
+  if (online && !hasUsableSession && !isLegacyRoute) {
+    if (snapshot.error) {
+      return (
+        <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8" data-session-gate="account-unavailable">
+          <div role="alert" className="max-w-container-reading rounded-control border border-warning-border bg-warning-soft p-4 text-style-body text-warning">
+            Não foi possível abrir os dados da sua conta. {snapshot.error}
+          </div>
+          <Button type="button" onClick={() => void session?.loadProfile().catch(() => undefined)}>Tentar novamente</Button>
+        </main>
+      );
+    }
+    return <div role="status" aria-live="polite" data-session-gate="opening-account">Abrindo sua conta…</div>;
   }
   if (isLegacyRoute || (!hasUsableSession && !isDashboardRoute)) {
     return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo o dashboard…</div>;

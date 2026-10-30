@@ -32,3 +32,12 @@ Remover `src/lib/infrastructure/local-db`, `file-system-access`, `diet-drafts` (
 
 ## 4. Documentação
 ADR-009, Decisões 09–13 e `AGENTS.md` atualizados para o modelo 100% online.
+
+## Estado da troca (modo `online`, atrás de flag)
+`NEXT_PUBLIC_PERSISTENCE=online` liga o runtime online; sem a variável, o app continua no modo local (padrão até a F5).
+- [x] `online-profile-session.ts`: sessão sem arquivo/grant/bloqueio; abre a conta sozinha quando `/api/auth/session` é válida.
+- [x] `createOnlinePatientRuntime` (em `browser-composition.ts`): aplicações sobre os adaptadores HTTP, IDs UUID, sem workspace local (`handle` e `backupApplication` opcionais).
+- [x] `online-preferences.ts`: favoritos e lembretes mantêm o cache síncrono da UI; hidratação na abertura e envio das diferenças em `markWorkspaceDirty` (em série, reenviando só o que falhou).
+- [x] `SessionAwareAppShell`: abre a conta automaticamente, mantém o deep link e mostra erro com "Tentar novamente".
+- [ ] Verificação manual de cada tela contra um Supabase real (Docker/staging) — pendente.
+- [ ] Virar o padrão para `online` e executar a F5 (apagar o modo local, telas e rotas de saves, testes locais).

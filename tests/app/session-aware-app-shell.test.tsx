@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testState = vi.hoisted(() => ({
   pathname: '/pacientes',
@@ -9,6 +9,7 @@ const testState = vi.hoisted(() => ({
   signOut: vi.fn(async () => undefined),
   signOutBrowserAccount: vi.fn(async () => undefined),
   restoreActiveProfile: vi.fn(),
+  loadProfile: vi.fn(async () => undefined),
   onResume: vi.fn(),
   retryLockedSave: vi.fn(async () => undefined),
   schedulerAccountIds: [] as Array<string | null>,
@@ -31,6 +32,7 @@ vi.mock('@/lib/application/browser-composition', () => ({
     signOut: testState.signOut,
     onResume: testState.onResume,
     retryLockedSave: testState.retryLockedSave,
+    loadProfile: testState.loadProfile,
   }),
 }));
 
@@ -59,6 +61,7 @@ describe('SessionAwareAppShell', () => {
     testState.signOut.mockReset();
     testState.signOutBrowserAccount.mockReset();
     testState.restoreActiveProfile.mockReset();
+    testState.loadProfile.mockClear();
     testState.onResume.mockReset();
     testState.retryLockedSave.mockReset();
     testState.schedulerAccountIds.length = 0;
@@ -214,5 +217,38 @@ describe('SessionAwareAppShell', () => {
     await waitFor(() => expect(screen.getByTestId('internal-content')).toBeInTheDocument());
     finishSync();
     await pendingSync;
+  });
+  describe('online persistence', () => {
+    beforeEach(() => {
+      vi.stubEnv('NEXT_PUBLIC_PERSISTENCE', 'online');
+      vi.stubGlobal('fetch', vi.fn(async () => Response.json({ user: { id: 'owner' }, profileComplete: true })));
+    });
+    afterEach(() => vi.unstubAllEnvs());
+
+    it('opens the account by itself and keeps a deep link instead of bouncing to the dashboard', async () => {
+      testState.pathname = '/pacientes';
+      render(<SessionAwareAppShell><div data-testid="internal-content">Pacientes</div></SessionAwareAppShell>);
+      expect(await screen.findByText('Abrindo sua conta…')).toBeInTheDocument();
+      await waitFor(() => expect(testState.loadProfile).toHaveBeenCalledOnce());
+      expect(testState.replace).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('internal-content')).not.toBeInTheDocument();
+    });
+
+    it('shows the module once the account runtime is available', async () => {
+      testState.snapshot = { status: 'active', authorizationExpiresAt: null, syncState: 'synced', account: { displayName: 'Dra. Ana' }, accountId: 'owner', runtime: { account: { id: 'owner' } }, fileName: null, hydration: 'ready', error: null };
+      render(<SessionAwareAppShell><div data-testid="internal-content">Pacientes</div></SessionAwareAppShell>);
+      expect(await screen.findByTestId('internal-content')).toBeInTheDocument();
+      expect(testState.loadProfile).not.toHaveBeenCalled();
+      expect(testState.replace).not.toHaveBeenCalledWith('/dashboard');
+    });
+
+    it('explains a failed open and retries on request', async () => {
+      testState.snapshot = { status: 'empty', authorizationExpiresAt: null, syncState: 'synced', account: null, accountId: null, runtime: null, fileName: null, hydration: 'ready', error: 'sem rede' };
+      render(<SessionAwareAppShell><div data-testid="internal-content">Pacientes</div></SessionAwareAppShell>);
+      expect(await screen.findByRole('alert')).toHaveTextContent('sem rede');
+      expect(testState.loadProfile).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+      expect(testState.loadProfile).toHaveBeenCalledOnce();
+    });
   });
 });

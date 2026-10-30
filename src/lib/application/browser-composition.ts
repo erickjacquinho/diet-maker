@@ -9,7 +9,7 @@ import { createPatientProfileReader } from './patients/patient-profile-reader';
 import { createDietApplication } from './diets/diet-application';
 import type { DietApplication } from './diets/diet-ports';
 import { PGliteDietRepository } from '@/lib/infrastructure/local-db/diets/pglite-diet-repository';
-import { createPatientDietReader } from '@/lib/infrastructure/local-db/diets/pglite-patient-diet-reader';
+import { createPatientDietReader } from '@/lib/application/diets/patient-diet-reader';
 import { InMemoryDietDraftStore } from '@/lib/infrastructure/diet-drafts/in-memory-diet-draft-store';
 import { IndexedDbDietDraftStore } from '@/lib/infrastructure/diet-drafts/indexed-db-diet-draft-store';
 import { createLibraryApplication, type LibraryApplication } from './library/library-application';
@@ -28,6 +28,21 @@ import { decodeBase64Url, type ProtectedSaveGrant } from '@/lib/domain/protected
 import { createOnlineSaveSession, guardOnlineSaveApplication, type OnlineSaveRevocationMarker, type OnlineSaveSession } from './online-save-session';
 import { getFavoritesFromStorage, setActiveFavoritesAccountId, setFavoritesFromStorage } from '@/lib/library-ui-adapter';
 import { readAgendaReminders, replaceAgendaReminders } from '@/lib/agenda-reminders';
+import { isOnlinePersistence } from './persistence-mode';
+import { createOnlineProfileSession } from './online-profile-session';
+import { createOnlinePreferences } from './online-preferences';
+import { getBrowserProfessionalProfileStore } from './professional-profile-store';
+import { HttpPatientRepository } from '@/lib/infrastructure/http/http-patient-repository';
+import { HttpObjectiveCatalogRepository } from '@/lib/infrastructure/http/http-objective-catalog-repository';
+import { HttpClinicalRepository } from '@/lib/infrastructure/http/http-clinical-repository';
+import { HttpDietRepository } from '@/lib/infrastructure/http/http-diet-repository';
+import { HttpDietDraftStore } from '@/lib/infrastructure/http/http-diet-draft-store';
+import {
+  HttpFoodCatalogRepository,
+  HttpReadyDietRepository,
+  HttpReadyMealRepository,
+  HttpRecipeRepository,
+} from '@/lib/infrastructure/http/http-library-repositories';
 
 export interface BrowserPatientRuntime {
   readonly account: Account;
@@ -36,8 +51,9 @@ export interface BrowserPatientRuntime {
   readonly application: PatientApplication;
   readonly dietApplication: DietApplication;
   readonly libraryApplication: LibraryApplication;
-  readonly backupApplication: BackupApplication;
-  readonly handle: LocalDatabaseHandle;
+  /** Local workspace only: absent when every record lives in the account (online mode). */
+  readonly backupApplication?: BackupApplication;
+  readonly handle?: LocalDatabaseHandle;
   getCheckpointState(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
   markWorkspaceDirty(): Promise<void>;
   advanceCheckpoint(revision: number): Promise<void>;
@@ -208,18 +224,87 @@ export async function createBrowserPatientRuntime(account: Account, onlineScope?
   }
 }
 
+/** The signed-in account, from the server session and the professional profile (never from a local file). */
+async function loadOnlineAccount(): Promise<Account> {
+  const response = await fetch('/api/auth/session', { cache: 'no-store', credentials: 'same-origin' });
+  const body: unknown = await response.json().catch(() => null);
+  const user = (body as { user?: { id?: unknown; email?: unknown } } | null)?.user;
+  if (!response.ok || !user || typeof user.id !== 'string') throw new Error('Entre novamente para abrir sua conta.');
+  const store = getBrowserProfessionalProfileStore();
+  await store.load().catch(() => undefined);
+  const { profile, accountEmail } = store.getSnapshot();
+  const email = typeof user.email === 'string' ? user.email : accountEmail;
+  const displayName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : (email ?? 'Minha conta');
+  const now = new Date().toISOString();
+  return { id: user.id, displayName: displayName || 'Minha conta', phone: null, createdAt: now, updatedAt: now };
+}
+
+/**
+ * Builds the applications over the account API: nothing is stored in the browser, so there is no workspace to open,
+ * checkpoint or lock. Favorites and agenda reminders keep their synchronous cache, hydrated here and pushed on change.
+ */
+export async function createOnlinePatientRuntime(account: Account): Promise<BrowserPatientRuntime> {
+  const newId = () => globalThis.crypto.randomUUID();
+  const preferences = createOnlinePreferences(account.id);
+  await preferences.hydrate();
+  const accountContext = createExplicitAccountContext(account);
+  const patientRepository = new HttpPatientRepository(newId);
+  const objectiveCatalogRepository = new HttpObjectiveCatalogRepository();
+  const clinicalRepository = new HttpClinicalRepository(newId);
+  const dietRepository = new HttpDietRepository();
+  const dietReader = createPatientDietReader(dietRepository);
+  const draftStore = new HttpDietDraftStore();
+  const foodRepository = new HttpFoodCatalogRepository(newId);
+  const recipeRepository = new HttpRecipeRepository(newId);
+  const readyMealRepository = new HttpReadyMealRepository(newId);
+  const readyDietRepository = new HttpReadyDietRepository(newId);
+  // Every confirmed operation is already stored by the server when it returns.
+  const confirmedOperation = createConfirmedOperationCoordinator(async () => undefined);
+  const patientProfileReader = createPatientProfileReader(
+    patientRepository,
+    objectiveCatalogRepository,
+    (accountId, patientId) => dietRepository.listPatientSummaries(accountId, [patientId]).then((summaries) => summaries[patientId]),
+    { clinicalRepository, listRelatedCounts: (accountId, patientIds) => dietRepository.listPatientSummaries(accountId, patientIds) },
+  );
+  return {
+    account,
+    hasExistingWorkspace: true,
+    getCheckpointState: async () => ({ workspaceRevision: 0, checkpointRevision: 0 }),
+    markWorkspaceDirty: () => preferences.push(),
+    advanceCheckpoint: async () => undefined,
+    bindSync: () => undefined,
+    application: createPatientApplication({
+      accountContext, patientRepository, objectiveCatalogRepository, patientProfileReader,
+      // Atomicity belongs to the server: each API call is already one transaction.
+      transactionRunner: { run: (operation) => operation() }, dietDraftStore: draftStore, clinicalRepository,
+      patientDietReader: dietReader, confirmedOperation, idFactory: newId,
+    }),
+    dietApplication: createDietApplication({
+      accountContext, patientReader: patientRepository, repository: dietRepository, draftStore, dietReader,
+      historyViewReader: dietRepository, confirmedOperation, idFactory: newId,
+      librarySourceReader: {
+        getRecipe: (accountId, recipeId) => recipeRepository.getById(accountId, recipeId),
+        getReadyMeal: (accountId, readyMealId) => readyMealRepository.getById(accountId, readyMealId),
+      },
+    }),
+    libraryApplication: createLibraryApplication({ accountContext, foodRepository, recipeRepository, readyMealRepository, readyDietRepository, confirmedOperation }),
+  };
+}
+
 export async function importBrowserPatientSnapshot(runtime: BrowserPatientRuntime, envelope: BackupEnvelope): Promise<void> {
   if (runtime.hasExistingWorkspace) return;
+  if (!runtime.handle) throw new Error('Não há um workspace local para receber o snapshot.');
   await createBrowserBackupRepository(runtime.handle).replaceAccountSnapshot(envelope.account[0].id, envelope);
 }
 
 export async function exportBrowserPatientSnapshot(runtime: BrowserPatientRuntime): Promise<BackupEnvelope> {
+  if (!runtime.handle) throw new Error('Não há um workspace local para exportar.');
   return createBrowserBackupRepository(runtime.handle).readAccountSnapshot(runtime.account.id);
 }
 
 export async function updateBrowserPatientAccount(runtime: BrowserPatientRuntime, account: Account): Promise<Account> {
   if (account.id !== runtime.account.id) throw new Error('A Conta editada não pertence ao save aberto.');
-  const stored = await new LocalAccountContextRepository(runtime.handle).saveAccount(account);
+  const stored = runtime.handle ? await new LocalAccountContextRepository(runtime.handle).saveAccount(account) : account;
   // Runtime copies share this object, so open applications read the new name without rebuilding.
   Object.assign(runtime.account, stored);
   return stored;
@@ -237,7 +322,7 @@ export async function disposeBrowserPatientRuntime(runtime: BrowserPatientRuntim
     activeRuntime = null;
     setActiveFavoritesAccountId(undefined);
   }
-  await runtime.handle.close();
+  await runtime.handle?.close();
 }
 
 export function getBrowserPatientRuntimeIfActive(): BrowserPatientRuntime | null {
@@ -426,6 +511,15 @@ function createBrowserOnlineSaveGateway(): ProfileSessionOnlineSaveGateway {
 }
 
 export function getBrowserProfileSession(): ProfileSession<BrowserPatientRuntime> {
+  if (!profileSession && isOnlinePersistence()) {
+    profileSession = createOnlineProfileSession<BrowserPatientRuntime>({
+      loadAccount: loadOnlineAccount,
+      createRuntime: createOnlinePatientRuntime,
+      activateRuntime: activateBrowserPatientRuntime,
+      disposeRuntime: disposeBrowserPatientRuntime,
+      sync: () => activeRuntime?.markWorkspaceDirty() ?? Promise.resolve(),
+    });
+  }
   if (!profileSession) {
     let session: ProfileSession<BrowserPatientRuntime>;
     session = createProfileSession<BrowserPatientRuntime>({
@@ -461,6 +555,6 @@ export async function getBrowserLibraryApplication(): Promise<LibraryApplication
 export async function resetBrowserPatientRuntimeForTests(): Promise<void> {
   const runtime = activeRuntime;
   activeRuntime = null;
-  await runtime?.handle.close();
+  await runtime?.handle?.close();
   profileSession = undefined;
 }

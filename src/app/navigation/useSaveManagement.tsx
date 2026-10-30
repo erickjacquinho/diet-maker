@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { BackupApplicationError } from '@/lib/application/backup-application';
+import { BackupApplicationError, type BackupApplication } from '@/lib/application/backup-application';
 import { getBrowserPatientRuntime, getBrowserProfileSession } from '@/lib/application/browser-composition';
 import { createBrowserSaveFilePort, inspectAssociatedSaveFile } from '@/lib/infrastructure/file-system-access/browser-save-file';
 import type { SaveFileAssociation } from '@/lib/persistence/save-file';
@@ -96,6 +96,12 @@ function locationErrorState(error: unknown): SaveLocationState | null {
   return null;
 }
 
+/** Backups exist only for the legacy local workspace; the online account has nothing to export or restore. */
+function requireBackupApplication(runtime: { backupApplication?: BackupApplication }): BackupApplication {
+  if (!runtime.backupApplication) throw new Error('Backups não existem no modo online: os dados ficam na sua conta.');
+  return runtime.backupApplication;
+}
+
 export function useSaveManagement(enabled: boolean) {
   const session = getBrowserProfileSession();
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
@@ -129,7 +135,7 @@ export function useSaveManagement(enabled: boolean) {
     setFeedback(undefined);
     try {
       const runtime = await getBrowserPatientRuntime();
-      const result = await runtime.backupApplication.exportBackup();
+      const result = await requireBackupApplication(runtime).exportBackup();
       const blob = new Blob([result.content], { type: 'application/json;charset=utf-8' });
       const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -177,7 +183,7 @@ export function useSaveManagement(enabled: boolean) {
     try {
       const content = await file.text();
       const runtime = await getBrowserPatientRuntime();
-      await runtime.backupApplication.validateBackup(content);
+      await requireBackupApplication(runtime).validateBackup(content);
       setRestoreContent(content);
       setRestoreFileName(file.name);
       setRestoreState('confirmation');
@@ -206,7 +212,7 @@ export function useSaveManagement(enabled: boolean) {
     setFeedback(undefined);
     try {
       const runtime = await getBrowserPatientRuntime();
-      await runtime.backupApplication.restoreBackup(restoreContent, {
+      await requireBackupApplication(runtime).restoreBackup(restoreContent, {
         confirmed: true,
         discardDrafts: options.discardDrafts ?? discardDraftsForRestore,
         ...options,
