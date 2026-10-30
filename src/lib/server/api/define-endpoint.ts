@@ -41,7 +41,8 @@ export interface EndpointDefinition<Input, Output> {
   input?: RequestSchema<Input>;
   /** Allowlist applied to every successful response. */
   output: RequestSchema<Output>;
-  requireVersion?: boolean;
+  /** `true` demands `If-Match`; `'optional'` accepts its absence (create-or-update endpoints). */
+  requireVersion?: boolean | 'optional';
   rateLimit: RateLimitClass;
   maxBodyBytes?: number;
   status?: 200 | 201;
@@ -86,7 +87,9 @@ export function createEndpointFactory(dependencies: EndpointDependencies) {
         if (definition.input) {
           input = await parseJsonBody(request, definition.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES, definition.input);
         }
-        const version = definition.requireVersion ? parseIfMatch(request) : undefined;
+        const version = definition.requireVersion
+          ? parseIfMatch(request, definition.requireVersion === 'optional')
+          : undefined;
         // 4. rate limit by IP before any session work
         const limits = rateLimits[definition.rateLimit];
         await enforce(dependencies.checkRateLimit, 'ip', dependencies.getClientIp(request), limits);
@@ -131,8 +134,9 @@ async function enforce(
   if (!result.allowed) throw new ApiError(429, 'RATE_LIMITED', {}, result.retryAfterSeconds);
 }
 
-function parseIfMatch(request: Request): number {
+function parseIfMatch(request: Request, optional: boolean): number | undefined {
   const header = request.headers.get('if-match');
+  if (header === null && optional) return undefined;
   if (header === null) throw new ApiError(428, 'VERSION_REQUIRED');
   const match = /^"?(\d{1,9})"?$/.exec(header.trim());
   if (!match || Number(match[1]) < 1) throw new ApiError(400, 'INVALID_REQUEST');
