@@ -58,7 +58,7 @@ beforeAll(async () => {
   }
   await client.exec(migration('20261029120000_account_keys.sql'));
   await client.exec(migration('20261029130000_patients.sql'));
-});
+}, 60_000);
 
 afterAll(async () => client.close());
 

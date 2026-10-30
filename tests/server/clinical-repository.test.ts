@@ -75,7 +75,7 @@ beforeAll(async () => {
     await patients.archive(archivedPatient, 1);
   });
   await asAccount(accountB, (_c, patients) => patients.create(patientB, patientInput('Bruno', { gender: 'Masculino' }) as never));
-});
+}, 60_000);
 
 afterAll(async () => client.close());
 

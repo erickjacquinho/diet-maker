@@ -27,11 +27,10 @@ export async function summarizePatients(
       AND id IN (${sql.join(patientIds.map((id) => sql`${id}::uuid`), sql`, `)})`)).rows as Array<{ id: string }>;
   const ids = existing.map((row) => row.id);
   const clinical = createServerClinicalRepository(tx, sealer, accountId);
-  const [assessments, followUps, diets] = await Promise.all([
-    clinical.summarizeAssessments(ids),
-    clinical.listFollowUps(ids),
-    createServerDietRepository(tx, accountId).summarize(ids),
-  ]);
+  // One transaction is one connection, so the three reads run one after another.
+  const assessments = await clinical.summarizeAssessments(ids);
+  const followUps = await clinical.listFollowUps(ids);
+  const diets = await createServerDietRepository(tx, accountId).summarize(ids);
   return ids.map((patientId) => {
     const assessment = assessments.get(patientId);
     const diet = diets.get(patientId);

@@ -177,7 +177,9 @@ export function createServerPatientRepository(tx: SqlExecutor, sealer: FieldSeal
     const { rows } = await run<PatientRow>(sql`
       SELECT ${COLUMNS} FROM app.patients WHERE account_id = ${accountId} AND archived_at IS NULL`);
     const needle = query.trim().toLocaleLowerCase('pt-BR');
-    const patients = await Promise.all(rows.map(toPatient));
+    // Sequential: decrypting may need the account key, and one transaction is one connection.
+    const patients: Patient[] = [];
+    for (const row of rows) patients.push(await toPatient(row));
     const matching = patients
       .filter((p) => !needle
         || p.name.toLocaleLowerCase('pt-BR').includes(needle)

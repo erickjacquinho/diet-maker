@@ -41,3 +41,10 @@ ADR-009, Decisões 09–13 e `AGENTS.md` atualizados para o modelo 100% online.
 - [x] `SessionAwareAppShell`: abre a conta automaticamente, mantém o deep link e mostra erro com "Tentar novamente".
 - [ ] Verificação manual de cada tela contra um Supabase real (Docker/staging) — pendente.
 - [ ] Virar o padrão para `online` e executar a F5 (apagar o modo local, telas e rotas de saves, testes locais).
+
+## Validação em Postgres real (Supabase local)
+- [x] `supabase db reset --local` reaplica as 12 migrations em ordem sem erro.
+- [x] `supabase db advisors --local --type security --level warn --fail-on warn`: sem problemas.
+- [x] Invariantes C1–C9 e matriz M1–M14 (`backend-foundation.integration`) passam com as tabelas novas (sem `DELETE`, RLS forçada e política em todas).
+- [x] `tests/server/domain.integration.test.ts`: fluxo clínico completo da conta A com o papel `app_runtime` e o driver `pg`, cifragem de S1 conferida no banco, conta B cega a todos os módulos, escritas entre contas e `DELETE` recusados.
+- [ ] Telas contra esse banco (navegador), importação de um `.nutridiet` real e Vercel: pendentes.
