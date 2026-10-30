@@ -7,6 +7,8 @@ import {
   parseEmptyDto,
   parseFollowUpDto,
   parseFollowUpInput,
+  parseFollowUpMovesDto,
+  parseFollowUpMovesRequest,
   parseOptionalFollowUpDto,
   parseUpdateAssessmentRequest,
 } from '@/lib/contracts/clinical';
@@ -85,5 +87,15 @@ export const clearFollowUpEndpoint = defineEndpoint({
   async handler(context) {
     await repository(context).clearFollowUp(param(context, 'id'), context.version as number);
     return {};
+  },
+});
+
+/** Moves several follow-ups in one transaction (agenda drag-and-drop); any stale version aborts all of them. */
+export const moveFollowUpsEndpoint = defineEndpoint({
+  input: { parse: parseFollowUpMovesRequest },
+  output: { parse: parseFollowUpMovesDto },
+  rateLimit: 'mutation',
+  async handler(context) {
+    return { moves: await repository(context).moveFollowUps(context.input.changes) };
   },
 });

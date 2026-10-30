@@ -200,6 +200,24 @@ describe('server clinical repository (RLS + composite FK)', () => {
       await expect(asAccount(accountA, (c) => c.clearFollowUp(patientA, 3))).rejects.toMatchObject({ status: 404 });
     });
 
+    it('moves follow-up dates for several patients atomically', async () => {
+      const second = randomUUID();
+      await asAccount(accountA, (_c, p) => p.create(second, patientInput('Segunda') as never));
+      await asAccount(accountA, (c) => c.setFollowUp(second, undefined, { dueDates: { ASSESSMENT_UPDATE: '2026-09-01', DIET_UPDATE: '2026-09-10' }, comments: 'x' }));
+      const current = await asAccount(accountA, (c) => c.getFollowUp(second));
+      const moves = await asAccount(accountA, (c) => c.moveFollowUps([{ patientId: second, types: ['DIET_UPDATE'], expectedVersion: current!.version, dueDate: '2026-10-05' }]));
+      expect(moves[0].before.dueDates).toEqual({ ASSESSMENT_UPDATE: '2026-09-01', DIET_UPDATE: '2026-09-10' });
+      expect(moves[0].after).toMatchObject({ dueDates: { ASSESSMENT_UPDATE: '2026-09-01', DIET_UPDATE: '2026-10-05' }, comments: 'x', version: current!.version + 1 });
+      // A stale change aborts the whole transaction, so the first move below is rolled back too.
+      await expect(asAccount(accountA, async (c) => {
+        await c.moveFollowUps([{ patientId: second, types: ['DIET_UPDATE'], expectedVersion: current!.version + 1, dueDate: '2026-11-01' }]);
+        await c.moveFollowUps([{ patientId: second, types: ['DIET_UPDATE'], expectedVersion: current!.version, dueDate: '2026-11-02' }]);
+      })).rejects.toMatchObject({ code: 'VERSION_CONFLICT' });
+      expect((await asAccount(accountA, (c) => c.getFollowUp(second)))!.dueDates?.DIET_UPDATE).toBe('2026-10-05');
+      await expect(asAccount(accountA, (c) => c.moveFollowUps([{ patientId: second, types: ['DIET_UPDATE'], expectedVersion: current!.version + 1, dueDate: 'x' }]))).rejects.toMatchObject({ status: 422 });
+      await expect(asAccount(accountB, (c) => c.moveFollowUps([{ patientId: second, types: ['DIET_UPDATE'], expectedVersion: 1, dueDate: '2026-11-01' }]))).rejects.toMatchObject({ status: 404 });
+    });
+
     it('fails closed when a comments ciphertext is moved to another patient', async () => {
       const other = (await asAccount(accountA, (_c, p) => p.searchActive('Outra', 0, 5))).items[0].id;
       const reactivated = await asAccount(accountA, (c) => c.setFollowUp(patientA, undefined, { dueDate: '2026-08-01', type: 'DIET_UPDATE', comments: 'a' }));

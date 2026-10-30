@@ -221,7 +221,17 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
         AND discarded_at IS NULL`);
   }
 
-  return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, patientState };
+  /** Called when a patient is archived: open drafts can no longer be saved. Returns how many were invalidated. */
+  async function invalidateDrafts(patientId: string): Promise<number> {
+    const { rows } = await run<{ route_diet_id: string }>(sql`
+      UPDATE app.diet_drafts SET state = 'INVALIDATED_BY_PATIENT_ARCHIVE', updated_at = now()
+      WHERE account_id = ${accountId} AND patient_id = ${patientId} AND discarded_at IS NULL
+        AND state = 'EDITABLE'
+      RETURNING route_diet_id`);
+    return rows.length;
+  }
+
+  return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, invalidateDrafts, patientState };
 }
 
 export type ServerDietRepository = ReturnType<typeof createServerDietRepository>;

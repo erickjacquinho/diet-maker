@@ -12,6 +12,7 @@ import { defineEndpoint, type EndpointContext } from '../api/define-endpoint';
 import { ApiError, NotFoundError } from '../api/api-errors';
 import { accountKeys } from '../crypto/account-keys';
 import { createServerPatientRepository } from './patient-repository';
+import { createServerDietRepository } from '../diets/diet-repository';
 
 const uuidPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
 
@@ -71,7 +72,13 @@ export const archivePatientEndpoint = defineEndpoint({
   output: { parse: parsePatientDto },
   requireVersion: true,
   rateLimit: 'mutation',
-  handler: (context) => repository(context).archive(patientId(context), context.version as number),
+  async handler(context) {
+    const id = patientId(context);
+    const archived = await repository(context).archive(id, context.version as number);
+    // Same transaction: either the patient is archived and its open drafts are invalidated, or neither.
+    await createServerDietRepository(context.tx, context.account.id).invalidateDrafts(id);
+    return archived;
+  },
 });
 
 export const restorePatientEndpoint = defineEndpoint({

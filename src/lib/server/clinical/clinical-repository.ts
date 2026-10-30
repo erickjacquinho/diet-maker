@@ -4,6 +4,7 @@ import { sql, type SQL } from 'drizzle-orm';
 import {
   buildBodyAssessment,
   ClinicalApplicationError,
+  normalizeClinicalDate,
   normalizeNextFollowUpInput,
   sortAssessments,
   type AssessmentInput,
@@ -306,7 +307,29 @@ export function createServerClinicalRepository(tx: SqlExecutor, sealer: FieldSea
       WHERE account_id = ${accountId} AND patient_id = ${patientId} AND version = ${expectedVersion}`);
   }
 
-  return { listAssessments, getAssessment, createAssessment, updateAssessment, getFollowUp, setFollowUp, clearFollowUp };
+  /**
+   * Moves the due date of the chosen follow-up types for several patients at once. All-or-nothing: the
+   * caller's transaction rolls back every move if any change is stale or invalid.
+   */
+  async function moveFollowUps(changes: ReadonlyArray<{ patientId: string; types: FollowUpType[]; expectedVersion: number; dueDate: string }>) {
+    if (new Set(changes.map((change) => change.patientId)).size !== changes.length) throw new ApiError(422, 'UNPROCESSABLE', { field: 'changes' });
+    const moves: Array<{ before: NextFollowUp; after: NextFollowUp }> = [];
+    for (const change of changes) {
+      const dueDate = normalizeClinicalDate(change.dueDate);
+      if (!dueDate || change.types.length === 0) throw new ApiError(422, 'UNPROCESSABLE', { field: 'changes' });
+      const before = await getFollowUp(change.patientId);
+      if (!before) throw new NotFoundError();
+      if (before.version !== change.expectedVersion) throw new VersionConflictError(before.version);
+      if (change.types.some((type) => before.dueDates?.[type] === undefined)) throw new VersionConflictError(before.version);
+      const dueDates = { ...before.dueDates };
+      for (const type of change.types) dueDates[type] = dueDate;
+      const after = await setFollowUp(change.patientId, change.expectedVersion, { dueDates, comments: before.comments });
+      moves.push({ before, after });
+    }
+    return moves;
+  }
+
+  return { listAssessments, getAssessment, createAssessment, updateAssessment, getFollowUp, setFollowUp, clearFollowUp, moveFollowUps };
 }
 
 export type ServerClinicalRepository = ReturnType<typeof createServerClinicalRepository>;

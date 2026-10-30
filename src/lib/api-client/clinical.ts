@@ -20,6 +20,8 @@ export const clinicalApi = {
     apiRequest<{ followUp: FollowUpDto | null }>(`${patientPath(patientId)}/follow-up`),
   setFollowUp: (patientId: string, followUp: NextFollowUpInput, version?: number) =>
     apiRequest<FollowUpDto>(`${patientPath(patientId)}/follow-up`, { method: 'PUT', version, body: { followUp } }),
+  moveFollowUps: (changes: Array<{ patientId: string; types: Array<'ASSESSMENT_UPDATE' | 'DIET_UPDATE'>; expectedVersion: number; dueDate: string }>) =>
+    apiRequest<{ moves: Array<{ before: FollowUpDto; after: FollowUpDto }> }>('/api/v1/agenda/follow-up-moves', { method: 'POST', body: { changes } }),
   clearFollowUp: (patientId: string, version: number) =>
     apiRequest<Record<string, never>>(`${patientPath(patientId)}/follow-up`, { method: 'DELETE', version }),
 };

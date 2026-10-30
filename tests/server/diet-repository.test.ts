@@ -194,6 +194,17 @@ describe('server diet repository (RLS + composite FK)', () => {
       expect(await asAccount(accountA, (d) => d.putDraft(patientA, 'nova', request(1)))).toMatchObject({ status: 'SAVED', revision: 1 });
     });
 
+    it('invalidates open drafts when the patient is archived', async () => {
+      const patient = randomUUID();
+      await asAccount(accountA, (_d, p) => p.create(patient, { name: 'Rascunho', gender: 'Feminino', birthDate: '1990-05-10', heightCm: 165, weightKg: 62 } as never));
+      await asAccount(accountA, (d) => d.putDraft(patient, 'nova', request(1)));
+      expect(await asAccount(accountA, (d) => d.invalidateDrafts(patient))).toBe(1);
+      expect(await asAccount(accountA, (d) => d.invalidateDrafts(patient))).toBe(0);
+      const draft = await asAccount(accountA, (d) => d.getDraft(patient, 'nova'));
+      expect(draft?.state).toBe('INVALIDATED_BY_PATIENT_ARCHIVE');
+      expect(await asAccount(accountA, (d) => d.putDraft(patient, 'nova', request(2)))).toEqual({ status: 'INVALIDATED' });
+    });
+
     it('does not accept drafts for archived patients', async () => {
       await expect(asAccount(accountA, (d) => d.putDraft(archivedPatient, 'nova', request(1)))).rejects.toMatchObject({ status: 422 });
     });

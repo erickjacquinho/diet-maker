@@ -156,6 +156,39 @@ export function parseOptionalFollowUpDto(value: unknown): { followUp: FollowUpDt
   return { followUp: body.followUp === null ? null : parseFollowUpDto(body.followUp) };
 }
 
+export interface FollowUpMoveChange {
+  patientId: string;
+  types: FollowUpType[];
+  expectedVersion: number;
+  dueDate: string;
+}
+
+export function parseFollowUpMovesRequest(value: unknown): { changes: FollowUpMoveChange[] } {
+  const body = record(value);
+  assertKeys(body, ['changes']);
+  if (!Array.isArray(body.changes) || body.changes.length === 0 || body.changes.length > 100) throw new TypeError('Invalid changes.');
+  return {
+    changes: body.changes.map((entry) => {
+      const change = record(entry);
+      assertKeys(change, ['patientId', 'types', 'expectedVersion', 'dueDate']);
+      if (typeof change.patientId !== 'string' || !uuidPattern.test(change.patientId)) throw new TypeError('Invalid id.');
+      if (!Array.isArray(change.types) || change.types.length === 0 || !change.types.every((type) => followUpTypes.includes(type as FollowUpType))) throw new TypeError('Invalid type.');
+      if (!Number.isSafeInteger(change.expectedVersion) || (change.expectedVersion as number) < 1) throw new TypeError('Invalid version.');
+      if (typeof change.dueDate !== 'string' || change.dueDate.length > 10) throw new TypeError('Invalid date.');
+      return {
+        patientId: change.patientId.toLowerCase(), types: [...new Set(change.types as FollowUpType[])],
+        expectedVersion: change.expectedVersion as number, dueDate: change.dueDate,
+      };
+    }),
+  };
+}
+
+export function parseFollowUpMovesDto(value: unknown): { moves: Array<{ before: FollowUpDto; after: FollowUpDto }> } {
+  const body = record(value);
+  if (!Array.isArray(body.moves)) throw new TypeError('Invalid moves.');
+  return { moves: body.moves.map((entry) => ({ before: parseFollowUpDto(record(entry).before), after: parseFollowUpDto(record(entry).after) })) };
+}
+
 export function parseEmptyDto(): Record<string, never> {
   return {};
 }
