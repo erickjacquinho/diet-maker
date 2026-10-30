@@ -222,6 +222,17 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
         AND discarded_at IS NULL`);
   }
 
+  /** Editable drafts still worth recovering, newest first; one patient or the whole account. */
+  async function listRecoverableDrafts(patientId?: string): Promise<DietDraft[]> {
+    if (patientId) await patientState(patientId);
+    const { rows } = await run<DraftRow>(sql`
+      SELECT ${DRAFT_COLUMNS} FROM app.diet_drafts
+      WHERE account_id = ${accountId} AND discarded_at IS NULL AND state = 'EDITABLE'
+        ${patientId ? sql`AND patient_id = ${patientId}` : sql``}
+      ORDER BY updated_at DESC, route_diet_id LIMIT 200`);
+    return rows.map(toDraft);
+  }
+
   /** Called when a patient is archived: open drafts can no longer be saved. Returns how many were invalidated. */
   async function invalidateDrafts(patientId: string): Promise<number> {
     const { rows } = await run<{ route_diet_id: string }>(sql`
@@ -249,7 +260,7 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
     return result;
   }
 
-  return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, invalidateDrafts, summarize, patientState };
+  return { listPlans, getPlan, confirmActive, getDraft, listRecoverableDrafts, putDraft, discardDraft, invalidateDrafts, summarize, patientState };
 }
 
 export type ServerDietRepository = ReturnType<typeof createServerDietRepository>;

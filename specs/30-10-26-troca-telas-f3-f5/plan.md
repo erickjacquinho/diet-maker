@@ -17,6 +17,13 @@ Implementar no navegador, sobre `src/lib/api-client`, as portas já usadas pela 
 - Erros HTTP (404/409/422) mapeiam para os erros de aplicação existentes (`VERSION_CONFLICT`, `NOT_FOUND`, validação).
 - `LibraryRepository.deleteIfUnreferenced` deixa de existir (sem `DELETE`): a UI passa a arquivar.
 
+### Estado dos adaptadores (`src/lib/infrastructure/http/`)
+- [x] `HttpPatientRepository`, `HttpObjectiveCatalogRepository`, `HttpClinicalRepository` (avaliações enviam só o digitado; o servidor recalcula composição e autopreenchimento).
+- [x] `HttpDietRepository` (+ resumos e histórico), `HttpDietDraftStore` (lembra onde cada `draftId` mora; o servidor invalida rascunhos ao arquivar), `HttpFoodCatalogRepository`, `HttpRecipeRepository`, `HttpReadyMealRepository`, `HttpReadyDietRepository` ("excluir" arquiva).
+- [ ] Favoritos e lembretes da agenda: a UI lê de forma síncrona, então entram na composição como cache em memória hidratado na abertura e com escrita assíncrona (`favoritesApi`/`agendaApi`).
+- [ ] `AccountContext`: conta vinda da sessão (`/api/auth/session`), sem `LocalAccountContextRepository`.
+- [ ] IDs: `idFactory` das aplicações passa a `crypto.randomUUID()`.
+
 ## 2. Composição
 `browser-composition.ts` passa a montar `PatientApplication`/`DietApplication`/`LibraryApplication` sobre os adaptadores HTTP; `createConfirmedOperationCoordinator` deixa de marcar workspace sujo/sincronizar save.
 

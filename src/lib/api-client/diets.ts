@@ -11,6 +11,8 @@ export const dietsApi = {
     apiRequest<DietPlanDto>(`${base(patientId)}/diets/${encodeURIComponent(dietId)}`),
   confirm: (patientId: string, request: ConfirmDietRequest) =>
     apiRequest<ConfirmActiveResult>(`${base(patientId)}/diets/confirm`, { method: 'POST', body: request }),
+  listPatientDrafts: (patientId: string) => apiRequest<{ drafts: DietDraftDto[] }>(`${base(patientId)}/diet-drafts`),
+  listAccountDrafts: () => apiRequest<{ drafts: DietDraftDto[] }>('/api/v1/diet-drafts'),
   getDraft: (patientId: string, routeId: string) =>
     apiRequest<{ draft: DietDraftDto | null }>(`${base(patientId)}/diet-drafts/${encodeURIComponent(routeId)}`),
   putDraft: (patientId: string, routeId: string, request: PutDietDraftRequest) =>

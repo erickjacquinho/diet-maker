@@ -205,6 +205,21 @@ describe('server diet repository (RLS + composite FK)', () => {
       expect(await asAccount(accountA, (d) => d.putDraft(patient, 'nova', request(2)))).toEqual({ status: 'INVALIDATED' });
     });
 
+    it('lists only editable, non-discarded drafts, per patient or for the whole account', async () => {
+      const patient = randomUUID();
+      await asAccount(accountA, (_d, p) => p.create(patient, { name: 'Lista', gender: 'Feminino', birthDate: '1990-05-10', heightCm: 165, weightKg: 62 } as never));
+      await asAccount(accountA, (d) => d.putDraft(patient, 'nova', request(1, 'Um')));
+      await asAccount(accountA, (d) => d.putDraft(patient, randomUUID(), request(1, 'Dois')));
+      expect((await asAccount(accountA, (d) => d.listRecoverableDrafts(patient))).map((draft) => draft.payload.name).sort()).toEqual(['Dois', 'Um']);
+      await asAccount(accountA, (d) => d.discardDraft(patient, 'nova'));
+      expect((await asAccount(accountA, (d) => d.listRecoverableDrafts(patient))).map((draft) => draft.payload.name)).toEqual(['Dois']);
+      expect((await asAccount(accountA, (d) => d.listRecoverableDrafts())).some((draft) => draft.patientId === patient)).toBe(true);
+      expect(await asAccount(accountB, (d) => d.listRecoverableDrafts())).toEqual([]);
+      await expect(asAccount(accountB, (d) => d.listRecoverableDrafts(patient))).rejects.toMatchObject({ status: 404 });
+      await asAccount(accountA, (d) => d.invalidateDrafts(patient));
+      expect(await asAccount(accountA, (d) => d.listRecoverableDrafts(patient))).toEqual([]);
+    });
+
     it('does not accept drafts for archived patients', async () => {
       await expect(asAccount(accountA, (d) => d.putDraft(archivedPatient, 'nova', request(1)))).rejects.toMatchObject({ status: 422 });
     });

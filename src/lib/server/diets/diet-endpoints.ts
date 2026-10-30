@@ -4,6 +4,7 @@ import {
   parseAutosaveResultDto,
   parseConfirmDietRequest,
   parseConfirmDietResultDto,
+  parseDietDraftListDto,
   parseDietPlanDto,
   parseDietPlanListDto,
   parseOptionalDietDraftDto,
@@ -77,5 +78,21 @@ export const discardDietDraftEndpoint = defineEndpoint({
   async handler(context) {
     await repository(context).discardDraft(uuidParam(context, 'id'), routeParam(context));
     return {};
+  },
+});
+
+export const listPatientDraftsEndpoint = defineEndpoint({
+  output: { parse: parseDietDraftListDto },
+  rateLimit: 'read',
+  async handler(context) {
+    return { drafts: await repository(context).listRecoverableDrafts(uuidParam(context, 'id')) };
+  },
+});
+
+export const listAccountDraftsEndpoint = defineEndpoint({
+  output: { parse: parseDietDraftListDto },
+  rateLimit: 'read',
+  async handler(context) {
+    return { drafts: await repository(context).listRecoverableDrafts() };
   },
 });

@@ -289,3 +289,9 @@ export function parseOptionalDietDraftDto(value: unknown): { draft: DietDraftDto
     },
   };
 }
+
+export function parseDietDraftListDto(value: unknown): { drafts: DietDraftDto[] } {
+  const v = record(value, ['drafts']);
+  if (!Array.isArray(v.drafts)) throw new TypeError('Invalid list.');
+  return { drafts: v.drafts.map((draft) => parseOptionalDietDraftDto({ draft }).draft as DietDraftDto) };
+}
