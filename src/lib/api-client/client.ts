@@ -19,6 +19,8 @@ async function ensureCsrfToken(): Promise<string> {
 export interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
+  /** Sends `text` untouched (e.g. a `.nutridiet` file) with these headers instead of a JSON body. */
+  rawBody?: { text: string; headers: Record<string, string> };
   /** Sent as `If-Match` for optimistic concurrency. */
   version?: number;
   signal?: AbortSignal;
@@ -31,6 +33,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const headers: Record<string, string> = { accept: 'application/json' };
   if (method !== 'GET') headers['x-csrf-token'] = await ensureCsrfToken();
   if (options.body !== undefined) headers['content-type'] = 'application/json';
+  if (options.rawBody) Object.assign(headers, options.rawBody.headers);
   if (options.version !== undefined) headers['if-match'] = String(options.version);
 
   const response = await fetch(path, {
@@ -39,7 +42,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     credentials: 'same-origin',
     cache: 'no-store',
     signal: options.signal,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.rawBody ? options.rawBody.text : options.body === undefined ? undefined : JSON.stringify(options.body),
   });
   const payload: unknown = await response.json().catch(() => undefined);
   if (!response.ok) {

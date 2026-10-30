@@ -39,6 +39,8 @@ export interface EndpointContext<Input> {
 export interface EndpointDefinition<Input, Output> {
   /** zod-compatible schema (`.strict()` for objects); omit for body-less endpoints. */
   input?: RequestSchema<Input>;
+  /** Reads the body as `application/octet-stream` text (capped at `maxBytes`) and hands it to `input`. */
+  rawBody?: { maxBytes: number };
   /** Allowlist applied to every successful response. */
   output: RequestSchema<Output>;
   /** `true` demands `If-Match`; `'optional'` accepts its absence (create-or-update endpoints). */
@@ -84,7 +86,9 @@ export function createEndpointFactory(dependencies: EndpointDependencies) {
         }
         // 3. content-type, size and schema
         let input = undefined as Input;
-        if (definition.input) {
+        if (definition.input && definition.rawBody) {
+          input = definition.input.parse(await readRawText(request, definition.rawBody.maxBytes));
+        } else if (definition.input) {
           input = await parseJsonBody(request, definition.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES, definition.input);
         }
         const version = definition.requireVersion
@@ -132,6 +136,39 @@ async function enforce(
 ): Promise<void> {
   const result = await check('v1', identityType, identifier, policy.limit, policy.windowSeconds);
   if (!result.allowed) throw new ApiError(429, 'RATE_LIMITED', {}, result.retryAfterSeconds);
+}
+
+async function readRawText(request: Request, maximumBytes: number): Promise<string> {
+  const mediaType = request.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+  if (mediaType !== 'application/octet-stream') throw new ApiError(400, 'INVALID_REQUEST');
+  const contentLength = request.headers.get('content-length');
+  if (contentLength !== null) {
+    if (!/^\d+$/.test(contentLength)) throw new ApiError(400, 'INVALID_REQUEST');
+    if (Number(contentLength) > maximumBytes) throw new ApiError(413, 'REQUEST_TOO_LARGE');
+  }
+  if (!request.body) throw new ApiError(400, 'INVALID_REQUEST');
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maximumBytes) {
+        await reader.cancel().catch(() => undefined);
+        throw new ApiError(413, 'REQUEST_TOO_LARGE');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks));
+  } catch {
+    throw new ApiError(400, 'INVALID_REQUEST');
+  }
 }
 
 function parseIfMatch(request: Request, optional: boolean): number | undefined {

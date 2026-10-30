@@ -39,7 +39,7 @@ type PatientRow = {
   archived_at: Date | string | null;
 };
 
-const SENSITIVE_COLUMN = 'patients.sensitive';
+export const SENSITIVE_COLUMN = 'patients.sensitive';
 const COLUMNS = sql`id, display_code, sensitive, gender, height_cm, weight_kg, current_objective,
   target_protein, target_carbs, target_fats, target_kcal, version, created_at, updated_at, archived_at`;
 

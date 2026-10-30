@@ -69,7 +69,7 @@ const ASSESSMENT_COLUMNS = sql`id, patient_id, clinical_date::text AS clinical_d
   calculation_input, version, created_at, updated_at`;
 const FOLLOW_UP_COLUMNS = sql`patient_id, assessment_due_date::text AS assessment_due_date,
   diet_due_date::text AS diet_due_date, comments, version, created_at, updated_at, cancelled_at`;
-const COMMENTS_COLUMN = 'next_follow_ups.comments';
+export const COMMENTS_COLUMN = 'next_follow_ups.comments';
 
 const commentsSchema = {
   parse(value: unknown): string {

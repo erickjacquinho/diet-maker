@@ -146,6 +146,24 @@ describe('defineEndpoint', () => {
     expect(gate.subscriptionGate).toHaveBeenCalledWith({ id: accountId });
   });
 
+  it('reads an octet-stream body as text, capped and strictly typed', async () => {
+    const raw = (body: string, headers: Record<string, string> = {}) => new Request('http://localhost:3000/api/v1/things', {
+      method: 'POST',
+      headers: { origin: 'http://localhost:3000', 'content-type': 'application/octet-stream', cookie: `dietmaker_csrf=${csrf}`, 'x-csrf-token': csrf, ...headers },
+      body,
+    });
+    const handler = vi.fn(async ({ input: text }: { input: string }) => ({ id: text }));
+    const POST = createEndpointFactory(dependencies())({
+      input: { parse: (value: unknown) => String(value) }, rawBody: { maxBytes: 8 }, output, rateLimit: 'mutation', handler: handler as never,
+    });
+    const ok = await POST(raw('hello'));
+    expect(ok.status).toBe(200);
+    expect(handler).toHaveBeenCalledOnce();
+    expect((await POST(raw('way too long for the cap'))).status).toBe(413);
+    expect((await POST(raw('hi', { 'content-type': 'application/json' }))).status).toBe(400);
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
   it('skips CSRF for safe methods but still requires a session', async () => {
     const deps = dependencies();
     const GET = createEndpointFactory(deps)({ output, rateLimit: 'read', handler: async () => ({ id: 'x' }) });
