@@ -192,3 +192,45 @@ export function parseFollowUpMovesDto(value: unknown): { moves: Array<{ before: 
 export function parseEmptyDto(): Record<string, never> {
   return {};
 }
+
+export interface PatientSummaryDto {
+  patientId: string;
+  dietCount: number;
+  assessmentCount: number;
+  latestAssessment: AssessmentDto | null;
+  previousAssessment: AssessmentDto | null;
+  nextFollowUp: FollowUpDto | null;
+  lastActivity: { eventDate: string; confirmedAt: string; type: 'assessment' | 'diet'; sourceId: string } | null;
+}
+
+export function parsePatientSummariesRequest(value: unknown): { patientIds: string[] } {
+  const body = record(value);
+  assertKeys(body, ['patientIds']);
+  if (!Array.isArray(body.patientIds) || body.patientIds.length === 0 || body.patientIds.length > 25) throw new TypeError('Invalid ids.');
+  const ids = body.patientIds.map((id) => {
+    if (typeof id !== 'string' || !uuidPattern.test(id)) throw new TypeError('Invalid id.');
+    return id.toLowerCase();
+  });
+  return { patientIds: [...new Set(ids)] };
+}
+
+export function parsePatientSummariesDto(value: unknown): { items: PatientSummaryDto[] } {
+  const body = record(value);
+  if (!Array.isArray(body.items)) throw new TypeError('Invalid items.');
+  return {
+    items: body.items.map((entry) => {
+      const s = record(entry);
+      const activity = s.lastActivity == null ? null : record(s.lastActivity);
+      return {
+        patientId: String(s.patientId), dietCount: Number(s.dietCount), assessmentCount: Number(s.assessmentCount),
+        latestAssessment: s.latestAssessment == null ? null : parseAssessmentDto(s.latestAssessment),
+        previousAssessment: s.previousAssessment == null ? null : parseAssessmentDto(s.previousAssessment),
+        nextFollowUp: s.nextFollowUp == null ? null : parseFollowUpDto(s.nextFollowUp),
+        lastActivity: activity === null ? null : {
+          eventDate: String(activity.eventDate), confirmedAt: String(activity.confirmedAt),
+          type: activity.type === 'diet' ? 'diet' : 'assessment', sourceId: String(activity.sourceId),
+        },
+      };
+    }),
+  };
+}

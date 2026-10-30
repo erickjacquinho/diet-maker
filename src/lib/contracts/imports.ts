@@ -11,6 +11,7 @@ export interface ImportSummaryDto {
   readyDiets: number;
   favorites: number;
   agendaReminders: number;
+  objectiveOptions: number;
   skipped: { account: number; objectiveOptions: number };
 }
 
@@ -23,7 +24,7 @@ export interface ImportResultDto {
 
 const countKeys = [
   'patients', 'bodyAssessments', 'nextFollowUps', 'dietPlans', 'foodCatalogItems', 'recipes', 'readyMeals',
-  'readyDiets', 'favorites', 'agendaReminders',
+  'readyDiets', 'favorites', 'agendaReminders', 'objectiveOptions',
 ] as const;
 
 function count(value: unknown): number {

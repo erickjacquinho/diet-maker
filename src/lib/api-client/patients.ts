@@ -1,5 +1,6 @@
 import type { PatientInput } from '@/lib/domain/patient';
 import type { PatientDto, PatientPageDto } from '@/lib/contracts/patients';
+import type { PatientSummaryDto } from '@/lib/contracts/clinical';
 import { apiRequest } from './client';
 
 /** Client for `/api/v1/patients`. Not yet wired to the screens: that happens when the last clinical module moves (F3). */
@@ -11,6 +12,8 @@ export const patientsApi = {
   get: (id: string) => apiRequest<PatientDto>(`/api/v1/patients/${encodeURIComponent(id)}`),
   update: (id: string, version: number, patient: PatientInput) =>
     apiRequest<PatientDto>(`/api/v1/patients/${encodeURIComponent(id)}`, { method: 'PATCH', version, body: { patient } }),
+  summaries: (patientIds: string[]) =>
+    apiRequest<{ items: PatientSummaryDto[] }>('/api/v1/patients/summaries', { method: 'POST', body: { patientIds } }),
   archive: (id: string, version: number) =>
     apiRequest<PatientDto>(`/api/v1/patients/${encodeURIComponent(id)}/archive`, { method: 'POST', version }),
   restore: (id: string, version: number) =>

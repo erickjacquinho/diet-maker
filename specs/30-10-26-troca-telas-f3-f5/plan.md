@@ -5,8 +5,8 @@ Ordem recomendada (a F5 só pode remover o modo local depois que as telas usarem
 ## 0. Lacunas do servidor que as telas exigem (feitas / pendentes)
 - [x] Mover vários acompanhamentos de uma vez: `POST /api/v1/agenda/follow-up-moves` (atômico).
 - [x] Arquivar paciente invalida os rascunhos abertos na mesma transação.
-- [ ] Catálogo de objetivos (`objectiveOptions`): tabela `app.objective_options` (+ sementes de sistema), endpoints listar/adicionar/arquivar; importar do `.nutridiet` (hoje contado em `skipped`).
-- [ ] Perfil e lista de pacientes: `GET /patients/:id/profile` e `POST /patients/summaries` com contagens de dietas/avaliações, última e penúltima avaliação, próximo acompanhamento e última atividade (evita N+1 e devolve a ordenação por atividade).
+- [x] Catálogo de objetivos: `app.objective_options` só com objetivos personalizados (os 4 padrão vêm da API, ids `system-*`, não arquivam); `GET|POST /objectives`, `POST /objectives/:id/archive`; o import do `.nutridiet` traz os personalizados.
+- [x] Resumos de pacientes: `POST /patients/summaries` (até 25 IDs) com contagens de dietas/avaliações, última e penúltima avaliação, próximo acompanhamento e última atividade, em consultas em lote (sem N+1). A ordenação da lista por atividade usa esses dados no adaptador.
 - [ ] Histórico de dietas: projeção resumida (metas e totais por variação) e paginação, no lugar da lista completa.
 - [ ] Perfil profissional/`account` (nome de exibição, telefone) fora do `private.saves`.
 

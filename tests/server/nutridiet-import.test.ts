@@ -21,6 +21,7 @@ import { createServerDietRepository } from '../../src/lib/server/diets/diet-repo
 import { createServerLibraryRepository } from '../../src/lib/server/library/library-repository';
 import { createServerRecipeRepository } from '../../src/lib/server/library/recipe-repository';
 import { createServerAgendaRepository } from '../../src/lib/server/agenda/agenda-repository';
+import { createServerObjectiveRepository } from '../../src/lib/server/objectives/objective-repository';
 import { importNutridietEnvelope, importedUuid } from '../../src/lib/server/imports/nutridiet-importer';
 import { readNutridiet } from '../../src/lib/server/imports/nutridiet-reader';
 import { encodeBase64Url, encodeBindingProof, protectedSaveAdditionalData } from '../../src/lib/domain/protected-save';
@@ -68,7 +69,10 @@ function envelope(overrides: Record<string, unknown> = {}) {
     favorites: ['taco-1', 'food1'],
     agendaReminders: [{ id: 'rem1', date: '2026-04-01', time: '09:30', task: 'diet-update' }],
     account: [{ id: 'acc', displayName: 'Dra. Ana', phone: null, createdAt: T, updatedAt: T }],
-    objectiveOptions: [{ id: 'obj', accountId: 'acc', label: 'Hipertrofia', normalizedLabel: 'hipertrofia', origin: 'SYSTEM', archivedAt: null, createdAt: T, updatedAt: T }],
+    objectiveOptions: [
+      { id: 'obj', accountId: 'acc', label: 'Cutting', normalizedLabel: 'cutting', origin: 'SYSTEM', archivedAt: null, createdAt: T, updatedAt: T },
+      { id: 'obj2', accountId: 'acc', label: 'Hipertrofia', normalizedLabel: 'hipertrofia', origin: 'CUSTOM', archivedAt: null, createdAt: T, updatedAt: T },
+    ],
     patients: [{
       id: 'pat1', accountId: 'acc', displayCode: 'P-0001', name: 'Maria Souza', age: 35, gender: 'Feminino', birthDate: '1990-05-10',
       isPregnant: false, pregnancyDueDate: null, heightCm: 165, weightKg: 62, maritalStatus: null, phone: '11987654321', whatsapp: null,
@@ -147,7 +151,7 @@ beforeAll(async () => {
   for (const name of [
     '20261029120000_account_keys.sql', '20261029130000_patients.sql', '20261029140000_assessments_follow_ups.sql',
     '20261030120000_diets.sql', '20261030130000_library_foods_ready_diets.sql', '20261030140000_library_recipes_ready_meals.sql',
-    '20261030150000_agenda_favorites.sql', '20261030160000_imports.sql',
+    '20261030150000_agenda_favorites.sql', '20261030160000_imports.sql', '20261030170000_objective_options.sql',
   ]) {
     await client.exec(migration(name));
   }
@@ -224,7 +228,7 @@ describe('importNutridietEnvelope', () => {
     const summary = await asAccount(accountA, async (tx, sealer) => importNutridietEnvelope(tx, sealer, accountA, await parsed()));
     expect(summary).toMatchObject({
       patients: 1, bodyAssessments: 1, nextFollowUps: 1, dietPlans: 1, foodCatalogItems: 1, recipes: 1, readyMeals: 1, readyDiets: 1,
-      favorites: 2, agendaReminders: 1, skipped: { account: 1, objectiveOptions: 1 },
+      favorites: 2, agendaReminders: 1, objectiveOptions: 1, skipped: { account: 1, objectiveOptions: 1 },
     });
     expect(() => parseImportResultDto({ replayed: false, format: 'nutridiet-v1-plaintext', summary })).not.toThrow();
 
@@ -263,6 +267,8 @@ describe('importNutridietEnvelope', () => {
       const agenda = createServerAgendaRepository(tx, accountA);
       expect(await agenda.listFavorites()).toEqual([foodId, 'taco-1'].sort());
       expect(await agenda.listReminders()).toEqual([{ id: 'rem1', date: '2026-04-01', time: '09:30', task: 'diet-update' }]);
+      const objectives = await createServerObjectiveRepository(tx, accountA).list();
+      expect(objectives.find((option) => option.label === 'Hipertrofia')).toMatchObject({ origin: 'CUSTOM', id: importedUuid(accountA, 'objective', 'obj2') });
     });
 
     const raw = await client.query<{ sensitive: Uint8Array }>('SELECT sensitive FROM app.patients WHERE id = $1', [patientId]);

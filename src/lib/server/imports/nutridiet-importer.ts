@@ -28,7 +28,8 @@ export interface ImportSummary {
   readyDiets: number;
   favorites: number;
   agendaReminders: number;
-  /** Rows that have no server counterpart yet and were intentionally not imported. */
+  objectiveOptions: number;
+  /** Rows with no server counterpart: the profile, and the built-in objectives (the API provides those itself). */
   skipped: { account: number; objectiveOptions: number };
 }
 
@@ -121,8 +122,19 @@ export async function importNutridietEnvelope(
       OR EXISTS (SELECT 1 FROM app.ready_diets WHERE account_id = ${accountId})
       OR EXISTS (SELECT 1 FROM app.agenda_reminders WHERE account_id = ${accountId})
       OR EXISTS (SELECT 1 FROM app.favorite_foods WHERE account_id = ${accountId})
+      OR EXISTS (SELECT 1 FROM app.objective_options WHERE account_id = ${accountId})
     ) AS used`);
   if (counts[0].used) throw new ApiError(409, 'CONFLICT', { reason: 'ACCOUNT_NOT_EMPTY' });
+
+  // ---- custom objectives (built-in ones are provided by the API, so they are not stored) ----
+  const customObjectives = envelope.objectiveOptions.filter((row) => row.origin === 'CUSTOM');
+  for (const row of customObjectives) {
+    await run(sql`
+      INSERT INTO app.objective_options (account_id, id, label, normalized_label, created_at, updated_at, archived_at)
+      VALUES (${accountId}, ${id('objective', row.id)}, ${row.label}, ${row.normalizedLabel}, ${iso(row.createdAt)}, ${iso(row.updatedAt)},
+        ${row.archivedAt ? iso(row.archivedAt) : null})
+      ON CONFLICT (account_id, normalized_label) DO NOTHING`);
+  }
 
   // ---- patients (S1 sealed) ----
   for (const row of envelope.patients) {
@@ -320,7 +332,7 @@ export async function importNutridietEnvelope(
     patients: envelope.patients.length, bodyAssessments: envelope.bodyAssessments.length, nextFollowUps: followUps,
     dietPlans: envelope.dietPlans.length, foodCatalogItems: envelope.foodCatalogItems.length, recipes: envelope.recipes.length,
     readyMeals: envelope.readyMeals.length, readyDiets: envelope.readyDiets.length, favorites,
-    agendaReminders: envelope.agendaReminders.length,
-    skipped: { account: envelope.account.length, objectiveOptions: envelope.objectiveOptions.length },
+    agendaReminders: envelope.agendaReminders.length, objectiveOptions: customObjectives.length,
+    skipped: { account: envelope.account.length, objectiveOptions: envelope.objectiveOptions.length - customObjectives.length },
   };
 }

@@ -51,7 +51,8 @@ const PLAN_COLUMNS = sql`id, patient_id, name, mode, status, weight_reference_kg
 const DRAFT_COLUMNS = sql`patient_id, route_diet_id, draft_id, payload_schema_version, draft_revision, state,
   base_diet_id, base_diet_version, target_diet_id, payload, created_at, updated_at, discarded_at`;
 
-const iso = (value: Date | string): string => new Date(value).toISOString();
+type Timestamp = Date | string;
+const iso = (value: Timestamp): string => new Date(value).toISOString();
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 
 export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
@@ -231,7 +232,24 @@ export function createServerDietRepository(tx: SqlExecutor, accountId: string) {
     return rows.length;
   }
 
-  return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, invalidateDrafts, patientState };
+  /** Diet count and the most recently activated diet per patient, in one query. */
+  async function summarize(patientIds: readonly string[]) {
+    const result = new Map<string, { count: number; latest: { id: string; activatedAt: string; updatedAt: string } }>();
+    if (patientIds.length === 0) return result;
+    const ids = sql.join(patientIds.map((id) => sql`${id}::uuid`), sql`, `);
+    const { rows } = await run<{ patient_id: string; id: string; activated_at: Timestamp; updated_at: Timestamp; total: number }>(sql`
+      SELECT patient_id, id, activated_at, updated_at, total FROM (
+        SELECT patient_id, id, activated_at, updated_at, count(*) OVER (PARTITION BY patient_id)::int AS total,
+          row_number() OVER (PARTITION BY patient_id ORDER BY activated_at DESC, updated_at DESC, id) AS rank
+        FROM app.diet_plans WHERE account_id = ${accountId} AND patient_id IN (${ids})
+      ) ranked WHERE rank = 1`);
+    for (const row of rows) {
+      result.set(row.patient_id, { count: row.total, latest: { id: row.id, activatedAt: iso(row.activated_at), updatedAt: iso(row.updated_at) } });
+    }
+    return result;
+  }
+
+  return { listPlans, getPlan, confirmActive, getDraft, putDraft, discardDraft, invalidateDrafts, summarize, patientState };
 }
 
 export type ServerDietRepository = ReturnType<typeof createServerDietRepository>;

@@ -329,7 +329,41 @@ export function createServerClinicalRepository(tx: SqlExecutor, sealer: FieldSea
     return moves;
   }
 
-  return { listAssessments, getAssessment, createAssessment, updateAssessment, getFollowUp, setFollowUp, clearFollowUp, moveFollowUps };
+  const idList = (ids: readonly string[]) => sql.join(ids.map((id) => sql`${id}::uuid`), sql`, `);
+
+  /** Assessment count plus the latest two per patient, in one pass (no per-patient queries). */
+  async function summarizeAssessments(patientIds: readonly string[]) {
+    const result = new Map<string, { count: number; latest: BodyAssessment | null; previous: BodyAssessment | null }>();
+    if (patientIds.length === 0) return result;
+    const { rows } = await run<AssessmentRow & { total: number }>(sql`
+      SELECT * FROM (
+        SELECT ${ASSESSMENT_COLUMNS},
+          count(*) OVER (PARTITION BY patient_id)::int AS total,
+          row_number() OVER (PARTITION BY patient_id ORDER BY clinical_date DESC, created_at DESC, id) AS rank
+        FROM app.body_assessments
+        WHERE account_id = ${accountId} AND patient_id IN (${idList(patientIds)})
+      ) ranked WHERE rank <= 2 ORDER BY patient_id, rank`);
+    for (const row of rows) {
+      const entry = result.get(row.patient_id) ?? { count: row.total, latest: null, previous: null };
+      const assessment = toAssessment(row, accountId);
+      if (entry.latest === null) entry.latest = assessment;
+      else entry.previous = assessment;
+      result.set(row.patient_id, entry);
+    }
+    return result;
+  }
+
+  async function listFollowUps(patientIds: readonly string[]): Promise<Map<string, NextFollowUp>> {
+    const result = new Map<string, NextFollowUp>();
+    if (patientIds.length === 0) return result;
+    const { rows } = await run<FollowUpRow>(sql`
+      SELECT ${FOLLOW_UP_COLUMNS} FROM app.next_follow_ups
+      WHERE account_id = ${accountId} AND cancelled_at IS NULL AND patient_id IN (${idList(patientIds)})`);
+    for (const row of rows) result.set(row.patient_id, await toFollowUp(row));
+    return result;
+  }
+
+  return { listAssessments, getAssessment, createAssessment, updateAssessment, getFollowUp, setFollowUp, clearFollowUp, moveFollowUps, summarizeAssessments, listFollowUps };
 }
 
 export type ServerClinicalRepository = ReturnType<typeof createServerClinicalRepository>;
