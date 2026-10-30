@@ -1,5 +1,10 @@
 # Dieta DB — Guia Central da Persistência
 
+> **Estado atual (2026-10-30):** a persistência é 100% online, na conta do
+> Supabase, conforme a [Decisão 15](./15-esquema-transferencia-backend-supabase.md).
+> As Decisões 09 a 13 e o ADR-009 descrevem o modo local-first que foi removido e
+> ficam como histórico; o `.nutridiet` só existe como arquivo de importação.
+
 Esta pasta reúne os requisitos, o vocabulário, as decisões, as justificativas
 e a divisão em SDDs da persistência do NutriDiet. É o ponto de consulta desse
 escopo; não é necessário percorrer o PRD, o glossário e os ADRs externos para

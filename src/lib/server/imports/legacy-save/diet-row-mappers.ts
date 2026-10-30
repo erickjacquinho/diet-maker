@@ -1,5 +1,5 @@
 import { createDecimalString, type DietDayCode, type DietPlan, type DietVariation, type DietMeal, type DietMealOption, type DietItem, type NutritionSnapshot, type NutritionValues, type JsonValue } from '@/lib/domain/diets/diet-model';
-import type { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationDays, dietVariations } from '../schema';
+import type { dietItemSnapshots, dietMealItems, dietMealOptions, dietMeals, dietPlans, dietVariationDays, dietVariations } from './schema';
 
 type PlanRow = typeof dietPlans.$inferSelect;
 type VariationRow = typeof dietVariations.$inferSelect;

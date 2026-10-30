@@ -1,8 +1,8 @@
 import 'server-only';
 
 import { createDecipheriv, timingSafeEqual } from 'node:crypto';
-import { BackupApplicationError, validateBackupEnvelope } from '@/lib/application/backup-application';
-import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { BackupApplicationError, validateBackupEnvelope } from './legacy-save/backup-format';
+import type { BackupEnvelope } from './legacy-save/logical-export-schema';
 import {
   decodeBase64Url,
   parseBindingProof,

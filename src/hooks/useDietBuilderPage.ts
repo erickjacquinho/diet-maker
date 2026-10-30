@@ -24,7 +24,7 @@ import { useDietBuilderModals } from './useDietBuilderModals';
 import { useDietMealActions } from './useDietMealActions';
 import { useDietPresets } from './useDietPresets';
 import { useSaveShortcut } from './useSaveShortcut';
-import { getBrowserDietApplication, getBrowserPatientApplication, getBrowserProfileSession, preserveBrowserDietDraft } from '@/lib/application/browser-composition';
+import { getBrowserDietApplication, getBrowserPatientApplication, getBrowserProfileSession } from '@/lib/application/browser-composition';
 import type { DietApplication } from '@/lib/application/diets/diet-ports';
 import type { CheckpointPendingSaveOutcome, ConfirmedDietSaveOutcome, SaveReconciliationOutcome } from '@/lib/domain/diets/diet-model';
 import { fromCanonicalPlan, fromEditableDocument, toEditableDocument } from '@/lib/application/diets/legacy-diet-adapter';
@@ -170,7 +170,7 @@ export function useDietBuilderPage() {
     retryOpenEditor();
   }, [dietApplicationLoadStatus, patientLoadStatus, retryOpenEditor]);
 
-  const canMutate = useCallback(() => !confirmationBusyRef.current && profileSession.isSaveAuthorized(), [profileSession]);
+  const canMutate = useCallback(() => !confirmationBusyRef.current && profileSession.isReady(), [profileSession]);
   const setDietPlanIfEditable = useCallback((update: Parameters<typeof setDietPlan>[0]) => {
     if (!canMutate()) return;
     setDietPlan((current) => {
@@ -495,10 +495,10 @@ export function useDietBuilderPage() {
     modals.openImportPreviousDietModal();
   }, [hasPreviousDiets, modals]);
 
-  const flushCurrentDraft = useCallback(async (preserving = false) => {
+  const flushCurrentDraft = useCallback(async () => {
     if (!dietApplication || !draft || !dietPlan) return null;
     const document = toEditableDocument(dietPlan);
-    const flush = () => preserving ? preserveBrowserDietDraft(dietApplication, draft.draftId, document) : dietApplication.flushDraft(draft.draftId, document);
+    const flush = () => dietApplication.flushDraft(draft.draftId, document);
     let result = await flush();
     if (result.status === 'SUPERSEDED') result = await flush();
     if (result.status === 'SAVED') {
@@ -508,20 +508,6 @@ export function useDietBuilderPage() {
     }
     return result;
   }, [dietApplication, dietPlan, draft, setLoadedDraft]);
-  const flushCurrentDraftRef = useRef(flushCurrentDraft);
-
-  useEffect(() => {
-    flushCurrentDraftRef.current = flushCurrentDraft;
-  }, [flushCurrentDraft]);
-
-  useEffect(() => {
-    if (!draft || !dietPlan || !dietApplication) return;
-    return profileSession.registerPendingDraftFlush(async () => {
-      const result = await flushCurrentDraftRef.current(true);
-      if (result?.status !== 'SAVED') throw new Error('O rascunho local mudou durante a preservação. Tente novamente.');
-    });
-  }, [dietApplication, draft?.draftId, profileSession]);
-
   const handleSaveDiet = useCallback(async () => {
     if (!dietApplication || !draft || !dietPlan || saveInFlightRef.current) return;
     saveInFlightRef.current = true;

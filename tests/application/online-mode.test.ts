@@ -100,7 +100,7 @@ describe('createOnlinePreferences', () => {
 
 describe('createOnlineProfileSession', () => {
   function build(overrides: Partial<Parameters<typeof createOnlineProfileSession>[0]> = {}) {
-    const runtime = { account, getCheckpointState: vi.fn(), markWorkspaceDirty: vi.fn(), advanceCheckpoint: vi.fn() };
+    const runtime = { account };
     const dependencies = {
       loadAccount: vi.fn(async () => account),
       createRuntime: vi.fn(async () => runtime),
@@ -114,14 +114,14 @@ describe('createOnlineProfileSession', () => {
   it('opens the account by itself, once, and exposes the runtime', async () => {
     const { session, runtime, dependencies } = build();
     expect(session.getSnapshot()).toMatchObject({ status: 'empty', hydration: 'pending', runtime: null });
-    expect(session.isSaveAuthorized()).toBe(false);
+    expect(session.isReady()).toBe(false);
     const seen: string[] = [];
     session.subscribe((snapshot) => seen.push(snapshot.status));
-    await Promise.all([session.loadProfile(), session.loadProfile(), session.restoreActiveProfile()]);
+    await Promise.all([session.loadProfile(), session.loadProfile()]);
     expect(dependencies.createRuntime).toHaveBeenCalledOnce();
     expect(dependencies.activateRuntime).toHaveBeenCalledWith(runtime);
-    expect(session.getSnapshot()).toMatchObject({ status: 'active', accountId: ACCOUNT_ID, hydration: 'ready', syncState: 'synced' });
-    expect(session.isSaveAuthorized()).toBe(true);
+    expect(session.getSnapshot()).toMatchObject({ status: 'active', accountId: ACCOUNT_ID, hydration: 'ready' });
+    expect(session.isReady()).toBe(true);
     expect(seen).toEqual(['busy', 'active']);
     await session.loadProfile(); // already open: no new work
     expect(dependencies.createRuntime).toHaveBeenCalledOnce();
@@ -136,25 +136,18 @@ describe('createOnlineProfileSession', () => {
     expect(session.getSnapshot()).toMatchObject({ status: 'active', error: null });
   });
 
-  it('closes the runtime on sign out and refuses save-only operations', async () => {
+  it('closes the runtime on sign out', async () => {
     const { session, runtime, dependencies } = build();
     await session.loadProfile();
     await session.signOut();
     expect(dependencies.disposeRuntime).toHaveBeenCalledWith(runtime);
     expect(session.getSnapshot()).toMatchObject({ status: 'empty', runtime: null });
-    for (const operation of [() => session.openSave('x'), () => session.locateSave('x'), () => session.createProfile({ displayName: 'x' }), () => session.adoptLegacyProfile()]) {
-      await expect(operation()).rejects.toMatchObject({ code: 'SESSION_UNAVAILABLE' });
-    }
-    expect(await session.listPendingRegistrations()).toEqual([]);
+    expect(session.isReady()).toBe(false);
   });
 
-  it('updates the display name in place and syncs through the injected hook', async () => {
+  it('syncs preferences through the injected hook', async () => {
     const sync = vi.fn(async () => undefined);
     const { session } = build({ sync });
-    await expect(session.updateProfileDetails({ displayName: 'x' })).rejects.toMatchObject({ code: 'SESSION_UNAVAILABLE' });
-    await session.loadProfile();
-    await session.updateProfileDetails({ displayName: '  Dra. Beatriz ', phone: '11999999999' });
-    expect(session.getSnapshot().account).toMatchObject({ displayName: 'Dra. Beatriz', phone: '11999999999' });
     await session.sync();
     expect(sync).toHaveBeenCalledOnce();
   });
@@ -167,10 +160,8 @@ describe('createOnlinePatientRuntime', () => {
     defaultMacroTargets: { proteinG: null, carbsG: null, fatsG: null, kcal: null }, createdAt: 'a', updatedAt: 'b', version: 1, archivedAt: null,
   });
 
-  it('wires the applications to the API with client-generated UUIDs and no local workspace', async () => {
+  it('wires the applications to the API with client-generated UUIDs', async () => {
     const runtime = await createOnlinePatientRuntime(account);
-    expect(runtime.handle).toBeUndefined();
-    expect(runtime.backupApplication).toBeUndefined();
     expect(favoritesApi.list).toHaveBeenCalledOnce();
 
     patientsApi.create.mockImplementation(async (id: string) => patientDto(id));
@@ -197,11 +188,10 @@ describe('createOnlinePatientRuntime', () => {
     expect(patientsApi.summaries.mock.calls.every((call) => call[0].length <= 25)).toBe(true);
   });
 
-  it('pushes preference changes through markWorkspaceDirty, as the screens already do after a change', async () => {
+  it('pushes preference changes to the account', async () => {
     const runtime = await createOnlinePatientRuntime(account);
     setFavoritesFromStorage(['taco-7'], ACCOUNT_ID);
-    await runtime.markWorkspaceDirty();
+    await runtime.pushPreferences();
     expect(favoritesApi.set).toHaveBeenCalledWith('taco-7', true);
-    expect(await runtime.getCheckpointState()).toEqual({ workspaceRevision: 0, checkpointRevision: 0 });
   });
 });

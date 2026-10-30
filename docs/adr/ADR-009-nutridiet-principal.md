@@ -1,8 +1,17 @@
 # ADR-009: `.nutridiet` como Save Principal e Banco Local como Área de Trabalho
 
-- **Status**: Aceito e implementado
+- **Status**: Substituído em 2026-10-30 (Decisão 15, F5)
 - **Data**: 2026-09-17
 - **Escopo**: Checkpoints do save da Conta, recuperação local e restauração
+
+> **Substituído.** O `.nutridiet` deixou de ser o save principal e o banco PGlite
+> no navegador foi removido. Todos os dados vivem na conta, no Supabase, e cada
+> operação confirmada já está gravada no servidor quando a resposta chega, sem
+> checkpoint, arquivo associado, grant de 8 h, catálogo de saves ou bloqueio de
+> aba. O `.nutridiet` v1 (texto puro) e v2 (protegido) só é aceito por
+> `POST /api/v1/imports/nutridiet`, uma vez, em conta vazia. Ver
+> [Decisão 15](../../refs/dieta-db/15-esquema-transferencia-backend-supabase.md).
+> O texto abaixo é o registro da decisão original.
 
 ## Contexto
 

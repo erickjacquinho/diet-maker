@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
-import { CreditCard, HardDrive, RefreshCw, UserRound } from 'lucide-react';
+import { CreditCard, FileUp, UserRound } from 'lucide-react';
 import { textStyle } from '@/design-system';
 import { Button } from '@/components/atoms/Button';
 import { Checkbox } from '@/components/atoms/Checkbox';
@@ -25,27 +25,22 @@ import {
 } from '@/lib/domain/professional-profile';
 import { formatWhatsappContact } from '@/lib/whatsapp';
 
-export type SettingsTab = 'profile' | 'save' | 'subscription';
-export type SettingsSaveSyncState = 'unbound' | 'syncing' | 'pending' | 'synced' | 'paused';
+export type SettingsTab = 'profile' | 'import' | 'subscription';
+
+interface NutridietImportOutcome {
+  replayed: boolean;
+  patients: number;
+  dietPlans: number;
+  foodCatalogItems: number;
+  recipes: number;
+  readyMeals: number;
+}
 
 export interface SettingsProfileState {
   status: 'idle' | 'loading' | 'ready' | 'error';
   profile: ProfessionalProfile | null;
   accountEmail: string | null;
   error: string | null;
-}
-
-export interface SettingsSaveState {
-  /** Null when no save is open in this session. */
-  details: { displayName: string; phone: string | null } | null;
-  fileName: string | null;
-  syncState: SettingsSaveSyncState;
-  editable: boolean;
-}
-
-export interface SaveSettingsInput {
-  displayName: string;
-  phone: string | null;
 }
 
 export interface SettingsDialogProps {
@@ -57,15 +52,11 @@ export interface SettingsDialogProps {
   onRetryProfile: () => void;
   onSaveProfile: (profile: ProfessionalProfile) => Promise<void>;
   onResetPassword: () => Promise<void>;
-  save: SettingsSaveState;
-  onSaveSettings: (input: SaveSettingsInput) => Promise<void>;
-  onSyncSave: () => Promise<void>;
-  savesContent?: ReactNode;
+  /** Sends a `.nutridiet` file to the account. Omit to hide the import tab. */
+  onImportNutridiet?: (fileText: string, options: { confirmPlaintext: boolean }) => Promise<NutridietImportOutcome>;
   suspended?: boolean;
   busy?: boolean;
 }
-
-const SAVE_LABEL_MAX = 80;
 
 const experienceOptions = [
   { value: 'months_1_6', label: 'De 1 a 6 meses' },
@@ -76,14 +67,6 @@ const experienceOptions = [
 const serviceModeOptions = (Object.keys(SERVICE_MODE_LABELS) as ProfessionalServiceMode[])
   .map((value) => ({ value, label: SERVICE_MODE_LABELS[value] }));
 const stateOptions = BRAZILIAN_STATES.map((value) => ({ value, label: value }));
-
-const syncLabels: Record<SettingsSaveSyncState, string> = {
-  unbound: 'Sem arquivo associado',
-  syncing: 'Sincronizando…',
-  pending: 'Alterações aguardando gravação',
-  synced: 'Tudo salvo no arquivo',
-  paused: 'Sincronização pausada',
-};
 
 type ProfileDraft = Record<
   | 'firstName' | 'lastName' | 'professionalTitle' | 'crn' | 'specialties' | 'bio' | 'contactEmail' | 'phone'
@@ -185,10 +168,7 @@ export function SettingsDialog({
   onRetryProfile,
   onSaveProfile,
   onResetPassword,
-  save,
-  onSaveSettings,
-  onSyncSave,
-  savesContent,
+  onImportNutridiet,
   suspended = false,
   busy = false,
 }: SettingsDialogProps) {
@@ -204,40 +184,28 @@ export function SettingsDialog({
   const [passwordFeedback, setPasswordFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  const saveBaseline = useMemo(() => ({
-    displayName: save.details?.displayName ?? '',
-    phone: formatWhatsappContact(save.details?.phone ?? '') || '',
-  }), [save.details]);
-  const [saveDraft, setSaveDraft] = useState(saveBaseline);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveFeedback, setSaveFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
-  const [savingSave, setSavingSave] = useState(false);
-  /** Set when the last save attempt failed, so the same values can be submitted again even if the baseline caught up. */
-  const [saveRetryable, setSaveRetryable] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
+  const [importFile, setImportFile] = useState<{ name: string; text: string; protectedFormat: boolean } | null>(null);
+  const [importConfirmed, setImportConfirmed] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importFeedback, setImportFeedback] = useState<{ kind: 'status' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setTab(defaultTab);
     setProfileErrors({});
     setProfileFeedback(null);
-    setSaveError(null);
-    setSaveFeedback(null);
     setPasswordFeedback(null);
     // Runs only when the dialog opens so a later defaultTab change does not switch tabs mid-edit.
   }, [open]);
 
   useEffect(() => { setDraft(baseline); }, [baseline]);
-  useEffect(() => { setSaveDraft(saveBaseline); }, [saveBaseline]);
 
   const profileDirty = !sameDraft(draft, baseline);
-  const saveDirty = save.details !== null
-    && (saveDraft.displayName !== saveBaseline.displayName || saveDraft.phone !== saveBaseline.phone);
 
   const requestOpenChange = (next: boolean) => {
-    if (!next && (busy || savingProfile || savingSave || syncing || readingLogo || resettingPassword)) return;
-    if (!next && (profileDirty || saveDirty) && !savingProfile && !savingSave) {
+    if (!next && (busy || savingProfile || readingLogo || importing || resettingPassword)) return;
+    if (!next && profileDirty && !savingProfile) {
       setDiscardOpen(true);
       return;
     }
@@ -246,7 +214,6 @@ export function SettingsDialog({
 
   const discardChanges = () => {
     setDraft(baseline);
-    setSaveDraft(saveBaseline);
     setDiscardOpen(false);
     onOpenChange(false);
   };
@@ -325,40 +292,38 @@ export function SettingsDialog({
     }
   };
 
-  const submitSave = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (savingSave || !save.details) return;
-    const displayName = saveDraft.displayName.trim().replace(/\s+/g, ' ');
-    if (!displayName) {
-      setSaveError('Informe o nome do save.');
-      window.setTimeout(() => document.getElementById(`${id}-saveName`)?.focus(), 0);
+  const chooseImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    setImportFeedback(null);
+    setImportConfirmed(false);
+    if (!file) return;
+    if (file.size > 4_000_000) {
+      setImportFile(null);
+      setImportFeedback({ kind: 'error', message: 'O arquivo passa de 4 MB e não pode ser importado.' });
       return;
     }
-    setSavingSave(true);
-    setSaveFeedback(null);
-    try {
-      await onSaveSettings({ displayName, phone: saveDraft.phone.trim() || null });
-      setSaveRetryable(false);
-      setSaveFeedback({ kind: 'status', message: 'Configurações do save atualizadas.' });
-    } catch (error) {
-      setSaveRetryable(true);
-      setSaveFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Não foi possível salvar as configurações do save.' });
-    } finally {
-      setSavingSave(false);
-    }
+    const text = await file.text();
+    let protectedFormat = false;
+    try { protectedFormat = (JSON.parse(text) as { formatVersion?: unknown }).formatVersion === 2; } catch { /* the server rejects it */ }
+    setImportFile({ name: file.name, text, protectedFormat });
   };
 
-  const syncNow = async () => {
-    if (syncing) return;
-    setSyncing(true);
-    setSaveFeedback(null);
+  const submitImport = async () => {
+    if (!importFile || !onImportNutridiet || importing) return;
+    setImporting(true);
+    setImportFeedback(null);
     try {
-      await onSyncSave();
-      setSaveFeedback({ kind: 'status', message: 'Save sincronizado no arquivo.' });
+      const result = await onImportNutridiet(importFile.text, { confirmPlaintext: importConfirmed });
+      setImportFile(null);
+      setImportConfirmed(false);
+      setImportFeedback({ kind: 'status', message: result.replayed
+        ? 'Este arquivo já tinha sido importado. Nada foi alterado.'
+        : `Importação concluída: ${result.patients} paciente(s), ${result.dietPlans} dieta(s), ${result.foodCatalogItems} alimento(s), ${result.recipes} receita(s) e ${result.readyMeals} refeição(ões) pronta(s). Recarregue a página para ver tudo.` });
     } catch (error) {
-      setSaveFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'A sincronização continua pausada.' });
+      setImportFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Não foi possível importar o arquivo.' });
     } finally {
-      setSyncing(false);
+      setImporting(false);
     }
   };
 
@@ -384,7 +349,7 @@ export function SettingsDialog({
           <DialogHeader>
             <DialogTitle className={textStyle('dialog-title')}>Configurações</DialogTitle>
             <DialogDescription className={textStyle('body-secondary')}>
-              Gerencie seu perfil profissional, sua assinatura e os saves da conta.
+              Gerencie seu perfil profissional e sua assinatura.
             </DialogDescription>
           </DialogHeader>
 
@@ -395,10 +360,12 @@ export function SettingsDialog({
                   <UserRound className="size-4" aria-hidden="true" />
                   Perfil profissional
                 </TabsTrigger>
-                <TabsTrigger value="save" className="gap-2">
-                  <HardDrive className="size-4" aria-hidden="true" />
-                  Saves
-                </TabsTrigger>
+                {onImportNutridiet ? (
+                  <TabsTrigger value="import" className="gap-2">
+                    <FileUp className="size-4" aria-hidden="true" />
+                    Importar dados
+                  </TabsTrigger>
+                ) : null}
                 <TabsTrigger value="subscription" className="gap-2">
                   <CreditCard className="size-4" aria-hidden="true" />
                   Assinatura
@@ -603,6 +570,35 @@ export function SettingsDialog({
                 )}
               </TabsContent>
 
+              {onImportNutridiet ? (
+                <TabsContent value="import" className="min-h-0 flex-1 overflow-y-auto">
+                  <div className="flex flex-col gap-4 py-4">
+                    <p className={textStyle('body')}>
+                      Traga para a sua conta os dados de um arquivo <code>.nutridiet</code> antigo. A importação vale só para uma conta vazia e acontece uma única vez.
+                    </p>
+                    <Field id={`${id}-importFile`} label="Arquivo .nutridiet">
+                      <Input id={`${id}-importFile`} type="file" accept=".nutridiet,application/json" disabled={importing} onChange={(event) => void chooseImportFile(event)} />
+                    </Field>
+                    {importFile && !importFile.protectedFormat ? (
+                      <div className="flex items-start gap-2">
+                        <Checkbox id={`${id}-importConfirmed`} checked={importConfirmed} onCheckedChange={setImportConfirmed}
+                          aria-label="Confirmo importar este arquivo sem criptografia" className="-m-2 shrink-0" />
+                        <label htmlFor={`${id}-importConfirmed`} className={textStyle('body')}>
+                          Este arquivo não é criptografado (formato antigo). Confirmo que quero importá-lo.
+                        </label>
+                      </div>
+                    ) : null}
+                    <FormFooter feedback={importFeedback}>
+                      <Button type="button" variant="primary" size="standard" loading={importing}
+                        disabled={!importFile || importing || (!importFile.protectedFormat && !importConfirmed)}
+                        onClick={() => void submitImport()}>
+                        Importar arquivo
+                      </Button>
+                    </FormFooter>
+                  </div>
+                </TabsContent>
+              ) : null}
+
               <TabsContent value="subscription" className="min-h-0 flex-1 overflow-y-auto">
                 <div className="flex flex-col gap-2 py-4">
                   <p className={textStyle('body')}>A gestão da assinatura estará disponível em breve.</p>
@@ -612,68 +608,6 @@ export function SettingsDialog({
                 </div>
               </TabsContent>
 
-              <TabsContent value="save" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
-                <fieldset disabled={profileDirty || saveDirty || savingProfile || savingSave || syncing || readingLogo || resettingPassword} className="min-w-0">
-                  <legend className="sr-only">Gerenciar saves e backups</legend>
-                  {savesContent}
-                </fieldset>
-                {(profileDirty || saveDirty) && <p role="status" className={textStyle('helper')}>Salve ou descarte as alterações das configurações antes de gerenciar os arquivos.</p>}
-                {!save.details ? (
-                  <div className="flex flex-col items-start gap-2 py-4">
-                    <p className={textStyle('body')}>Nenhum save está aberto nesta sessão.</p>
-                    <p className={textStyle('helper')}>
-                      Abra ou crie um save nesta aba para editar as configurações dele.
-                    </p>
-                  </div>
-                ) : (
-                  <form onSubmit={submitSave} noValidate aria-busy={savingSave} aria-label="Configurações do save" className="flex flex-col gap-6">
-                    <Section title="Identificação do save">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Field id={`${id}-saveName`} label="Nome do save" error={saveError ?? undefined} required hint="Também aparece na lista de saves da conta.">
-                          <Input id={`${id}-saveName`} maxLength={SAVE_LABEL_MAX} disabled={!save.editable || busy}
-                            aria-invalid={saveError ? true : undefined} aria-describedby={saveError ? `${id}-saveName-error` : undefined}
-                            value={saveDraft.displayName}
-                            onChange={(event) => { setSaveDraft({ ...saveDraft, displayName: event.target.value }); setSaveError(null); setSaveFeedback(null); }} />
-                        </Field>
-                        <Field id={`${id}-savePhone`} label="Telefone do consultório">
-                          <Input id={`${id}-savePhone`} type="tel" inputMode="numeric" placeholder="(11) 99999-9999" disabled={!save.editable || busy}
-                            value={saveDraft.phone}
-                            onChange={(event) => { setSaveDraft({ ...saveDraft, phone: formatWhatsappContact(event.target.value) }); setSaveFeedback(null); }} />
-                        </Field>
-                      </div>
-                    </Section>
-
-                    <Section title="Arquivo e sincronização">
-                      <dl className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                          <dt className={textStyle('field-label')}>Arquivo</dt>
-                          <dd className={textStyle('field-value')}>{save.fileName ?? 'Não associado'}</dd>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <dt className={textStyle('field-label')}>Estado</dt>
-                          <dd className={textStyle('field-value')} data-sync-state={save.syncState}>{syncLabels[save.syncState]}</dd>
-                        </div>
-                      </dl>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <Button type="button" variant="secondary" size="compact" onClick={() => void syncNow()} disabled={!save.editable || syncing || busy} loading={syncing}>
-                          <RefreshCw className="size-4" aria-hidden="true" />
-                          Sincronizar agora
-                        </Button>
-                      </div>
-                    </Section>
-
-                    <FormFooter feedback={saveFeedback}>
-                      <Button type="button" variant="secondary" size="standard" disabled={!saveDirty || savingSave}
-                        onClick={() => { setSaveDraft(saveBaseline); setSaveError(null); setSaveFeedback(null); }}>
-                        Descartar alterações
-                      </Button>
-                      <Button type="submit" variant="primary" size="standard" disabled={busy || !save.editable || !(saveDirty || saveRetryable) || savingSave} loading={savingSave}>
-                        Salvar configurações do save
-                      </Button>
-                    </FormFooter>
-                  </form>
-                )}
-              </TabsContent>
             </Tabs>
           </fieldset>
         </DialogContent>

@@ -21,9 +21,6 @@ function renderDialog(overrides: Partial<SettingsDialogProps> = {}) {
     onRetryProfile: vi.fn(),
     onSaveProfile: vi.fn(async () => undefined),
     onResetPassword: vi.fn(async () => undefined),
-    save: { details: { displayName: 'Consultório Centro', phone: '11999998888' }, fileName: 'centro.dietmaker', syncState: 'synced', editable: true },
-    onSaveSettings: vi.fn(async () => undefined),
-    onSyncSave: vi.fn(async () => undefined),
     ...overrides,
   };
   render(<SettingsDialog {...props} />);
@@ -69,43 +66,39 @@ describe('SettingsDialog', () => {
     expect(props.onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it('updates the open save name and phone and syncs on demand', async () => {
-    const { props, dialog } = renderDialog({ defaultTab: 'save' });
+  it('imports a plaintext .nutridiet only after the user confirms it', async () => {
+    const onImportNutridiet = vi.fn(async () => ({ replayed: false, patients: 3, dietPlans: 2, foodCatalogItems: 1, recipes: 0, readyMeals: 4 }));
+    const { dialog } = renderDialog({ defaultTab: 'import', onImportNutridiet });
 
-    expect(within(dialog).getByText('centro.dietmaker')).toBeInTheDocument();
-    expect(within(dialog).getByText('Tudo salvo no arquivo')).toBeInTheDocument();
-    const submit = within(dialog).getByRole('button', { name: 'Salvar configurações do save' });
+    const file = new File([JSON.stringify({ formatVersion: 1 })], 'consultorio.nutridiet', { type: 'application/json' });
+    fireEvent.change(within(dialog).getByLabelText('Arquivo .nutridiet'), { target: { files: [file] } });
+    const submit = within(dialog).getByRole('button', { name: 'Importar arquivo' });
+    await waitFor(() => expect(within(dialog).getByRole('checkbox', { name: /sem criptografia/ })).toBeInTheDocument());
     expect(submit).toBeDisabled();
 
-    fireEvent.change(within(dialog).getByLabelText(/^Nome do save/), { target: { value: '  Consultório   Norte ' } });
+    fireEvent.click(within(dialog).getByRole('checkbox', { name: /sem criptografia/ }));
+    expect(submit).toBeEnabled();
     fireEvent.click(submit);
-    await waitFor(() => expect(props.onSaveSettings).toHaveBeenCalledWith({ displayName: 'Consultório Norte', phone: '(11) 99999-8888' }));
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Sincronizar agora' }));
-    await waitFor(() => expect(props.onSyncSave).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onImportNutridiet).toHaveBeenCalledWith(expect.stringContaining('formatVersion'), { confirmPlaintext: true }));
+    expect(await within(dialog).findByText(/3 paciente\(s\), 2 dieta\(s\)/)).toBeInTheDocument();
   });
 
-  it('explains the save tab when no save is open', () => {
-    const { dialog } = renderDialog({
-      defaultTab: 'save',
-      save: { details: null, fileName: null, syncState: 'unbound', editable: false },
-    });
+  it('imports a protected .nutridiet without asking for confirmation and reports a failure', async () => {
+    const onImportNutridiet = vi.fn().mockRejectedValue(new Error('A conta já tem dados.'));
+    const { dialog } = renderDialog({ defaultTab: 'import', onImportNutridiet });
 
-    expect(within(dialog).getByText('Nenhum save está aberto nesta sessão.')).toBeInTheDocument();
-    expect(within(dialog).queryByRole('form', { name: 'Configurações do save' })).not.toBeInTheDocument();
+    const file = new File([JSON.stringify({ formatVersion: 2 })], 'protegido.nutridiet', { type: 'application/json' });
+    fireEvent.change(within(dialog).getByLabelText('Arquivo .nutridiet'), { target: { files: [file] } });
+    const submit = within(dialog).getByRole('button', { name: 'Importar arquivo' });
+    await waitFor(() => expect(submit).toBeEnabled());
+    expect(within(dialog).queryByRole('checkbox', { name: /sem criptografia/ })).not.toBeInTheDocument();
+
+    fireEvent.click(submit);
+    expect(await within(dialog).findByText('A conta já tem dados.')).toBeInTheDocument();
+    expect(onImportNutridiet).toHaveBeenCalledWith(expect.any(String), { confirmPlaintext: false });
   });
 
-  it('blocks file operations until pending save settings are saved or discarded', () => {
-    const { dialog } = renderDialog({ defaultTab: 'save', savesContent: <button type="button">Abrir arquivo</button> });
-    const openFile = within(dialog).getByRole('button', { name: 'Abrir arquivo' });
-    expect(openFile).toBeEnabled();
-    fireEvent.change(within(dialog).getByLabelText(/^Nome do save/), { target: { value: 'Outro nome' } });
-    expect(openFile).toBeDisabled();
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Descartar alterações' }));
-    expect(openFile).toBeEnabled();
-  });
-
-  it('shows subscription as an informational tab without save controls', () => {
+  it('shows subscription as an informational tab without profile controls', () => {
     const { dialog } = renderDialog({ defaultTab: 'subscription' });
 
     expect(within(dialog).getByRole('tab', { name: 'Assinatura' })).toHaveAttribute('aria-selected', 'true');
@@ -136,13 +129,6 @@ describe('SettingsDialog', () => {
     expect(within(dialog).getByText('A gestão da assinatura estará disponível em breve.')).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
     expect(props.onOpenChange).not.toHaveBeenCalled();
-  });
-
-  it('keeps Settings open while a file operation is busy', () => {
-    const { props, dialog } = renderDialog({ busy: true, defaultTab: 'save' });
-    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
-    expect(props.onOpenChange).not.toHaveBeenCalled();
-    expect(within(dialog).getByLabelText(/^Nome do save/)).toBeDisabled();
   });
 
   it('requests password recovery and surfaces a failure for retry', async () => {

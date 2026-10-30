@@ -1,8 +1,10 @@
 # Decisão 09 — Topologia da V1 Local-First e Conta Local
 
-- **Status:** Aprovado pelo usuário para especificação; implementação pendente
+- **Status:** Substituída (modo local removido) — 2026-10-30
 - **Data:** 2026-08-29
 - **Escopo:** Topologia inicial de persistência e identidade da Conta
+
+> **Substituída em 2026-10-30 pela [Decisão 15](./15-esquema-transferencia-backend-supabase.md).** O produto grava tudo na conta (Supabase) e não tem mais modo local nem save `.nutridiet`. Este texto fica como registro histórico; só o formato do arquivo segue válido, como entrada da importação (Decisão 15, F4).
 
 ## 1. Decisão aprovada
 

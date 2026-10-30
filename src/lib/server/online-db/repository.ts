@@ -8,7 +8,6 @@ import { professionalProfiles, runtimeAuthSessions, saves } from './schema';
 type OnlineTransaction = Parameters<Parameters<ReturnType<typeof getOnlineDatabase>['transaction']>[0]>[0];
 
 export type SaveRegistryRecord = typeof saves.$inferSelect;
-export type SaveRegistryInsert = typeof saves.$inferInsert;
 
 export const uuidPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
 
@@ -71,26 +70,6 @@ export async function updateProfessionalProfile(input: {
   });
 }
 
-export async function updateSaveLabel(input: {
-  ownerId: string;
-  saveId: string;
-  labelCipher: Buffer;
-  labelIv: Buffer;
-  labelKekId: string;
-}): Promise<boolean> {
-  assertUuid(input.saveId);
-  return withOwnerTransaction(input.ownerId, async (transaction) => {
-    const updated = await transaction.execute(sql`
-      UPDATE private.saves
-      SET label_cipher = ${input.labelCipher}, label_iv = ${input.labelIv}, label_kek_id = ${input.labelKekId}
-      WHERE id = ${input.saveId} AND owner_id = ${input.ownerId}
-      RETURNING id
-    `);
-
-    return updated.rows.length === 1;
-  });
-}
-
 export async function findAuthSessionOwner(sessionId: string): Promise<string | null> {
   assertUuid(sessionId);
   const [session] = await onlineDatabase()
@@ -102,60 +81,6 @@ export async function findAuthSessionOwner(sessionId: string): Promise<string | 
   return session?.userId ?? null;
 }
 
-export async function registerSaveRecord(
-  input: SaveRegistryInsert,
-): Promise<{ record: SaveRegistryRecord; created: boolean } | null> {
-  return withOwnerTransaction(input.ownerId, async (transaction) => {
-    // Serialize registrations for the owner so concurrent requests cannot create a second save.
-    await transaction.execute(sql`SELECT owner_id FROM private.professional_profiles WHERE owner_id = ${input.ownerId} FOR UPDATE`);
-    const findByIdempotencyKey = () => transaction
-      .select()
-      .from(saves)
-      .where(and(eq(saves.ownerId, input.ownerId), eq(saves.idempotencyKey, input.idempotencyKey)))
-      .limit(1);
-    const findByLocalAccountId = () => transaction
-      .select()
-      .from(saves)
-      .where(eq(saves.localAccountId, input.localAccountId))
-      .limit(1);
-
-    const [byIdempotencyKey] = await findByIdempotencyKey();
-    if (byIdempotencyKey) return { record: byIdempotencyKey, created: false };
-
-    const [byLocalAccountId] = await findByLocalAccountId();
-    if (byLocalAccountId) return { record: byLocalAccountId, created: false };
-
-    const [existingSave] = await transaction.select({ id: saves.id }).from(saves)
-      .where(eq(saves.ownerId, input.ownerId)).limit(1);
-    if (existingSave) return null;
-
-    const { rows } = await transaction.execute(sql`
-      INSERT INTO private.saves (
-        id, owner_id, local_account_id, key_id, wrapped_key, wrap_iv, wrap_kek_id,
-        binding_mac, binding_kek_id, label_cipher, label_iv, label_kek_id, idempotency_key
-      ) VALUES (
-        ${input.id}, ${input.ownerId}, ${input.localAccountId}, ${input.keyId}, ${input.wrappedKey},
-        ${input.wrapIv}, ${input.wrapKekId}, ${input.bindingMac}, ${input.bindingKekId},
-        ${input.labelCipher ?? null}, ${input.labelIv ?? null}, ${input.labelKekId ?? null}, ${input.idempotencyKey}
-      )
-      ON CONFLICT DO NOTHING
-      RETURNING
-        id, owner_id AS "ownerId", local_account_id AS "localAccountId", key_id AS "keyId",
-        wrapped_key AS "wrappedKey", wrap_iv AS "wrapIv", wrap_kek_id AS "wrapKekId",
-        binding_mac AS "bindingMac", binding_kek_id AS "bindingKekId",
-        label_cipher AS "labelCipher", label_iv AS "labelIv", label_kek_id AS "labelKekId",
-        idempotency_key AS "idempotencyKey", created_at AS "createdAt"
-    `);
-    const created = rows[0] as unknown as SaveRegistryRecord | undefined;
-    if (created) return { record: created, created: true };
-
-    const [idempotencyRace] = await findByIdempotencyKey();
-    if (idempotencyRace) return { record: idempotencyRace, created: false };
-    const [claimRace] = await findByLocalAccountId();
-    return claimRace ? { record: claimRace, created: false } : null;
-  });
-}
-
 export async function getSaveRecord(ownerId: string, saveId: string): Promise<SaveRegistryRecord | null> {
   assertUuid(saveId);
   return withOwnerTransaction(ownerId, async (transaction) => {
@@ -165,45 +90,6 @@ export async function getSaveRecord(ownerId: string, saveId: string): Promise<Sa
       .where(and(eq(saves.id, saveId), eq(saves.ownerId, ownerId)))
       .limit(1);
     return record ?? null;
-  });
-}
-
-export interface SaveCatalogRecord {
-  id: string;
-  createdAt: Date;
-  labelCipher: Buffer | null;
-  labelIv: Buffer | null;
-  labelKekId: string | null;
-}
-
-export async function getSaveCatalogPage(ownerId: string, pageIndex: number, pageSize = 50): Promise<{
-  items: SaveCatalogRecord[];
-  totalRows: number;
-}> {
-  if (!Number.isSafeInteger(pageIndex) || pageIndex < 0 || !Number.isSafeInteger(pageSize) || pageSize !== 50) {
-    throw new TypeError('Save catalog pagination is invalid.');
-  }
-  const offset = pageIndex * pageSize;
-  if (!Number.isSafeInteger(offset)) throw new TypeError('Save catalog pagination is invalid.');
-  return withOwnerTransaction(ownerId, async (transaction) => {
-    const [countRow] = await transaction
-      .select({ totalRows: sql<number>`count(*)::integer` })
-      .from(saves)
-      .where(eq(saves.ownerId, ownerId));
-    const items = await transaction
-      .select({
-        id: saves.id,
-        createdAt: saves.createdAt,
-        labelCipher: saves.labelCipher,
-        labelIv: saves.labelIv,
-        labelKekId: saves.labelKekId,
-      })
-      .from(saves)
-      .where(eq(saves.ownerId, ownerId))
-      .orderBy(desc(saves.createdAt), desc(saves.id))
-      .limit(pageSize)
-      .offset(offset);
-    return { items, totalRows: Number(countRow?.totalRows ?? 0) };
   });
 }
 

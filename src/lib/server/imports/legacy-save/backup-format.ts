@@ -6,7 +6,7 @@ import {
   BACKUP_SCHEMA_VERSION,
   BACKUP_TABLE_NAMES,
   LEGACY_BACKUP_SCHEMA_VERSION,
-} from '@/lib/infrastructure/local-db/logical-export-schema';
+} from './logical-export-schema';
 import type {
   AccountRow,
   BackupEnvelope,
@@ -27,14 +27,15 @@ import type {
   ReadyMealRow,
   RecipeIngredientRow,
   RecipeRow,
-} from '@/lib/infrastructure/local-db/logical-export-schema';
+} from './logical-export-schema';
 import { isAgendaReminder, type AgendaReminder } from '@/lib/agenda-reminders';
-import { BackupRepositoryError, type BackupErrorCode, type BackupRepository } from '@/lib/persistence/backup-repository';
-import type { AccountContext } from '@/lib/persistence/account-context';
-import type { DietDraftStore } from './diets/diet-ports';
-import { ProtectedSaveError, type ProtectedSaveGrant } from '@/lib/domain/protected-save';
-import { decryptProtectedSave, encryptProtectedSave } from '@/lib/infrastructure/crypto/protected-save';
-import { OnlineSaveSessionError, type OnlineSaveSession } from './online-save-session';
+
+/** Validation failures of a legacy `.nutridiet` file. */
+export type BackupErrorCode =
+  | 'BACKUP_FORMAT_INVALID'
+  | 'BACKUP_APP_MISMATCH'
+  | 'BACKUP_VERSION_UNSUPPORTED'
+  | 'BACKUP_RELATION_INVALID';
 
 export interface BackupValidationContext {
   accountId?: string;
@@ -532,156 +533,4 @@ export function parseBackupEnvelope(serialized: string, context: BackupValidatio
     fail('BACKUP_FORMAT_INVALID', 'O arquivo de backup não contém JSON válido.', cause);
   }
   return validateBackupEnvelope(parsed, context);
-}
-
-export interface BackupExportResult {
-  fileName: string;
-  content: string;
-  envelope: BackupEnvelope;
-}
-
-export interface BackupApplicationDependencies {
-  accountContext: AccountContext;
-  repository: BackupRepository;
-  draftStore: Pick<DietDraftStore, 'listRecoverableByAccount' | 'removeIfRevision'>;
-  getCheckpointState?(): Promise<{ workspaceRevision: number; checkpointRevision: number }>;
-  savePendingCheckpoint?(): Promise<void>;
-  protectedSave?: {
-    readonly session: OnlineSaveSession;
-    readonly identity: Pick<ProtectedSaveGrant, 'ownerId' | 'saveId' | 'localAccountId' | 'keyId' | 'bindingProof'>;
-    authorizeRestore(): Promise<void>;
-  };
-}
-
-export interface BackupApplication {
-  exportBackup(): Promise<BackupExportResult>;
-  validateBackup(serialized: string): Promise<BackupEnvelope>;
-  restoreBackup(serialized: string, options?: { confirmed?: boolean; pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean }): Promise<void>;
-}
-
-function appErrorFromCause(code: BackupErrorCode, message: string, cause: unknown): BackupApplicationError {
-  if (cause instanceof BackupApplicationError) return cause;
-  if (cause instanceof BackupRepositoryError && cause.code === code) return new BackupApplicationError(code, message, { cause });
-  return new BackupApplicationError(code, message, { cause });
-}
-
-function exportFileName(exportedAt: string): string {
-  const datePart = exportedAt.slice(0, 10) || 'local';
-  return `nutridiet-backup-${datePart}.nutridiet`;
-}
-
-export function createBackupApplication(dependencies: BackupApplicationDependencies): BackupApplication {
-  const getValidationContext = async (): Promise<{ accountId: string; schemaVersion: string }> => {
-    const active = await dependencies.accountContext.requireActive();
-    return { accountId: active.accountId, schemaVersion: BACKUP_SCHEMA_VERSION };
-  };
-
-  const withProtectedGrant = async <T>(
-    context: { accountId: string; schemaVersion: string },
-    operation: (grant: ProtectedSaveGrant) => Promise<T>,
-  ): Promise<T> => {
-    const protectedSave = dependencies.protectedSave;
-    if (!protectedSave) throw new Error('Protected backup access is unavailable.');
-    if (context.accountId !== protectedSave.identity.localAccountId) {
-      throw new BackupApplicationError('BACKUP_APP_MISMATCH', 'O arquivo pertence a outra Conta clínica.');
-    }
-    try {
-      return await protectedSave.session.withOperation(protectedSave.identity, operation);
-    } catch (cause) {
-      if (cause instanceof BackupApplicationError) throw cause;
-      if (cause instanceof OnlineSaveSessionError) {
-        throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'Autorize novamente este save para continuar.');
-      }
-      if (cause instanceof ProtectedSaveError) {
-        if (cause.code === 'IDENTITY_MISMATCH') {
-          throw new BackupApplicationError('BACKUP_APP_MISMATCH', 'O arquivo pertence a outra Conta clínica ou save.');
-        }
-        if (cause.code === 'KEY_INVALID') {
-          throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'A autorização deste save não está disponível.');
-        }
-        throw new BackupApplicationError('BACKUP_FORMAT_INVALID', 'O arquivo protegido não é um backup NutriDiet válido.');
-      }
-      throw cause;
-    }
-  };
-
-  const restoreValidatedEnvelope = async (
-    context: { accountId: string; schemaVersion: string },
-    envelope: BackupEnvelope,
-    options: { confirmed?: boolean; pendingChanges?: 'save' | 'discard'; discardDrafts?: boolean },
-  ): Promise<void> => {
-    if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
-    const drafts = await dependencies.draftStore.listRecoverableByAccount(context.accountId);
-    if (drafts.length > 0 && options.discardDrafts) {
-      for (const draft of drafts) {
-        const removed = await dependencies.draftStore.removeIfRevision(draft.draftId, draft.draftRevision);
-        if (!removed) throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Um rascunho mudou durante a restauração; nenhum rascunho atualizado foi descartado.');
-      }
-      if ((await dependencies.draftStore.listRecoverableByAccount(context.accountId)).length > 0) {
-        throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Ainda há rascunhos pendentes; a base local não foi alterada.');
-      }
-    } else if (drafts.length > 0) {
-      throw new BackupApplicationError('BACKUP_PENDING_EDITS', 'Salve os rascunhos no perfil ou descarte-os explicitamente antes de importar o backup.');
-    }
-    const checkpoint = await dependencies.getCheckpointState?.();
-    if (checkpoint && checkpoint.workspaceRevision > checkpoint.checkpointRevision) {
-      if (options.pendingChanges === 'save') {
-        if (!dependencies.savePendingCheckpoint) throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'O save principal não está disponível para gravar as alterações pendentes.');
-        await dependencies.savePendingCheckpoint();
-        const saved = await dependencies.getCheckpointState?.();
-        if (saved && saved.workspaceRevision > saved.checkpointRevision) {
-          throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Ainda há alterações locais sem checkpoint no arquivo principal.');
-        }
-      } else if (options.pendingChanges !== 'discard') {
-        throw new BackupApplicationError('BACKUP_PENDING_CHECKPOINT', 'Escolha salvar ou descartar as alterações locais antes de importar o backup.');
-      }
-    }
-    try {
-      await dependencies.repository.replaceAccountSnapshot(context.accountId, envelope);
-    } catch (cause) {
-      throw appErrorFromCause('BACKUP_RESTORE_FAILED', 'A importação falhou; a base anterior foi preservada.', cause);
-    }
-  };
-
-  return {
-    exportBackup: async () => {
-      try {
-        const active = await dependencies.accountContext.requireActive();
-        const context = { accountId: active.accountId, schemaVersion: BACKUP_SCHEMA_VERSION };
-        const exportWithGrant = async (grant?: ProtectedSaveGrant) => {
-          const envelope = await dependencies.repository.readAccountSnapshot(active.accountId);
-          const validated = validateBackupEnvelope(envelope, { accountId: active.accountId });
-          const content = grant ? await encryptProtectedSave(validated, grant) : JSON.stringify(validated);
-          if (!content) throw new Error('O conteúdo do backup ficou vazio.');
-          return { fileName: exportFileName(validated.exportedAt), content, envelope: validated };
-        };
-        return dependencies.protectedSave
-          ? await withProtectedGrant(context, (grant) => exportWithGrant(grant))
-          : await exportWithGrant();
-      } catch (cause) {
-        throw appErrorFromCause('BACKUP_EXPORT_FAILED', 'O backup não pôde ser concluído. A base local permanece utilizável.', cause);
-      }
-    },
-    validateBackup: async (serialized) => {
-      const context = await getValidationContext();
-      if (!dependencies.protectedSave) return parseBackupEnvelope(serialized, context);
-      return withProtectedGrant(context, (grant) => decryptProtectedSave(serialized, grant));
-    },
-    restoreBackup: async (serialized, options = {}) => {
-      const context = await getValidationContext();
-      if (!dependencies.protectedSave) {
-        return restoreValidatedEnvelope(context, parseBackupEnvelope(serialized, context), options);
-      }
-      if (!dependencies.protectedSave.session.isAuthorizedFor(dependencies.protectedSave.identity)) {
-        throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'Autorize novamente este save para continuar.');
-      }
-      if (options.confirmed !== true) throw new BackupApplicationError('BACKUP_CANCELLED', 'A importação foi cancelada; a base local não foi alterada.');
-      try { await dependencies.protectedSave.authorizeRestore(); }
-      catch { throw new BackupApplicationError('BACKUP_AUTH_REQUIRED', 'A restauração exige uma nova autorização online deste save.'); }
-      return withProtectedGrant(context, async (grant) => {
-        const envelope = await decryptProtectedSave(serialized, grant);
-        return restoreValidatedEnvelope(context, envelope, options);
-      });
-    },
-  };
 }

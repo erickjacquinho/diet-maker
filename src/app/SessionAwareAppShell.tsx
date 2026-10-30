@@ -1,33 +1,28 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ProfileSessionSnapshot } from '@/lib/application/profile-session';
 import { AgendaReminderScheduler } from '@/app/AgendaReminderScheduler';
 import { SidebarNavigationAdapter } from '@/app/navigation/SidebarNavigationAdapter';
-import { getBrowserProfileSession, type BrowserPatientRuntime } from '@/lib/application/browser-composition';
+import { getBrowserProfileSession, signOutBrowserAccount, type BrowserPatientRuntime } from '@/lib/application/browser-composition';
 import { AppLayoutShell } from '@/components/templates';
 import { Button } from '@/components/atoms';
 import { toast } from 'sonner';
-import { signOutBrowserAccount } from '@/lib/application/browser-composition';
 import { getBrowserProfessionalProfileStore } from '@/lib/application/professional-profile-store';
-import { isOnlinePersistence } from '@/lib/application/persistence-mode';
 
 const DEFAULT_INTERNAL_ROUTE = '/dashboard';
 const PUBLIC_ROUTES = new Set(['/', '/login', '/criar-conta', '/recuperar-senha', '/redefinir-senha']);
+// Routes of the removed save screens: old bookmarks land on the dashboard.
+const REMOVED_ROUTES = new Set(['/home', '/saves']);
 const EMPTY_PROFILE_SNAPSHOT: ProfileSessionSnapshot<BrowserPatientRuntime> = {
   status: 'empty',
-  authorizationExpiresAt: null,
-  syncState: 'unbound',
   account: null,
   accountId: null,
   runtime: null,
-  fileName: null,
   hydration: 'ready',
-  resumeFileName: null,
   error: null,
-  protectedCopyRequired: false,
 };
 const subscribeToNoProfile = () => () => undefined;
 const getEmptyProfileSnapshot = () => EMPTY_PROFILE_SNAPSHOT;
@@ -52,17 +47,13 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const isPublicRoute = PUBLIC_ROUTES.has(pathname);
-  const isDashboardRoute = pathname === DEFAULT_INTERNAL_ROUTE;
-  const isLegacyRoute = pathname === '/home' || pathname === '/saves';
+  const isRemovedRoute = REMOVED_ROUTES.has(pathname);
   const session = isPublicRoute ? null : getBrowserProfileSession();
   const subscribe = session?.subscribe ?? subscribeToNoProfile;
   const getSnapshot = session?.getSnapshot ?? getEmptyProfileSnapshot;
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const [accountGate, setAccountGate] = useState<AccountGateState>('checking');
-  const previousPathname = useRef(pathname);
-  const online = isOnlinePersistence();
-  const hasUsableSession = Boolean(snapshot.runtime) && ['active', 'paused', 'busy'].includes(snapshot.status);
-  const isPreservingLockedSave = snapshot.status === 'locked' && Boolean(snapshot.runtime);
+  const hasUsableSession = Boolean(snapshot.runtime) && snapshot.status === 'active';
 
   useEffect(() => {
     if (isPublicRoute) {
@@ -90,36 +81,15 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
     return () => { current = false; };
   }, [isPublicRoute]);
 
-  // Online mode has no save to open: once the account is valid, its data opens by itself.
+  // There is no save to open: once the account is valid, its data opens by itself.
   useEffect(() => {
-    if (!online || isPublicRoute || !session || accountGate !== 'ready') return;
+    if (isPublicRoute || !session || accountGate !== 'ready') return;
     if (snapshot.runtime || snapshot.status === 'busy' || snapshot.error) return;
     void session.loadProfile().catch(() => undefined);
-  }, [accountGate, isPublicRoute, online, session, snapshot.error, snapshot.runtime, snapshot.status]);
+  }, [accountGate, isPublicRoute, session, snapshot.error, snapshot.runtime, snapshot.status]);
 
   useEffect(() => {
-    if (isPublicRoute || !session || typeof snapshot.authorizationExpiresAt !== 'number') return;
-    const handleResume = () => session.onResume();
-    const delay = Math.max(0, snapshot.authorizationExpiresAt - Date.now());
-    const timer = window.setTimeout(handleResume, delay);
-    window.addEventListener('focus', handleResume);
-    document.addEventListener('visibilitychange', handleResume);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('focus', handleResume);
-      document.removeEventListener('visibilitychange', handleResume);
-    };
-  }, [isPublicRoute, session, snapshot.authorizationExpiresAt]);
-
-  useEffect(() => {
-    if (previousPathname.current === pathname) return;
-    previousPathname.current = pathname;
-    if (isPublicRoute || !session || !['pending', 'paused', 'syncing'].includes(snapshot.syncState)) return;
-    void session.sync().catch(() => undefined);
-  }, [isPublicRoute, pathname, session, snapshot.syncState]);
-
-  useEffect(() => {
-    if (isPublicRoute || isPreservingLockedSave || accountGate === 'checking' || accountGate === 'unavailable') return;
+    if (isPublicRoute || accountGate === 'checking' || accountGate === 'unavailable') return;
     if (accountGate === 'anonymous') {
       router.replace('/login');
       return;
@@ -128,12 +98,8 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
       if (pathname !== '/criar-conta') router.replace('/criar-conta?completar=1');
       return;
     }
-    if (isLegacyRoute) {
-      router.replace(DEFAULT_INTERNAL_ROUTE);
-      return;
-    }
-    if (!online && !hasUsableSession && !isDashboardRoute) router.replace(DEFAULT_INTERNAL_ROUTE);
-  }, [accountGate, hasUsableSession, isDashboardRoute, online, isLegacyRoute, isPreservingLockedSave, isPublicRoute, pathname, router]);
+    if (isRemovedRoute) router.replace(DEFAULT_INTERNAL_ROUTE);
+  }, [accountGate, isPublicRoute, isRemovedRoute, pathname, router]);
 
   const handleSignOut = async (): Promise<void> => {
     try {
@@ -147,23 +113,6 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   };
 
   if (isPublicRoute) return <>{children}</>;
-  const lockedGate = isPreservingLockedSave ? (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8" data-session-gate="locked">
-        {snapshot.error ? (
-          <div role="alert" className="max-w-container-reading rounded-control border border-warning-border bg-warning-soft p-4 text-style-body text-warning">
-            O save está bloqueado. O rascunho local não foi preservado; tente novamente antes de sair.
-          </div>
-        ) : (
-          <div role="status" aria-live="polite">O save expirou. Preservando o rascunho local antes de fechar a sessão…</div>
-        )}
-        {snapshot.error ? (
-          <Button type="button" onClick={() => void session?.retryLockedSave().catch(() => undefined)}>
-            Tentar preservar rascunho
-          </Button>
-        ) : null}
-      </main>
-  ) : null;
-  if (!isPreservingLockedSave) {
   if (accountGate === 'checking') {
     return <div role="status" aria-live="polite" data-session-gate="checking">Verificando sua conta…</div>;
   }
@@ -173,7 +122,10 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
   if (accountGate !== 'ready') {
     return <div role="status" aria-live="polite" data-session-gate="redirecting">Encaminhando para o acesso da conta…</div>;
   }
-  if (online && !hasUsableSession && !isLegacyRoute) {
+  if (isRemovedRoute) {
+    return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo o dashboard…</div>;
+  }
+  if (!hasUsableSession) {
     if (snapshot.error) {
       return (
         <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8" data-session-gate="account-unavailable">
@@ -186,20 +138,13 @@ export function SessionAwareAppShell({ children }: SessionAwareAppShellProps) {
     }
     return <div role="status" aria-live="polite" data-session-gate="opening-account">Abrindo sua conta…</div>;
   }
-  if (isLegacyRoute || (!hasUsableSession && !isDashboardRoute)) {
-    return <div role="status" aria-live="polite" data-session-gate="redirecting">Abrindo o dashboard…</div>;
-  }
-  }
 
   return (
     <>
-      {lockedGate}
-      <div hidden={isPreservingLockedSave} aria-hidden={isPreservingLockedSave || undefined} inert={isPreservingLockedSave || undefined}>
-      <AgendaReminderScheduler accountId={hasUsableSession ? snapshot.accountId ?? snapshot.runtime?.account.id ?? null : null} />
+      <AgendaReminderScheduler accountId={snapshot.accountId ?? snapshot.runtime?.account.id ?? null} />
       <AppLayoutShell sidebar={<SidebarNavigationAdapter onSignOut={handleSignOut} />}>
         {children}
       </AppLayoutShell>
-      </div>
     </>
   );
 }

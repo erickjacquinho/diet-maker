@@ -25,7 +25,6 @@ const canonicalFiles = [
   'src/lib/application/account/account-context.ts',
   'src/lib/application/patients',
   'src/lib/persistence',
-  'src/lib/infrastructure/local-db',
 ];
 
 function readSource(relativePath: string): string {
@@ -62,18 +61,6 @@ describe('legacy patient persistence cutover', () => {
     expect(violations).toEqual([]);
   });
 
-  it('limits browser local storage to the nonclinical pending-revocation marker', () => {
-    const source = readSource('src/lib/application/browser-composition.ts');
-    const localStorageCalls = source.match(/window\.localStorage\.(?:getItem|setItem|removeItem)\([^;]+\)/g) ?? [];
-
-    expect(source).toContain("const revocationMarkerKey = 'nutridiet.online-save-revocation-pending'");
-    expect(localStorageCalls).toEqual([
-      'window.localStorage.getItem(revocationMarkerKey)',
-      "window.localStorage.setItem(revocationMarkerKey, '1')",
-      'window.localStorage.removeItem(revocationMarkerKey)',
-    ]);
-  });
-
   it('keeps canonical patient modules free from legacy storage and UI dependencies', () => {
     const forbidden = /localStorage|sessionStorage|nutridiet_patients|nutridiet_assessments_|nutridiet_diets_|diet_maker_custom_objectives|from ['"]react['"]|from ['"]next\//i;
     const violations = canonicalFiles.flatMap((file) => expandSources(file).some((source) => forbidden.test(source)) ? [file] : []);
@@ -84,8 +71,7 @@ describe('legacy patient persistence cutover', () => {
   it('does not introduce a next-follow-up persistence column in the canonical patient model', () => {
     const canonicalSources = [
       readSource('src/lib/domain/patient.ts'),
-      readSource('src/lib/infrastructure/local-db/schema.ts'),
-      readSource('src/lib/infrastructure/local-db/patient-repository.ts'),
+      readSource('src/lib/server/patients/patient-repository.ts'),
     ].join('\n');
 
     expect(canonicalSources).not.toMatch(/nextEvent|next_event/i);

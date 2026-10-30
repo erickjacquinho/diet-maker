@@ -10,8 +10,7 @@ import { tacoSnapshotFixture } from '../fixtures/diets';
 
 const mockPush = vi.fn();
 const mockProfileSession = vi.hoisted(() => ({
-  isSaveAuthorized: vi.fn(() => true),
-  registerPendingDraftFlush: vi.fn((_flush: () => Promise<void>) => () => undefined),
+  isReady: vi.fn(() => true),
 }));
 
 const canonicalPatient = {
@@ -59,7 +58,6 @@ vi.mock('@/lib/application/browser-composition', () => ({
   getBrowserPatientApplication: () => Promise.resolve(mockPatientApplication),
   getBrowserDietApplication: () => Promise.resolve(mockDietApplication),
   getBrowserProfileSession: () => mockProfileSession,
-  preserveBrowserDietDraft: (_application: unknown, ...args: unknown[]) => mockDietApplication.flushDraft(...args),
 }));
 
 const patient = {
@@ -123,7 +121,7 @@ const dietPlan: FullDietPlan = {
 describe('useDietBuilderPage meal variation context', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockProfileSession.isSaveAuthorized.mockReturnValue(true);
+    mockProfileSession.isReady.mockReturnValue(true);
     mockPatientApplication.getPatientProfile.mockResolvedValue({ patient: canonicalPatient, initials: 'PT', availableObjectives: ['Manutenção'] });
     mockDietApplication.openEditor.mockResolvedValue({
       draft: {
@@ -224,33 +222,13 @@ describe('useDietBuilderPage meal variation context', () => {
     expect(result.current.confirmationBusy).toBe(false);
   });
 
-  it('blocks new clinical edits after the online save locks but still flushes the current local draft', async () => {
-    mockProfileSession.isSaveAuthorized.mockReturnValue(false);
-    mockDietApplication.flushDraft.mockResolvedValue({ status: 'SAVED', revision: 2, updatedAt: '2026-08-30T12:00:00.000Z' });
+  it('blocks new clinical edits while the account data is not open', async () => {
+    mockProfileSession.isReady.mockReturnValue(false);
     const { result } = renderHook(() => useDietBuilderPage());
     await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
     const originalCount = result.current.dietPlan!.carbCyclingVariations.length;
 
     act(() => result.current.handleAddVariation());
     expect(result.current.dietPlan!.carbCyclingVariations).toHaveLength(originalCount);
-
-    const preserveDraft = mockProfileSession.registerPendingDraftFlush.mock.calls.at(-1)?.[0];
-    expect(preserveDraft).toBeTypeOf('function');
-    await act(async () => preserveDraft!());
-    expect(mockDietApplication.flushDraft).toHaveBeenCalledWith('draft-variations', expect.objectContaining({ mode: 'CARB_CYCLING' }));
-  });
-
-  it('retries a superseded local flush once before declaring the draft preserved', async () => {
-    mockDietApplication.flushDraft
-      .mockResolvedValueOnce({ status: 'SUPERSEDED', currentRevision: 2 })
-      .mockResolvedValueOnce({ status: 'SAVED', revision: 3, updatedAt: '2026-08-30T12:00:00.000Z' });
-    const { result } = renderHook(() => useDietBuilderPage());
-    await waitFor(() => expect(result.current.dietPlan?.id).toBe('diet-variations'));
-
-    const preserveDraft = mockProfileSession.registerPendingDraftFlush.mock.calls.at(-1)?.[0];
-    await act(async () => preserveDraft!());
-
-    expect(mockDietApplication.flushDraft).toHaveBeenCalledTimes(2);
-    expect(mockDietApplication.flushDraft).toHaveBeenLastCalledWith('draft-variations', expect.objectContaining({ mode: 'CARB_CYCLING' }));
   });
 });

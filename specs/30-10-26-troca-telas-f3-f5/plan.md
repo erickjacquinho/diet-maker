@@ -48,3 +48,11 @@ ADR-009, Decisões 09–13 e `AGENTS.md` atualizados para o modelo 100% online.
 - [x] Invariantes C1–C9 e matriz M1–M14 (`backend-foundation.integration`) passam com as tabelas novas (sem `DELETE`, RLS forçada e política em todas).
 - [x] `tests/server/domain.integration.test.ts`: fluxo clínico completo da conta A com o papel `app_runtime` e o driver `pg`, cifragem de S1 conferida no banco, conta B cega a todos os módulos, escritas entre contas e `DELETE` recusados.
 - [ ] Telas contra esse banco (navegador), importação de um `.nutridiet` real e Vercel: pendentes.
+
+## F5 — remoção do modo local (feita em 2026-10-30)
+- [x] Online é o único modo: `persistence-mode` e `NEXT_PUBLIC_PERSISTENCE` removidos; `browser-composition` só monta o runtime HTTP.
+- [x] Removidos: `local-db` (PGlite), `file-system-access`, rascunhos em IndexedDB, `backup-application`, `online-save-session`, `profile-session` antigo (virou um tipo enxuto), `persistence/backup-repository|save-file`.
+- [x] Removidos: `/saves`, `/home` (redirecionam ao dashboard), `/api/saves/*`, `SavesDashboard`, `useSaveManagement`, `ProfileCreateDialog`, aba "Save" do `SettingsDialog`, bloco de sincronização da `SidebarNav`, botão "Abrir configurações de saves" do dashboard.
+- [x] Mantido só o necessário à importação: `src/lib/server/imports/legacy-save` (esquema lógico, validação/migração do envelope, mapeadores de dieta, decifra v2) e `private.saves` em leitura (`getSaveRecord`) para decifrar arquivos v2 até o fim da transição.
+- [x] Testes do modo local removidos; os do servidor (PGlite como emulador de Postgres e Postgres real) cobrem o domínio.
+- [ ] Pendente (não bloqueia): E2E Playwright dos fluxos online (os específicos de save foram removidos); desativar `private.saves` com uma migration própria ao fim da transição, após a importação dos saves reais; limpar o conceito de checkpoint ainda presente em `composition-root`/`diet-application` (sem efeito no modo online).

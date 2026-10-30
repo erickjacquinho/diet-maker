@@ -96,18 +96,6 @@ describe('SidebarNav preservation contract', () => {
     expect(screen.getByRole('button', { name: 'Recolher Menu' })).toBeInTheDocument();
   });
 
-  it.each([
-    ['pending', 'Alterações locais pendentes', 'Salvar alterações'],
-    ['paused', 'Sincronização pausada', 'Reautorizar arquivo'],
-  ] as const)('keeps global profile recovery for %s state', (state, message, action) => {
-    const onRetryProfileSync = vi.fn(async () => undefined);
-    renderSidebar({ profileSyncState: state, onRetryProfileSync });
-
-    expect(screen.getByRole('status')).toHaveTextContent(message);
-    fireEvent.click(screen.getByRole('button', { name: action }));
-    expect(onRetryProfileSync).toHaveBeenCalledTimes(1);
-  });
-
   it('keeps the public compound component parts available', () => {
     expect(SidebarNavComponent.Brand).toBeDefined();
     expect(SidebarNavComponent.Item).toBeDefined();

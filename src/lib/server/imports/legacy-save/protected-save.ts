@@ -1,5 +1,5 @@
-import { BackupApplicationError, validateBackupEnvelope } from '@/lib/application/backup-application';
-import type { BackupEnvelope } from '@/lib/infrastructure/local-db/logical-export-schema';
+import { BackupApplicationError, validateBackupEnvelope } from './backup-format';
+import type { BackupEnvelope } from './logical-export-schema';
 import {
   assertProtectedSaveGrant,
   decodeBase64Url,

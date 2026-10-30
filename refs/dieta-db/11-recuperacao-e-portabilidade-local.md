@@ -1,8 +1,10 @@
 # Decisão 11 — Save Principal, Recuperação e Portabilidade
 
-- **Status:** Implementada e validada no SDD de backup manual simples
+- **Status:** Substituída (backup/restauração locais removidos; `.nutridiet` só é importado) — 2026-10-30
 - **Data:** 2026-08-30
 - **Escopo:** Backup manual simples dos dados canônicos locais
+
+> **Substituída em 2026-10-30 pela [Decisão 15](./15-esquema-transferencia-backend-supabase.md).** O produto grava tudo na conta (Supabase) e não tem mais modo local nem save `.nutridiet`. Este texto fica como registro histórico; só o formato do arquivo segue válido, como entrada da importação (Decisão 15, F4).
 
 ## 1. Decisão
 

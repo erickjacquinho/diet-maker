@@ -24,9 +24,9 @@ All AI agents working on this codebase MUST read and strictly follow the target 
 | **Domain Context** | [docs/context/CONTEXT.md](file:///c:/Programmer/diet-maker/docs/context/CONTEXT.md) | Termos nutricionais, tabela TACO, VET e fórmulas de macros |
 | **Architecture Decisions** | [docs/adr/](file:///c:/Programmer/diet-maker/docs/adr/) | Registros de decisões arquiteturais ADR-001 a ADR-008 |
 | **Pesquisa Mercadológica** | [refs/pesquisa-mercadologica/index.md](file:///c:/Programmer/diet-maker/refs/pesquisa-mercadologica/index.md) | Panorama do mercado brasileiro, concorrentes, personas e proposta de valor |
-| **Dieta DB & Persistência** | [refs/dieta-db/index.md](file:///c:/Programmer/diet-maker/refs/dieta-db/index.md) | Arquitetura do banco relacional local, receitas, refeições e arquivo mestre |
-| **Proposta futura — MVP online / Supabase por conta** | [refs/dieta-db/proposta-mvp-online-supabase.md](refs/dieta-db/proposta-mvp-online-supabase.md) | Retomar ao discutir migração 100% online: conta única com todos os dados, sem saves ou portabilidade; após estabilizar o núcleo e antes do lançamento do MVP. Registro de intenção, não autorização de execução |
-| **Retrocompatibilidade do Save** | [refs/dieta-db/11-recuperacao-e-portabilidade-local.md](refs/dieta-db/11-recuperacao-e-portabilidade-local.md#21-retrocompatibilidade-do-save) | Regra obrigatória ao atualizar o esquema do save: preservar compatibilidade com a versão anterior sempre que possível |
+| **Dieta DB & Persistência** | [refs/dieta-db/index.md](file:///c:/Programmer/diet-maker/refs/dieta-db/index.md) | Persistência 100% online (Supabase por conta, Decisão 15); Decisões 09–13 e ADR-009 são o histórico do modo local, removido |
+| **Backend Supabase (Decisão 15)** | [refs/dieta-db/15-esquema-transferencia-backend-supabase.md](refs/dieta-db/15-esquema-transferencia-backend-supabase.md) | Fonte de verdade da persistência: `/api/v1`, esquema `app` com RLS, campos S1 cifrados por conta e importação de `.nutridiet`. Migrations remotas, segredos e publicação exigem confirmação do usuário |
+| **Importação de `.nutridiet`** | [refs/dieta-db/11-recuperacao-e-portabilidade-local.md](refs/dieta-db/11-recuperacao-e-portabilidade-local.md#21-retrocompatibilidade-do-save) | O leitor em `src/lib/server/imports/legacy-save` aceita os formatos v1 e v2 já emitidos: não quebre a leitura deles |
 | **Plan Execution** | `/speckit-implement` | Comando obrigatório para executar planos de implementação aprovados |
 
 ### Design System component catalog

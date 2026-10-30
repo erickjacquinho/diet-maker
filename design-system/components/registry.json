@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseline": {
-    "currentSourceCount": 84,
+    "currentSourceCount": 82,
     "capturedAt": "2026-10-10",
     "legacyAudit": {
       "findings": 0,
@@ -3485,8 +3485,7 @@
         "organism-patient-assessments-table",
         "organism-patient-consultation-history-table",
         "template-diet-pdf-template",
-        "organism-meal-card-container",
-        "organism-saves-dashboard"
+        "organism-meal-card-container"
       ],
       "primitiveBase": "ui-table",
       "specStatus": "homologated",
@@ -4310,22 +4309,7 @@
           "documentedBy": "non-visual"
         },
         {
-          "name": "SettingsSaveSyncState",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
           "name": "SettingsProfileState",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "SettingsSaveState",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "SaveSettingsInput",
           "kind": "type",
           "documentedBy": "non-visual"
         },
@@ -5539,44 +5523,6 @@
       "exceptions": []
     },
     {
-      "id": "molecule-profile-create-dialog",
-      "name": "ProfileCreateDialog",
-      "nature": "domain",
-      "lifecycle": "implemented",
-      "currentLayer": "molecule",
-      "targetLayer": "molecule",
-      "primaryCategory": "overlays",
-      "traits": [
-        "async"
-      ],
-      "sourceFiles": [
-        {
-          "path": "src/components/molecules/profile-create-dialog.tsx",
-          "role": "implementation",
-          "discoveredLayer": "molecule"
-        }
-      ],
-      "publicExports": [
-        {
-          "name": "ProfileCreateDialogProps",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "ProfileCreateDialog",
-          "kind": "component",
-          "documentedBy": "profile"
-        }
-      ],
-      "profile": "design-system/components/profiles/molecules/profile-create-dialog.md",
-      "consumers": [
-        "src/app/navigation/useSaveManagement.tsx"
-      ],
-      "primitiveBase": "ui-dialog",
-      "specStatus": "homologated",
-      "exceptions": []
-    },
-    {
       "id": "organism-login-form",
       "name": "LoginForm",
       "nature": "domain",
@@ -5710,52 +5656,6 @@
         "src/app/redefinir-senha/page.tsx"
       ],
       "primitiveBase": null,
-      "specStatus": "homologated",
-      "exceptions": []
-    },
-    {
-      "id": "organism-saves-dashboard",
-      "name": "SavesDashboard",
-      "nature": "domain",
-      "lifecycle": "implemented",
-      "currentLayer": "organism",
-      "targetLayer": "organism",
-      "primaryCategory": "data-display",
-      "traits": [],
-      "sourceFiles": [
-        {
-          "path": "src/components/organisms/SavesDashboard.tsx",
-          "role": "implementation",
-          "discoveredLayer": "organism"
-        }
-      ],
-      "publicExports": [
-        {
-          "name": "SaveCatalogItem",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "SaveLocationState",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "SavesDashboardProps",
-          "kind": "type",
-          "documentedBy": "non-visual"
-        },
-        {
-          "name": "SavesDashboard",
-          "kind": "component",
-          "documentedBy": "profile"
-        }
-      ],
-      "profile": "design-system/components/profiles/organisms/saves-dashboard.md",
-      "consumers": [
-        "src/app/navigation/useSaveManagement.tsx"
-      ],
-      "primitiveBase": "molecule-data-table",
       "specStatus": "homologated",
       "exceptions": []
     },
